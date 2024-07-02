@@ -1,17 +1,17 @@
 /** @odoo-module **/
 
-import { evaluateBooleanExpr } from "@web/core/py_js/py";
+import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import { deepCopy, pick } from "@web/core/utils/objects";
-import { nbsp } from "@web/core/utils/strings";
-import { parseXML } from "@web/core/utils/xml";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { extractLayoutComponents } from "@web/search/layout";
+import { SearchPanel } from "@web/search/search_panel/search_panel";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { OnboardingBanner } from "@web/views/onboarding_banner";
 import { useActionLinks } from "@web/views/view_hook";
-import { computeViewClassName } from "./utils";
+
 import {
     Component,
     markRaw,
@@ -33,6 +33,8 @@ const viewRegistry = registry.category("views");
  *  @property {() => Object} getPagerProps
  *  @property {Object[]} viewSwitcherEntry
  *  @property {Object[]} viewSwitcherEntry
+ *  @property {Component} ControlPanel
+ *  @property {Component} SearchPanel
  *  @property {Component} Banner
  */
 
@@ -66,12 +68,14 @@ export function getDefaultConfig() {
         },
         viewSwitcherEntries: [],
         views: [],
+        ControlPanel: ControlPanel,
+        SearchPanel: SearchPanel,
         Banner: OnboardingBanner,
     };
     return config;
 }
 
-/** @typedef {import("./utils").OrderTerm} OrderTerm */
+/** @typedef {import("./relational_model").OrderTerm} OrderTerm */
 
 /** @typedef {Object} ViewProps
  *  @property {string} resModel
@@ -111,14 +115,6 @@ export function getDefaultConfig() {
 
 export class ViewNotFoundError extends Error {}
 
-const CALLBACK_RECORDER_NAMES = [
-    "__beforeLeave__",
-    "__getGlobalState__",
-    "__getLocalState__",
-    "__getContext__",
-    "__getOrderBy__",
-];
-
 const STANDARD_PROPS = [
     "resModel",
     "type",
@@ -155,14 +151,11 @@ const STANDARD_PROPS = [
     "hideCustomGroupBy",
     "searchMenuTypes",
 
-    ...CALLBACK_RECORDER_NAMES,
-
     // LEGACY: remove this later (clean when mappings old state <-> new state are established)
     "searchPanel",
     "searchModel",
 ];
 
-const ACTIONS = ["create", "delete", "edit", "group_create", "group_delete", "group_edit"];
 export class View extends Component {
     setup() {
         const { arch, fields, resModel, searchViewArch, searchViewFields, type } = this.props;
@@ -188,9 +181,6 @@ export class View extends Component {
                 ...getDefaultConfig(),
                 ...this.env.config,
             },
-            ...Object.fromEntries(
-                CALLBACK_RECORDER_NAMES.map((name) => [name, this.props[name] || null])
-            ),
         });
 
         this.handleActionLinks = useActionLinks({ resModel });
@@ -278,20 +268,13 @@ export class View extends Component {
             actionMenus = viewDescription.actionMenus;
         }
 
-        const archXmlDoc = parseXML(arch.replace(/&amp;nbsp;/g, nbsp));
-        for (const action of ACTIONS) {
-            if (action in this.props.context && !this.props.context[action]) {
-                archXmlDoc.setAttribute(action, "0");
-            }
-        }
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(arch, "text/xml");
+        const rootNode = xml.documentElement;
 
-        let subType = archXmlDoc.getAttribute("js_class");
-        const bannerRoute = archXmlDoc.getAttribute("banner_route");
-        const sample = archXmlDoc.getAttribute("sample");
-        const className = computeViewClassName(type, archXmlDoc, [
-            "o_view_controller",
-            ...(props.className || "").split(" "),
-        ]);
+        let subType = rootNode.getAttribute("js_class");
+        const bannerRoute = rootNode.getAttribute("banner_route");
+        const sample = rootNode.getAttribute("sample");
 
         // determine ViewClass to instantiate (if not already done)
         if (subType) {
@@ -303,7 +286,7 @@ export class View extends Component {
         }
 
         Object.assign(this.env.config, {
-            viewArch: archXmlDoc,
+            viewArch: rootNode,
             viewId: viewDescription.id,
             viewType: type,
             viewSubType: subType,
@@ -323,12 +306,12 @@ export class View extends Component {
         // prepare the view props
         const viewProps = {
             info,
-            arch: archXmlDoc,
+            arch,
             fields,
             relatedModels,
             resModel,
             useSampleModel: false,
-            className,
+            className: `${props.className} o_view_controller o_${this.env.config.viewType}_view`,
         };
         if (viewDescription.custom_view_id) {
             // for dashboard
@@ -341,7 +324,7 @@ export class View extends Component {
         if ("useSampleModel" in props) {
             viewProps.useSampleModel = props.useSampleModel;
         } else if (sample) {
-            viewProps.useSampleModel = evaluateBooleanExpr(sample);
+            viewProps.useSampleModel = Boolean(evaluateExpr(sample));
         }
 
         for (const key in props) {
@@ -428,7 +411,5 @@ View.defaultProps = {
     loadIrFilters: false,
     className: "",
 };
-View.props = {
-    "*": true,
-};
+
 View.searchMenuTypes = ["filter", "groupBy", "favorite"];

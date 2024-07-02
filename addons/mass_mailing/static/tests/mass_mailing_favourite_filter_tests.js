@@ -1,9 +1,8 @@
-/** @odoo-module */
+/** @odoo-module alias=mass_mailing.FieldMassMailingFavoriteFilter.test */
 
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import * as testUtils from "@web/../tests/helpers/utils";
-import weTestUtils from "@web_editor/../tests/test_utils";
-import * as dsHelpers from "@web/../tests/core/domain_selector_tests";
+import weTestUtils from "web_editor.test_utils";
 
 let fixture;
 let serverData;
@@ -130,9 +129,9 @@ QUnit.module('favorite filter widget', (hooks) => {
                         widget="mailing_filter"
                         options="{'no_create': '1', 'no_open': '1', 'domain_field': 'mailing_domain', 'model': 'mailing_model_id'}"/>
                 </form>`,
-            mockRPC: function (_, { args, model, method }) {
-                if (method === 'create' && model === 'mailing.filter') {
-                    assert.deepEqual(args[0],
+            mockRPC: function (route, args) {
+                if (args.method === 'create' && args.model === 'mailing.filter') {
+                    assert.deepEqual(args.args,
                         [{mailing_domain: '[["new_user","=",True]]', mailing_model_id: 1, name: 'event promo - new users'}],
                         "should pass correct data in create");
                 }
@@ -146,8 +145,8 @@ QUnit.module('favorite filter widget', (hooks) => {
         assert.isVisible(fixture.querySelector('.o_mass_mailing_save_filter_container'),
             "should have option to save filter if no filter is set");
         await testUtils.click(fixture.querySelector('.o_field_mailing_filter input'));
-        assert.containsN($dropdown, 'li.ui-menu-item', 2,
-            "there should be only one existing filter and a search more btn");
+        assert.containsOnce($dropdown, 'li.ui-menu-item',
+            "there should be only one existing filter");
         // create a new filter
         await testUtils.click(fixture, '.o_mass_mailing_add_filter');
         fixture.querySelector('.o_mass_mailing_filter_name').value = 'event promo - new users';
@@ -167,8 +166,8 @@ QUnit.module('favorite filter widget', (hooks) => {
         // Ensures input is not focussed otherwise clicking on it will just close the dropdown instead of opening it
         fixture.querySelector('.o_field_mailing_filter .o_input_dropdown input').blur();
         await testUtils.click(fixture.querySelector('.o_field_mailing_filter input'));
-        assert.containsN($dropdown, 'li.ui-menu-item', 3,
-            "there should be two existing filters and a search more btn");
+        assert.containsN($dropdown, 'li.ui-menu-item', 2,
+            "there should be two existing filters");
         await testUtils.clickSave(fixture);
     });
 
@@ -194,7 +193,7 @@ QUnit.module('favorite filter widget', (hooks) => {
             mockRPC: function (route, args) {
                 if (args.method === 'unlink' && args.model === 'mailing.filter') {
                     assert.deepEqual(args.args[0], [1], "should pass correct filter ID for deletion");
-                } else if (args.method === 'web_save' && args.model === 'mailing.mailing') {
+                } else if (args.method === 'write' && args.model === 'mailing.mailing') {
                     assert.strictEqual(args.args[1].mailing_filter_id,
                         false, "filter id should be");
                     assert.strictEqual(args.args[1].mailing_domain,
@@ -290,7 +289,7 @@ QUnit.module('favorite filter widget', (hooks) => {
         await testUtils.click(fixture.querySelector('.o_field_mailing_filter input'));
         fixture.querySelector('.o_field_mailing_filter input').autocomplete = 'widget';
         const $dropdown = fixture.querySelector('.o_field_mailing_filter .dropdown');
-        await testUtils.click($dropdown.lastElementChild, 'li:first-of-type');
+        await testUtils.click($dropdown.lastElementChild, 'li');
         assert.equal(fixture.querySelector('.o_domain_show_selection_button').textContent.trim(), '1 record(s)',
             "applied filter should only display single record (only Azure)");
         await testUtils.clickSave(fixture);
@@ -378,7 +377,7 @@ QUnit.module('favorite filter widget', (hooks) => {
             "should show icon to save the filter because domain is set in the mailing");
 
         // If domain is not set on mailing and no filter available, both drop-down and icon container are hidden
-        await dsHelpers.clickOnButtonDeleteNode(fixture);
+        await testUtils.click(fixture.querySelector('.o_domain_delete_node_button'));
         assert.isNotVisible(fixture.querySelector('.o_field_mailing_filter .o_input_dropdown'),
             "should not display drop-down because there is still no filter available to select from");
         assert.isNotVisible(fixture.querySelector('.o_mass_mailing_filter_container'),
@@ -401,7 +400,7 @@ QUnit.module('favorite filter widget', (hooks) => {
         assert.isNotVisible(fixture.querySelector('.o_mass_mailing_save_filter_container'),
             "should not have option to save filter if filter is selected");
 
-        await dsHelpers.clickOnButtonAddNewRule(fixture);
+        await testUtils.click(fixture.querySelector('.o_domain_add_node_button'));
         await testUtils.nextTick();
         assert.isVisible(fixture.querySelector('.o_mass_mailing_save_filter_container'),
             "should have option to save filter because mailing domain is changed");
@@ -437,7 +436,7 @@ QUnit.module('favorite filter widget', (hooks) => {
         assert.isNotVisible(fixture.querySelector('.o_mass_mailing_remove_filter'));
 
         // Set incorrect domain format
-        await testUtils.editInput(fixture, "div[name='mailing_domain'] input", "[");
+        await testUtils.editInput(fixture, "#mailing_domain", "[");
         // Wait to lose the focus
         await testUtils.nextTick();
 
@@ -497,7 +496,7 @@ QUnit.module('favorite filter widget', (hooks) => {
                     <field name="display_name"/>
                     <field name="subject"/>
                     <field name="mailing_model_name" invisible="1"/>
-                    <field name="mailing_model_id" readonly="state != 'draft'"/>
+                    <field name="mailing_model_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                     <field name="mailing_filter_count" />
                     <field name="mailing_filter_id" widget="mailing_filter" options="{'no_create': '1', 'no_open': '1', 'domain_field': 'mailing_domain', 'model': 'mailing_model_id'}"/>
                     <field name="state" widget="statusbar" options="{'clickable' : '1'}"/>
@@ -510,13 +509,13 @@ QUnit.module('favorite filter widget', (hooks) => {
         await testUtils.nextTick();
         const selectField = fixture.querySelector("button[data-value='running']");
         assert.containsOnce(fixture, "div[name='mailing_model_id']:not(.o_readonly_modifier)");
-        assert.ok(fixture.querySelector(".o_mass_mailing_save_filter_container:not(.d-none)"));
+        assert.ok(fixture.querySelector(".o_mass_mailing_save_filter_container").checkVisibility());
         // set to 'running'
         selectField.dispatchEvent(new Event('click'));
         selectField.dispatchEvent(new Event('change'));
         await testUtils.nextTick();
         assert.containsOnce(fixture, "div[name='mailing_model_id'].o_readonly_modifier");
-        assert.ok(fixture.querySelector(".o_mass_mailing_save_filter_container:not(.d-none)"));
+        assert.ok(fixture.querySelector(".o_mass_mailing_save_filter_container").checkVisibility());
     });
 });
 });

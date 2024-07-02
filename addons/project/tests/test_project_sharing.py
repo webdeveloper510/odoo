@@ -125,6 +125,7 @@ class TestProjectSharing(TestProjectSharingCommon):
             3) Give the 'edit' access mode to a portal user in a project and try to create task with this user.
             3.1) Try to change the project of the new task with this user.
         """
+        self.project_portal.allow_subtasks = True
         Task = self.env['project.task'].with_context({'tracking_disable': True, 'default_project_id': self.project_portal.id, 'default_user_ids': [(4, self.user_portal.id)]})
         # 1) Give the 'read' access mode to a portal user in a project and try to create task with this user.
         with self.assertRaises(AccessError, msg="Should not accept the portal user create a task in the project when he has not the edit access right."):
@@ -145,7 +146,6 @@ class TestProjectSharing(TestProjectSharingCommon):
             self.assertEqual(task.name, 'Test')
             self.assertEqual(task.project_id, self.project_portal)
             self.assertFalse(task.portal_user_names)
-            self.assertTrue(task.stage_id)
 
             # Check creating a sub-task while creating the parent task works as expected.
             self.assertEqual(task.child_ids.name, 'Test Subtask')
@@ -160,29 +160,31 @@ class TestProjectSharing(TestProjectSharingCommon):
 
         Task = Task.with_user(self.user_portal)
         # Create/Update a forbidden task through child_ids
-        with self.assertRaisesRegex(AccessError, "You cannot write on color"):
-            Task.create({'name': 'foo', 'child_ids': [Command.create({'name': 'Foo', 'color': 1})]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "You cannot write on description"):
+            Task.create({'name': 'foo', 'child_ids': [Command.create({'name': 'Foo', 'description': 'Foo'})]})
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.create({'name': 'foo', 'child_ids': [Command.update(self.task_no_collabo.id, {'name': 'Foo'})]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to delete 'Task'"):
             Task.create({'name': 'foo', 'child_ids': [Command.delete(self.task_no_collabo.id)]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.create({'name': 'foo', 'child_ids': [Command.unlink(self.task_no_collabo.id)]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.create({'name': 'foo', 'child_ids': [Command.link(self.task_no_collabo.id)]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.create({'name': 'foo', 'child_ids': [Command.set([self.task_no_collabo.id])]})
 
         # Same thing but using context defaults
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "You cannot write on description"):
+            Task.with_context(default_child_ids=[Command.create({'name': 'Foo', 'description': 'Foo'})]).create({'name': 'foo'})
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.with_context(default_child_ids=[Command.update(self.task_no_collabo.id, {'name': 'Foo'})]).create({'name': 'foo'})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to delete 'Task'"):
             Task.with_context(default_child_ids=[Command.delete(self.task_no_collabo.id)]).create({'name': 'foo'})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.with_context(default_child_ids=[Command.unlink(self.task_no_collabo.id)]).create({'name': 'foo'})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.with_context(default_child_ids=[Command.link(self.task_no_collabo.id)]).create({'name': 'foo'})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             Task.with_context(default_child_ids=[Command.set([self.task_no_collabo.id])]).create({'name': 'foo'})
 
         # Create/update a tag through tag_ids
@@ -220,6 +222,10 @@ class TestProjectSharing(TestProjectSharingCommon):
             3.2) Create a sub-task
             3.3) Create a second sub-task
         """
+        # 0) Allow to create subtasks in the project tasks
+        # Required for `child_ids` to be visible in the view
+        # {'invisible': [('allow_subtasks', '=', False)]}
+        self.project_cows.allow_subtasks = True
         # 1) Give the 'read' access mode to a portal user in a project and try to create task with this user.
         with self.assertRaises(AccessError, msg="Should not accept the portal user create a task in the project when he has not the edit access right."):
             with self.get_project_sharing_form_view(self.task_cow.with_context({'tracking_disable': True, 'default_project_id': self.project_cows.id}), self.user_portal) as form:
@@ -252,7 +258,7 @@ class TestProjectSharing(TestProjectSharingCommon):
             with form.child_ids.new() as subtask_form:
                 subtask_form.name = 'Test Subtask'
                 with self.assertRaises(AssertionError, msg="Should not accept the portal user changes the project of the task."):
-                    subtask_form.project_id = self.project_portal
+                    subtask_form.display_project_id = self.project_portal
         self.assertEqual(task.child_ids.name, 'Test Subtask')
         self.assertEqual(task.child_ids.project_id, self.project_cows)
         self.assertFalse(task.child_ids.portal_user_names, 'by default no user should be assigned to a subtask created by the portal user.')
@@ -275,17 +281,17 @@ class TestProjectSharing(TestProjectSharingCommon):
         self.assertEqual(len(task.child_ids), 2, 'Check 2 subtasks has correctly been created by the user portal.')
 
         # Create/Update a forbidden task through child_ids
-        with self.assertRaisesRegex(AccessError, "You cannot write on color"):
-            task.write({'child_ids': [Command.create({'name': 'Foo', 'color': 1})]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "You cannot write on description"):
+            task.write({'child_ids': [Command.create({'name': 'Foo', 'description': 'Foo'})]})
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             task.write({'child_ids': [Command.update(self.task_no_collabo.id, {'name': 'Foo'})]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to delete 'Task'"):
             task.write({'child_ids': [Command.delete(self.task_no_collabo.id)]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             task.write({'child_ids': [Command.unlink(self.task_no_collabo.id)]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             task.write({'child_ids': [Command.link(self.task_no_collabo.id)]})
-        with self.assertRaisesRegex(AccessError, "top-secret records"):
+        with self.assertRaisesRegex(AccessError, "not allowed to modify 'Task'"):
             task.write({'child_ids': [Command.set([self.task_no_collabo.id])]})
 
         # Create/update a tag through tag_ids
@@ -394,7 +400,7 @@ class TestProjectSharing(TestProjectSharingCommon):
 
         task_read_group = self.env['project.task'].read_group(
             expression.AND([expression.TRUE_DOMAIN, domain]),
-            ['id:min'],
+            ['id'],
             [],
         )
         self.assertEqual(task_read_group[0]['__count'], 1, 'The task should be found with the read_group method containing a truly tuple.')
@@ -402,7 +408,7 @@ class TestProjectSharing(TestProjectSharingCommon):
 
         task_read_group = self.env['project.task'].read_group(
             expression.AND([expression.FALSE_DOMAIN, domain]),
-            ['id:min'],
+            ['id'],
             [],
         )
         self.assertFalse(task_read_group[0]['__count'], 'No result should found with the read_group since the domain is falsy.')

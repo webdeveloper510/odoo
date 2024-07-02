@@ -10,7 +10,7 @@
                     <h6 t-if="data['bom_code']">Reference: <t t-esc="data['bom_code']"/></h6>
                 </div>
                 <t t-set="currency" t-value="data['currency']"/>
-                <table class="o_mrp_bom_expandable table table-borderless">
+                <table class="o_mrp_bom_expandable table">
                     <thead>
                         <tr>
                             <th name="th_mrp_bom_h">Product</th>
@@ -47,15 +47,13 @@
                                 </span>
                             </td>
                             <td>
-                                <span t-if="data['route_name']"><t t-esc="data['route_name']"/>: </span>
+                                <span t-if="data['route_name']" t-attf-class="{{'text-danger' if data.get('route_alert') else ''}}"><t t-esc="data['route_name']"/>: </span>
                                 <span t-esc="data['route_detail']"/>
                             </td>
                             <td t-if="data['show_costs']" class="text-end" t-esc="data['bom_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
                             <td t-if="data['show_costs']" class="text-end" t-esc="data['prod_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
                         </tr>
                         <t t-call="mrp.report_mrp_bom_pdf_line"/>
-                    </tbody>
-                    <tfoot>
                         <tr t-if="data['show_costs']">
                             <td name="td_mrp_bom_f" class="text-end">
                                 <span t-if="data['byproducts']" t-esc="data['name']"/>
@@ -84,7 +82,7 @@
                                 <td class="text-end" t-esc="byproduct['prod_cost'] / byproduct['quantity']" t-options='{"widget": "monetary", "display_currency": currency}'/>
                             </tr>
                         </t>
-                    </tfoot>
+                    </tbody>
                 </table>
             </div>
             <div t-else="" class="d-flex align-items-center justify-content-center h-50">
@@ -129,7 +127,7 @@
                     </span>
                 </td>
                 <td>
-                    <span t-if="l.get('route_name')"><t t-esc="l['route_name']"/>: <t t-esc="l['route_detail']"/></span>
+                    <span t-if="l.get('route_name')" t-attf-class="{{'text-danger' if l.get('route_alert') else ''}}"><t t-esc="l['route_name']"/>: <t t-esc="l['route_detail']"/></span>
                 </td>
                 <td t-if="data['show_costs']" t-attf-class="text-end {{ 'text-muted' if l['type'] == 'component' else '' }}" t-esc="l['bom_cost']" t-options='{"widget": "monetary", "display_currency": currency}'/>
                 <td t-if="data['show_costs']" class="text-end">

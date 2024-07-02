@@ -13,10 +13,10 @@ import werkzeug.wsgi
 import odoo
 import odoo.modules.registry
 from odoo import http
-from odoo.modules import get_manifest
+from odoo.modules import get_manifest, get_resource_path
 from odoo.http import request
 from odoo.tools import lazy
-from odoo.tools.misc import file_open, file_path
+from odoo.tools.misc import file_open
 from .utils import _local_web_translations
 
 
@@ -29,11 +29,32 @@ def CONTENT_MAXAGE():
     return http.STATIC_CACHE_LONG
 
 
+MOMENTJS_LANG_CODES_MAP = {
+    "sr_RS": "sr_cyrl",
+    "sr@latin": "sr"
+}
+
+
 class WebClient(http.Controller):
 
-    # FIXME: to be removed in master, deprecated since momentjs removal in commit 4327c062d820
     @http.route('/web/webclient/locale/<string:lang>', type='http', auth="none")
     def load_locale(self, lang):
+        lang = MOMENTJS_LANG_CODES_MAP.get(lang, lang)
+        magic_file_finding = [lang.replace("_", '-').lower(), lang.split('_')[0]]
+        for code in magic_file_finding:
+            try:
+                return http.Response(
+                    werkzeug.wsgi.wrap_file(
+                        request.httprequest.environ,
+                        file_open(f'web/static/lib/moment/locale/{code}.js', 'rb')
+                    ),
+                    content_type='application/javascript; charset=utf-8',
+                    headers=[('Cache-Control', f'max-age={http.STATIC_CACHE}')],
+                    direct_passthrough=True,
+                )
+            except IOError:
+                _logger.debug("No moment locale for code %s", code)
+
         return request.make_response("", headers=[
             ('Content-Type', 'application/javascript'),
             ('Cache-Control', f'max-age={http.STATIC_CACHE}'),
@@ -59,7 +80,7 @@ class WebClient(http.Controller):
         for addon_name in mods:
             manifest = get_manifest(addon_name)
             if manifest and manifest['bootstrap']:
-                f_name = file_path(f'{addon_name}/i18n/{lang}.po')
+                f_name = get_resource_path(addon_name, 'i18n', f'{lang}.po')
                 if not f_name:
                     continue
                 translations_per_module[addon_name] = {'messages': _local_web_translations(f_name)}
@@ -85,7 +106,7 @@ class WebClient(http.Controller):
         translations_per_module, lang_params = request.env["ir.http"].get_translations_for_webclient(mods, lang)
 
         body = json.dumps({
-            'lang': lang,
+            'lang': lang_params and lang_params["code"],
             'lang_parameters': lang_params,
             'modules': translations_per_module,
             'multi_lang': len(request.env['res.lang'].sudo().get_installed()) > 1,
@@ -110,6 +131,10 @@ class WebClient(http.Controller):
     def test_mobile_suite(self, mod=None, **kwargs):
         return request.render('web.qunit_mobile_suite')
 
+    @http.route('/web/benchmarks', type='http', auth="none")
+    def benchmarks(self, mod=None, **kwargs):
+        return request.render('web.benchmark_suite')
+
     @http.route('/web/bundle/<string:bundle_name>', auth="public", methods=["GET"])
     def bundle(self, bundle_name, **bundle_params):
         """
@@ -123,6 +148,7 @@ class WebClient(http.Controller):
         data = [{
             "type": tag,
             "src": attrs.get("src") or attrs.get("data-src") or attrs.get('href'),
-        } for tag, attrs in files]
+            "content": content,
+        } for tag, attrs, content in files]
 
         return request.make_json_response(data)

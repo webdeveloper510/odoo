@@ -1,6 +1,6 @@
 # Please note that this Dockerfile is used for testing nightly builds and should
 # not be used to deploy Odoo
-FROM debian:bookworm
+FROM debian:bullseye
 MAINTAINER Odoo S.A. <info@odoo.com>
 
 RUN apt-get update && \
@@ -27,7 +27,6 @@ RUN apt-get update -qq &&  \
         python3-dateutil \
         python3-decorator \
         python3-docutils \
-        python3-geoip2 \
         python3-gevent \
         python3-pil \
         python3-jinja2 \
@@ -41,7 +40,6 @@ RUN apt-get update -qq &&  \
         python3-pydot \
         python3-openssl \
         python3-pypdf2 \
-        python3-rjsmin \
         python3-qrcode \
         python3-renderpm \
         python3-reportlab \
@@ -59,3 +57,5 @@ RUN apt-get update -qq &&  \
     rm -rf /var/lib/apt/lists/*
 
 RUN echo "PS1=\"[\u@nightly-tests] # \"" > ~/.bashrc
+
+USER odoo

@@ -3,32 +3,24 @@
 # 	* payment_stripe
 # 
 # Translators:
-# 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2023
+# Jeffery CHEN <jeffery9@gmail.com>, 2023
+# Wil Odoo, 2023
+# Martin Trigaux, 2023
 # Chloe Wang, 2023
-# Jeffery CHEN <jeffery9@gmail.com>, 2024
-# Wil Odoo, 2024
-# 湘子 南 <1360857908@qq.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: 湘子 南 <1360857908@qq.com>, 2024\n"
+"POT-Creation-Date: 2023-01-31 14:10+0000\n"
+"PO-Revision-Date: 2023-09-25 06:59+0000\n"
+"Last-Translator: Chloe Wang, 2023\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: payment_stripe
-#. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
-#, python-format
-msgid "Cannot display the payment form"
-msgstr "无法显示付款表单"
 
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_provider__code
@@ -74,14 +66,7 @@ msgstr "获得您的Secret和可发布的密钥"
 msgid ""
 "If a webhook is enabled on your Stripe account, this signing secret must be "
 "set to authenticate the messages sent from Stripe to Odoo."
-msgstr "如果在您的Stripe账户上启用了webhook，就必须设置这个签名秘密来验证从Stripe发送到 ERP 的消息."
-
-#. module: payment_stripe
-#. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
-#, python-format
-msgid "Incorrect payment details"
-msgstr "付款信息不正确"
+msgstr "如果在您的Stripe账户上启用了webhook，就必须设置这个签名秘密来验证从Stripe发送到Odoo的信息。"
 
 #. module: payment_stripe
 #. odoo-python
@@ -89,13 +74,6 @@ msgstr "付款信息不正确"
 #, python-format
 msgid "No transaction found matching reference %s."
 msgstr "没有发现与参考文献%s相匹配的交易。"
-
-#. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-#, python-format
-msgid "Other Payment Providers"
-msgstr "其他支付提供商"
 
 #. module: payment_stripe
 #: model:ir.model,name:payment_stripe.model_payment_provider
@@ -110,19 +88,12 @@ msgstr "支付提供商"
 #. module: payment_stripe
 #: model:ir.model,name:payment_stripe.model_payment_token
 msgid "Payment Token"
-msgstr "付款令牌"
+msgstr "支付令牌"
 
 #. module: payment_stripe
 #: model:ir.model,name:payment_stripe.model_payment_transaction
 msgid "Payment Transaction"
-msgstr "付款交易"
-
-#. module: payment_stripe
-#. odoo-javascript
-#: code:addons/payment_stripe/static/src/js/payment_form.js:0
-#, python-format
-msgid "Payment processing failed"
-msgstr "付款处理失败"
+msgstr "支付交易"
 
 #. module: payment_stripe
 #. odoo-python
@@ -165,26 +136,17 @@ msgstr "密钥"
 #. module: payment_stripe
 #: model:ir.model.fields.selection,name:payment_stripe.selection__payment_provider__code__stripe
 msgid "Stripe"
-msgstr "Stripe"
+msgstr "条纹"
 
 #. module: payment_stripe
-#. odoo-python
-#: code:addons/payment_stripe/models/payment_provider.py:0
-#, python-format
-msgid ""
-"Stripe Connect is not available in your country, please use another payment "
-"provider."
-msgstr "Stripe Connect 在您所在的国家/地区不可用，请使用其他支付提供商。"
-
-#. module: payment_stripe
-#: model:ir.model.fields,field_description:payment_stripe.field_payment_token__stripe_mandate
-msgid "Stripe Mandate"
-msgstr "Stripe 授权"
+#: model:ir.model.fields,field_description:payment_stripe.field_payment_transaction__stripe_payment_intent
+msgid "Stripe Payment Intent ID"
+msgstr "Stripe 付款意向 ID"
 
 #. module: payment_stripe
 #: model:ir.model.fields,field_description:payment_stripe.field_payment_token__stripe_payment_method
 msgid "Stripe Payment Method ID"
-msgstr "Stripe 付款方式 ID"
+msgstr "Stripe支付方式ID"
 
 #. module: payment_stripe
 #. odoo-python
@@ -198,14 +160,14 @@ msgstr "Stripe 代理错误：%(error)s"
 #: code:addons/payment_stripe/models/payment_provider.py:0
 #, python-format
 msgid "Stripe Proxy: An error occurred when communicating with the proxy."
-msgstr "Stripe代理：在与代理进行通信时发生了错误。"
+msgstr "Stripe代理:在与代理进行通信时发生了错误。"
 
 #. module: payment_stripe
 #. odoo-python
 #: code:addons/payment_stripe/models/payment_provider.py:0
 #, python-format
 msgid "Stripe Proxy: Could not establish the connection."
-msgstr "Stripe代理：无法建立连接。"
+msgstr "Stripe代理:无法建立连接。"
 
 #. module: payment_stripe
 #. odoo-python
@@ -217,8 +179,9 @@ msgid ""
 "Stripe gave us the following info about the problem:\n"
 "'%s'"
 msgstr ""
-"与 API 通信失败。\n"
-"就该问题，Stripe 提供了以下信息：'%s'"
+"与API的通信失败。\n"
+"Stripe给了我们关于这个问题的以下信息:\n"
+"'%s'"
 
 #. module: payment_stripe
 #. odoo-python
@@ -230,7 +193,7 @@ msgstr "客户已离开支付页面。"
 #. module: payment_stripe
 #: model:ir.model.fields,help:payment_stripe.field_payment_provider__stripe_publishable_key
 msgid "The key solely used to identify the account with Stripe"
-msgstr "用于识别 Stripe 账户的唯一密钥"
+msgstr "用于识别Stripe账户的唯一密钥。"
 
 #. module: payment_stripe
 #. odoo-python

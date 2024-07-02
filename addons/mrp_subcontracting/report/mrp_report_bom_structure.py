@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, models, _, fields
+from odoo.tools import float_compare
+
 
 class ReportBomStructure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
@@ -19,8 +21,8 @@ class ReportBomStructure(models.AbstractModel):
             'level': level or 0
         }
 
-    def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, bom_line=False, level=0, parent_bom=False, parent_product=False, index=0, product_info=False, ignore_stock=False):
-        res = super()._get_bom_data(bom, warehouse, product, line_qty, bom_line, level, parent_bom, parent_product, index, product_info, ignore_stock)
+    def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, bom_line=False, level=0, parent_bom=False, index=0, product_info=False, ignore_stock=False):
+        res = super()._get_bom_data(bom, warehouse, product, line_qty, bom_line, level, parent_bom, index, product_info, ignore_stock)
         if bom.type == 'subcontract' and not self.env.context.get('minimized', False):
             if not res['product']:
                 seller = bom.product_tmpl_id.seller_ids.filtered(lambda s: s.partner_id in bom.subcontractor_ids)[:1]
@@ -50,19 +52,17 @@ class ReportBomStructure(models.AbstractModel):
         return lines
 
     @api.model
-    def _need_special_rules(self, product_info, parent_bom=False, parent_product=False):
-        if parent_bom and parent_product:
-            parent_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
+    def _need_special_rules(self, product_info, parent_bom=False, parent_product_id=False):
+        if parent_bom and parent_product_id:
+            parent_info = product_info.get(parent_product_id, {}).get(parent_bom.id, {})
             return parent_info and parent_info.get('route_type') == 'subcontract'
-        return super()._need_special_rules(product_info, parent_bom, parent_product)
+        return super()._need_special_rules(product_info, parent_bom, parent_product_id)
 
     @api.model
-    def _find_special_rules(self, product, product_info, parent_bom=False, parent_product=False):
-        res = super()._find_special_rules(product, product_info, parent_bom, parent_product)
-        if not parent_bom or not parent_product:
-            return res
+    def _find_special_rules(self, product, product_info, parent_bom=False, parent_product_id=False):
+        res = super()._find_special_rules(product, product_info, parent_bom, parent_product_id)
         # If no rules could be found within the warehouse, check if the product is a component from a subcontracted product.
-        parent_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
+        parent_info = product_info.get(parent_product_id, {}).get(parent_bom.id, {})
         if parent_info and parent_info.get('route_type') == 'subcontract':
             # Since the product is subcontracted, check the subcontracted location for rules instead of the warehouse.
             subcontracting_loc = parent_info['supplier'].partner_id.property_stock_subcontractor
@@ -75,52 +75,51 @@ class ReportBomStructure(models.AbstractModel):
         subcontract_rules = [rule for rule in rules if rule.action == 'buy' and bom and bom.type == 'subcontract']
         if subcontract_rules:
             supplier = product._select_seller(quantity=quantity, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
-            # for subcontracting, we can't decide the lead time without component's resupply availability
-            # we only return necessary info and calculate the lead time late when we have component's data
+            if not supplier:
+                # If no vendor found for the right quantity, we still want to display a vendor for the lead times
+                supplier = product._select_seller(quantity=None, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
             if supplier:
+                qty_supplier_uom = product.uom_id._compute_quantity(quantity, supplier.product_uom)
                 return {
                     'route_type': 'subcontract',
                     'route_name': subcontract_rules[0].route_id.display_name,
                     'route_detail': supplier.display_name,
-                    'lead_time': rules_delay,
+                    'lead_time': supplier.delay + rules_delay,
+                    'supplier_delay': supplier.delay + rules_delay,
+                    'manufacture_delay': product.produce_delay,
                     'supplier': supplier,
-                    'bom': bom,
+                    'route_alert': float_compare(qty_supplier_uom, supplier.min_qty, precision_rounding=product.uom_id.rounding) < 0,
+                    'qty_checked': quantity,
                 }
 
         return res
 
     @api.model
-    def _get_quantities_info(self, product, bom_uom, product_info, parent_bom=False, parent_product=False):
-        quantities_info = super()._get_quantities_info(product, bom_uom, product_info, parent_bom, parent_product)
-        if parent_product and parent_bom and parent_bom.type == 'subcontract' and product.type == 'product':
-            route_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
+    def _get_quantities_info(self, product, bom_uom, parent_bom, product_info):
+        if parent_bom and parent_bom.type == 'subcontract' and product.detailed_type == 'product':
+            parent_product_id = self.env.context.get('parent_product_id', False)
+            route_info = product_info.get(parent_product_id, {}).get(parent_bom.id, {})
             if route_info and route_info['route_type'] == 'subcontract':
                 subcontracting_loc = route_info['supplier'].partner_id.property_stock_subcontractor
-                subloc_product = product.with_context(location=subcontracting_loc.id, warehouse=False)
-                subloc_product.fetch(['free_qty', 'qty_available'])
+                subloc_product = product.with_context(location=subcontracting_loc.id, warehouse=False).read(['free_qty', 'qty_available'])[0]
                 stock_loc = f"subcontract_{subcontracting_loc.id}"
                 if not product_info[product.id]['consumptions'].get(stock_loc, False):
                     product_info[product.id]['consumptions'][stock_loc] = 0
-                quantities_info['free_to_manufacture_qty'] = product.uom_id._compute_quantity(subloc_product.free_qty, bom_uom)
-                quantities_info['free_qty'] += quantities_info['free_to_manufacture_qty']
-                quantities_info['on_hand_qty'] += product.uom_id._compute_quantity(subloc_product.qty_available, bom_uom)
-                quantities_info['stock_loc'] = stock_loc
+                return {
+                    'free_qty': product.uom_id._compute_quantity(subloc_product['free_qty'], bom_uom),
+                    'on_hand_qty': product.uom_id._compute_quantity(subloc_product['qty_available'], bom_uom),
+                    'stock_loc': stock_loc,
+                }
 
-        return quantities_info
+        return super()._get_quantities_info(product, bom_uom, parent_bom, product_info)
 
     @api.model
     def _get_resupply_availability(self, route_info, components):
-        resupply_state, resupply_delay = super()._get_resupply_availability(route_info, components)
         if route_info.get('route_type') == 'subcontract':
             max_component_delay = self._get_max_component_delay(components)
             if max_component_delay is False:
                 return ('unavailable', False)
-            # Calculate the lead time for subcontracting, keep same as `_get_lead_days`
-            vendor_lead_time = route_info['supplier'].delay
-            manufacture_lead_time = route_info['bom'].produce_delay
-            subcontract_delay = resupply_delay if resupply_delay else 0
-            subcontract_delay += max(vendor_lead_time, manufacture_lead_time) + max_component_delay
-            route_info['manufacture_delay'] = route_info['lead_time'] + max(vendor_lead_time, manufacture_lead_time)
-            route_info['lead_time'] += max(vendor_lead_time, manufacture_lead_time + route_info['bom'].days_to_prepare_mo)
-            return ('estimated', subcontract_delay)
-        return (resupply_state, resupply_delay)
+            produce_delay = route_info.get('manufacture_delay', 0) + max_component_delay
+            supplier_delay = route_info.get('supplier_delay', 0)
+            return ('estimated', max(produce_delay, supplier_delay))
+        return super()._get_resupply_availability(route_info, components)

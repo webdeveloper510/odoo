@@ -91,7 +91,7 @@ QUnit.module("Fields", (hooks) => {
 
         await click(target, ".o_form_button_save");
 
-        var newRecord = serverData.models.partner.records.at(-1);
+        var newRecord = _.last(serverData.models.partner.records);
         assert.strictEqual(newRecord.product_id, 37, "should have saved record with correct value");
     });
 
@@ -122,7 +122,7 @@ QUnit.module("Fields", (hooks) => {
 
             await click(target.querySelector(".o_form_button_save"));
 
-            var newRecord = serverData.models.partner.records.at(-1);
+            var newRecord = _.last(serverData.models.partner.records);
             assert.strictEqual(
                 newRecord.color,
                 "black",
@@ -145,6 +145,42 @@ QUnit.module("Fields", (hooks) => {
                 target,
                 "div.o_readonly_modifier span",
                 "should have 1 possible value in readonly mode"
+            );
+        }
+    );
+
+    QUnit.test(
+        "BadgeSelectionField widget on a selection unchecking selected value",
+        async function (assert) {
+            await makeView({
+                serverData,
+                type: "form",
+                resModel: "partner",
+                arch: '<form><field name="color" widget="selection_badge"/></form>',
+            });
+
+            assert.containsOnce(
+                target,
+                "div.o_field_selection_badge",
+                "should have rendered outer div"
+            );
+            assert.containsN(target, "span.o_selection_badge", 2, "should have 2 possible choices");
+            assert.strictEqual(
+                target.querySelector("span.o_selection_badge").textContent,
+                "Red",
+                "one of them should be Red"
+            );
+
+            // click again on red option
+            await click(target.querySelector("span.o_selection_badge.active"));
+
+            await click(target.querySelector(".o_form_button_save"));
+
+            var newRecord = _.last(serverData.models.partner.records);
+            assert.strictEqual(
+                newRecord.color,
+                false,
+                "the new value should be false as we have selected same value as default"
             );
         }
     );

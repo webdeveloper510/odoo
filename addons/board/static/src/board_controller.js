@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
 import { renderToString } from "@web/core/utils/render";
-import { useSortable } from "@web/core/utils/sortable_owl";
+import { useSortable } from "@web/core/utils/sortable";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { BoardAction } from "./board_action";
-import { blockDom, Component, useState, useRef } from "@odoo/owl";
+
+const { blockDom, Component, useState, useRef } = owl;
 
 export class BoardController extends Component {
     setup() {
@@ -92,7 +92,7 @@ export class BoardController extends Component {
 
     closeAction(column, action) {
         this.dialogService.add(ConfirmationDialog, {
-            body: _t("Are you sure that you want to remove this item?"),
+            body: this.env._t("Are you sure that you want to remove this item?"),
             confirm: () => {
                 const index = column.actions.indexOf(action);
                 column.actions.splice(index, 1);

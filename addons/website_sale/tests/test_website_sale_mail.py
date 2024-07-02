@@ -17,7 +17,6 @@ class TestWebsiteSaleMail(HttpCase):
         self.env['product.product'].create({
             'name': 'Acoustic Bloc Screens',
             'list_price': 2950.0,
-            'sale_ok': True,
             'website_published': True,
         })
         self.env['res.partner'].create({

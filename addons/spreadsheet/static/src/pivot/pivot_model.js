@@ -4,14 +4,17 @@ import { _t } from "@web/core/l10n/translation";
 import { Domain } from "@web/core/domain";
 import { sprintf } from "@web/core/utils/strings";
 import { PivotModel } from "@web/views/pivot/pivot_model";
+import { computeReportMeasures } from "@web/views/utils";
+import { session } from "@web/session";
 
-import * as spreadsheet from "@odoo/o-spreadsheet";
+import { FORMATS } from "../helpers/constants";
+
+import spreadsheet from "../o_spreadsheet/o_spreadsheet_extended";
+import { formatDate } from "./pivot_helpers";
 import { PERIODS } from "@spreadsheet/pivot/pivot_helpers";
 import { SpreadsheetPivotTable } from "@spreadsheet/pivot/pivot_table";
-import { pivotTimeAdapter } from "./pivot_time_adapters";
 
 const { toString, toNumber, toBoolean } = spreadsheet.helpers;
-const { DEFAULT_LOCALE } = spreadsheet.constants;
 
 /**
  * @typedef {import("@spreadsheet/data_sources/metadata_repository").Field} Field
@@ -41,13 +44,7 @@ const { DEFAULT_LOCALE } = spreadsheet.constants;
  * @returns {{field: Field, aggregateOperator: string, isPositional: boolean}}
  */
 function parseGroupField(allFields, groupFieldString) {
-    let fieldName = groupFieldString;
-    let aggregateOperator = undefined;
-    const index = groupFieldString.indexOf(":");
-    if (index !== -1) {
-        fieldName = groupFieldString.slice(0, index);
-        aggregateOperator = groupFieldString.slice(index + 1);
-    }
+    let [fieldName, aggregateOperator] = groupFieldString.split(":");
     const isPositional = fieldName.startsWith("#");
     fieldName = isPositional ? fieldName.substring(1) : fieldName;
     const field = allFields[fieldName];
@@ -83,10 +80,9 @@ function throwUnsupportedFieldError(field) {
  * the two group values are "42" and "won".
  * @param {object} field
  * @param {number | boolean | string} groupValue
- * @param {"day" | "week" | "month" | "quarter" | "year" | undefined} aggregateOperator
  * @returns {number | boolean | string}
  */
-export function toNormalizedPivotValue(field, groupValue, aggregateOperator) {
+export function parsePivotFormulaFieldValue(field, groupValue) {
     const groupValueString =
         typeof groupValue === "boolean"
             ? toString(groupValue).toLocaleLowerCase()
@@ -101,10 +97,7 @@ export function toNormalizedPivotValue(field, groupValue, aggregateOperator) {
     switch (field.type) {
         case "datetime":
         case "date":
-            return pivotTimeAdapter(aggregateOperator).normalizeFunctionValue(
-                groupValueString,
-                field
-            );
+            return toString(groupValueString);
         case "selection":
         case "char":
         case "text":
@@ -116,7 +109,7 @@ export function toNormalizedPivotValue(field, groupValue, aggregateOperator) {
         case "monetary":
         case "many2one":
         case "many2many":
-            return toNumber(groupValueString, DEFAULT_LOCALE);
+            return toNumber(groupValueString);
         default:
             throwUnsupportedFieldError(field);
     }
@@ -124,7 +117,7 @@ export function toNormalizedPivotValue(field, groupValue, aggregateOperator) {
 
 /**
  * This class is an extension of PivotModel with some additional information
- * that we need in spreadsheet (display_name, isUsedInSheet, ...)
+ * that we need in spreadsheet (name_get, isUsedInSheet, ...)
  */
 export class SpreadsheetPivotModel extends PivotModel {
     /**
@@ -171,7 +164,7 @@ export class SpreadsheetPivotModel extends PivotModel {
         try {
             const { field } = this.parseGroupField(fieldName);
             return this._isCol(field);
-        } catch {
+        } catch (_) {
             return false;
         }
     }
@@ -185,7 +178,7 @@ export class SpreadsheetPivotModel extends PivotModel {
         try {
             const { field } = this.parseGroupField(fieldName);
             return this._isRow(field);
-        } catch {
+        } catch (_) {
             return false;
         }
     }
@@ -198,6 +191,10 @@ export class SpreadsheetPivotModel extends PivotModel {
     getFormattedGroupBy(fieldName) {
         const { field, aggregateOperator } = this.parseGroupField(fieldName);
         return field.string + (aggregateOperator ? ` (${PERIODS[aggregateOperator]})` : "");
+    }
+
+    getReportMeasures() {
+        return computeReportMeasures(this.metaData.fields, this.metaData.fieldAttrs, []);
     }
 
     //--------------------------------------------------------------------------
@@ -216,7 +213,8 @@ export class SpreadsheetPivotModel extends PivotModel {
      * Check if the given domain with the given measure has been used
      */
     isUsedValue(domain, measure) {
-        return this._usedValueDomains.has(measure + "," + domain.join());
+        const tag = [measure, ...domain];
+        return this._usedValueDomains.has(tag.join());
     }
 
     /**
@@ -230,7 +228,8 @@ export class SpreadsheetPivotModel extends PivotModel {
      * Indicate that the given domain has been used with the given measure
      */
     markAsValueUsed(domain, measure) {
-        this._usedValueDomains.add(measure + "," + domain.join());
+        const toTag = [measure, ...domain];
+        this._usedValueDomains.add(toTag.join());
     }
 
     /**
@@ -289,29 +288,35 @@ export class SpreadsheetPivotModel extends PivotModel {
         const { cols, rows } = this._getColsRowsValuesFromDomain(domain);
         const group = JSON.stringify([rows, cols]);
         const values = this.data.measurements[group];
-        return (values && values[0][measure]) ?? "";
+        return (values && values[0][measure]) || "";
     }
 
     /**
-     * Get the value of a field
-     *
-     * @example
-     * getGroupByCellValue("stage_id", 42) // "Won"
+     * Get the label the given field-value
      *
      * @param {string} groupFieldString Name of the field
-     * @param {string | number} groupValueString Value of the group by
-     * @returns {string | number}
+     * @param {string} groupValueString Value of the group by
+     * @returns {string}
      */
-    getGroupByCellValue(groupFieldString, groupValueString) {
+    getGroupByDisplayLabel(groupFieldString, groupValueString) {
         if (groupValueString === NO_RECORD_AT_THIS_POSITION) {
             return "";
         }
+        if (groupFieldString === "measure") {
+            if (groupValueString === "__count") {
+                return _t("Count");
+            }
+            // the value is actually the measure field name
+            return this.parseGroupField(groupValueString).field.string;
+        }
         const { field, aggregateOperator } = this.parseGroupField(groupFieldString);
-        const value = toNormalizedPivotValue(field, groupValueString, aggregateOperator);
+        const value = parsePivotFormulaFieldValue(field, groupValueString);
         const undef = _t("None");
         if (this._isDateField(field)) {
-            const adapter = pivotTimeAdapter(aggregateOperator);
-            return adapter.toCellValue(value);
+            if (value && aggregateOperator === "day") {
+                return toNumber(value);
+            }
+            return formatDate(aggregateOperator, value);
         }
         if (field.relation) {
             const label = this.metadataRepository.getRecordDisplayName(field.relation, value);
@@ -328,25 +333,30 @@ export class SpreadsheetPivotModel extends PivotModel {
     }
 
     /**
-     * Get the value of the last group by of the function arguments
-     * e.g. in `ODOO.PIVOT.HEADER(1, "stage_id", "42", "status", "won")`
-     *      the last group value is "won".
+     * Get the label of the last group by of the domain
      *
-     * It can also handle positional arguments.
-     * e.g. in `ODOO.PIVOT.HEADER(1, "#stage_id", 1, "#user_id", 1)`
-     *      the last group value is the id of the first user of the first stage.
-     *
-     * @param {(string | number)[]} domainArgs ODOO.PIVOT.HEADER arguments
+     * @param {string[]} domain Domain of the formula
      */
-    getLastPivotGroupValue(domainArgs) {
-        const groupFieldString = domainArgs.at(-2);
+    getPivotHeaderValue(domain) {
+        const groupFieldString = domain[domain.length - 2];
         if (groupFieldString.startsWith("#")) {
             const { field } = this.parseGroupField(groupFieldString);
-            const { cols, rows } = this._getColsRowsValuesFromDomain(domainArgs);
-            return this._isCol(field) ? cols.at(-1) : rows.at(-1);
+            const { cols, rows } = this._getColsRowsValuesFromDomain(domain);
+            return this._isCol(field) ? cols[cols.length - 1] : rows[rows.length - 1];
         }
-        const groupValueString = domainArgs.at(-1);
+        const groupValueString = domain[domain.length - 1];
         return groupValueString;
+    }
+
+    /**
+     * Get the displayed label of the last group by of the domain
+     *
+     * @param {string[]} domain Domain of the formula
+     * @returns {string}
+     */
+    getDisplayedPivotHeaderValue(domain) {
+        const groupFieldString = domain[domain.length - 2];
+        return this.getGroupByDisplayLabel(groupFieldString, this.getPivotHeaderValue(domain));
     }
 
     //--------------------------------------------------------------------------
@@ -363,26 +373,15 @@ export class SpreadsheetPivotModel extends PivotModel {
         return domains ? domains[0] : Domain.FALSE.toList();
     }
 
-    getTableStructure() {
-        if (this._tableStructure === undefined) {
-            // lazy build the structure
-            this._tableStructure = this._buildTableStructure();
-        }
-        return this._tableStructure;
-    }
-
     /**
      * @returns {SpreadsheetPivotTable}
      */
-    _buildTableStructure() {
+    getTableStructure() {
         const cols = this._getSpreadsheetCols();
         const rows = this._getSpreadsheetRows(this.data.rowGroupTree);
         rows.push(rows.shift()); //Put the Total row at the end.
         const measures = this.metaData.activeMeasures;
-        const rowTitle = this.metaData.rowGroupBys[0]
-            ? this.getFormattedGroupBy(this.metaData.rowGroupBys[0])
-            : "";
-        return new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
+        return new SpreadsheetPivotTable(cols, rows, measures);
     }
 
     //--------------------------------------------------------------------------
@@ -449,18 +448,40 @@ export class SpreadsheetPivotModel extends PivotModel {
      * @override
      */
     _getGroupValues(group, groupBys) {
-        return groupBys.map((gb) => {
-            const groupBy = this._normalize(gb);
-            const { field, aggregateOperator } = this.parseGroupField(gb);
+        return groupBys.map((groupBy) => {
+            const { field, aggregateOperator } = this.parseGroupField(groupBy);
             if (this._isDateField(field)) {
-                return pivotTimeAdapter(aggregateOperator).normalizeServerValue(
-                    groupBy,
-                    field,
-                    group
-                );
+                const value = this._getGroupStartingDay(groupBy, group);
+                if (!value) {
+                    return false;
+                }
+                const fOut = FORMATS[aggregateOperator]["out"];
+                // eslint-disable-next-line no-undef
+                const date = moment(value);
+                return date.isValid() ? date.format(fOut) : false;
             }
             return this._sanitizeValue(group[groupBy]);
         });
+    }
+
+    /**
+     * When grouping by a time field, return
+     * the group starting day (local to the timezone)
+     * @param {string} groupBy
+     * @param {object} readGroup
+     * @returns {string | undefined}
+     */
+    _getGroupStartingDay(groupBy, readGroup) {
+        if (!readGroup["__range"] || !readGroup["__range"][groupBy]) {
+            return undefined;
+        }
+        const { field } = this.parseGroupField(groupBy);
+        const sqlValue = readGroup["__range"][groupBy].from;
+        if (this.metaData.fields[field.name].type === "date") {
+            return sqlValue;
+        }
+        const userTz = session.user_context.tz || luxon.Settings.defaultZoneName;
+        return luxon.DateTime.fromSQL(sqlValue, { zone: "utc" }).setZone(userTz).toISODate();
     }
 
     /**
@@ -495,7 +516,7 @@ export class SpreadsheetPivotModel extends PivotModel {
      * @returns {number | boolean | string}
      */
     _parsePivotFormulaWithPosition(field, groupValueString, cols, rows) {
-        const position = toNumber(groupValueString, DEFAULT_LOCALE) - 1;
+        const position = toNumber(groupValueString) - 1;
         let tree;
         if (this._isCol(field)) {
             tree = this.data.colGroupTree;
@@ -530,13 +551,12 @@ export class SpreadsheetPivotModel extends PivotModel {
         while (i < domain.length) {
             const groupFieldString = domain[i];
             const groupValue = domain[i + 1];
-            const { field, isPositional, aggregateOperator } =
-                this.parseGroupField(groupFieldString);
+            const { field, isPositional } = this.parseGroupField(groupFieldString);
             let value;
             if (isPositional) {
                 value = this._parsePivotFormulaWithPosition(field, groupValue, cols, rows);
             } else {
-                value = toNormalizedPivotValue(field, groupValue, aggregateOperator);
+                value = parsePivotFormulaFieldValue(field, groupValue);
             }
             if (this._isCol(field)) {
                 cols.push(value);
@@ -554,7 +574,7 @@ export class SpreadsheetPivotModel extends PivotModel {
      */
     _getSpreadsheetRows(tree) {
         /**@type {Row[]}*/
-        let rows = [];
+        const rows = [];
         const group = tree.root;
         const indent = group.labels.length;
         const rowGroupBys = this.metaData.fullRowGroupBys;
@@ -568,7 +588,7 @@ export class SpreadsheetPivotModel extends PivotModel {
         const subTreeKeys = tree.sortedKeys || [...tree.directSubTrees.keys()];
         subTreeKeys.forEach((subTreeKey) => {
             const subTree = tree.directSubTrees.get(subTreeKey);
-            rows = rows.concat(this._getSpreadsheetRows(subTree));
+            rows.push(...this._getSpreadsheetRows(subTree));
         });
         return rows;
     }

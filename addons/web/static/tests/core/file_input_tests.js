@@ -7,8 +7,6 @@ import {
     mount,
     patchWithCleanup,
     triggerEvent,
-    makeDeferred,
-    nextTick,
 } from "@web/../tests/helpers/utils";
 import { FileInput } from "@web/core/file_input/file_input";
 import { registry } from "@web/core/registry";
@@ -132,26 +130,6 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.isNotVisible(target.querySelector(".o_file_input"));
     });
 
-    QUnit.test("uploading the same file twice triggers the onChange twice", async (assert) => {
-        await createFileInput({
-            props: {
-                onUpload(files) {
-                    assert.step(files[0].name);
-                },
-            },
-            mockPost: (route, params) => {
-                return JSON.stringify([{ name: params.ufile[0].name }]);
-            },
-        });
-
-        const file = new File(["test"], "fake_file.txt", { type: "text/plain" });
-        await editInput(target, ".o_file_input input", file);
-        assert.verifySteps(["fake_file.txt"], "file has been initially uploaded");
-
-        await editInput(target, ".o_file_input input", file);
-        assert.verifySteps(["fake_file.txt"], "file has been uploaded a second time");
-    });
-
     QUnit.test("uploading a file that is too heavy will send a notification", async (assert) => {
         serviceRegistry.add("localization", makeFakeLocalizationService());
         patchWithCleanup(session, { max_file_upload_size: 2 });
@@ -181,30 +159,5 @@ QUnit.module("Components", ({ beforeEach }) => {
             ["notification"],
             "Only the notification will be triggered and the file won't be uploaded."
         );
-    });
-
-    QUnit.test("Upload button is disabled if attachment upload is not finished", async (assert) => {
-        assert.expect(2);
-
-        const uploadedPromise = makeDeferred();
-        await createFileInput({
-            mockPost: async (route, params) => {
-                if (route === "/web/binary/upload_attachment") {
-                    await uploadedPromise;
-                }
-                return "[]";
-            },
-            props: {},
-        });
-        //enable button
-        const input = target.querySelector(".o_file_input input");
-        await triggerEvent(input, null, "change", {}, { skipVisibilityCheck: true });
-
-        //disable button
-        assert.ok(input.disabled, "the upload button should be disabled on upload");
-
-        uploadedPromise.resolve();
-        await nextTick();
-        assert.notOk(input.disabled, "the upload button should be enabled for upload");
     });
 });

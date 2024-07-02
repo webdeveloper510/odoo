@@ -23,13 +23,7 @@ class TestSalePrices(SaleCommon):
 
         # Needed when run without demo data
         #   s.t. taxes creation doesn't fail
-        belgium = cls.env.ref('base.be')
-        cls.env.company.account_fiscal_country_id = belgium
-        for model in ('account.tax', 'account.tax.group'):
-            cls.env.add_to_compute(
-                cls.env[model]._fields['country_id'],
-                cls.env[model].search([('company_id', '=', cls.env.company.id)]),
-            )
+        cls.env.company.account_fiscal_country_id = cls.env.ref('base.be')
 
     def _create_discount_pricelist_rule(self, **additional_values):
         return self.env['product.pricelist.item'].create({
@@ -226,8 +220,8 @@ class TestSalePrices(SaleCommon):
         with freeze_time('2022-08-19'):
             self.env['res.currency.rate'].create({
                 'name': fields.Date.today(),
-                'rate': 2.0,
-                'currency_id': other_currency.id,
+                'rate': 1.0,
+                'currency_id': self.env.company.currency_id.id,
                 'company_id': self.env.company.id,
             })
             order_in_other_currency = self.env['sale.order'].create({
@@ -241,8 +235,7 @@ class TestSalePrices(SaleCommon):
                     }),
                 ]
             })
-            # 20.0 (product price) * 24.0 (2 dozens) * 2.0 (price rate USD -> EUR)
-            self.assertEqual(order_in_other_currency.amount_total, 960.0)
+            self.assertEqual(order_in_other_currency.amount_total, 480.0)
 
     def test_negative_discounts(self):
         """aka surcharges"""
@@ -408,7 +401,6 @@ class TestSalePrices(SaleCommon):
 
         pricelist = self.env['product.pricelist'].create({
             'name': 'Test multi-currency',
-            'company_id': False,
             'discount_policy': 'without_discount',
             'currency_id': other_curr.id,
             'item_ids': [
@@ -493,7 +485,6 @@ class TestSalePrices(SaleCommon):
         """
         sale_order = self.sale_order
         so_amount = sale_order.amount_total
-        start_so_amount = so_amount
         sale_order._recompute_prices()
         self.assertEqual(
             sale_order.amount_total, so_amount,
@@ -519,17 +510,6 @@ class TestSalePrices(SaleCommon):
         self.assertTrue(all(line.discount == 0 for line in sale_order.order_line))
         self.assertEqual(sale_order.amount_undiscounted, so_amount)
         self.assertEqual(sale_order.amount_total, 0.95*so_amount)
-
-        # Test taking off the pricelist
-        sale_order.pricelist_id = False
-        sale_order._recompute_prices()
-
-        self.assertTrue(all(line.discount == 0 for line in sale_order.order_line))
-        self.assertEqual(sale_order.amount_undiscounted, so_amount)
-        self.assertEqual(
-            sale_order.amount_total, start_so_amount,
-            "The SO amount without pricelist should be the same than with an empty pricelist"
-        )
 
     # Taxes tests:
     # We do not rely on accounting common on purpose to avoid
@@ -1000,9 +980,6 @@ class TestSalePrices(SaleCommon):
         order.action_confirm()
         line = order.order_line
         quantity_precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        self.assertEqual(
-            line.product_uom_qty, float_round(product_uom_qty, precision_digits=quantity_precision))
-        expected_price_subtotal = line.currency_id.round(
-            line.price_unit * float_round(product_uom_qty, precision_digits=quantity_precision))
+        expected_price_subtotal = line.price_unit * float_round(product_uom_qty, precision_digits=quantity_precision)
         self.assertAlmostEqual(line.price_subtotal, expected_price_subtotal)
         self.assertEqual(order.amount_total, order.tax_totals.get('amount_total'))

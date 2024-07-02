@@ -26,7 +26,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.product3 = self.create_product('Product 3', self.categ_basic, 30.0, 15)
         self.product4 = self.create_product('Product_4', self.categ_basic, 9.96, 4.98)
         self.product99 = self.create_product('Product_99', self.categ_basic, 99, 50)
-        self.product_multi_tax = self.create_product('Multi-tax product', self.categ_basic, 100, 100, (self.taxes['tax8'] | self.taxes['tax9']).ids)
+        self.product_multi_tax = self.create_product('Multi-tax product', self.categ_basic, 100, 100, (self.taxes['tax7base'] | self.taxes['tax10nobase']).ids)
         self.adjust_inventory([self.product1, self.product2, self.product3], [100, 50, 50])
 
     def test_orders_no_invoiced(self):
@@ -846,17 +846,7 @@ class TestPoSBasicConfig(TestPoSCommon):
             self.assertEqual(session.cash_register_balance_start, pos_data['amount_paid'])
 
         pos01_config = self.config
-        self.cash_journal = self.env['account.journal'].create(
-            {'name': 'CASH journal', 'type': 'cash', 'code': 'CSH00'})
-        self.cash_payment_method = self.env['pos.payment.method'].create({
-            'name': 'Cash Test',
-            'journal_id': self.cash_journal.id,
-            'receivable_account_id': pos01_config.payment_method_ids.filtered(lambda s: s.is_cash_count)[
-                1].receivable_account_id.id
-        })
-        pos02_config = pos01_config.copy({
-            'payment_method_ids': self.cash_payment_method
-        })
+        pos02_config = pos01_config.copy()
         pos01_data = {'config': pos01_config, 'p_qty': 1, 'amount_paid': 0}
         pos02_data = {'config': pos02_config, 'p_qty': 3, 'amount_paid': 0}
 
@@ -889,6 +879,8 @@ class TestPoSBasicConfig(TestPoSCommon):
             'company_id': company2.id,
         })
 
+        # activate limited partners loading
+        self.config.limited_partners_loading = True
         self.open_new_session()
 
         # calling load_pos_data should not raise an error
@@ -1038,24 +1030,24 @@ class TestPoSBasicConfig(TestPoSCommon):
         self._run_test({
             'payment_methods': self.cash_pm1 | self.bank_pm1,
             'orders': [
-                {'pos_order_lines_ui_args': [(self.product_multi_tax, 1)], 'payments': [(self.bank_pm1, 117.72)], 'customer': False, 'is_invoiced': False, 'uid': '00100-010-0001'},
+                {'pos_order_lines_ui_args': [(self.product_multi_tax, 1)], 'payments': [(self.bank_pm1, 117.7)], 'customer': False, 'is_invoiced': False, 'uid': '00100-010-0001'},
             ],
             'journal_entries_before_closing': {},
             'journal_entries_after_closing': {
                 'session_journal_entry': {
                     'line_ids': [
-                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 8, 'reconciled': False},
-                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 9.72, 'reconciled': False},
+                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 7, 'reconciled': False},
+                        {'account_id': self.tax_received_account.id, 'partner_id': False, 'debit': 0, 'credit': 10.7, 'reconciled': False},
                         {'account_id': self.sales_account.id, 'partner_id': False, 'debit': 0, 'credit': 100, 'reconciled': False},
-                        {'account_id': self.bank_pm1.receivable_account_id.id, 'partner_id': False, 'debit': 117.72, 'credit': 0, 'reconciled': True},
+                        {'account_id': self.bank_pm1.receivable_account_id.id, 'partner_id': False, 'debit': 117.7, 'credit': 0, 'reconciled': True},
                     ],
                 },
                 'cash_statement': [],
                 'bank_payments': [
-                    ((117.72, ), {
+                    ((117.7, ), {
                         'line_ids': [
-                            {'account_id': self.bank_pm1.outstanding_account_id.id, 'partner_id': False, 'debit': 117.72, 'credit': 0, 'reconciled': False},
-                            {'account_id': self.bank_pm1.receivable_account_id.id, 'partner_id': False, 'debit': 0, 'credit': 117.72, 'reconciled': True},
+                            {'account_id': self.bank_pm1.outstanding_account_id.id, 'partner_id': False, 'debit': 117.7, 'credit': 0, 'reconciled': False},
+                            {'account_id': self.bank_pm1.receivable_account_id.id, 'partner_id': False, 'debit': 0, 'credit': 117.7, 'reconciled': True},
                         ]
                     })
                 ],
@@ -1077,7 +1069,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertTrue(order_to_invoice.account_move, 'Invoice should be created.')
         self.assertRecordValues(order_to_invoice.account_move.line_ids, [
             {'account_id': self.sales_account.id, 'balance': -100, 'reconciled': False},
-            {'account_id': self.tax_received_account.id, 'balance': -8, 'reconciled': False},
-            {'account_id': self.tax_received_account.id, 'balance': -9.72, 'reconciled': False},
-            {'account_id': self.receivable_account.id, 'balance': 117.72, 'reconciled': True},
+            {'account_id': self.tax_received_account.id, 'balance': -7, 'reconciled': False},
+            {'account_id': self.tax_received_account.id, 'balance': -10.7, 'reconciled': False},
+            {'account_id': self.receivable_account.id, 'balance': 117.7, 'reconciled': True},
         ])

@@ -5,10 +5,11 @@ import contextlib
 import logging
 import json
 import requests
-import threading
 import uuid
+from unittest.mock import patch
 
 from odoo import exceptions, _
+from odoo.tests.common import BaseCase
 from odoo.tools import email_normalize, pycompat
 
 _logger = logging.getLogger(__name__)
@@ -16,11 +17,28 @@ _logger = logging.getLogger(__name__)
 DEFAULT_ENDPOINT = 'https://iap.odoo.com'
 
 
+# We need to mock iap_jsonrpc during tests as we don't want to perform real calls to RPC endpoints
+def iap_jsonrpc_mocked(*args, **kwargs):
+    raise exceptions.AccessError("Unavailable during tests.")
+
+
+iap_patch = patch('odoo.addons.iap.tools.iap_tools.iap_jsonrpc', iap_jsonrpc_mocked)
+
+
+def setUp(self):
+    old_setup_func(self)
+    iap_patch.start()
+    self.addCleanup(iap_patch.stop)
+
+
+old_setup_func = BaseCase.setUp
+BaseCase.setUp = setUp
+
 #----------------------------------------------------------
 # Tools globals
 #----------------------------------------------------------
 
-_MAIL_DOMAIN_BLACKLIST = set([
+_MAIL_PROVIDERS = {
     'gmail.com', 'hotmail.com', 'yahoo.com', 'qq.com', 'outlook.com', '163.com', 'yahoo.fr', 'live.com', 'hotmail.fr', 'icloud.com', '126.com',
     'me.com', 'free.fr', 'ymail.com', 'msn.com', 'mail.com', 'orange.fr', 'aol.com', 'wanadoo.fr', 'live.fr', 'mail.ru', 'yahoo.co.in',
     'rediffmail.com', 'hku.hk', 'googlemail.com', 'gmx.de', 'sina.com', 'skynet.be', 'laposte.net', 'yahoo.co.uk', 'yahoo.co.id', 'web.de',
@@ -28,7 +46,7 @@ _MAIL_DOMAIN_BLACKLIST = set([
     'sfr.fr', 'libero.it', 'mac.com', 'rocketmail.com', 'protonmail.com', 'gmx.com', 'gamil.com', 'hotmail.es', 'gmx.net', 'comcast.net',
     'yahoo.com.mx', 'linkedin.com', 'yahoo.com.br', 'yahoo.in', 'yahoo.ca', 't-online.de', '139.com', 'yandex.ru', 'yahoo.com.hk','yahoo.de',
     'yeah.net', 'yandex.com', 'nwytg.net', 'neuf.fr', 'yahoo.com.ar', 'outlook.es', 'abv.bg', 'aliyun.com', 'yahoo.com.tw', 'ukr.net', 'live.nl',
-    'wp.pl', 'hotmail.it', 'live.com.mx', 'zoho.com', 'live.co.uk', 'sohu.com', 'twoomail.com', 'yahoo.com.sg', 'odoo.com', 'yahoo.com.vn',
+    'wp.pl', 'hotmail.it', 'live.com.mx', 'zoho.com', 'live.co.uk', 'sohu.com', 'twoomail.com', 'yahoo.com.sg', 'yahoo.com.vn',
     'windowslive.com', 'gmail', 'vols.utk.edu', 'email.com', 'tiscali.it', 'yahoo.it', 'gmx.ch', 'trbvm.com', 'nwytg.com', 'mvrht.com', 'nyit.edu',
     'o2.pl', 'live.cn', 'gmial.com', 'seznam.cz', 'live.be', 'videotron.ca', 'gmil.com', 'live.ca', 'hotmail.de', 'sbcglobal.net', 'connect.hku.hk',
     'yahoo.com.au', 'att.net', 'live.in', 'btinternet.com', 'gmx.fr', 'voila.fr', 'shaw.ca', 'prodigy.net.mx', 'vip.qq.com', 'yahoo.com.ph',
@@ -46,7 +64,8 @@ _MAIL_DOMAIN_BLACKLIST = set([
     'prisme.ch', 'bbox.fr', 'orbitalu.com', 'netcourrier.com', 'iinet.net.au', 'cegetel.net', 'proton.me', 'dbmail.com',
     # Dummy entries
     'example.com',
-])
+}
+_MAIL_DOMAIN_BLACKLIST = _MAIL_PROVIDERS | {'odoo.com'}
 
 # List of country codes for which we should offer state filtering when mining new leads.
 # See crm.iap.lead.mining.request#_compute_available_state_ids() or task-2471703 for more details.
@@ -108,9 +127,6 @@ def iap_jsonrpc(url, method='call', params=None, timeout=15):
     Calls the provided JSON-RPC endpoint, unwraps the result and
     returns JSON-RPC errors as exceptions.
     """
-    if hasattr(threading.current_thread(), 'testing') and threading.current_thread().testing:
-        raise exceptions.AccessError("Unavailable during tests.")
-
     payload = {
         'jsonrpc': '2.0',
         'method': method,
@@ -123,7 +139,6 @@ def iap_jsonrpc(url, method='call', params=None, timeout=15):
         req = requests.post(url, json=payload, timeout=timeout)
         req.raise_for_status()
         response = req.json()
-        _logger.info("iap jsonrpc %s answered in %s seconds", url, req.elapsed.total_seconds())
         if 'error' in response:
             name = response['error']['data'].get('name').rpartition('.')[-1]
             message = response['error']['data'].get('message')

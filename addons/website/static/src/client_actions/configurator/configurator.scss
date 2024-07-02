@@ -1,7 +1,6 @@
 .o_configurator_container {
     @include o-position-absolute(0, 0, 0, 0);
     background-color: $o-view-background-color;
-    $input-font-size: 40%;
 
     .o_configurator_screen {
 
@@ -124,9 +123,6 @@
                         color: inherit;
                         outline: none;
                     }
-                    &::placeholder {
-                        font-size: $input-font-size;
-                    }
                 }
 
                 &::after {
@@ -170,14 +166,12 @@
             .dropdown-menu, .custom-ui-autocomplete {
                 @include border-bottom-radius($border-radius);
                 font-size: inherit;
+                min-width: 100%;
                 overflow-y: auto;
-                &:not(.o_configurator_industry_dropdown) {
-                    min-width: 100%;
-                }
             }
 
             .dropdown-item, .fa-angle-down, .ui-menu-item a, .ui-menu-item a.ui-state-active {
-                font-size: .5em;
+                font-size: .65em;
                 font-weight: inherit;
             }
 

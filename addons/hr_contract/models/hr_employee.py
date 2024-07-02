@@ -1,32 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from pytz import timezone, UTC
 from datetime import date, datetime, time
+from pytz import timezone
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.osv import expression
-from odoo.addons.resource.models.utils import Intervals
-
-
-class EmployeePublic(models.Model):
-    _inherit = 'hr.employee.public'
-
-    first_contract_date = fields.Date(compute='_compute_manager_only_fields', search='_search_first_contract_date')
-
-    def _get_manager_only_fields(self):
-        return super()._get_manager_only_fields() + ['first_contract_date']
-
-    def _search_first_contract_date(self, operator, value):
-        employees = self.env['hr.employee'].sudo().search([('id', 'child_of', self.env.user.employee_id.ids), ('first_contract_date', operator, value)])
-        return [('id', 'in', employees.ids)]
-
-
-class EmployeeBase(models.AbstractModel):
-    _inherit = "hr.employee.base"
-
-    @api.model
-    def _get_new_hire_field(self):
-        return 'first_contract_date'
+from odoo.addons.resource.models.resource import Intervals
+from odoo.exceptions import UserError
 
 
 class Employee(models.Model):
@@ -51,7 +31,6 @@ class Employee(models.Model):
 
     def _get_first_contract_date(self, no_gap=True):
         self.ensure_one()
-
         def remove_gap(contracts):
             # We do not consider a gap of more than 4 days to be a same occupation
             # contracts are considered to be ordered correctly
@@ -111,26 +90,6 @@ class Employee(models.Model):
     def _get_incoming_contracts(self, date_from, date_to):
         return self._get_contracts(date_from, date_to, states=['draft'], kanban_state=['done'])
 
-    def _get_calendar(self, date_from=None):
-        res = super()._get_calendar()
-        if not date_from:
-            return res
-        contracts = self.env['hr.contract'].sudo().search([
-            '|',
-                ('state', 'in', ['open', 'close']),
-                '&',
-                    ('state', '=', 'draft'),
-                    ('kanban_state', '=', 'done'),
-            ('employee_id', '=', self.id),
-            ('date_start', '<=', date_from),
-            '|',
-                ('date_end', '=', False),
-                ('date_end', '>=', date_from)
-        ])
-        if not contracts:
-            return res
-        return contracts[0].resource_calendar_id.sudo(False)
-
     @api.model
     def _get_all_contracts(self, date_from, date_to, states=['open']):
         """
@@ -138,34 +97,11 @@ class Employee(models.Model):
         """
         return self.search(['|', ('active', '=', True), ('active', '=', False)])._get_contracts(date_from, date_to, states=states)
 
-    def _get_unusual_days(self, date_from, date_to=None):
-        employee_contracts = self.env['hr.contract'].sudo().search([
-            ('state', '!=', 'cancel'),
-            ('employee_id', '=', self.id),
-            ('date_start', '<=', date_to),
-            '|',
-            ('date_end', '=', False),
-            ('date_end', '>=', date_from),
-        ])
-        if not employee_contracts:
-            return super()._get_unusual_days(date_from, date_to)
-        unusual_days = {}
-        date_from_date = datetime.strptime(date_from, '%Y-%m-%d %H:%M:%S').date()
-        date_to_date = datetime.strptime(date_to, '%Y-%m-%d %H:%M:%S').date() if date_to else None
-        for contract in employee_contracts:
-            tmp_date_from = max(date_from_date, contract.date_start)
-            tmp_date_to = min(date_to_date, contract.date_end) if contract.date_end else date_to_date
-            unusual_days.update(contract.resource_calendar_id.sudo(False)._get_unusual_days(
-                datetime.combine(fields.Date.from_string(tmp_date_from), time.min).replace(tzinfo=UTC),
-                datetime.combine(fields.Date.from_string(tmp_date_to), time.max).replace(tzinfo=UTC)
-            ))
-        return unusual_days
-
-    def _get_expected_attendances(self, date_from, date_to):
+    def _get_expected_attendances(self, date_from, date_to, domain=None):
         self.ensure_one()
         valid_contracts = self.sudo()._get_contracts(date_from, date_to, states=['open', 'close'])
         if not valid_contracts:
-            return super()._get_expected_attendances(date_from, date_to)
+            return super()._get_expected_attendances(date_from, date_to, domain)
         employee_tz = timezone(self.tz) if self.tz else None
         duration_data = Intervals()
         for contract in valid_contracts:
@@ -176,61 +112,27 @@ class Employee(models.Model):
                                     max(date_from, contract_start),
                                     min(date_to, contract_end),
                                     tz=employee_tz,
-                                    resources=self.resource_id,
-                                    compute_leaves=True)[self.resource_id.id]
-            duration_data = duration_data.__or__(contract_intervals)
-        return self.env['resource.calendar']._get_attendance_intervals_days_data(duration_data)
-
-    def _get_calendar_attendances(self, date_from, date_to):
-        self.ensure_one()
-        valid_contracts = self.sudo()._get_contracts(date_from, date_to, states=['open', 'close'])
-        if not valid_contracts:
-            return super()._get_calendar_attendances(date_from, date_to)
-        employee_tz = timezone(self.tz) if self.tz else None
-        duration_data = {'days': 0, 'hours': 0}
-        for contract in valid_contracts:
-            contract_start = datetime.combine(contract.date_start, time.min, employee_tz)
-            contract_end = datetime.combine(contract.date_end or date.max, time.max, employee_tz)
-            calendar = contract.resource_calendar_id or contract.company_id.resource_calendar_id
-            contract_duration_data = calendar\
-                .with_context(employee_timezone=employee_tz)\
-                .get_work_duration_data(
-                    max(date_from, contract_start),
-                    min(date_to, contract_end),
-                    domain=[('company_id', 'in', [False, contract.company_id.id])])
-            duration_data['days'] += contract_duration_data['days']
-            duration_data['hours'] += contract_duration_data['hours']
+                                    domain=domain,
+                                    compute_leaves=True,
+                                    resources=self.resource_id)[self.resource_id.id]
+            duration_data = duration_data | contract_intervals
         return duration_data
 
     def write(self, vals):
-        res = super().write(vals)
+        res = super(Employee, self).write(vals)
         if vals.get('contract_id'):
             for employee in self:
                 employee.resource_calendar_id.transfer_leaves_to(employee.contract_id.resource_calendar_id, employee.resource_id)
-                if employee.resource_calendar_id:
-                    employee.resource_calendar_id = employee.contract_id.resource_calendar_id
+                employee.resource_calendar_id = employee.contract_id.resource_calendar_id
         return res
 
-    def action_open_contract(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_open_contract(self):
+        if any(contract.state == 'open' for contract in self.contract_ids):
+            raise UserError(_('You cannot delete an employee with a running contract.'))
+
+    def action_open_contract_history(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id('hr_contract.action_hr_contract')
-        action['views'] = [(False, 'form')]
-        if not self.contract_ids:
-            action['context'] = {
-                'default_employee_id': self.id,
-            }
-            action['target'] = 'new'
-            return action
-
-        target_contract = self.contract_id
-        if target_contract:
-            action['res_id'] = target_contract.id
-            return action
-
-        target_contract = self.contract_ids.filtered(lambda c: c.state == 'draft')
-        if target_contract:
-            action['res_id'] = target_contract[0].id
-            return action
-
-        action['res_id'] = self.contract_ids[0].id
+        action = self.env["ir.actions.actions"]._for_xml_id('hr_contract.hr_contract_history_view_form_action')
+        action['res_id'] = self.id
         return action

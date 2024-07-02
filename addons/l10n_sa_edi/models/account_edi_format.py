@@ -1,4 +1,5 @@
 import json
+import pytz
 from hashlib import sha256
 from base64 import b64decode, b64encode
 from lxml import etree
@@ -116,9 +117,9 @@ class AccountEdiFormat(models.Model):
         """
         mode = 'reporting' if invoice._l10n_sa_is_simplified() else 'clearance'
         if mode == 'clearance' and clearance_data.get('clearanceStatus', '') != 'CLEARED':
-            return {'error': _("Invoice could not be cleared:\n%s", clearance_data), 'blocking_level': 'error'}
+            return {'error': _("Invoice could not be cleared: \r\n %s ") % clearance_data, 'blocking_level': 'error'}
         elif mode == 'reporting' and clearance_data.get('reportingStatus', '') != 'REPORTED':
-            return {'error': _("Invoice could not be reported:\n%s", clearance_data), 'blocking_level': 'error'}
+            return {'error': _("Invoice could not be reported: \r\n %s ") % clearance_data, 'blocking_level': 'error'}
         return clearance_data
 
     # ====== UBL Document Rendering & Submission =======
@@ -149,7 +150,7 @@ class AccountEdiFormat(models.Model):
         xml_content, errors = self.env['account.edi.xml.ubl_21.zatca']._export_invoice(invoice)
         if errors:
             return {
-                'error': _("Could not generate Invoice UBL content: %s", ", \n".join(errors)),
+                'error': _("Could not generate Invoice UBL content: %s") % ", \n".join(errors),
                 'blocking_level': 'error'
             }
         return self._l10n_sa_postprocess_zatca_template(xml_content)
@@ -399,7 +400,7 @@ class AccountEdiFormat(models.Model):
         """
 
         def _set_missing_partner_fields(missing_fields, name):
-            return _("- Please, set the following fields on the %s: %s", name, ', '.join(missing_fields))
+            return _("- Please, set the following fields on the %s: %s") % (name, ', '.join(missing_fields))
 
         journal = invoice.journal_id
         company = invoice.company_id
@@ -416,17 +417,17 @@ class AccountEdiFormat(models.Model):
 
         if not journal._l10n_sa_ready_to_submit_einvoices():
             errors.append(
-                _("- Finish the Onboarding procees for journal %s by requesting the CSIDs and completing the checks.", journal.name))
+                _("- Finish the Onboarding procees for journal %s by requesting the CSIDs and completing the checks.") % journal.name)
 
         if not company._l10n_sa_check_organization_unit():
             errors.append(
                 _("- The company VAT identification must contain 15 digits, with the first and last digits being '3' as per the BR-KSA-39 and BR-KSA-40 of ZATCA KSA business rule."))
         if not company.sudo().l10n_sa_private_key:
             errors.append(
-                _("- No Private Key was generated for company %s. A Private Key is mandatory in order to generate Certificate Signing Requests (CSR).", company.name))
+                _("- No Private Key was generated for company %s. A Private Key is mandatory in order to generate Certificate Signing Requests (CSR).") % company.name)
         if not journal.l10n_sa_serial_number:
             errors.append(
-                _("- No Serial Number was assigned for journal %s. A Serial Number is mandatory in order to generate Certificate Signing Requests (CSR).", journal.name))
+                _("- No Serial Number was assigned for journal %s. A Serial Number is mandatory in order to generate Certificate Signing Requests (CSR).") % journal.name)
 
         supplier_missing_info = self._l10n_sa_check_seller_missing_info(invoice)
         customer_missing_info = self._l10n_sa_check_buyer_missing_info(invoice)
@@ -439,7 +440,7 @@ class AccountEdiFormat(models.Model):
             errors.append(_("- Please, make sure the invoice date is set to either the same as or before Today."))
         if invoice.move_type in ('in_refund', 'out_refund') and not invoice._l10n_sa_check_refund_reason():
             errors.append(
-                _("- Please, make sure both the Reversed Entry and the Reversal Reason are specified when confirming a Credit/Debit note"))
+                _("- Please, make sure either the Reversed Entry or the Reversal Reason are specified when confirming a Credit/Debit note"))
         return errors
 
     def _needs_web_services(self):

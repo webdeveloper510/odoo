@@ -22,8 +22,8 @@ _logger = logging.getLogger(__name__)
 # longpolling timeout connection
 TIMEOUT = 50
 
-# custom function to call instead of default PostgreSQL's `pg_notify`
-ODOO_NOTIFY_FUNCTION = os.getenv('ODOO_NOTIFY_FUNCTION', 'pg_notify')
+# custom function to call instead of NOTIFY postgresql command (opt-in)
+ODOO_NOTIFY_FUNCTION = os.environ.get('ODOO_NOTIFY_FUNCTION')
 
 
 def get_notify_payload_max_length(default=8000):
@@ -55,8 +55,6 @@ def hashable(key):
 def channel_with_db(dbname, channel):
     if isinstance(channel, models.Model):
         return (dbname, channel._name, channel.id)
-    if isinstance(channel, tuple) and len(channel) == 2 and isinstance(channel[0], models.Model):
-        return (dbname, channel[0]._name, channel[0].id, channel[1])
     if isinstance(channel, str):
         return (dbname, channel)
     return channel
@@ -119,7 +117,10 @@ class ImBus(models.Model):
             @self.env.cr.postcommit.add
             def notify():
                 with odoo.sql_db.db_connect('postgres').cursor() as cr:
-                    query = sql.SQL("SELECT {}('imbus', %s)").format(sql.Identifier(ODOO_NOTIFY_FUNCTION))
+                    if ODOO_NOTIFY_FUNCTION:
+                        query = sql.SQL("SELECT {}('imbus', %s)").format(sql.Identifier(ODOO_NOTIFY_FUNCTION))
+                    else:
+                        query = "NOTIFY imbus, %s"
                     payloads = get_notify_payloads(list(channels))
                     if len(payloads) > 1:
                         _logger.info("The imbus notification payload was too large, "
@@ -150,10 +151,6 @@ class ImBus(models.Model):
                 'message': json.loads(notif['message']),
             })
         return result
-
-    def _bus_last_id(self):
-        last = self.env['bus.bus'].search([], order='id desc', limit=1)
-        return last.id if last else 0
 
 
 #----------------------------------------------------------

@@ -80,15 +80,11 @@ class PurchaseRequisitionCreateAlternative(models.TransientModel):
             'origin': self.origin_po_id.origin,
         }
         if self.copy_products and self.origin_po_id:
-            vals['order_line'] = [Command.create(self._get_alternative_line_value(line)) for line in self.origin_po_id.order_line]
+            vals['order_line'] = [Command.create({
+                'product_id': line.product_id.id,
+                'product_qty': line.product_qty,
+                'product_uom': line.product_uom.id,
+                'display_type': line.display_type,
+                'name': line.name,
+            }) for line in self.origin_po_id.order_line]
         return vals
-
-    @api.model
-    def _get_alternative_line_value(self, order_line):
-        return {
-            'product_id': order_line.product_id.id,
-            'product_qty': order_line.product_qty,
-            'product_uom': order_line.product_uom.id,
-            'display_type': order_line.display_type,
-            'name': order_line.name,
-        }

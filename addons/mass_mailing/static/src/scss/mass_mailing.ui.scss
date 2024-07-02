@@ -1,4 +1,5 @@
-.o_form_view .o_form_sheet .o_notebook .tab-content .tab-pane .o_mail_body {
+.o_form_view .o_form_sheet .o_notebook .tab-content .tab-pane .o_mail_body,
+.o_legacy_form_view .o_form_sheet .o_notebook .tab-content .tab-pane .o_mail_body {
     // cancel padding of form_sheet
     margin-top: -$o-sheet-cancel-tpadding;
     margin-left: -$o-sheet-cancel-hpadding;
@@ -6,7 +7,7 @@
     margin-bottom: -$o-sheet-cancel-bpadding;
 }
 
-html:not(.o_mass_mailing_iframe), body:not(.o_mass_mailing_iframe), html.o_fullscreen {
+html:not(.o_mass_mailing_iframe_full_width), body:not(.o_mass_mailing_iframe), html.o_fullscreen {
     overflow: visible !important;
 }
 
@@ -359,19 +360,6 @@ body.editor_enable.o_basic_theme.o_in_iframe {
                     transform: unset !important;
                     bottom: 100% !important;
                     top: unset !important;
-                }
-            }
-
-            #font-size > button {
-                &:focus-within input {
-                    padding: 0 !important;
-                    width: calc(2ch + #{$o-we-sidebar-content-field-clickable-spacing * 2} - #{$o-we-sidebar-content-field-border-width * 2});
-                }
-
-                input {
-                    padding: 0;
-                    text-align: center;
-                    width: calc(2ch + #{$o-we-sidebar-content-field-clickable-spacing * 2});
                 }
             }
         }

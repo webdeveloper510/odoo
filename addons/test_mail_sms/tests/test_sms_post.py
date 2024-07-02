@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime, timedelta
-
-from odoo.addons.base.tests.test_ir_cron import CronMixinCase
-from odoo.addons.sms.tests.common import SMSCommon
-from odoo.addons.test_mail_sms.tests.common import TestSMSRecipients
-from odoo.tests import tagged
+from odoo.addons.test_mail_sms.tests.common import TestSMSCommon, TestSMSRecipients
 
 
-@tagged('sms_post')
-class TestSMSPost(SMSCommon, TestSMSRecipients, CronMixinCase):
+class TestSMSPost(TestSMSCommon, TestSMSRecipients):
     """ TODO
 
       * add tests for new mail.message and mail.thread fields;
@@ -232,44 +226,6 @@ class TestSMSPost(SMSCommon, TestSMSRecipients, CronMixinCase):
 
         self.assertSMSNotification([{'partner': self.partner_1}, {'number': self.random_numbers_san[0]}], self._test_body, messages)
 
-    def test_message_sms_schedule(self):
-        """ Test delaying notifications through scheduled_date usage """
-        cron_id = self.env.ref('mail.ir_cron_send_scheduled_message').id
-        now = datetime.utcnow().replace(second=0, microsecond=0)
-        scheduled_datetime = now + timedelta(days=5)
-
-        with self.mock_datetime_and_now(now), \
-             self.with_user('employee'), \
-             self.capture_triggers(cron_id) as capt, \
-             self.mockSMSGateway():
-            test_record = self.env['mail.test.sms'].browse(self.test_record.id)
-            messages = test_record._message_sms(
-                'Testing Scheduled Notifications',
-                partner_ids=self.partner_1.ids,
-                scheduled_date=scheduled_datetime,
-            )
-
-        self.assertEqual(capt.records.call_at, scheduled_datetime,
-                         msg='Should have created a cron trigger for the scheduled sending')
-        self.assertFalse(self._new_sms)
-        self.assertFalse(self._sms)
-
-        schedules = self.env['mail.message.schedule'].sudo().search([('mail_message_id', '=', messages.id)])
-        self.assertEqual(len(schedules), 1, msg='Should have scheduled the message')
-        self.assertEqual(schedules.scheduled_datetime, scheduled_datetime)
-
-        # trigger cron now -> should not sent as in future
-        with self.mock_datetime_and_now(now):
-            self.env['mail.message.schedule'].sudo()._send_notifications_cron()
-        self.assertTrue(schedules.exists(), msg='Should not have sent the message')
-
-        # Send the scheduled message from the cron at right date
-        with self.mock_datetime_and_now(now + timedelta(days=5)), self.mockSMSGateway():
-            self.env['mail.message.schedule'].sudo()._send_notifications_cron()
-        self.assertFalse(schedules.exists(), msg='Should have sent the message')
-        # check notifications have been sent
-        self.assertSMSNotification([{'partner': self.partner_1}], 'Testing Scheduled Notifications', messages)
-
     def test_message_sms_with_template(self):
         sms_template = self.env['sms.template'].create({
             'name': 'Test Template',
@@ -313,8 +269,7 @@ class TestSMSPost(SMSCommon, TestSMSRecipients, CronMixinCase):
         self.assertSMSNotification([{'partner': self.partner_1, 'number': self.test_numbers_san[1]}], 'Dear %s this is an SMS.' % self.test_record.display_name, messages)
 
 
-@tagged('sms_post')
-class TestSMSPostException(SMSCommon, TestSMSRecipients):
+class TestSMSPostException(TestSMSCommon, TestSMSRecipients):
 
     @classmethod
     def setUpClass(cls):
@@ -391,14 +346,14 @@ class TestSMSPostException(SMSCommon, TestSMSRecipients):
         ], self._test_body, messages)
 
     def test_message_sms_crash_credit_single(self):
-        with self.with_user('employee'), self.mockSMSGateway(nbr_t_error={self.partner_2._phone_format(): 'credit'}):
+        with self.with_user('employee'), self.mockSMSGateway(nbr_t_error={self.partner_2.phone_get_sanitized_number(): 'credit'}):
             test_record = self.env['mail.test.sms'].browse(self.test_record.id)
             messages = test_record._message_sms(self._test_body, partner_ids=(self.partner_1 | self.partner_2 | self.partner_3).ids)
 
         self.assertSMSNotification([
-            {'partner': self.partner_1, 'state': 'pending'},
+            {'partner': self.partner_1, 'state': 'sent'},
             {'partner': self.partner_2, 'state': 'exception', 'failure_type': 'sms_credit'},
-            {'partner': self.partner_3, 'state': 'pending'},
+            {'partner': self.partner_3, 'state': 'sent'},
         ], self._test_body, messages)
 
     def test_message_sms_crash_server_crash(self):
@@ -423,14 +378,14 @@ class TestSMSPostException(SMSCommon, TestSMSRecipients):
         ], self._test_body, messages)
 
     def test_message_sms_crash_unregistered_single(self):
-        with self.with_user('employee'), self.mockSMSGateway(nbr_t_error={self.partner_2._phone_format(): 'unregistered'}):
+        with self.with_user('employee'), self.mockSMSGateway(nbr_t_error={self.partner_2.phone_get_sanitized_number(): 'unregistered'}):
             test_record = self.env['mail.test.sms'].browse(self.test_record.id)
             messages = test_record._message_sms(self._test_body, partner_ids=(self.partner_1 | self.partner_2 | self.partner_3).ids)
 
         self.assertSMSNotification([
-            {'partner': self.partner_1, 'state': 'pending'},
+            {'partner': self.partner_1, 'state': 'sent'},
             {'partner': self.partner_2, 'state': 'exception', 'failure_type': 'sms_acc'},
-            {'partner': self.partner_3, 'state': 'pending'},
+            {'partner': self.partner_3, 'state': 'sent'},
         ], self._test_body, messages)
 
     def test_message_sms_crash_wrong_number(self):
@@ -444,18 +399,18 @@ class TestSMSPostException(SMSCommon, TestSMSRecipients):
         ], self._test_body, messages)
 
     def test_message_sms_crash_wrong_number_single(self):
-        with self.with_user('employee'), self.mockSMSGateway(nbr_t_error={self.partner_2._phone_format(): 'wrong_number_format'}):
+        with self.with_user('employee'), self.mockSMSGateway(nbr_t_error={self.partner_2.phone_get_sanitized_number(): 'wrong_number_format'}):
             test_record = self.env['mail.test.sms'].browse(self.test_record.id)
             messages = test_record._message_sms(self._test_body, partner_ids=(self.partner_1 | self.partner_2 | self.partner_3).ids)
 
         self.assertSMSNotification([
-            {'partner': self.partner_1, 'state': 'pending'},
+            {'partner': self.partner_1, 'state': 'sent'},
             {'partner': self.partner_2, 'state': 'exception', 'failure_type': 'sms_number_format'},
-            {'partner': self.partner_3, 'state': 'pending'},
+            {'partner': self.partner_3, 'state': 'sent'},
         ], self._test_body, messages)
 
 
-class TestSMSApi(SMSCommon):
+class TestSMSApi(TestSMSCommon):
 
     @classmethod
     def setUpClass(cls):

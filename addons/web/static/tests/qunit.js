@@ -1,14 +1,16 @@
 /** @odoo-module */
 
 import { isVisible as isElemVisible } from "@web/core/utils/ui";
-import { fullTraceback, fullAnnotatedTraceback } from "@web/core/errors/error_utils";
+import { UncaughtClientError, UncaughtPromiseError } from "@web/core/errors/error_service";
+import {
+    completeUncaughtError,
+    fullTraceback,
+    fullAnnotatedTraceback,
+} from "@web/core/errors/error_utils";
 import { registry } from "@web/core/registry";
-import { Component, whenReady } from "@odoo/owl";
-
-const consoleError = console.error;
 
 function setQUnitDebugMode() {
-    whenReady(() => document.body.classList.add("debug")); // make the test visible to the naked eye
+    owl.whenReady(() => document.body.classList.add("debug")); // make the test visible to the naked eye
     QUnit.config.debug = true; // allows for helper functions to behave differently (logging, the HTML element in which the test occurs etc...)
     QUnit.config.testTimeout = 60 * 60 * 1000;
     // Allows for interacting with the test when it is over
@@ -32,6 +34,8 @@ QUnit.debug = (name, cb) => {
 QUnit.config.autostart = false;
 
 export function setupQUnit() {
+    const { Component } = owl;
+
     // -----------------------------------------------------------------------------
     // QUnit config
     // -----------------------------------------------------------------------------
@@ -58,7 +62,7 @@ export function setupQUnit() {
             }
             $el = $(target.el);
         } else {
-            $el = target instanceof Element ? $(target) : target;
+            $el = target instanceof HTMLElement ? $(target) : target;
         }
         msg = msg || `Selector '${selector}' should have exactly ${n} matches inside the target`;
         QUnit.assert.strictEqual($el.find(selector).length, n, msg);
@@ -67,7 +71,7 @@ export function setupQUnit() {
     /**
      * Checks that the target contains exactly 0 match for the selector.
      *
-     * @param {Element} el
+     * @param {HTMLElement} el
      * @param {string} selector
      * @param {string} [msg]
      */
@@ -78,7 +82,7 @@ export function setupQUnit() {
     /**
      * Checks that the target contains exactly 1 match for the selector.
      *
-     * @param {Element} el
+     * @param {HTMLElement} el
      * @param {string} selector
      * @param {string} [msg]
      */
@@ -90,7 +94,7 @@ export function setupQUnit() {
      * Helper function, to check if a given element has (or has not) classnames.
      *
      * @private
-     * @param {Element | jQuery | Widget} el
+     * @param {HTMLElement|jQuery|Widget} el
      * @param {string} classNames
      * @param {boolean} shouldHaveClass
      * @param {string} [msg]
@@ -99,7 +103,7 @@ export function setupQUnit() {
         if (el) {
             if (el._widgetRenderAndInsert) {
                 el = el.el; // legacy widget
-            } else if (!(el instanceof Element)) {
+            } else if (!(el instanceof HTMLElement)) {
                 el = el[0];
             }
         }
@@ -116,7 +120,7 @@ export function setupQUnit() {
     /**
      * Checks that the target element has the given classnames.
      *
-     * @param {Element} el
+     * @param {HTMLElement} el
      * @param {string} classNames
      * @param {string} [msg]
      */
@@ -127,7 +131,7 @@ export function setupQUnit() {
     /**
      * Checks that the target element does not have the given classnames.
      *
-     * @param {Element} el
+     * @param {HTMLElement} el
      * @param {string} classNames
      * @param {string} [msg]
      */
@@ -141,7 +145,7 @@ export function setupQUnit() {
      * - is unique
      * - has the given attribute with the proper value
      *
-     * @param {Component | Element | Widget | jQuery} w
+     * @param {Widget|jQuery|HTMLElement|Component} w
      * @param {string} attr
      * @param {string} value
      * @param {string} [msg]
@@ -158,7 +162,7 @@ export function setupQUnit() {
             }
             $el = $(target.el);
         } else {
-            $el = target instanceof Element ? $(target) : target;
+            $el = target instanceof HTMLElement ? $(target) : target;
         }
 
         if ($el.length !== 1) {
@@ -179,7 +183,7 @@ export function setupQUnit() {
      * - is (or not) visible
      *
      * @private
-     * @param {Element | jQuery | Widget} el
+     * @param {HTMLElement|jQuery|Widget} el
      * @param {boolean} shouldBeVisible
      * @param {string} [msg]
      */
@@ -187,7 +191,7 @@ export function setupQUnit() {
         if (el) {
             if (el._widgetRenderAndInsert) {
                 el = el.el; // legacy widget
-            } else if (!(el instanceof Element)) {
+            } else if (!(el instanceof HTMLElement)) {
                 el = el[0];
             }
         }
@@ -202,19 +206,6 @@ export function setupQUnit() {
     function isNotVisible(el, msg) {
         return _checkVisible(el, false, msg);
     }
-    function expectErrors() {
-        QUnit.config.current.expectErrors = true;
-        QUnit.config.current.unverifiedErrors = [];
-    }
-    function verifyErrors(expectedErrors) {
-        if (!QUnit.config.current.expectErrors) {
-            QUnit.pushFailure(`assert.expectErrors() must be called at the beginning of the test`);
-            return;
-        }
-        const unverifiedErrors = QUnit.config.current.unverifiedErrors;
-        QUnit.config.current.assert.deepEqual(unverifiedErrors, expectedErrors, "verifying errors");
-        QUnit.config.current.unverifiedErrors = [];
-    }
     QUnit.assert.containsN = containsN;
     QUnit.assert.containsNone = containsNone;
     QUnit.assert.containsOnce = containsOnce;
@@ -223,8 +214,6 @@ export function setupQUnit() {
     QUnit.assert.hasAttrValue = hasAttrValue;
     QUnit.assert.isVisible = isVisible;
     QUnit.assert.isNotVisible = isNotVisible;
-    QUnit.assert.expectErrors = expectErrors;
-    QUnit.assert.verifyErrors = verifyErrors;
 
     // -----------------------------------------------------------------------------
     // QUnit logs
@@ -239,7 +228,7 @@ export function setupQUnit() {
         const messages = errorMessages.slice();
         errorMessages = [];
         const infos = await Promise.all(messages);
-        consoleError(infos.map((info) => info.error || info).join("\n"));
+        console.error(infos.map((info) => info.error || info).join("\n"));
         // Only log the source of the errors in "info" log level to allow matching the same
         // error with its log message, as source contains asset file name which changes
         console.info(
@@ -252,21 +241,71 @@ export function setupQUnit() {
     }
 
     /**
+     * Waits for the module system to end processing the JS modules, so that we can
+     * make the suite fail if some modules couldn't be loaded (e.g. because of a
+     * missing dependency).
+     *
+     * @returns {Promise<boolean>}
+     */
+    async function checkModules() {
+        // do not mark the suite as successful already, as we still need to ensure
+        // that all modules have been correctly loaded
+        document.querySelector("#qunit-banner").classList.remove("qunit-pass");
+        const modulesAlert = document.createElement("div");
+        modulesAlert.classList.add("alert");
+        modulesAlert.classList.add("alert-info");
+        modulesAlert.textContent = "Waiting for modules check...";
+        document.getElementById("qunit").appendChild(modulesAlert);
+        const info = odoo.__DEBUG__.jsModules;
+        if (info.missing.length || info.failed.length || info.unloaded.length) {
+            document.querySelector("#qunit-banner").classList.add("qunit-fail");
+            modulesAlert.classList.toggle("alert-danger");
+            modulesAlert.classList.toggle("alert-info");
+            let error = "Some modules couldn't be started:<ul>";
+            if (info.failed.length) {
+                const failedList = info.failed.map((mod) => "<li>" + _.escape(mod) + "</li>");
+                error += `<li> Failed modules: <ul>${failedList.join("")}</ul> </li>`;
+            }
+            if (info.missing.length) {
+                const missingList = info.missing.map((mod) => "<li>" + _.escape(mod) + "</li>");
+                error += `<li> Missing dependencies: <ul>${missingList.join("")}</ul> </li>`;
+            }
+            if (info.unloaded.length) {
+                const unloadedList = info.unloaded.map((mod) => "<li>" + _.escape(mod) + "</li>");
+                error += `
+                    <li> Non loaded modules due to missing dependencies:
+                        <ul>${unloadedList.join("")}</ul>
+                    </li>`;
+                if (info.cycle) {
+                    error += `<li> Cycle: ${info.cycle} </li>`;
+                }
+            }
+            error += "</ul>";
+
+            modulesAlert.innerHTML = error;
+            errorMessages.unshift(error);
+            return false;
+        } else {
+            modulesAlert.classList.toggle("alert-success");
+            modulesAlert.classList.toggle("alert-info");
+            modulesAlert.textContent = "All modules have been correctly loaded.";
+            document.querySelector("#qunit-banner").classList.add("qunit-pass");
+            return true;
+        }
+    }
+
+    QUnit.begin(() => odoo.__DEBUG__.didLogInfo);
+    /**
      * If we want to log several errors, we have to log all of them at once, as
      * browser_js is closed as soon as an error is logged.
      */
     QUnit.done(async (result) => {
-        await odoo.loader.checkErrorProm;
-        const moduleLoadingError = document.querySelector(".o_module_error");
-        if (moduleLoadingError) {
-            errorMessages.unshift(moduleLoadingError.innerText);
-        }
+        const allModulesLoaded = await checkModules();
         if (result.failed) {
             errorMessages.push(`${result.failed} / ${result.total} tests failed.`);
         }
-        if (!result.failed && !moduleLoadingError) {
-            console.log("QUnit test suite done.");
-            console.log("test successful"); // for ChromeBowser to know it's over and ok
+        if (!result.failed && allModulesLoaded) {
+            console.log("test successful");
         } else {
             logErrors();
         }
@@ -316,56 +355,6 @@ export function setupQUnit() {
                 };
             })
         );
-    });
-
-    /**
-     * The purpose of this function is to reset the timer nesting level of the execution context
-     * to 0, to prevent situations where a setTimeout with a timeout of 0 may end up being
-     * scheduled after another one that also has a timeout of 0 that was called later.
-     * Example code:
-     * (async () => {
-     *     const timeout = () => new Promise((resolve) => setTimeout(resolve, 0));
-     *     const animationFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
-     *
-     *     for (let i = 0; i < 4; i++) {
-     *         await timeout();
-     *     }
-     *     timeout().then(() => console.log("after timeout"));
-     *     await animationFrame()
-     *     timeout().then(() => console.log("after animationFrame"));
-     *     // logs "after animationFrame" before "after timeout"
-     * })()
-     *
-     * When the browser runs a task that was the result of a timer (setTimeout or setInterval),
-     * that task has an intrinsic "timer nesting level". If you schedule another task with
-     * a timer from within such a task, the new task has the existing task's timer nesting level,
-     * plus one. When the timer nesting level of a task is greater than 5, the `timeout` parameter
-     * for setTimeout/setInterval will be forced to at least 4 (see step 5 in the timer initialization
-     * steps in the HTML spec: https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timer-initialisation-steps).
-     *
-     * In the above example, every `await timeout()` besides inside the loop schedules a new task
-     * from within a task that was initiated by a timer, causing the nesting level to be 5 after
-     * the loop. The first timeout after the loop is now forced to 4.
-     *
-     * When we await the animation frame promise, we create a task that is *not* initiated by a timer,
-     * reseting the nesting level to 0, causing the timeout following it to properly be treated as 0,
-     * as such the callback that was registered by it is oftentimes executed before the previous one.
-     *
-     * While we can't prevent this from happening within a given test, we want to at least prevent
-     * the timer nesting level to propagate from one test to the next as this can be a cause of
-     * indeterminism. To avoid slowing down the tests by waiting one frame after every test,
-     * we instead use a MessageChannel to add a task with not nesting level to the event queue immediately.
-     */
-    QUnit.testDone(async () => {
-        return new Promise((resolve) => {
-            const channel = new MessageChannel();
-            channel.port1.onmessage = () => {
-                channel.port1.close();
-                channel.port2.close();
-                resolve();
-            };
-            channel.port2.postMessage("");
-        });
     });
 
     // Append a "Rerun in debug" link.
@@ -446,6 +435,13 @@ export function setupQUnit() {
             });
         }
     });
+    const oldError = QUnit.onError;
+    QUnit.onError = (err) => {
+        if (err.message === "ResizeObserver loop limit exceeded") {
+            return true;
+        }
+        return oldError(err);
+    };
 
     // -----------------------------------------------------------------------------
     // Add sort button
@@ -493,23 +489,15 @@ export function setupQUnit() {
     let passedEl;
     let failedEl;
     let skippedEl;
-    let todoCompletedEl;
-    let todoUncompletedEl;
     function insertStats() {
         const toolbar = document.querySelector("#qunit-testrunner-toolbar .qunit-url-config");
         const statsEl = document.createElement("label");
         passedEl = document.createElement("span");
         passedEl.classList.add("text-success", "ms-5", "me-3");
         statsEl.appendChild(passedEl);
-        todoCompletedEl = document.createElement("span");
-        todoCompletedEl.classList.add("text-warning", "me-3");
-        statsEl.appendChild(todoCompletedEl);
         failedEl = document.createElement("span");
         failedEl.classList.add("text-danger", "me-3");
         statsEl.appendChild(failedEl);
-        todoUncompletedEl = document.createElement("span");
-        todoUncompletedEl.classList.add("text-primary", "me-3");
-        statsEl.appendChild(todoUncompletedEl);
         skippedEl = document.createElement("span");
         skippedEl.classList.add("text-dark");
         statsEl.appendChild(skippedEl);
@@ -519,36 +507,20 @@ export function setupQUnit() {
     let testPassedCount = 0;
     let testFailedCount = 0;
     let testSkippedCount = 0;
-    let todoCompletedCount = 0;
-    let todoUncompletedCount = 0;
-    QUnit.testDone(({ skipped, failed, todo }) => {
+    QUnit.testDone(({ skipped, failed }) => {
         if (!passedEl) {
             insertStats();
         }
         if (!skipped) {
             if (failed > 0) {
-                if (todo) {
-                    todoUncompletedCount++;
-                } else {
-                    testFailedCount++;
-                }
+                testFailedCount++;
             } else {
-                if (todo) {
-                    todoCompletedCount++;
-                } else {
-                    testPassedCount++;
-                }
+                testPassedCount++;
             }
         } else {
             testSkippedCount++;
         }
         passedEl.innerText = `${testPassedCount} passed`;
-        if (todoCompletedCount > 0) {
-            todoCompletedEl.innerText = `${todoCompletedCount} todo completed`;
-        }
-        if (todoUncompletedCount > 0) {
-            todoUncompletedEl.innerText = `${todoUncompletedCount} todo uncompleted`;
-        }
         if (testFailedCount > 0) {
             failedEl.innerText = `${testFailedCount} failed`;
         }
@@ -569,92 +541,41 @@ export function setupQUnit() {
         document.head.appendChild(el);
     });
 
-    // -----------------------------------------------------------------------------
-    // Error management
-    // -----------------------------------------------------------------------------
-
-    QUnit.on("OdooAfterTestHook", (info) => {
-        const { expectErrors, unverifiedErrors } = QUnit.config.current;
-        if (expectErrors && unverifiedErrors.length) {
-            QUnit.pushFailure(
-                `Expected assert.verifyErrors() to be called before end of test. Unverified errors: ${unverifiedErrors}`
-            );
-        }
-    });
-
-    const { onUnhandledRejection } = QUnit;
+    const { onUnhandledRejection, onError } = QUnit;
     QUnit.onUnhandledRejection = () => {};
     QUnit.onError = () => {};
-
-    console.error = function () {
-        if (QUnit.config.current) {
-            QUnit.pushFailure(`console.error called with "${arguments[0]}"`);
-        } else {
-            consoleError(...arguments);
-        }
-    };
-
-    function onUncaughtErrorInTest(error) {
-        if (!QUnit.config.current.expectErrors) {
-            // we did not expect any error, so notify qunit to add a failure
-            onUnhandledRejection(error);
-        } else {
-            // we expected errors, so store it, it will be checked later (see verifyErrors)
-            while (error instanceof Error && "cause" in error) {
-                error = error.cause;
-            }
-            QUnit.config.current.unverifiedErrors.push(error.message);
-        }
-    }
-
-    // e.g. setTimeout(() => throw new Error()) (event handler crashes synchronously)
     window.addEventListener("error", async (ev) => {
-        if (!QUnit.config.current) {
-            return; // we are not in a test -> do nothing
+        // don't do anything if error service is up and we are in a test
+        if (registry.category("services").get("error", false) && QUnit.config.current) {
+            return;
         }
-        // do not log to the console as this will kill python test early
+        // Do not log to the console as this will kill python test early
         ev.preventDefault();
-        // if the error service is deployed, we'll get to the patched default handler below if no
-        // other handler handled the error, so do nothing here
-        if (registry.category("services").get("error", false)) {
-            return;
+        const { error: originalError } = ev;
+        const uncaughtError = new UncaughtClientError();
+        if (originalError instanceof Error) {
+            originalError.errorEvent = ev;
+            await completeUncaughtError(uncaughtError, originalError);
+            originalError.stacktrace = uncaughtError.traceback;
         }
-        if (
-            ev.message === "ResizeObserver loop limit exceeded" ||
-            ev.message === "ResizeObserver loop completed with undelivered notifications."
-        ) {
-            return;
-        }
-        onUncaughtErrorInTest(ev.error);
+        onError(originalError);
     });
 
-    // e.g. Promise.resolve().then(() => throw new Error()) (crash in event handler after async boundary)
     window.addEventListener("unhandledrejection", async (ev) => {
-        if (!QUnit.config.current) {
-            return; // we are not in a test -> do nothing
-        }
-        // do not log to the console as this will kill python test early
-        ev.preventDefault();
-        // if the error service is deployed, we'll get to the patched default handler below if no
-        // other handler handled the error, so do nothing here
-        if (registry.category("services").get("error", false)) {
+        // don't do anything if error service is up and we are in a test
+        if (registry.category("services").get("error", false) && QUnit.config.current) {
             return;
         }
-        onUncaughtErrorInTest(ev.reason);
-    });
-
-    // This is an approximation, but we can't directly import the default error handler, because
-    // it's not the same in all tested environments (e.g. /web and /pos), so we get the last item
-    // from the handler registry and assume it is the default one, which handles all "not already
-    // handled" errors, like tracebacks.
-    const errorHandlerRegistry = registry.category("error_handlers");
-    const [defaultHandlerName, defaultHandler] = errorHandlerRegistry.getEntries().at(-1);
-    const testDefaultHandler = (env, uncaughtError, originalError) => {
-        onUncaughtErrorInTest(originalError);
-        return defaultHandler(env, uncaughtError, originalError);
-    };
-    errorHandlerRegistry.add(defaultHandlerName, testDefaultHandler, {
-        sequence: Number.POSITIVE_INFINITY,
-        force: true,
+        // Do not log to the console as this will kill python test early
+        ev.preventDefault();
+        const originalError = ev.reason;
+        const uncaughtError = new UncaughtPromiseError();
+        uncaughtError.unhandledRejectionEvent = ev;
+        if (originalError instanceof Error) {
+            originalError.errorEvent = ev;
+            await completeUncaughtError(uncaughtError, originalError);
+            originalError.stack = uncaughtError.traceback;
+        }
+        onUnhandledRejection(originalError);
     });
 }

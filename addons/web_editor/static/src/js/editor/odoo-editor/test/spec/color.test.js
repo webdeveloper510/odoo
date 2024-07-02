@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { BasicEditor, testEditor, unformat } from '../utils.js';
 import { rgbToHex } from '../../src/utils/utils.js';
 
@@ -17,19 +15,6 @@ describe('applyColor', () => {
             contentAfter: '<p>a<font class="a">b<span class="b">c</span></font>' +
                 '<font class="a" style="color: rgb(255, 0, 0);"><span class="b">[def]</span></font>' +
                 '<font class="a"><span class="b">g</span>h</font>i</p>',
-        });
-    });
-    it('should apply a color to the qweb tag', async () => {
-        await testEditor(BasicEditor, {
-            contentBefore: `<div><p t-esc="'Test'" contenteditable="false">[Test]</p></div>`,
-            stepFunction: setColor('rgb(255, 0, 0)', 'color'),
-            contentAfter: `<div>[<p t-esc="'Test'" contenteditable="false" style="color: rgb(255, 0, 0);">Test</p>]</div>`,
-        });
-
-        await testEditor(BasicEditor, {
-            contentBefore: `<div><p t-field="record.display_name" contenteditable="false">[Test]</p></div>`,
-            stepFunction: setColor('rgb(255, 0, 0)', 'color'),
-            contentAfter: `<div>[<p t-field="record.display_name" contenteditable="false" style="color: rgb(255, 0, 0);">Test</p>]</div>`,
         });
     });
     it('should apply a background color to a slice of text in a span in a font', async () => {
@@ -106,8 +91,9 @@ describe('applyColor', () => {
         await testEditor(BasicEditor, {
             contentBefore: unformat(`
                 <table><tbody>
-                    <tr><td>[ab</td></tr>
-                    <tr><td contenteditable="false">cd]</td></tr>
+                    <tr><td class="o_selected_td">[ab</td></tr>
+                    <tr><td contenteditable="false" class="o_selected_td">cd</td></tr>
+                    <tr><td class="o_selected_td">ef]</td></tr>
                 </tbody></table>
             `),
             stepFunction: setColor('rgb(255, 0, 0)', 'backgroundColor'),
@@ -115,6 +101,7 @@ describe('applyColor', () => {
                 <table><tbody>
                     <tr><td style="background-color: rgb(255, 0, 0);">[]ab</td></tr>
                     <tr><td contenteditable="false">cd</td></tr>
+                    <tr><td style="background-color: rgb(255, 0, 0);">ef</td></tr>
                 </tbody></table>
             `),
         });
@@ -146,12 +133,14 @@ describe('applyColor', () => {
     it('should remove font tag if font-color and background-color both are removed one by one', async () => {
         await testEditor(BasicEditor, {
             contentBefore: '<p><font style="color: rgb(255, 0, 0);" class="bg-200">[abcabc]</font></p>',
-            stepFunction: setColor('','backgroundColor') && setColor('','color'),
+            stepFunction: setColor('','backgroundColor'),
+            stepFunction: setColor('','color'),
             contentAfter: '<p>[abcabc]</p>',
         });
         await testEditor(BasicEditor, {
             contentBefore: '<p><font style="background-color: rgb(255, 0, 0);" class="text-900">[abcabc]</font></p>',
-            stepFunction: setColor('','color') && setColor('','backgroundColor'),
+            stepFunction: setColor('','color'),
+            stepFunction: setColor('','backgroundColor'),
             contentAfter: '<p>[abcabc]</p>',
         });
     });

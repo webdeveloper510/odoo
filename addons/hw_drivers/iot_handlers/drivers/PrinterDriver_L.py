@@ -11,6 +11,7 @@ import os
 from PIL import Image, ImageOps
 import re
 import subprocess
+import tempfile
 from uuid import getnode as get_mac
 
 from odoo import http

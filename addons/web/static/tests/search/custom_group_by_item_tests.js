@@ -1,18 +1,19 @@
 /** @odoo-module **/
 
 import { browser } from "@web/core/browser/browser";
-import { getFixture, getNodesTextContent, patchWithCleanup } from "../helpers/utils";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { getFixture, patchWithCleanup } from "../helpers/utils";
 import {
+    applyGroup,
     getFacetTexts,
     isItemSelected,
     isOptionSelected,
     makeWithSearch,
-    selectGroup,
     setupControlPanelServiceRegistry,
+    toggleAddCustomGroup,
+    toggleGroupByMenu,
     toggleMenuItem,
-    toggleSearchBarMenu,
 } from "./helpers";
-import { SearchBar } from "@web/search/search_bar/search_bar";
 
 let target;
 let serverData;
@@ -46,26 +47,31 @@ QUnit.module("Search", (hooks) => {
     QUnit.module("CustomGroupByItem");
 
     QUnit.test("simple rendering", async function (assert) {
-        assert.expect(2);
+        assert.expect(5);
 
         await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: SearchBar,
+            Component: ControlPanel,
             searchMenuTypes: ["groupBy"],
             searchViewId: false,
         });
 
-        await toggleSearchBarMenu(target);
+        await toggleGroupByMenu(target);
 
-        const groupByMenu = target.querySelector(".o_group_by_menu");
-        assert.strictEqual(
-            groupByMenu.querySelector(".o_group_by_menu option[disabled]").innerText.trim(),
-            "Add Custom Group"
-        );
+        const customGroupByItem = target.querySelector(".o_add_custom_group_menu");
+        assert.strictEqual(customGroupByItem.innerText.trim(), "Add Custom Group");
+
+        assert.containsOnce(customGroupByItem, "button.dropdown-toggle");
+        assert.containsNone(customGroupByItem, ".dropdown-menu");
+
+        await toggleAddCustomGroup(target);
+
+        assert.containsOnce(customGroupByItem, ".dropdown-menu");
+
         assert.deepEqual(
-            getNodesTextContent(
-                target.querySelectorAll(".o_add_custom_group_menu option:not([disabled])")
+            [...target.querySelectorAll(".o_add_custom_group_menu select option")].map(
+                (el) => el.innerText
             ),
             ["Birthday", "Date", "Foo"]
         );
@@ -79,7 +85,7 @@ QUnit.module("Search", (hooks) => {
             await makeWithSearch({
                 serverData,
                 resModel: "foo",
-                Component: SearchBar,
+                Component: ControlPanel,
                 searchMenuTypes: ["groupBy"],
                 searchViewId: false,
                 searchViewFields: {
@@ -88,11 +94,17 @@ QUnit.module("Search", (hooks) => {
                 },
             });
 
-            await toggleSearchBarMenu(target);
-            const optionDescriptions = [
-                ...target.querySelectorAll(".o_add_custom_group_menu option:not([disabled])"),
-            ].map((option) => option.innerText.trim());
-            assert.deepEqual(optionDescriptions, ["Foo"]);
+            await toggleGroupByMenu(target);
+            await toggleAddCustomGroup(target);
+
+            assert.deepEqual(
+                [
+                    ...target.querySelectorAll(
+                        ".o_add_custom_group_menu .dropdown-menu select option"
+                    ),
+                ].map((el) => el.innerText),
+                ["Foo"]
+            );
         }
     );
 
@@ -104,7 +116,7 @@ QUnit.module("Search", (hooks) => {
             await makeWithSearch({
                 serverData,
                 resModel: "foo",
-                Component: SearchBar,
+                Component: ControlPanel,
                 searchMenuTypes: ["groupBy"],
                 searchViewId: false,
                 searchViewFields: {
@@ -118,11 +130,17 @@ QUnit.module("Search", (hooks) => {
                 },
             });
 
-            await toggleSearchBarMenu(target);
-            const optionDescriptions = [
-                ...target.querySelectorAll(".o_add_custom_group_menu option:not([disabled])"),
-            ].map((option) => option.innerText.trim());
-            assert.deepEqual(optionDescriptions, ["Char A", "M2M Stored"]);
+            await toggleGroupByMenu(target);
+            await toggleAddCustomGroup(target);
+
+            assert.deepEqual(
+                [
+                    ...target.querySelectorAll(
+                        ".o_add_custom_group_menu .dropdown-menu select option"
+                    ),
+                ].map((el) => el.innerText),
+                ["Char A", "M2M Stored"]
+            );
         }
     );
 
@@ -134,7 +152,7 @@ QUnit.module("Search", (hooks) => {
             const controlPanel = await makeWithSearch({
                 serverData,
                 resModel: "foo",
-                Component: SearchBar,
+                Component: ControlPanel,
                 searchMenuTypes: ["groupBy"],
                 searchViewId: false,
                 searchViewFields: {
@@ -142,12 +160,13 @@ QUnit.module("Search", (hooks) => {
                     id: { sortable: true, string: "ID", type: "integer" },
                 },
             });
-            await toggleSearchBarMenu(target);
+            await toggleGroupByMenu(target);
 
             assert.deepEqual(controlPanel.env.searchModel.groupBy, []);
-            assert.containsOnce(target, ".o_add_custom_group_menu"); //Add Custom Group
+            assert.containsNone(target, ".o_menu_item");
 
-            await selectGroup(target, "date_field");
+            await toggleAddCustomGroup(target);
+            await applyGroup(target);
 
             assert.deepEqual(controlPanel.env.searchModel.groupBy, ["date_field:month"]);
             assert.deepEqual(getFacetTexts(target), ["Date: Month"]);
@@ -160,44 +179,48 @@ QUnit.module("Search", (hooks) => {
     );
 
     QUnit.test("click on add custom group toggle group selector", async function (assert) {
-        assert.expect(3);
+        assert.expect(4);
 
         await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: SearchBar,
+            Component: ControlPanel,
             searchMenuTypes: ["groupBy"],
             searchViewFields: {
                 date: { sortable: true, name: "date", string: "Super Date", type: "date" },
             },
         });
 
-        await toggleSearchBarMenu(target);
+        await toggleGroupByMenu(target);
 
         const addCustomGroupMenu = target.querySelector(".o_add_custom_group_menu");
 
-        assert.strictEqual(
-            addCustomGroupMenu.querySelector("option[disabled]").innerText.trim(),
-            "Add Custom Group"
-        );
+        assert.strictEqual(addCustomGroupMenu.innerText.trim(), "Add Custom Group");
+
+        await toggleAddCustomGroup(target);
 
         // Single select node with a single option
-        assert.containsOnce(target, ".o_add_custom_group_menu option:not([disabled])");
-        assert.deepEqual(
-            target.querySelector(".o_add_custom_group_menu option:not([disabled])").textContent,
+        assert.containsOnce(target, ".o_add_custom_group_menu .dropdown-menu select");
+        assert.strictEqual(
+            target
+                .querySelector(".o_add_custom_group_menu .dropdown-menu select option")
+                .innerText.trim(),
             "Super Date"
         );
+
+        // Button apply
+        assert.containsOnce(target, ".o_add_custom_group_menu .dropdown-menu .btn");
     });
 
     QUnit.test(
         "select a field name in Add Custom Group menu properly trigger the corresponding field",
         async function (assert) {
-            assert.expect(3);
+            assert.expect(4);
 
             await makeWithSearch({
                 serverData,
                 resModel: "foo",
-                Component: SearchBar,
+                Component: ControlPanel,
                 searchMenuTypes: ["groupBy"],
                 searchViewFields: {
                     candle_light: {
@@ -208,11 +231,13 @@ QUnit.module("Search", (hooks) => {
                 },
             });
 
-            await toggleSearchBarMenu(target);
-            await selectGroup(target, "candle_light");
+            await toggleGroupByMenu(target);
+            await toggleAddCustomGroup(target);
+            await applyGroup(target);
 
-            assert.containsN(target, ".o_group_by_menu .o_menu_item", 2);
-            assert.containsOnce(target, ".o_add_custom_group_menu");
+            assert.containsOnce(target, ".o_group_by_menu .o_menu_item");
+            assert.containsOnce(target, ".o_add_custom_group_menu .dropdown-toggle");
+            assert.containsOnce(target, ".o_add_custom_group_menu .dropdown-menu");
             assert.deepEqual(getFacetTexts(target), ["Candlelight"]);
         }
     );

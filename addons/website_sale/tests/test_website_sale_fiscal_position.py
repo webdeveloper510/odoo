@@ -21,7 +21,6 @@ class TestWebsiteSaleFiscalPosition(ProductCommon, HttpCaseWithUserPortal):
             The goal of this test is to check that this template
             is up to date with the fiscal position detected.
         """
-        self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('product.group_product_pricelist').id)]})
         self.env.company.country_id = self.env.ref('base.us')
         website_id = self.env.ref('website.default_website').id
         belgium_id = self.env.ref('base.be').id
@@ -39,7 +38,7 @@ class TestWebsiteSaleFiscalPosition(ProductCommon, HttpCaseWithUserPortal):
             'include_base_amount': False,
         })
         tax_0 = self.env['account.tax'].create({
-            'name': '0% Test Tax',
+            'name': '0%',
             'type_tax_use': 'sale',
             'amount_type': 'percent',
             'amount': 0,
@@ -54,21 +53,14 @@ class TestWebsiteSaleFiscalPosition(ProductCommon, HttpCaseWithUserPortal):
             })]
         })
         # Create a pricelist which will be automatically detected
-        self.env['product.pricelist'].create([{
+        self.env['product.pricelist'].create({
             'name': 'EUROPE EUR',
             'selectable': True,
             'website_id': website_id,
             'country_group_ids': [Command.link(self.env.ref('base.europe').id)],
             'sequence': 1,
             'currency_id': self.env.ref('base.EUR').id,
-        }, {
-            'name': 'Christmas List',
-            'selectable': False,
-            'website_id': website_id,
-            'country_group_ids': [Command.link(self.env.ref('base.europe').id)],
-            'sequence': 20,
-            'currency_id': self.env.ref('base.EUR').id,
-        }])
+        })
         # Create the product to be used for analysis
         self.env["product.product"].create({
             'name': "Super product",

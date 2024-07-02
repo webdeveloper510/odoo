@@ -244,11 +244,7 @@ class Websocket:
         self._channels = set()
         self._last_notif_sent_id = 0
         # Websocket start up
-        self.__selector = (
-            selectors.PollSelector()
-            if odoo.evented and hasattr(selectors, 'PollSelector')
-            else selectors.DefaultSelector()
-        )
+        self.__selector = selectors.DefaultSelector()
         self.__selector.register(self.__socket, selectors.EVENT_READ)
         self.__selector.register(self.__notif_sock_r, selectors.EVENT_READ)
         self.state = ConnectionState.OPEN
@@ -423,8 +419,7 @@ class Websocket:
         """
         frame = self._get_next_frame()
         if frame.opcode in CTRL_OP:
-            self._handle_control_frame(frame)
-            return
+            return self._handle_control_frame(frame)
         if self.state is not ConnectionState.OPEN:
             # After receiving a control frame indicating the connection
             # should be closed, a peer discards any further data
@@ -581,13 +576,7 @@ class Websocket:
             code = CloseCode.SESSION_EXPIRED
         if code is CloseCode.SERVER_ERROR:
             reason = None
-            registry = Registry(self._session.db)
-            sequence = registry.registry_sequence
-            registry = registry.check_signaling()
-            if sequence != registry.registry_sequence:
-                _logger.warning("Bus operation aborted; registry has been reloaded")
-            else:
-                _logger.error(exc, exc_info=True)
+            _logger.error(exc, exc_info=True)
         self.disconnect(code, reason)
 
     def _limit_rate(self):
@@ -777,11 +766,12 @@ class WebsocketRequest:
         appropriate ir.websocket method since only two events are
         tolerated: `subscribe` and `update_presence`.
         """
-        self.env['ir.websocket']._authenticate()
+        ir_websocket = self.env['ir.websocket']
+        ir_websocket._authenticate()
         if event_name == 'subscribe':
-            self.env['ir.websocket']._subscribe(data)
+            ir_websocket._subscribe(data)
         if event_name == 'update_presence':
-            self.env['ir.websocket']._update_bus_presence(**data)
+            ir_websocket._update_bus_presence(**data)
 
     def _get_session(self):
         session = root.session_store.get(self.ws._session.sid)
@@ -794,14 +784,6 @@ class WebsocketRequest:
         Update the environment of the current websocket request.
         """
         Request.update_env(self, user, context, su)
-
-    def update_context(self, **overrides):
-        """
-        Override the environment context of the current request with the
-        values of ``overrides``. To replace the entire context, please
-        use :meth:`~update_env` instead.
-        """
-        self.update_env(context=dict(self.env.context, **overrides))
 
 
 class WebsocketConnectionHandler:
@@ -830,11 +812,11 @@ class WebsocketConnectionHandler:
         """
         if not cls.websocket_allowed(request):
             raise ServiceUnavailable("Websocket is disabled in test mode")
-        cls._handle_public_configuration(request)
+        public_session = cls._handle_public_configuration(request)
         try:
             response = cls._get_handshake_response(request.httprequest.headers)
             socket = request.httprequest._HTTPRequest__environ['socket']
-            session, db, httprequest = request.session, request.db, request.httprequest
+            session, db, httprequest = (public_session or request.session), request.db, request.httprequest
             response.call_on_close(lambda: cls._serve_forever(
                 Websocket(socket, session),
                 db,
@@ -883,9 +865,11 @@ class WebsocketConnectionHandler:
         headers = request.httprequest.headers
         origin_url = urlparse(headers.get('origin'))
         if origin_url.netloc != headers.get('host') or origin_url.scheme != request.httprequest.scheme:
-            request.session = root.session_store.new()
-            request.session.update(get_default_session(), db=request.session.db)
-            request.session.is_explicit = True
+            session = root.session_store.new()
+            session.update(get_default_session(), db=request.session.db)
+            root.session_store.save(session)
+            return session
+        return None
 
     @classmethod
     def _assert_handshake_validity(cls, headers):

@@ -302,8 +302,3 @@ def validate_xml_from_attachment(env, xml_content, xsd_name, reload_files_functi
         _logger.info("XSD validation successful!")
     except FileNotFoundError:
         _logger.info("XSD file not found, skipping validation")
-
-
-def find_xml_value(xpath, xml_element, namespaces=None):
-    element = xml_element.xpath(xpath, namespaces=namespaces)
-    return element[0].text if element else None

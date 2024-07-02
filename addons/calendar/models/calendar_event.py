@@ -3,7 +3,8 @@
 
 import logging
 import math
-from datetime import datetime, timedelta
+from collections import defaultdict
+from datetime import timedelta
 from itertools import repeat
 from werkzeug.urls import url_parse
 
@@ -40,13 +41,6 @@ SORT_ALIASES = {
     'start_date': 'sort_start',
 }
 
-RRULE_TYPE_SELECTION_UI = [
-    ('daily', 'Daily'),
-    ('weekly', 'Weekly'),
-    ('monthly', 'Monthly'),
-    ('yearly', 'Yearly'),
-    ('custom', 'Custom')
-]
 
 def get_weekday_occurence(date):
     """
@@ -69,13 +63,8 @@ class Meeting(models.Model):
     _description = "Calendar Event"
     _order = "start desc"
     _inherit = ["mail.thread"]
-    _systray_view = 'calendar'
 
     DISCUSS_ROUTE = 'calendar/join_videocall'
-
-    @api.model
-    def get_state_selections(self):
-        return Attendee.STATE_SELECTION
 
     @api.model
     def default_get(self, fields):
@@ -107,17 +96,6 @@ class Meeting(models.Model):
                 partners |= self.env['res.partner'].browse(active_id)
         return partners
 
-    @api.model
-    def _default_start(self):
-        now = fields.Datetime.now()
-        return now + (datetime.min - now) % timedelta(minutes=30)
-
-    @api.model
-    def _default_stop(self):
-        now = fields.Datetime.now()
-        start = now + (datetime.min - now) % timedelta(minutes=30)
-        return start + timedelta(hours=1)
-
     # description
     name = fields.Char('Meeting Subject', required=True)
     description = fields.Html('Description')
@@ -128,7 +106,7 @@ class Meeting(models.Model):
     videocall_location = fields.Char('Meeting URL', compute='_compute_videocall_location', store=True, copy=True)
     access_token = fields.Char('Invitation Token', store=True, copy=False, index=True)
     videocall_source = fields.Selection([('discuss', 'Discuss'), ('custom', 'Custom')], compute='_compute_videocall_source')
-    videocall_channel_id = fields.Many2one('discuss.channel', 'Discuss Channel')
+    videocall_channel_id = fields.Many2one('mail.channel', 'Discuss Channel')
     # visibility
     privacy = fields.Selection(
         [('public', 'Public'),
@@ -157,10 +135,10 @@ class Meeting(models.Model):
         'calendar.event.type', 'meeting_category_rel', 'event_id', 'type_id', 'Tags')
     # timing
     start = fields.Datetime(
-        'Start', required=True, tracking=True, default=_default_start,
+        'Start', required=True, tracking=True, default=fields.Date.today,
         help="Start date of an event, without time for full days events")
     stop = fields.Datetime(
-        'Stop', required=True, tracking=True, default=_default_stop,
+        'Stop', required=True, tracking=True, default=lambda self: fields.Datetime.today() + timedelta(hours=1),
         compute='_compute_stop', readonly=False, store=True,
         help="Stop date of an event, without time for full days events")
     display_time = fields.Char('Event Time', compute='_compute_display_time')
@@ -177,15 +155,13 @@ class Meeting(models.Model):
     res_model_id = fields.Many2one('ir.model', 'Document Model', ondelete='cascade')
     res_model = fields.Char(
         'Document Model Name', related='res_model_id.model', readonly=True, store=True)
-    res_model_name = fields.Char(related='res_model_id.name')
     # messaging
     activity_ids = fields.One2many('mail.activity', 'calendar_event_id', string='Activities')
     # attendees
     attendee_ids = fields.One2many(
         'calendar.attendee', 'event_id', 'Participant')
-    current_attendee = fields.Many2one("calendar.attendee", compute="_compute_current_attendee", search="_search_current_attendee")
-    current_status = fields.Selection(string="Attending?", related="current_attendee.state", readonly=False)
-    should_show_status = fields.Boolean(compute="_compute_should_show_status")
+    attendee_status = fields.Selection(
+        Attendee.STATE_SELECTION, string='Attendee Status', compute='_compute_attendee')
     partner_ids = fields.Many2many(
         'res.partner', 'calendar_event_res_partner_rel',
         string='Attendees', default=_default_partners)
@@ -212,10 +188,6 @@ class Meeting(models.Model):
     # If some of these fields are set and recurrence_id does not exists,
     # a `calendar.recurrence.rule` will be dynamically created.
     rrule = fields.Char('Recurrent Rule', compute='_compute_recurrence', readonly=False)
-    rrule_type_ui = fields.Selection(RRULE_TYPE_SELECTION_UI, string='Repeat',
-                                     compute="_compute_rrule_type_ui",
-                                     readonly=False,
-                                     help="Let the event automatically repeat at that interval")
     rrule_type = fields.Selection(RRULE_TYPE_SELECTION, string='Recurrence',
                                   help="Let the event automatically repeat at that interval",
                                   compute='_compute_recurrence', readonly=False)
@@ -225,10 +197,10 @@ class Meeting(models.Model):
         END_TYPE_SELECTION, string='Recurrence Termination',
         compute='_compute_recurrence', readonly=False)
     interval = fields.Integer(
-        string='Repeat On', compute='_compute_recurrence', readonly=False,
+        string='Repeat Every', compute='_compute_recurrence', readonly=False,
         help="Repeat every (Days/Week/Month/Year)")
     count = fields.Integer(
-        string='Number of Repetitions', help="Repeat x times", compute='_compute_recurrence', readonly=False)
+        string='Repeat', help="Repeat x times", compute='_compute_recurrence', readonly=False)
     mon = fields.Boolean(compute='_compute_recurrence', readonly=False)
     tue = fields.Boolean(compute='_compute_recurrence', readonly=False)
     wed = fields.Boolean(compute='_compute_recurrence', readonly=False)
@@ -244,51 +216,6 @@ class Meeting(models.Model):
     until = fields.Date(compute='_compute_recurrence', readonly=False)
     # UI Fields.
     display_description = fields.Boolean(compute='_compute_display_description')
-    attendees_count = fields.Integer(compute='_compute_attendees_count')
-    accepted_count = fields.Integer(compute='_compute_attendees_count')
-    declined_count = fields.Integer(compute='_compute_attendees_count')
-    tentative_count = fields.Integer(compute='_compute_attendees_count')
-    awaiting_count = fields.Integer(compute="_compute_attendees_count")
-    user_can_edit = fields.Boolean(compute='_compute_user_can_edit')
-
-    @api.depends("attendee_ids")
-    def _compute_should_show_status(self):
-        for event in self:
-            event.should_show_status = event.current_attendee and any(attendee.partner_id != self.env.user.partner_id for attendee in event.attendee_ids)
-
-    @api.depends('attendee_ids', 'attendee_ids.state')
-    def _compute_current_attendee(self):
-        for event in self:
-            current_attendee = event.attendee_ids.filtered(lambda attendee: attendee.partner_id == self.env.user.partner_id)
-            event.current_attendee = current_attendee and current_attendee[0]
-
-    def _search_current_attendee(self, operator, value):
-        return [("id", operator, value)]
-
-    @api.depends('attendee_ids', 'attendee_ids.state', 'partner_ids')
-    def _compute_attendees_count(self):
-        for event in self:
-            count_event = {}
-            for attendee in event.attendee_ids:
-                count_event[attendee.state] = count_event.get(attendee.state, 0) + 1
-
-            accepted_count = count_event.get('accepted', 0)
-            declined_count = count_event.get('declined', 0)
-            tentative_count = count_event.get('tentative', 0)
-            attendees_count = len(event.partner_ids)
-            event.update({
-                'accepted_count': accepted_count,
-                'declined_count': declined_count,
-                'tentative_count': tentative_count,
-                'attendees_count': attendees_count,
-                'awaiting_count': attendees_count - accepted_count - declined_count - tentative_count
-            })
-
-    @api.depends('partner_ids')
-    @api.depends_context('uid')
-    def _compute_user_can_edit(self):
-        for event in self:
-            event.user_can_edit = self.env.user in event.partner_ids.user_ids + event.user_id
 
     @api.depends('attendee_ids')
     def _compute_invalid_email_partner_ids(self):
@@ -404,6 +331,12 @@ class Meeting(models.Model):
                     'stop': enddate.replace(tzinfo=None)
                 })
 
+    def _compute_attendee(self):
+        mapped_attendees = self._find_attendee_batch()
+        for meeting in self:
+            attendee = mapped_attendees[meeting.id]
+            meeting.attendee_status = attendee.state if attendee else 'needsAction'
+
     @api.constrains('start', 'stop', 'start_date', 'stop_date')
     def _check_closing_date(self):
         for meeting in self:
@@ -427,16 +360,6 @@ class Meeting(models.Model):
                 )
 
     @api.depends('recurrence_id', 'recurrency')
-    def _compute_rrule_type_ui(self):
-        defaults = self.env["calendar.recurrence"].default_get(["interval", "rrule_type"])
-        for event in self:
-            if event.recurrency:
-                if event.recurrence_id:
-                    event.rrule_type_ui = 'custom' if event.recurrence_id.interval != 1 else (event.recurrence_id.rrule_type)
-                else:
-                    event.rrule_type_ui = defaults["rrule_type"]
-
-    @api.depends('recurrence_id', 'recurrency', 'rrule_type_ui')
     def _compute_recurrence(self):
         recurrence_fields = self._get_recurrent_fields()
         false_values = {field: False for field in recurrence_fields}  # computes need to set a value
@@ -444,7 +367,6 @@ class Meeting(models.Model):
         default_rrule_values = self.recurrence_id.default_get(recurrence_fields)
         for event in self:
             if event.recurrency:
-                current_rrule = (event.rrule_type if event.rrule_type_ui == "custom" else event.rrule_type_ui)
                 event.update(defaults)  # default recurrence values are needed to correctly compute the recurrence params
                 event_values = event._get_recurrence_params()
                 rrule_values = {
@@ -453,7 +375,6 @@ class Meeting(models.Model):
                     if event.recurrence_id[field]
                 }
                 rrule_values = rrule_values or default_rrule_values
-                rrule_values['rrule_type'] = current_rrule or rrule_values.get('rrule_type') or defaults['rrule_type']
                 event.update({**false_values, **defaults, **event_values, **rrule_values})
             else:
                 event.update(false_values)
@@ -513,12 +434,13 @@ class Meeting(models.Model):
     def create(self, vals_list):
         # Prevent sending update notification when _inverse_dates is called
         self = self.with_context(is_calendar_event_new=True)
-        defaults = self.default_get(['activity_ids', 'res_model_id', 'res_id', 'user_id', 'res_model', 'partner_ids'])
 
         vals_list = [  # Else bug with quick_create when we are filter on an other user
-            dict(vals, user_id=defaults.get('user_id', self.env.user.id)) if not 'user_id' in vals else vals
+            dict(vals, user_id=self.env.user.id) if not 'user_id' in vals else vals
             for vals in vals_list
         ]
+
+        defaults = self.default_get(['activity_ids', 'res_model_id', 'res_id', 'user_id', 'res_model', 'partner_ids'])
         meeting_activity_type = self.env['mail.activity.type'].search([('category', '=', 'meeting')], limit=1)
         # get list of models ids and filter out None values directly
         model_ids = list(filter(None, {values.get('res_model_id', defaults.get('res_model_id')) for values in vals_list}))
@@ -572,19 +494,13 @@ class Meeting(models.Model):
                 detached_events = event._apply_recurrence_values(recurrence_values)
                 detached_events.active = False
 
-        events.filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_invitation_emails()
-
+        events.filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_mail_to_attendees(
+            self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
+        )
         events._sync_activities(fields={f for vals in vals_list for f in vals.keys()})
         if not self.env.context.get('dont_notify'):
-            alarm_events = self.env['calendar.event']
-            for event, values in zip(events, vals_list):
-                if values.get('allday'):
-                    # All day events will trigger the _inverse_date method which will create the trigger.
-                    continue
-                alarm_events |= event
-            recurring_events = alarm_events.filtered('recurrence_id')
-            recurring_events.recurrence_id._setup_alarms()
-            (alarm_events - recurring_events)._setup_alarms()
+            events._setup_alarms()
+
         return events.with_context(is_calendar_event_new=False)
 
     def _compute_field_value(self, field):
@@ -592,40 +508,40 @@ class Meeting(models.Model):
             return super(Meeting, self.with_context(prefetch_fields=False))._compute_field_value(field)
         return super()._compute_field_value(field)
 
-    def _fetch_query(self, query, fields):
-        if self.env.su:
-            return super()._fetch_query(query, fields)
+    def _read(self, fields):
+        if self.env.is_system():
+            super()._read(fields)
+            return
 
-        public_fnames = self._get_public_fields()
-        private_fields = [field for field in fields if field.name not in public_fnames]
+        fields = set(fields)
+        private_fields = fields - self._get_public_fields()
         if not private_fields:
-            return super()._fetch_query(query, fields)
+            super()._read(fields)
+            return
 
-        fields_to_fetch = list(fields) + [self._fields[name] for name in ('privacy', 'user_id', 'partner_ids')]
-        events = super()._fetch_query(query, fields_to_fetch)
-
-        # determine private events to which the user does not participate
-        others_private_events = events.filtered(lambda ev: ev._check_private_event_conditions())
+        private_fields.add('partner_ids')
+        super()._read(fields | {'privacy', 'user_id', 'partner_ids'})
+        current_partner_id = self.env.user.partner_id
+        others_private_events = self.filtered(
+            lambda e: e.privacy == 'private' \
+                  and e.user_id != self.env.user \
+                  and current_partner_id not in e.partner_ids
+        )
         if not others_private_events:
-            return events
+            return
 
-        private_fields.append(self._fields['partner_ids'])
-        for field in private_fields:
+        for field_name in private_fields:
+            field = self._fields[field_name]
             replacement = field.convert_to_cache(
-                _('Busy') if field.name == 'name' else False,
+                _('Busy') if field_name == 'name' else False,
                 others_private_events)
             self.env.cache.update(others_private_events, field, repeat(replacement))
-
-        return events
 
     def write(self, values):
         detached_events = self.env['calendar.event']
         recurrence_update_setting = values.pop('recurrence_update', None)
         update_recurrence = recurrence_update_setting in ('all_events', 'future_events') and len(self) == 1
         break_recurrence = values.get('recurrency') is False
-
-        if any(vals in self._get_recurrent_fields() for vals in values) and not (update_recurrence or values.get('recurrency')):
-            raise UserError(_('Unable to save the recurrence with "This Event"'))
 
         update_alarms = False
         update_time = False
@@ -686,9 +602,7 @@ class Meeting(models.Model):
         # Notify attendees if there is an alarm on the modified event, or if there was an alarm
         # that has just been removed, as it might have changed their next event notification
         if not self.env.context.get('dont_notify') and update_alarms:
-            self.recurrence_id._setup_alarms(recurrence_update=True)
-            if not self.recurrence_id:
-                self._setup_alarms()
+            self._setup_alarms()
         attendee_update_events = self.filtered(lambda ev: ev.user_id and ev.user_id != self.env.user)
         if update_time and attendee_update_events:
             # Another user update the event time fields. It should not be auto accepted for the organizer.
@@ -723,31 +637,59 @@ class Meeting(models.Model):
         return True
 
     def _check_private_event_conditions(self):
-        """
-        Checks if the event is private, returning True if the conditions match and False otherwise.
-        The event is private if it is explicetely defined and the user is neither the organizer or a partner of it.
-        """
+        """ Checks if the event is private, returning True if the conditions match and False otherwise. """
         self.ensure_one()
         event_is_private = self.privacy == 'private'
         user_is_not_partner = self.user_id.id != self.env.uid and self.env.user.partner_id not in self.partner_ids
         return event_is_private and user_is_not_partner
 
-    @api.depends('privacy', 'user_id')
-    def _compute_display_name(self):
+    def name_get(self):
         """ Hide private events' name for events which don't belong to the current user
         """
-        hidden = self.filtered(lambda event: event._check_private_event_conditions())
-        hidden.display_name = _('Busy')
-        super(Meeting, self - hidden)._compute_display_name()
+        hidden = self.filtered(lambda evt: evt._check_private_event_conditions())
+        shown = self - hidden
+        shown_names = super(Meeting, shown).name_get()
+        obfuscated_names = [(eid, _('Busy')) for eid in hidden.ids]
+        return shown_names + obfuscated_names
+
+    def read(self, fields=None, load='_classic_read'):
+        """
+        Return the events information to be shown on calendar/tree/form views.
+        Private events will have their sensitive fields hidden by default.
+        """
+        records = super().read(fields=fields, load=load)
+        if fields:
+            # Define the private fields and filter the private events from self.
+            private_fields = ['name', 'location', 'attendee_ids', 'description', 'videocall_location', 'message_ids']
+            private_events = self.filtered(lambda ev: ev._check_private_event_conditions())
+
+            # Hide the private information of the event by changing their values to 'Busy' and False.
+            for event in records:
+                if event['id'] in private_events.ids:
+                    for field in private_fields:
+                        if self._fields[field].type in ('one2many', 'many2many'):
+                            event[field] = []
+                        else:
+                            event[field] = _('Busy') if field in ('name', 'display_name') else False
+
+            # Update the cache with the new hidden values.
+            for field_name in private_fields:
+                if field_name in self._fields:
+                    field = self._fields[field_name]
+                    value = False
+                    if field.type in ('one2many', 'many2many'):
+                        value = []
+                    elif field_name in ('name', 'display_name'):
+                        value = _('Busy')
+                    for private_event in private_events:
+                        replacement = field.convert_to_cache(value, private_event)
+                        self.env.cache.update(private_event, field, repeat(replacement))
+        return records
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         groupby = [groupby] if isinstance(groupby, str) else groupby
-        fields_aggregates = [
-            field_name for field_name in (fields or list(self._fields))
-            if ':' in field_name or (field_name in self and self._fields[field_name].group_operator)
-        ]
-        grouped_fields = {group_field.split(':')[0] for group_field in groupby + fields_aggregates}
+        grouped_fields = set(group_field.split(':')[0] for group_field in groupby)
         private_fields = grouped_fields - self._get_public_fields()
         if not self.env.su and private_fields:
             # display public and confidential events
@@ -767,7 +709,7 @@ class Meeting(models.Model):
         # don't forget to update recurrences if there are some base events in the set to unlink,
         # but after having removed the events ;-)
         recurrences = self.env["calendar.recurrence"].search([
-            ('base_event_id', 'in', [e.id for e in self])
+            ('base_event_id.id', 'in', [e.id for e in self])
         ])
 
         result = super().unlink()
@@ -792,14 +734,6 @@ class Meeting(models.Model):
         copied_event = super().copy(default)
         copied_event.write({'partner_ids': [(Command.set(self.partner_ids.ids))]})
         return copied_event
-
-    @api.model
-    def _get_mail_message_access(self, res_ids, operation, model_name=None):
-        if operation == 'read' and (not model_name or model_name == 'event.event'):
-            for event in self.browse(res_ids):
-                if event.privacy == "private" and self.env.user.partner_id not in event.attendee_ids.partner_id:
-                    return 'write'
-        return super()._get_mail_message_access(res_ids, operation, model_name=model_name)
 
     def _attendees_values(self, partner_commands):
         """
@@ -855,14 +789,14 @@ class Meeting(models.Model):
         self.videocall_channel_id.channel_change_description(self.recurrence_id.name if self.recurrency else self.display_time)
 
     def _create_videocall_channel_id(self, name, partner_ids):
-        videocall_channel = self.env['discuss.channel'].create_group(partner_ids, default_display_mode='video_full_screen', name=name)
+        videocall_channel_id = self.env['mail.channel'].create_group(partner_ids, default_display_mode='video_full_screen', name=name)
         # if recurrent event, set channel to all other records of the same recurrency
         if self.recurrency:
             recurrent_events_without_channel = self.env['calendar.event'].search([
                 ('recurrence_id', '=', self.recurrence_id.id), ('videocall_channel_id', '=', False)
             ])
-            recurrent_events_without_channel.videocall_channel_id = videocall_channel
-        return videocall_channel
+            recurrent_events_without_channel.videocall_channel_id = videocall_channel_id['id']
+        return videocall_channel_id['id']
 
     # ------------------------------------------------------------
     # ACTIONS
@@ -895,11 +829,12 @@ class Meeting(models.Model):
             raise UserError(_("There are no attendees on these events"))
         template_id = self.env['ir.model.data']._xmlid_to_res_id('calendar.calendar_template_meeting_update', raise_if_not_found=False)
         # The mail is sent with datetime corresponding to the sending user TZ
-        default_composition_mode = self.env.context.get('default_composition_mode', self.env.context.get('composition_mode', 'comment'))
+        composition_mode = self.env.context.get('composition_mode', 'comment')
         compose_ctx = dict(
-            default_composition_mode=default_composition_mode,
+            default_composition_mode=composition_mode,
             default_model='calendar.event',
             default_res_ids=self.ids,
+            default_use_template=bool(template_id),
             default_template_id=template_id,
             default_partner_ids=self.partner_ids.ids,
             mail_tz=self.env.user.tz,
@@ -919,7 +854,7 @@ class Meeting(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'url': self.videocall_location,
-            'target': 'new'
+            'target': 'self' if self.videocall_source == 'discuss' else 'new'
         }
 
     def action_join_meeting(self, partner_id):
@@ -1009,44 +944,18 @@ class Meeting(models.Model):
         cron = self.env.ref('calendar.ir_cron_scheduler_alarm').sudo()
         alarm_types = self._get_trigger_alarm_types()
         events_to_notify = self.env['calendar.event']
-        triggers_by_events = {}
+
         for event in self:
-            existing_trigger = event.recurrence_id.trigger_id
             for alarm in (alarm for alarm in event.alarm_ids if alarm.alarm_type in alarm_types):
                 at = event.start - timedelta(minutes=alarm.duration_minutes)
-                create_trigger = not existing_trigger or existing_trigger and existing_trigger.call_at != at
-                if create_trigger and (not cron.lastcall or at > cron.lastcall):
+                if not cron.lastcall or at > cron.lastcall:
                     # Don't trigger for past alarms, they would be skipped by design
-                    trigger = cron._trigger(at=at)
-                    triggers_by_events[event.id] = trigger.id
+                    cron._trigger(at=at)
             if any(alarm.alarm_type == 'notification' for alarm in event.alarm_ids):
                 # filter events before notifying attendees through calendar_alarm_manager
                 events_to_notify |= event.filtered(lambda ev: ev.alarm_ids and ev.stop >= fields.Datetime.now())
         if events_to_notify:
             self.env['calendar.alarm_manager']._notify_next_alarm(events_to_notify.partner_ids.ids)
-        return triggers_by_events
-
-    def get_next_alarm_date(self, events_by_alarm):
-        self.ensure_one()
-        now = fields.datetime.now()
-        sorted_alarms = self.alarm_ids.sorted("duration_minutes")
-        triggered_alarms = sorted_alarms.filtered(lambda alarm: alarm.id in events_by_alarm)[0]
-        event_has_future_alarms = sorted_alarms[0] != triggered_alarms
-        next_date = None
-        if self.recurrence_id.trigger_id and self.recurrence_id.trigger_id.call_at <= now:
-            next_date = self.start - timedelta(minutes=sorted_alarms[0].duration_minutes) \
-                if event_has_future_alarms \
-                else self.start
-        # For recurrent events, when there is no next_date and no trigger in the recurence, set the next
-        # date as the date of the next event. This keeps the single alarm alive in the recurrence.
-        recurrence_has_no_trigger = self.recurrence_id and not self.recurrence_id.trigger_id
-        if recurrence_has_no_trigger and not next_date and len(sorted_alarms) > 0:
-            future_recurrent_events = self.recurrence_id.calendar_event_ids.filtered(lambda ev: ev.start > self.start)
-            if future_recurrent_events:
-                # The next event (minus the alarm duration) will be the next date.
-                next_recurrent_event = future_recurrent_events.sorted("start")[0]
-                next_date = next_recurrent_event.start - timedelta(minutes=sorted_alarms[0].duration_minutes)
-        return next_date
 
     # ------------------------------------------------------------
     # RECURRENCY
@@ -1199,8 +1108,7 @@ class Meeting(models.Model):
             deactivate the detached events except for the updated event and apply recurrence values.
         """
         self.ensure_one()
-        base_event = self
-        update_dict = self._get_time_update_dict(base_event, time_values)
+        update_dict = self._get_time_update_dict(self, time_values)
         time_values.update(update_dict)
         # Get base values from the previous recurrence and update the start date weekday field.
         start_date = time_values['start'].date() if 'start' in time_values else self.start.date()
@@ -1233,7 +1141,7 @@ class Meeting(models.Model):
     def _rewrite_recurrence(self, values, time_values, recurrence_values):
         """ Delete the current recurrence, reactivate base event and apply updated recurrence values. """
         self.ensure_one()
-        base_event = self.recurrence_id.base_event_id or self.recurrence_id._get_first_event(include_outliers=False)
+        base_event = self.recurrence_id.base_event_id
         update_dict = self._get_time_update_dict(base_event, time_values)
         time_values.update(update_dict)
 
@@ -1280,7 +1188,8 @@ class Meeting(models.Model):
             events = self
         attendee = events.attendee_ids.filtered(lambda x: x.partner_id == self.env.user.partner_id)
         if status == 'accepted':
-            return attendee.do_accept()
+            all_events = recurrence_update_setting == 'all_events'
+            return attendee.with_context(all_events=all_events).do_accept()
         if status == 'declined':
             return attendee.do_decline()
         return attendee.do_tentative()
@@ -1296,6 +1205,47 @@ class Meeting(models.Model):
     # ------------------------------------------------------------
     # TOOLS
     # ------------------------------------------------------------
+
+    def _find_attendee_batch(self):
+        """ Return the first attendee where the user connected has been invited
+            or the attendee selected in the filter that is the owner
+            from all the meeting_ids in parameters.
+        """
+        result = defaultdict(lambda: self.env['calendar.attendee'])
+        self_attendees = self.attendee_ids.filtered(lambda a: a.partner_id == self.env.user.partner_id)
+        for attendee in self_attendees:
+            result[attendee.event_id.id] = attendee
+        remaining_events = self - self_attendees.event_id
+
+        events_checked_partners = self.env['calendar.filters'].search([
+            ('user_id', '=', self.env.user.id),
+            ('partner_id', 'in', remaining_events.attendee_ids.partner_id.ids),
+            ('partner_checked', '=', True)
+        ]).partner_id
+        filter_events = self.env['calendar.event']
+        for event in remaining_events:
+            event_partners = event.attendee_ids.partner_id
+            event_checked_partners = events_checked_partners & event_partners
+            if event.partner_id in event_checked_partners and event.partner_id in event_partners:
+                filter_events |= event
+                result[event.id] = event.attendee_ids.filtered(lambda attendee: attendee.partner_id == event.partner_id)[:1]
+        remaining_events -= filter_events
+
+        for event in remaining_events:
+            event_checked_partners = events_checked_partners & event_partners
+            attendee = event.attendee_ids.filtered(
+                lambda a: a.partner_id in event_checked_partners and a.state != "needsAction")
+            result[event.id] = attendee[:1]
+        return result
+
+    # YTI TODO MASTER: Remove deprecated method
+    def _find_attendee(self):
+        """ Return the first attendee where the user connected has been invited
+            or the attendee selected in the filter that is the owner
+            from all the meeting_ids in parameters.
+        """
+        self.ensure_one()
+        return self._find_attendee_batch()[self.id]
 
     def _get_start_date(self):
         """Return the event starting date in the event's timezone.
@@ -1347,10 +1297,13 @@ class Meeting(models.Model):
             event.add('created').value = ics_datetime(fields.Datetime.now())
             event.add('dtstart').value = ics_datetime(meeting.start, meeting.allday)
             event.add('dtend').value = ics_datetime(meeting.stop, meeting.allday)
-            event.add('summary').value = meeting._get_customer_summary()
-            description = meeting._get_customer_description()
-            if description:
-                event.add('description').value = description
+            event.add('summary').value = meeting.name
+            if not is_html_empty(meeting.description):
+                if 'appointment_type_id' in meeting._fields and self.appointment_type_id:
+                    # convert_online_event_desc_to_text method for correct data formatting in external calendars
+                    event.add('description').value = self.convert_online_event_desc_to_text(meeting.description)
+                else:
+                    event.add('description').value = html2plaintext(meeting.description)
             if meeting.location:
                 event.add('location').value = meeting.location
             if meeting.rrule:
@@ -1386,13 +1339,22 @@ class Meeting(models.Model):
 
         return result
 
-    def _get_customer_description(self):
-        """:return (str): The description to include in calendar exports"""
-        return html2plaintext(self.description) if self.description else ''
-
-    def _get_customer_summary(self):
-        """:return (str): The summary to include in calendar exports"""
-        return self.name or ''
+    def convert_online_event_desc_to_text(self, description):
+        """
+        We can sync the calendar events with google calendar, iCal and Outlook, and we
+        also pass the event description along with other data. This description needs
+        to be in plaintext to be displayed properly in above platforms. Because online
+        events have fixed format for the description, this method removes some specific
+        html tags, and converts it into readable plaintext (to be used in external
+        calendars). Note that for regular (offline) events, we simply use the standard
+        `html2plaintext` method instead.
+        """
+        desc_str = str(description)
+        tags_to_replace = ["<ul>", "</ul>", "<li>"]
+        for tag in tags_to_replace:
+            desc_str = desc_str.replace(tag, "")
+        desc_str = desc_str.replace("</li>", "<br/>")
+        return html2plaintext(desc_str)
 
     @api.model
     def _get_display_time(self, start, stop, zduration, zallday):

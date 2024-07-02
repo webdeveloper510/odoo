@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 
 
@@ -15,7 +15,10 @@ class ProductTemplate(models.Model):
             ('ordered_prepaid', _('Prepaid/Fixed Price')),
             ('delivered_manual', _('Based on Delivered Quantity (Manual)')),
         ]
-        if self.user_has_groups('project.group_project_milestone'):
+        user = self.env['res.users'].sudo().browse(SUPERUSER_ID)
+        if (self.user_has_groups('project.group_project_milestone') or
+                (self.env.user.has_group('base.group_public') and user.has_group('project.group_project_milestone'))
+        ):
             service_policies.insert(1, ('delivered_milestones', _('Based on Milestones')))
         return service_policies
 
@@ -33,10 +36,10 @@ class ProductTemplate(models.Model):
         creating a new project based on the selected template.")
     project_id = fields.Many2one(
         'project.project', 'Project', company_dependent=True,
-    )
+        domain="[('company_id', '=', current_company_id)]")
     project_template_id = fields.Many2one(
         'project.project', 'Project Template', company_dependent=True, copy=True,
-    )
+        domain="[('company_id', '=', current_company_id)]")
     service_policy = fields.Selection('_selection_service_policy', string="Service Invoicing Policy", compute_sudo=True, compute='_compute_service_policy', inverse='_inverse_service_policy')
     service_type = fields.Selection(selection_add=[
         ('milestones', 'Project Milestones'),
@@ -49,10 +52,10 @@ class ProductTemplate(models.Model):
             if not product.service_policy and product.type == 'service':
                 product.service_policy = 'ordered_prepaid'
 
-    @api.depends('service_tracking', 'service_policy', 'type', 'sale_ok')
+    @api.depends('service_tracking', 'service_policy', 'type')
     def _compute_product_tooltip(self):
         super()._compute_product_tooltip()
-        for record in self.filtered(lambda record: record.type == 'service' and record.sale_ok):
+        for record in self.filtered(lambda record: record.type == 'service'):
             if record.service_policy == 'ordered_prepaid':
                 if record.service_tracking == 'no':
                     record.product_tooltip = _(
@@ -66,13 +69,13 @@ class ProductTemplate(models.Model):
                 elif record.service_tracking == 'project_only':
                     record.product_tooltip = _(
                         "Invoice ordered quantities as soon as this service is sold. "
-                        "Create a project for the order with a task for each sales order line "
-                        "to track the time spent."
+                        "Create an empty project for the order to track the time spent."
                     )
                 elif record.service_tracking == 'task_in_project':
                     record.product_tooltip = _(
                         "Invoice ordered quantities as soon as this service is sold. "
-                        "Create an empty project for the order to track the time spent."
+                        "Create a project for the order with a task for each sales order line "
+                        "to track the time spent."
                     )
             elif record.service_policy == 'delivered_milestones':
                 if record.service_tracking == 'no':
@@ -87,13 +90,13 @@ class ProductTemplate(models.Model):
                 elif record.service_tracking == 'project_only':
                     record.product_tooltip = _(
                         "Invoice your milestones when they are reached. "
-                        "Create a project for the order with a task for each sales order line "
-                        "to track the time spent."
+                        "Create an empty project for the order to track the time spent."
                     )
                 elif record.service_tracking == 'task_in_project':
                     record.product_tooltip = _(
                         "Invoice your milestones when they are reached. "
-                        "Create an empty project for the order to track the time spent."
+                        "Create a project for the order with a task for each sales order line "
+                        "to track the time spent."
                     )
             elif record.service_policy == 'delivered_manual':
                 if record.service_tracking == 'no':
@@ -108,13 +111,13 @@ class ProductTemplate(models.Model):
                 elif record.service_tracking == 'project_only':
                     record.product_tooltip = _(
                         "Invoice this service when it is delivered (set the quantity by hand on your sales order lines). "
-                        "Create a project for the order with a task for each sales order line "
-                        "to track the time spent."
+                        "Create an empty project for the order to track the time spent."
                     )
                 elif record.service_tracking == 'task_in_project':
                     record.product_tooltip = _(
                         "Invoice this service when it is delivered (set the quantity by hand on your sales order lines). "
-                        "Create an empty project for the order to track the time spent."
+                        "Create a project for the order with a task for each sales order line "
+                        "to track the time spent."
                     )
 
     def _get_service_to_general_map(self):
@@ -149,11 +152,11 @@ class ProductTemplate(models.Model):
         """
         for product in self:
             if product.service_tracking == 'no' and (product.project_id or product.project_template_id):
-                raise ValidationError(_('The product %s should not have a project nor a project template since it will not generate project.', product.name))
+                raise ValidationError(_('The product %s should not have a project nor a project template since it will not generate project.') % (product.name,))
             elif product.service_tracking == 'task_global_project' and product.project_template_id:
-                raise ValidationError(_('The product %s should not have a project template since it will generate a task in a global project.', product.name))
+                raise ValidationError(_('The product %s should not have a project template since it will generate a task in a global project.') % (product.name,))
             elif product.service_tracking in ['task_in_project', 'project_only'] and product.project_id:
-                raise ValidationError(_('The product %s should not have a global project since it will generate a project.', product.name))
+                raise ValidationError(_('The product %s should not have a global project since it will generate a project.') % (product.name,))
 
     @api.onchange('service_tracking')
     def _onchange_service_tracking(self):

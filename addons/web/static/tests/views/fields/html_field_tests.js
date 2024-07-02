@@ -9,7 +9,7 @@ import {
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
-import { htmlField } from "@web/views/fields/html/html_field";
+import { HtmlField } from "@web/views/fields/html/html_field";
 import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import { session } from "@web/session";
 
@@ -38,7 +38,7 @@ QUnit.module("Fields", ({ beforeEach }) => {
         setupViewRegistries();
 
         // Explicitly removed by web_editor, we need to add it back
-        registry.category("fields").add("html", htmlField, { force: true });
+        registry.category("fields").add("html", HtmlField, { force: true });
     });
 
     QUnit.module("HtmlField");
@@ -295,99 +295,4 @@ QUnit.module("Fields", ({ beforeEach }) => {
 
         await click(target, ".modal button.btn-primary"); // save
     });
-
-    QUnit.test("html fields: spellcheck is disabled on blur", async (assert) => {
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: /* xml */ `<form><field name="txt" /></form>`,
-        });
-
-        const textarea = target.querySelector(".o_field_html textarea");
-        assert.strictEqual(textarea.spellcheck, true, "by default, spellcheck is enabled");
-        textarea.focus();
-
-        await editInput(textarea, null, "nev walue");
-        textarea.blur();
-        assert.strictEqual(
-            textarea.spellcheck,
-            false,
-            "spellcheck is disabled once the field has lost its focus"
-        );
-        textarea.focus();
-        assert.strictEqual(
-            textarea.spellcheck,
-            true,
-            "spellcheck is re-enabled once the field is focused"
-        );
-    });
-
-    QUnit.test(
-        "Setting an html field to empty string is saved as a false value",
-        async function (assert) {
-            assert.expect(1);
-
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                arch: `
-                    <form>
-                        <sheet>
-                            <group>
-                                <field name="txt" />
-                            </group>
-                        </sheet>
-                    </form>`,
-                resId: 1,
-                mockRPC(route, { args, method }) {
-                    if (method === "web_save") {
-                        assert.strictEqual(args[1].txt, false, "the txt value should be false");
-                    }
-                },
-            });
-
-            await editInput(target, ".o_field_widget[name=txt] textarea", "");
-            await clickSave(target);
-        }
-    );
-
-    QUnit.test(
-        "html field: correct value is used to evaluate the modifiers",
-        async function (assert) {
-            serverData.models.partner.fields.foo = { string: "foo", type: "char" };
-            serverData.models.partner.onchanges = {
-                foo: (obj) => {
-                    if (obj.foo === "a") {
-                        obj.txt = false;
-                    } else if (obj.foo === "b") {
-                        obj.txt = "";
-                    }
-                },
-            };
-            serverData.models.partner.records[0].foo = false;
-            serverData.models.partner.records[0].txt = false;
-
-            await makeView({
-                type: "form",
-                resModel: "partner",
-                serverData,
-                resId: 1,
-                arch: `
-                <form>
-                    <field name="foo" />
-                    <field name="txt" invisible="'' == txt"/>
-                </form>`,
-            });
-            assert.containsOnce(target, "[name='txt'] textarea");
-
-            await editInput(target, "[name='foo'] input", "a");
-            assert.containsOnce(target, "[name='txt'] textarea");
-
-            await editInput(target, "[name='foo'] input", "b");
-            assert.containsNone(target, "[name='txt'] textarea");
-        }
-    );
 });

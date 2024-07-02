@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from collections import deque
 
-from odoo import api, Command, fields, models, _
+from odoo import api, fields, models, _
 from odoo.tools.float_utils import float_round, float_is_zero, float_compare
 from odoo.exceptions import UserError
 
@@ -13,14 +12,14 @@ class StockMove(models.Model):
     purchase_line_id = fields.Many2one(
         'purchase.order.line', 'Purchase Order Line',
         ondelete='set null', index='btree_not_null', readonly=True)
-    created_purchase_line_ids = fields.Many2many(
-        'purchase.order.line', 'stock_move_created_purchase_line_rel',
-        'move_id', 'created_purchase_line_id', 'Created Purchase Order Lines', copy=False)
+    created_purchase_line_id = fields.Many2one(
+        'purchase.order.line', 'Created Purchase Order Line',
+        ondelete='set null', index='btree_not_null', readonly=True, copy=False)
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
         distinct_fields = super(StockMove, self)._prepare_merge_moves_distinct_fields()
-        distinct_fields += ['purchase_line_id', 'created_purchase_line_ids']
+        distinct_fields += ['purchase_line_id', 'created_purchase_line_id']
         return distinct_fields
 
     @api.model
@@ -29,11 +28,6 @@ class StockMove(models.Model):
         if self.env['ir.config_parameter'].sudo().get_param('purchase_stock.merge_different_procurement'):
             excluded_fields += ['procure_method']
         return excluded_fields
-
-    def _compute_partner_id(self):
-        # dropshipped moves should have their partner_ids directly set
-        not_dropshipped_moves = self.filtered(lambda m: not m._is_dropshipped())
-        super(StockMove, not_dropshipped_moves)._compute_partner_id()
 
     def _should_ignore_pol_price(self):
         self.ensure_one()
@@ -49,7 +43,7 @@ class StockMove(models.Model):
         order = line.order_id
         received_qty = line.qty_received
         if self.state == 'done':
-            received_qty -= self.product_uom._compute_quantity(self.quantity, line.product_uom, rounding_method='HALF-UP')
+            received_qty -= self.product_uom._compute_quantity(self.quantity_done, line.product_uom, rounding_method='HALF-UP')
         if line.product_id.purchase_method == 'purchase' and float_compare(line.qty_invoiced, received_qty, precision_rounding=line.product_uom.rounding) > 0:
             move_layer = line.move_ids.sudo().stock_valuation_layer_ids
             invoiced_layer = line.sudo().invoice_lines.stock_valuation_layer_ids
@@ -61,22 +55,30 @@ class StockMove(models.Model):
             if invoiced_layer:
                 receipt_value += sum(invoiced_layer.mapped(lambda l: l.currency_id._convert(
                     l.value, order.currency_id, order.company_id, l.create_date, round=False)))
-            invoiced_value = 0
+            total_invoiced_value = 0
             invoiced_qty = 0
             for invoice_line in line.sudo().invoice_lines:
                 if invoice_line.move_id.state != 'posted':
                     continue
                 if invoice_line.tax_ids:
-                    invoiced_value += invoice_line.tax_ids.with_context(round=False).compute_all(
+                    invoice_line_value = invoice_line.tax_ids.with_context(round=False).compute_all(
                         invoice_line.price_unit, currency=invoice_line.currency_id, quantity=invoice_line.quantity)['total_void']
                 else:
-                    invoiced_value += invoice_line.price_unit * invoice_line.quantity
+                    invoice_line_value = invoice_line.price_unit * invoice_line.quantity
+                total_invoiced_value += invoice_line.currency_id._convert(
+                        invoice_line_value, order.currency_id, order.company_id, invoice_line.move_id.invoice_date, round=False)
                 invoiced_qty += invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_id.uom_id)
             # TODO currency check
-            remaining_value = invoiced_value - receipt_value
+            remaining_value = total_invoiced_value - receipt_value
             # TODO qty_received in product uom
             remaining_qty = invoiced_qty - line.product_uom._compute_quantity(received_qty, line.product_id.uom_id)
-            price_unit = float_round(remaining_value / remaining_qty, precision_digits=price_unit_prec) if remaining_value and remaining_qty else line._get_gross_price_unit()
+            if order.currency_id != order.company_id.currency_id and remaining_value and remaining_qty:
+                # will be rounded during currency conversion
+                price_unit = remaining_value / remaining_qty
+            elif remaining_value and remaining_qty:
+                price_unit = float_round(remaining_value / remaining_qty, precision_digits=price_unit_prec)
+            else:
+                price_unit = line._get_gross_price_unit()
         else:
             price_unit = line._get_gross_price_unit()
         if order.currency_id != order.company_id.currency_id:
@@ -156,7 +158,7 @@ class StockMove(models.Model):
         returned_move = self.origin_returned_move_id
         pdiff_exists = bool((self | returned_move).stock_valuation_layer_ids.stock_valuation_layer_ids.account_move_line_id)
 
-        if not am_vals_list or not self.purchase_line_id or pdiff_exists or float_is_zero(qty, precision_rounding=self.product_id.uom_id.rounding):
+        if not am_vals_list or not self.purchase_line_id or pdiff_exists:
             return am_vals_list
 
         layer = self.env['stock.valuation.layer'].browse(svl_id)
@@ -164,10 +166,11 @@ class StockMove(models.Model):
 
         if returned_move and self._is_out() and self._is_returned(valued_type='out'):
             returned_layer = returned_move.stock_valuation_layer_ids.filtered(lambda svl: not svl.stock_valuation_layer_id)[:1]
-            unit_diff = layer._get_layer_price_unit() - returned_layer._get_layer_price_unit()
+            returned_unit_cost = returned_layer.value / returned_layer.quantity
+            unit_diff = layer.unit_cost - returned_unit_cost
         elif returned_move and returned_move._is_out() and returned_move._is_returned(valued_type='out'):
             returned_layer = returned_move.stock_valuation_layer_ids.filtered(lambda svl: not svl.stock_valuation_layer_id)[:1]
-            unit_diff = returned_layer._get_layer_price_unit() - self.purchase_line_id._get_gross_price_unit()
+            unit_diff = returned_layer.unit_cost - self.purchase_line_id._get_gross_price_unit()
         else:
             return am_vals_list
 
@@ -189,7 +192,6 @@ class StockMove(models.Model):
     def _prepare_extra_move_vals(self, qty):
         vals = super(StockMove, self)._prepare_extra_move_vals(qty)
         vals['purchase_line_id'] = self.purchase_line_id.id
-        vals['created_purchase_line_ids'] = [Command.set(self.created_purchase_line_ids.ids)]
         return vals
 
     def _prepare_move_split_vals(self, uom_qty):
@@ -199,12 +201,12 @@ class StockMove(models.Model):
 
     def _clean_merged(self):
         super(StockMove, self)._clean_merged()
-        self.write({'created_purchase_line_ids': [Command.clear()]})
+        self.write({'created_purchase_line_id': False})
 
     def _get_upstream_documents_and_responsibles(self, visited):
-        created_pl = self.created_purchase_line_ids.filtered(lambda cpl: cpl.state not in ('done', 'cancel') and (cpl.state != 'draft' or self._context.get('include_draft_documents')))
-        if created_pl:
-            return [(pl.order_id, pl.order_id.user_id, visited) for pl in created_pl]
+        if self.created_purchase_line_id and self.created_purchase_line_id.state not in ('done', 'cancel') \
+                and (self.created_purchase_line_id.state != 'draft' or self._context.get('include_draft_documents')):
+            return [(self.created_purchase_line_id.order_id, self.created_purchase_line_id.order_id.user_id, visited)]
         elif self.purchase_line_id and self.purchase_line_id.state not in ('done', 'cancel'):
             return[(self.purchase_line_id.order_id, self.purchase_line_id.order_id.user_id, visited)]
         else:
@@ -238,8 +240,7 @@ class StockMove(models.Model):
             valuation_total_qty += layers_qty
         if float_is_zero(valuation_total_qty, precision_rounding=related_aml.product_uom_id.rounding or related_aml.product_id.uom_id.rounding):
             raise UserError(
-                _('Odoo is not able to generate the anglo saxon entries. The total valuation of %s is zero.',
-                  related_aml.product_id.display_name))
+                _('Odoo is not able to generate the anglo saxon entries. The total valuation of %s is zero.') % related_aml.product_id.display_name)
         return valuation_price_unit_total, valuation_total_qty
 
     def _is_purchase_return(self):
@@ -254,16 +255,3 @@ class StockMove(models.Model):
 
     def _get_all_related_sm(self, product):
         return super()._get_all_related_sm(product) | self.filtered(lambda m: m.purchase_line_id.product_id == product)
-
-    def _get_purchase_line_and_partner_from_chain(self):
-        moves_to_check = deque(self)
-        seen_moves = set()
-        while moves_to_check:
-            current_move = moves_to_check.popleft()
-            if current_move.purchase_line_id:
-                return current_move.purchase_line_id.id, current_move.picking_id.partner_id.id
-            seen_moves.add(current_move)
-            moves_to_check.extend(
-                [move for move in current_move.move_orig_ids if move not in moves_to_check and move not in seen_moves]
-            )
-        return None, None

@@ -1,8 +1,8 @@
-/** @odoo-module **/
+/** @odoo-module */
 
-import { _t } from "@web/core/l10n/translation";
-import { session } from "@web/session";
+import session from 'web.session'
 import { useService } from "@web/core/utils/hooks";
+import { useEnv } from "@odoo/owl";
 
 /**
  * Redirect to the sub employee kanban view.
@@ -16,6 +16,7 @@ export function onEmployeeSubRedirect() {
     const actionService = useService('action');
     const orm = useService('orm');
     const rpc = useService('rpc');
+    const env = useEnv();
 
     return async (event) => {
         const employeeId = parseInt(event.currentTarget.dataset.employeeId);
@@ -31,7 +32,7 @@ export function onEmployeeSubRedirect() {
         });
         let action = await orm.call('hr.employee', 'get_formview_action', [employeeId]);
         action = {...action,
-            name: _t('Team'),
+            name: env._t('Team'),
             view_mode: 'kanban,list,form',
             views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
             domain: [['id', 'in', subordinateIds]],

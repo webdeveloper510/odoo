@@ -3,7 +3,8 @@
 import { getFixture, patchWithCleanup, triggerEvent } from "@web/../tests/helpers/utils";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
-import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { FavoriteMenu } from "@web/search/favorite_menu/favorite_menu";
 import { useSetupAction } from "@web/webclient/actions/action_hook";
 import {
     editFavoriteName,
@@ -13,13 +14,12 @@ import {
     saveFavorite,
     setupControlPanelFavoriteMenuRegistry,
     setupControlPanelServiceRegistry,
+    toggleFavoriteMenu,
     toggleSaveFavorite,
-    toggleSearchBarMenu,
     validateSearch,
 } from "./helpers";
 
 import { Component, xml } from "@odoo/owl";
-import { SearchBar } from "@web/search/search_bar/search_bar";
 const serviceRegistry = registry.category("services");
 
 /**
@@ -79,7 +79,7 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: SearchBar,
+            Component: ControlPanel,
             searchMenuTypes: ["favorite"],
             searchViewId: false,
             config: {
@@ -87,23 +87,17 @@ QUnit.module("Search", (hooks) => {
             },
         });
 
-        await toggleSearchBarMenu(target);
+        await toggleFavoriteMenu(target);
         await toggleSaveFavorite(target);
         assert.strictEqual(
-            target.querySelector('.o_add_favorite + .o_accordion_values input[type="text"]').value,
+            target.querySelector('.o_add_favorite input[type="text"]').value,
             "Action Name"
         );
-        assert.containsN(
-            target,
-            '.o_add_favorite + .o_accordion_values .form-check input[type="checkbox"]',
-            2
-        );
-        const labelEls = target.querySelectorAll(
-            ".o_add_favorite + .o_accordion_values .form-check label"
-        );
+        assert.containsN(target, '.o_add_favorite .form-check input[type="checkbox"]', 2);
+        const labelEls = target.querySelectorAll(".o_add_favorite .form-check label");
         assert.deepEqual(
             [...labelEls].map((e) => e.innerText.trim()),
-            ["Default filter", "Shared"]
+            ["Use by default", "Share with all users"]
         );
     });
 
@@ -113,12 +107,12 @@ QUnit.module("Search", (hooks) => {
         await makeWithSearch({
             serverData,
             resModel: "foo",
-            Component: SearchBar,
+            Component: ControlPanel,
             searchMenuTypes: ["favorite"],
             searchViewId: false,
         });
 
-        await toggleSearchBarMenu(target);
+        await toggleFavoriteMenu(target);
         await toggleSaveFavorite(target);
         const checkboxes = target.querySelectorAll('input[type="checkbox"]');
 
@@ -172,8 +166,8 @@ QUnit.module("Search", (hooks) => {
                 });
             }
         }
-        TestComponent.components = { SearchBarMenu };
-        TestComponent.template = xml`<div><SearchBarMenu/></div>`;
+        TestComponent.components = { FavoriteMenu };
+        TestComponent.template = xml`<div><FavoriteMenu/></div>`;
 
         const comp = await makeWithSearch({
             serverData,
@@ -189,11 +183,11 @@ QUnit.module("Search", (hooks) => {
             Component: TestComponent,
             searchViewId: false,
         });
-        comp.env.bus.addEventListener("CLEAR-CACHES", () => assert.step("CLEAR-CACHES"));
+        comp.env.bus.on("CLEAR-CACHES", comp, () => assert.step("CLEAR-CACHES"));
 
         assert.verifySteps([]);
 
-        await toggleSearchBarMenu(target);
+        await toggleFavoriteMenu(target);
         await toggleSaveFavorite(target);
         await editFavoriteName(target, "aaa");
         await saveFavorite(target);
@@ -217,8 +211,8 @@ QUnit.module("Search", (hooks) => {
                 }
             },
             resModel: "foo",
-            Component: SearchBar,
-            searchMenuTypes: ["filter", "favorite"],
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
             searchViewId: false,
             searchViewArch: `
                     <search>
@@ -230,7 +224,7 @@ QUnit.module("Search", (hooks) => {
 
         assert.deepEqual(getFacetTexts(target), ["Filter"]);
 
-        await toggleSearchBarMenu(target);
+        await toggleFavoriteMenu(target);
         await toggleSaveFavorite(target);
         await editFavoriteName(target, "My favorite");
         await saveFavorite(target);
@@ -251,7 +245,7 @@ QUnit.module("Search", (hooks) => {
                 }
             },
             resModel: "foo",
-            Component: SearchBar,
+            Component: ControlPanel,
             searchMenuTypes: ["favorite"],
             searchViewId: false,
             searchViewArch: `
@@ -268,7 +262,7 @@ QUnit.module("Search", (hooks) => {
 
         assert.deepEqual(getFacetTexts(target), ["Foo\na"]);
 
-        await toggleSearchBarMenu(target);
+        await toggleFavoriteMenu(target);
         await toggleSaveFavorite(target);
         await editFavoriteName(target, "My favorite");
         await saveFavorite(target);
@@ -318,7 +312,7 @@ QUnit.module("Search", (hooks) => {
                     }
                 },
                 resModel: "foo",
-                Component: SearchBar,
+                Component: ControlPanel,
                 searchMenuTypes: ["favorite"],
                 searchViewId: false,
                 irFilters: [
@@ -334,7 +328,7 @@ QUnit.module("Search", (hooks) => {
                 ],
             });
 
-            await toggleSearchBarMenu(target);
+            await toggleFavoriteMenu(target);
             await toggleSaveFavorite(target);
 
             // first try: should fail
@@ -383,15 +377,65 @@ QUnit.module("Search", (hooks) => {
                     }
                 },
                 resModel: "foo",
-                Component: SearchBarMenu,
+                Component: FavoriteMenu,
                 searchViewId: false,
             });
 
-            await toggleSearchBarMenu(target);
+            await toggleFavoriteMenu(target);
             await toggleSaveFavorite(target);
             await saveFavorite(target);
         }
     );
+
+    QUnit.test("add favorite with enter which already exists", async function (assert) {
+        serviceRegistry.add(
+            "notification",
+            {
+                start() {
+                    return {
+                        add(message, options) {
+                            assert.strictEqual(message, "A filter with same name already exists.");
+                            assert.deepEqual(options, { type: "danger" });
+                            assert.step("warning dialog");
+                        },
+                    };
+                },
+            },
+            { force: true }
+        );
+        await makeWithSearch({
+            serverData,
+            resModel: "foo",
+            Component: ControlPanel,
+            searchMenuTypes: ["favorite"],
+            searchViewId: false,
+            config: {
+                displayName: "Action Name",
+            },
+            irFilters: [
+                {
+                    context: "{}",
+                    domain: "[]",
+                    id: 1,
+                    is_default: false,
+                    name: "My favorite",
+                    sort: "[]",
+                    user_id: [2, "Mitchell Admin"],
+                },
+            ],
+        });
+
+        await toggleFavoriteMenu(target);
+        await toggleSaveFavorite(target);
+        await editFavoriteName(target, "My favorite");
+        triggerEvent(
+            target,
+            `.o_favorite_menu .o_add_favorite .dropdown-menu input[type="text"]`,
+            "keydown",
+            { key: "Enter" }
+        );
+        assert.verifySteps(["warning dialog"]);
+    });
 
     QUnit.skip("save search filter in modal", async function (assert) {
         /** @todo I don't know yet how to convert this test */
@@ -507,7 +551,7 @@ QUnit.module("Search", (hooks) => {
         // await applyFilter(".modal");
         // assert.containsNone(document.body, "tr.o_data_row", "should display 0 records");
         // // Save this search
-        // await toggleSearchBarMenu(".modal");
+        // await toggleFavoriteMenu(".modal");
         // await toggleSaveFavorite(".modal");
         // const filterNameInput = document.querySelector('.o_add_favorite input[type="text"]');
         // assert.isVisible(filterNameInput, "should display an input field for the filter name");

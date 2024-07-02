@@ -5,6 +5,7 @@ import odoo
 
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.tests.common import Form
+from odoo import fields
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestPoSSale(TestPointOfSaleHttpCommon):
@@ -56,29 +57,22 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
         picking = sale_order.picking_ids
-        picking.move_ids.quantity = 300
-        picking.move_ids.picked = True
+        picking.move_ids.quantity_done = 300
         action = picking.button_validate()
         wizard = Form(self.env[action['res_model']].with_context(action['context']))
         wizard.save().process()
 
         self.assertEqual(sale_order.order_line.qty_delivered, 1)
 
-        self.pos_user.write({
-            'groups_id': [
-                (4, self.env.ref('stock.group_stock_user').id),
-                (4, self.env.ref('sales_team.group_sale_salesman_all_leads').id),
-            ]
-        })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSettleOrder', login="pos_user")
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSettleOrder', login="accountman")
 
         #assert that sales order qty are correctly updated
         self.assertEqual(sale_order.order_line.qty_delivered, 3)
         self.assertEqual(sale_order.picking_ids[0].move_ids.product_qty, 2100) # 7 left to deliver => 300 * 7 = 2100
-        self.assertEqual(sale_order.picking_ids[0].move_ids.quantity, 0)
+        self.assertEqual(sale_order.picking_ids[0].move_ids.quantity_done, 0)
         self.assertEqual(sale_order.picking_ids[1].move_ids.product_qty, 300)
-        self.assertEqual(sale_order.picking_ids[1].move_ids.quantity, 300) # 1 delivered => 300 * 2 = 600
+        self.assertEqual(sale_order.picking_ids[1].move_ids.quantity_done, 300) # 1 delivered => 300 * 2 = 600
 
     def test_settle_order_with_incompatible_partner(self):
         """ If the partner of the sale order is not compatible with the current pos order,
@@ -124,12 +118,14 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'type': 'product',
             'lst_price': 10.0,
+            'default_code': 'A001',
         })
         product_b = self.env['product.product'].create({
             'name': 'Product B',
             'available_in_pos': True,
             'type': 'product',
             'lst_price': 10.0,
+            'default_code': 'A002',
         })
         #create a sale order with 2 lines
         sale_order = self.env['sale.order'].create({
@@ -164,34 +160,6 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(orderline_product_a.move_ids.product_uom_qty, 0)
         # 1 item to deliver for product b.
         self.assertEqual(orderline_product_b.move_ids.product_uom_qty, 1)
-
-    def test_downpayment_refund(self):
-        #create a sale order
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
-            'order_line': [(0, 0, {
-                'product_id': self.product_a.id,
-                'name': self.product_a.name,
-                'product_uom_qty': 1,
-                'price_unit': 100,
-                'product_uom': self.product_a.uom_id.id
-            })],
-        })
-        sale_order.action_confirm()
-        #set downpayment product in pos config
-        self.downpayment_product = self.env['product.product'].create({
-            'name': 'Down Payment',
-            'available_in_pos': True,
-            'type': 'service',
-        })
-        self.main_pos_config.write({
-            'down_payment_product_id': self.downpayment_product.id,
-        })
-        self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosRefundDownpayment', login="accountman")
-        self.assertEqual(len(sale_order.order_line), 3)
-        self.assertEqual(sale_order.order_line[1].qty_invoiced, 1)
-        self.assertEqual(sale_order.order_line[2].qty_invoiced, -1)
 
     def test_settle_order_unreserve_order_lines(self):
         #create a product category that use the closest location for the removal strategy
@@ -246,21 +214,53 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
 
-        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[0].quantity, 2)
+        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[0].reserved_qty, 2)
         self.assertEqual(sale_order.order_line.move_ids.move_line_ids[0].location_id.id, self.shelf_1.id)
-        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[1].quantity, 2)
+        self.assertEqual(sale_order.order_line.move_ids.move_line_ids[1].reserved_qty, 2)
         self.assertEqual(sale_order.order_line.move_ids.move_line_ids[1].location_id.id, self.shelf_2.id)
 
-        self.main_pos_config.company_id.write({'point_of_sale_update_stock_quantities': 'real'})
+        self.config = self.env['res.config.settings'].create({
+            'update_stock_quantities': 'real',
+        })
+        self.config.execute()
+
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSettleOrderRealTime', login="accountman")
-        self.main_pos_config.current_session_id.close_session_from_ui()
+
         pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
-        self.assertEqual(pos_order.picking_ids.move_line_ids[0].quantity, 2)
+        self.assertEqual(pos_order.picking_ids.move_line_ids[0].qty_done, 2)
         self.assertEqual(pos_order.picking_ids.move_line_ids[0].location_id.id, self.shelf_1.id)
-        self.assertEqual(pos_order.picking_ids.move_line_ids[1].quantity, 2)
+        self.assertEqual(pos_order.picking_ids.move_line_ids[1].qty_done, 2)
         self.assertEqual(pos_order.picking_ids.move_line_ids[1].location_id.id, self.shelf_2.id)
         self.assertEqual(sale_order.order_line.move_ids.move_lines_count, 0)
+
+    def test_downpayment_refund(self):
+        #create a sale order
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
+            'order_line': [(0, 0, {
+                'product_id': self.product_a.id,
+                'name': self.product_a.name,
+                'product_uom_qty': 1,
+                'price_unit': 100,
+                'product_uom': self.product_a.uom_id.id
+            })],
+        })
+        sale_order.action_confirm()
+        #set downpayment product in pos config
+        self.downpayment_product = self.env['product.product'].create({
+            'name': 'Down Payment',
+            'available_in_pos': True,
+            'type': 'service',
+        })
+        self.main_pos_config.write({
+            'down_payment_product_id': self.downpayment_product.id,
+        })
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosRefundDownpayment', login="accountman")
+        self.assertEqual(len(sale_order.order_line), 3)
+        self.assertEqual(sale_order.order_line[1].qty_invoiced, 1)
+        self.assertEqual(sale_order.order_line[2].qty_invoiced, -1)
 
     def test_settle_order_with_multistep_delivery(self):
         """This test create an order and settle it in the PoS. It also uses multistep delivery
@@ -277,6 +277,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'type': 'product',
             'lst_price': 10.0,
         })
+        self.env['stock.quant']._update_available_quantity(product_a, warehouse.lot_stock_id, 1)
+
         #create a sale order with 2 lines
         sale_order = self.env['sale.order'].create({
             'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
@@ -362,66 +364,82 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSettleOrderWithNote', login="accountman")
 
-    def test_pos_invoice_analytic_account(self):
-        #create a sale order with product_a
-        self.analytic_plan_projects = self.env['account.analytic.plan'].create({'name': 'Projects'})
-        self.analytic_plan_departments = self.env['account.analytic.plan'].create({'name': 'Departments test'})
+    def test_untaxed_invoiced_amount(self):
+        """Make sure that orders invoiced in the pos gets their untaxed invoiced
+           amount updated accordingly"""
 
-        self.analytic_account_partner_a_1 = self.env['account.analytic.account'].create({
-            'name': 'analytic_account_partner_a_1',
-            'partner_id': self.partner_a.id,
-            'plan_id': self.analytic_plan_projects.id,
+        product_a = self.env['product.product'].create({
+            'name': 'Product A',
+            'available_in_pos': True,
+            'type': 'product',
+            'lst_price': 10.0,
+            'taxes_id': [],
         })
-        self.env['sale.order'].create({
-            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
+
+        product_b = self.env['product.product'].create({
+            'name': 'Product B',
+            'available_in_pos': True,
+            'type': 'product',
+            'lst_price': 5.0,
+            'taxes_id': [],
+        })
+
+        partner_test = self.env['res.partner'].create({'name': 'Test Partner'})
+
+        sale_order = self.env['sale.order'].create({
+            'partner_id': partner_test.id,
             'order_line': [(0, 0, {
-                'product_id': self.desk_pad.id,
-                'name': self.desk_pad.name,
-                'product_uom_qty': 3.5,
-                'product_uom': self.desk_pad.uom_id.id,
-                'price_unit': self.desk_pad.lst_price,
+                'product_id': product_a.id,
+                'name': product_a.name,
+                'product_uom_qty': 1,
+                'product_uom': product_a.uom_id.id,
+                'price_unit': product_a.lst_price,
+            }), (0, 0, {
+                'product_id': product_b.id,
+                'name': product_b.name,
+                'product_uom_qty': 1,
+                'product_uom': product_b.uom_id.id,
+                'price_unit': product_b.lst_price,
             })],
-            'analytic_account_id': self.analytic_account_partner_a_1.id,
         })
-        self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosSettleAndInvoiceOrder', login="accountman")
-
-        pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
-        self.assertTrue(pos_order.account_move.line_ids[0].analytic_distribution, "Analytic distribution should be set on the invoice line")
-        self.assertEqual(pos_order.account_move.line_ids[0].analytic_distribution.get(str(self.analytic_account_partner_a_1.id)), 100)
-
-    def test_order_sales_count(self):
+        sale_order.action_confirm()
         self.main_pos_config.open_ui()
         current_session = self.main_pos_config.current_session_id
-        partner_1 = self.env['res.partner'].create({'name': 'Test Partner'})
-        order = self.env['pos.order'].create({
-            'company_id': self.env.company.id,
-            'session_id': current_session.id,
-            'partner_id': partner_1.id,
-            'pricelist_id': partner_1.property_product_pricelist.id,
-            'lines': [(0, 0, {
-                'name': "OL/0001",
-                'product_id': self.desk_pad.id,
-                'price_unit': self.desk_pad.lst_price,
-                'discount': 0.0,
-                'qty': 1.0,
-                'tax_ids': [],
-                'price_subtotal': self.desk_pad.lst_price,
-                'price_subtotal_incl': self.desk_pad.lst_price,
-            })],
-            'amount_total': self.desk_pad.lst_price,
-            'amount_tax': 0.0,
-            'amount_paid': 0.0,
-            'amount_return': 0.0,
-            'last_order_preparation_change': '{}'
-        })
-        payment_context = {"active_ids": order.ids, "active_id": order.id}
-        order_payment = self.env['pos.make.payment'].with_context(**payment_context).create({
-            'amount': order.amount_total,
-            'payment_method_id': current_session.payment_method_ids[0].id,
-        })
-        order_payment.with_context(**payment_context).check()
 
-        current_session.close_session_from_ui()
-        self.env.flush_all()
-        self.assertEqual(self.desk_pad.sales_count, 1)
+        pos_order = {'data':
+          {'amount_paid': 10,
+           'amount_return': 0,
+           'amount_tax': 0,
+           'amount_total': 10,
+           'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
+           'fiscal_position_id': False,
+           'to_invoice': True,
+           'partner_id': partner_test.id,
+           'pricelist_id': self.main_pos_config.available_pricelist_ids[0].id,
+           'lines': [[0,
+             0,
+             {'discount': 0,
+              'pack_lot_ids': [],
+              'price_unit': 10,
+              'product_id': product_a.id,
+              'price_subtotal': 10,
+              'price_subtotal_incl': 10,
+              'sale_order_line_id': sale_order.order_line[0],
+              'sale_order_origin_id': sale_order,
+              'qty': 1,
+              'tax_ids': []}]],
+           'name': 'Order 00044-003-0014',
+           'pos_session_id': current_session.id,
+           'sequence_number': self.main_pos_config.journal_id.id,
+           'statement_ids': [[0,
+             0,
+             {'amount': 10,
+              'name': fields.Datetime.now(),
+              'payment_method_id': self.main_pos_config.payment_method_ids[0].id}]],
+           'uid': '00044-003-0014',
+           'user_id': self.env.uid},
+            }
+
+        self.env['pos.order'].create_from_ui([pos_order])
+        self.assertEqual(sale_order.order_line[0].untaxed_amount_invoiced, 10, "Untaxed invoiced amount should be 10")
+        self.assertEqual(sale_order.order_line[1].untaxed_amount_invoiced, 0, "Untaxed invoiced amount should be 0")

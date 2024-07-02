@@ -3,9 +3,8 @@
 import { _t } from "@web/core/l10n/translation";
 import { OdooViewsDataSource } from "../data_sources/odoo_views_data_source";
 import { SpreadsheetPivotModel } from "./pivot_model";
-import { Domain } from "@web/core/domain";
 
-export class PivotDataSource extends OdooViewsDataSource {
+export default class PivotDataSource extends OdooViewsDataSource {
     /**
      *
      * @override
@@ -48,62 +47,29 @@ export class PivotDataSource extends OdooViewsDataSource {
                 metadataRepository: this._metadataRepository,
             }
         );
-
-        const userContext = this._orm.user.context;
-        const domain = new Domain(this._initialSearchParams.domain).toList({
-            ...this._initialSearchParams.context,
-            ...userContext,
-        });
-
-        const searchParams = { ...this._initialSearchParams, domain };
-        await model.load(searchParams);
+        await model.load(this._initialSearchParams);
         return model;
     }
 
-    /**
-     * High level method computing the result of ODOO.PIVOT.HEADER functions.
-     * - regular function 'ODOO.PIVOT.HEADER(1,"stage_id",2,"user_id",6)'
-     * - measure header 'ODOO.PIVOT.HEADER(1,"stage_id",2,"user_id",6,"measure","expected_revenue")
-     * - positional header 'ODOO.PIVOT.HEADER(1,"#stage_id",1,"#user_id",1)'
-     *
-     * @param {(string | number)[]} domainArgs arguments of the function (except the first one which is the pivot id)
-     * @returns {string | number}
-     */
-    computeOdooPivotHeaderValue(domainArgs) {
+    getReportMeasures() {
         this._assertDataIsLoaded();
-        if (domainArgs.length === 0) {
-            return _t("Total");
-        }
-        if (domainArgs.at(-2) === "measure") {
-            return this.getMeasureDisplayName(domainArgs.at(-1));
-        }
-        return this._model.getGroupByCellValue(
-            domainArgs.at(-2),
-            this._model.getLastPivotGroupValue(domainArgs)
-        );
+        return this._model.getReportMeasures();
     }
 
     /**
-     * @param {string} measure
-     * @returns {string}
+     * @param {string[]} domain
      */
-    getMeasureDisplayName(measure) {
-        if (measure === "__count") {
-            return _t("Count");
-        }
-        const field = this.getField(measure);
-        if (field === undefined) {
-            throw new Error(_t("Field %s does not exist", measure));
-        }
-        return field.string;
+    getDisplayedPivotHeaderValue(domain) {
+        this._assertDataIsLoaded();
+        return this._model.getDisplayedPivotHeaderValue(domain);
     }
 
     /**
-     * @param {(string | number)[]} domainArgs
+     * @param {string[]} domain
      */
-    getLastPivotGroupValue(domainArgs) {
+    getPivotHeaderValue(domain) {
         this._assertDataIsLoaded();
-        return this._model.getLastPivotGroupValue(domainArgs);
+        return this._model.getPivotHeaderValue(domain);
     }
 
     /**
@@ -170,6 +136,16 @@ export class PivotDataSource extends OdooViewsDataSource {
     getPivotCellDomain(domain) {
         this._assertDataIsLoaded();
         return this._model.getPivotCellDomain(domain);
+    }
+
+    /**
+     * @param {string} fieldName
+     * @param {string} value raw string value
+     * @returns {string}
+     */
+    getGroupByDisplayLabel(fieldName, value) {
+        this._assertDataIsLoaded();
+        return this._model.getGroupByDisplayLabel(fieldName, value);
     }
 
     /**

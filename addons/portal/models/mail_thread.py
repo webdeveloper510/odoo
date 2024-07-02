@@ -4,7 +4,7 @@
 import hashlib
 import hmac
 
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 
 
 class MailThread(models.AbstractModel):
@@ -13,14 +13,11 @@ class MailThread(models.AbstractModel):
     _mail_post_token_field = 'access_token' # token field for external posts, to be overridden
 
     website_message_ids = fields.One2many('mail.message', 'res_id', string='Website Messages',
-        domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ('comment', 'email', 'email_outgoing'))],
-        auto_join=True,
+        domain=lambda self: [('model', '=', self._name), '|', ('message_type', '=', 'comment'), ('message_type', '=', 'email')], auto_join=True,
         help="Website communication history")
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
-        groups = super()._notify_get_recipients_groups(
-            message, model_description, msg_vals=msg_vals
-        )
+    def _notify_get_recipients_groups(self, msg_vals=None):
+        groups = super()._notify_get_recipients_groups(msg_vals=msg_vals)
         if not self:
             return groups
 
@@ -28,7 +25,7 @@ class MailThread(models.AbstractModel):
         if not portal_enabled:
             return groups
 
-        customer = self._mail_get_partners(introspect_fields=False)[self.id]
+        customer = self._mail_get_partners()[self.id]
         if customer:
             access_token = self._portal_ensure_token()
             local_msg_vals = dict(msg_vals or {})
@@ -40,11 +37,11 @@ class MailThread(models.AbstractModel):
 
             new_group = [
                 ('portal_customer', lambda pdata: pdata['id'] == customer.id, {
-                    'active': True,
+                    'has_button_access': True,
                     'button_access': {
                         'url': access_link,
                     },
-                    'has_button_access': True,
+                    'notification_is_customer': True,
                 })
             ]
         else:
@@ -79,3 +76,11 @@ class MailThread(models.AbstractModel):
         secret = self.env["ir.config_parameter"].sudo().get_param("database.secret")
         token = (self.env.cr.dbname, self[self._mail_post_token_field], pid)
         return hmac.new(secret.encode('utf-8'), repr(token).encode('utf-8'), hashlib.sha256).hexdigest()
+
+    def _portal_get_parent_hash_token(self, pid):
+        """ Overridden in models which have M2o 'parent' field and can be shared on
+        either an individual basis or indirectly in a group via the M2o record.
+
+        :return: False or logical parent's _sign_token() result
+        """
+        return False

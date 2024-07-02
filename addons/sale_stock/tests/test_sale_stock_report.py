@@ -56,10 +56,10 @@ class TestSaleStockReports(TestReportsCommon):
         line_2 = lines[1]
         self.assertEqual(line_1['quantity'], 5)
         self.assertTrue(line_1['replenishment_filled'])
-        self.assertEqual(line_1['document_out']['id'], so_2.id)
+        self.assertEqual(line_1['document_out'].id, so_2.id)
         self.assertEqual(line_2['quantity'], 5)
         self.assertEqual(line_2['replenishment_filled'], False)
-        self.assertEqual(line_2['document_out']['id'], so_1.id)
+        self.assertEqual(line_2['document_out'].id, so_1.id)
 
     def test_report_forecast_2_report_line_corresponding_to_so_line_highlighted(self):
         """ When accessing the report from a SO line, checks if the correct SO line is highlighted in the report
@@ -80,7 +80,7 @@ class TestSaleStockReports(TestReportsCommon):
             context = {"move_to_match_ids": so.order_line.move_ids.ids}
             _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids, context=context)
             for line in lines:
-                if line['document_out']['id'] == so.id:
+                if line['document_out'] == so:
                     self.assertTrue(line['is_matched'], "The corresponding SO line should be matched in the forecast report.")
                 else:
                     self.assertFalse(line['is_matched'], "A line of the forecast report not linked to the SO shoud not be matched.")
@@ -142,7 +142,7 @@ class TestSaleStockInvoices(TestSaleCommon):
         so.action_confirm()
 
         picking = so.picking_ids
-        picking.move_ids.write({'quantity': 5, 'picked': True})
+        picking.move_ids.quantity_done = 5
         picking.button_validate()
 
         invoice = so._create_invoices()
@@ -181,7 +181,7 @@ class TestSaleStockInvoices(TestSaleCommon):
         invoice.action_post()
 
         picking = so.picking_ids
-        picking.move_ids.write({'quantity': 4, 'picked': True})
+        picking.move_ids.quantity_done = 4
         picking.button_validate()
 
         html = self.env['ir.actions.report']._render_qweb_html(
@@ -209,8 +209,11 @@ class TestSaleStockInvoices(TestSaleCommon):
         so.action_confirm()
 
         picking = so.picking_ids
-        picking.move_ids.move_line_ids[0].quantity = 1
+        picking.move_ids.move_line_ids[0].qty_done = 1
         picking.button_validate()
+        action = picking.button_validate()
+        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
+        wizard.process()
 
         invoice01 = so._create_invoices()
         with Form(invoice01) as form:
@@ -219,7 +222,7 @@ class TestSaleStockInvoices(TestSaleCommon):
         invoice01.action_post()
 
         backorder = picking.backorder_ids
-        backorder.move_ids.move_line_ids.quantity = 1
+        backorder.move_ids.move_line_ids.qty_done = 1
         backorder.button_validate()
 
         IrActionsReport = self.env['ir.actions.report']
@@ -288,7 +291,7 @@ class TestSaleStockInvoices(TestSaleCommon):
 
         # Deliver 10 x LOT0001
         delivery01 = so.picking_ids
-        delivery01.move_ids.write({'quantity': 10, 'picked': True})
+        delivery01.move_ids.quantity_done = 10
         delivery01.button_validate()
         self.assertEqual(delivery01.move_line_ids.lot_id.name, 'LOT0001')
 
@@ -298,12 +301,11 @@ class TestSaleStockInvoices(TestSaleCommon):
         action = return_wizard.create_returns()
         pick_return = self.env['stock.picking'].browse(action['res_id'])
 
-        move_form = Form(pick_return.move_ids, view='stock.view_stock_move_operations')
-        with move_form.move_line_ids.edit(0) as line:
+        move_form = Form(pick_return.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot01
-            line.quantity = 10
+            line.qty_done = 10
         move_form.save()
-        pick_return.move_ids.picked = True
         pick_return.button_validate()
 
         # Return pick_return
@@ -314,12 +316,11 @@ class TestSaleStockInvoices(TestSaleCommon):
 
         # Deliver 3 x LOT0002
         delivery02.do_unreserve()
-        move_form = Form(delivery02.move_ids, view='stock.view_stock_move_operations')
-        with move_form.move_line_ids.new() as line:
+        move_form = Form(delivery02.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot02
-            line.quantity = 3
+            line.qty_done = 3
         move_form.save()
-        delivery02.move_ids.picked = True
         action = delivery02.button_validate()
         wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
         wizard.process()
@@ -340,15 +341,14 @@ class TestSaleStockInvoices(TestSaleCommon):
         # Deliver 5 x LOT0002 + 2 x LOT0003
         delivery03 = delivery02.backorder_ids
         delivery03.do_unreserve()
-        move_form = Form(delivery03.move_ids, view='stock.view_stock_move_operations')
-        with move_form.move_line_ids.new() as line:
+        move_form = Form(delivery03.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot02
-            line.quantity = 5
-        with move_form.move_line_ids.new() as line:
+            line.qty_done = 5
+        with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = lot03
-            line.quantity = 2
+            line.qty_done = 2
         move_form.save()
-        delivery03.move_ids.picked = True
         delivery03.button_validate()
 
         # Invoice 8 x P
@@ -382,9 +382,8 @@ class TestSaleStockInvoices(TestSaleCommon):
         so.action_confirm()
 
         picking = so.picking_ids
-        picking.move_ids.move_line_ids[0].quantity = 1
-        picking.move_ids.move_line_ids[1].quantity = 1
-        picking.move_ids.picked = True
+        picking.move_ids.move_line_ids[0].qty_done = 1
+        picking.move_ids.move_line_ids[1].qty_done = 1
         picking.button_validate()
 
         invoice01 = so._create_invoices()
@@ -397,11 +396,11 @@ class TestSaleStockInvoices(TestSaleCommon):
 
         # Refund the invoice
         refund_wizard = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice01.ids).create({
+            'refund_method': 'cancel',
             'journal_id': invoice01.journal_id.id,
         })
-        res = refund_wizard.refund_moves()
+        res = refund_wizard.reverse_moves()
         refund_invoice = self.env['account.move'].browse(res['res_id'])
-        refund_invoice.action_post()
 
         # recieve the returned product
         stock_return_picking_form = Form(self.env['stock.return.picking'].with_context(active_ids=picking.ids, active_id=picking.sorted().ids[0], active_model='stock.picking'))
@@ -409,15 +408,14 @@ class TestSaleStockInvoices(TestSaleCommon):
         res = return_wiz.create_returns()
         pick_return = self.env['stock.picking'].browse(res['res_id'])
 
-        move_form = Form(pick_return.move_ids, view='stock.view_stock_move_operations')
-        with move_form.move_line_ids.edit(0) as line:
+        move_form = Form(pick_return.move_ids, view='stock.view_stock_move_nosuggest_operations')
+        with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = self.usn01
-            line.quantity = 1
-        with move_form.move_line_ids.edit(1) as line:
+            line.qty_done = 1
+        with move_form.move_line_nosuggest_ids.new() as line:
             line.lot_id = self.usn02
-            line.quantity = 1
+            line.qty_done = 1
         move_form.save()
-        pick_return.move_ids.picked = True
         pick_return.button_validate()
 
         # reversed invoice
@@ -446,8 +444,7 @@ class TestSaleStockInvoices(TestSaleCommon):
         so.action_confirm()
 
         picking = so.picking_ids
-        picking.move_ids.move_line_ids[0].quantity = 1
-        picking.move_ids.picked = True
+        picking.move_ids.move_line_ids[0].qty_done = 1
         picking.button_validate()
 
         invoice01 = so._create_invoices()
@@ -459,9 +456,10 @@ class TestSaleStockInvoices(TestSaleCommon):
 
         # Refund the invoice with full refund and new draft invoice
         refund_wizard = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice01.ids).create({
+            'refund_method': 'modify',
             'journal_id': invoice01.journal_id.id,
         })
-        res = refund_wizard.modify_moves()
+        res = refund_wizard.reverse_moves()
         invoice02 = self.env['account.move'].browse(res['res_id'])
         invoice02.action_post()
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, tools
+from odoo import api, fields, models, tools
 
 
 class PosOrderReport(models.Model):
@@ -9,7 +9,6 @@ class PosOrderReport(models.Model):
     _description = "Point of Sale Orders Report"
     _auto = False
     _order = 'date desc'
-    _rec_name = 'order_id'
 
     date = fields.Datetime(string='Order Date', readonly=True)
     order_id = fields.Many2one('pos.order', string='Order', readonly=True)
@@ -33,6 +32,7 @@ class PosOrderReport(models.Model):
     product_categ_id = fields.Many2one('product.category', string='Product Category', readonly=True)
     invoiced = fields.Boolean(readonly=True)
     config_id = fields.Many2one('pos.config', string='Point of Sale', readonly=True)
+    pos_categ_id = fields.Many2one('pos.category', string='PoS Category', readonly=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', readonly=True)
     session_id = fields.Many2one('pos.session', string='Session', readonly=True)
     margin = fields.Float(string='Margin', readonly=True)
@@ -45,7 +45,7 @@ class PosOrderReport(models.Model):
                 s.date_order AS date,
                 SUM(l.qty) AS product_qty,
                 SUM(l.qty * l.price_unit / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END) AS price_sub_total,
-                SUM(ROUND((l.price_subtotal_incl) * (100 - l.discount) / 100 / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END, cu.decimal_places)) AS price_total,
+                SUM(ROUND((l.price_subtotal_incl) / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END, cu.decimal_places)) AS price_total,
                 SUM((l.qty * l.price_unit) * (l.discount / 100) / CASE COALESCE(s.currency_rate, 0) WHEN 0 THEN 1.0 ELSE s.currency_rate END) AS total_discount,
                 CASE
                     WHEN SUM(l.qty * u.factor) = 0 THEN NULL
@@ -62,6 +62,7 @@ class PosOrderReport(models.Model):
                 pt.categ_id AS product_categ_id,
                 p.product_tmpl_id,
                 ps.config_id,
+                pt.pos_categ_id,
                 s.pricelist_id,
                 s.session_id,
                 s.account_move IS NOT NULL AS invoiced,
@@ -87,7 +88,7 @@ class PosOrderReport(models.Model):
                 s.user_id, s.company_id, s.sale_journal,
                 s.pricelist_id, s.account_move, s.create_date, s.session_id,
                 l.product_id,
-                pt.categ_id,
+                pt.categ_id, pt.pos_categ_id,
                 p.product_tmpl_id,
                 ps.config_id
         """

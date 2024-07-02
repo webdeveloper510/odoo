@@ -1,7 +1,10 @@
-/** @odoo-module **/
+odoo.define('website_hr_recruitment.form', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import FormEditorRegistry from "@website/js/form_editor_registry";
+var core = require('web.core');
+var FormEditorRegistry = require('website.form_editor_registry');
+
+const _lt = core._lt;
 
 FormEditorRegistry.add('apply_job', {
     formFields: [{
@@ -9,27 +12,27 @@ FormEditorRegistry.add('apply_job', {
         modelRequired: true,
         name: 'partner_name',
         fillWith: 'name',
-        string: _t('Your Name'),
+        string: _lt('Your Name'),
     }, {
         type: 'email',
         required: true,
         fillWith: 'email',
         name: 'email_from',
-        string: _t('Your Email'),
+        string: _lt('Your Email'),
     }, {
         type: 'char',
         required: true,
         fillWith: 'phone',
         name: 'partner_mobile',
-        string: _t('Phone Number'),
+        string: _lt('Phone Number'),
     }, {
         type: 'char',
         name: 'linkedin_profile',
-        string: _t('LinkedIn Profile'),
+        string: _lt('LinkedIn Profile'),
     }, {
         type: 'text',
         name: 'description',
-        string: _t('Short Introduction'),
+        string: _lt('Short Introduction'),
     }, {
         type: 'binary',
         custom: true,
@@ -39,12 +42,14 @@ FormEditorRegistry.add('apply_job', {
         name: 'job_id',
         type: 'many2one',
         relation: 'hr.job',
-        string: _t('Applied Job'),
+        string: _lt('Applied Job'),
     }, {
         name: 'department_id',
         type: 'many2one',
         relation: 'hr.department',
-        string: _t('Department'),
+        string: _lt('Department'),
     }],
     successPage: '/job-thank-you',
+});
+
 });

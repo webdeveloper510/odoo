@@ -2,13 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.base.tests.test_ir_actions import TestServerActionsBase
-from odoo.addons.mail.tests.common import MailCommon
+from odoo.addons.test_mail.tests.common import TestMailCommon
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 
 @tagged('ir_actions')
-class TestServerActionsEmail(MailCommon, TestServerActionsBase):
+class TestServerActionsEmail(TestMailCommon, TestServerActionsBase):
 
     def setUp(self):
         super(TestServerActionsEmail, self).setUp()
@@ -78,9 +78,6 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         with self.assertSinglePostNotifications(
                 [{'partner': self.test_partner, 'type': 'email', 'status': 'ready'}],
                 message_info={'content': 'Hello %s' % self.test_partner.name,
-                              'fields_values': {
-                                'author_id': self.env.user.partner_id,
-                              },
                               'message_type': 'notification',
                               'subtype': 'mail.mt_comment',
                              }
@@ -113,6 +110,22 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
             'activity_user_type': 'specific',
             'activity_type_id': self.env.ref('mail.mail_activity_data_meeting').id,
             'activity_summary': 'TestNew',
+        })
+        before_count = self.env['mail.activity'].search_count([])
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: create next activity action correctly finished should return False')
+        self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
+        self.assertEqual(self.env['mail.activity'].search_count([('summary', '=', 'TestNew')]), 1)
+
+    def test_action_next_activity_due_date(self):
+        """ Make sure we don't crash if a due date is set without a type. """
+        self.action.write({
+            'state': 'next_activity',
+            'activity_user_type': 'specific',
+            'activity_type_id': self.env.ref('mail.mail_activity_data_meeting').id,
+            'activity_summary': 'TestNew',
+            'activity_date_deadline_range': 1,
+            'activity_date_deadline_range_type': False,
         })
         before_count = self.env['mail.activity'].search_count([])
         run_res = self.action.with_context(self.context).run()

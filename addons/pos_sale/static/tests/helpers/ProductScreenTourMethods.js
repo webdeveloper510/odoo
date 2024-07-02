@@ -1,63 +1,76 @@
-/** @odoo-module */
+odoo.define('pos_sale.tour.ProductScreenTourMethods', function (require) {
+    'use strict';
 
-export function clickQuotationButton() {
-    return [
-        {
-            content: "click quotation button",
-            trigger: ".o_sale_order_button",
-        },
-    ];
-}
-export function selectFirstOrder() {
-    return [
-        {
-            content: `select order`,
-            trigger: `.order-row .col.name:first`,
-        },
-        {
-            content: `click on select the order`,
-            trigger: `.selection-item:contains('Settle the order')`,
-        },
-    ];
-}
-export function selectNthOrder(n) {
-    return [
-        {
-            content: `select order`,
-            trigger: `.order-list .order-row:nth-child(${n})`,
-        },
-        {
-            content: `click on select the order`,
-            trigger: `.selection-item:contains('Settle the order')`,
-        },
-    ];
-}
-export function downPaymentFirstOrder() {
-    return [
-        {
-            content: `select order`,
-            trigger: `.order-row .col.name:first`,
-        },
-        {
-            content: `click on select the order`,
-            trigger: `.selection-item:contains('Apply a down payment')`,
-        },
-        {
-            content: `click on +10 button`,
-            trigger: `div.numpad.row button.col:contains("+10")`,
-        },
-        {
-            content: `click on ok button`,
-            trigger: `.button.confirm`,
-        },
-    ];
-}
+    const { createTourMethods } = require('point_of_sale.tour.utils');
+    const { Do, Check, Execute } = require('point_of_sale.tour.ProductScreenTourMethods');
 
-export function checkCustomerNotes(note) {
-        return [
-            {
-                content: `check customer notes`,
-                trigger: `.customer-note:contains(${note})`,
-            }
-        ];
-}
+    class DoExt extends Do {
+        clickQuotationButton() {
+            return [
+                {
+                    content: 'click quotation button',
+                    trigger: '.o_sale_order_button',
+                }
+            ];
+        }
+
+        selectFirstOrder() {
+            return [
+                {
+                    content: `select order`,
+                    trigger: `.order-row .col.name:first`,
+                },
+                {
+                    content: `click on select the order`,
+                    trigger: `.selection-item:contains('Settle the order')`,
+                }
+            ];
+        }
+
+        selectNthOrder(n) {
+            return [
+                {
+                    content: `select order`,
+                    trigger: `.order-list .order-row:nth-child(${n})`,
+                },
+                {
+                    content: `click on select the order`,
+                    trigger: `.selection-item:contains('Settle the order')`,
+                }
+            ];
+        }
+
+        downPaymentFirstOrder() {
+            return [
+                {
+                    content: `select order`,
+                    trigger: `.order-row .col.name:first`,
+                },
+                {
+                    content: `click on select the order`,
+                    trigger: `.selection-item:contains('Apply a down payment')`,
+                },
+                {
+                    content: `click on +10 button`,
+                    trigger: `.mode-button.add:contains('+10')`,
+                },
+                {
+                    content: `click on ok button`,
+                    trigger: `.button.confirm`,
+                }
+            ];
+        }
+    }
+
+    class CheckExt extends Check{
+        checkCustomerNotes(note) {
+            return [
+                {
+                    content: `check customer notes`,
+                    trigger: `.orderline-note:contains(${note})`,
+                }
+            ];
+        }
+    }
+    return createTourMethods('ProductScreen', DoExt, CheckExt, Execute);
+});

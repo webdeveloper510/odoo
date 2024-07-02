@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import babel.dates
 import werkzeug
 
-from odoo import http, fields, tools, models
+from odoo import http, fields, tools
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.portal.controllers.portal import pager as portal_pager
 from odoo.exceptions import AccessError
-from odoo.http import request
+from odoo.http import request, Response
 from odoo.osv import expression
-from odoo.tools.misc import get_lang
+from odoo.tools import consteq
 
 
 class PortalMailGroup(http.Controller):
@@ -25,24 +24,22 @@ class PortalMailGroup(http.Controller):
     def _get_archives(self, group_id):
         """Return the different date range and message count for the group messages."""
         domain = expression.AND([self._get_website_domain(), [('mail_group_id', '=', group_id)]])
-        results = request.env['mail.group.message']._read_group(
+        results = request.env['mail.group.message']._read_group_raw(
             domain,
-            groupby=['create_date:month'],
-            aggregates=['__count'],
-        )
+            ['subject', 'create_date'],
+            groupby=['create_date'], orderby='create_date')
 
         date_groups = []
 
-        locale = get_lang(request.env).code
-        fmt = models.READ_GROUP_DISPLAY_FORMAT['month']
-        interval = models.READ_GROUP_TIME_GRANULARITY['month']
-        for start, count in results:
-            label = babel.dates.format_datetime(start, format=fmt, locale=locale)
+        for result in results:
+            (dates_range, label) = result['create_date']
+            start, end = dates_range.split('/')
+
             date_groups.append({
                 'date': label,
-                'date_begin': fields.Date.to_string(start),
-                'date_end': fields.Date.to_string(start + interval),
-                'messages_count': count,
+                'date_begin': fields.Date.to_string(fields.Date.to_date(start)),
+                'date_end': fields.Date.to_string(fields.Date.to_date(end)),
+                'messages_count': result['create_date_count'],
             })
 
         thread_domain = expression.AND([domain, [('group_message_parent_id', '=', False)]])
@@ -210,6 +207,31 @@ class PortalMailGroup(http.Controller):
     # ------------------------------------------------------------
     # SUBSCRIPTION
     # ------------------------------------------------------------
+
+    # csrf is disabled here because it will be called by the MUA with unpredictable session at that time
+    @http.route('/group/<int:group_id>/unsubscribe_oneclick', website=True, type='http', auth='public',
+           methods=['POST'], csrf=False)
+    def group_unsubscribe_oneclick(self, group_id, token, email):
+        """ Unsubscribe a given user from a given group. One-click unsubscribe
+        allow mail user agent to propose a one click button to the user to
+        unsubscribe as defined in rfc8058. Only POST method is allowed preventing
+        the risk that anti-spam trigger unwanted unsubscribe (scenario explained
+        in the same rfc).
+
+        :param int group_id: group ID from which user wants to unsubscribe;
+        :param str token: optional access token ensuring security;
+        :param email: email to unsubscribe;
+        """
+        group_sudo = request.env['mail.group'].sudo().browse(group_id).exists()
+        # new route parameters
+        if group_sudo and token and email:
+            correct_token = group_sudo._generate_email_access_token(email)
+            if not consteq(correct_token, token):
+                raise werkzeug.exceptions.NotFound()
+            group_sudo._leave_group(email)
+        else:
+            raise werkzeug.exceptions.NotFound()
+        return Response(status=200)
 
     @http.route('/group/subscribe', type='json', auth='public', website=True)
     def group_subscribe(self, group_id=0, email=None, token=None, **kw):

@@ -7,7 +7,7 @@ from odoo.tools.misc import format_date, formatLang
 class AccountPayment(models.Model):
     _name = "account.payment"
     _inherits = {'account.move': 'move_id'}
-    _inherit = ['mail.thread.main.attachment', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Payments"
     _order = "date desc, name desc"
     _check_company_auto = True
@@ -31,14 +31,12 @@ class AccountPayment(models.Model):
         readonly=False, store=True, tracking=True,
         compute='_compute_partner_bank_id',
         domain="[('id', 'in', available_partner_bank_ids)]",
-        check_company=True,
-        ondelete='restrict',
-    )
+        check_company=True)
     is_internal_transfer = fields.Boolean(string="Internal Transfer",
         readonly=False, store=True,
         tracking=True,
         compute="_compute_is_internal_transfer")
-    qr_code = fields.Html(string="QR Code URL",
+    qr_code = fields.Char(string="QR Code URL",
         compute="_compute_qr_code")
     paired_internal_transfer_payment_id = fields.Many2one('account.payment',
         index='btree_not_null',
@@ -105,12 +103,12 @@ class AccountPayment(models.Model):
         string='Destination Account',
         store=True, readonly=False,
         compute='_compute_destination_account_id',
-        domain="[('account_type', 'in', ('asset_receivable', 'liability_payable'))]",
+        domain="[('account_type', 'in', ('asset_receivable', 'liability_payable')), ('company_id', '=', company_id)]",
         check_company=True)
     destination_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Destination Journal',
-        domain="[('type', 'in', ('bank','cash')), ('id', '!=', journal_id)]",
+        domain="[('type', 'in', ('bank','cash')), ('company_id', '=', company_id), ('id', '!=', journal_id)]",
         check_company=True,
     )
 
@@ -170,10 +168,6 @@ class AccountPayment(models.Model):
     # HELPERS
     # -------------------------------------------------------------------------
 
-    @api.model
-    def _get_valid_payment_account_types(self):
-        return ['asset_receivable', 'liability_payable']
-
     def _seek_for_lines(self):
         ''' Helper used to dispatch the journal items between:
         - The lines using the temporary liquidity account.
@@ -183,35 +177,26 @@ class AccountPayment(models.Model):
         '''
         self.ensure_one()
 
-        # liquidity_lines, counterpart_lines, writeoff_lines
-        lines = [self.env['account.move.line'] for _dummy in range(3)]
-        valid_account_types = self._get_valid_payment_account_types()
+        liquidity_lines = self.env['account.move.line']
+        counterpart_lines = self.env['account.move.line']
+        writeoff_lines = self.env['account.move.line']
+
         for line in self.move_id.line_ids:
             if line.account_id in self._get_valid_liquidity_accounts():
-                lines[0] += line  # liquidity_lines
-            elif line.account_id.account_type in valid_account_types or line.account_id == line.company_id.transfer_account_id:
-                lines[1] += line  # counterpart_lines
+                liquidity_lines += line
+            elif line.account_id.account_type in ('asset_receivable', 'liability_payable') or line.account_id == self.company_id.transfer_account_id:
+                counterpart_lines += line
             else:
-                lines[2] += line  # writeoff_lines
+                writeoff_lines += line
 
-        # In some case, there is no liquidity or counterpart line (after changing an outstanding account on the journal for example)
-        # In that case, and if there is one writeoff line, we take this line and set it as liquidity/counterpart line
-        if len(lines[2]) == 1:
-            for i in (0, 1):
-                if not lines[i]:
-                    lines[i] = lines[2]
-                    lines[2] -= lines[2]
-
-        return lines
+        return liquidity_lines, counterpart_lines, writeoff_lines
 
     def _get_valid_liquidity_accounts(self):
-        journal_comp = self.journal_id.company_id
-        accessible_branches = journal_comp.with_company(journal_comp)._accessible_branches()
         return (
             self.journal_id.default_account_id |
             self.payment_method_line_id.payment_account_id |
-            accessible_branches.account_journal_payment_debit_account_id |
-            accessible_branches.account_journal_payment_credit_account_id |
+            self.journal_id.company_id.account_journal_payment_debit_account_id |
+            self.journal_id.company_id.account_journal_payment_credit_account_id |
             self.journal_id.inbound_payment_method_line_ids.payment_account_id |
             self.journal_id.outbound_payment_method_line_ids.payment_account_id
         )
@@ -283,13 +268,12 @@ class AccountPayment(models.Model):
         else:
             return self._get_aml_default_display_name_list()
 
-    def _prepare_move_line_default_vals(self, write_off_line_vals=None, force_balance=None):
+    def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         ''' Prepare the dictionary to create the default account.move.lines for the current payment.
         :param write_off_line_vals: Optional list of dictionaries to create a write-off account.move.line easily containing:
             * amount:       The amount to be added to the counterpart amount.
             * name:         The label to set on the line.
             * account_id:   The account on which create the write-off.
-        :param force_balance: Optional balance.
         :return: A list of python dictionary to be passed to the account.move.line's 'create' method.
         '''
         self.ensure_one()
@@ -314,16 +298,12 @@ class AccountPayment(models.Model):
         else:
             liquidity_amount_currency = 0.0
 
-        if not write_off_line_vals and force_balance is not None:
-            sign = 1 if liquidity_amount_currency > 0 else -1
-            liquidity_balance = sign * abs(force_balance)
-        else:
-            liquidity_balance = self.currency_id._convert(
-                liquidity_amount_currency,
-                self.company_id.currency_id,
-                self.company_id,
-                self.date,
-            )
+        liquidity_balance = self.currency_id._convert(
+            liquidity_amount_currency,
+            self.company_id.currency_id,
+            self.company_id,
+            self.date,
+        )
         counterpart_amount_currency = -liquidity_amount_currency - write_off_amount_currency
         counterpart_balance = -liquidity_balance - write_off_balance
         currency_id = self.currency_id.id
@@ -476,16 +456,17 @@ class AccountPayment(models.Model):
         Get all journals having at least one payment method for inbound/outbound depending on the payment_type.
         """
         journals = self.env['account.journal'].search([
-            '|',
-            ('company_id', 'parent_of', self.env.company.id),
-            ('company_id', 'child_of', self.env.company.id),
-            ('type', 'in', ('bank', 'cash')),
+            ('company_id', 'in', self.company_id.ids), ('type', 'in', ('bank', 'cash'))
         ])
         for pay in self:
             if pay.payment_type == 'inbound':
-                pay.available_journal_ids = journals.filtered('inbound_payment_method_line_ids')
+                pay.available_journal_ids = journals.filtered(
+                    lambda j: j.company_id == pay.company_id and j.inbound_payment_method_line_ids.ids != []
+                )
             else:
-                pay.available_journal_ids = journals.filtered('outbound_payment_method_line_ids')
+                pay.available_journal_ids = journals.filtered(
+                    lambda j: j.company_id == pay.company_id and j.outbound_payment_method_line_ids.ids != []
+                )
 
     def _get_payment_method_codes_to_exclude(self):
         # can be overriden to exclude payment methods based on the payment characteristics
@@ -531,7 +512,7 @@ class AccountPayment(models.Model):
                     pay.destination_account_id = pay.partner_id.with_company(pay.company_id).property_account_receivable_id
                 else:
                     pay.destination_account_id = self.env['account.account'].search([
-                        *self.env['account.account']._check_company_domain(pay.company_id),
+                        ('company_id', '=', pay.company_id.id),
                         ('account_type', '=', 'asset_receivable'),
                         ('deprecated', '=', False),
                     ], limit=1)
@@ -541,7 +522,7 @@ class AccountPayment(models.Model):
                     pay.destination_account_id = pay.partner_id.with_company(pay.company_id).property_account_payable_id
                 else:
                     pay.destination_account_id = self.env['account.account'].search([
-                        *self.env['account.account']._check_company_domain(pay.company_id),
+                        ('company_id', '=', pay.company_id.id),
                         ('account_type', '=', 'liability_payable'),
                         ('deprecated', '=', False),
                     ], limit=1)
@@ -552,7 +533,6 @@ class AccountPayment(models.Model):
         for pay in self:
             if pay.state in ('draft', 'posted') \
                 and pay.partner_bank_id \
-                and pay.partner_bank_id.allow_out_payment \
                 and pay.payment_method_line_id.code == 'manual' \
                 and pay.payment_type == 'outbound' \
                 and pay.currency_id:
@@ -697,9 +677,8 @@ class AccountPayment(models.Model):
     # -------------------------------------------------------------------------
 
     def new(self, values=None, origin=None, ref=None):
-        payment = super().new(values, origin, ref)
+        payment = super(AccountPayment, self.with_context(is_payment=True)).new(values, origin, ref)
         if not any(values.values()) and not payment.journal_id and not payment.default_get(['journal_id']):  # might not be computed because declared by inheritance
-            payment.move_id.payment_id = payment
             payment.move_id._compute_journal_id()
         return payment
 
@@ -707,26 +686,22 @@ class AccountPayment(models.Model):
     def create(self, vals_list):
         # OVERRIDE
         write_off_line_vals_list = []
-        force_balance_vals_list = []
 
         for vals in vals_list:
 
             # Hack to add a custom write-off line.
             write_off_line_vals_list.append(vals.pop('write_off_line_vals', None))
 
-            # Hack to force a custom balance.
-            force_balance_vals_list.append(vals.pop('force_balance', None))
-
             # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
-            vals['journal_id'] = vals.get('journal_id') or self.move_id.with_context(is_payment=True)._search_default_journal().id
 
-        payments = super().create([{
-            'name': False,
-            **vals,
-        } for vals in vals_list])
+        payments = super(AccountPayment, self.with_context(is_payment=True))\
+            .create([{'name': '/', **vals} for vals in vals_list])\
+            .with_context(is_payment=False)
 
         for i, pay in enumerate(payments):
+            write_off_line_vals = write_off_line_vals_list[i]
+
             # Write payment_id on the journal entry plus the fields being stored in both models but having the same
             # name, e.g. partner_bank_id. The ORM is currently not able to perform such synchronization and make things
             # more difficult by creating related fields on the fly to handle the _inherits.
@@ -738,13 +713,7 @@ class AccountPayment(models.Model):
                     to_write[k] = v
 
             if 'line_ids' not in vals_list[i]:
-                to_write['line_ids'] = [
-                    Command.create(line_vals)
-                    for line_vals in pay._prepare_move_line_default_vals(
-                        write_off_line_vals=write_off_line_vals_list[i],
-                        force_balance=force_balance_vals_list[i],
-                    )
-                ]
+                to_write['line_ids'] = [(0, 0, line_vals) for line_vals in pay._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)]
 
             pay.move_id.write(to_write)
             self.env.add_to_compute(self.env['account.move']._fields['name'], pay.move_id)
@@ -767,9 +736,8 @@ class AccountPayment(models.Model):
         return res
 
     @api.depends('move_id.name')
-    def _compute_display_name(self):
-        for payment in self:
-            payment.display_name = payment.move_id.name if payment.move_id.name != '/' else _('Draft Payment')
+    def name_get(self):
+        return [(payment.id, payment.move_id.name != '/' and payment.move_id.name or _('Draft Payment')) for payment in self]
 
     # -------------------------------------------------------------------------
     # SYNCHRONIZATION account.payment <-> account.move
@@ -934,27 +902,21 @@ class AccountPayment(models.Model):
             })
             paired_payment.move_id._post(soft=False)
             payment.paired_internal_transfer_payment_id = paired_payment
-            body = _("This payment has been created from:") + payment._get_html_link()
+
+            body = _(
+                "This payment has been created from %s",
+                payment._get_html_link(),
+            )
             paired_payment.message_post(body=body)
-            body = _("A second payment has been created:") + paired_payment._get_html_link()
+            body = _(
+                "A second payment has been created: %s",
+                paired_payment._get_html_link(),
+            )
             payment.message_post(body=body)
 
             lines = (payment.move_id.line_ids + paired_payment.move_id.line_ids).filtered(
                 lambda l: l.account_id == payment.destination_account_id and not l.reconciled)
             lines.reconcile()
-
-    def _get_payment_receipt_report_values(self):
-        """ Get the extra values when rendering the Payment Receipt PDF report.
-
-        :return: A dictionary:
-            * display_invoices: Display the invoices table.
-            * display_payment_method: Display the payment method value.
-        """
-        self.ensure_one()
-        return {
-            'display_invoices': True,
-            'display_payment_method': True,
-        }
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
@@ -968,11 +930,6 @@ class AccountPayment(models.Model):
 
     def action_post(self):
         ''' draft -> posted '''
-        # Do not allow to post if the account is required but not trusted
-        for payment in self:
-            if payment.require_partner_bank_account and not payment.partner_bank_id.allow_out_payment:
-                raise UserError(_('To record payments with %s, the recipient bank account must be manually validated. You should go on the partner bank account in order to validate it.', self.payment_method_line_id.name))
-
         self.move_id._post(soft=False)
 
         self.filtered(
@@ -982,9 +939,6 @@ class AccountPayment(models.Model):
     def action_cancel(self):
         ''' draft -> cancelled '''
         self.move_id.button_cancel()
-
-    def button_request_cancel(self):
-        self.move_id.button_request_cancel()
 
     def action_draft(self):
         ''' posted -> draft '''

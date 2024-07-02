@@ -4,6 +4,8 @@
 from unittest.mock import patch
 
 import odoo.tests
+from odoo.addons.iap.tools.iap_tools import iap_jsonrpc_mocked
+from odoo.tools import mute_logger
 
 class TestConfiguratorCommon(odoo.tests.HttpCase):
 
@@ -39,8 +41,8 @@ class TestConfiguratorCommon(odoo.tests.HttpCase):
                 return []
             elif '/api/website/2/configurator/custom_resources/' in endpoint:
                 return {'images': {}}
-            elif '/api/olg/1/generate_placeholder' in endpoint:
-                return {"a non existing placeholder": "😠", 'Catchy Headline': 'Welcome to XXXX - Your Super test'}
+
+            iap_jsonrpc_mocked()
 
         iap_patch = patch('odoo.addons.iap.tools.iap_tools.iap_jsonrpc', iap_jsonrpc_mocked_configurator)
         self.startPatcher(iap_patch)

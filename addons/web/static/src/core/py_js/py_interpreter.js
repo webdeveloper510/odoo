@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { BUILTINS, EvaluationError, execOnIterable } from "./py_builtin";
+import { BUILTINS } from "./py_builtin";
 import {
     NotSupportedError,
     PyDate,
@@ -19,6 +19,8 @@ import { parseArgs } from "./py_parser";
 /**
  * @typedef { import("./py_parser").AST } AST
  */
+
+export class EvaluationError extends Error {}
 
 // -----------------------------------------------------------------------------
 // Constants and helpers
@@ -134,9 +136,6 @@ function isIn(left, right) {
     if (typeof right === "string" && typeof left === "string") {
         return right.includes(left);
     }
-    if (typeof right === "object") {
-        return left in right;
-    }
     return false;
 }
 
@@ -176,9 +175,6 @@ function applyBinaryOp(ast, context) {
                 } else {
                     throw NotSupportedError();
                 }
-            }
-            if (left instanceof Array && right instanceof Array) {
-                return [...left, ...right];
             }
 
             return left + right;
@@ -260,74 +256,6 @@ const DICT = {
     },
 };
 
-const STRING = {
-    lower() {
-        return this.toLowerCase();
-    },
-    upper() {
-        return this.toUpperCase();
-    },
-};
-
-function applyFunc(key, func, set, ...args) {
-    // we always receive at least one argument: kwargs (return fnValue(...args, kwargs); in FunctionCall case)
-    if (args.length === 1) {
-        return new Set(set);
-    }
-    if (args.length > 2) {
-        throw new EvaluationError(
-            `${key}: py_js supports at most 1 argument, got (${args.length - 1})`
-        );
-    }
-    return execOnIterable(args[0], func);
-}
-
-const SET = {
-    intersection(...args) {
-        return applyFunc(
-            "intersection",
-            (iterable) => {
-                const intersection = new Set();
-                for (const i of iterable) {
-                    if (this.has(i)) {
-                        intersection.add(i);
-                    }
-                }
-                return intersection;
-            },
-            this,
-            ...args
-        );
-    },
-    difference(...args) {
-        return applyFunc(
-            "difference",
-            (iterable) => {
-                iterable = new Set(iterable);
-                const difference = new Set();
-                for (const e of this) {
-                    if (!iterable.has(e)) {
-                        difference.add(e);
-                    }
-                }
-                return difference;
-            },
-            this,
-            ...args
-        );
-    },
-    union(...args) {
-        return applyFunc(
-            "union",
-            (iterable) => {
-                return new Set([...this, ...iterable]);
-            },
-            this,
-            ...args
-        );
-    },
-};
-
 // -----------------------------------------------------------------------------
 // Evaluate function
 // -----------------------------------------------------------------------------
@@ -343,7 +271,6 @@ function methods(_class) {
 
 const allowedFns = new Set([
     BUILTINS.time.strftime,
-    BUILTINS.set,
     BUILTINS.bool,
     BUILTINS.context_today,
     BUILTINS.datetime.datetime.now,
@@ -351,9 +278,7 @@ const allowedFns = new Set([
     BUILTINS.datetime.date.today,
     ...methods(BUILTINS.relativedelta),
     ...Object.values(BUILTINS.datetime).flatMap((obj) => methods(obj)),
-    ...Object.values(SET),
     ...Object.values(DICT),
-    ...Object.values(STRING),
 ]);
 
 const unboundFn = Symbol("unbound function");
@@ -367,16 +292,14 @@ export function evaluate(ast, context = {}) {
     const dicts = new Set();
     let pyContext;
     const evalContext = Object.create(context);
-    if (!evalContext.context) {
-        Object.defineProperty(evalContext, "context", {
-            get() {
-                if (!pyContext) {
-                    pyContext = toPyDict(context);
-                }
-                return pyContext;
-            },
-        });
-    }
+    Object.defineProperty(evalContext, "context", {
+        get() {
+            if (!pyContext) {
+                pyContext = toPyDict(context);
+            }
+            return pyContext;
+        },
+    });
 
     function _innerEvaluate(ast) {
         switch (ast.type) {
@@ -449,18 +372,11 @@ export function evaluate(ast, context = {}) {
                 }
             }
             case 15 /* ObjLookup */: {
-                let left = _evaluate(ast.obj);
+                const left = _evaluate(ast.obj);
                 let result;
                 if (dicts.has(left) || Object.isPrototypeOf.call(PY_DICT, left)) {
                     // this is a dictionary => need to apply dict methods
                     result = DICT[ast.key];
-                } else if (typeof left === "string") {
-                    result = STRING[ast.key];
-                } else if (left instanceof Set) {
-                    result = SET[ast.key];
-                } else if (ast.key == "get" && typeof left === "object") {
-                    result = DICT[ast.key];
-                    left = toPyDict(left);
                 } else {
                     result = left[ast.key];
                 }

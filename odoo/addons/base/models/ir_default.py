@@ -33,17 +33,17 @@ class IrDefault(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        self.env.registry.clear_cache()
+        self.clear_caches()
         return super(IrDefault, self).create(vals_list)
 
     def write(self, vals):
         if self:
-            self.env.registry.clear_cache()
+            self.clear_caches()
         return super(IrDefault, self).write(vals)
 
     def unlink(self):
         if self:
-            self.env.registry.clear_cache()
+            self.clear_caches()
         return super(IrDefault, self).unlink()
 
     @api.model
@@ -76,9 +76,9 @@ class IrDefault(models.Model):
             parsed = field.convert_to_cache(value, model)
             json_value = json.dumps(value, ensure_ascii=False)
         except KeyError:
-            raise ValidationError(_("Invalid field %s.%s", model_name, field_name))
+            raise ValidationError(_("Invalid field %s.%s") % (model_name, field_name))
         except Exception:
-            raise ValidationError(_("Invalid value for %s.%s: %s", model_name, field_name, value))
+            raise ValidationError(_("Invalid value for %s.%s: %s") % (model_name, field_name, value))
         if field.type == 'integer' and not (-2**31 < parsed < 2**31-1):
             raise ValidationError(_("Invalid value for %s.%s: %s is out of bounds (integers should be between -2,147,483,648 and 2,147,483,647)", model_name, field_name, value))
 
@@ -105,7 +105,7 @@ class IrDefault(models.Model):
         return True
 
     @api.model
-    def _get(self, model_name, field_name, user_id=False, company_id=False, condition=False):
+    def get(self, model_name, field_name, user_id=False, company_id=False, condition=False):
         """ Return the default value for the given field, user and company, or
             ``None`` if no default is available.
 
@@ -139,7 +139,7 @@ class IrDefault(models.Model):
     # Note about ormcache invalidation: it is not needed when deleting a field,
     # a user, or a company, as the corresponding defaults will no longer be
     # requested. It must only be done when a user's company is modified.
-    def _get_model_defaults(self, model_name, condition=False):
+    def get_model_defaults(self, model_name, condition=False):
         """ Return the available default values for the given model (for the
             current user), as a dict mapping field names to values.
         """

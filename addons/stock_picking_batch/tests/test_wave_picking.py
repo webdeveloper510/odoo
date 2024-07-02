@@ -67,7 +67,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': cls.customer_location.id,
             'picking_type_id': cls.picking_type_out,
             'company_id': cls.env.company.id,
-            'state': 'draft',
         })
 
         cls.env['stock.move'].create({
@@ -95,7 +94,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': cls.customer_location.id,
             'picking_type_id': cls.picking_type_out,
             'company_id': cls.env.company.id,
-            'state': 'draft',
         })
 
         cls.env['stock.move'].create({
@@ -113,7 +111,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': cls.customer_location.id,
             'picking_type_id': cls.picking_type_out,
             'company_id': cls.env.company.id,
-            'state': 'draft',
         })
 
         cls.env['stock.move'].create({
@@ -131,7 +128,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': cls.customer_location.id,
             'picking_type_id': cls.picking_type_internal,
             'company_id': cls.env.company.id,
-            'state': 'draft',
         })
 
         cls.env['stock.move'].create({
@@ -338,10 +334,11 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': self.picking_type_out,
             'company_id': self.env.company.id,
+            'immediate_transfer': True,
         })
         ml1 = self.env['stock.move.line'].create({
             'product_id': self.productA.id,
-            'quantity': 5,
+            'qty_done': 5,
             'product_uom_id': self.productA.uom_id.id,
             'picking_id': picking.id,
             'location_id': self.stock_location.id,
@@ -349,7 +346,7 @@ class TestBatchPicking(TransactionCase):
         })
         self.env['stock.move.line'].create({
             'product_id': self.productA.id,
-            'quantity': 5,
+            'qty_done': 5,
             'product_uom_id': self.productA.uom_id.id,
             'picking_id': picking.id,
             'location_id': self.stock_location.id,
@@ -358,12 +355,13 @@ class TestBatchPicking(TransactionCase):
 
         ml2 = self.env['stock.move.line'].create({
             'product_id': self.productA.id,
-            'quantity': 5,
+            'qty_done': 5,
             'product_uom_id': self.productA.uom_id.id,
             'picking_id': picking.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
         })
+        picking.action_confirm()
 
         ml1._add_to_wave()
         wave = self.env['stock.picking.batch'].search([
@@ -371,11 +369,9 @@ class TestBatchPicking(TransactionCase):
         ])
         self.assertFalse(picking.batch_id)
         self.assertEqual(ml1.picking_id.batch_id.id, wave.id)
-        self.assertEqual(ml1.picking_id.move_ids.quantity, 5)
         self.assertEqual(ml1.picking_id.move_ids.product_uom_qty, 5)
         self.assertEqual(ml2.picking_id.id, picking.id)
-        self.assertEqual(ml2.picking_id.move_ids.quantity, 10)
-        self.assertEqual(ml2.picking_id.move_ids.product_uom_qty, 0)
+        self.assertEqual(ml2.picking_id.move_ids.product_uom_qty, 10)
 
     def test_wave_trigger_errors(self):
         with self.assertRaises(UserError):
@@ -417,7 +413,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.customer_location.id,
             'picking_type_id': self.picking_type_out,
             'company_id': self.env.company.id,
-            'state': 'draft',
         })
         self.env['stock.move'].create({
             'name': 'Test Wave',
@@ -434,8 +429,7 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(len(picking_1.move_line_ids), 2)
         move_line_to_wave = picking_1.move_line_ids[0]
         move_line_to_wave._add_to_wave()
-        picking_1.move_line_ids.quantity = 5
-        picking_1.move_ids.picked = True
+        picking_1.move_line_ids.qty_done = 5
         picking_1._action_done()
 
         new_move = self.env['stock.move'].create({
@@ -472,7 +466,6 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.stock_location.id,
             'picking_type_id': self.picking_type_in,
             'company_id': self.env.company.id,
-            'state': 'draft',
         })
         self.env['stock.move'].create({
             'name': self.productA.name,
@@ -493,8 +486,7 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': warehouse.wh_input_stock_loc_id.id,
         })
         picking.action_confirm()
-        picking.move_ids.move_line_ids.write({'quantity': 1})
-        picking.move_ids.picked = True
+        picking.move_ids.move_line_ids.write({'qty_done': 1})
         res_dict = picking.button_validate()
         self.env[res_dict['res_model']].with_context(res_dict['context']).process()
 

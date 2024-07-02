@@ -19,6 +19,7 @@ class TestEventBoothSaleWData(TestEventBoothSaleCommon, TestSalesCommon):
 
         cls.event_0 = cls.env['event.event'].create({
             'name': 'TestEvent',
+            'auto_confirm': True,
             'date_begin': fields.Datetime.to_string(datetime.today() + timedelta(days=1)),
             'date_end': fields.Datetime.to_string(datetime.today() + timedelta(days=15)),
             'date_tz': 'Europe/Brussels',
@@ -111,6 +112,9 @@ class TestEventBoothSale(TestEventBoothSaleWData):
                 booth.contact_name, self.event_customer.name,
                 "Booth contact name should be the same as sale order customer name.")
             self.assertEqual(
+                booth.contact_mobile, self.event_customer.mobile,
+                "Booth contact mobile should be the same as sale order customer mobile.")
+            self.assertEqual(
                 booth.contact_phone, self.event_customer.phone,
                 "Booth contact phone should be the same as sale order customer phone.")
             self.assertEqual(
@@ -133,6 +137,10 @@ class TestEventBoothSale(TestEventBoothSaleWData):
             ]
         })
 
+        # Confirm the SO.
+        sale_order.action_confirm()
+        self.assertEqual(sale_order.event_booth_count, 2,
+                         "Event Booth Count should be equal to 2.")
         self.assertEqual(sale_order.order_line.event_booth_registration_ids.event_booth_id.ids,
                          (self.booth_1 + self.booth_2).ids,
                          "Booths not correctly linked with event_booth_registration.")
@@ -141,7 +149,7 @@ class TestEventBoothSale(TestEventBoothSaleWData):
         sale_order.write({
             'order_line': [
                 Command.update(sale_order.order_line.id, {
-                    'event_booth_pending_ids': [Command.set((self.booth_2 + self.booth_3).ids)]
+                    'event_booth_pending_ids':[Command.set((self.booth_2 + self.booth_3).ids)]
                 })
             ]
         })

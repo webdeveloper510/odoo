@@ -16,6 +16,8 @@ class ResConfigSettings(models.TransientModel):
         compute='_compute_providers_state')
     first_provider_label = fields.Char(
         compute='_compute_providers_state')
+    module_payment_paypal = fields.Boolean(
+        string='Paypal - Express Checkout')
     is_stripe_supported_country = fields.Boolean(
         related='company_id.country_id.is_stripe_supported_country')
 
@@ -49,14 +51,15 @@ class ResConfigSettings(models.TransientModel):
         self.ensure_one()
         if not self.is_stripe_supported_country:
             return False
-        return self.env['ir.actions.actions']._for_xml_id('website_payment.action_activate_stripe')
+        menu = self.env.ref('website.menu_website_website_settings', raise_if_not_found=False)
+        menu_id = menu and menu.id
+        return self.env.company._run_payment_onboarding_step(menu_id=menu_id)
 
     def action_configure_first_provider(self):
         self.ensure_one()
-        stripe = self.env['payment.provider'].search([
-            *self.env['payment.provider']._check_company_domain(self.env.company),
-            ('code', '=', 'stripe')
-        ], limit=1)
+        stripe = self.env['payment.provider'].search(
+            [('company_id', '=', self.env.company.id), ('code', '=', 'stripe')], limit=1
+        )
         providers = self._get_activated_providers()
         return {
             'name': self.first_provider_label,

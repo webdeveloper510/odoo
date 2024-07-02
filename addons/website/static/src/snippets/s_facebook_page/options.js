@@ -1,14 +1,9 @@
-/** @odoo-module **/
+odoo.define('website.s_facebook_page_options', function (require) {
+'use strict';
 
-import { pick } from "@web/core/utils/objects";
-import options from "@web_editor/js/editor/snippets.options";
+const options = require('web_editor.snippets.options');
 
 options.registry.facebookPage = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * Initializes the required facebook page data to create the iframe.
      *
@@ -26,11 +21,15 @@ options.registry.facebookPage = options.Class.extend({
             small_header: true,
             hide_cover: true,
         };
-        this.fbData = Object.assign({}, defaults, pick(this.$target[0].dataset, Object.keys(defaults)), defaults);
+        this.fbData = _.defaults(_.pick(this.$target[0].dataset, _.keys(defaults)), defaults);
+
         if (!this.fbData.href) {
             // Fetches the default url for facebook page from website config
             var self = this;
-            defs.push(this.orm.searchRead("website", [], ["social_facebook"], {
+            defs.push(this._rpc({
+                model: 'website',
+                method: 'search_read',
+                args: [[], ['social_facebook']],
                 limit: 1,
             }).then(function (res) {
                 if (res) {
@@ -40,12 +39,6 @@ options.registry.facebookPage = options.Class.extend({
         }
 
         return Promise.all(defs).then(() => this._markFbElement()).then(() => this._refreshPublicWidgets());
-    },
-    /**
-     * @override
-     */
-    onBuilt() {
-        this.$target[0].querySelector('.o_facebook_page_preview')?.remove();
     },
 
     //--------------------------------------------------------------------------
@@ -112,9 +105,9 @@ options.registry.facebookPage = options.Class.extend({
             } else {
                 this.fbData.height = 150;
             }
-            for (const [key, value] of Object.entries(this.fbData)) {
+            _.each(this.fbData, (value, key) => {
                 this.$target[0].dataset[key] = value;
-            }
+            });
         });
     },
     /**
@@ -128,7 +121,8 @@ options.registry.facebookPage = options.Class.extend({
                     return this.fbData.tabs.split(',').includes(optionName.replace(/^tab./, ''));
                 } else {
                     if (optionName === 'show_cover') {
-                        return !this.fbData.hide_cover;
+                        // Sometimes a string, sometimes a boolean.
+                        return String(this.fbData.hide_cover) === "false";
                     }
                     return this.fbData[optionName];
                 }
@@ -174,4 +168,5 @@ options.registry.facebookPage = options.Class.extend({
         this.fbData.href = defaultURL;
         return Promise.resolve();
     },
+});
 });

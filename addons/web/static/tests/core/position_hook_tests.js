@@ -6,7 +6,6 @@ import { registerCleanup } from "../helpers/cleanup";
 import {
     destroy,
     getFixture,
-    makeDeferred,
     mockAnimationFrame,
     mount,
     nextTick,
@@ -14,44 +13,25 @@ import {
     triggerEvent,
 } from "../helpers/utils";
 import { localization } from "@web/core/l10n/localization";
-import { Component, useRef, xml } from "@odoo/owl";
 
-const FLEXBOX_STYLE = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-};
-const CONTAINER_STYLE = {
-    ...FLEXBOX_STYLE,
-    backgroundColor: "salmon",
-    height: "450px",
-    width: "450px",
-    margin: "25px",
-};
-const TARGET_STYLE = {
-    backgroundColor: "tomato",
-    height: "50px",
-    width: "50px",
-};
+import { Component, useRef, xml } from "@odoo/owl";
 let container;
 
 /**
  * @param {import("@web/core/position_hook").Options} popperOptions
  * @returns {Component}
  */
-function getTestComponent(popperOptions = {}, target = document.createElement("div")) {
-    popperOptions.container = popperOptions.container || container;
-
-    target.id = "target";
-    Object.assign(target.style, TARGET_STYLE);
-    if (!target.isConnected) {
-        // If the target is not in any DOM, we append it to the container by default
-        popperOptions.container.appendChild(target);
-    }
+function getTestComponent(popperOptions = {}) {
+    const reference = document.createElement("div");
+    reference.id = "reference";
+    reference.style.backgroundColor = "yellow";
+    reference.style.height = "50px";
+    reference.style.width = "50px";
+    container.appendChild(reference);
 
     class TestComp extends Component {
         setup() {
-            usePosition("popper", () => target, popperOptions);
+            usePosition(reference, { container, ...popperOptions });
         }
     }
     TestComp.template = xml`<div id="popper" t-ref="popper" />`;
@@ -63,7 +43,12 @@ QUnit.module("usePosition Hook", {
         // Force container style, to make these tests independent of screen size
         container = document.createElement("div");
         container.id = "container";
-        Object.assign(container.style, CONTAINER_STYLE);
+        container.style.backgroundColor = "pink";
+        container.style.height = "450px";
+        container.style.width = "450px";
+        container.style.display = "flex";
+        container.style.alignItems = "center";
+        container.style.justifyContent = "center";
         getFixture().prepend(container);
         registerCleanup(() => {
             getFixture().removeChild(container);
@@ -72,7 +57,7 @@ QUnit.module("usePosition Hook", {
         const sheet = document.createElement("style");
         sheet.textContent = `
             #popper {
-                background-color: plum;
+                background-color: cyan;
                 height: 100px;
                 width: 100px;
             }
@@ -120,35 +105,35 @@ QUnit.test("can add margin", async (assert) => {
         const TestComp = getTestComponent(popperOptions);
         const popper = await mount(TestComp, container);
         const popBox = document.getElementById("popper").getBoundingClientRect();
-        const targetBox = document.getElementById("target").getBoundingClientRect();
+        const refBox = document.getElementById("reference").getBoundingClientRect();
         destroy(popper);
-        container.removeChild(document.getElementById("target"));
-        return [popBox, targetBox];
+        container.removeChild(document.getElementById("reference"));
+        return [popBox, refBox];
     }
 
     // With/without additional margin (default direction is bottom)
-    let [popBox, targetBox] = await _mountTestComponentAndDestroy();
-    assert.strictEqual(popBox.top, targetBox.bottom + SHEET_MARGINS.top);
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ margin: 10 });
-    assert.strictEqual(popBox.top, targetBox.bottom + SHEET_MARGINS.top + 10);
+    let [popBox, refBox] = await _mountTestComponentAndDestroy();
+    assert.strictEqual(popBox.top, refBox.bottom + SHEET_MARGINS.top);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ margin: 10 });
+    assert.strictEqual(popBox.top, refBox.bottom + SHEET_MARGINS.top + 10);
 
     // With/without additional margin, direction is top
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ position: "top" });
-    assert.strictEqual(popBox.top, targetBox.top - popBox.height - SHEET_MARGINS.bottom);
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ position: "top", margin: 10 });
-    assert.strictEqual(popBox.top, targetBox.top - popBox.height - SHEET_MARGINS.bottom - 10);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ position: "top" });
+    assert.strictEqual(popBox.top, refBox.top - popBox.height - SHEET_MARGINS.bottom);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ position: "top", margin: 10 });
+    assert.strictEqual(popBox.top, refBox.top - popBox.height - SHEET_MARGINS.bottom - 10);
 
     // With/without additional margin, direction is left
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ position: "left" });
-    assert.strictEqual(popBox.left, targetBox.left - popBox.width - SHEET_MARGINS.right);
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ position: "left", margin: 10 });
-    assert.strictEqual(popBox.left, targetBox.left - popBox.width - SHEET_MARGINS.right - 10);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ position: "left" });
+    assert.strictEqual(popBox.left, refBox.left - popBox.width - SHEET_MARGINS.right);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ position: "left", margin: 10 });
+    assert.strictEqual(popBox.left, refBox.left - popBox.width - SHEET_MARGINS.right - 10);
 
     // With/without additional margin, direction is right
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ position: "right" });
-    assert.strictEqual(popBox.left, targetBox.right + SHEET_MARGINS.left);
-    [popBox, targetBox] = await _mountTestComponentAndDestroy({ position: "right", margin: 10 });
-    assert.strictEqual(popBox.left, targetBox.right + SHEET_MARGINS.left + 10);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ position: "right" });
+    assert.strictEqual(popBox.left, refBox.right + SHEET_MARGINS.left);
+    [popBox, refBox] = await _mountTestComponentAndDestroy({ position: "right", margin: 10 });
+    assert.strictEqual(popBox.left, refBox.right + SHEET_MARGINS.left + 10);
 });
 
 QUnit.test("is restricted to its container, even with margins", async (assert) => {
@@ -169,14 +154,14 @@ QUnit.test("is restricted to its container, even with margins", async (assert) =
         });
         const popper = await mount(TestComp, container);
         destroy(popper);
-        container.removeChild(document.getElementById("target"));
+        container.removeChild(document.getElementById("reference"));
     }
 
-    const minSize = 150; // => popper is 100px, target is 50px
+    const minSize = 150; // => popper is 100px, ref is 50px
     const margin = 10; // will serve as additional margin
 
     // === DIRECTION: BOTTOM ===
-    // Container style changes: push target to top
+    // Container style changes: push ref to top
     Object.assign(container.style, { alignItems: "flex-start" });
 
     // --> Without additional margin
@@ -200,7 +185,7 @@ QUnit.test("is restricted to its container, even with margins", async (assert) =
     assert.verifySteps(["right-start"]);
 
     // === DIRECTION: TOP ===
-    // Container style changes: push target to bottom
+    // Container style changes: push ref to bottom
     Object.assign(container.style, { alignItems: "flex-end" });
 
     // --> Without additional margin
@@ -228,7 +213,7 @@ QUnit.test("is restricted to its container, even with margins", async (assert) =
     // === DIRECTION: LEFT ===
     // Container style changes: reset previous changes
     Object.assign(container.style, { alignItems: "center", height: "450px" });
-    // Container style changes: push target to right
+    // Container style changes: push ref to right
     Object.assign(container.style, { justifyContent: "flex-end" });
 
     // --> Without additional margin
@@ -254,7 +239,7 @@ QUnit.test("is restricted to its container, even with margins", async (assert) =
     assert.verifySteps(["bottom-end"]);
 
     // === DIRECTION: RIGHT ===
-    // Container style changes: push target to left
+    // Container style changes: push ref to left
     Object.assign(container.style, { justifyContent: "flex-start" });
 
     // --> Without additional margin
@@ -294,8 +279,25 @@ QUnit.test("popper is an inner element", async (assert) => {
     await mount(TestComp, container);
 });
 
+QUnit.test("can change the popper reference name", async (assert) => {
+    assert.expect(2);
+    const TestComp = getTestComponent({
+        popper: "myRef",
+        onPositioned: (el) => {
+            assert.notOk(document.getElementById("not-popper") === el);
+            assert.ok(document.getElementById("popper") === el);
+        },
+    });
+    TestComp.template = xml`
+        <div id="not-popper">
+            <div id="popper" t-ref="myRef"/>
+        </div>
+    `;
+    await mount(TestComp, container);
+});
+
 QUnit.test("has no effect when component is destroyed", async (assert) => {
-    mockAnimationFrame();
+    const execRegisteredCallbacks = mockAnimationFrame();
     const TestComp = getTestComponent({
         onPositioned: () => {
             assert.step("onPositioned called");
@@ -304,12 +306,16 @@ QUnit.test("has no effect when component is destroyed", async (assert) => {
     const comp = await mount(TestComp, container);
     assert.verifySteps(["onPositioned called"], "onPositioned called when component mounted");
 
-    await triggerEvent(document, null, "scroll");
+    triggerEvent(document, null, "scroll");
+    await nextTick();
+    assert.verifySteps([]);
+    execRegisteredCallbacks();
     assert.verifySteps(["onPositioned called"], "onPositioned called when document scrolled");
 
     triggerEvent(document, null, "scroll");
-    destroy(comp);
     await nextTick();
+    destroy(comp);
+    execRegisteredCallbacks();
     assert.verifySteps(
         [],
         "onPositioned not called even if scroll happened right before the component destroys"
@@ -328,20 +334,6 @@ QUnit.test("reposition popper when a load event occurs", async (assert) => {
     assert.verifySteps(["onPositioned called"], "onPositioned called when load event is triggered");
 });
 
-QUnit.test("reposition popper when a scroll event occurs", async (assert) => {
-    const TestComp = getTestComponent({
-        onPositioned: () => {
-            assert.step("onPositioned called");
-        },
-    });
-    await mount(TestComp, container);
-    assert.verifySteps(["onPositioned called"]);
-    await document.querySelector("#popper").dispatchEvent(new Event("scroll"));
-    assert.verifySteps([], "onPositioned not called when scroll event is triggered inside popper");
-    await document.querySelector("#popper").parentElement.dispatchEvent(new Event("scroll"));
-    assert.verifySteps(["onPositioned called"]);
-});
-
 QUnit.test("is positioned relative to its containing block", async (assert) => {
     const fixtureBox = getFixture().getBoundingClientRect();
     // offset the container
@@ -357,7 +349,7 @@ QUnit.test("is positioned relative to its containing block", async (assert) => {
 
     const popBox1 = document.getElementById("popper").getBoundingClientRect();
     destroy(popper);
-    document.getElementById("target").remove();
+    document.getElementById("reference").remove();
 
     // make container the containing block instead of the viewport
     container.style.contain = "layout";
@@ -379,283 +371,36 @@ QUnit.test("is positioned relative to its containing block", async (assert) => {
     assert.equal(popBox1.left, popBox2.left);
 });
 
-QUnit.test("iframe: popper is outside, target inside", async (assert) => {
-    // Prepare target inside iframe
-    const IFRAME_STYLE = {
-        margin: "25px",
-        height: "200px",
-        width: "400px",
-    };
-    const iframe = document.createElement("iframe");
-    Object.assign(iframe.style, IFRAME_STYLE);
-    iframe.srcdoc = `<div id="target" />`;
-    const def = makeDeferred();
-    iframe.onload = def.resolve;
-    container.appendChild(iframe);
-    await def;
-    const iframeBody = iframe.contentDocument.body;
-    Object.assign(iframeBody.style, {
-        ...FLEXBOX_STYLE,
-        backgroundColor: "papayawhip",
-        height: "300px",
-        width: "400px",
-        overflowX: "hidden",
-    });
-
-    // Prepare popper outside iframe
-    const popperTarget = iframe.contentDocument.getElementById("target");
-    let onPositionedArgs;
-    const Popper = getTestComponent(
-        {
-            onPositioned: (el, solution) => {
-                onPositionedArgs = { el, solution };
-                assert.step(`${solution.direction}-${solution.variant}`);
-            },
-        },
-        popperTarget
-    );
-    await mount(Popper, container);
-    assert.verifySteps(["bottom-middle"]);
-
-    // Check everything is rendered where it should be
-    assert.containsOnce(container, "#popper");
-    assert.containsNone(container, "#target");
-
-    assert.strictEqual(iframeBody.querySelectorAll("#target").length, 1);
-    assert.strictEqual(iframeBody.querySelectorAll("#popper").length, 0);
-
-    // Check the expected position
-    const { top: iframeTop, left: iframeLeft } = iframe.getBoundingClientRect();
-    let targetBox = popperTarget.getBoundingClientRect();
-    let popperBox = onPositionedArgs.el.getBoundingClientRect();
-    let expectedTop = iframeTop + targetBox.top + popperTarget.offsetHeight;
-    let expectedLeft =
-        iframeLeft + targetBox.left + popperTarget.offsetWidth / 2 - popperBox.width / 2;
-
-    assert.strictEqual(popperBox.top, expectedTop);
-    assert.strictEqual(popperBox.top, onPositionedArgs.solution.top);
-
-    assert.strictEqual(popperBox.left, expectedLeft);
-    assert.strictEqual(popperBox.left, onPositionedArgs.solution.left);
-
-    // Scrolling inside the iframe should reposition the popover accordingly
-    const previousPositionSolution = onPositionedArgs.solution;
-    const scrollOffset = 100;
-    const scrollable = iframe.contentDocument.documentElement;
-    scrollable.scrollTop = scrollOffset;
-    await nextTick();
-    assert.verifySteps(["bottom-middle"]);
-    assert.strictEqual(previousPositionSolution.top, onPositionedArgs.solution.top + scrollOffset);
-
-    // Check the expected position
-    targetBox = popperTarget.getBoundingClientRect();
-    popperBox = onPositionedArgs.el.getBoundingClientRect();
-    expectedTop = iframeTop + targetBox.top + popperTarget.offsetHeight;
-    expectedLeft = iframeLeft + targetBox.left + popperTarget.offsetWidth / 2 - popperBox.width / 2;
-
-    assert.strictEqual(popperBox.top, expectedTop);
-    assert.strictEqual(popperBox.top, onPositionedArgs.solution.top);
-
-    assert.strictEqual(popperBox.left, expectedLeft);
-    assert.strictEqual(popperBox.left, onPositionedArgs.solution.left);
-});
-
-QUnit.test("iframe: both popper and target inside", async (assert) => {
-    // Prepare target inside iframe
-    const IFRAME_STYLE = {
-        height: "300px",
-        width: "400px",
-    };
-    const iframe = document.createElement("iframe");
-    Object.assign(iframe.style, IFRAME_STYLE);
-    iframe.srcdoc = `<div id="inner-container" />`;
-    let def = makeDeferred();
-    iframe.onload = def.resolve;
-    container.appendChild(iframe);
-    await def; // wait for the iframe to be loaded
-    const iframeBody = iframe.contentDocument.body;
-    Object.assign(iframeBody.style, {
-        ...FLEXBOX_STYLE,
-        backgroundColor: "papayawhip",
-        margin: "25px",
-        overflowX: "hidden",
-    });
-
-    def = makeDeferred();
-    const iframeSheet = iframe.contentDocument.createElement("style");
-    iframeSheet.onload = def.resolve;
-    iframeSheet.textContent = `
-            #popper {
-                background-color: plum;
-                height: 100px;
-                width: 100px;
-            }
-        `;
-    iframe.contentDocument.head.appendChild(iframeSheet);
-    await def; // wait for the iframe's stylesheet to be loaded
-
-    const innerContainer = iframe.contentDocument.getElementById("inner-container");
-    Object.assign(innerContainer.style, {
-        ...CONTAINER_STYLE,
-        backgroundColor: "khaki",
-    });
-
-    // Prepare popper inside iframe
-    let onPositionedArgs;
-    const Popper = getTestComponent({
-        container: innerContainer,
-        onPositioned: (el, solution) => {
-            onPositionedArgs = { el, solution };
-            assert.step(`${solution.direction}-${solution.variant}`);
-        },
-    });
-    await mount(Popper, innerContainer);
-    assert.verifySteps(["bottom-middle"]);
-
-    // Check everything is rendered where it should be
-    assert.strictEqual(innerContainer.ownerDocument, iframe.contentDocument);
-    assert.strictEqual(innerContainer.querySelectorAll("#target").length, 1);
-    assert.strictEqual(innerContainer.querySelectorAll("#popper").length, 1);
-    assert.strictEqual(iframeBody.querySelectorAll("#target").length, 1);
-    assert.strictEqual(iframeBody.querySelectorAll("#popper").length, 1);
-
-    // Check the expected position
-    const popperTarget = innerContainer.querySelector("#target");
-    // const { top: iframeTop, left: iframeLeft } = iframe.getBoundingClientRect();
-    let targetBox = popperTarget.getBoundingClientRect();
-    let popperBox = onPositionedArgs.el.getBoundingClientRect();
-    let expectedTop = targetBox.top + popperTarget.offsetHeight;
-    let expectedLeft = targetBox.left + popperTarget.offsetWidth / 2 - popperBox.width / 2;
-
-    assert.strictEqual(popperBox.top, expectedTop);
-    assert.strictEqual(popperBox.top, onPositionedArgs.solution.top);
-
-    assert.strictEqual(popperBox.left, expectedLeft);
-    assert.strictEqual(popperBox.left, onPositionedArgs.solution.left);
-
-    // Scrolling inside the iframe should reposition the popover accordingly
-    const previousPositionSolution = onPositionedArgs.solution;
-    const scrollOffset = 100;
-    const scrollable = iframe.contentDocument.documentElement;
-    scrollable.scrollTop = scrollOffset;
-    await nextTick();
-    assert.verifySteps(["bottom-middle"]);
-    assert.strictEqual(previousPositionSolution.top, onPositionedArgs.solution.top + scrollOffset);
-
-    // Check the expected position
-    targetBox = popperTarget.getBoundingClientRect();
-    popperBox = onPositionedArgs.el.getBoundingClientRect();
-    expectedTop = targetBox.top + popperTarget.offsetHeight;
-    expectedLeft = targetBox.left + popperTarget.offsetWidth / 2 - popperBox.width / 2;
-
-    assert.strictEqual(popperBox.top, expectedTop);
-    assert.strictEqual(popperBox.top, onPositionedArgs.solution.top);
-
-    assert.strictEqual(popperBox.left, expectedLeft);
-    assert.strictEqual(popperBox.left, onPositionedArgs.solution.left);
-});
-
-QUnit.test("iframe: default container is the popper owner's document", async (assert) => {
-    assert.expect(1);
-    // Prepare an outer iframe, that will hold the popper element
-    let def = makeDeferred();
-    const outerIframe = document.createElement("iframe");
-    Object.assign(outerIframe.style, { height: "450px", width: "450px" });
-    outerIframe.onload = def.resolve;
-    getFixture().prepend(outerIframe);
-    registerCleanup(() => outerIframe.remove());
-    await def;
-    Object.assign(outerIframe.contentDocument.body.style, {
-        ...CONTAINER_STYLE,
-        margin: "0",
-        justifyContent: "flex-start",
-    });
-
-    def = makeDeferred();
-    const iframeSheet = outerIframe.contentDocument.createElement("style");
-    iframeSheet.onload = def.resolve;
-    iframeSheet.textContent = `
-            #popper {
-                background-color: plum;
-                height: 100px;
-                width: 100px;
-            }
-        `;
-    outerIframe.contentDocument.head.appendChild(iframeSheet);
-    await def; // wait for the iframe's stylesheet to be loaded
-
-    // Prepare the inner iframe, that will hold the target element
-    def = makeDeferred();
-    const innerIframe = document.createElement("iframe");
-    innerIframe.srcdoc = `<div id="target" />`;
-    Object.assign(innerIframe.style, {
-        height: "300px",
-        width: "120px",
-        marginLeft: "10px",
-    });
-    innerIframe.onload = def.resolve;
-    outerIframe.contentDocument.body.appendChild(innerIframe);
-    await def;
-    Object.assign(innerIframe.contentDocument.body.style, {
-        ...FLEXBOX_STYLE,
-        height: "300px",
-        width: "120px",
-        margin: "0",
-    });
-
-    // Prepare the target element
-    const target = innerIframe.contentDocument.getElementById("target");
-    Object.assign(target.style, TARGET_STYLE);
-
-    // Mount the popper component and check its position
-    class Popper extends Component {
-        static template = xml`<div id="popper" t-ref="popper" />`;
-        setup() {
-            usePosition("popper", () => target, {
-                position: "top-start",
-                onPositioned: (_, { direction, variant }) => {
-                    assert.strictEqual(`${direction}-${variant}`, "top-start");
-                    // the style setup in this test leaves enough space in the inner iframe
-                    // for the popper to be positioned at top-middle, but this is exactly
-                    // what we want to avoid: the popper's base container should not be the
-                    // inner iframe, but the outer iframe, so the popper should be positioned
-                    // at top-start.
-                },
-            });
-        }
-    }
-    await mount(Popper, outerIframe.contentDocument.body);
-});
-
 QUnit.test("popper as child of another", async (assert) => {
     class Child extends Component {
-        static template = /* xml */ xml`
-            <div id="child">
-                <div class="target" t-ref="ref" />
-                <div class="popper" t-ref="popper" />
-            </div>
-        `;
         setup() {
             const ref = useRef("ref");
-            usePosition("popper", () => ref.el, { position: "left" });
+            usePosition(() => ref.el, { popper: "popper", container, position: "left" });
         }
     }
-    const target = document.createElement("div");
-    target.id = "target";
-    Object.assign(target.style, TARGET_STYLE);
-    container.appendChild(target);
+    Child.template = /* xml */ xml`
+        <div id="child">
+            <div class="ref" t-ref="ref" />
+            <div class="popper" t-ref="popper" />
+        </div>
+    `;
+    const reference = container.querySelector("#reference");
     class Parent extends Component {
-        static components = { Child };
-        static template = /* xml */ xml`<div id="popper" t-ref="popper"><Child/></div>`;
         setup() {
-            usePosition("popper", () => target);
+            usePosition(reference, { container });
         }
     }
+    Parent.components = { Child };
+    Parent.template = /* xml */ xml`
+        <div id="popper">
+            <Child/>
+        </div>
+    `;
 
     const sheet = document.createElement("style");
     sheet.textContent = `
-        #child .target {
-            background-color: peachpuff;
+        #child .ref {
+            background-color: salmon;
             height: 100px;
             width: 10px;
         }
@@ -671,6 +416,7 @@ QUnit.test("popper as child of another", async (assert) => {
     await mount(Parent, container);
     const parentPopBox1 = container.querySelector("#popper").getBoundingClientRect();
     const childPopBox1 = container.querySelector("#child .popper").getBoundingClientRect();
+
     const spacer = document.createElement("div");
     spacer.id = "foo";
     spacer.style.height = "1px";
@@ -685,35 +431,6 @@ QUnit.test("popper as child of another", async (assert) => {
     assert.strictEqual(childPopBox1.top, childPopBox2.top);
     assert.strictEqual(parentPopBox2.left, parentPopBox1.left + spacer.offsetWidth * 0.5);
     assert.strictEqual(childPopBox2.left, childPopBox1.left + spacer.offsetWidth * 0.5);
-});
-
-QUnit.test("batch update call", async (assert) => {
-    const target = document.createElement("div");
-    target.id = "target";
-    Object.assign(target.style, TARGET_STYLE);
-    container.appendChild(target);
-
-    let position = null;
-
-    class TestComponent extends Component {
-        static template = xml`<div class="popper" t-ref="popper">Popper</div>`;
-        setup() {
-            position = usePosition("popper", () => target, {
-                onPositioned: () => {
-                    assert.step("positioned");
-                },
-            });
-        }
-    }
-
-    await mount(TestComponent, container);
-    assert.verifySteps(["positioned"]);
-
-    position.unlock();
-    position.unlock();
-    position.unlock();
-    await nextTick();
-    assert.verifySteps(["positioned"]);
 });
 
 function getPositionTest(position, positionToCheck) {
@@ -781,8 +498,8 @@ const CONTAINER_STYLE_MAP = {
     left: { justifyContent: "flex-start" },
     right: { justifyContent: "flex-end" },
     slimfit: { height: "100px", width: "100px" }, // height and width of popper
-    h125: { height: "125px" }, // height of popper + 1/2 target
-    w125: { width: "125px" }, // width of popper + 1/2 target
+    h125: { height: "125px" }, // height of popper + 1/2 reference
+    w125: { width: "125px" }, // width of popper + 1/2 reference
 };
 
 function getRepositionTest(from, to, containerStyleChanges) {
@@ -1397,32 +1114,3 @@ QUnit.test(
     "reposition from right-end to top-end",
     getRepositionTest("right-end", "top-end", "w125 right")
 );
-
-function getFittingTest(position, styleAttribute) {
-    return async (assert) => {
-        const TestComp = getTestComponent({ position });
-        await mount(TestComp, container);
-        assert.strictEqual(container.querySelector("#popper").style[styleAttribute], "50px");
-    };
-}
-
-QUnit.test(
-    "reposition from bottom-fit to top-fit",
-    getRepositionTest("bottom-fit", "top-fit", "bottom")
-);
-QUnit.test(
-    "reposition from top-fit to bottom-fit",
-    getRepositionTest("top-fit", "bottom-fit", "top")
-);
-QUnit.test(
-    "reposition from right-fit to left-fit",
-    getRepositionTest("right-fit", "left-fit", "right")
-);
-QUnit.test(
-    "reposition from left-fit to right-fit",
-    getRepositionTest("left-fit", "right-fit", "left")
-);
-QUnit.test("bottom-fit has the same width as the target", getFittingTest("bottom-fit", "width"));
-QUnit.test("top-fit has the same width as the target", getFittingTest("top-fit", "width"));
-QUnit.test("left-fit has the same height as the target", getFittingTest("left-fit", "height"));
-QUnit.test("right-fit has the same height as the target", getFittingTest("right-fit", "height"));

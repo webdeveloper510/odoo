@@ -96,7 +96,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
                 })],
         })
         so.action_confirm()
-        so.picking_ids.move_ids.write({'quantity': 1, 'picked': True})
+        so.picking_ids.move_ids.quantity_done = 1
         so.picking_ids.button_validate()
 
         invoice = so.with_context(default_journal_id=self.company_data['default_journal_sale'].id)._create_invoices()
@@ -182,6 +182,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
                     'product_uom': product.uom_id.id,
                     'price_unit': product.list_price
                 })],
+                'pricelist_id': self.env.ref('product.list0').id,
                 'company_id': self.company_data['company'].id,
             }
             so = self.env['sale.order'].create(so_vals)
@@ -190,7 +191,9 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
             # Deliver the three finished products
             pick = so.picking_ids
             # To check the products on the picking
-            pick.button_validate()
+            wiz_act = pick.button_validate()
+            wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
+            wiz.process()
             # Create the invoice
             so._create_invoices()
             invoice = so.invoice_ids
@@ -242,7 +245,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
             'price_unit': p,
         } for p in [10, 20, 60]])
         in_moves._action_confirm()
-        in_moves.write({'quantity': 1, 'picked': True})
+        in_moves.quantity_done = 1
         in_moves._action_done()
 
         # Sell 3 kits
@@ -265,7 +268,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         picking = so.picking_ids
         while picking:
             pickings.append(picking)
-            picking.move_ids.write({'quantity': 1, 'picked': True})
+            picking.move_ids.quantity_done = 1
             action = picking.button_validate()
             if isinstance(action, dict):
                 wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
@@ -286,7 +289,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
             'price_unit': 100,
         })
         in_moves._action_confirm()
-        in_moves.write({'quantity': 1, 'picked': True})
+        in_moves.quantity_done = 1
         in_moves._action_done()
 
         # Return the second picking (i.e. one component @20)
@@ -294,15 +297,16 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         return_wizard = Form(self.env['stock.return.picking'].with_context(ctx)).save()
         return_picking_id, dummy = return_wizard._create_returns()
         return_picking = self.env['stock.picking'].browse(return_picking_id)
-        return_picking.move_ids.write({'quantity': 1, 'picked': True})
+        return_picking.move_ids.quantity_done = 1
         return_picking.button_validate()
 
         # Add a credit note for the returned kit
         ctx = {'active_model': 'account.move', 'active_ids': invoice.ids}
         refund_wizard = self.env['account.move.reversal'].with_context(ctx).create({
+            'refund_method': 'refund',
             'journal_id': invoice.journal_id.id,
         })
-        action = refund_wizard.refund_moves()
+        action = refund_wizard.reverse_moves()
         reverse_invoice = self.env['account.move'].browse(action['res_id'])
         with Form(reverse_invoice) as reverse_invoice_form:
             with reverse_invoice_form.invoice_line_ids.edit(0) as line:
@@ -347,7 +351,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
             'price_unit': p,
         } for p in [10, 20, 60]])
         in_moves._action_confirm()
-        in_moves.write({'quantity': 1, 'picked': True})
+        in_moves.quantity_done = 1
         in_moves._action_done()
 
         # Sell 3 kits
@@ -370,7 +374,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         picking = so.picking_ids
         while picking:
             pickings.append(picking)
-            picking.move_ids.write({'quantity': 1, 'picked': True})
+            picking.move_ids.quantity_done = 1
             action = picking.button_validate()
             if isinstance(action, dict):
                 wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
@@ -391,7 +395,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
             'price_unit': 100,
         })
         in_moves._action_confirm()
-        in_moves.write({'quantity': 1, 'picked': True})
+        in_moves.quantity_done = 1
         in_moves._action_done()
 
         # Return the second picking (i.e. one component @20)
@@ -399,7 +403,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
         return_wizard = Form(self.env['stock.return.picking'].with_context(ctx)).save()
         return_picking_id, dummy = return_wizard._create_returns()
         return_picking = self.env['stock.picking'].browse(return_picking_id)
-        return_picking.move_ids.write({'quantity': 1, 'picked': True})
+        return_picking.move_ids.quantity_done = 1
         return_picking.button_validate()
 
         # Create a new invoice for the returned kit
@@ -458,7 +462,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
                 })],
         })
         so.action_confirm()
-        so.picking_ids.move_ids.write({'quantity': 1, 'picked': True})
+        so.picking_ids.move_ids.quantity_done = 1
         so.picking_ids.button_validate()
 
         invoice = so._create_invoices()
@@ -511,8 +515,7 @@ class TestSaleMRPAngloSaxonValuation(ValuationReconciliationTestCommon):
                 })],
         })
         so.action_confirm()
-        so.picking_ids.move_line_ids.quantity = 1
-        so.picking_ids.move_ids.picked = True
+        so.picking_ids.move_line_ids.qty_done = 1
         so.picking_ids.button_validate()
 
         invoice = so._create_invoices()

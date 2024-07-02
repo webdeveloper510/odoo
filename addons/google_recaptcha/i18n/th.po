@@ -3,15 +3,15 @@
 # 	* google_recaptcha
 # 
 # Translators:
-# Wil Odoo, 2023
+# Wichanon Jamwutthipreecha, 2022
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"PO-Revision-Date: 2022-09-22 05:46+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -22,8 +22,17 @@ msgstr ""
 
 #. module: google_recaptcha
 #: model_terms:ir.ui.view,arch_db:google_recaptcha.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Generate reCAPTCHA v3 keys"
-msgstr "<i class=\"oi oi-arrow-right\"/> สร้างคีย์ reCAPTCHA v3"
+msgid "<i class=\"fa fa-arrow-right\"/> Generate reCAPTCHA v3 keys"
+msgstr "<i class=\"fa fa-arrow-right\"/>สร้าง reCAPTCHA v3 keys"
+
+#. module: google_recaptcha
+#: model:ir.model.fields,help:google_recaptcha.field_res_config_settings__recaptcha_min_score
+msgid ""
+"By default, should be one of 0.1, 0.3, 0.7, 0.9.\n"
+"1.0 is very likely a good interaction, 0.0 is very likely a bot"
+msgstr ""
+"โดยค่าเริ่มต้น ควรเป็นหนึ่งใน 0.1, 0.3, 0.7, 0.9\n"
+"1.0 มีแนวโน้มว่าจะมีการโต้ตอบที่ดี 0.0 มีแนวโน้มว่าเป็นบอท"
 
 #. module: google_recaptcha
 #: model:ir.model,name:google_recaptcha.model_res_config_settings
@@ -34,6 +43,11 @@ msgstr "ตั้งค่าการกำหนดค่า"
 #: model:ir.model,name:google_recaptcha.model_ir_http
 msgid "HTTP Routing"
 msgstr "การกำหนด HTTP"
+
+#. module: google_recaptcha
+#: model_terms:ir.ui.view,arch_db:google_recaptcha.res_config_settings_view_form
+msgid "If no keys are provided, no checks will be done."
+msgstr "หากไม่มีคีย์ให้ จะไม่มีการตรวจสอบ"
 
 #. module: google_recaptcha
 #: model:ir.model.fields,field_description:google_recaptcha.field_res_config_settings__recaptcha_min_score
@@ -67,15 +81,6 @@ msgid "Secret Key"
 msgstr "คีย์ลับ"
 
 #. module: google_recaptcha
-#: model:ir.model.fields,help:google_recaptcha.field_res_config_settings__recaptcha_min_score
-msgid ""
-"By default, should be one of 0.1, 0.3, 0.7, 0.9.\n"
-"1.0 is very likely a good interaction, 0.0 is very likely a bot"
-msgstr ""
-"โดยค่าเริ่มต้น ควรเป็นหนึ่งใน 0.1, 0.3, 0.7, 0.9\n"
-"1.0 มีแนวโน้มว่าจะมีการโต้ตอบที่ดี 0.0 มีแนวโน้มว่าเป็นบอท"
-
-#. module: google_recaptcha
 #: model:ir.model.fields,field_description:google_recaptcha.field_res_config_settings__recaptcha_public_key
 msgid "Site Key"
 msgstr "คีย์ไซต์"
@@ -99,7 +104,7 @@ msgstr "คีย์ส่วนตัว reCaptcha ไม่ถูกต้อ�
 #: code:addons/google_recaptcha/models/ir_http.py:0
 #, python-format
 msgid "The reCaptcha token is invalid."
-msgstr "โทเค็น reCaptcha ไม่ถูกต้อง"
+msgstr "โทเคน reCaptcha ไม่ถูกต้อง"
 
 #. module: google_recaptcha
 #. odoo-javascript

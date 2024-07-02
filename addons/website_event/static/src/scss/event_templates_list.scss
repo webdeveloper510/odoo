@@ -1,11 +1,11 @@
 .o_wevent_sidebar_social > .o_wevent_social_link {
-    $o_link_size: 2.3em;
+    $o_link_size: 3em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: $o_link_size;
     height: $o_link_size;
-    margin: 0 0 ($spacer * .5) ($spacer * .25);
+    margin: 0 ($spacer * .25) ($spacer * .5) ($spacer * .25);
     line-height: $o_link_size;
     background-color: map-get($grays, '100');
     border: $border-width solid $border-color;
@@ -13,7 +13,6 @@
     text-align: center;
     &:hover, &:focus {
         background-color: map-get($grays, '300');
-        text-decoration: none;
     }
 }
 
@@ -21,22 +20,34 @@
 .o_wevent_index {
     // Events List
     .o_wevent_events_list {
-        .opt_events_list_columns {
-            .card-header {
-                height: 200px;
+        header {
+            a {
+                transition: all .25s ease-in-out;
+                &:hover, &:focus {
+                    transform: scale(1.05);
+                }
             }
-            .card-footer {
-                color: color-contrast($card-bg);
+        }
+        @include media-breakpoint-up(sm) {
+            #o_wevent_index_main_col article div.col {
+                min-width: 0;
+            }
+        }
+        .opt_events_list_columns {
+            header {
+                height: 200px;
             }
         }
         .opt_events_list_rows {
-            .card-header {
-                min-height: 130px;
+            @include media-breakpoint-down(md) {
+                header {
+                    height: 200px;
+                }
             }
         }
         .o_wevent_badge_event {
-            @include o-position-absolute($top: 0, $right: 0);
-            @include border-end-radius(0);
+            @include o-position-absolute($top: 0, $left: 0);
+            @include border-start-radius(0);
             padding: ($spacer * .5) $card-spacer-x;
             transform: translateY(-50%);
         }
@@ -51,20 +62,33 @@
             border-radius: 50%;
             text-align: center;
             background-color: $o-wevent-bg-color-base;
-            color: $o-wevent-bg-color-base-contrast;
+            color: $o-wevent-color;
 
             .o_wevent_event_day {
-                @include font-size(1.125rem);
+                font-size: 1.125rem;
                 font-weight: 300;
                 line-height: 1;
             }
             .o_wevent_event_month {
-                @include font-size(0.75rem);
+                font-size: 0.75rem;
                 font-weight: $font-weight-bold;
                 text-transform: uppercase;
             }
-            &.left{
-                left: $card-spacer-x;
+        }
+        .o_wevent_participating,
+        .o_wevent_unpublished {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: $card-spacer-y $card-spacer-x;
+            text-align: right;
+        }
+        article {
+            background-color: $o-wevent-bg-color-base;
+            color: $o-wevent-color;
+            .card-body {
+                background-color: $o-wevent-bg-color-base !important;
+                color: $o-wevent-color;
             }
         }
     }
@@ -73,6 +97,7 @@
         border-bottom: $border-width solid $border-color;
         padding: 0 0 ($spacer * .5) 0;
         font-weight: $font-weight-bold;
+        text-transform: uppercase;
     }
     .o_wevent_sidebar_block {
         margin: 0 0 ($spacer * 2.5) 0;

@@ -42,11 +42,11 @@ class PosPaymentMethod(models.Model):
                                                   limit=1)
             if existing_payment_method:
                 if existing_payment_method.company_id == payment_method.company_id:
-                    raise ValidationError(_('Terminal %s is already used on payment method %s.',
-                                      payment_method.adyen_terminal_identifier, existing_payment_method.display_name))
+                    raise ValidationError(_('Terminal %s is already used on payment method %s.')
+                                      % (payment_method.adyen_terminal_identifier, existing_payment_method.display_name))
                 else:
-                    raise ValidationError(_('Terminal %s is already used in company %s on payment method %s.',
-                                             payment_method.adyen_terminal_identifier,
+                    raise ValidationError(_('Terminal %s is already used in company %s on payment method %s.')
+                                          % (payment_method.adyen_terminal_identifier,
                                              existing_payment_method.company_id.name,
                                              existing_payment_method.display_name))
 
@@ -56,7 +56,8 @@ class PosPaymentMethod(models.Model):
         }
 
     def _is_write_forbidden(self, fields):
-        return super(PosPaymentMethod, self)._is_write_forbidden(fields - {'adyen_latest_response'})
+        whitelisted_fields = set(('adyen_latest_response', 'adyen_latest_diagnosis'))
+        return super(PosPaymentMethod, self)._is_write_forbidden(fields - whitelisted_fields)
 
     def get_latest_adyen_status(self):
         self.ensure_one()
@@ -65,7 +66,10 @@ class PosPaymentMethod(models.Model):
 
         latest_response = self.sudo().adyen_latest_response
         latest_response = json.loads(latest_response) if latest_response else False
-        return latest_response
+
+        return {
+            'latest_response': latest_response,
+        }
 
     def proxy_adyen_request(self, data, operation=False):
         ''' Necessary because Adyen's endpoints don't have CORS enabled '''
@@ -75,7 +79,7 @@ class PosPaymentMethod(models.Model):
         if not data:
             raise UserError(_('Invalid Adyen request'))
 
-        if 'SaleToPOIRequest' in data and data['SaleToPOIRequest']['MessageHeader']['MessageCategory'] == 'Payment': # Clear only if it is a payment request
+        if 'SaleToPOIRequest' in data and data['SaleToPOIRequest']['MessageHeader']['MessageCategory'] == 'Payment' and 'PaymentRequest' in data['SaleToPOIRequest']:  # Clear only if it is a payment request
             self.sudo().adyen_latest_response = ''  # avoid handling old responses multiple times
 
         if not operation:
@@ -122,18 +126,14 @@ class PosPaymentMethod(models.Model):
 
         if is_payment_request_with_acquirer_data:
             parsed_sale_to_acquirer_data = parse_qs(data['SaleToPOIRequest']['PaymentRequest']['SaleData']['SaleToAcquirerData'])
-            valid_acquirer_data = self._get_valid_acquirer_data()
-            is_payment_request_with_acquirer_data = len(parsed_sale_to_acquirer_data.keys()) <= len(valid_acquirer_data.keys())
+            is_payment_request_with_acquirer_data = len(parsed_sale_to_acquirer_data) <= 2
             if is_payment_request_with_acquirer_data:
                 for key, values in parsed_sale_to_acquirer_data.items():
                     if len(values) != 1:
                         is_payment_request_with_acquirer_data = False
                         break
                     value = values[0]
-                    valid_value = valid_acquirer_data.get(key)
-                    if valid_value == UNPREDICTABLE_ADYEN_DATA:
-                        continue
-                    if value != valid_value:
+                    if not ((key == 'tenderOption' and value == 'AskGratuity') or (key == 'authorisationType' and value == 'PreAuth')):
                         is_payment_request_with_acquirer_data = False
                         break
 
@@ -205,18 +205,11 @@ class PosPaymentMethod(models.Model):
         return res
 
     @api.model
-    def _get_valid_acquirer_data(self):
-        return {
-            'tenderOption': 'AskGratuity',
-            'authorisationType': 'PreAuth'
-        }
-
-    @api.model
-    def _get_hmac(self, sale_id, service_id, poi_id, sale_transaction_id):
+    def _get_hmac(self, sale_id, service_id, poiid, sale_transaction_id):
         return hmac(
             env=self.env(su=True),
             scope='pos_adyen_payment',
-            message=(sale_id, service_id, poi_id, sale_transaction_id)
+            message=(sale_id, service_id, poiid, sale_transaction_id),
         )
 
     def _proxy_adyen_request_direct(self, data, operation):

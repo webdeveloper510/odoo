@@ -9,9 +9,8 @@ class NewModel(models.Model):
 
     value = fields.Integer(default=4)
 
-    def _compute_display_name(self):
-        for record in self:
-            record.display_name = f"{self._name}:{record.value}"
+    def name_get(self):
+        return [(record.id, "%s:%s" % (self._name, record.value)) for record in self]
 
 class GroupOperator(models.Model):
     _name = 'export.group_operator'
@@ -28,6 +27,7 @@ class GroupOperator(models.Model):
     bool_or = fields.Boolean(group_operator='bool_or')
     many2one = fields.Many2one('export.integer')
     one2many = fields.One2many('export.group_operator.one2many', 'parent_id')
+    active = fields.Boolean(default=True)
 
 class GroupOperatorO2M(models.Model):
     _name = 'export.group_operator.one2many'

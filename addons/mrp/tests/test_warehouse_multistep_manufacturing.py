@@ -3,7 +3,6 @@
 
 from odoo.tests import Form, tagged
 from odoo.addons.mrp.tests.common import TestMrpCommon
-from odoo import Command
 
 
 @tagged('post_install', '-at_install')
@@ -147,9 +146,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'location_dest_id': self.customer_location,
             'partner_id': self.env['ir.model.data']._xmlid_to_res_id('base.res_partner_4'),
             'picking_type_id': self.warehouse.out_type_id.id,
-            'state': 'draft',
         })
-
         self.env['stock.move'].create({
             'name': self.finished_product.name,
             'product_id': self.finished_product.id,
@@ -189,7 +186,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.assertEqual(picking_stock_postprod.origin, 'SOURCEDOCUMENT', 'The post-prod origin should be the SO name')
 
         picking_stock_preprod.action_assign()
-        picking_stock_preprod.move_ids.write({'quantity': 4, 'picked': True})
+        picking_stock_preprod.move_line_ids.qty_done = 4
         picking_stock_preprod._action_done()
 
         self.assertFalse(sum(self.env['stock.quant']._gather(self.raw_product, self.warehouse.lot_stock_id).mapped('quantity')))
@@ -229,7 +226,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'location_dest_id': self.customer_location,
             'partner_id': self.env['ir.model.data']._xmlid_to_res_id('base.res_partner_4'),
             'picking_type_id': self.warehouse.out_type_id.id,
-            'state': 'draft',
         })
         self.env['stock.move'].create({
             'name': self.finished_product.name,
@@ -489,7 +485,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         """
 
         self.warehouse.mto_pull_id.route_id.active = True
-        # Creating complex product which trigger another manufacture
+        # Creating complex product which trigger another manifacture
 
         routes = self.warehouse.manufacture_pull_id.route_id + self.warehouse.mto_pull_id.route_id
         self.complex_product = self.env['product.product'].create({
@@ -529,7 +525,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         production_form.picking_type_id = self.warehouse.manu_type_id
         production = production_form.save()
         production.action_confirm()
-        self.env.invalidate_all()
 
         move_raw_ids = production.move_raw_ids
         self.assertEqual(len(move_raw_ids), 2)
@@ -700,113 +695,3 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.assertEqual(len(mo), 1)
         self.assertEqual(mo.product_qty, 1.0)
         self.assertEqual(mo.bom_id, bom_2)
-
-    def test_manufacturing_bom_with_repetitions(self):
-        """
-            Checks that manufacturing orders created to manufacture the components of a BOM
-            are set with the correct quantities when products appear with repetitions.
-                - Create 5 products: product 1,2,3,4 (P1,P2,P3 and P4) and a final product (FP)
-                - Set routes to manifacture on each product
-                - For P1, P2, P3, P4 add a 0:0 reordering rule.
-                - Add a BOM for P2 with 1 unit of P1 as components
-                - Add a BOM for P3 with 1 unit of P2 as components
-                - Add a BOM for P4 with 1 unit of P3 as components
-                - Add a BOM for FP with 3 unit of P4 and 2 units of P3 as components
-        """
-        manufacturing_route = self.env['stock.rule'].search([
-            ('action', '=', 'manufacture')]).route_id
-        products = self.env['product.product'].create([
-            {
-            'name': 'FP',
-            'type': 'product',
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P1',
-            'type': 'product',
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P2',
-            'type': 'product',
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P3',
-            'type': 'product',
-            'route_ids': manufacturing_route,
-            },
-            {
-            'name': 'P4',
-            'type': 'product',
-            'route_ids': manufacturing_route,
-            },
-
-        ])
-        self.env['stock.warehouse.orderpoint'].create([
-            {
-            'name': 'My orderpoint',
-            'product_id': i,
-            'product_min_qty': 0,
-            'product_max_qty': 0,
-            } for i in products.ids[1:]
-        ])
-        self.env['mrp.bom'].create([
-            {
-            'product_tmpl_id': products[2].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[2].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[1].id,
-                    'product_qty': 1,
-                })
-            ]},
-            {
-            'product_tmpl_id': products[3].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[3].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[2].id,
-                    'product_qty': 1,
-                })
-            ]},
-            {
-            'product_tmpl_id': products[4].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[4].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[3].id,
-                    'product_qty': 1,
-                })
-            ]},
-            {
-            'product_tmpl_id': products[0].product_tmpl_id.id,
-            'product_qty': 1,
-            'product_uom_id': products[0].uom_id.id,
-            'type': 'normal',
-            'bom_line_ids': [
-                Command.create({
-                    'product_id': products[4].id,
-                    'product_qty': 3,
-                }),
-                Command.create({
-                    'product_id': products[2].id,
-                    'product_qty': 2,
-                }),
-            ]},
-        ])
-        mo = self.env['mrp.production'].create({
-            'product_id': products[0].id,
-            'product_uom_qty': 1,
-        })
-        mo.action_confirm()
-        mo_P1 = self.env['mrp.production'].search([('product_id', '=', products[1].id)])
-        mo_P2 = self.env['mrp.production'].search([('product_id', '=', products[2].id)])
-        self.assertEqual(mo_P1.product_uom_qty, 5.0)
-        self.assertEqual(mo_P2.product_uom_qty, 5.0)

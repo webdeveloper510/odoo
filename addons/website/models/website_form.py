@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
-
 from odoo import models, fields, api, SUPERUSER_ID
 from odoo.http import request
-
-_logger = logging.getLogger(__name__)
 
 
 class website_form_config(models.Model):
@@ -67,10 +63,11 @@ class website_form_model(models.Model):
         # Remove readonly, JSON, and magic fields
         # Remove string domains which are supposed to be evaluated
         # (e.g. "[('product_id', '=', product_id)]")
+        MAGIC_FIELDS = models.MAGIC_COLUMNS + [model.CONCURRENCY_CHECK_FIELD]
         for field in list(fields_get):
             if 'domain' in fields_get[field] and isinstance(fields_get[field]['domain'], str):
                 del fields_get[field]['domain']
-            if fields_get[field].get('readonly') or field in models.MAGIC_COLUMNS or \
+            if fields_get[field].get('readonly') or field in MAGIC_FIELDS or \
                     fields_get[field]['type'] in ['many2one_reference', 'properties', 'json']:
                 del fields_get[field]
 
@@ -119,11 +116,6 @@ class website_form_model_fields(models.Model):
         # only allow users who can change the website structure
         if not self.env['res.users'].has_group('website.group_website_designer'):
             return False
-
-        unexisting_fields = [field for field in fields if field not in self.env[model]._fields.keys()]
-        if unexisting_fields:
-            # TODO in master: Raise instead of log
-            _logger.error("Unable to whitelist field(s) %r for model %r.", unexisting_fields, model)
 
         # the ORM only allows writing on custom fields and will trigger a
         # registry reload once that's happened. We want to be able to

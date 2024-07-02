@@ -1,17 +1,18 @@
 /** @odoo-module **/
 
-import tourUtils from '@website_sale/js/tours/tour_utils';
-import wTourUtils from '@website/js/tours/tour_utils';
+import tourUtils from 'website_sale.tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 wTourUtils.registerWebsitePreviewTour('shop_customize', {
     url: '/shop',
     edition: true,
     test: true,
 },
-    () => [
+    [
         ...wTourUtils.clickOnSave(),
         {
             content: "select product attribute Steel",
+            extra_trigger: "iframe body:not(.editor_enable)",
             trigger: 'iframe form.js_attributes input:not(:checked) + label:contains(Steel - Test)',
         },
         {
@@ -47,6 +48,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         ...wTourUtils.clickOnSave(),
         {
             context: "check variant price",
+            extra_trigger: "iframe body:not(.editor_enable)",
             trigger: 'iframe .form-check:contains("Aluminium") .badge:contains("+") .oe_currency_value:contains("50.4")',
             run: function () {},
         },
@@ -81,6 +83,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         ...wTourUtils.clickOnSave(),
         {
             content: "check page loaded after list of variant customization disabled",
+            extra_trigger: "iframe body:not(.editor_enable)",
             trigger: "iframe .js_product:not(:has(.js_product_change))",
             run: function () {}, // it's a check
         },
@@ -109,7 +112,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         },
         {
             content: "click on 'Add to Cart' button",
-            trigger: "iframe a:contains(Add to cart)",
+            trigger: "iframe a:contains(ADD TO CART)",
         },
         {
             content: "check quantity",
@@ -119,7 +122,7 @@ wTourUtils.registerWebsitePreviewTour('shop_customize', {
         tourUtils.goToCart({backend: true}),
         {
             content: "click on shop",
-            trigger: "iframe a:contains(Continue shopping)",
+            trigger: "iframe a:contains(Continue Shopping)",
             extra_trigger: 'iframe body:not(:has(#products_grid_before .js_attributes))',
         },
         ...wTourUtils.clickOnEditAndWaitEditMode(),

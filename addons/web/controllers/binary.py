@@ -15,13 +15,14 @@ except ImportError:
 
 import odoo
 import odoo.modules.registry
-from odoo import SUPERUSER_ID, _, http
-from odoo.addons.base.models.assetsbundle import ANY_UNIQUE
+from odoo import http, _
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request, Response
+from odoo.modules import get_resource_path
 from odoo.tools import file_open, file_path, replace_exceptions
-from odoo.tools.image import image_guess_size_from_field_name
 from odoo.tools.mimetypes import guess_mimetype
+from odoo.tools.image import image_guess_size_from_field_name
+
 
 _logger = logging.getLogger(__name__)
 
@@ -72,6 +73,9 @@ class Binary(http.Controller):
         with replace_exceptions(UserError, by=request.not_found()):
             record = request.env['ir.binary']._find_record(xmlid, model, id and int(id), access_token)
             stream = request.env['ir.binary']._get_stream_from(record, field, filename, filename_field, mimetype)
+            if request.httprequest.args.get('access_token'):
+                stream.public = True
+
         send_file_kwargs = {'as_attachment': download}
         if unique:
             send_file_kwargs['immutable'] = True
@@ -83,59 +87,32 @@ class Binary(http.Controller):
         res.headers['Content-Security-Policy'] = "default-src 'none'"
         return res
 
-    @http.route([
-        '/web/assets/<string:unique>/<string:filename>'], type='http', auth="public")
-    def content_assets(self, filename=None, unique=ANY_UNIQUE, nocache=False, assets_params=None):
-        assets_params = assets_params or {}
-        assert isinstance(assets_params, dict)
-        debug_assets = unique == 'debug'
-        if unique in ('any', '%'):
-            unique = ANY_UNIQUE
-        attachment = None
-        if unique != 'debug':
-            url = request.env['ir.asset']._get_asset_bundle_url(filename, unique, assets_params)
-            assert not '%' in url
-            domain = [
-                ('public', '=', True),
-                ('url', '!=', False),
-                ('url', '=like', url),
-                ('res_model', '=', 'ir.ui.view'),
-                ('res_id', '=', 0),
-                ('create_uid', '=', SUPERUSER_ID),
-            ]
-            attachment = request.env['ir.attachment'].sudo().search(domain, limit=1)
-        if not attachment:
-            # try to generate one
-            try:
-                if filename.endswith('.map'):
-                    _logger.error(".map should have been generated through debug assets, (version %s most likely outdated)", unique)
-                    raise request.not_found()
-                bundle_name, rtl, asset_type = request.env['ir.asset']._parse_bundle_name(filename, debug_assets)
-                css = asset_type == 'css'
-                js = asset_type == 'js'
-                bundle = request.env['ir.qweb']._get_asset_bundle(
-                    bundle_name,
-                    css=css,
-                    js=js,
-                    debug_assets=debug_assets,
-                    rtl=rtl,
-                    assets_params=assets_params,
-                )
-                # check if the version matches. If not, redirect to the last version
-                if not debug_assets and unique != ANY_UNIQUE and unique != bundle.get_version(asset_type):
-                    return request.redirect(bundle.get_link(asset_type))
-                if css and bundle.stylesheets:
-                    attachment = bundle.css()
-                elif js and bundle.javascripts:
-                    attachment = bundle.js()
-            except ValueError as e:
-                _logger.warning("Parsing asset bundle %s has failed: %s", filename, e)
-                raise request.not_found() from e
-        if not attachment:
-            raise request.not_found()
-        stream = request.env['ir.binary']._get_stream_from(attachment, 'raw', filename)
+    @http.route(['/web/assets/debug/<string:filename>',
+        '/web/assets/debug/<path:extra>/<string:filename>',
+        '/web/assets/<int:id>/<string:filename>',
+        '/web/assets/<int:id>-<string:unique>/<string:filename>',
+        '/web/assets/<int:id>-<string:unique>/<path:extra>/<string:filename>'], type='http', auth="public")
+    # pylint: disable=redefined-builtin,invalid-name
+    def content_assets(self, id=None, filename=None, unique=False, extra=None, nocache=False):
+        if not id:
+            domain = [('url', '!=', False)]
+            if extra:
+                domain += [('url', '=like', f'/web/assets/%/{extra}/{filename}')]
+            else:
+                domain += [
+                    ('url', '=like', f'/web/assets/%/{filename}'),
+                    ('url', 'not like', f'/web/assets/%/%/{filename}')
+                ]
+            attachments = request.env['ir.attachment'].sudo().search_read(domain, fields=['id'], limit=1)
+            if not attachments:
+                raise request.not_found()
+            id = attachments[0]['id']
+        with replace_exceptions(UserError, by=request.not_found()):
+            record = request.env['ir.binary']._find_record(res_id=int(id))
+            stream = request.env['ir.binary']._get_stream_from(record, 'raw', filename)
+
         send_file_kwargs = {'as_attachment': False}
-        if unique and unique != 'debug':
+        if unique:
             send_file_kwargs['immutable'] = True
             send_file_kwargs['max_age'] = http.STATIC_CACHE_LONG
         if nocache:
@@ -171,6 +148,8 @@ class Binary(http.Controller):
                 record, field, filename=filename, filename_field=filename_field,
                 mimetype=mimetype, width=int(width), height=int(height), crop=crop,
             )
+            if request.httprequest.args.get('access_token'):
+                stream.public = True
         except UserError as exc:
             if download:
                 raise request.not_found() from exc
@@ -181,6 +160,7 @@ class Binary(http.Controller):
             stream = request.env['ir.binary']._get_image_stream_from(
                 record, 'raw', width=int(width), height=int(height), crop=crop,
             )
+            stream.public = False
 
         send_file_kwargs = {'as_attachment': download}
         if unique:
@@ -213,7 +193,7 @@ class Binary(http.Controller):
             try:
                 attachment = Model.create({
                     'name': filename,
-                    'raw': ufile.read(),
+                    'datas': base64.encodebytes(ufile.read()),
                     'res_model': model,
                     'res_id': int(id)
                 })
@@ -226,7 +206,7 @@ class Binary(http.Controller):
             else:
                 args.append({
                     'filename': clean(filename),
-                    'mimetype': attachment.mimetype,
+                    'mimetype': ufile.content_type,
                     'id': attachment.id,
                     'size': attachment.file_size
                 })
@@ -240,11 +220,12 @@ class Binary(http.Controller):
     def company_logo(self, dbname=None, **kw):
         imgname = 'logo'
         imgext = '.png'
+        placeholder = functools.partial(get_resource_path, 'web', 'static', 'img')
         dbname = request.db
         uid = (request.session.uid if dbname else None) or odoo.SUPERUSER_ID
 
         if not dbname:
-            response = http.Stream.from_path(file_path('web/static/img/logo.png')).get_response()
+            response = http.Stream.from_path(placeholder(imgname + imgext)).get_response()
         else:
             try:
                 # create an empty registry
@@ -280,9 +261,9 @@ class Binary(http.Controller):
                             response_class=Response,
                         )
                     else:
-                        response = http.Stream.from_path(file_path('web/static/img/nologo.png')).get_response()
+                        response = http.Stream.from_path(placeholder('nologo.png')).get_response()
             except Exception:
-                response = http.Stream.from_path(file_path(f'web/static/img/{imgname}{imgext}')).get_response()
+                response = http.Stream.from_path(placeholder(imgname + imgext)).get_response()
 
         return response
 
@@ -298,7 +279,7 @@ class Binary(http.Controller):
         """
         supported_exts = ('.ttf', '.otf', '.woff', '.woff2')
         fonts = []
-        fonts_directory = file_path('web/static/fonts/sign')
+        fonts_directory = file_path(os.path.join('web', 'static', 'fonts', 'sign'))
         if fontname:
             font_path = os.path.join(fonts_directory, fontname)
             with file_open(font_path, 'rb', filter_ext=supported_exts) as font_file:

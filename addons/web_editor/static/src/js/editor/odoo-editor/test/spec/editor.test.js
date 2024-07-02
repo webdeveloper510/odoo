@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { OdooEditor } from '../../src/OdooEditor.js';
 import {
     childNodeIndex,
@@ -128,10 +126,34 @@ describe('Editor', () => {
             });
         });
         describe('sanitize should modify p within li', () => {
-            it('should convert p into span if p has classes and split link items for each p', async () => {
+            it('should convert p into span if p has classes and add br between each span', async () => {
                 await testEditor(BasicEditor, {
                     contentBefore: '<ul><li><p class="class-1">abc</p><p class="class-2">def</p></li></ul>',
-                    contentAfter: '<ul><li><span class="class-1">abc</span></li><li class="oe-nested"><span class="class-2">def</span></li></ul>',
+                    contentAfter: '<ul><li><span class="class-1">abc</span><br><span class="class-2">def</span></li></ul>',
+                });
+            });
+            it('should convert p into span and add display block if p had text align style', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li><p style="text-align: center;">abc</p></li></ul>',
+                    contentAfter: '<ul><li><span style="text-align: center; display: block;">abc</span></li></ul>',
+                });
+            });
+            it('should convert two p into span and add display block if p had text align style without adding br', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li><p style="text-align: center;">abc</p><p style="text-align: center;">def</p></li></ul>',
+                    contentAfter: '<ul><li><span style="text-align: center; display: block;">abc</span><span style="text-align: center; display: block;">def</span></li></ul>',
+                });
+            });
+            it('should unwrap two p if they do not have any attributes', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li><p>abc</p><p>def</p></li></ul>',
+                    contentAfter: '<ul><li>abc<br>def</li></ul>',
+                });
+            });
+            it('should unwrap two p one containing br and other containing text', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li><p><br></p><p>a</p></li></ul>',
+                    contentAfter: '<ul><li><br>a</li></ul>',
                 });
             });
         });
@@ -1655,13 +1677,6 @@ X[]
                         <p>before[]after</p>`),
                 });
             });
-            it('should keep empty line and delete prefix of second line', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: '<p>ab</p><p>[<br></p><p>d]ef</p>',
-                    stepFunction: deleteForward,
-                    contentAfter: '<p>ab</p><p>[]<br></p><p>ef</p>',
-                });
-            });
         });
     });
 
@@ -1763,7 +1778,7 @@ X[]
                             await deleteBackward(editor);
                             await insertText(editor, 'x');
                         },
-                        contentAfterEdit: '<div><p>cd</p><br><span class="a" data-oe-zws-empty-inline="">x[]\u200B</span></div>',
+                        contentAfterEdit: '<div><p>cd</p><br><span class="a">x[]</span></div>',
                         contentAfter: '<div><p>cd</p><br><span class="a">x[]</span></div>',
                     });
                 });
@@ -1785,7 +1800,7 @@ X[]
                             await deleteBackward(editor);
                             await insertText(editor, 'i');
                         },
-                        contentAfterEdit: '<p>uv<i style="color:red" data-oe-zws-empty-inline="">i[]\u200B</i>xy</p>',
+                        contentAfterEdit: '<p>uv<i style="color:red">i[]</i>xy</p>',
                         contentAfter: '<p>uv<i style="color:red">i[]</i>xy</p>',
                     });
                     await testEditor(BasicEditor, {
@@ -1804,7 +1819,7 @@ X[]
                             await deleteBackward(editor);
                             await insertText(editor, 'x');
                         },
-                        contentAfterEdit: '<p>ab<span class="style" data-oe-zws-empty-inline="">x[]\u200B</span>ef</p>',
+                        contentAfterEdit: '<p>ab<span class="style">x[]</span>ef</p>',
                         contentAfter: '<p>ab<span class="style">x[]</span>ef</p>',
                     });
                 });
@@ -2054,6 +2069,13 @@ X[]
                             await deleteBackward(editor);
                         },
                         contentAfter: `<p>abc</p><p>[]def</p>`,
+                    });
+                });
+                it('should not delete in contenteditable=false', async () => {
+                    await testEditor(BasicEditor, {
+                        contentBefore: `<p contenteditable="false">ab[]cdef</p>`,
+                        stepFunction: deleteBackward,
+                        contentAfter: `<p contenteditable="false">ab[]cdef</p>`,
                     });
                 });
             });
@@ -2907,7 +2929,7 @@ X[]
                         await deleteBackward(editor);
                         await insertText(editor, 'x');
                     },
-                    contentAfterEdit: '<div><p>ab <span class="style" data-oe-zws-empty-inline="">x[]\u200B</span> d</p></div>',
+                    contentAfterEdit: '<div><p>ab <span class="style">x[]</span> d</p></div>',
                     contentAfter: '<div><p>ab <span class="style">x[]</span> d</p></div>',
                 });
                 await testEditor(BasicEditor, {
@@ -2916,7 +2938,7 @@ X[]
                         await deleteBackward(editor);
                         await insertText(editor, 'x');
                     },
-                    contentAfterEdit: '<div><p>ab<span class="style" data-oe-zws-empty-inline="">x[]\u200B</span>d</p></div>',
+                    contentAfterEdit: '<div><p>ab<span class="style">x[]</span>d</p></div>',
                     contentAfter: '<div><p>ab<span class="style">x[]</span>d</p></div>',
                 });
                 await testEditor(BasicEditor, {
@@ -2925,7 +2947,7 @@ X[]
                         await deleteBackward(editor);
                         await insertText(editor, 'x');
                     },
-                    contentAfterEdit: '<div><p>ab <span class="style" data-oe-zws-empty-inline="">x[]\u200B</span> f</p></div>',
+                    contentAfterEdit: '<div><p>ab <span class="style">x[]</span> f</p></div>',
                     contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
                 });
             });
@@ -3395,11 +3417,26 @@ X[]
                     });
                 });
             });
-            it('should keep empty line and delete prefix of second line', async () => {
+            it('should not delete in contenteditable=false 1', async () => {
                 await testEditor(BasicEditor, {
-                    contentBefore: '<p>ab</p><p>[<br></p><p>d]ef</p>',
+                    contentBefore: `<p contenteditable="false">ab[cd]ef</p>`,
                     stepFunction: deleteBackward,
-                    contentAfter: '<p>ab</p><p>[]<br></p><p>ef</p>',
+                    contentAfter: `<p contenteditable="false">ab[cd]ef</p>`,
+                });
+            });
+            it('should not delete in contenteditable=false 2', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<div contenteditable="false">
+                                        <p>a[b</p>
+                                        <p>cd</p>
+                                        <p>e]f</p>
+                                    </div>`,
+                    stepFunction: deleteBackward,
+                    contentAfter: `<div contenteditable="false">
+                                        <p>a[b</p>
+                                        <p>cd</p>
+                                        <p>e]f</p>
+                                    </div>`,
                 });
             });
         });
@@ -4408,79 +4445,79 @@ X[]
         });
     });
 
-    describe('automatic link creation when pressing Space, Enter or Shift+Enter after an url', () => {
+    describe('automatic link creation when typing a space after an url', () => {
+        const simulateInputSpace = (editor) => {
+            editor.testMode = false;
+            triggerEvent(editor.editable, 'keydown', {key: ' ', code: 'Space'});
+            // Insert space at the cursor position.
+            const selection = editor.document.getSelection();
+            const anchorOffset = selection.anchorOffset;
+            const textNode = selection.anchorNode;
+            const textContent = textNode.textContent;
+            textNode.textContent = textContent.slice(0, anchorOffset) + '\u00a0' + textContent.slice(anchorOffset);
+            selection.extend(textNode, anchorOffset + 1);
+            selection.collapseToEnd();
+            triggerEvent(editor.editable, 'input', {data: ' ', inputType: 'insertText' });
+            triggerEvent(editor.editable, 'keyup', {key: ' ', code: 'Space'});
+        }
         it('should transform url after space', async () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>a http://test.com b http://test.com[] c http://test.com d</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p>a http://test.com b <a href="http://test.com">http://test.com</a> []&nbsp;c http://test.com d</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p>a http://test.com b <a href="http://test.com">http://test.com</a>&nbsp;[] c http://test.com d</p>',
             });
-        });
-        it('should transform url followed by punctuation characters after space', async () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>http://test.com.[]</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p><a href="http://test.com">http://test.com</a>. []</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p><a href="http://test.com">http://test.com</a>.&nbsp;[]</p>',
             });
             await testEditor(BasicEditor, {
                 contentBefore: '<p>test.com...[]</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p><a href="http://test.com">test.com</a>... []</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p><a href="https://test.com">test.com</a>...&nbsp;[]</p>',
             });
             await testEditor(BasicEditor, {
                 contentBefore: '<p>test.com,[]</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p><a href="http://test.com">test.com</a>, []</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p><a href="https://test.com">test.com</a>,&nbsp;[]</p>',
             });
             await testEditor(BasicEditor, {
                 contentBefore: '<p>test.com,hello[]</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p><a href="http://test.com">test.com</a>,hello []</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p><a href="https://test.com">test.com</a>,hello&nbsp;[]</p>',
             });
             await testEditor(BasicEditor, {
                 contentBefore: '<p>http://test.com[]</p>',
                 stepFunction: async (editor) => {
-                    // Setup: simulate multiple text nodes in a p: <p>"http://test" ".com"</p>
-                    editor.editable.firstChild.firstChild.splitText(11);
-                    // Action: insert space
-                    insertText(editor, ' ');
+                    editor.testMode = false;
+                    const p = editor.editable.querySelector('p');
+                    // Simulate multiple text nodes in a p: <p>"http://test" ".com"</p>
+                    const firstTextNode = p.childNodes[0];
+                    const secondTextNode = firstTextNode.splitText(11); 
+                    const selection = editor.document.getSelection();
+                    const anchorOffset = selection.anchorOffset;
+                    triggerEvent(editor.editable, 'keydown', {key: ' ', code: 'Space'});
+                    secondTextNode.textContent = ".com\u00a0";
+                    selection.extend(secondTextNode, anchorOffset + 1);
+                    selection.collapseToEnd();
+                    triggerEvent(editor.editable, 'input', {data: ' ', inputType: 'insertText' });
+                    triggerEvent(editor.editable, 'keyup', {key: ' ', code: 'Space'});
                 },
-                contentAfter: '<p><a href="http://test.com">http://test.com</a> []</p>',
-            });
-        });
-        it('should transform url after enter', async () => {
-            await testEditor(BasicEditor, {
-                contentBefore: '<p>a http://test.com b http://test.com[] c http://test.com d</p>',
-                stepFunction: async (editor) => {
-                    triggerEvent(editor.editable, 'keydown', {key: 'Enter'});
-                    triggerEvent(editor.editable, 'input', {data: ' ', inputType: 'insertParagraph' });
-                    triggerEvent(editor.editable, 'keyup', {key: 'Enter'});
-                },
-                contentAfter: '<p>a http://test.com b <a href="http://test.com">http://test.com</a></p><p>[]&nbsp;c http://test.com d</p>',
-            });
-        });
-        it('should transform url after shift+enter', async () => {
-            await testEditor(BasicEditor, {
-                contentBefore: '<p>a http://test.com b http://test.com[] c http://test.com d</p>',
-                stepFunction: async (editor) => {
-                    triggerEvent(editor.editable, 'keydown', {key: 'Enter', shiftKey: true});
-                    triggerEvent(editor.editable, 'keyup', {key: 'Enter', shiftKey: true});
-                },
-                contentAfter: '<p>a http://test.com b <a href="http://test.com">http://test.com</a><br>[]&nbsp;c http://test.com d</p>',
+                contentAfter: '<p><a href="http://test.com">http://test.com</a>&nbsp;[]</p>',
             });
         });
         it('should not transform an email url after space', async () => {
             await testEditor(BasicEditor, {
                 contentBefore: '<p>user@domain.com[]</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p>user@domain.com []</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p>user@domain.com&nbsp;[]</p>',
             });
         });
         it('should not transform url after two space', async () => {
             await testEditor(BasicEditor, {
-                contentBefore: '<p>a http://test.com b http://test.com&nbsp;[] c http://test.com d</p>',
-                stepFunction: editor => insertText(editor, ' '),
-                contentAfter: '<p>a http://test.com b http://test.com&nbsp; []&nbsp;c http://test.com d</p>',
+                contentBefore: '<p>a http://test.com b http://test.com [] c http://test.com d</p>',
+                stepFunction: simulateInputSpace,
+                contentAfter: '<p>a http://test.com b http://test.com &nbsp;[] c http://test.com d</p>',
             });
         });
     });
@@ -4712,7 +4749,7 @@ X[]
 
     describe('columnize', () => {
         const columnsContainer = contents => `<div class="container o_text_columns"><div class="row">${contents}</div></div>`;
-        const column = (size, contents) => `<div class="col-${size}">${contents}</div>`;
+        const column = (size, contents) => `<div class="col-lg-${size}">${contents}</div>`;
         describe('2 columns', () => {
             it('should do nothing', async () => {
                 await testEditor(BasicEditor, {
@@ -4954,10 +4991,10 @@ X[]
                     stepFunction: editor => editor.execCommand('columnize', 2),
                     contentAfter: '<div class="container"><div class="row"><div class="col">' +
                                       '<div class="o_text_columns"><div class="row">' + // no "container" class
-                                          '<div class="col-6">' +
+                                          '<div class="col-lg-6">' +
                                               '<p>ab[]cd</p>' +
                                           '</div>' +
-                                          '<div class="col-6"><p><br></p></div>' +
+                                          '<div class="col-lg-6"><p><br></p></div>' +
                                       '</div></div>' +
                                       '<p><br></p>' +
                                   '</div></div></div>',
@@ -7021,179 +7058,77 @@ X[]
         });
     });
 
-    describe('data-oe-protected', () => {
-        describe('true', () => {
-            it('should ignore protected elements children mutations', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                    <div><p>a[]</p></div>
-                    <div data-oe-protected="true"><p>a</p></div>
-                    `),
-                    stepFunction: async editor => {
-                        await insertText(editor, 'bc');
-                        const protectedParagraph = editor.editable.querySelector('[data-oe-protected="true"] > p');
-                        protectedParagraph.append(document.createTextNode('b'));
-                        editor.historyStep();
-                        editor.historyUndo();
-                    },
-                    contentAfterEdit: unformat(`
-                    <div><p>ab[]</p></div>
-                    <div data-oe-protected="true"><p>ab</p></div>
-                    `),
-                });
-            });
-            it('should not sanitize (sanitize.js) protected elements children', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                    <div>
-                        <p><i class="fa"></i></p>
-                        <ul><li><p><br></p></li></ul>
-                    </div>
-                    <div data-oe-protected="true">
-                        <p><i class="fa"></i></p>
-                        <ul><li><p><br></p></li></ul>
-                    </div>
-                    `),
-                    stepFunction: async editor => editor.sanitize(),
-                    contentAfterEdit: unformat(`
-                    <div>
-                        <p><i class="fa" contenteditable="false">\u200B</i></p>
-                        <ul><li><br></li></ul>
-                    </div>
-                    <div data-oe-protected="true">
-                        <p><i class="fa"></i></p>
-                        <ul><li><p><br></p></li></ul>
-                    </div>
-                    `),
-                });
-            });
-            it('should not handle table selection in protected elements children', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                    <div data-oe-protected="true">
-                        <p>a[bc</p><table><tbody><tr><td>a]b</td><td>cd</td><td>ef</td></tr></tbody></table>
-                    </div>
-                    `),
-                    contentAfterEdit: unformat(`
-                    <div data-oe-protected="true">
-                        <p>a[bc</p><table><tbody><tr><td>a]b</td><td>cd</td><td>ef</td></tr></tbody></table>
-                    </div>
-                    `),
-                });
-            });
-            it('should not select a protected table', async () => {
-                // Individually protected cells are not yet supported for simplicity
-                // since there is no need for that currently.
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                        <table data-oe-protected="true"><tbody><tr>
-                            <td>[ab</td>
-                        </tr></tbody></table>
-                        <table><tbody><tr>
-                            <td>cd]</td>
-                        </tr></tbody></table>
-                    `),
-                    contentAfterEdit: unformat(`
-                        <table data-oe-protected="true"><tbody><tr>
-                            <td>[ab</td>
-                        </tr></tbody></table>
-                        <table class="o_selected_table"><tbody><tr>
-                            <td class="o_selected_td">cd]</td>
-                        </tr></tbody></table>
-                    `),
-                });
-            });
-        });
-        describe('false', () => {
-            it('should not ignore unprotected elements children mutations', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                    <div><p>a[]</p></div>
-                    <div data-oe-protected="true"><div data-oe-protected="false"><p>a</p></div></div>
-                    `),
-                    stepFunction: async editor => {
-                        await insertText(editor, 'bc');
-                        const unProtectedParagraph = editor.editable.querySelector('[data-oe-protected="false"] > p');
-                        setSelection(unProtectedParagraph, 1);
-                        await insertText(editor, 'bc');
-                        editor.historyUndo();
-                    },
-                    contentAfterEdit: unformat(`
-                    <div><p>abc</p></div>
-                    <div data-oe-protected="true"><div data-oe-protected="false"><p>ab[]</p></div></div>
-                    `),
-                });
-            });
-            it('should sanitize (sanitize.js) unprotected elements children', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                    <div data-oe-protected="true">
-                        <p><i class="fa"></i></p>
-                        <ul><li><p><br></p></li></ul>
-                        <div data-oe-protected="false">
-                            <p><i class="fa"></i></p>
-                            <ul><li><p><br></p></li></ul>
-                        </div>
-                    </div>
-                    `),
-                    stepFunction: async editor => editor.sanitize(),
-                    contentAfterEdit: unformat(`
-                    <div data-oe-protected="true">
-                        <p><i class="fa"></i></p>
-                        <ul><li><p><br></p></li></ul>
-                        <div data-oe-protected="false">
-                            <p><i class="fa" contenteditable="false">\u200B</i></p>
-                            <ul><li><br></li></ul>
-                        </div>
-                    </div>
-                    `),
-                });
-            });
-            it('should handle table selection in unprotected elements children', async () => {
-                await testEditor(BasicEditor, {
-                    contentBefore: unformat(`
-                    <div data-oe-protected="true">
-                        <div data-oe-protected="false">
-                            <p>a[bc</p><table><tbody><tr><td>a]b</td><td>cd</td><td>ef</td></tr></tbody></table>
-                        </div>
-                    </div>
-                    `),
-                    contentAfterEdit: unformat(`
-                    <div data-oe-protected="true">
-                        <div data-oe-protected="false">
-                            <p>a[bc</p>
-                            <table class="o_selected_table"><tbody><tr>
-                                <td class="o_selected_td">a]b</td>
-                                <td class="o_selected_td">cd</td>
-                                <td class="o_selected_td">ef</td>
-                            </tr></tbody></table>
-                        </div>
-                    </div>
-                    `),
-                });
-            });
-        });
-    });
-    describe('data-oe-transient-content', () => {
-        it('should remove transient elements children during cleaning', async () => {
+    describe('oe-protected', () => {
+        it('should ignore protected elements children mutations', async () => {
             await testEditor(BasicEditor, {
-                contentBefore: '<div><p>a</p></div><div data-oe-transient-content="true"><p>a</p></div>',
-                contentAfter: '<div><p>a</p></div><div data-oe-transient-content="true"></div>',
-            });
-        });
-        it('should ignore transient elements children during serialization', async () => {
-            await testEditor(BasicEditor, {
-                contentBefore: '<div><p>a</p></div><div data-oe-transient-content="true"><p>a</p></div>',
+                contentBefore: unformat(`
+                <div><p>a[]</p></div>
+                <div data-oe-protected="true"><p>a</p></div>
+                `),
                 stepFunction: async editor => {
-                    const elements = [];
-                    for (const element of [...editor.editable.children]) {
-                        elements.push(editor.unserializeNode(editor.serializeNode(element)));
-                    }
-                    const container = document.createElement('DIV');
-                    container.append(...elements);
-                    editor.resetContent(container.innerHTML)
+                    await insertText(editor, 'bc');
+                    const protectedParagraph = editor.editable.querySelector('[data-oe-protected="true"] > p');
+                    setSelection(protectedParagraph, 1);
+                    await insertText(editor, 'b');
+                    editor.historyUndo();
                 },
-                contentAfter: '<div><p>a</p></div><div data-oe-transient-content="true"></div>',
+                contentAfterEdit: unformat(`
+                <div><p>ab[]</p></div>
+                <div data-oe-protected="true"><p>ab</p></div>
+                `),
+            });
+        });
+        it('should not sanitize protected elements children', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                <div>
+                    <p><i class="fa"></i></p>
+                    <ul><li><p><br></p></li></ul>
+                </div>
+                <div data-oe-protected="true">
+                    <p><i class="fa"></i></p>
+                    <ul><li><p><br></p></li></ul>
+                </div>
+                `),
+                stepFunction: async editor => editor.sanitize(),
+                contentAfterEdit: unformat(`
+                <div>
+                    <p><i class="fa" contenteditable="false">\u200B</i></p>
+                    <ul><li><br></li></ul>
+                </div>
+                <div data-oe-protected="true">
+                    <p><i class="fa"></i></p>
+                    <ul><li><p><br></p></li></ul>
+                </div>
+                `),
+            });
+        });
+        it('should remove protected elements children during cleaning', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<div><p>a[]</p></div><div data-oe-protected="true"><p>a</p></div>',
+                contentAfter: '<div><p>a[]</p></div><div data-oe-protected="true"></div>',
+            });
+        });
+        it('should not select a protected table', async () => {
+            // Individually protected cells are not yet supported for simplicity
+            // since there is no need for that currently.
+            await testEditor(BasicEditor, {
+                contentBefore: unformat(`
+                    <table data-oe-protected="true"><tbody><tr>
+                        <td>[ab</td>
+                    </tr></tbody></table>
+                    <table><tbody><tr>
+                        <td>cd]</td>
+                    </tr></tbody></table>
+                `),
+                contentAfterEdit: unformat(`
+                    <table data-oe-protected="true"><tbody><tr>
+                        <td>[ab</td>
+                    </tr></tbody></table>
+                    <table class="o_selected_table"><tbody><tr>
+                        <td class="o_selected_td">cd]</td>
+                    </tr></tbody></table>
+                `),
             });
         });
     });
@@ -7429,12 +7364,12 @@ X[]
             });
             it('should delete star rating elements when delete is pressed twice', async () => {
                 await testEditor(BasicEditor, {
-                    contentBefore: `<p>\u200B<span contenteditable="false" class="o_stars o_three_stars"><i class="fa fa-star-o" id="checkId-1" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" id="checkId-2" contenteditable="false">\u200B</i><i class="o_stars fa fa-star-o" id="checkId-3" contenteditable="false">\u200B</i></span>\u200B[]</p>`,
+                    contentBefore: `<p>\u200B<span contenteditable="false" class="o_stars o_three_stars" id="checkId-1"><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i><i class="fa fa-star-o" contenteditable="false">\u200B</i></span>\u200B</p><p>[]</p>`,
                     stepFunction: async editor => {
                         await deleteBackward(editor)
                         await deleteBackward(editor)
                     },
-                    contentAfter: '<p>\u200B[]<br></p>'
+                    contentAfter: '<p>\u200B[]</p>'
                 });
             });
         });

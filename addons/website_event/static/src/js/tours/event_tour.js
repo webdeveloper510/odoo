@@ -1,36 +1,40 @@
-/** @odoo-module **/
+odoo.define('website_event.event_steps', function (require) {
+"use strict";
 
-import { _t } from "@web/core/l10n/translation";
-import EventAdditionalTourSteps from "@event/js/tours/event_steps";
+const {_t} = require('web.core');
+const {Markup} = require('web.utils');
 
-import { markup } from "@odoo/owl";
-import { patch } from "@web/core/utils/patch";
+var EventAdditionalTourSteps = require('event.event_steps');
 
-patch(EventAdditionalTourSteps.prototype, {
+EventAdditionalTourSteps.include({
 
-    _get_website_event_steps() {
-        return [
-            ...super._get_website_event_steps(), {
+    init: function() {
+        this._super.apply(this, arguments);
+    },
+
+    _get_website_event_steps: function () {
+        this._super.apply(this, arguments);
+        return [{
                 trigger: '.o_event_form_view button[title="Unpublished"]',
-                content: markup(_t("Use this <b>shortcut</b> to easily access your event web page.")),
+                content: Markup(_t("Use this <b>shortcut</b> to easily access your event web page.")),
                 position: 'bottom',
             }, {
                 trigger: '.o_edit_website_container a',
-                content: markup(_t("With the Edit button, you can <b>customize</b> the web page visitors will see when registering.")),
+                content: Markup(_t("With the Edit button, you can <b>customize</b> the web page visitors will see when registering.")),
                 position: 'bottom',
             }, {
                 trigger: '#oe_snippets.o_loaded div[name="Image - Text"] .oe_snippet_thumbnail',
-                content: markup(_t("<b>Drag and Drop</b> this snippet below the event title.")),
+                content: Markup(_t("<b>Drag and Drop</b> this snippet below the event title.")),
                 position: 'bottom',
-                run: 'drag_and_drop_native iframe #o_wevent_event_main_col',
+                run: 'drag_and_drop iframe #o_wevent_event_main_col',
             }, {
                 trigger: 'button[data-action="save"]',
-                content: markup(_t("Don't forget to click <b>save</b> when you're done.")),
+                content: Markup(_t("Don't forget to click <b>save</b> when you're done.")),
                 position: 'bottom',
             }, {
                 trigger: '.o_menu_systray_item .o_switch_danger_success',
                 extra_trigger: 'iframe body:not(.editor_enable) .o_wevent_event',
-                content: markup(_t("Looking great! Let's now <b>publish</b> this page so that it becomes <b>visible</b> on your website!")),
+                content: Markup(_t("Looking great! Let's now <b>publish</b> this page so that it becomes <b>visible</b> on your website!")),
                 position: 'bottom',
             }, {
                 trigger: '.o_website_edit_in_backend > a',
@@ -41,4 +45,6 @@ patch(EventAdditionalTourSteps.prototype, {
     }
 });
 
-export default EventAdditionalTourSteps;
+return EventAdditionalTourSteps;
+
+});

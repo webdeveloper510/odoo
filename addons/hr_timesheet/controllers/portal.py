@@ -33,8 +33,8 @@ class TimesheetCustomerPortal(CustomerPortal):
             'name': {'input': 'name', 'label': _('Search in Description')},
         }
 
-    def _task_get_searchbar_sortings(self, milestones_allowed, project=False):
-        values = super()._task_get_searchbar_sortings(milestones_allowed, project)
+    def _task_get_searchbar_sortings(self, milestones_allowed):
+        values = super()._task_get_searchbar_sortings(milestones_allowed)
         values['progress'] = {'label': _('Progress'), 'order': 'progress asc', 'sequence': 10}
         return values
 
@@ -137,14 +137,14 @@ class TimesheetCustomerPortal(CustomerPortal):
             timesheets = Timesheet_sudo.search(domain, order=orderby, limit=_items_per_page, offset=pager['offset'])
             if field:
                 if groupby == 'date':
-                    raw_timesheets_group = Timesheet_sudo._read_group(
-                        domain, ['date:day'], ['unit_amount:sum', 'id:recordset']
+                    raw_timesheets_group = Timesheet_sudo.read_group(
+                        domain, ["unit_amount:sum", "ids:array_agg(id)"], ["date:day"]
                     )
-                    grouped_timesheets = [(records, unit_amount) for __, unit_amount, records in raw_timesheets_group]
+                    grouped_timesheets = [(Timesheet_sudo.browse(group["ids"]), group["unit_amount"]) for group in raw_timesheets_group]
 
                 else:
-                    time_data = Timesheet_sudo._read_group(domain, [field], ['unit_amount:sum'])
-                    mapped_time = {field.id: unit_amount for field, unit_amount in time_data}
+                    time_data = Timesheet_sudo.read_group(domain, [field, 'unit_amount:sum'], [field])
+                    mapped_time = dict([(m[field][0] if m[field] else False, m['unit_amount']) for m in time_data])
                     grouped_timesheets = [(Timesheet_sudo.concat(*g), mapped_time[k.id]) for k, g in groupbyelem(timesheets, itemgetter(field))]
                 return timesheets, grouped_timesheets
 
@@ -183,3 +183,11 @@ class TimesheetProjectCustomerPortal(ProjectCustomerPortal):
         timesheets = request.env['account.analytic.line'].sudo().search(task_domain)
         return self._show_report(model=timesheets,
             report_type=report_type, report_ref='hr_timesheet.timesheet_report_task_timesheets', download=download)
+
+    def _prepare_tasks_values(self, page, date_begin, date_end, sortby, search, search_in, groupby, url="/my/tasks", domain=None, su=False):
+        values = super()._prepare_tasks_values(page, date_begin, date_end, sortby, search, search_in, groupby, url, domain, su)
+        values.update(
+            is_uom_day=request.env['account.analytic.line']._is_timesheet_encode_uom_day(),
+        )
+
+        return values

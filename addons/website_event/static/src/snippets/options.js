@@ -1,12 +1,8 @@
 /** @odoo-module **/
 
-import options from '@web_editor/js/editor/snippets.options';
+import options from 'web_editor.snippets.options';
 
 options.registry.WebsiteEvent = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
 
     /**
      * @override
@@ -17,8 +13,14 @@ options.registry.WebsiteEvent = options.Class.extend({
         this.eventId = this._getEventObjectId();
         // Only need for one RPC request as the option will be destroyed if a
         // change is made.
-        const rpcData = await this.orm.read("event.event", [this.eventId], ["website_menu","website_url"]);
-        this.data.reload = this.currentWebsiteUrl;
+        const rpcData = await this._rpc({
+            model: 'event.event',
+            method: 'read',
+            args: [
+                [this.eventId],
+                ['website_menu', 'website_url'],
+            ],
+        });
         this.websiteMenu = rpcData[0]['website_menu'];
         this.data.reload = rpcData[0]['website_url'];
         return res;
@@ -32,7 +34,11 @@ options.registry.WebsiteEvent = options.Class.extend({
      * @see this.selectClass for parameters
      */
     displaySubmenu(previewMode, widgetValue, params) {
-        return this.orm.call("event.event", "toggle_website_menu", [[this.eventId], widgetValue]);
+        return this._rpc({
+            model: 'event.event',
+            method: 'toggle_website_menu',
+            args: [[this.eventId], widgetValue],
+        });
     },
 
     //--------------------------------------------------------------------------

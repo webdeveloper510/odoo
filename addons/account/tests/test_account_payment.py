@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged, new_test_user
 from odoo.tests.common import Form
@@ -860,30 +859,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'is_matched': True,
         }])
 
-    def test_reconciliation_payment_states_reverse_payment_move(self):
-        invoice = self.env['account.move'].create({
-            'move_type': 'out_invoice',
-            'partner_id': self.partner_a.id,
-            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
-        })
-        invoice.action_post()
-
-        payment = self.env['account.payment.register']\
-            .with_context(active_model='account.move', active_ids=invoice.ids)\
-            .create({})\
-            ._create_payments()
-
-        self.assertTrue(invoice.payment_state in ('paid', 'in_payment'))
-        self.assertRecordValues(payment, [{'reconciled_invoice_ids': invoice.ids}])
-
-        # Reverse the payment move
-        reversal_wizard = self.env['account.move.reversal']\
-            .with_context(active_model='account.move', active_ids=payment.move_id.ids)\
-            .create({'reason': "oopsie", 'journal_id': payment.journal_id.id})
-        reversal_wizard.refund_moves()
-        self.assertRecordValues(invoice, [{'payment_state': 'not_paid'}])
-        self.assertRecordValues(payment.line_ids, [{'reconciled': True}] * 2)
-
     def test_payment_name(self):
         AccountPayment = self.env['account.payment']
         AccountPayment.search([]).unlink()
@@ -894,9 +869,9 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         self.assertRegex(payment.name, r'BNK1/\d{4}/00001')
 
         with Form(AccountPayment.with_context(default_move_journal_types=('bank', 'cash'))) as payment_form:
-            self.assertEqual(payment_form.name, '/')
+            self.assertEqual(payment_form._values['name'], '/')
             payment_form.journal_id = self.company_data['default_journal_cash']
-            self.assertRegex(payment_form.name, r'CSH1/\d{4}/00001')
+            self.assertRegex(payment_form._values['name'], r'CSH1/\d{4}/00001')
             payment_form.journal_id = self.company_data['default_journal_bank']
         payment = payment_form.save()
         self.assertEqual(payment.name, '/')
@@ -1027,35 +1002,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             {'account_id': bank_2.inbound_payment_method_line_ids.payment_account_id.id},
             {'account_id': transfer_account.id},
         ])
-
-    def test_reconciliation_with_old_oustanding_account(self):
-        """
-        Test the reconciliation of an invoice with a payment after changing the outstanding account of the journal.
-        """
-        outstanding_account_1 = self.company_data['company'].account_journal_payment_debit_account_id.copy()
-        outstanding_account_2 = outstanding_account_1.copy()
-
-        self.company_data['default_journal_bank'].inbound_payment_method_line_ids.payment_account_id = outstanding_account_1
-
-        payment = self.env['account.payment'].create({
-            'payment_type': 'inbound',
-            'partner_type': 'customer',
-            'partner_id': self.partner_a.id,
-            'journal_id': self.company_data['default_journal_bank'].id,
-            'amount': 1150,
-        })
-        payment.action_post()
-
-        self.company_data['default_journal_bank'].inbound_payment_method_line_ids.payment_account_id = outstanding_account_2
-        invoice = self.init_invoice('out_invoice', post=True, amounts=[1000.0], taxes=self.env['account.tax'])
-
-        credit_line = payment.line_ids.filtered(lambda l: l.credit and l.account_id == self.company_data['default_account_receivable'])
-
-        invoice.js_assign_outstanding_line(credit_line.id)
-        self.assertTrue(invoice.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        invoice.button_draft()
-        self.assertTrue(invoice.payment_state == 'not_paid', "Invoice should'nt be paid anymore")
-        self.assertTrue(invoice.state == 'draft', "Invoice should be draft")
 
     def test_journal_onchange(self):
         """Ensure that the payment method line is recomputed when switching journal in form view."""

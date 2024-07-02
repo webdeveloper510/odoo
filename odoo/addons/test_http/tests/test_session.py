@@ -3,7 +3,7 @@
 import datetime
 import json
 import pytz
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 from unittest.mock import patch
 
 import odoo
@@ -41,13 +41,44 @@ class TestHttpSession(TestHttpBase):
     def test_session1_default_session(self):
         # The default session should not be saved on the filestore.
         with patch.object(odoo.http.root.session_store, 'save') as mock_save:
-            res = self.db_url_open('/test_http/geoip')
+            res = self.db_url_open('/test_http/greeting')
             res.raise_for_status()
             try:
                 mock_save.assert_not_called()
             except AssertionError as exc:
                 msg = f'save() was called with args: {mock_save.call_args}'
                 raise AssertionError(msg) from exc
+
+    def test_session2_geoip(self):
+        real_save = odoo.http.root.session_store.save
+        with patch.object(odoo.http.root.geoip_resolver, 'resolve') as mock_resolve,\
+             patch.object(odoo.http.root.session_store, 'save') as mock_save:
+            mock_resolve.return_value = GEOIP_ODOO_FARM_2
+            mock_save.side_effect = real_save
+
+            # Geoip is lazy: it should be computed only when necessary.
+            self.nodb_url_open('/test_http/greeting').raise_for_status()
+            mock_resolve.assert_not_called()
+
+            # Geoip is like the defaut session: the session should not
+            # be stored only due to geoip.
+            mock_resolve.reset_mock()
+            mock_save.reset_mock()
+            res = self.nodb_url_open('/test_http/geoip')
+            res.raise_for_status()
+            self.assertEqual(res.text, str(GEOIP_ODOO_FARM_2))
+            mock_save.assert_not_called()
+
+            # Geoip is cached on the session: we shouldn't geolocate the
+            # same ip multiple times.
+            mock_resolve.reset_mock()
+            mock_save.reset_mock()
+            self.nodb_url_open('/test_http/save_session').raise_for_status()
+            self.nodb_url_open('/test_http/geoip').raise_for_status()
+            res = self.nodb_url_open('/test_http/geoip')
+            res.raise_for_status()
+            self.assertEqual(res.text, str(GEOIP_ODOO_FARM_2))
+            mock_resolve.assert_called_once()
 
     def test_session3_logout_15_0_geoip(self):
         session = self.authenticate(None, None)
@@ -206,3 +237,22 @@ class TestHttpSession(TestHttpBase):
             with self.assertRaises(TypeError):
                 dict.update(session, foo=value)
             self.assertFalse(session.foo)
+
+    def test_session8_logout(self):
+        sid = self.authenticate('admin', 'admin').sid
+        self.assertTrue(odoo.http.root.session_store.get(sid), "session should exist")
+        self.url_open('/web/session/logout', allow_redirects=False).raise_for_status()
+        self.assertFalse(odoo.http.root.session_store.get(sid), "session should not exist")
+
+    def test_session9_explicit_session(self):
+        forged_sid = 'da39a3ee5e6b4b0d3255bfef95601890afd80709'
+        admin_session = self.authenticate('admin', 'admin')
+        with self.assertLogs('odoo.http') as capture:
+            qs = urlencode({'debug': 1, 'session_id': forged_sid})
+            self.url_open(f'/web/session/logout?{qs}').raise_for_status()
+        self.assertEqual(len(capture.output), 1)
+        self.assertRegex(capture.output[0],
+            r"^WARNING:odoo.http:<function odoo\.addons\.\w+\.controllers\.\w+\.logout> "
+            r"called ignoring args {('session_id', 'debug'|'debug', 'session_id')}$"
+        )
+        self.assertEqual(admin_session.debug, '1')

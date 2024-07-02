@@ -1,10 +1,15 @@
 /** @odoo-module **/
 
-import { mountComponent } from "./env";
+import { makeEnv, startServices } from "./env";
+import { legacySetupProm } from "./legacy/legacy_setup";
+import { mapLegacyEnvToWowlEnv } from "./legacy/utils";
 import { localization } from "@web/core/l10n/localization";
 import { session } from "@web/session";
+import { renderToString } from "./core/utils/render";
+import { setLoadXmlDefaultApp, templates } from "@web/core/assets";
 import { hasTouch } from "@web/core/browser/feature_detection";
-import { Component, whenReady } from "@odoo/owl";
+
+import { App, whenReady } from "@odoo/owl";
 
 /**
  * Function to start a webclient.
@@ -23,11 +28,24 @@ export async function startWebClient(Webclient) {
     };
     odoo.isReady = false;
 
-    await whenReady();
-    const app = await mountComponent(Webclient, document.body, { name: "Odoo Web Client" });
-    const { env } = app;
-    Component.env = env;
+    // setup environment
+    const env = makeEnv();
+    await startServices(env);
 
+    // start web client
+    await whenReady();
+    const legacyEnv = await legacySetupProm;
+    mapLegacyEnvToWowlEnv(legacyEnv, env);
+    const app = new App(Webclient, {
+        env,
+        templates,
+        dev: env.debug,
+        translatableAttributes: ["data-tooltip"],
+        translateFn: env._t,
+    });
+    renderToString.app = app;
+    setLoadXmlDefaultApp(app);
+    const root = await app.mount(document.body);
     const classList = document.body.classList;
     if (localization.direction === "rtl") {
         classList.add("o_rtl");
@@ -42,5 +60,17 @@ export async function startWebClient(Webclient) {
         classList.add("o_touch_device");
     }
     // delete odoo.debug; // FIXME: some legacy code rely on this
+    odoo.__WOWL_DEBUG__ = { root };
     odoo.isReady = true;
+
+    // Update Favicons
+    const favicon = `/web/image/res.company/${env.services.company.currentCompany.id}/favicon`;
+    const icons = document.querySelectorAll("link[rel*='icon']");
+    const msIcon = document.querySelector("meta[name='msapplication-TileImage']");
+    for (const icon of icons) {
+        icon.href = favicon;
+    }
+    if (msIcon) {
+        msIcon.content = favicon;
+    }
 }

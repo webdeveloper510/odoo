@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import imaplib
 import logging
 import poplib
 import socket
@@ -27,6 +28,38 @@ poplib._MAXLINE = 65536
 IMAP4._create_socket = lambda self, timeout=MAIL_TIMEOUT: socket.create_connection((self.host or None, self.port), timeout)
 
 
+def make_wrap_property(name):
+    return property(
+        lambda self: getattr(self.__obj__, name),
+        lambda self, value: setattr(self.__obj__, name, value),
+    )
+
+
+class IMAP4Connection:
+    """Wrapper around IMAP4 and IMAP4_SSL"""
+    def __init__(self, server, port, is_ssl):
+        self.__obj__ = IMAP4_SSL(server, port) if is_ssl else IMAP4(server, port)
+
+
+class POP3Connection:
+    """Wrapper around POP3 and POP3_SSL"""
+    def __init__(self, server, port, is_ssl, timeout=MAIL_TIMEOUT):
+        self.__obj__ = POP3_SSL(server, port, timeout=timeout) if is_ssl else POP3(server, port, timeout=timeout)
+
+
+IMAP_COMMANDS = [cmd.lower() for cmd in imaplib.Commands]
+IMAP_ATTRIBUTES = ['examine', 'login_cram_md5', 'move', 'recent', 'response', 'shutdown', 'unselect'] + IMAP_COMMANDS
+POP3_ATTRIBUTES = [
+    'apop', 'capa', 'close', 'dele', 'list', 'noop', 'pass_', 'quit', 'retr', 'rpop', 'rset', 'set_debuglevel', 'stat',
+    'stls', 'top', 'uidl', 'user', 'utf8'
+]
+for name in IMAP_ATTRIBUTES:
+    setattr(IMAP4Connection, name, make_wrap_property(name))
+
+for name in POP3_ATTRIBUTES:
+    setattr(POP3Connection, name, make_wrap_property(name))
+
+
 class FetchmailServer(models.Model):
     """Incoming POP/IMAP mail server account"""
 
@@ -40,8 +73,8 @@ class FetchmailServer(models.Model):
         ('draft', 'Not Confirmed'),
         ('done', 'Confirmed'),
     ], string='Status', index=True, readonly=True, copy=False, default='draft')
-    server = fields.Char(string='Server Name', readonly=False, help="Hostname or IP of the mail server")
-    port = fields.Integer()
+    server = fields.Char(string='Server Name', readonly=True, help="Hostname or IP of the mail server", states={'draft': [('readonly', False)]})
+    port = fields.Integer(readonly=True, states={'draft': [('readonly', False)]})
     server_type = fields.Selection([
         ('imap', 'IMAP Server'),
         ('pop', 'POP Server'),
@@ -54,13 +87,13 @@ class FetchmailServer(models.Model):
     original = fields.Boolean('Keep Original', help="Whether a full original copy of each email should be kept for reference "
                                                     "and attached to each processed message. This will usually double the size of your message database.")
     date = fields.Datetime(string='Last Fetch Date', readonly=True)
-    user = fields.Char(string='Username', readonly=False)
-    password = fields.Char()
+    user = fields.Char(string='Username', readonly=True, states={'draft': [('readonly', False)]})
+    password = fields.Char(readonly=True, states={'draft': [('readonly', False)]})
     object_id = fields.Many2one('ir.model', string="Create a New Record", help="Process each incoming mail as part of a conversation "
                                                                                 "corresponding to this document type. This will create "
                                                                                 "new documents for new conversations, or attach follow-up "
                                                                                 "emails to the existing conversations (documents).")
-    priority = fields.Integer(string='Server Priority', readonly=False, help="Defines the order of processing, lower values mean higher priority", default=5)
+    priority = fields.Integer(string='Server Priority', readonly=True, states={'draft': [('readonly', False)]}, help="Defines the order of processing, lower values mean higher priority", default=5)
     message_ids = fields.One2many('mail.mail', 'fetchmail_server_id', string='Messages', readonly=True)
     configuration = fields.Text('Configuration', readonly=True)
     script = fields.Char(readonly=True, default='/mail/static/scripts/odoo-mailgate.py')
@@ -124,16 +157,10 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
             raise UserError(_('The server "%s" cannot be used because it is archived.', self.display_name))
         connection_type = self._get_connection_type()
         if connection_type == 'imap':
-            if self.is_ssl:
-                connection = IMAP4_SSL(self.server, int(self.port))
-            else:
-                connection = IMAP4(self.server, int(self.port))
+            connection = IMAP4Connection(self.server, int(self.port), self.is_ssl)
             self._imap_login(connection)
         elif connection_type == 'pop':
-            if self.is_ssl:
-                connection = POP3_SSL(self.server, int(self.port), timeout=MAIL_TIMEOUT)
-            else:
-                connection = POP3(self.server, int(self.port), timeout=MAIL_TIMEOUT)
+            connection = POP3Connection(self.server, int(self.port), self.is_ssl)
             #TODO: use this to remove only unread messages
             #connection.user("recent:"+server.user)
             connection.user(self.user)
@@ -152,12 +179,12 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
 
     def button_confirm_login(self):
         for server in self:
-            connection = None
+            connection = False
             try:
                 connection = server.connect(allow_archived=True)
                 server.write({'state': 'done'})
             except UnicodeError as e:
-                raise UserError(_("Invalid server name!\n %s", tools.ustr(e)))
+                raise UserError(_("Invalid server name !\n %s", tools.ustr(e)))
             except (gaierror, timeout, IMAP4.abort) as e:
                 raise UserError(_("No response received. Check server information.\n %s", tools.ustr(e)))
             except (IMAP4.error, poplib.error_proto) as err:

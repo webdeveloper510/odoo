@@ -3,7 +3,7 @@
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { useBus } from "@web/core/utils/hooks";
 
-import { useComponent, useEffect, useRef } from "@odoo/owl";
+import { useComponent, useEffect, useRef, useEnv } from "@odoo/owl";
 
 /**
  * This hook is meant to be used by field components that use an input or
@@ -14,9 +14,9 @@ import { useComponent, useEffect, useRef } from "@odoo/owl";
  * @param {() => string} getValue a function that returns the value to write in
  *   the input, if the user isn't currently editing it
  * @param {string} [refName="input"] the ref of the input/textarea
- * @param {boolean} preventLineBreaks Prevent line breaks in input when set
  */
 export function useInputField(params) {
+    const env = useEnv();
     const inputRef = params.ref || useRef(params.refName || "input");
     const component = useComponent();
 
@@ -46,8 +46,10 @@ export function useInputField(params) {
      */
     function onInput(ev) {
         isDirty = ev.target.value !== lastSetValue;
-        component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
-        if (!component.props.record.isValid) {
+        if (component.props.setDirty) {
+            component.props.setDirty(isDirty);
+        }
+        if (component.props.record && !component.props.record.isValid) {
             component.props.record.resetFieldValidity(component.props.name);
         }
     }
@@ -56,7 +58,7 @@ export function useInputField(params) {
      * On blur, we consider the field no longer dirty, even if it were to be invalid.
      * However, if the field is invalid, the new value will not be committed to the model.
      */
-    async function onChange(ev) {
+    function onChange(ev) {
         if (isDirty) {
             isDirty = false;
             let isInvalid = false;
@@ -64,22 +66,24 @@ export function useInputField(params) {
             if (params.parse) {
                 try {
                     val = params.parse(val);
-                } catch {
-                    component.props.record.setInvalidField(component.props.name);
+                } catch (_e) {
+                    if (component.props.record) {
+                        component.props.record.setInvalidField(component.props.name);
+                    }
                     isInvalid = true;
                 }
             }
 
             if (!isInvalid) {
-                if (val !== component.props.record.data[component.props.name]) {
-                    lastSetValue = inputRef.el.value;
-                    pendingUpdate = true;
-                    await component.props.record.update({ [component.props.name]: val });
+                pendingUpdate = true;
+                Promise.resolve(component.props.update(val)).then(() => {
                     pendingUpdate = false;
-                    component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
-                } else {
-                    inputRef.el.value = params.getValue();
-                }
+                });
+                lastSetValue = ev.target.value;
+            }
+
+            if (component.props.setDirty) {
+                component.props.setDirty(isDirty);
             }
         }
     }
@@ -87,9 +91,6 @@ export function useInputField(params) {
         const hotkey = getActiveHotkey(ev);
         if (["enter", "tab", "shift+tab"].includes(hotkey)) {
             commitChanges(false);
-        }
-        if (params.preventLineBreaks && ["enter", "shift+enter"].includes(hotkey)) {
-            ev.preventDefault();
         }
     }
 
@@ -116,23 +117,19 @@ export function useInputField(params) {
      * If it is not such a case, we update the field with the new value.
      */
     useEffect(() => {
-        // We need to call getValue before the condition to always observe
-        // the corresponding value in the record. Otherwise, in some cases,
-        // if the value in the record change the useEffect isn't triggered.
-        const value = params.getValue();
-        if (
-            inputRef.el &&
-            !isDirty &&
-            !component.props.record.isFieldInvalid(component.props.name)
-        ) {
-            inputRef.el.value = value;
+        const isInvalid = component.props.record
+            ? component.props.record.isInvalid(component.props.name)
+            : false;
+        if (inputRef.el && !isDirty && !isInvalid) {
+            inputRef.el.value = params.getValue();
             lastSetValue = inputRef.el.value;
         }
     });
 
-    const { model } = component.props.record;
-    useBus(model.bus, "WILL_SAVE_URGENTLY", () => commitChanges(true));
-    useBus(model.bus, "NEED_LOCAL_CHANGES", (ev) => ev.detail.proms.push(commitChanges()));
+    useBus(env.bus, "RELATIONAL_MODEL:WILL_SAVE_URGENTLY", () => commitChanges(true));
+    useBus(env.bus, "RELATIONAL_MODEL:NEED_LOCAL_CHANGES", (ev) =>
+        ev.detail.proms.push(commitChanges())
+    );
 
     /**
      * Roughly the same as onChange, but called at more specific / critical times. (See bus events)
@@ -150,11 +147,11 @@ export function useInputField(params) {
             if (params.parse) {
                 try {
                     val = params.parse(val);
-                } catch {
+                } catch (_e) {
                     isInvalid = true;
                     if (urgent) {
                         return;
-                    } else {
+                    } else if (component.props.record) {
                         component.props.record.setInvalidField(component.props.name);
                     }
                 }
@@ -164,10 +161,12 @@ export function useInputField(params) {
                 return;
             }
 
-            if ((val || false) !== (component.props.record.data[component.props.name] || false)) {
+            if ((val || false) !== (component.props.value || false)) {
                 lastSetValue = inputRef.el.value;
-                await component.props.record.update({ [component.props.name]: val });
-                component.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
+                await component.props.update(val);
+                if (component.props.setDirty) {
+                    component.props.setDirty(isDirty);
+                }
             } else {
                 inputRef.el.value = params.getValue();
             }

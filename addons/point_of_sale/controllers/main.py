@@ -6,7 +6,6 @@ from odoo.http import request
 from odoo.osv.expression import AND
 from odoo.tools import format_amount
 from odoo.addons.account.controllers.portal import PortalAccount
-from datetime import timedelta, datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -19,7 +18,7 @@ class PosController(PortalAccount):
 
         The right pos session will be selected to open, if non is open yet a new session will be created.
 
-        /pos/ui and /pos/web both can be used to access the POS. On the SaaS,
+        /pos/ui and /pos/web both can be used to acces the POS. On the SaaS,
         /pos/ui uses HTTPS while /pos/web uses HTTP.
 
         :param debug: The debug mode to load the session in.
@@ -53,13 +52,11 @@ class PosController(PortalAccount):
             pos_session = request.env['pos.session'].sudo().search(domain, limit=1)
         if not pos_session or config_id and not pos_config.active:
             return request.redirect('/web#action=point_of_sale.action_client_pos_menu')
-        # The POS only works in one company, so we enforce the one of the session in the context
+        # The POS only work in one company, so we enforce the one of the session in the context
         company = pos_session.company_id
         session_info = request.env['ir.http'].session_info()
         session_info['user_context']['allowed_company_ids'] = company.ids
         session_info['user_companies'] = {'current_company': company.id, 'allowed_companies': {company.id: session_info['user_companies']['allowed_companies'][company.id]}}
-        session_info['nomenclature_id'] = pos_session.company_id.nomenclature_id.id
-        session_info['fallback_nomenclature_id'] = pos_session._get_pos_fallback_nomenclature_id()
         context = {
             'session_info': session_info,
             'login_number': pos_session.login(),
@@ -92,40 +89,6 @@ class PosController(PortalAccount):
         pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(pdf))]
         return request.make_response(pdf, headers=pdfhttpheaders)
 
-    @http.route(['/pos/ticket'], type='http', auth="public", website=True, sitemap=False)
-    def invoice_request_screen(self, **kwargs):
-        errors = {}
-        form_values = {}
-        if request.httprequest.method == 'POST':
-            for field in ['pos_reference', 'date_order', 'ticket_code']:
-                if not kwargs.get(field):
-                    errors[field] = " "
-                else:
-                    form_values[field] = kwargs.get(field)
-
-            if errors:
-                errors['generic'] = _("Please fill all the required fields.")
-            elif len(form_values['pos_reference']) < 14:
-                errors['pos_reference'] = _("The Ticket Number should be at least 14 characters long.")
-            else:
-                date_order = datetime(*[int(i) for i in form_values['date_order'].split('-')])
-                order = request.env['pos.order'].sudo().search([
-                    ('pos_reference', '=like', '%' + form_values['pos_reference'].replace('%', r'\%').replace('_', r'\_')),
-                    ('date_order', '>=', date_order),
-                    ('date_order', '<', date_order + timedelta(days=1)),
-                    ('ticket_code', '=', form_values['ticket_code']),
-                ], limit=1)
-                if order:
-                    return request.redirect('/pos/ticket/validate?access_token=%s' % (order.access_token))
-                else:
-                    errors['generic'] = _("No sale order found.")
-
-        return request.render("point_of_sale.ticket_request_with_code", {
-            'errors': errors,
-            'banner_error': " ".join(errors.values()),
-            'form_values': form_values,
-        })
-
     @http.route(['/pos/ticket/validate'], type='http', auth="public", website=True, sitemap=False)
     def show_ticket_validation_screen(self, access_token='', **kwargs):
         def _parse_additional_values(fields, prefix, kwargs):
@@ -149,10 +112,6 @@ class PosController(PortalAccount):
         pos_order = request.env['pos.order'].sudo().search([('access_token', '=', access_token)])
         if not pos_order:
             return request.not_found()
-
-        # Set the proper context in case of unauthenticated user accessing
-        # from the main company website
-        pos_order = pos_order.with_company(pos_order.company_id)
 
         # If the order was already invoiced, return the invoice directly by forcing the access token so that the non-connected user can see it.
         if pos_order.account_move and pos_order.account_move.is_sale_document():

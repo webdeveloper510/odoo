@@ -16,7 +16,8 @@ EXEMPTION_REASON_CODES = [
     ('VATEX-SA-35', 'VATEX-SA-35 Medicines and medical equipment.'),
     ('VATEX-SA-36', 'VATEX-SA-36 Qualifying metals.'),
     ('VATEX-SA-EDU', 'VATEX-SA-EDU Private education to citizen.'),
-    ('VATEX-SA-HEA', 'VATEX-SA-HEA Private healthcare to citizen.')
+    ('VATEX-SA-HEA', 'VATEX-SA-HEA Private healthcare to citizen.'),
+    ('VATEX-SA-OOS', 'VATEX-SA-OOS Not subject to VAT.')
 ]
 
 
@@ -39,3 +40,20 @@ class AccountTax(models.Model):
         for tax in self:
             if tax.amount >= 0 and tax.l10n_sa_is_retention and tax.type_tax_use == 'sale':
                 raise UserError(_("Cannot set a tax to Retention if the amount is greater than or equal 0"))
+
+
+class AccountTaxTemplate(models.Model):
+    _inherit = 'account.tax.template'
+
+    l10n_sa_is_retention = fields.Boolean("Is Retention", default=False,
+                                          help="Determines whether or not a tax counts as a Withholding Tax")
+
+    l10n_sa_exemption_reason_code = fields.Selection(string="Exemption Reason Code",
+                                                     selection=EXEMPTION_REASON_CODES, help="Tax Exemption Reason Code (ZATCA)")
+
+    def _get_tax_vals(self, company, tax_template_to_tax):
+        # OVERRIDE
+        res = super()._get_tax_vals(company, tax_template_to_tax)
+        res['l10n_sa_is_retention'] = self.l10n_sa_is_retention
+        res['l10n_sa_exemption_reason_code'] = self.l10n_sa_exemption_reason_code
+        return res

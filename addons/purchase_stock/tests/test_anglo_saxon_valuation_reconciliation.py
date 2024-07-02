@@ -100,22 +100,21 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             stock_return_picking_action = stock_return_picking.create_returns()
             return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
             return_pick.action_assign()
-            return_pick.move_ids.quantity = 1
-            return_pick.move_ids.picked = True
+            return_pick.move_ids.quantity_done = 1
             return_pick._action_done()
 
         # Refund the invoice
         refund_invoice_wiz = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=[invoice.id]).create({
             'reason': 'test_invoice_shipment_refund',
+            'refund_method': 'cancel',
             'date': '2018-03-15',
             'journal_id': invoice.journal_id.id,
         })
-        new_invoice = self.env['account.move'].browse(refund_invoice_wiz.modify_moves()['res_id'])
-        refund_invoice = invoice.reversal_move_id
+        refund_invoice = self.env['account.move'].browse(refund_invoice_wiz.reverse_moves()['res_id'])
+
         # Check the result
         self.assertEqual(invoice.payment_state, 'reversed', "Invoice should be in 'reversed' state")
         self.assertEqual(refund_invoice.payment_state, 'paid', "Refund should be in 'paid' state")
-        self.assertEqual(new_invoice.state, 'draft', "New invoice should be in 'draft' state")
         self.check_reconciliation(refund_invoice, return_pick)
 
     def test_multiple_shipments_invoices(self):
@@ -317,7 +316,6 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             'amount': 33.3333,
             'company_id': self.company_data['company'].id,
             'cash_basis_transition_account_id': cash_basis_transfer_account.id,
-            'type_tax_use': 'purchase',
             'tax_exigibility': 'on_payment',
             'invoice_repartition_line_ids': [
                 (0, 0, {
@@ -472,7 +470,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         stock_return_picking.product_return_moves.write({'quantity': 1000.0})
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_line_ids.write({'quantity': 1000})
+        return_pick.move_line_ids.write({'qty_done': 1000})
         return_pick.button_validate()
 
         # create vendor bill

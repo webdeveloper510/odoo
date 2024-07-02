@@ -30,16 +30,27 @@ class ProductTemplate(models.Model):
         compute='_compute_used_in_bom_count', compute_sudo=False)
     mrp_product_qty = fields.Float('Manufactured', digits='Product Unit of Measure',
         compute='_compute_mrp_product_qty', compute_sudo=False)
+    produce_delay = fields.Float(
+        'Manufacturing Lead Time', default=0.0,
+        help="Average lead time in days to manufacture this product. In the case of multi-level BOM, the manufacturing lead times of the components will be added. In case the product is subcontracted, this can be used to determine the date at which components should be sent to the subcontractor.")
     is_kits = fields.Boolean(compute='_compute_is_kits', search='_search_is_kits')
+    days_to_prepare_mo = fields.Float(
+        string="Days to prepare Manufacturing Order", default=0.0,
+        help="Create and confirm Manufacturing Orders this many days in advance, to have enough time to replenish components or manufacture semi-finished products.\n"
+             "Note that security lead times will also be considered when appropriate.")
 
     def _compute_bom_count(self):
         for product in self:
             product.bom_count = self.env['mrp.bom'].search_count(['|', ('product_tmpl_id', '=', product.id), ('byproduct_ids.product_id.product_tmpl_id', '=', product.id)])
 
     def _compute_is_kits(self):
-        domain = [('product_tmpl_id', 'in', self.ids), ('type', '=', 'phantom')]
-        bom_mapping = self.env['mrp.bom'].sudo().search_read(domain, ['product_tmpl_id'])
-        kits_ids = set(b['product_tmpl_id'][0] for b in bom_mapping)
+        domain = [('company_id', 'in', [False] + self.env.companies.ids),
+                  ('product_tmpl_id', 'in', self.ids),
+                  ('active', '=', True),
+                  ('type', '=', 'phantom')]
+        bom_mapping = self.env['mrp.bom'].sudo()._read_group(
+            domain, ['product_tmpl_id'], ['product_tmpl_id'], orderby='id')
+        kits_ids = {b['product_tmpl_id'][0] for b in bom_mapping}
         for template in self:
             template.is_kits = (template.id in kits_ids)
 
@@ -83,12 +94,18 @@ class ProductTemplate(models.Model):
             template.mrp_product_qty = float_round(sum(template.mapped('product_variant_ids').mapped('mrp_product_qty')), precision_rounding=template.uom_id.rounding)
 
     def action_view_mos(self):
-        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_production_action")
+        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_production_report")
         action['domain'] = [('state', '=', 'done'), ('product_tmpl_id', 'in', self.ids)]
         action['context'] = {
+            'graph_measure': 'product_uom_qty',
             'search_default_filter_plan_date': 1,
         }
         return action
+
+    def action_compute_bom_days(self):
+        templates = self.filtered(lambda t: t.bom_count > 0)
+        if templates:
+            return templates.mapped('product_variant_id').action_compute_bom_days()
 
     def action_archive(self):
         filtered_products = self.env['mrp.bom.line'].search([('product_id', 'in', self.product_variant_ids.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')
@@ -125,18 +142,19 @@ class ProductProduct(models.Model):
             product.bom_count = self.env['mrp.bom'].search_count(['|', '|', ('byproduct_ids.product_id', '=', product.id), ('product_id', '=', product.id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product.product_tmpl_id.id)])
 
     def _compute_is_kits(self):
-        domain = ['&', ('type', '=', 'phantom'),
-                       '|', ('product_id', 'in', self.ids),
-                            '&', ('product_id', '=', False),
-                                 ('product_tmpl_id', 'in', self.product_tmpl_id.ids)]
-        bom_mapping = self.env['mrp.bom'].sudo().search_read(domain, ['product_tmpl_id', 'product_id'])
-        kits_template_ids = set([])
-        kits_product_ids = set([])
-        for bom_data in bom_mapping:
-            if bom_data['product_id']:
-                kits_product_ids.add(bom_data['product_id'][0])
-            else:
-                kits_template_ids.add(bom_data['product_tmpl_id'][0])
+        domain = [
+            '&', ('company_id', 'in', [False] + self.env.companies.ids),
+            '&', ('active', '=', True),
+            '&', ('type', '=', 'phantom'),
+            '|', ('product_id', 'in', self.ids),
+            '&', ('product_id', '=', False),
+            ('product_tmpl_id', 'in', self.product_tmpl_id.ids)]
+        tmpl_bom_mapping = self.env['mrp.bom'].sudo()._read_group(
+            domain, ['product_tmpl_id'], ['product_tmpl_id'], orderby='id')
+        product_bom_mapping = self.env['mrp.bom'].sudo()._read_group(
+            domain, ['product_id'], ['product_id'], orderby='id')
+        kits_template_ids = {b['product_tmpl_id'][0] for b in tmpl_bom_mapping}
+        kits_product_ids = {b['product_id'][0] for b in product_bom_mapping if b['product_id']}
         for product in self:
             product.is_kits = (product.id in kits_product_ids or product.product_tmpl_id.id in kits_template_ids)
 
@@ -195,9 +213,9 @@ class ProductProduct(models.Model):
     def _compute_mrp_product_qty(self):
         date_from = fields.Datetime.to_string(fields.datetime.now() - timedelta(days=365))
         #TODO: state = done?
-        domain = [('state', '=', 'done'), ('product_id', 'in', self.ids), ('date_start', '>', date_from)]
-        read_group_res = self.env['mrp.production']._read_group(domain, ['product_id'], ['product_uom_qty:sum'])
-        mapped_data = {product.id: qty for product, qty in read_group_res}
+        domain = [('state', '=', 'done'), ('product_id', 'in', self.ids), ('date_planned_start', '>', date_from)]
+        read_group_res = self.env['mrp.production']._read_group(domain, ['product_id', 'product_uom_qty'], ['product_id'])
+        mapped_data = dict([(data['product_id'][0], data['product_uom_qty']) for data in read_group_res])
         for product in self:
             if not product.id:
                 product.mrp_product_qty = 0.0
@@ -324,6 +342,24 @@ class ProductProduct(models.Model):
             res['context'].pop('default_product_tmpl_id', None)
         return res
 
+    def action_compute_bom_days(self):
+        bom_by_products = self.env['mrp.bom']._bom_find(self)
+        company_id = self.env.context.get('default_company_id', self.env.company.id)
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
+        for product in self:
+            bom_data = self.env['report.mrp.report_bom_structure'].with_context(minimized=True)._get_bom_data(bom_by_products[product], warehouse, product, ignore_stock=True)
+            if bom_data.get('availability_state') == 'unavailable' and not bom_data.get('components_available', True):
+                return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Cannot compute days to prepare due to missing route info for at least 1 component or for the final product.'),
+                    'sticky': False,
+                    }
+                }
+            availability_delay = bom_data.get('resupply_avail_delay')
+            product.days_to_prepare_mo = availability_delay - bom_data.get('lead_time', 0) if availability_delay else 0
+
     def _match_all_variant_values(self, product_template_attribute_value_ids):
         """ It currently checks that all variant values (`product_template_attribute_value_ids`)
         are in the product (`self`).
@@ -341,7 +377,7 @@ class ProductProduct(models.Model):
     def _count_returned_sn_products(self, sn_lot):
         res = self.env['stock.move.line'].search_count([
             ('lot_id', '=', sn_lot.id),
-            ('quantity', '=', 1),
+            ('qty_done', '=', 1),
             ('state', '=', 'done'),
             ('production_id', '=', False),
             ('location_id.usage', '=', 'production'),

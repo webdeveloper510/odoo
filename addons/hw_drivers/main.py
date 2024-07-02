@@ -10,7 +10,6 @@ import time
 import urllib3
 
 from odoo.addons.hw_drivers.tools import helpers
-from odoo.addons.hw_drivers.websocket_client import WebsocketClient
 
 _logger = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ iot_devices = {}
 
 
 class Manager(Thread):
-    def send_alldevices(self, iot_client=None):
+    def send_alldevices(self):
         """
         This method send IoT Box and devices informations to Odoo database
         """
@@ -50,7 +49,7 @@ class Manager(Thread):
                 'identifier': helpers.get_mac_address(),
                 'ip': domain,
                 'token': helpers.get_token(),
-                'version': helpers.get_version(),
+                'version': helpers.get_version(detailed_version=True),
             }
             devices_list = {}
             for device in iot_devices:
@@ -66,7 +65,7 @@ class Manager(Thread):
             urllib3.disable_warnings()
             http = urllib3.PoolManager(cert_reqs='CERT_NONE')
             try:
-                resp = http.request(
+                http.request(
                     'POST',
                     server + "/iot/setup",
                     body=json.dumps(data).encode('utf8'),
@@ -75,8 +74,6 @@ class Manager(Thread):
                         'Accept': 'text/plain',
                     },
                 )
-                if iot_client:
-                    iot_client.iot_channel = json.loads(resp.data).get('result', '')
             except Exception as e:
                 _logger.error('Could not reach configured server')
                 _logger.error('A error encountered : %s ' % e)
@@ -89,7 +86,7 @@ class Manager(Thread):
         """
 
         helpers.start_nginx_server()
-        _logger.info("IoT Box Image version: %s", helpers.get_version())
+        _logger.info("IoT Box Image version: %s", helpers.get_version(detailed_version=True))
         if platform.system() == 'Linux' and helpers.get_odoo_server_url():
             helpers.check_git_branch()
             helpers.generate_password()
@@ -98,10 +95,9 @@ class Manager(Thread):
             _logger.warning("An error happened when trying to get the HTTPS certificate: %s",
                             certificate_details)
 
-        iot_client = helpers.get_odoo_server_url() and WebsocketClient(helpers.get_odoo_server_url())
         # We first add the IoT Box to the connected DB because IoT handlers cannot be downloaded if
         # the identifier of the Box is not found in the DB. So add the Box to the DB.
-        self.send_alldevices(iot_client)
+        self.send_alldevices()
         helpers.download_iot_handlers()
         helpers.load_iot_handlers()
 
@@ -117,9 +113,6 @@ class Manager(Thread):
         # Set scheduled actions
         schedule and schedule.every().day.at("00:00").do(helpers.get_certificate_status)
 
-        #Setup the websocket connection
-        if helpers.get_odoo_server_url():
-            iot_client.start()
         # Check every 3 secondes if the list of connected devices has changed and send the updated
         # list to the connected DB.
         self.previous_iot_devices = []
@@ -127,7 +120,7 @@ class Manager(Thread):
             try:
                 if iot_devices != self.previous_iot_devices:
                     self.previous_iot_devices = iot_devices.copy()
-                    self.send_alldevices(iot_client)
+                    self.send_alldevices()
                 time.sleep(3)
                 schedule and schedule.run_pending()
             except Exception:

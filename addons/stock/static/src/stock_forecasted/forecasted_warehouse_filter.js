@@ -2,7 +2,7 @@
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart } from "@odoo/owl";
+const { Component, onWillStart} = owl;
 
 export class ForecastedWarehouseFilter extends Component {
 
@@ -22,9 +22,10 @@ export class ForecastedWarehouseFilter extends Component {
     }
 
     get activeWarehouse(){
-        return this.context.warehouse ?
-            this.warehouses.find(w => w.id == this.context.warehouse) :
-            this.warehouses[0];
+        if (this.context.warehouse)
+            return this.warehouses.find(w => w.id == this.context.warehouse);
+        else
+            return this.warehouses[0];
     }
 }
 

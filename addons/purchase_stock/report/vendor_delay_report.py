@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, tools
-from odoo.tools import SQL
+from odoo import api, fields, models, tools
+from odoo.exceptions import UserError
+from odoo.osv.expression import expression
 
 
 class VendorDelayReport(models.Model):
@@ -30,7 +31,7 @@ SELECT m.id                     AS id,
        Min(po.partner_id)       AS partner_id,
        Min(m.product_qty)       AS qty_total,
        Sum(CASE
-             WHEN (m.state = 'done' and pol.date_planned::date >= m.date::date) THEN (ml.quantity / ml_uom.factor * pt_uom.factor)
+             WHEN (m.state = 'done' and pol.date_planned::date >= m.date::date) THEN (ml.qty_done / ml_uom.factor * pt_uom.factor)
              ELSE 0
            END)                 AS qty_on_time
 FROM   stock_move m
@@ -53,9 +54,37 @@ FROM   stock_move m
 GROUP  BY m.id
 )""")
 
-    def _read_group_select(self, aggregate_spec, query):
-        if aggregate_spec == 'on_time_rate:sum':
-            # Make a weigthed average instead of simple average for these fields
-            sql_expr = SQL('SUM(qty_on_time) / SUM(qty_total) * 100')
-            return sql_expr, ['on_time_rate', 'qty_on_time', 'qty_total']
-        return super()._read_group_select(aggregate_spec, query)
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        if all('on_time_rate' not in field for field in fields):
+            res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+            return res
+
+        for field in fields:
+            if 'on_time_rate' not in field:
+                continue
+
+            fields.remove(field)
+
+            agg = field.split(':')[1:]
+            if agg and agg[0] != 'sum':
+                raise NotImplementedError('Aggregate functions other than \':sum\' are not allowed.')
+
+            qty_total = field.replace('on_time_rate', 'qty_total')
+            if qty_total not in fields:
+                fields.append(qty_total)
+            qty_on_time = field.replace('on_time_rate', 'qty_on_time')
+            if qty_on_time not in fields:
+                fields.append(qty_on_time)
+            break
+
+        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
+        for group in res:
+            if group['qty_total'] == 0:
+                on_time_rate = 100
+            else:
+                on_time_rate = group['qty_on_time'] / group['qty_total'] * 100
+            group.update({'on_time_rate': on_time_rate})
+
+        return res

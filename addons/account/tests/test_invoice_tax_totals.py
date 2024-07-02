@@ -36,11 +36,10 @@ class TestTaxTotals(AccountTestInvoicingCommon):
         })
 
         cls.tax_10 = cls.env['account.tax'].create({
-            'name': "tax_10a",
+            'name': "tax_10",
             'amount_type': 'percent',
             'amount': 10.0,
         })
-
         cls.tax_16 = cls.env['account.tax'].create({
             'name': "tax_16",
             'amount_type': 'percent',
@@ -60,7 +59,7 @@ class TestTaxTotals(AccountTestInvoicingCommon):
 
     def assertTaxTotals(self, document, expected_values):
         main_keys_to_ignore = {'formatted_amount_total', 'formatted_amount_untaxed'}
-        group_keys_to_ignore = {'group_key', 'formatted_tax_group_amount', 'formatted_tax_group_base_amount'}
+        group_keys_to_ignore = {'group_key', 'formatted_tax_group_amount', 'formatted_tax_group_base_amount', 'hide_base_amount'}
         subtotals_keys_to_ignore = {'formatted_amount'}
 
         to_compare = document.tax_totals
@@ -750,84 +749,6 @@ class TestTaxTotals(AccountTestInvoicingCommon):
         run_case('round_per_line', lines, [15.45])
         run_case('round_globally', lines, [15.45])
 
-    def test_invoice_foreign_currency_tax_totals(self):
-        self.env['res.currency.rate'].create({
-            'name': '2018-01-01',
-            'rate': 0.2,
-            'currency_id': self.currency_data['currency'].id,
-            'company_id': self.env.company.id,
-        })
-
-        tax_10 = self.env['account.tax'].create({
-            'name': "tax_10",
-            'amount_type': 'percent',
-            'amount': 10.0,
-            'tax_group_id': self.tax_group1.id,
-        })
-
-        tax_20 = self.env['account.tax'].create({
-            'name': "tax_20",
-            'amount_type': 'percent',
-            'amount': 20.0,
-            'tax_group_id': self.tax_group2.id,
-        })
-
-        invoice = self.env['account.move'].create({
-            'move_type': 'out_invoice',
-            'partner_id': self.partner_a.id,
-            'invoice_date': '2019-01-01',
-            'currency_id': self.currency_data['currency'].id,
-        })
-
-        lines_data = [(100, tax_10), (300, tax_20)]
-        invoice_lines_vals = [
-            Command.create({
-                'name': 'line',
-                'display_type': 'product',
-                'account_id': self.company_data['default_account_revenue'].id,
-                'price_unit': amount,
-                'tax_ids': [Command.set(taxes.ids)],
-            })
-            for amount, taxes in lines_data
-        ]
-
-        invoice['invoice_line_ids'] = invoice_lines_vals
-
-        self.assertTaxTotals(invoice, {
-            'amount_total': 470,
-            'amount_total_company_currency': 2350,
-            'amount_untaxed': 400,
-            'display_tax_base': True,
-            'groups_by_subtotal': {
-                'Untaxed Amount': [
-                    {
-                        'tax_group_name': self.tax_group1.name,
-                        'tax_group_amount': 10,
-                        'tax_group_base_amount': 100,
-                        'tax_group_id': self.tax_group1.id,
-                        'tax_group_amount_company_currency': 50,
-                        'tax_group_base_amount_company_currency': 500,
-                    },
-                    {
-                        'tax_group_name': self.tax_group2.name,
-                        'tax_group_amount': 60,
-                        'tax_group_base_amount': 300,
-                        'tax_group_id': self.tax_group2.id,
-                        'tax_group_amount_company_currency': 300,
-                        'tax_group_base_amount_company_currency': 1500,
-                    }
-                ]
-            },
-            'subtotals': [
-                {
-                    'name': "Untaxed Amount",
-                    'amount': 400,
-                    'amount_company_currency': 2000,
-                }
-            ],
-            'subtotals_order': ["Untaxed Amount"],
-        })
-
     def test_cash_rounding_amount_total_rounded(self):
         tax_15 = self.env['account.tax'].create({
             'name': "tax_15",
@@ -886,7 +807,8 @@ class TestTaxTotals(AccountTestInvoicingCommon):
             self.assertEqual(move.tax_totals['groups_by_subtotal']['Untaxed Amount'][0]['tax_group_amount'], 56.7)
             self.assertEqual(move.tax_totals['groups_by_subtotal']['Untaxed Amount'][1]['tax_group_amount'], 10)
             self.assertEqual(move.tax_totals['rounding_amount'], 0.3)
-            self.assertEqual(move.tax_totals['amount_total'], 545)
+            self.assertEqual(move.tax_totals['amount_total'], 544.7)
+            self.assertEqual(move.tax_totals['amount_total_rounded'], 545)
 
     def test_recompute_cash_rounding_lines(self):
         # if rounding_method is changed then rounding shouldn't be recomputed in posted invoices

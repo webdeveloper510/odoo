@@ -5,18 +5,17 @@
 # Translators:
 # Martin Trigaux, 2023
 # Hamid Darabi, 2023
-# Hamed Mohammadi <hamed@dehongi.com>, 2023
-# Yousef Shadmanesh <y.shadmanesh@gmail.com>, 2023
-# Hanna Kheradroosta, 2023
 # saeed raesi <saeed.raesi2020@gmail.com>, 2023
+# Hamed Mohammadi <hamed@dehongi.com>, 2023
+# Hanna Kheradroosta, 2023
 # Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server saas~15.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-04-19 13:57+0000\n"
+"PO-Revision-Date: 2022-09-22 05:44+0000\n"
 "Last-Translator: Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
@@ -29,6 +28,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
 msgid "<span class=\"o_stat_text\">Debit Notes</span>"
 msgstr "<span class=\"o_stat_text\">اسناد بدهکاری</span>"
+
+#. module: account_debit_note
+#: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
+msgid "Add Debit Note"
+msgstr "افزودن سند بدهکاری"
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_debit_note
@@ -67,18 +71,12 @@ msgid "Created on"
 msgstr "ایجادشده در"
 
 #. module: account_debit_note
-#: model:ir.actions.server,name:account_debit_note.action_move_debit_note
-msgid "Debit Note"
-msgstr "سند بستانکار"
-
-#. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__date
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_account_debit_note
 msgid "Debit Note Date"
 msgstr "تاریخ سند بدهکاری"
 
 #. module: account_debit_note
-#. odoo-python
 #: code:addons/account_debit_note/models/account_move.py:0
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #: model:ir.model.fields,field_description:account_debit_note.field_account_bank_statement_line__debit_note_ids
@@ -91,7 +89,7 @@ msgstr "اسناد بدهکاری"
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__id
@@ -117,7 +115,7 @@ msgstr ""
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_move
 msgid "Journal Entry"
-msgstr "سند دفترروزنامه‌"
+msgstr "داده روزنامه"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__journal_type
@@ -125,9 +123,14 @@ msgid "Journal Type"
 msgstr "نوع دفتر روزنامه"
 
 #. module: account_debit_note
+#: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note____last_update
+msgid "Last Modified on"
+msgstr "آخرین اصلاح در"
+
+#. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__write_date
@@ -180,7 +183,6 @@ msgid "The debit notes created for this invoice"
 msgstr "سند بدهکاری ایجاد شده برای این فاکتور"
 
 #. module: account_debit_note
-#. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #, python-format
 msgid "This debit note was created from: %s"
@@ -192,30 +194,7 @@ msgid "Use Specific Journal"
 msgstr "استفاده از روزنامه بخصوص"
 
 #. module: account_debit_note
-#. odoo-python
-#: code:addons/account_debit_note/wizard/account_debit_note.py:0
-#, python-format
-msgid ""
-"You can make a debit note only for a Customer Invoice, a Customer Credit "
-"Note, a Vendor Bill or a Vendor Credit Note."
-msgstr ""
-"می‌توانید یک سند بستانکار را تنها برای یک فاکتور مشتری، یک سند بستانکار "
-"مشتری، صورت‌حساب یک فروشنده یا سند بستانکار یک فروشنده ایجاد کنید."
-
-#. module: account_debit_note
-#. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #, python-format
 msgid "You can only debit posted moves."
 msgstr "فقط می توانید انتقال ارسال شده را بدهکار کنید."
-
-#. module: account_debit_note
-#. odoo-python
-#: code:addons/account_debit_note/wizard/account_debit_note.py:0
-#, python-format
-msgid ""
-"You can't make a debit note for an invoice that is already linked to a debit"
-" note."
-msgstr ""
-"نمی‌توانید یک سند بستانکار را برای فاکتور ی که از قبل با یک سند بستانکار در "
-"ارتباط است ایجاد کنید."

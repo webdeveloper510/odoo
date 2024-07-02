@@ -3,16 +3,19 @@
 # 	* crm
 # 
 # Translators:
-# Wil Odoo, 2023
-# Thi Huong Nguyen, 2024
+# Duy BQ <duybq86@gmail.com>, 2022
+# Vo Thanh Thuy, 2022
+# Martin Trigaux, 2022
+# Nancy Momoland <thanh.np2502@gmail.com>, 2023
+# Thi Huong Nguyen, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
+"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"Last-Translator: Thi Huong Nguyen, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,6 +27,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_count
 msgid "# Leads/Opps assigned this month"
 msgstr "# Lead/Cơ hội được phân công trong tháng này"
+
+#. module: crm
+#: model:ir.model.fields,field_description:crm.field_crm_lead__calendar_event_count
+msgid "# Meetings"
+msgstr "# Cuộc họp"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_recurring_plan__number_of_months
@@ -112,8 +120,13 @@ msgid ""
 "<b>Drag &amp; drop opportunities</b> between columns as you progress in your"
 " sales cycle."
 msgstr ""
-"<b>Kéo &amp; thả cơ hội</b> giữa các cột khi bạn có bước tiến mới trong chu "
-"kỳ bán hàng.  "
+"<b>Kéo &amp; thả các cơ hội</b> giữa các cột giống như cách bạn làm với tiến"
+" trình trong chu kỳ bán hàng.  "
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
+msgid "<b>Predictive Lead Scoring</b>"
+msgstr "<b>Điểm lead dự đoán</b>"
 
 #. module: crm
 #. odoo-javascript
@@ -142,11 +155,6 @@ msgstr ""
 "aria-label=\"Switch to automatic probability\"/>"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-msgid "<i class=\"fa fa-info-circle me-2\" title=\"Assigned Lead Count\"/>"
-msgstr "<i class=\"fa fa-info-circle me-2\" title=\"Số lead đã phân công\"/>"
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
 "<i title=\"Update now\" role=\"img\" aria-label=\"Update now\" class=\"fa "
@@ -156,54 +164,64 @@ msgstr ""
 " fa-fw fa-refresh\"/>"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
+msgid "<span class=\"bg-danger\">Lost</span>"
+msgstr "<span class=\"bg-danger\">Mất</span>"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
 "title=\"By saving this change, the customer email will also be updated.\" "
-"invisible=\"not partner_email_update\"/>"
+"attrs=\"{'invisible': [('partner_email_update', '=', False)]}\"/>"
 msgstr ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
-"title=\"Sau khi lưu thay đổi này, email của khách hàng cũng sẽ được cập "
-"nhật.\" invisible=\"not partner_email_update\"/>"
+"title=\"Bằng cách lưu thay đổi này, email khách hàng cũng sẽ được cập nhật "
+"\" attrs=\"{'invisible': [('partner_email_update', '=', False)]}\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
 "title=\"By saving this change, the customer phone number will also be "
-"updated.\" invisible=\"not partner_phone_update\"/>"
+"updated.\" attrs=\"{'invisible': [('partner_phone_update', '=', False)]}\"/>"
 msgstr ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
-"title=\"Sau khi lưu thay đổi này, số điện thoại của khách hàng cũng sẽ được "
-"cập nhật.\" invisible=\"not partner_phone_update\"/>"
+"title=\"Bằng cách lưu thay đổi này, số điện thoại của khách hàng cũng sẽ "
+"được cập nhật. \" attrs=\"{'invisible': [('partner_phone_update', '=', "
+"False)]}\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">Similar Leads</span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"duplicate_lead_count &gt; 1\">Similar Lead</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&lt;', 2)]}\"> Meetings</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&gt;', 1)]}\"> Meeting</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">Lead tương tự</span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"duplicate_lead_count &gt; 1\">Lead tương tự</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&lt;', 2)]}\"> Cuộc họp</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&gt;', 1)]}\"> Cuộc họp</span>"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&lt;', 2)]}\">Similar Leads</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&gt;', 1)]}\">Similar Lead</span>"
+msgstr ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&lt;', 2)]}\">Lead tương tự</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&gt;', 1)]}\">Lead tương tự</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"not use_leads\">Leads</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"use_leads\">Opportunities</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', False)]}\">Leads</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', True)]}\">Opportunities</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"not use_leads\">Lead</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"use_leads\">Cơ hội</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', False)]}\">Lead</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', True)]}\">Cơ hội</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 msgid "<span class=\"o_stat_text\"> Leads</span>"
 msgstr "<span class=\"o_stat_text\">Lead</span>"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid "<span class=\"oe_grey p-2 text-nowrap\"> at </span>"
-msgstr "<span class=\"oe_grey p-2 text-nowrap\"> vào </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -216,8 +234,13 @@ msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid "<span class=\"oe_grey p-2\"> %</span>"
-msgstr "<span class=\"oe_grey p-2\"> %</span>"
+msgid "<span class=\"oe_grey p-2\"> at </span>"
+msgstr "<span class=\"oe_grey p-2\">tại</span>"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid "<span class=\"oe_grey\"> %</span>"
+msgstr "<span class=\"oe_grey\"> %</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_member_view_form
@@ -230,20 +253,6 @@ msgid "<span class=\"oe_inline\"> / </span>"
 msgstr "<span class=\"oe_inline\">/</span>"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
-msgid "<span class=\"text-bg-danger\">Lost</span>"
-msgstr "<span class=\"text-bg-danger\">Mất</span>"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-msgid ""
-"<span> leads assigned this month\n"
-"                            on a maximum of </span>"
-msgstr ""
-"<span>đã phân công tháng này\n"
-"                            tối đa là</span>"
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "<span>Expected Revenues:</span>"
 msgstr "<span>Doanh thu dự kiến:</span>"
@@ -251,22 +260,22 @@ msgstr "<span>Doanh thu dự kiến:</span>"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "<span>Merged the Lead/Opportunity</span>"
-msgstr "<span>Đã hợp nhất lead/cơ hội</span>"
+msgstr "<span>Lead/Cơ hội đã hợp nhất</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
 "<span>Periodically assign leads based on rules</span><br/>\n"
-"                                <span invisible=\"not crm_use_auto_assignment\">\n"
-"                                    All sales teams will use this setting by default unless\n"
-"                                    specified otherwise.\n"
-"                                </span>"
+"                                    <span attrs=\"{'invisible': [('crm_use_auto_assignment', '=', False)]}\">\n"
+"                                        All sales teams will use this setting by default unless\n"
+"                                        specified otherwise.\n"
+"                                    </span>"
 msgstr ""
 "<span>Phân công lead định kỳ dựa theo quy tắc</span><br/>\n"
-"                                <span invisible=\"not crm_use_auto_assignment\">\n"
-"                                    Theo mặc định, tất cả bộ phận kinh doanh sẽ dùng cài đặt này trừ khi\n"
-"                                    có quy định khác.\n"
-"                                </span>"
+"                                    <span attrs=\"{'invisible': [('crm_use_auto_assignment', '=', False)]}\">\n"
+"                                        Tất cả Đội ngũ kinh doanh bán hàng sẽ dùng cài đặt này theo mặc định trừ khi \n"
+"                                        có quy định khác.\n"
+"                                    </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -424,8 +433,8 @@ msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
 msgstr ""
-"Một từ điển Python sẽ được đánh giá để cung cấp giá trị mặc định khi tạo tập"
-" dữ liệu mới cho bí danh này. "
+"Một từ điển Python sẽ được đánh giá để cung cấp giá trị mặc định khi tạo dữ "
+"liệu mới cho bí danh này. "
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_3
@@ -503,11 +512,6 @@ msgid "Activity Exception Decoration"
 msgstr "Hoạt động ngoại lệ"
 
 #. module: crm
-#: model:ir.ui.menu,name:crm.mail_activity_plan_menu_config_lead
-msgid "Activity Plans"
-msgstr "Kế hoạch hoạt động"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_state
 msgid "Activity State"
 msgstr "Trạng thái hoạt động"
@@ -537,11 +541,6 @@ msgstr "Hoạt động theo"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Add a description..."
 msgstr "Thêm mô tả..."
-
-#. module: crm
-#: model_terms:ir.actions.act_window,help:crm.mail_activity_plan_action_lead
-msgid "Add a new plan"
-msgstr "Thêm kế hoạch mới"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -586,46 +585,26 @@ msgid "Alias Contact Security"
 msgstr "Bảo mật bí danh liên hệ "
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_domain_id
-msgid "Alias Domain"
-msgstr "Miền bí danh"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_domain
-msgid "Alias Domain Name"
-msgstr "Tên miền bí danh"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_full_name
-msgid "Alias Email"
-msgstr "Email bí danh"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_name
 msgid "Alias Name"
 msgstr "Tên bí danh"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_status
-msgid "Alias Status"
-msgstr "Trạng thái bí danh"
-
-#. module: crm
-#: model:ir.model.fields,help:crm.field_crm_team__alias_status
-msgid "Alias status assessed on the last message received."
-msgstr "Trạng thái bí danh được ước tính trong tin nhắn đã nhận gần đây nhất."
+#: model:ir.model.fields,field_description:crm.field_crm_team__alias_domain
+msgid "Alias domain"
+msgstr "Miền bí danh"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_model_id
 msgid "Aliased Model"
-msgstr "Mô hình bí danh"
+msgstr "Model bí danh"
 
 #. module: crm
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "All set. Let’s <b>Schedule</b> it."
-msgstr "Đã thiết lập xong. Hãy lập <b>lịch trình</b>."
+msgstr "Đã thiết lập xong. Hãy lập <b>Lịch trình</b>."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -656,7 +635,7 @@ msgid ""
 "As you are a member of no Sales Team, you are showed the Pipeline of the <b>first team by default.</b>\n"
 "                                        To work with the CRM, you should <a name=\"%d\" type=\"action\" tabindex=\"-1\">join a team.</a>"
 msgstr ""
-"Vì bạn không phải là thành viên của Đội ngũ kinh doanh nào, nên bạn sẽ được xem Chu trình của <b>đội ngũ đầu tiên theo mặc định.</b>\n"
+"Vì bạn không phải là thành viên của Đội ngũ Bán hàng, nên bạn sẽ được xem Chu trình của <b>đội ngũ đầu tiên theo mặc định.</b>\n"
 "                                        Để làm việc với CRM, bạn nên <a name=\"%d\" type=\"action\" tabindex=\"-1\">tham gia một đội ngũ.</a> "
 
 #. module: crm
@@ -667,8 +646,13 @@ msgid ""
 "As you are a member of no Sales Team, you are showed the Pipeline of the <b>first team by default.</b>\n"
 "                                        To work with the CRM, you should join a team."
 msgstr ""
-"Vì bạn không phải là thành viên của Đội ngũ kinh doanh nào, nên bạn sẽ được xem Chu trình của <b>đội ngũ đầu tiên theo mặc định.</b>\n"
+"Vì bạn không phải là thành viên của Đội ngũ Bán hàng, nên bạn sẽ được xem Chu trình của <b>đội ngũ đầu tiên theo mặc định.</b>\n"
 "                                        Để làm việc với CRM, bạn nên tham gia một đội ngũ."
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
+msgid "Assign Documentation"
+msgstr "Tài liệu phân công"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
@@ -694,6 +678,11 @@ msgstr "Phân công những cơ hội này cho"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 msgid "Assign this opportunity to"
 msgstr "Phân công cơ hội này cho"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
+msgid "Assigned Leads Count"
+msgstr "Số lead đã phân công"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__author_id
@@ -722,7 +711,7 @@ msgstr "Quy tắc phân công"
 #: code:addons/crm/models/crm_team.py:0
 #, python-format
 msgid "Assignment domain for team %(team)s is incorrectly formatted"
-msgstr "Miền phân công cho đội ngũ %(team)s được định dạng không chính xác"
+msgstr "Quy tắc phân công cho đội ngũ %(team)s được định dạng sai"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__lead_id
@@ -753,7 +742,7 @@ msgstr "Đơn vị khoảng thời gian phân công tự động"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__crm_auto_assignment_run_datetime
 msgid "Auto Assignment Next Execution Date"
-msgstr "Ngày tiến hành phân công tự động tiếp theo"
+msgstr "Ngày thực thi phân công tự động tiếp theo"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__automated_probability
@@ -785,7 +774,7 @@ msgstr "Số điện thoại bị hạn chế là số điện thoại bàn"
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Boom! Team record for the past 30 days."
-msgstr "Yeah! Số liệu của đội ngũ trong 30 ngày qua."
+msgstr "Yeah! Kỷ lục của đội ngũ trong 30 ngày qua."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_bounce
@@ -816,13 +805,14 @@ msgstr "Trạng thái CRM"
 
 #. module: crm
 #: model:ir.actions.server,name:crm.ir_cron_crm_lead_assign_ir_actions_server
+#: model:ir.cron,cron_name:crm.ir_cron_crm_lead_assign
 msgid "CRM: Lead Assignment"
 msgstr "CRM: Phân công lead"
 
 #. module: crm
 #: model:ir.model,name:crm.model_calendar_event
 msgid "Calendar Event"
-msgstr "Sự kiện theo lịch"
+msgstr "Sự kiện theo Lịch"
 
 #. module: crm
 #: model:mail.activity.type,name:crm.mail_activity_demo_call_demo
@@ -868,7 +858,7 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__use_opportunities
 msgid "Check this box to manage a presales process with opportunities."
-msgstr "Chọn ô này để quản lý quy trình chào hàng với các cơ hội."
+msgstr "Chọn ô này để quản lý quy trình trước bán hàng với các cơ hội."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__city
@@ -880,12 +870,11 @@ msgid "City"
 msgstr "Thành phố"
 
 #. module: crm
-#: model:ir.model.fields,help:crm.field_crm_activity_report__tag_ids
 #: model:ir.model.fields,help:crm.field_crm_lead__tag_ids
 msgid ""
 "Classify and analyze your lead/opportunity categories like: Training, "
 "Service"
-msgstr "Phân loại và phân tích danh mục lead/cơ hội như: Đào tạo, Dịch vụ"
+msgstr "Phân loại và phân tích nhóm lead/cơ hội như: Đào tạo, Dịch vụ"
 
 #. module: crm
 #. odoo-javascript
@@ -895,8 +884,8 @@ msgid ""
 "Click on the breadcrumb to go back to your Pipeline. Odoo will save all "
 "modifications as you navigate."
 msgstr ""
-"Nhấp vào thanh điều hướng để quay lại chu trình của bạn. Hệ thống sẽ lưu tất"
-" cả các sửa đổi khi bạn điều hướng."
+"Nhấp vào breadcrumb để quay lại Quy trình của bạn. Hệ thống sẽ lưu tất cả "
+"các sửa đổi khi bạn điều hướng."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date_closed
@@ -965,6 +954,16 @@ msgstr "Cài đặt cấu hình"
 #: model:ir.ui.menu,name:crm.crm_menu_config
 msgid "Configuration"
 msgstr "Cấu hình"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
+msgid "Configure a custom domain"
+msgstr "Cài đặt miền riêng"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
+msgid "Confirm"
+msgstr "Xác nhận"
 
 #. module: crm
 #. odoo-javascript
@@ -1040,19 +1039,19 @@ msgstr "Chuyển đổi lead thành cơ hội (không phải hàng loạt) "
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid "Convert to Opportunities"
-msgstr "Chuyển đổi thành cơ hội"
+msgstr "Chuyển thành Cơ hội"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid "Convert to Opportunity"
-msgstr "Chuyển đổi thành cơ hội"
+msgstr "Chuyển thành Cơ hội"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.action_crm_send_mass_convert
 msgid "Convert to opportunities"
-msgstr "Chuyển đổi thành cơ hội"
+msgstr "Chuyển thành Cơ hội"
 
 #. module: crm
 #. odoo-python
@@ -1062,7 +1061,7 @@ msgstr "Chuyển đổi thành cơ hội"
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead2opportunity_partner_mass__name__convert
 #, python-format
 msgid "Convert to opportunity"
-msgstr "Chuyển đổi thành cơ hội"
+msgstr "Chuyển thành Cơ hội"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -1078,6 +1077,13 @@ msgstr ""
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__phone_state__correct
 msgid "Correct"
 msgstr "Chính xác"
+
+#. module: crm
+#. odoo-javascript
+#: code:addons/crm/static/src/views/crm_kanban/crm_kanban_renderer.js:0
+#, python-format
+msgid "Count"
+msgstr "Số lượng"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__message_bounce
@@ -1280,7 +1286,7 @@ msgstr "Giá trị mặc định"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Define recurring plans and revenues on Opportunities"
-msgstr "Xác định doanh thu và kế hoạch định kỳ cho cơ hội"
+msgstr "Xác định doanh thu và kế hoạch định kỳ cho Cơ hội"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
@@ -1303,8 +1309,8 @@ msgid ""
 "Did you know emails sent to a Sales Team alias generate opportunities in "
 "your pipeline?"
 msgstr ""
-"Bạn có biết rằng email được gửi đến bí danh đội ngũ kinh doanh tạo ra cơ hội"
-" trong chu trình của bạn không?"
+"Bạn có biết rằng email được gửi đến bí danh đội kinh doanh tạo ra cơ hội "
+"trong chu trình của bạn?"
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_4
@@ -1367,6 +1373,11 @@ msgid "Do not link to a customer"
 msgstr "Không liên kết với một khách hàng"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
+msgid "Documentation"
+msgstr "Tài liệu"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_member_view_form
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
 msgid "Domain"
@@ -1376,16 +1387,20 @@ msgstr "Miền"
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
-msgid "Drag your opportunity to <b>Won</b> when you get the deal. Congrats!"
+msgid "Drag your opportunity to <b>Won</b> when you get the deal. Congrats !"
 msgstr ""
-"Kéo cơ hội của bạn qua <b>Đạt</b> khi bạn chốt giao dịch. Xin chúc mừng!"
+"Kéo cơ hội của bạn qua <b>Đạt</b> khi bạn nhận được thỏa thuận. Chúc mừng!"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Duration: %s"
-msgstr "Thời lượng: %s"
+#: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
+msgid "Dropdown menu"
+msgstr "Menu thả xuống"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
+msgid "E.g. Monthly"
+msgstr "Ví dụ: Hàng tháng"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_forecast
@@ -1396,7 +1411,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
 msgid "Edit"
-msgstr "Chỉnh sửa"
+msgstr "Sửa"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__email_from
@@ -1407,15 +1422,9 @@ msgid "Email"
 msgstr "Email"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_email
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
 msgid "Email Alias"
 msgstr "Bí danh email"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__email_domain_criterion
-msgid "Email Domain Criterion"
-msgstr "Tiêu chí miền email"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__email_state
@@ -1476,19 +1485,14 @@ msgid ""
 "Enter here the internal requirements for this stage (ex: Offer sent to "
 "customer). It will appear as a tooltip over the stage's name."
 msgstr ""
-"Nhập yêu cầu nội bộ cho giai đoạn này (vd: Ưu đãi được gửi cho khách hàng) "
-"vào đây. Yêu cầu sẽ xuất hiện dưới dạng một chú thích phía trên tên giai "
+"Nhập vào đây yêu cầu nội bộ cho giai đoạn này (vd: Ưu đãi được gửi cho khách"
+" hàng). Yêu cầu sẽ xuất hiện dưới dạng một chú thích phía trên tên giai "
 "đoạn."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__date_deadline
 msgid "Estimate of the date on which the opportunity will be won."
 msgstr "Ước tính ngày có thể đạt được cơ hội"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_exceeded
-msgid "Exceed monthly lead assignement"
-msgstr "Vượt quá lượng phân công lead hàng tháng"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date_deadline
@@ -1499,12 +1503,12 @@ msgstr "Vượt quá lượng phân công lead hàng tháng"
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Expected Closing"
-msgstr "Ngày đóng dự kiến"
+msgstr "Đóng dự kiến"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "Expected Closing:"
-msgstr "Ngày đóng dự kiến:"
+msgstr "Đóng dự kiến: "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue_monthly
@@ -1530,12 +1534,12 @@ msgstr "Bộ lọc mở rộng"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Extra Info"
-msgstr "Thông tin bổ sung"
+msgstr "Thông tin thêm"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Extra Information"
-msgstr "Thông tin bổ sung"
+msgstr "Thông tin thêm"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
@@ -1558,13 +1562,13 @@ msgid ""
 "Field used to store sanitized phone number. Helps speeding up searches and "
 "comparisons."
 msgstr ""
-"Trường được sử dụng để lưu trữ số điện thoại hợp lệ. Giúp tăng tốc tìm kiếm "
-"và so sánh. "
+"Trường được sử dụng để chứa số điện thoại được làm sạch. Giúp tăng tốc tìm "
+"kiếm và so sánh. "
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead_scoring_frequency_field
 msgid "Fields that can be used for predictive lead scoring computation"
-msgstr "Các trường có thể được sử dụng để tính điểm lead dự đoán"
+msgstr "Các trường có thể được sử dụng để tính điểm dự đoán cho lead"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_stage__fold
@@ -1589,7 +1593,7 @@ msgstr "Người theo dõi (Đối tác)"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Font biểu tượng, ví dụ: fa-tasks"
+msgstr "Font biểu tượng ví dụ: fa-tasks"
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_1
@@ -1599,10 +1603,10 @@ msgid ""
 "targeted to your needs: company size, industry, etc. To help you test the "
 "feature, we offer you 200 credits for free."
 msgstr ""
-"Đối với một đội ngũ kinh doanh, không có gì tệ hơn là cạn nguồn lead. May "
-"mắn thay, chỉ với vài cú nhấp chuột, bạn có thể tạo lead dựa theo nhu cầu "
-"của mình: quy mô công ty, ngành nghề,... Để giúp bạn kiểm thử tính năng này,"
-" chúng tôi cung cấp cho bạn 200 tín dụng miễn phí."
+"Đối với một đội ngũ kinh doanh, không có tệ hơn là cạn nguồn lead. May mắn "
+"thay, chỉ với vài cú nhấp chuột, bạn có thể tạo lead dựa theo nhu cầu của "
+"mình: quy mô công ty, ngành nghề,... Để giúp bạn kiểm tra tính năng này, "
+"chúng tôi cung cấp cho bạn 200 tín dụng miễn phí."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__force_assignment
@@ -1632,15 +1636,15 @@ msgstr "Từ %(source_name)s"
 #. odoo-python
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
-msgid "From %(source_name)s: %(source_subject)s"
-msgstr "Từ %(source_name)s: %(source_subject)s"
+msgid "From %(source_name)s : %(source_subject)s"
+msgstr "Từ %(source_name)s : %(source_subject)s"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_my_activities_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Future Activities"
-msgstr "Hoạt động trong tương lai"
+msgstr "Hoạt động tương lai"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__module_crm_iap_mine
@@ -1714,7 +1718,7 @@ msgid ""
 "ID of the parent record holding the alias (example: project holding the task"
 " creation alias)"
 msgstr ""
-"ID của tập dữ liệu cha chứa bí danh (ví dụ: dự án chứa bí danh tạo nhiệm vụ)"
+"ID của dữ liệu cha chứa bí danh (ví dụ: dự án chứa bí danh tạo nhiệm vụ)"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_exception_icon
@@ -1724,7 +1728,7 @@ msgstr "Biểu tượng"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Biểu tượng cho thấy một hoạt động ngoại lệ."
+msgstr "Biểu tượng để chỉ ra một hoạt động ngoại lệ."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead2opportunity_partner__force_assignment
@@ -1733,8 +1737,8 @@ msgid ""
 "If checked, forces salesman to be updated on updated opportunities even if "
 "already set."
 msgstr ""
-"Nếu được chọn, buộc nhân viên kinh doanh phải nắm bắt thông tin các cơ hội "
-"được cập nhật ngay cả khi đã được thiết lập."
+"Nếu được chọn, buộc nhân viên kinh doanh phải nắm bắt các cơ hội được cập "
+"nhật ngay cả khi đã được thiết lập."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__message_needaction
@@ -1754,7 +1758,7 @@ msgid ""
 "If set, this Sales Team will be used for sales and assignments related to "
 "this partner"
 msgstr ""
-"Nếu được cài đặt, đội ngũ kinh doanh sẽ được sử dụng cho bán hàng và phân "
+"Nếu được cài đặt, Đội ngũ kinh doanh sẽ được sử dụng cho bán hàng và phân "
 "công liên quan tới đối tác này. "
 
 #. module: crm
@@ -1782,13 +1786,13 @@ msgid ""
 "If the sanitized phone number is on the blacklist, the contact won't receive"
 " mass mailing sms anymore, from any list"
 msgstr ""
-"Nếu số điện thoại hợp lệ nằm trong danh sách hạn chế, thì liên hệ sẽ không "
-"nhận được sms hàng loạt từ bất kỳ danh sách nào nữa"
+"Nếu số điện thoại được làm sạch nằm trong danh sách hạn chế, thì liên hệ sẽ "
+"không nhận được sms hàng loạt từ bất kỳ danh sách nào nữa"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.menu_import_crm
 msgid "Import & Synchronize"
-msgstr "Nhập & đồng bộ"
+msgstr "Nhập & Đồng bộ"
 
 #. module: crm
 #. odoo-python
@@ -1820,9 +1824,9 @@ msgid ""
 "distinguish which number is blacklisted             when there is both a "
 "mobile and phone field in a model."
 msgstr ""
-"Cho biết số điện thoại hợp lệ trong danh sách hạn chế có phải là số di động "
-"hay không. Giúp phân biệt số nào bị hạn chế             khi có cả trường di "
-"động và trường điện thoại bàn trong một mô hình."
+"Cho biết số điện thoại được làm sạch trong danh sách hạn chế có phải là số "
+"di động hay không. Giúp phân biệt số nào bị hạn chế             khi có cả "
+"trường di động và trường điện thoại bàn trong một model."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__phone_blacklisted
@@ -1831,9 +1835,9 @@ msgid ""
 "distinguish which number is blacklisted             when there is both a "
 "mobile and phone field in a model."
 msgstr ""
-"Cho biết số điện thoại hợp lệ trong danh sách hạn chế có phải là số điện "
-"thoại bàn hay không. Giúp phân biệt số nào bị hạn chế             khi có cả "
-"trường di động và trường điện thoại bàn trong một mô hình."
+"Cho biết số điện thoại được làm sạch trong danh sách hạn chế có phải là số "
+"điện thoại bàn hay không. Giúp phân biệt số nào bị hạn chế             khi "
+"có cả trường di động và trường điện thoại bàn trong một model."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -1879,19 +1883,14 @@ msgid "Is automated probability?"
 msgstr "Là xác suất tự động?"
 
 #. module: crm
-#: model:ir.model.fields,help:crm.field_crm_lead__duration_tracking
-msgid "JSON that maps ids from a many2one field to seconds spent"
-msgstr "JSON ánh xạ id từ trường many2one tới số giây đã sử dụng"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__function
 msgid "Job Position"
-msgstr "Vị trí công việc"
+msgstr "Chức vụ"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "Job Position:"
-msgstr "Vị trí công việc:"
+msgstr "Chức vụ:"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__kanban_state
@@ -1901,7 +1900,7 @@ msgstr "Trạng thái kanban"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_digest_digest__kpi_crm_lead_created_value
 msgid "Kpi Crm Lead Created Value"
-msgstr "Kpi Crm Giá trị lead đã tạo"
+msgstr "Kpi Crm giá trị lead đã tạo"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_digest_digest__kpi_crm_opportunities_won_value
@@ -1924,21 +1923,30 @@ msgid "Language:"
 msgstr "Ngôn ngữ:"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__date_automation_last
+#: model:ir.model.fields,field_description:crm.field_crm_lead__date_action_last
 msgid "Last Action"
 msgstr "Hành động cuối cùng"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
-msgid "Last Automation:"
-msgstr "Tự động hóa cuối cùng:"
+msgid "Last Action:"
+msgstr "Hành động cuối cùng:"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Last Meeting"
-msgstr "Cuộc gặp cuối"
+#: model:ir.model.fields,field_description:crm.field_crm_activity_report____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner_mass____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_lost____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_pls_update____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency_field____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lost_reason____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_merge_opportunity____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_recurring_plan____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_stage____last_update
+msgid "Last Modified on"
+msgstr "Chỉnh sửa Lần cuối vào"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__date_last_stage_update
@@ -2024,11 +2032,6 @@ msgid "Lead Mining"
 msgstr "Khai thác lead"
 
 #. module: crm
-#: model:ir.actions.act_window,name:crm.mail_activity_plan_action_lead
-msgid "Lead Plans"
-msgstr "Kế hoạch lead"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_properties_definition
 msgid "Lead Properties"
 msgstr "Thuộc tính lead"
@@ -2059,12 +2062,6 @@ msgid "Lead Scoring Starting Date in String"
 msgstr "Ngày bắt đầu tính điểm lead ở dạng chuỗi"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
-#: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_tree
-msgid "Lead Tags"
-msgstr "Thẻ lead"
-
-#. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team_member__lead_month_count
 msgid "Lead assigned to this member those last 30 days"
 msgstr "Lead được phân công cho thành viên này trong 30 ngày qua"
@@ -2083,7 +2080,7 @@ msgstr "Lead hoặc cơ hội"
 msgid ""
 "Lead/Opportunities automatic assignment is limited to managers or "
 "administrators"
-msgstr "Chỉ quản lý và quản trị viên có thể tự động phân công lead/cơ hội "
+msgstr "Chỉ quản lý và quản trị viên có thể phân công lead/cơ hội tự động"
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead
@@ -2100,7 +2097,6 @@ msgstr "Lead/Cơ hội được tạo"
 #: code:addons/crm/models/crm_lost_reason.py:0
 #: model:ir.actions.act_window,name:crm.crm_case_form_view_salesteams_lead
 #: model:ir.actions.act_window,name:crm.crm_lead_all_leads
-#: model:ir.model.fields,field_description:crm.field_crm_lead_lost__lead_ids
 #: model:ir.model.fields,field_description:crm.field_crm_team__use_leads
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__group_use_lead
 #: model:ir.ui.menu,name:crm.crm_menu_leads
@@ -2110,7 +2106,6 @@ msgstr "Lead/Cơ hội được tạo"
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-#: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_kanban
 #, python-format
 msgid "Leads"
 msgstr "Lead"
@@ -2195,13 +2190,13 @@ msgid ""
 "Leads that you selected that have duplicates. If the list is empty, it means"
 " that no duplicates were found"
 msgstr ""
-"Lead bạn đã chọn có bản trùng lặp. Nếu danh sách trống, điều đó có nghĩa là "
-"không tìm thấy bản trùng lặp. "
+"Lead bạn chọn đã có bản trùng lặp. Nếu danh sách trống, đó có nghĩa là không"
+" tìm thấy bản trùng lặp. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid "Leads with existing duplicates (for information)"
-msgstr "Lead với bản trùng lặp hiện có (để tham khảo thông tin) "
+msgstr "Lead với bản trùng lặp hiện có (thêm thông tin) "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_merge_opportunity__opportunity_ids
@@ -2243,37 +2238,35 @@ msgstr ""
 "có thể tìm thấy đối tác theo tên, MST, email hoặc mã tham chiếu nội bộ. "
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_incoming_local
-msgid "Local-part based incoming detection"
-msgstr "Phát hiện gửi đến dựa trên phần cục bộ"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__lang_code
 msgid "Locale Code"
-msgstr "Mã vị trí"
+msgstr "Mã địa phương hóa"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_my_activities
 msgid "Looks like nothing is planned."
-msgstr "Có vẻ như không có kế hoạch nào."
+msgstr "Có vẻ như không có gì được lên kế hoạch."
 
 #. module: crm
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid ""
-"Looks like nothing is planned. :(<br><br><i>Tip: Schedule activities to keep"
-" track of everything you have to do!</i>"
+"Looks like nothing is planned. :(<br><br><i>Tip : Schedule activities to "
+"keep track of everything you have to do!</i>"
 msgstr ""
-"Có vẻ như không có kế hoạch nào. :(<br><br><i>Mẹo: Lên lịch các hoạt động để"
-" theo dõi mọi việc bạn phải làm!</i>"
+"Có vẻ như không có kế hoạch. :(<br><br><i>Mẹo: Lên lịch các hoạt động để "
+"theo dõi mọi việc bạn phải làm!</i>"
 
 #. module: crm
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_kanban_forecast
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
+#, python-format
 msgid "Lost"
 msgstr "Mất"
 
@@ -2282,7 +2275,7 @@ msgstr "Mất"
 #: code:addons/crm/wizard/crm_lead_lost.py:0
 #, python-format
 msgid "Lost Comment"
-msgstr "Bình luận về trường hợp bị mất"
+msgstr "Bình luận về mất"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency__lost_count
@@ -2290,13 +2283,10 @@ msgid "Lost Count"
 msgstr "Số lượng mất"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
-msgid "Lost Lead"
-msgstr "Lead đã mất"
-
-#. module: crm
+#: model:ir.actions.act_window,name:crm.crm_lead_lost_action
 #: model:ir.model.fields,field_description:crm.field_crm_lead__lost_reason_id
 #: model:ir.model.fields,field_description:crm.field_crm_lead_lost__lost_reason_id
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
@@ -2318,6 +2308,11 @@ msgstr "Lý do mất"
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__priority__0
 msgid "Low"
 msgstr "Thấp"
+
+#. module: crm
+#: model:ir.model.fields,field_description:crm.field_crm_lead__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Tệp đính kèm chính"
 
 #. module: crm
 #: model:mail.activity.type,name:crm.mail_activity_demo_make_quote
@@ -2346,26 +2341,7 @@ msgid "Manually"
 msgstr "Thủ công"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#: model:ir.actions.act_window,name:crm.crm_lead_lost_action
-#, python-format
-msgid "Mark Lost"
-msgstr "Đánh dấu là mất"
-
-#. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Mark Won"
-msgstr "Đánh dấu là đạt"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
-msgid "Mark as Lost"
-msgstr "Đánh dấu là mất"
-
-#. module: crm
+#: model:ir.actions.server,name:crm.action_mark_as_lost
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Mark as lost"
 msgstr "Đánh dấu là mất"
@@ -2400,21 +2376,11 @@ msgid "Medium:"
 msgstr "Phương tiện:"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__meeting_display_date
-msgid "Meeting Display Date"
-msgstr "Ngày hiển thị cuộc gặp"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__meeting_display_label
-msgid "Meeting Display Label"
-msgstr "Nhãn hiển thị cuộc họp"
-
-#. module: crm
 #. odoo-python
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
-msgid "Meeting scheduled at %s"
-msgstr "Cuộc họp được lên lịch vào %s"
+msgid "Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s"
+msgstr "Cuộc họp dự kiến lúc '%s'<br> Chủ đề: %s <br> Thời lượng: %s"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.act_crm_opportunity_calendar_event_new
@@ -2431,7 +2397,7 @@ msgid ""
 "formatted"
 msgstr ""
 "Miền phân công thành viên cho người dùng %(user)s và đội ngũ %(team)s được "
-"định dạng không chính xác"
+"định dạng sai"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.action_merge_opportunities
@@ -2580,13 +2546,6 @@ msgid "Next Activity Type"
 msgstr "Loại hoạt động tiếp theo"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Next Meeting"
-msgstr "Cuộc gặp tiếp theo"
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Next Run"
 msgstr "Lần chạy tiếp theo"
@@ -2594,7 +2553,7 @@ msgstr "Lần chạy tiếp theo"
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__kanban_state__green
 msgid "Next activity is planned"
-msgstr "Hoạt động tiếp theo được lên kế hoạch"
+msgstr "Hoạt động kế tiếp được lên kế hoạch"
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__kanban_state__red
@@ -2612,13 +2571,6 @@ msgstr "Không"
 #. odoo-python
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
-msgid "No Meeting"
-msgstr "Không có cuộc gặp"
-
-#. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
 msgid "No Subject"
 msgstr "Không tiêu đề"
 
@@ -2630,8 +2582,8 @@ msgid ""
 "No allocated leads to %(team_name)s team and its salespersons because no "
 "unassigned lead matches its domain."
 msgstr ""
-"Không có lead nào được phân bổ đến đội ngũ %(team_name)s và nhân viên kinh "
-"doanh của đội ngũ này vì không có lead chưa được phân công nào phù hợp với "
+"Không có lead nào được phân bổ đến đội ngũ %(team_name)s và nhân viên bán "
+"hàng của đội ngũ này vì không có lead chưa được phân công nào phù hợp với "
 "miền của đội."
 
 #. module: crm
@@ -2642,8 +2594,8 @@ msgid ""
 "No allocated leads to %(team_name)s team because it has no capacity. Add "
 "capacity to its salespersons."
 msgstr ""
-"Không có lead nào được phân bổ đến đội ngũ %(team_name)s vì không đủ dung "
-"lượng. Thêm dung lượng cho nhân viên kinh doanh của đội."
+"Không có lead nào được phân bổ đến đội ngũ %(team_name)s vì nó không có đủ "
+"dung lượng. Thêm dung lượng cho nhân viên kinh doanh."
 
 #. module: crm
 #. odoo-python
@@ -2654,7 +2606,7 @@ msgid ""
 "Salespersons configuration as well as unassigned leads."
 msgstr ""
 "Không có lead được phân bổ tới bất kỳ đội ngũ hay nhân viên kinh doanh nào. "
-"Kiểm tra cấu hình đội ngũ kinh doanh và nhân viên kinh doanh cũng như lead "
+"Kiểm tra cấu hình Đội ngũ kinh doanh và Nhân viên kinh doanh cũng như lead "
 "chưa được phân công. "
 
 #. module: crm
@@ -2704,7 +2656,7 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__kanban_state__grey
 msgid "No next activity planned"
-msgstr "Không có kế hoạch cho hoạt động tiếp theo"
+msgstr "Không có hoạt động tiếp theo được lên kế hoạch"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_forecast
@@ -2741,7 +2693,7 @@ msgstr "Ghi chú:"
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "Now, <b>add your Opportunity</b> to your Pipeline."
-msgstr "Bây giờ, <b>thêm cơ hội của bạn</b> vào chu trình. "
+msgstr "Bây giờ, <b>thêm Cơ hội của bạn</b> vào chu trình. "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_needaction_counter
@@ -2751,7 +2703,7 @@ msgstr "Số lượng hành động"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_has_error_counter
 msgid "Number of errors"
-msgstr "Số lượng lỗi"
+msgstr "Số lỗi"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_res_config_settings__crm_auto_assignment_interval_number
@@ -2784,7 +2736,7 @@ msgid ""
 "                    up potential sales and better forecast your future revenues."
 msgstr ""
 "Odoo giúp bạn theo dõi chu trình kinh doanh và cơ hội bán hàng\n"
-"                    đồng thời giúp dự đoán hiệu quả hơn về doanh thu tương lai của bạn."
+"                    đồng thời giúp dự đoán hiệu quả hơn về doanh số tương lai của bạn."
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_2
@@ -2796,8 +2748,8 @@ msgid ""
 msgstr ""
 "Công cụ trí tuệ nhân tạo của Odoo dự đoán tỷ lệ thành công của từng cơ hội "
 "dựa trên lịch sử của bạn. Bạn luôn có thể cập nhật tỷ lệ thành công theo "
-"cách thủ công, nhưng nếu bạn để Odoo thực hiện, điểm số sẽ được cập nhật "
-"trong khi cơ hội tiến triển trong chu trình bán hàng của bạn."
+"cách thủ công, nhưng nếu bạn để Odoo thực hiện công việc, điểm số sẽ được "
+"cập nhật trong khi cơ hội tiến triển trong chu trình bán hàng của bạn."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
@@ -2813,7 +2765,7 @@ msgstr "Mở cơ hội"
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lost_reason
 msgid "Opp. Lost Reason"
-msgstr "Lý do mất cơ hội"
+msgstr "Lý do mất"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_case_form_view_salesteams_opportunity
@@ -2828,7 +2780,6 @@ msgstr "Lý do mất cơ hội"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_graph
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
-#: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_kanban
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 #: model_terms:ir.ui.view,arch_db:crm.view_partners_form_crm1
 msgid "Opportunities"
@@ -2848,11 +2799,10 @@ msgid ""
 "mainly used by the sales manager in order to do the periodic review with the"
 " channels of the sales pipeline."
 msgstr ""
-"Phân tích cơ hội cho phép bạn truy cập tiếp cận các cơ hội một cách nhanh "
-"chóng với thông tin như: doanh thu dự kiến, chi phí dự định, hạn chót bị "
-"trễ, số lần tương tác cho mỗi cơ hội. Báo cáo này chủ yếu được quản lý kinh "
-"doanh sử dụng để thực hiện việc đánh giá định kỳ các kênh của chu trình kinh"
-" doanh. "
+"Phân tích cơ hội cho phép bạn truy cập nhanh đến các cơ hội với thông tin "
+"như: doanh thu dự kiến, chi phí dự định, hạn chót bị trễ, số lần tương tác "
+"cho mỗi cơ hội. Báo cáo này chủ yếu được quản lý kinh doanh sử dụng để thực "
+"hiện việc đánh giá định kỳ các kênh của chu trình bán hàng. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_graph_forecast
@@ -2941,9 +2891,9 @@ msgid ""
 "attached, even if they did not reply to it. If set, this will disable the "
 "creation of new records completely."
 msgstr ""
-"ID tùy chọn của một luồng (tập dữ liệu) tập hợp tất cả tin nhắn nhận được, "
-"thậm chí nếu đó là tin nhắn không có phản hồi. Nếu cài đặt, điều này sẽ tắt "
-"hoàn toàn việc tạo các tập dữ liệu mới. "
+"ID tùy chọn của một luồng (dữ liệu) tập hợp tất cả tin nhắn nhận được, thậm "
+"chí nếu đó là tin nhắn không có phản hồi. Nếu cài đặt, điều này sẽ tắt hoàn "
+"toàn việc tạo dữ liệu mới. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
@@ -2978,14 +2928,19 @@ msgid "Overdue Opportunity"
 msgstr "Cơ hội quá hạn"
 
 #. module: crm
+#: model:ir.model.fields,field_description:crm.field_crm_team__alias_user_id
+msgid "Owner"
+msgstr "Người phụ trách"
+
+#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_parent_model_id
 msgid "Parent Model"
-msgstr "Mô hình cha"
+msgstr "Model cha"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_parent_thread_id
 msgid "Parent Record Thread ID"
-msgstr "ID luồng tập dữ liệu cha"
+msgstr "ID luồng dữ liệu cha"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_parent_model_id
@@ -2994,9 +2949,9 @@ msgid ""
 " necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
-"Mô hình cha chứa bí danh này. Mô hình chứa tham chiếu bí danh không nhất "
-"thiết phải là mô hình được đưa ra bởi alias_model_id (Ví dụ: dự án "
-"(parent_model) và nhiệm vụ (model))"
+"Model cha chứa bí danh này. Model chứa tham chiếu bí danh không nhất thiết "
+"phải là model được đưa ra bởi alias_model_id (Ví dụ: dự án (parent_model) và"
+" nhiệm vụ (model))"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__partner_email_update
@@ -3077,8 +3032,7 @@ msgid ""
 "Please select more than one element (lead or opportunity) from the list "
 "view."
 msgstr ""
-"Vui lòng chọn nhiều hơn một yếu tố (lead hoặc cơ hội) từ chế độ xem danh "
-"sách. "
+"Vui lòng chọn hơn một yếu tố (lead hoặc cơ hội) từ chế độ xem danh sách. "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_pls_update__pls_fields
@@ -3098,7 +3052,7 @@ msgid ""
 "- partners: only authenticated partners\n"
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
-"Chính sách cho phép đăng thông báo lên tài liệu sử dụng cổng email.\n"
+"Chính sách cho phép đăng tin nhắn lên tài liệu sử dụng cổng email.\n"
 "- mọi người: mọi người có thể đăng\n"
 "- đối tác: chỉ các đối tác đã xác thực\n"
 "- người theo dõi: chỉ những người theo dõi của tài liệu liên quan hoặc thành viên của kênh đang theo dõi\n"
@@ -3114,19 +3068,15 @@ msgid "Potential Duplicate Lead Count"
 msgstr "Số lead trùng lặp tiềm năng"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
-msgid "Predictive Lead Scoring"
-msgstr "Tính điểm lead dự đoán"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__predictive_lead_scoring_field_labels
 msgid "Predictive Lead Scoring Field Labels"
-msgstr "Nhãn trường tính điểm lead dự đoán"
+msgstr "Nhãn trường tính điểm tiềm năng dự đoán"
 
 #. module: crm
 #: model:ir.actions.server,name:crm.website_crm_score_cron_ir_actions_server
+#: model:ir.cron,cron_name:crm.website_crm_score_cron
 msgid "Predictive Lead Scoring: Recompute Automated Probabilities"
-msgstr "Tính điểm lead dự đoán: Tính lại xác suất tự động"
+msgstr "Tính điểm khách hàng tiềm năng dự đoán: Tính lại xác suất tự động"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__priority
@@ -3157,8 +3107,6 @@ msgstr "Xác suất:"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__lead_properties
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
-#: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
-#: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Properties"
 msgstr "Thuộc tính"
 
@@ -3171,11 +3119,6 @@ msgstr "Đề xuất"
 #: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue_monthly_prorated
 msgid "Prorated MRR"
 msgstr "MRR theo tỷ lệ"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue_prorated
-msgid "Prorated Recurring Revenues"
-msgstr "Doanh thu định kỳ theo tỷ lệ"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__prorated_revenue
@@ -3193,11 +3136,6 @@ msgid "Qualified"
 msgstr "Đã đánh giá chất lượng"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__rating_ids
-msgid "Ratings"
-msgstr "Đánh giá"
-
-#. module: crm
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #: code:addons/crm/static/src/js/tours/crm.js:0
@@ -3210,7 +3148,7 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_force_thread_id
 msgid "Record Thread ID"
-msgstr "ID luồng tập dữ liệu"
+msgstr "ID luồng dữ liệu"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_plan
@@ -3338,6 +3276,13 @@ msgid "Sales Team Member"
 msgstr "Thành viên đội ngũ kinh doanh"
 
 #. module: crm
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0
+#, python-format
+msgid "Sales Team Settings"
+msgstr "Cài đặt đội ngũ kinh doanh"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "Sales Team:"
 msgstr "Đội ngũ kinh doanh:"
@@ -3345,7 +3290,7 @@ msgstr "Đội ngũ kinh doanh:"
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_team_config
 msgid "Sales Teams"
-msgstr "Đội ngũ kinh doanh"
+msgstr "Đội ngũ kinh doanh bán hàng"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__user_id
@@ -3373,7 +3318,7 @@ msgstr "Nhân viên kinh doanh"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__phone_sanitized
 msgid "Sanitized Number"
-msgstr "Số hợp lệ"
+msgstr "Số đã làm sạch "
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_my_activities
@@ -3400,7 +3345,7 @@ msgstr "Chọn lead/cơ hội"
 #: model:ir.actions.act_window,name:crm.action_lead_mail_compose
 #: model:ir.actions.act_window,name:crm.action_lead_mass_mail
 msgid "Send email"
-msgstr "Gửi email"
+msgstr "Gửi mail"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_recurring_plan__sequence
@@ -3415,12 +3360,12 @@ msgid ""
 "periodicity<br>(e.g: Monthly, Yearly)."
 msgstr ""
 "Cài đặt kế hoạch định kỳ cho cơ hội để hiển thị khoảng thời gian gia hạn của"
-" hợp đồng<br>(ví dụ: hàng tháng, hàng năm)."
+" hợp đồng<br>(ví dụ: hằng tháng, hằng năm)."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_stage_action
 msgid "Set a new stage in your opportunity pipeline"
-msgstr "Thiết lập một giai đoạn mới cho chu trình cơ hội của bạn"
+msgstr "Đặt một giai đoạn mới cho chu trình cơ hội của bạn"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_config_settings_action
@@ -3579,11 +3524,6 @@ msgstr ""
 "Kế hoạch: Cần thực hiện trong tương lai."
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__duration_tracking
-msgid "Status time"
-msgstr "Thời gian của trạng thái"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__street
 msgid "Street"
 msgstr "Đường"
@@ -3604,11 +3544,9 @@ msgid "Street2"
 msgstr "Đường2"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Subject: "
-msgstr "Tiêu đề:"
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
+msgid "Submit"
+msgstr "Gửi"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__subtype_id
@@ -3627,7 +3565,6 @@ msgid "Tag"
 msgstr "Thẻ"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_activity_report__tag_ids
 #: model:ir.model.fields,field_description:crm.field_crm_lead__tag_ids
 #: model:ir.ui.menu,name:crm.menu_crm_lead_categ
 msgid "Tags"
@@ -3673,9 +3610,9 @@ msgid ""
 " email that does not reply to an existing record will cause the creation of "
 "a new record of this model (e.g. a Project Task)"
 msgstr ""
-"Mô hình (Loại tài liệu Odoo) mà bí danh này tương tác. Mọi email đến mà "
-"không phải là email trả lời một tập dữ liệu hiện có sẽ tạo ra một tập dữ "
-"liệu mới trong mô hình này. (ví dụ: Nhiệm vụ dự án) "
+"Model (Loại tài liệu Odoo) mà bí danh này tương tác. Mọi email đến mà không "
+"phải là email trả lời một tập dữ liệu hiện có sẽ tạo ra một tập dữ liệu mới "
+"trong model này. (ví dụ: Nhiệm vụ dự án) "
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_name
@@ -3697,6 +3634,19 @@ msgstr "Tên công ty của đối tác sẽ được tạo khi chuyển lead th
 #: model:ir.model.constraint,message:crm.constraint_crm_recurring_plan_check_number_of_months
 msgid "The number of month can't be negative."
 msgstr "Số tháng phải lớn hơn 0."
+
+#. module: crm
+#: model:ir.model.fields,help:crm.field_crm_team__alias_user_id
+msgid ""
+"The owner of records created upon receiving emails on this alias. If this "
+"field is not set the system will attempt to find the right owner based on "
+"the sender (From) address, or will use the Administrator account if no "
+"system user is found for that address."
+msgstr ""
+"Người sở hữu của các tập dữ liệu được tạo khi nhận email gửi tới bí danh "
+"này. Nếu trường này không được cài đặt, hệ thống sẽ cố gắng tìm đúng người "
+"sở hữu dựa vào địa chỉ người gửi (Từ), hoặc sẽ dùng tài khoản Quản trị viên "
+"nếu không tìm thấy người dùng hệ thống nào cho địa chỉ đó. "
 
 #. module: crm
 #: model:ir.model.constraint,message:crm.constraint_crm_lead_check_probability
@@ -3727,7 +3677,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
 msgid ""
 "This bar allows to filter the opportunities based on scheduled activities."
-msgstr "Thanh này cho phép lọc cơ hội dựa vào hoạt động theo lịch trình. "
+msgstr "Thanh này cho phép lọc cơ hội dựa vào hoạt động đã lập kế hoạch. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -3762,7 +3712,7 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__lang_code
 msgid "This field is used to set/get locales for user"
-msgstr "Trường này được sử dụng để cài/lấy vị trí cho người dùng"
+msgstr "Trường này được sử dụng để cài/lấy địa điểm cho người dùng"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__campaign_id
@@ -3786,8 +3736,8 @@ msgid ""
 "This is the source of the link, e.g. Search Engine, another domain, or name "
 "of email list"
 msgstr ""
-"Đây là nguồn của liên kết, ví dụ: công cụ tìm kiếm, miền khác hoặc tên của "
-"danh sách email"
+"Đây là nguồn của liên kết, ví dụ: công cụ tìm kiếm, tên miền khác hoặc tên "
+"của danh sách email"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -3803,8 +3753,8 @@ msgid ""
 "This stage is folded in the kanban view when there are no records in that "
 "stage to display."
 msgstr ""
-"Giai đoạn này sẽ được thu gọn ở chế độ xem Kanban khi không có tập dữ liệu "
-"nào thuộc giai đoạn này để hiển thị."
+"Giai đoạn này được thu gọn trong chế độ xem kanban khi không có hồ sơ trong "
+"giai đoạn này để hiển thị. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
@@ -3889,15 +3839,6 @@ msgid "Trailing 12 months"
 msgstr "12 tháng liên tiếp"
 
 #. module: crm
-#: model:ir.model.fields,help:crm.field_crm_team__lead_all_assigned_month_exceeded
-msgid ""
-"True if the monthly lead assignment count is greater than the maximum "
-"assignment limit, false otherwise."
-msgstr ""
-"Đúng nếu số lượng phân công lead hàng tháng lớn hơn giới hạn phân công tối "
-"đa, ngược lại là sai."
-
-#. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
 msgid "Try sending an email"
 msgstr "Hãy thử gửi một email"
@@ -3912,12 +3853,12 @@ msgstr "Loại"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_activity_report__lead_type
 msgid "Type is used to separate Leads and Opportunities"
-msgstr "Loại được sử dụng để tách lead và cơ hội "
+msgstr "Loại được sử dụng để tách Lead và Cơ hội "
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Loại hoạt động ngoại lệ trong tập dữ liệu."
+msgstr "Loại hoạt động ngoại lệ trên tập dữ liệu."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -3959,12 +3900,7 @@ msgstr "Tin nhắn chưa đọc"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_search_forecast
 msgid "Upcoming Closings"
-msgstr "Hoạt động chốt sắp tới"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
-msgid "Update"
-msgstr "Cập nhật"
+msgstr "Sắp đóng"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_lead_pls_update_action
@@ -4022,7 +3958,7 @@ msgstr ""
 "khách hàng. Đó có thể là tấm danh thiếp bạn nhận được, mẫu liên lạc đã điền "
 "thông tin trên website, hoặc hồ sơ khách hàng tiềm năng chưa được đánh giá "
 "mà bạn nhập,... Khi đã đánh giá chất lượng, lead có thể được chuyển đổi "
-"thành cơ hội kinh doanh và/hoặc khách hàng mới trong danh bạ của bạn. "
+"thành cơ hội kinh doanh và/hoặc khách hàng mới trong sổ địa chỉ. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
@@ -4034,18 +3970,16 @@ msgstr "Sử dụng nút <i>Mới</i> hoặc gửi một email tới"
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid ""
-"Use the <i>New</i> button, or send an email to %(email_link)s to test the "
-"email gateway."
+"Use the <i>New</i> button, or send an email to %s to test the email gateway."
 msgstr ""
-"Sử dụng nút <i>Mới</i> hoặc gửi một email tới %(email_link)s để kiểm thử "
-"cổng email."
+"Sử dụng nút <i>Mới</i> hoặc gửi một email tới %s để kiểm tra cổng email."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
 msgid ""
 "Use the New button, or configure an email alias to test the email gateway."
 msgstr ""
-"Sử dụng nút Mới hoặc định cấu hình bí danh email để kiểm thử cổng email."
+"Sử dụng nút Mới hoặc định cấu hình bí danh email để kiểm tra cổng email."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_opportunity_report_action
@@ -4065,7 +3999,7 @@ msgstr "Người dùng"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__user_company_ids
 msgid "User Company"
-msgstr "Công ty của người dùng"
+msgstr "Công ty người dùng"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency__value
@@ -4085,7 +4019,7 @@ msgstr "Rất cao"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Visits to Leads"
-msgstr "Khách truy cập thành lead"
+msgstr "Chuyển khách truy cập thành lead"
 
 #. module: crm
 #: model:crm.lost.reason,name:crm.lost_reason_2
@@ -4129,16 +4063,18 @@ msgstr "Demo chào mừng"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
-msgid "What went wrong?"
+msgid "What went wrong ?"
 msgstr "Vấn đề gì đã xảy ra?"
 
 #. module: crm
-#: model:crm.stage,name:crm.stage_lead4
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0 model:crm.stage,name:crm.stage_lead4
 #: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_kanban_forecast
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
+#, python-format
 msgid "Won"
 msgstr "Đạt"
 
@@ -4157,7 +4093,7 @@ msgstr "Đạt trong mục tiêu cơ hội"
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "Yeah! Deal of the last 7 days for the team."
-msgstr "Tuyệt vời! Các giao dịch của đội ngũ trong 7 ngày qua. "
+msgstr "Quá tuyệt! Các giao dịch của đội ngũ trong 7 ngày qua. "
 
 #. module: crm
 #: model:crm.recurring.plan,name:crm.crm_recurring_plan_yearly
@@ -4176,7 +4112,7 @@ msgstr "Có"
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "You can make your opportunity advance through your pipeline from here."
-msgstr "Bạn có thể thúc đẩy cơ hội trong chu trình của mình từ đây."
+msgstr "Bạn có thể nâng cao cơ hội thông qua chu trình của bạn từ đây."
 
 #. module: crm
 #. odoo-python
@@ -4221,25 +4157,9 @@ msgid "Zip"
 msgstr "Mã bưu chính"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "e.g. \"0123456789\""
-msgstr "VD: \"0123456789\""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "e.g. \"Monthly\""
-msgstr "VD: \"Hàng tháng\""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "e.g. \"email@address.com\""
-msgstr "VD: \"email@address.com\""
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_stage_form
 msgid "e.g. Negotiation"
-msgstr "ví dụ: Đàm phán"
+msgstr "ví dụ: Thương thảo"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -4251,11 +4171,6 @@ msgstr "vd: Giá sản phẩm"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 msgid "e.g. Too expensive"
 msgstr "vd: Quá đắt"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-msgid "e.g. domain.com"
-msgstr "VD: domain.com"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -4280,14 +4195,14 @@ msgstr "team_count"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
 msgid "to test the email gateway."
-msgstr "để kiểm thử cổng email."
+msgstr "để kiểm tra cổng email."
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
 msgid "to your CRM. This email address is configurable by sales team members."
 msgstr ""
-"cho CRM của bạn. Các thành viên trong đội ngũ kinh doanh có thể cấu hình địa"
-" chỉ email này."
+"cho CRM của bạn. Các thành viên trong đội ngũ kinh doanh có thể định hình "
+"địa chỉ email này."
 
 #. module: crm
 #. odoo-python

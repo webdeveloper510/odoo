@@ -16,8 +16,11 @@ from ..controllers.home import Home
 
 _logger = logging.getLogger(__name__)
 
-class TestTOTPMixin:
-    def install_totphook(self):
+
+@tagged('post_install', '-at_install')
+class TestTOTP(HttpCaseWithUserDemo):
+    def setUp(self):
+        super().setUp()
         totp = None
         # might be possible to do client-side using `crypto.subtle` instead of
         # this horror show, but requires working on 64b integers, & BigInt is
@@ -35,21 +38,14 @@ class TestTOTPMixin:
                 return totp.generate(time.time() + 30).token
         # because not preprocessed by ControllerType metaclass
         totp_hook.routing_type = 'json'
-        self.env.registry.clear_cache('routing')
+        self.env['ir.http']._clear_routing_map()
         # patch Home to add test endpoint
         Home.totp_hook = http.route('/totphook', type='json', auth='none')(totp_hook)
         # remove endpoint and destroy routing map
         @self.addCleanup
         def _cleanup():
             del Home.totp_hook
-            self.env.registry.clear_cache('routing')
-
-
-@tagged('post_install', '-at_install')
-class TestTOTP(HttpCaseWithUserDemo, TestTOTPMixin):
-    def setUp(self):
-        super().setUp()
-        self.install_totphook()
+            self.env['ir.http']._clear_routing_map()
 
     def test_totp(self):
         # TODO: Make this work if no demo data + hr installed
@@ -129,6 +125,7 @@ class TestTOTP(HttpCaseWithUserDemo, TestTOTPMixin):
                 "db": get_db_name(),
                 "login": "demo",
                 "password": "demo",
+                "context": {},
             },
         }
         response = self.url_open("/web/session/authenticate", data=json.dumps(payload), headers=headers)

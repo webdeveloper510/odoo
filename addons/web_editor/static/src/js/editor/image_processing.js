@@ -1,11 +1,11 @@
-/** @odoo-module **/
+odoo.define('web_editor.image_processing', function (require) {
+'use strict';
 
-import { pick } from "@web/core/utils/objects";
-import {getAffineApproximation, getProjective} from "@web_editor/js/editor/perspective_utils";
+const {getAffineApproximation, getProjective} = require('@web_editor/js/editor/perspective_utils');
 
 // Fields returned by cropperjs 'getData' method, also need to be passed when
 // initializing the cropper to reuse the previous crop.
-export const cropperDataFields = ['x', 'y', 'width', 'height', 'rotate', 'scaleX', 'scaleY'];
+const cropperDataFields = ['x', 'y', 'width', 'height', 'rotate', 'scaleX', 'scaleY'];
 const modifierFields = [
     'filter',
     'quality',
@@ -16,9 +16,8 @@ const modifierFields = [
     'resizeWidth',
     'aspectRatio',
     "bgSrc",
-    "mimetypeBeforeConversion",
 ];
-export const isGif = (mimetype) => mimetype === 'image/gif';
+const isGif = (mimetype) => mimetype === 'image/gif';
 
 // webgl color filters
 const _applyAll = (result, filter, filters) => {
@@ -202,7 +201,7 @@ const glFilters = {
  * @param {HTMLImageElement} img the image to which modifications are applied
  * @returns {string} dataURL of the image with the applied modifications
  */
-export async function applyModifications(img, dataOptions = {}) {
+async function applyModifications(img, dataOptions = {}) {
     const data = Object.assign({
         glFilter: '',
         filter: '#0000',
@@ -235,8 +234,6 @@ export async function applyModifications(img, dataOptions = {}) {
     // Crop
     const container = document.createElement('div');
     const original = await loadImage(originalSrc);
-    // loadImage may have ended up loading a different src (see: LOAD_IMAGE_404)
-    originalSrc = original.getAttribute('src');
     container.appendChild(original);
     await activateCropper(original, 0, data);
     let croppedImg = $(original).cropper('getCroppedCanvas', {width, height});
@@ -338,13 +335,7 @@ export async function applyModifications(img, dataOptions = {}) {
     ctx.fillRect(0, 0, result.width, result.height);
 
     // Quality
-    const dataURL = result.toDataURL(mimetype, quality / 100);
-    const newSize = getDataURLBinarySize(dataURL);
-    const originalSize = _getImageSizeFromCache(originalSrc);
-    const isChanged = !!perspective || !!glFilter ||
-        original.width !== result.width || original.height !== result.height ||
-        original.width !== croppedImg.width || original.height !== croppedImg.height;
-    return (isChanged || originalSize >= newSize) ? dataURL : await _loadImageDataURL(originalSrc);
+    return result.toDataURL(mimetype, quality / 100);
 }
 
 /**
@@ -355,14 +346,13 @@ export async function applyModifications(img, dataOptions = {}) {
  * @returns {Promise<HTMLImageElement>} Promise that resolves to the loaded img
  *     or a placeholder image if the src is not found.
  */
-export function loadImage(src, img = new Image()) {
+function loadImage(src, img = new Image()) {
     const handleImage = (source, resolve, reject) => {
         img.addEventListener("load", () => resolve(img), {once: true});
         img.addEventListener("error", reject, {once: true});
         img.src = source;
     };
     // The server will return a placeholder image with the following src.
-    // grep: LOAD_IMAGE_404
     const placeholderHref = "/web/image/__odoo__unknown__src__/";
 
     return new Promise((resolve, reject) => {
@@ -419,19 +409,8 @@ async function _updateImageData(src, key = 'objectURL') {
     } else {
         value = URL.createObjectURL(blob);
     }
-    imageCache.set(src, Object.assign(currentImageData || {}, {[key]: value, size: blob.size}));
+    imageCache.set(src, Object.assign(currentImageData || {}, {[key]: value}));
     return value;
-}
-/**
- * Returns the size of a cached image.
- * Warning: this supposes that the image is already in the cache, i.e. that
- * _updateImageData was called before.
- *
- * @param {String} src used as a key on the image cache map.
- * @returns {Number} size of the image in bytes.
- */
-function _getImageSizeFromCache(src) {
-    return imageCache.get(src).size;
 }
 /**
  * Activates the cropper on a given image.
@@ -440,24 +419,18 @@ function _getImageSizeFromCache(src) {
  * @param {Number} aspectRatio the aspectRatio of the crop box
  * @param {DOMStringMap} dataset dataset containing the cropperDataFields
  */
-export async function activateCropper(image, aspectRatio, dataset) {
-    const oldSrc = image.src;
-    const newSrc = await _loadImageObjectURL(image.getAttribute('src'));
-    image.src = newSrc;
+async function activateCropper(image, aspectRatio, dataset) {
+    image.src = await _loadImageObjectURL(image.getAttribute('src'));
     $(image).cropper({
         viewMode: 2,
         dragMode: 'move',
         autoCropArea: 1.0,
         aspectRatio: aspectRatio,
-        data: Object.fromEntries(Object.entries(pick(dataset, ...cropperDataFields))
-            .map(([key, value]) => [key, parseFloat(value)])),
+        data: _.mapObject(_.pick(dataset, ...cropperDataFields), value => parseFloat(value)),
         // Can't use 0 because it's falsy and cropperjs will then use its defaults (200x100)
         minContainerWidth: 1,
         minContainerHeight: 1,
     });
-    if (oldSrc === newSrc && image.complete) {
-        return;
-    }
     return new Promise(resolve => image.addEventListener('ready', resolve, {once: true}));
 }
 /**
@@ -469,12 +442,10 @@ export async function activateCropper(image, aspectRatio, dataset) {
  * @param {string} [attachmentSrc=''] specifies the URL of the corresponding
  * attachment if it can't be found in the 'src' attribute.
  */
-export async function loadImageInfo(img, rpc, attachmentSrc = '') {
+async function loadImageInfo(img, rpc, attachmentSrc = '') {
     const src = attachmentSrc || img.getAttribute('src');
     // If there is a marked originalSrc, the data is already loaded.
-    // If the image does not have the "mimetypeBeforeConversion" attribute, it
-    // has to be added.
-    if ((img.dataset.originalSrc && img.dataset.mimetypeBeforeConversion) || !src) {
+    if (img.dataset.originalSrc || !src) {
         return;
     }
     // In order to be robust to absolute, relative and protocol relative URLs,
@@ -483,15 +454,13 @@ export async function loadImageInfo(img, rpc, attachmentSrc = '') {
     // the URL object if the src of the img is a relative or protocol relative
     // URL. The original attachment linked to the img is then retrieved thanks
     // to the path of the built URL object.
-    let docHref = img.ownerDocument.defaultView.location.href;
-    if (docHref === "about:srcdoc") {
-        docHref = window.location.href;
-    }
-
-    const srcUrl = new URL(src, docHref);
+    const srcUrl = new URL(src, img.ownerDocument.defaultView.location.href);
     const relativeSrc = srcUrl.pathname;
 
-    const {original} = await rpc('/web_editor/get_image_info', {src: relativeSrc});
+    const {original} = await rpc({
+        route: '/web_editor/get_image_info',
+        params: {src: relativeSrc},
+    });
     // If src was an absolute "external" URL, we consider unlikely that its
     // relative part matches something from the DB and even if it does, nothing
     // bad happens, besides using this random image as the original when using
@@ -501,18 +470,10 @@ export async function loadImageInfo(img, rpc, attachmentSrc = '') {
     // setup their website domain. That means they can have an absolute URL that
     // looks like "https://mycompany.odoo.com/web/image/123" that leads to a
     // "local" image even if the domain name is now "mycompany.be".
-    //
-    // The "redirect" check is for when it is a redirect image attachment due to
-    // an external URL upload.
-    if (original && original.image_src && !/\/web\/image\/\d+-redirect\//.test(original.image_src)) {
-        if (!img.dataset.mimetype) {
-            // The mimetype has to be added only if it is not already present as
-            // we want to avoid to reset a mimetype set by the user.
-            img.dataset.mimetype = original.mimetype;
-        }
+    if (original && original.image_src) {
         img.dataset.originalId = original.id;
         img.dataset.originalSrc = original.image_src;
-        img.dataset.mimetypeBeforeConversion = original.mimetype;
+        img.dataset.mimetype = original.mimetype;
     }
 }
 
@@ -522,17 +483,17 @@ export async function loadImageInfo(img, rpc, attachmentSrc = '') {
  *     won't be accepted.
  * @returns {Boolean}
  */
-export function isImageSupportedForProcessing(mimetype, strict = false) {
+function isImageSupportedForProcessing(mimetype, strict = false) {
     if (isGif(mimetype)) {
         return !strict;
     }
-    return ['image/jpeg', 'image/png', 'image/webp'].includes(mimetype);
+    return ['image/jpeg', 'image/png'].includes(mimetype);
 }
 /**
  * @param {HTMLImageElement} img
  * @returns {Boolean}
  */
-export function isImageSupportedForStyle(img) {
+function isImageSupportedForStyle(img) {
     if (!img.parentElement) {
         return false;
     }
@@ -551,37 +512,12 @@ export function isImageSupportedForStyle(img) {
 
     return !isTFieldImg && !isEditableRootElement;
 }
-/**
- * @param {HTMLImageElement} img
- * @returns {Promise<Boolean>}
- */
-export async function isImageCorsProtected(img) {
-    const src = img.getAttribute('src');
-    if (!src) {
-        return false;
-    }
-    let isCorsProtected = false;
-    if (!src.startsWith("/") || /\/web\/image\/\d+-redirect\//.test(src)) {
-        // The `fetch()` used later in the code might fail if the image is
-        // CORS protected. We check upfront if it's the case.
-        // Two possible cases:
-        // 1. the `src` is an absolute URL from another domain.
-        //    For instance, abc.odoo.com vs abc.com which are actually the
-        //    same database behind.
-        // 2. A "attachment-url" which is just a redirect to the real image
-        //    which could be hosted on another website.
-        isCorsProtected = await fetch(src, {method: 'HEAD'})
-            .then(() => false)
-            .catch(() => true);
-    }
-    return isCorsProtected;
-}
 
 /**
  * @param {Blob} blob
  * @returns {Promise}
  */
-export function createDataURL(blob) {
+function createDataURL(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.addEventListener('load', () => resolve(reader.result));
@@ -591,27 +527,16 @@ export function createDataURL(blob) {
     });
 }
 
-/**
- * @param {String} dataURL
- * @returns {Number} number of bytes represented with base64
- */
-export function getDataURLBinarySize(dataURL) {
-    // Every 4 bytes of base64 represent 3 bytes.
-    return dataURL.split(',')[1].length / 4 * 3;
-}
-
-export const removeOnImageChangeAttrs = [...cropperDataFields, ...modifierFields];
-
-export default {
+return {
     applyModifications,
     cropperDataFields,
     activateCropper,
     loadImageInfo,
     loadImage,
-    removeOnImageChangeAttrs,
+    removeOnImageChangeAttrs: [...cropperDataFields, ...modifierFields],
     isImageSupportedForProcessing,
     isImageSupportedForStyle,
     createDataURL,
     isGif,
-    getDataURLBinarySize,
 };
+});

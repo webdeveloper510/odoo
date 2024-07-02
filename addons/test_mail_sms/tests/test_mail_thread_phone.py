@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.sms.tests.common import SMSCommon
-from odoo.addons.test_mail_sms.tests.common import TestSMSRecipients
+from odoo.addons.test_mail_sms.tests.common import TestSMSCommon, TestSMSRecipients
 from odoo.tests import tagged, users
 
 
 @tagged('mail_thread')
-class TestSMSActionsCommon(SMSCommon, TestSMSRecipients):
+class TestSMSActionsCommon(TestSMSCommon, TestSMSRecipients):
     """ Test mail.thread.phone mixin, its tools and API """
 
     @classmethod

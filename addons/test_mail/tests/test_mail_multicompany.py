@@ -9,18 +9,19 @@ from unittest.mock import patch
 from werkzeug.urls import url_parse, url_decode
 
 from odoo.addons.mail.models.mail_message import Message
-from odoo.addons.mail.tests.common import MailCommon
-from odoo.addons.test_mail.tests.common import TestRecipients
+from odoo.addons.test_mail.tests.common import TestMailCommon, TestRecipients
 from odoo.exceptions import AccessError
 from odoo.tests import tagged, users, HttpCase
-from odoo.tools import mute_logger
+from odoo.tools import formataddr, mute_logger
 
 
-class TestMailMCCommon(MailCommon, TestRecipients):
+@tagged('multi_company')
+class TestMultiCompanySetup(TestMailCommon, TestRecipients):
 
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
+        super(TestMultiCompanySetup, cls).setUpClass()
+        cls._activate_multi_company()
 
         cls.test_model = cls.env['ir.model']._get('mail.test.gateway')
         cls.email_from = '"Sylvie Lelitre" <test.sylvie.lelitre@agrolait.com>'
@@ -36,16 +37,17 @@ class TestMailMCCommon(MailCommon, TestRecipients):
              'company_id': cls.user_employee_c2.company_id.id},
         ])
 
+        cls.company_3 = cls.env['res.company'].create({'name': 'ELIT'})
         cls.partner_1 = cls.env['res.partner'].with_context(cls._test_context).create({
             'name': 'Valid Lelitre',
             'email': 'valid.lelitre@agrolait.com',
         })
         # groups@.. will cause the creation of new mail.test.gateway
-        cls.mail_alias = cls.env['mail.alias'].create({
-            'alias_contact': 'everyone',
-            'alias_model_id': cls.test_model.id,
+        cls.alias = cls.env['mail.alias'].create({
             'alias_name': 'groups',
-        })
+            'alias_user_id': False,
+            'alias_model_id': cls.test_model.id,
+            'alias_contact': 'everyone'})
 
         # Set a first message on public group to test update and hierarchy
         cls.fake_email = cls.env['mail.message'].create({
@@ -59,13 +61,10 @@ class TestMailMCCommon(MailCommon, TestRecipients):
         })
 
     def setUp(self):
-        super().setUp()
+        super(TestMultiCompanySetup, self).setUp()
         # patch registry to simulate a ready environment
         self.patch(self.env.registry, 'ready', True)
-
-
-@tagged('multi_company')
-class TestMultiCompanySetup(TestMailMCCommon):
+        self.flush_tracking()
 
     @users('employee_c2')
     @mute_logger('odoo.addons.base.models.ir_rule')
@@ -85,35 +84,26 @@ class TestMultiCompanySetup(TestMailMCCommon):
         with self.assertRaises(AccessError):
             test_record_c1.write({'name': 'Cannot Write'})
 
-        first_attachment = self.env['ir.attachment'].create({
-            'company_id': self.user_employee_c2.company_id.id,
-            'datas': base64.b64encode(b'First attachment'),
-            'mimetype': 'text/plain',
-            'name': 'TestAttachmentIDS.txt',
-            'res_model': 'mail.compose.message',
-            'res_id': 0,
-        })
-
         message = test_record_c1.message_post(
-            attachments=[('testAttachment', b'First attachment')],
-            attachment_ids=first_attachment.ids,
+            attachments=[('testAttachment', b'Test attachment')],
             body='My Body',
             message_type='comment',
             subtype_xmlid='mail.mt_comment',
         )
-        self.assertTrue('testAttachment' in message.attachment_ids.mapped('name'))
+        self.assertEqual(message.attachment_ids.mapped('name'), ['testAttachment'])
+        first_attachment = message.attachment_ids
         self.assertEqual(test_record_c1.message_main_attachment_id, first_attachment)
 
         new_attach = self.env['ir.attachment'].create({
             'company_id': self.user_employee_c2.company_id.id,
-            'datas': base64.b64encode(b'Second attachment'),
+            'datas': base64.b64encode(b'Test attachment'),
             'mimetype': 'text/plain',
             'name': 'TestAttachmentIDS.txt',
             'res_model': 'mail.compose.message',
             'res_id': 0,
         })
         message = test_record_c1.message_post(
-            attachments=[('testAttachment', b'Second attachment')],
+            attachments=[('testAttachment', b'Test attachment')],
             attachment_ids=new_attach.ids,
             body='My Body',
             message_type='comment',
@@ -271,6 +261,7 @@ class TestMultiCompanySetup(TestMailMCCommon):
         self.assertEqual(
             test_activity,
             {
+                "actions": [{"icon": "fa-clock-o", "name": "Summary"}],
                 "icon": "/base/static/description/icon.png",
                 "id": self.env["ir.model"]._get_id("mail.test.multi.company.with.activity"),
                 "model": "mail.test.multi.company.with.activity",
@@ -280,7 +271,6 @@ class TestMultiCompanySetup(TestMailMCCommon):
                 "today_count": 2,
                 "total_count": 2,
                 "type": "activity",
-                "view_type": "list",
             }
         )
 
@@ -291,6 +281,7 @@ class TestMultiCompanySetup(TestMailMCCommon):
         self.assertEqual(
             test_activity,
             {
+                "actions": [{"icon": "fa-clock-o", "name": "Summary"}],
                 "icon": "/base/static/description/icon.png",
                 "id": self.env["ir.model"]._get_id("mail.test.multi.company.with.activity"),
                 "model": "mail.test.multi.company.with.activity",
@@ -300,13 +291,17 @@ class TestMultiCompanySetup(TestMailMCCommon):
                 "today_count": 1,
                 "total_count": 1,
                 "type": "activity",
-                "view_type": "list",
             }
         )
 
 
 @tagged('-at_install', 'post_install', 'multi_company')
-class TestMultiCompanyRedirect(MailCommon, HttpCase):
+class TestMultiCompanyRedirect(TestMailCommon, HttpCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestMultiCompanyRedirect, cls).setUpClass()
+        cls._activate_multi_company()
 
     def test_redirect_to_records(self):
         """ Test mail/view redirection in MC environment, notably cids being

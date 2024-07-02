@@ -4,7 +4,7 @@ import { browser } from "@web/core/browser/browser";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { registry } from "@web/core/registry";
 import { uiService, useActiveElement } from "@web/core/ui/ui_service";
-import { getActiveHotkey, hotkeyService } from "@web/core/hotkeys/hotkey_service";
+import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { makeTestEnv } from "../../helpers/mock_env";
 import {
     destroy,
@@ -52,6 +52,20 @@ QUnit.test("register / unregister", async (assert) => {
     await nextTick();
 
     assert.verifySteps([key]);
+});
+
+QUnit.test("should ignore when IME is composing", async (assert) => {
+    const key = "enter";
+    env.services.hotkey.add(key, () => assert.step(key));
+    await nextTick();
+
+    triggerHotkey(key);
+    await nextTick();
+    assert.verifySteps([key]);
+
+    triggerHotkey(key, false, { isComposing: true });
+    await nextTick();
+    assert.verifySteps([]);
 });
 
 QUnit.test("hotkey handles wrongly formed KeyboardEvent", async (assert) => {
@@ -144,7 +158,7 @@ QUnit.test("[accesskey] attrs replaced by [data-hotkey], part 2", async (assert)
             useActiveElement("bouh");
         }
     }
-    UIOwnershipTakerComponent.template = xml`<p class="owner" t-ref="bouh"><button/></p>`;
+    UIOwnershipTakerComponent.template = xml`<p class="owner" t-ref="bouh">bouh</p>`;
     class MyComponent extends Component {
         setup() {
             this.state = useState({ foo: true });
@@ -1015,7 +1029,7 @@ QUnit.test("operating area and UI active element", async (assert) => {
             useActiveElement("bouh");
         }
     }
-    UIOwnershipTakerComponent.template = xml`<p class="owner" t-ref="bouh"><button/></p>`;
+    UIOwnershipTakerComponent.template = xml`<p class="owner" t-ref="bouh">bouh</p>`;
     class C extends Component {
         setup() {
             this.state = useState({ foo: false });
@@ -1075,7 +1089,7 @@ QUnit.test("operating area and UI active element", async (assert) => {
 });
 
 QUnit.test("validating option", async (assert) => {
-    let isAvailable = false;
+    let isValid = false;
     class A extends Component {
         setup() {
             useHotkey(
@@ -1084,7 +1098,10 @@ QUnit.test("validating option", async (assert) => {
                     assert.step("RGNTDJÛ!");
                 },
                 {
-                    isAvailable: () => isAvailable,
+                    validate: (eventTarget) => {
+                        assert.strictEqual(eventTarget, document.activeElement);
+                        return isValid;
+                    },
                 }
             );
         }
@@ -1096,14 +1113,14 @@ QUnit.test("validating option", async (assert) => {
     await nextTick();
     assert.verifySteps([]);
 
-    isAvailable = true;
+    isValid = true;
     triggerHotkey("Space");
     await nextTick();
     assert.verifySteps(["RGNTDJÛ!"]);
 });
 
 QUnit.test("operation area with validating option", async (assert) => {
-    let isAvailable;
+    let isValid;
     class A extends Component {
         setup() {
             const areaRef = useRef("area");
@@ -1112,7 +1129,7 @@ QUnit.test("operation area with validating option", async (assert) => {
                 () => {
                     assert.step("RGNTDJÛ!");
                 },
-                { area: () => areaRef.el, isAvailable: () => isAvailable }
+                { area: () => areaRef.el, validate: () => isValid }
             );
         }
     }
@@ -1125,12 +1142,12 @@ QUnit.test("operation area with validating option", async (assert) => {
     // Trigger hotkeys from the 'one'
     target.querySelector(".one").focus();
 
-    isAvailable = false;
+    isValid = false;
     triggerHotkey("Space");
     await nextTick();
     assert.verifySteps([]);
 
-    isAvailable = true;
+    isValid = true;
     triggerHotkey("Space");
     await nextTick();
     assert.verifySteps([]);
@@ -1138,12 +1155,12 @@ QUnit.test("operation area with validating option", async (assert) => {
     // Trigger hotkeys from the 'two'
     target.querySelector(".two").focus();
 
-    isAvailable = false;
+    isValid = false;
     triggerHotkey("Space");
     await nextTick();
     assert.verifySteps([]);
 
-    isAvailable = true;
+    isValid = true;
     triggerHotkey("Space");
     await nextTick();
     assert.verifySteps(["RGNTDJÛ!"]);
@@ -1164,19 +1181,4 @@ QUnit.test("mixing hotkeys with and without operation area", async (assert) => {
     triggerHotkey("Space");
     await nextTick();
     assert.verifySteps(["withArea"]);
-});
-
-QUnit.test("native browser space key ' ' is correctly translated to 'space' ", async (assert) => {
-    class A extends Component {
-        setup() {
-            useHotkey("space", () => assert.step("space"));
-        }
-    }
-    A.template = xml``;
-
-    assert.strictEqual(getActiveHotkey({ key: " " }), "space");
-
-    await mount(A, target, { env });
-    await triggerHotkey(" "); // event key triggered by the browser
-    assert.verifySteps(["space"]);
 });

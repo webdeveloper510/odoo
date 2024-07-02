@@ -25,10 +25,7 @@ function iconFromString(iconString) {
     const icon = {};
     if (iconString.startsWith("fa-")) {
         icon.tag = "i";
-        icon.class = `o_button_icon fa fa-fw ${iconString}`;
-    } else if (iconString.startsWith("oi-")) {
-        icon.tag = "i";
-        icon.class = `o_button_icon oi oi-fw ${iconString}`;
+        icon.class = `fa fa-fw o_button_icon ${iconString}`;
     } else {
         icon.tag = "img";
         icon.src = iconString;
@@ -51,10 +48,7 @@ export class ViewButton extends Component {
                 string: this.props.string,
                 help: this.clickParams.help,
                 context: this.clickParams.context,
-                invisible: this.props.attrs?.invisible,
-                column_invisible: this.props.attrs?.column_invisible,
-                readonly: this.props.attrs?.readonly,
-                required: this.props.attrs?.required,
+                modifiers: this.clickParams.modifiers,
                 special: this.clickParams.special,
                 type: this.clickParams.type,
                 name: this.clickParams.name,
@@ -103,6 +97,8 @@ export class ViewButton extends Component {
                     this.env[DROPDOWN].close();
                 }
             },
+            disableAction: this.props.disable,
+            enableAction: this.props.enable,
         });
     }
 
@@ -144,7 +140,9 @@ ViewButton.props = [
     "clickParams?",
     "icon?",
     "defaultRank?",
+    "disable?",
     "disabled?",
+    "enable?",
     "size?",
     "tabindex?",
     "title?",
@@ -157,4 +155,6 @@ ViewButton.defaultProps = {
     tag: "button",
     className: "",
     clickParams: {},
+    disable: () => {},
+    enable: () => {},
 };

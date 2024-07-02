@@ -1,7 +1,6 @@
-/** @odoo-module **/
+/** @odoo-module */
 
-import { _t } from "@web/core/l10n/translation";
-import fonts from '@web_editor/js/wysiwyg/fonts';
+import fonts from 'wysiwyg.fonts';
 import { SearchMedia } from './search_media';
 
 import { Component, useState } from "@odoo/owl";
@@ -13,7 +12,7 @@ export class IconSelector extends Component {
             needle: '',
         });
 
-        this.searchPlaceholder = _t("Search a pictogram");
+        this.searchPlaceholder = this.env._t("Search a pictogram");
     }
 
     get selectedMediaIds() {

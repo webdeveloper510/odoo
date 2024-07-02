@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import contextlib
-
-from odoo import _, api, models, SUPERUSER_ID
+from odoo import _, models, SUPERUSER_ID
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.http import request
 from odoo.tools import consteq
@@ -11,22 +9,6 @@ from odoo.tools import consteq
 
 class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
-
-    @api.model
-    def check(self, mode, values=None):
-        super().check(mode, values=values)
-        if mode == 'write' and not {'datas', 'db_datas', 'raw'} & (values or {}).keys():
-            return True
-        if mode not in ('unlink', 'write') or not self or self.env.is_admin():
-            return True
-        if self.create_uid == self.env.user:
-            return True
-        linked_messages = self.env['mail.message'].sudo().search([('attachment_ids', 'in', self.ids)])
-        if not linked_messages:
-            return True
-        authors = linked_messages.author_id
-        if len(authors) > 1 or authors != self.env.user.partner_id:
-            raise AccessError(_("You may not unlink or modify the content of attachments from other people's messages"))
 
     def _check_attachments_access(self, attachment_tokens):
         """This method relies on access rules/rights and therefore it should not be called from a sudo env."""
@@ -49,59 +31,65 @@ class IrAttachment(models.Model):
             except (AccessError, MissingError):
                 raise UserError(_("The attachment %s does not exist or you do not have the rights to access it.", attachment.id))
 
-    def _post_add_create(self, **kwargs):
+    def _post_add_create(self):
         """ Overrides behaviour when the attachment is created through the controller
         """
-        super(IrAttachment, self)._post_add_create(**kwargs)
+        super(IrAttachment, self)._post_add_create()
         for record in self:
             record.register_as_main_attachment(force=False)
 
     def register_as_main_attachment(self, force=True):
         """ Registers this attachment as the main one of the model it is
         attached to.
-
-        :param bool force: if set, the method always updates the existing main attachment
-            otherwise it only sets the main attachment if there is none.
         """
         self.ensure_one()
-        if not self.res_model or not self.res_id:
+        if not self.res_model:
             return
         related_record = self.env[self.res_model].browse(self.res_id)
-        if not related_record or \
-                not related_record.check_access_rights('write', raise_exception=False) or \
-                not hasattr(related_record, 'message_main_attachment_id'):
+        if not related_record.check_access_rights('write', raise_exception=False):
             return
+        # message_main_attachment_id field can be empty, that's why we compare to False;
+        # we are just checking that it exists on the model before writing it
+        if related_record and hasattr(related_record, 'message_main_attachment_id'):
+            if force or not related_record.message_main_attachment_id:
+                #Ignore AccessError, if you don't have access to modify the document
+                #Just don't set the value
+                try:
+                    related_record.message_main_attachment_id = self
+                except AccessError:
+                    pass
 
-        if force or not related_record.message_main_attachment_id:
-            with contextlib.suppress(AccessError):
-                related_record.message_main_attachment_id = self
-
-    def _delete_and_notify(self, message=None):
-        if message:
-            # sudo: mail.message - safe write just updating the date, because guests don't have the rights
-            message.sudo().write({})  # to make sure write_date on the message is updated
-        self.env['bus.bus']._sendmany((attachment._bus_notification_target(), 'ir.attachment/delete', {
-            'id': attachment.id, 'message': {'id': message.id, 'write_date': message.write_date} if message else None
-        }) for attachment in self)
+    def _delete_and_notify(self):
+        for attachment in self:
+            if attachment.res_model == 'mail.channel' and attachment.res_id:
+                target = self.env['mail.channel'].browse(attachment.res_id)
+            else:
+                target = self.env.user.partner_id
+            self.env['bus.bus']._sendone(target, 'ir.attachment/delete', {
+                'id': attachment.id,
+            })
         self.unlink()
 
-    def _bus_notification_target(self):
-        self.ensure_one()
-        return self.env.user.partner_id
-
-    def _attachment_format(self):
+    def _attachment_format(self, legacy=False):
         safari = request and request.httprequest.user_agent and request.httprequest.user_agent.browser == 'safari'
-        return [{
-            'checksum': attachment.checksum,
-            'create_date': attachment.create_date,
-            'id': attachment.id,
-            'filename': attachment.name,
-            'name': attachment.name,
-            "size": attachment.file_size,
-            'res_name': attachment.res_name,
-            'mimetype': 'application/octet-stream' if safari and attachment.mimetype and 'video' in attachment.mimetype else attachment.mimetype,
-            'originThread': [('ADD', {
-                'id': attachment.res_id,
-                'model': attachment.res_model,
-            })],
-        } for attachment in self]
+        res_list = []
+        for attachment in self:
+            res = {
+                'checksum': attachment.checksum,
+                'id': attachment.id,
+                'filename': attachment.name,
+                'name': attachment.name,
+                'mimetype': 'application/octet-stream' if safari and attachment.mimetype and 'video' in attachment.mimetype else attachment.mimetype,
+            }
+            if not legacy:
+                res['originThread'] = [('insert', {
+                    'id': attachment.res_id,
+                    'model': attachment.res_model,
+                })]
+            else:
+                res.update({
+                    'res_id': attachment.res_id,
+                    'res_model': attachment.res_model,
+                })
+            res_list.append(res)
+        return res_list

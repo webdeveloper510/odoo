@@ -75,13 +75,13 @@ class TestM2MGrouping(TransactionCaseWithUserDemo):
                 'user_ids': (self.users[0].id, "Mario"),
                 'user_ids_count': 1,
                 'name': ["Super Mario Bros."],
-                '__domain': ['&', ('id', '=', self.tasks[0].id), ('user_ids', '=', self.users[0].id)],
+                '__domain': ['&', ('user_ids', '=', self.users[0].id), ('id', '=', self.tasks[0].id)],
             },
             {   # task of Luigi
                 'user_ids': (self.users[1].id, "Luigi"),
                 'user_ids_count': 1,
                 'name': ["Super Mario Bros."],
-                '__domain': ['&', ('id', '=', self.tasks[0].id), ('user_ids', '=', self.users[1].id)],
+                '__domain': ['&', ('user_ids', '=', self.users[1].id), ('id', '=', self.tasks[0].id)],
             },
         ])
 
@@ -108,7 +108,7 @@ class TestM2MGrouping(TransactionCaseWithUserDemo):
                 'user_ids': False,
                 'user_ids_count': 1,
                 'name': unordered(["Donkey Kong"]),
-                '__domain': [('user_ids', 'not in', [self.users[0].id, self.users[1].id])],
+                '__domain': [('user_ids', '=', False)],
             },
         ])
 
@@ -131,23 +131,18 @@ class TestM2MGrouping(TransactionCaseWithUserDemo):
             'domain_force': [('id', '=', self.users[0].id)],
         })
 
-        # warmup
-        as_admin = self.tasks.read_group(
-            domain=[],
-            fields=['name:array_agg'],
-            groupby=['user_ids'],
-        )
-
         # as superuser, ir.rule should not apply
         expected = """
             SELECT
-                "test_read_group_task__user_ids"."user_id",
-                COUNT(*),
-                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+                min("test_read_group_task".id) AS id,
+                count("test_read_group_task".id) AS "user_ids_count",
+                array_agg("test_read_group_task"."name") AS "name",
+                "test_read_group_task__user_ids"."user_id" AS "user_ids"
             FROM "test_read_group_task"
-            LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids" ON ("test_read_group_task"."id" = "test_read_group_task__user_ids"."task_id")
+            LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids"
+                ON ("test_read_group_task"."id" = "test_read_group_task__user_ids"."task_id")
             GROUP BY "test_read_group_task__user_ids"."user_id"
-            ORDER BY "test_read_group_task__user_ids"."user_id" ASC
+            ORDER BY "user_ids"
         """
         with self.assertQueries([expected]):
             as_admin = self.tasks.read_group(
@@ -172,7 +167,7 @@ class TestM2MGrouping(TransactionCaseWithUserDemo):
                 'user_ids': False,
                 'user_ids_count': 1,
                 'name': unordered(["Donkey Kong"]),
-                '__domain': [('user_ids', 'not in', [self.users[0].id, self.users[1].id])],
+                '__domain': [('user_ids', '=', False)],
             },
         ])
 
@@ -184,21 +179,22 @@ class TestM2MGrouping(TransactionCaseWithUserDemo):
 
         expected = """
             SELECT
-                "test_read_group_task__user_ids"."user_id",
-                COUNT(*),
-                ARRAY_AGG("test_read_group_task"."name" ORDER BY "test_read_group_task"."id")
+                min("test_read_group_task".id) AS id,
+                count("test_read_group_task".id) AS "user_ids_count",
+                array_agg("test_read_group_task"."name") AS "name",
+                "test_read_group_task__user_ids"."user_id" AS "user_ids"
             FROM "test_read_group_task"
             LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids"
                 ON (
                     "test_read_group_task"."id" = "test_read_group_task__user_ids"."task_id"
                     AND "test_read_group_task__user_ids"."user_id" IN (
-                        SELECT "test_read_group_user"."id"
+                        SELECT "test_read_group_user".id
                         FROM "test_read_group_user"
                         WHERE ("test_read_group_user"."id" = %s)
                     )
                 )
             GROUP BY "test_read_group_task__user_ids"."user_id"
-            ORDER BY "test_read_group_task__user_ids"."user_id" ASC
+            ORDER BY "user_ids"
         """
         with self.assertQueries([expected]):
             as_demo = tasks.read_group(
@@ -217,51 +213,30 @@ class TestM2MGrouping(TransactionCaseWithUserDemo):
                 'user_ids': False,
                 'user_ids_count': 2,
                 'name': unordered(["Luigi's Mansion", 'Donkey Kong']),
-                '__domain': [('user_ids', 'not in', self.users[0].ids)],
+                '__domain': [('user_ids', '=', False)],
             },
         ])
 
-        for group in as_demo:
-            self.assertEqual(
-                group['user_ids_count'],
-                tasks.search_count(group['__domain']),
-                'A search using the domain returned by the read_group should give the '
-                'same number of records as counted in the group',
+    def test_order_by_many2one_id(self):
+        # ordering by a many2one ordered itself by id does not use useless join
+        expected_query = '''
+            SELECT
+              min("test_read_group_order_line".id) AS id,
+              count("test_read_group_order_line".id) AS "order_id_count",
+              "test_read_group_order_line"."order_id" as "order_id"
+            FROM "test_read_group_order_line"
+            GROUP BY "test_read_group_order_line"."order_id"
+            ORDER BY "order_id"
+        '''
+        with self.assertQueries([expected_query]):
+            self.env["test_read_group.order.line"].read_group(
+                [], ["order_id"], "order_id"
+            )
+        with self.assertQueries([expected_query + ' DESC']):
+            self.env["test_read_group.order.line"].read_group(
+                [], ["order_id"], "order_id", orderby="order_id DESC"
             )
 
-    def test_ordered_tasks(self):
-        """
-            Depending on the order of the group_by, you may obtain non-desired behavior.
-            In this test, we check the operation of read_group in the event that the first
-            group (defined by orderby) contains no results.
-
-            Default order is 'users_ids ASC'
-            So we reverse the order to have the spot without users in first position.
-        """
-        tasks_by_users = self.tasks.read_group(
-            domain=[],
-            fields=['name'],
-            groupby=['user_ids'],
-            orderby='user_ids DESC',
-        )
-
-        self.assertEqual(tasks_by_users, [
-            {   # tasks of no one
-                'user_ids': False,
-                'user_ids_count': 1,
-                '__domain': [('user_ids', 'not in', [self.users[1].id, self.users[0].id])],
-            },
-            {   # tasks of Luigi
-                'user_ids': (self.users[1].id, 'Luigi'),
-                'user_ids_count': 2,
-                '__domain': [('user_ids', '=', self.users[1].id)],
-            },
-            {   # tasks of Mario
-                'user_ids': (self.users[0].id, 'Mario'),
-                'user_ids_count': 2,
-                '__domain': [('user_ids', '=', self.users[0].id)],
-            },
-        ])
 
 class unordered(list):
     """ A list where equality is interpreted without ordering. """

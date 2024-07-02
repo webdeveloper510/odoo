@@ -21,9 +21,10 @@ import contextlib
 import requests
 import secrets
 
-from odoo import _, http, service
+from odoo import _, http, release, service
 from odoo.tools.func import lazy_property
 from odoo.tools.misc import file_path
+from odoo.modules.module import get_resource_path
 
 _logger = logging.getLogger(__name__)
 
@@ -116,11 +117,11 @@ def check_certificate():
         if key[0] == b'CN':
             cn = key[1].decode('utf-8')
     if cn == 'OdooTempIoTBoxCertificate' or datetime.datetime.now() > cert_end_date:
-        message = _('Your certificate %s must be updated', cn)
+        message = _('Your certificate %s must be updated') % (cn)
         _logger.info(message)
         return {"status": CertificateStatus.NEED_REFRESH}
     else:
-        message = _('Your certificate %s is valid until %s', cn, cert_end_date)
+        message = _('Your certificate %s is valid until %s') % (cn, cert_end_date)
         _logger.info(message)
         return {"status": CertificateStatus.OK, "message": message}
 
@@ -232,7 +233,7 @@ def get_certificate_status(is_first=True):
                                               "The HTTPS certificate was generated correctly")
 
 def get_img_name():
-    major, minor = get_version().split('.')
+    major, minor = get_version()[1:].split('.')
     return 'iotboxv%s_%s.zip' % (major, minor)
 
 def get_ip():
@@ -272,11 +273,29 @@ def get_odoo_server_url():
 def get_token():
     return read_file_first_line('token')
 
-def get_version():
+
+def get_commit_hash():
+    return subprocess.run(
+        ['git', '--work-tree=/home/pi/odoo/', '--git-dir=/home/pi/odoo/.git', 'rev-parse', '--short', 'HEAD'],
+        stdout=subprocess.PIPE,
+        check=True,
+    ).stdout.decode('ascii').strip()
+
+
+def get_version(detailed_version=False):
     if platform.system() == 'Linux':
-        return read_file_first_line('/var/odoo/iotbox_version')
+        image_version = read_file_first_line('/var/odoo/iotbox_version')
     elif platform.system() == 'Windows':
-        return 'W23_11'
+        # updated manually when big changes are made to the windows virtual IoT
+        image_version = '22.11'
+
+    version = platform.system()[0] + image_version
+    if detailed_version:
+        # Note: on windows IoT, the `release.version` finish with the build date
+        version += f"-{release.version}"
+        if platform.system() == 'Linux':
+            version += f'#{get_commit_hash()}'
+    return version
 
 def get_wifi_essid():
     wifi_options = []
@@ -380,8 +399,9 @@ def download_iot_handlers(auto=True):
             _logger.error('A error encountered : %s ' % e)
 
 def compute_iot_handlers_addon_name(handler_kind, handler_file_name):
+    # TODO: replace with `removesuffix` (for Odoo version using an IoT image that use Python >= 3.9)
     return "odoo.addons.hw_drivers.iot_handlers.{handler_kind}.{handler_name}".\
-        format(handler_kind=handler_kind, handler_name=handler_file_name.removesuffix('.py'))
+        format(handler_kind=handler_kind, handler_name=handler_file_name.replace('.py', ''))
 
 def load_iot_handlers():
     """
@@ -390,7 +410,7 @@ def load_iot_handlers():
     And execute these python drivers and interfaces
     """
     for directory in ['interfaces', 'drivers']:
-        path = file_path(f'hw_drivers/iot_handlers/{directory}')
+        path = get_resource_path('hw_drivers', 'iot_handlers', directory)
         filesList = list_file_by_os(path)
         for file in filesList:
             spec = util.spec_from_file_location(compute_iot_handlers_addon_name(directory, file), str(Path(path).joinpath(file)))

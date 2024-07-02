@@ -3,15 +3,15 @@
 # 	* product_images
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
 # Larissa Manderfeld, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: Larissa Manderfeld, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
@@ -28,21 +28,20 @@ msgid ""
 "%(matching_images_count)s matching images have been found for "
 "%(product_count)s products."
 msgstr ""
-"%(matching_images_count)s se han encontrado imágenes coincidentes para "
-"%(product_count)s productos."
+"%(matching_images_count)s se han encontrado imágenes coincidentes "
+"para%(product_count)s productos."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid ""
-"<span invisible=\"nb_products_selected &lt;= 10000\">\n"
+"<span attrs=\"{'invisible': [('nb_products_selected', '&lt;=', 10000)]}\">\n"
 "                            As only 10,000 products can be processed per day, the remaining will be\n"
 "                            done tomorrow.\n"
 "                        </span>"
 msgstr ""
-"<span invisible=\"nb_products_selected &lt;= 10000\">\n"
-"                            Como solo se pueden procesar 10,000 productos al día, el resto\n"
-"                            se terminará mañana.\n"
-"                        </span>"
+"<span attrs=\"{'invisible': [('nb_products_selected', '&lt;=', 10000)]}\">\n"
+"Como solo 10,000 productos pueden ser procesados por dia, el resto se hará mañana.\n"
+"</span>"
 
 #. module: product_images
 #. odoo-python
@@ -68,7 +67,7 @@ msgstr "Cancelar"
 #. module: product_images
 #: model:ir.model,name:product_images.model_res_config_settings
 msgid "Config Settings"
-msgstr "Ajustes de configuración"
+msgstr "Opciones de configuración"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__create_uid
@@ -97,7 +96,7 @@ msgstr ""
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid "Get Pictures"
-msgstr "Obtener imágenes"
+msgstr "Obtener imágenes."
 
 #. module: product_images
 #: model:ir.actions.act_window,name:product_images.product_product_action_get_pic_with_barcode
@@ -108,7 +107,7 @@ msgstr "Obtener imágenes de Google Imágenes"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_res_config_settings__google_custom_search_key
 msgid "Google Custom Search API Key"
-msgstr "Clave API para búsqueda personalizada en Google"
+msgstr "Clave API de buúqueda personalizada de Google"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__id
@@ -119,6 +118,11 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:product_images.field_product_product__image_fetch_pending
 msgid "Image Fetch Pending"
 msgstr "Imágen pendiente de obtener"
+
+#. module: product_images
+#: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard____last_update
+msgid "Last Modified on"
+msgstr "Última modificación el"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__write_uid
@@ -138,7 +142,7 @@ msgstr "Número de productos no procesables"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__nb_products_to_process
 msgid "Number of products to process"
-msgstr "Número de productos a procesar"
+msgstr "Número de productos por procesar"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__nb_products_selected
@@ -156,13 +160,14 @@ msgstr ""
 
 #. module: product_images
 #: model:ir.actions.server,name:product_images.ir_cron_fetch_image_ir_actions_server
+#: model:ir.cron,cron_name:product_images.ir_cron_fetch_image
 msgid "Product Images: Get product images from Google"
 msgstr "Imágenes de productos: Obtenga imágenes de producto de Google"
 
 #. module: product_images
 #: model:ir.model,name:product_images.model_product_product
 msgid "Product Variant"
-msgstr "Variante de producto"
+msgstr "Variantes de producto"
 
 #. module: product_images
 #. odoo-python
@@ -174,7 +179,7 @@ msgstr "Imágenes de productos"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__products_to_process
 msgid "Products To Process"
-msgstr "Productos a procesar"
+msgstr "Productos por procesar"
 
 #. module: product_images
 #. odoo-python
@@ -226,8 +231,8 @@ msgid ""
 "The list of selected products that meet the criteria (have a barcode and no "
 "image)"
 msgstr ""
-"La lista de productos selecionados que cumples los criterios (tener un "
-"código de barras y sin imagen)"
+"La lista de productos seleccionados que cumplen con los criterios (tener "
+"código de barras y no tener imágenes)"
 
 #. module: product_images
 #. odoo-python
@@ -264,19 +269,19 @@ msgstr ""
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid "You selected"
-msgstr "Ha seleccionado"
+msgstr "Has seleccionado"
 
 #. module: product_images
 #. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "Your API Key or your Search Engine ID is incorrect."
-msgstr "Su clave API o su ID de motor de búsqueda son incorrectos."
+msgstr "Su clave API o su ID de motor de búsqueda son incorrectos"
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid "of which will be processed."
-msgstr "de los cuales serán procesados."
+msgstr "De los cuales se procesará."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -285,9 +290,8 @@ msgid ""
 "                            processed because they either already have an image or their barcode\n"
 "                            number is not set."
 msgstr ""
-"productos no se\n"
-"                            procesarán porque ya tienen una imagen o no se ha establecido\n"
-"                            su número de código de barras."
+"los productos no serán procesados porque ya tienen una imagen o su número de"
+" código de barras no está establecido."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form

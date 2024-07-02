@@ -21,8 +21,6 @@ def _create_sequence(cr, seq_name, number_increment, number_next):
 
 def _drop_sequences(cr, seq_names):
     """ Drop the PostreSQL sequences if they exist. """
-    if not seq_names:
-        return
     names = sql.SQL(',').join(map(sql.Identifier, seq_names))
     # RESTRICT is the default; it prevents dropping the sequence if an
     # object depends on it.
@@ -234,8 +232,8 @@ class IrSequence(models.Model):
         try:
             interpolated_prefix = _interpolate(self.prefix, d)
             interpolated_suffix = _interpolate(self.suffix, d)
-        except ValueError:
-            raise UserError(_('Invalid prefix or suffix for sequence %r', self.name))
+        except (ValueError, TypeError):
+            raise UserError(_('Invalid prefix or suffix for sequence \'%s\'') % self.name)
         return interpolated_prefix, interpolated_suffix
 
     def get_next_char(self, number_next):
@@ -339,8 +337,7 @@ class IrSequenceDateRange(models.Model):
     @api.model
     def default_get(self, fields):
         result = super(IrSequenceDateRange, self).default_get(fields)
-        if 'number_next_actual' in fields:
-            result['number_next_actual'] = 1
+        result['number_next_actual'] = 1
         return result
 
     date_from = fields.Date(string='From', required=True)

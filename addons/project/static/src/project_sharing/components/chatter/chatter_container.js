@@ -1,11 +1,14 @@
 /** @odoo-module */
 
+import { formatDateTime, parseDateTime } from "@web/core/l10n/dates";
 import { useService } from "@web/core/utils/hooks";
+import { sprintf } from '@web/core/utils/strings';
 import { ChatterComposer } from "./chatter_composer";
 import { ChatterMessageCounter } from "./chatter_message_counter";
 import { ChatterMessages } from "./chatter_messages";
 import { ChatterPager } from "./chatter_pager";
-import { Component, markup, onWillStart, useState, onWillUpdateProps } from "@odoo/owl";
+
+const { Component, markup, onWillStart, useState, onWillUpdateProps } = owl;
 
 export class ChatterContainer extends Component {
     setup() {
@@ -121,6 +124,16 @@ export class ChatterContainer extends Component {
     preprocessMessages(messages) {
         return messages.map(m => ({
             ...m,
+            author_avatar_url: sprintf('/web/image/mail.message/%s/author_avatar/50x50', m.id),
+            published_date_str: sprintf(
+                this.env._t('Published on %s'),
+                formatDateTime(
+                    parseDateTime(
+                        m.date,
+                        { format: 'MM-dd-yyy HH:mm:ss' },
+                    ),
+                )
+            ),
             body: markup(m.body),
         }));
     }

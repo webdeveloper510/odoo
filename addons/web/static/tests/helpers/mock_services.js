@@ -1,19 +1,19 @@
 /** @odoo-module **/
 
-import { Component, status } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { routerService } from "@web/core/browser/router_service";
-import { effectService } from "@web/core/effects/effect_service";
 import { localization } from "@web/core/l10n/localization";
+import { _t } from "@web/core/l10n/translation";
 import { rpcService } from "@web/core/network/rpc_service";
-import { ormService } from "@web/core/orm_service";
-import { overlayService } from "@web/core/overlay/overlay_service";
-import { uiService } from "@web/core/ui/ui_service";
 import { userService } from "@web/core/user_service";
+import { effectService } from "@web/core/effects/effect_service";
 import { objectToUrlEncodedString } from "@web/core/utils/urls";
-import { ConnectionAbortedError } from "../../src/core/network/rpc_service";
 import { registerCleanup } from "./cleanup";
 import { patchWithCleanup } from "./utils";
+import { uiService } from "@web/core/ui/ui_service";
+import { ConnectionAbortedError } from "../../src/core/network/rpc_service";
+
+import { Component, status } from "@odoo/owl";
 
 // -----------------------------------------------------------------------------
 // Mock Services
@@ -35,13 +35,12 @@ export const defaultLocalization = {
  * @param {Partial<typeof defaultLocalization>} [config]
  */
 export function makeFakeLocalizationService(config = {}) {
-    patchWithCleanup(localization, { ...defaultLocalization, ...config });
-    patchWithCleanup(luxon.Settings, { defaultNumberingSystem: "latn" });
+    patchWithCleanup(localization, Object.assign({}, defaultLocalization, config));
 
     return {
         name: "localization",
         start: async (env) => {
-            return localization;
+            env._t = _t;
         },
     };
 }
@@ -60,33 +59,15 @@ function buildMockRPC(mockRPC) {
 export function makeFakeRPCService(mockRPC) {
     return {
         name: "rpc",
-        start(env) {
+        start() {
             const rpcService = buildMockRPC(mockRPC);
-            let nextId = 1;
-            return function (route, params = {}, settings = {}) {
+            return function () {
                 let rejectFn;
-                const data = {
-                    id: nextId++,
-                    jsonrpc: "2.0",
-                    method: "call",
-                    params: params,
-                };
-                env.bus.trigger("RPC:REQUEST", { data, url: route, settings });
                 const rpcProm = new Promise((resolve, reject) => {
                     rejectFn = reject;
                     rpcService(...arguments)
-                        .then((result) => {
-                            env.bus.trigger("RPC:RESPONSE", { data, settings, result });
-                            resolve(result);
-                        })
-                        .catch((error) => {
-                            env.bus.trigger("RPC:RESPONSE", {
-                                data,
-                                settings,
-                                error,
-                            });
-                            reject(error);
-                        });
+                        .then(resolve)
+                        .catch(reject);
                 });
                 rpcProm.abort = (rejectError = true) => {
                     if (rejectError) {
@@ -129,13 +110,13 @@ export function makeMockXHR(response, sendCb, def) {
                     if (typeof data === "string") {
                         try {
                             data = JSON.parse(data);
-                        } catch {
+                        } catch (_e) {
                             // Ignore
                         }
                     }
                     try {
                         await sendCb.call(this, data);
-                    } catch {
+                    } catch (_e) {
                         listener = this._errorListener;
                     }
                 }
@@ -170,7 +151,8 @@ export function makeMockFetch(mockRPC) {
         try {
             res = await _rpc(route, params);
             status = 200;
-        } catch {
+        } catch (_e) {
+            res = { error: _e.message };
             status = 500;
         }
         const blob = new Blob([JSON.stringify(res || {})], { type: "application/json" });
@@ -188,6 +170,7 @@ export function makeMockFetch(mockRPC) {
 
 /**
  * @param {Object} [params={}]
+ * @param {Object} [params.onRedirect] hook on the "redirect" method
  * @returns {typeof routerService}
  */
 export function makeFakeRouterService(params = {}) {
@@ -199,6 +182,14 @@ export function makeFakeRouterService(params = {}) {
                 browser.location.hash = objectToUrlEncodedString(hash);
             });
             registerCleanup(router.cancelPushes);
+            patchWithCleanup(router, {
+                async redirect() {
+                    await this._super(...arguments);
+                    if (params.onRedirect) {
+                        params.onRedirect(...arguments);
+                    }
+                },
+            });
             return router;
         },
     };
@@ -214,6 +205,25 @@ export const fakeCommandService = {
                 return [];
             },
             openPalette() {},
+        };
+    },
+};
+
+export const fakeCookieService = {
+    start() {
+        const cookie = {};
+        return {
+            get current() {
+                return cookie;
+            },
+            setCookie(key, value) {
+                if (value !== undefined) {
+                    cookie[key] = value;
+                }
+            },
+            deleteCookie(key) {
+                delete cookie[key];
+            },
         };
     },
 };
@@ -283,26 +293,13 @@ export function makeFakeUserService(hasGroup = () => false) {
 export const fakeCompanyService = {
     start() {
         return {
-            allowedCompanies: {},
-            activeCompanyIds: [],
+            availableCompanies: {},
+            allowedCompanyIds: [],
             currentCompany: {},
             setCompanies: () => {},
         };
     },
 };
-
-export function makeFakeBarcodeService() {
-    return {
-        start() {
-            return {
-                bus: {
-                    async addEventListener() {},
-                    async removeEventListener() {},
-                },
-            };
-        },
-    };
-}
 
 export function makeFakeHTTPService(getResponse, postResponse) {
     getResponse =
@@ -329,20 +326,11 @@ export function makeFakeHTTPService(getResponse, postResponse) {
     };
 }
 
-function makeFakeActionService() {
-    return {
-        start() {
-            return {
-                doAction() {},
-            };
-        },
-    };
-}
-
 export const mocks = {
     color_scheme: () => fakeColorSchemeService,
     company: () => fakeCompanyService,
     command: () => fakeCommandService,
+    cookie: () => fakeCookieService,
     effect: () => effectService, // BOI The real service ? Is this what we want ?
     localization: makeFakeLocalizationService,
     notification: makeFakeNotificationService,
@@ -352,7 +340,4 @@ export const mocks = {
     ui: () => uiService,
     user: () => userService,
     dialog: makeFakeDialogService,
-    orm: () => ormService,
-    action: makeFakeActionService,
-    overlay: () => overlayService,
 };

@@ -24,7 +24,7 @@ function compileChatter(node, params) {
         projectSharingId: params.projectSharingId,
     });
     const chatterContainerHookXml = createElement('div');
-    chatterContainerHookXml.classList.add("o-mail-ChatterContainer", 'o-mail-Form-chatter');
+    chatterContainerHookXml.classList.add('o_FormRenderer_chatterContainer');
     append(chatterContainerHookXml, chatterContainerXml);
     return chatterContainerHookXml;
 }
@@ -37,12 +37,12 @@ export class ProjectSharingChatterCompiler extends ViewCompiler {
 
     compile(node, params) {
         const res = super.compile(node, params).children[0];
-        const chatterContainerHookXml = res.querySelector(".o-mail-Form-chatter");
+        const chatterContainerHookXml = res.querySelector(".o_FormRenderer_chatterContainer");
         if (chatterContainerHookXml) {
             setAttributes(chatterContainerHookXml, {
-                "t-if": `__comp__.uiService.size >= ${SIZES.XXL}`,
+                "t-if": `uiService.size >= ${SIZES.XXL}`,
             });
-            chatterContainerHookXml.classList.add('overflow-x-hidden', 'overflow-y-auto', 'o-aside', 'h-100', 'd-none');
+            chatterContainerHookXml.classList.add('overflow-x-hidden', 'overflow-y-auto', 'o-aside', 'h-100');
         }
         return res;
     }
@@ -54,7 +54,7 @@ export class ProjectSharingChatterCompiler extends ViewCompiler {
             let compiledChild = this.compileNode(child, params, false);
             compiledChild = this.applyInvisible(invisible, compiledChild, {
                 ...params,
-                recordExpr: "__comp__.model.root",
+                recordExpr: "model.root",
             });
             append(compiledRoot, compiledChild);
         }
@@ -63,9 +63,9 @@ export class ProjectSharingChatterCompiler extends ViewCompiler {
 
     compileChatter(node) {
         return compileChatter(node, {
-            resId: '__comp__.model.root.resId or undefined',
-            resModel: '__comp__.model.root.resModel',
-            projectSharingId: '__comp__.model.root.context.active_id_chatter',
+            resId: 'model.root.resId or undefined',
+            resModel: 'model.root.resModel',
+            projectSharingId: 'model.root.context.active_id_chatter',
         });
     }
 }
@@ -74,16 +74,16 @@ registry.category("form_compilers").add("portal_chatter_compiler", {
     selector: "div.oe_chatter",
     fn: (node) =>
         compileChatter(node, {
-            resId: "__comp__.props.record.resId or undefined",
-            resModel: "__comp__.props.record.resModel",
-            projectSharingId: "__comp__.props.record.context.active_id_chatter",
+            resId: "props.record.resId or undefined",
+            resModel: "props.record.resModel",
+            projectSharingId: "props.record.context.active_id_chatter",
         }),
 });
 
-patch(FormCompiler.prototype, {
+patch(FormCompiler.prototype, 'project_sharing_chatter', {
     compile(node, params) {
-        const res = super.compile(node, params);
-        const chatterContainerHookXml = res.querySelector('.o-mail-Form-chatter');
+        const res = this._super(node, params);
+        const chatterContainerHookXml = res.querySelector('.o_FormRenderer_chatterContainer');
         if (!chatterContainerHookXml) {
             return res; // no chatter, keep the result as it is
         }
@@ -97,10 +97,7 @@ patch(FormCompiler.prototype, {
         }
         // after sheet bg (standard position, below form)
         setAttributes(chatterContainerHookXml, {
-            't-att-class': `{
-                'overflow-x-hidden overflow-y-auto o-aside h-100': __comp__.uiService.size >= ${SIZES.XXL},
-                'px-3 py-0': __comp__.uiService.size < ${SIZES.XXL},
-            }`,
+            't-if': `uiService.size < ${SIZES.XXL}`,
         });
         append(parentXml, chatterContainerHookXml);
         return res;

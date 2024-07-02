@@ -24,7 +24,7 @@ from odoo.addons.l10n_es_edi_tbai.models.xml_utils import (
     cleanup_xml_signature, fill_signature, int_as_bytes)
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import get_lang
-from odoo.tools.float_utils import float_repr, float_round
+from odoo.tools.float_utils import float_repr
 from odoo.tools.xml_utils import cleanup_xml_node, validate_xml_from_attachment
 
 
@@ -87,7 +87,7 @@ class AccountEdiFormat(models.Model):
         if invoice.move_type == 'out_refund':
             if not invoice.l10n_es_tbai_refund_reason:
                 raise ValidationError(_('Refund reason must be specified (TicketBAI)'))
-            if invoice.l10n_es_is_simplified:
+            if invoice._is_l10n_es_tbai_simplified():
                 if invoice.l10n_es_tbai_refund_reason != 'R5':
                     raise ValidationError(_('Refund reason must be R5 for simplified invoices (TicketBAI)'))
             else:
@@ -109,8 +109,28 @@ class AccountEdiFormat(models.Model):
             # - If called from a cron, then the re-ordering of jobs should prevent this from triggering
             # - If called manually, then the user will see this error pop up when it triggers
             chain_head = invoice.company_id._get_l10n_es_tbai_last_posted_invoice()
+            error_msg = ''
             if chain_head and chain_head != invoice and not chain_head._l10n_es_tbai_is_in_chain():
-                raise UserError(f"TicketBAI: Cannot post invoice while chain head ({chain_head.name}) has not been posted")
+                error_msg = _("TicketBAI: Cannot post invoice while chain head (%s) has not been posted", chain_head.name)
+            if invoice.move_type == 'out_refund' and not invoice.reversed_entry_id._l10n_es_tbai_is_in_chain():
+                error_msg = _("TicketBAI: Cannot post a reversal move while the source document (%s) has not been posted", invoice.reversed_entry_id.name)
+
+            # Tax configuration check: In case of foreign customer we need the tax scope to be set
+            com_partner = invoice.commercial_partner_id
+            if (com_partner.country_id.code not in ('ES', False) or (com_partner.vat or '').startswith("ESN")) and\
+                    invoice.line_ids.tax_ids.filtered(lambda t: not t.tax_scope):
+                error_msg = _(
+                    "In case of a foreign customer, you need to configure the tax scope on taxes:\n%s",
+                    "\n".join(invoice.line_ids.tax_ids.mapped('name'))
+                )
+
+            if error_msg:
+                return {
+                    invoice: {
+                        'error': error_msg,
+                        'blocking_level': 'error',
+                    }
+                }
 
             # Generate the XML values.
             inv_dict = self._get_l10n_es_tbai_invoice_xml(invoice)
@@ -228,10 +248,6 @@ class AccountEdiFormat(models.Model):
         return xml_str
 
     def _get_l10n_es_tbai_invoice_xml(self, invoice, cancel=False):
-        def format_float(value, precision_digits=2):
-            rounded_value = float_round(value, precision_digits=precision_digits)
-            return float_repr(rounded_value, precision_digits=precision_digits)
-
         # If previously generated XML was posted and not rejected (success or timeout), reuse it
         doc = invoice._get_l10n_es_tbai_submitted_xml(cancel)
         if doc is not None:
@@ -248,7 +264,7 @@ class AccountEdiFormat(models.Model):
             'datetime_now': datetime.now(tz=timezone('Europe/Madrid')),
             'format_date': lambda d: datetime.strftime(d, '%d-%m-%Y'),
             'format_time': lambda d: datetime.strftime(d, '%H:%M:%S'),
-            'format_float': format_float,
+            'format_float': lambda f: float_repr(f, precision_digits=2),
         }
         template_name = 'l10n_es_edi_tbai.template_invoice_main' + ('_cancel' if cancel else '_post')
         xml_str = self.env['ir.qweb']._render(template_name, values)
@@ -278,7 +294,7 @@ class AccountEdiFormat(models.Model):
 
         # NOTE: TicketBai supports simplified invoices WITH recipients but we don't for now (we should for POS)
         # NOTE: TicketBAI credit notes for simplified invoices are ALWAYS simplified BUT can have a recipient even if invoice doesn't
-        if invoice.l10n_es_is_simplified:
+        if invoice._is_l10n_es_tbai_simplified():
             return values  # do not set 'recipient' unless there is an actual recipient (used as condition in template)
 
         # === RECIPIENTS (DESTINATARIOS) ===
@@ -350,7 +366,7 @@ class AccountEdiFormat(models.Model):
                 'discount': discount * refund_sign,
                 'unit_price': (line.balance + discount) / line.quantity * refund_sign,
                 'total': total,
-                'description': regex_sub(r'[^0-9a-zA-Z ]', '', line.name)[:250]
+                'description': regex_sub(r'[^0-9a-zA-Z ]', '', line.name or '')[:250]
             })
         values['invoice_lines'] = invoice_lines
         # Tax details (desglose)
@@ -362,10 +378,13 @@ class AccountEdiFormat(models.Model):
         # Regime codes (ClaveRegimenEspecialOTrascendencia)
         # NOTE there's 11 more codes to implement, also there can be up to 3 in total
         # See https://www.gipuzkoa.eus/documents/2456431/13761128/Anexo+I.pdf/2ab0116c-25b4-f16a-440e-c299952d683d
-        export_exempts = invoice.invoice_line_ids.tax_ids.filtered(lambda t: t.l10n_es_exempt_reason == 'E2')
-        values['regime_key'] = ['02'] if export_exempts else ['01']
+        com_partner = invoice.commercial_partner_id
+        if not com_partner.country_id or com_partner.country_id.code in self.env.ref('base.europe').country_ids.mapped('code'):
+            values['regime_key'] = ['01']
+        else:
+            values['regime_key'] = ['02']
 
-        if invoice.l10n_es_is_simplified:
+        if invoice._is_l10n_es_tbai_simplified():
             values['regime_key'].append(52)  # code for simplified invoices
 
         return values
@@ -593,9 +612,9 @@ class AccountEdiFormat(models.Model):
             'format_float': lambda f: float_repr(f, precision_digits=2),
         }
         # Check if intracom
-        mod_303_10 = self.env.ref('l10n_es.mod_303_casilla_10_balance')._get_matching_tags()
-        mod_303_11 = self.env.ref('l10n_es.mod_303_casilla_11_balance')._get_matching_tags()
-        tax_tags = invoice.invoice_line_ids.tax_ids.repartition_line_ids.tag_ids
+        mod_303_10 = self.env.ref('l10n_es.mod_303_10')
+        mod_303_11 = self.env.ref('l10n_es.mod_303_11')
+        tax_tags = invoice.invoice_line_ids.tax_ids.invoice_repartition_line_ids.tag_ids
         intracom = bool(tax_tags & (mod_303_10 + mod_303_11))
         values['regime_key'] = ['09'] if intracom else ['01']
         # Credit notes (factura rectificativa)
@@ -603,7 +622,7 @@ class AccountEdiFormat(models.Model):
         if values['is_refund']:
             values['credit_note_code'] = invoice.l10n_es_tbai_refund_reason
             values['credit_note_invoice'] = invoice.reversed_entry_id
-        values['tipofactura'] = 'F5' if invoice._l10n_es_is_dua() else 'F1'
+        values['tipofactura'] = 'F1'
         return values
 
     def _l10n_es_tbai_prepare_values_bi(self, invoice, invoice_xml, cancel=False):

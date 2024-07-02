@@ -11,7 +11,12 @@ from odoo.tools.misc import formatLang
 class AccruedExpenseRevenue(models.TransientModel):
     _name = 'account.accrued.orders.wizard'
     _description = 'Accrued Orders Wizard'
-    _check_company_auto = True
+
+    def _get_account_domain(self):
+        if self.env.context.get('active_model') == 'purchase.order':
+            return [('account_type', '=', 'liability_current'), ('company_id', '=', self._get_default_company())]
+        else:
+            return [('account_type', '=', 'asset_current'), ('company_id', '=', self._get_default_company())]
 
     def _get_default_company(self):
         if not self._context.get('active_model'):
@@ -19,16 +24,22 @@ class AccruedExpenseRevenue(models.TransientModel):
         orders = self.env[self._context['active_model']].browse(self._context['active_ids'])
         return orders and orders[0].company_id.id
 
+    def _get_default_journal(self):
+        return self.env['account.journal'].search([('company_id', '=', self.env.company.id), ('type', '=', 'general')], limit=1)
+
     def _get_default_date(self):
         return date_utils.get_month(fields.Date.context_today(self))[0] - relativedelta(days=1)
 
     company_id = fields.Many2one('res.company', default=_get_default_company)
     journal_id = fields.Many2one(
         comodel_name='account.journal',
-        compute='_compute_journal_id', store=True, readonly=False, precompute=True,
-        domain="[('type', '=', 'general')]",
+        compute='_compute_journal_id',
+        domain="[('type', '=', 'general'), ('company_id', '=', company_id)]",
+        readonly=False,
         required=True,
+        default=_get_default_journal,
         check_company=True,
+        company_dependent=True,
         string='Journal',
     )
     date = fields.Date(default=_get_default_date, required=True)
@@ -49,7 +60,7 @@ class AccruedExpenseRevenue(models.TransientModel):
         required=True,
         string='Accrual Account',
         check_company=True,
-        domain="[('account_type', '=', 'liability_current')] if context.get('active_model') == 'purchase.order' else [('account_type', '=', 'asset_current')]",
+        domain=_get_account_domain,
     )
     preview_data = fields.Text(compute='_compute_preview_data')
     display_amount = fields.Boolean(compute='_compute_display_amount')
@@ -72,11 +83,11 @@ class AccruedExpenseRevenue(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_journal_id(self):
+        journal = self.env['account.journal'].search(
+            [('type', '=', 'general'), ('company_id', '=', self.company_id.id)], limit=1
+        )
         for record in self:
-            record.journal_id = self.env['account.journal'].search([
-                *self.env['account.journal']._check_company_domain(record.company_id),
-                ('type', '=', 'general')
-            ], limit=1)
+            record.journal_id = journal
 
     @api.depends('date', 'journal_id', 'account_id', 'amount')
     def _compute_preview_data(self):
@@ -155,6 +166,8 @@ class AccruedExpenseRevenue(models.TransientModel):
                 values = _get_aml_vals(order, self.amount, 0, account.id, label=_('Manual entry'), analytic_distribution=distribution)
                 move_lines.append(Command.create(values))
             else:
+                other_currency = self.company_id.currency_id != order.currency_id
+                rate = order.currency_id._get_rates(self.company_id, self.date).get(order.currency_id.id) if other_currency else 1.0
                 # create a virtual order that will allow to recompute the qty delivered/received (and dependancies)
                 # without actually writing anything on the real record (field is computed and stored)
                 o = order.new(origin=order)
@@ -177,14 +190,14 @@ class AccruedExpenseRevenue(models.TransientModel):
                 for order_line in lines:
                     if is_purchase:
                         account = self._get_computed_account(order, order_line.product_id, is_purchase)
+                        amount = self.company_id.currency_id.round(order_line.qty_to_invoice * order_line.price_unit / rate)
                         amount_currency = order_line.currency_id.round(order_line.qty_to_invoice * order_line.price_unit)
-                        amount = order.currency_id._convert(amount_currency, self.company_id.currency_id, self.company_id)
                         fnames = ['qty_to_invoice', 'qty_received', 'qty_invoiced', 'invoice_lines']
                         label = _('%s - %s; %s Billed, %s Received at %s each', order.name, _ellipsis(order_line.name, 20), order_line.qty_invoiced, order_line.qty_received, formatLang(self.env, order_line.price_unit, currency_obj=order.currency_id))
                     else:
                         account = self._get_computed_account(order, order_line.product_id, is_purchase)
+                        amount = self.company_id.currency_id.round(order_line.untaxed_amount_to_invoice / rate)
                         amount_currency = order_line.untaxed_amount_to_invoice
-                        amount = order.currency_id._convert(amount_currency, self.company_id.currency_id, self.company_id)
                         fnames = ['qty_to_invoice', 'untaxed_amount_to_invoice', 'qty_invoiced', 'qty_delivered', 'invoice_lines']
                         label = _('%s - %s; %s Invoiced, %s Delivered at %s each', order.name, _ellipsis(order_line.name, 20), order_line.qty_invoiced, order_line.qty_delivered, formatLang(self.env, order_line.price_unit, currency_obj=order.currency_id))
                     distribution = order_line.analytic_distribution if order_line.analytic_distribution else {}

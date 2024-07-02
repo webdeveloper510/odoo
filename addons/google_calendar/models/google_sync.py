@@ -7,7 +7,6 @@ from functools import wraps
 from requests import HTTPError
 import pytz
 from dateutil.parser import parse
-from markupsafe import Markup
 
 from odoo import api, fields, models, registry, _
 from odoo.tools import ormcache_context, email_normalize
@@ -64,33 +63,31 @@ class GoogleSync(models.AbstractModel):
     def write(self, vals):
         google_service = GoogleCalendarService(self.env['google.service'])
         if 'google_id' in vals:
-            self.env.registry.clear_cache()  # _event_ids_from_google_ids
+            self._event_ids_from_google_ids.clear_cache(self)
         synced_fields = self._get_google_synced_fields()
         if 'need_sync' not in vals and vals.keys() & synced_fields and not self.env.user.google_synchronization_stopped:
             vals['need_sync'] = True
 
         result = super().write(vals)
-        if self.env.user._get_google_sync_status() != "sync_paused":
-            for record in self:
-                if record.need_sync and record.google_id:
-                    record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values(), timeout=3)
+        for record in self.filtered('need_sync'):
+            if record.google_id:
+                record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values(), timeout=3)
 
         return result
 
     @api.model_create_multi
     def create(self, vals_list):
         if any(vals.get('google_id') for vals in vals_list):
-            self.env.registry.clear_cache()  # _event_ids_from_google_ids
+            self._event_ids_from_google_ids.clear_cache(self)
         if self.env.user.google_synchronization_stopped:
             for vals in vals_list:
                 vals.update({'need_sync': False})
         records = super().create(vals_list)
 
         google_service = GoogleCalendarService(self.env['google.service'])
-        if self.env.user._get_google_sync_status() != "sync_paused":
-            for record in records:
-                if record.need_sync and record.active:
-                    record.with_user(record._get_event_user())._google_insert(google_service, record._google_values(), timeout=3)
+        records_to_sync = records.filtered(lambda r: r.need_sync and r.active)
+        for record in records_to_sync:
+            record.with_user(record._get_event_user())._google_insert(google_service, record._google_values(), timeout=3)
         return records
 
     def unlink(self):
@@ -131,14 +128,12 @@ class GoogleSync(models.AbstractModel):
 
         updated_records = records_to_sync.filtered('google_id')
         new_records = records_to_sync - updated_records
-        if self.env.user._get_google_sync_status() != "sync_paused":
-            for record in cancelled_records:
-                if record.google_id and record.need_sync:
-                    record.with_user(record._get_event_user())._google_delete(google_service, record.google_id)
-            for record in new_records:
-                record.with_user(record._get_event_user())._google_insert(google_service, record._google_values())
-            for record in updated_records:
-                record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values())
+        for record in cancelled_records.filtered(lambda e: e.google_id and e.need_sync):
+            record.with_user(record._get_event_user())._google_delete(google_service, record.google_id)
+        for record in new_records:
+            record.with_user(record._get_event_user())._google_insert(google_service, record._google_values())
+        for record in updated_records:
+            record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values())
 
     def _cancel(self):
         self.with_context(dont_notify=True).write({'google_id': False})
@@ -155,9 +150,6 @@ class GoogleSync(models.AbstractModel):
         existing = google_events.exists(self.env)
         new = google_events - existing - google_events.cancelled()
         write_dates = self._context.get('write_dates', {})
-        # Pop 'write_dates' from the context (frozendict) after using it for resetting the old value in the call stack.
-        context = dict(self.env.context, dont_notify=True)
-        context.pop('write_dates', None)
 
         odoo_values = [
             dict(self._odoo_values(e, default_reminders), need_sync=False)
@@ -190,7 +182,7 @@ class GoogleSync(models.AbstractModel):
             # Migration from 13.4 does not fill write_date. Therefore, we force the update from Google.
             if not odoo_record_write_date or updated >= pytz.utc.localize(odoo_record_write_date):
                 vals = dict(self._odoo_values(gevent, default_reminders), need_sync=False)
-                odoo_record.with_context(context)._write_from_google(gevent, vals)
+                odoo_record.with_context(dont_notify=True)._write_from_google(gevent, vals)
                 synced_records |= odoo_record
 
         return synced_records
@@ -233,9 +225,10 @@ class GoogleSync(models.AbstractModel):
                                                                     'reason': reason}
             _logger.warning(error_log)
 
-            body = _("The following event could not be synced with Google Calendar.") + Markup("<br/>") + \
-                   _("It will not be synced as long at it is not updated.") + Markup("<br/>") + \
-                   reason
+            body = _(
+                "The following event could not be synced with Google Calendar. </br>"
+                "It will not be synced as long at it is not updated.</br>"
+                "%(reason)s", reason=reason)
 
             if event:
                 event.message_post(
@@ -267,16 +260,6 @@ class GoogleSync(models.AbstractModel):
                 if values:
                     self.exists().with_context(dont_notify=True).need_sync = False
 
-    def _get_post_sync_values(self, request_values, google_values):
-        """ Method to be override: select the information that will be written in the event after insertion. """
-        self.ensure_one()
-        return {'google_id': google_values['id'], 'need_sync': False}
-
-    def write_insertion_values(self, request_values, google_values):
-        """ Callback method: get post synchronization values and write them in the event. """
-        writeable_values = self._get_post_sync_values(request_values, google_values)
-        self.with_context(dont_notify=True).write(writeable_values)
-
     @after_commit
     def _google_insert(self, google_service: GoogleCalendarService, values, timeout=TIMEOUT):
         if not values:
@@ -286,14 +269,12 @@ class GoogleSync(models.AbstractModel):
                 try:
                     send_updates = self._context.get('send_updates', True)
                     google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
-                    # Use callback method in stable branches to be called after insertion, updating the event right after insertion.
-                    # This approach was needed because the insert function returns only the id information and discards event info from Google.
-                    google_id = google_service.insert(values, token=token, timeout=timeout, callback_method=self.write_insertion_values)
-                    if not self.google_id:
-                        self.with_context(dont_notify=True).write({
-                            'google_id': google_id,
-                            'need_sync': False,
-                        })
+                    google_id = google_service.insert(values, token=token, timeout=timeout)
+                    # Everything went smoothly
+                    self.with_context(dont_notify=True).write({
+                        'google_id': google_id,
+                        'need_sync': False,
+                    })
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
@@ -330,11 +311,11 @@ class GoogleSync(models.AbstractModel):
     def _get_sync_partner(self, emails):
         normalized_emails = [email_normalize(contact) for contact in emails if email_normalize(contact)]
         user_partners = self.env['mail.thread']._mail_search_on_user(normalized_emails, extra_domain=[('share', '=', False)])
-        partners = list(user_partners)
+        partners = [user_partner for user_partner in user_partners if user_partner.type != 'private']
         remaining = [email for email in normalized_emails if
                      email not in [partner.email_normalized for partner in partners]]
         if remaining:
-            partners += self.env['mail.thread']._mail_find_partner_from_emails(remaining, records=self, force_create=True)
+            partners += self.env['mail.thread']._mail_find_partner_from_emails(remaining, records=self, force_create=True, extra_domain=[('type', '!=', 'private')])
         unsorted_partners = self.env['res.partner'].browse([p.id for p in partners if p.id])
         # partners needs to be sorted according to the emails order provided by google
         k = {value: idx for idx, value in enumerate(emails)}

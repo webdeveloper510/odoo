@@ -4,11 +4,13 @@
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail_group.tests.common import TestMailListCommon
 from odoo.exceptions import ValidationError, AccessError
-from odoo.tests.common import users
+from odoo.tests.common import tagged, users
 from odoo.tools import mute_logger, append_content_to_html
 
 
+@tagged("mail_group")
 class TestMailGroup(TestMailListCommon):
+
     def test_clean_email_body(self):
         footer = self.env['ir.qweb']._render('mail_group.mail_group_footer', {'group_url': 'Test remove footer'}, minimal_qcontext=True)
         body = append_content_to_html("<div>Test email body</div>", footer, plaintext=False)
@@ -43,7 +45,7 @@ class TestMailGroup(TestMailListCommon):
 
         self.test_group.alias_id.alias_contact = 'followers'
         self.test_group.access_mode = 'groups'
-        err_msg = self.test_group._alias_get_error({}, {'email_from': group_user_not_member.email}, self.test_group.alias_id)
+        err_msg = self.test_group._alias_get_error_message({}, {'email_from': group_user_not_member.email}, self.test_group.alias_id)
         self.assertFalse(err_msg, "Mail with sender belonging to allowed user group (not a member of the mail group) was rejected")
 
     def test_find_member(self):
@@ -123,7 +125,7 @@ class TestMailGroup(TestMailListCommon):
             'email_from': user2.email,
         }
         self.test_group.alias_id.alias_contact = 'followers'
-        self.assertFalse(self.test_group._alias_get_error({}, msg_dict, self.test_group.alias_id))
+        self.assertFalse(self.test_group._alias_get_error_message({}, msg_dict, self.test_group.alias_id))
 
     @users('employee')
     def test_join_group(self):

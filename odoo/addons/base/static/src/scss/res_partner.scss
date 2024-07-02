@@ -1,4 +1,26 @@
 .o_kanban_view .o_res_partner_kanban {
+
+    .ribbon {
+        &::before, &::after {
+            display: none;
+        }
+
+        span {
+            padding: 5px;
+            font-size: x-small;
+            z-index: unset;
+            height: auto;
+        }
+    }
+    .ribbon-top-right {
+        margin-top: -$o-kanban-dashboard-vpadding;
+
+        span {
+            top: 15px;
+            left: 10px;
+        }
+    }
+
     .oe_kanban_action_a:hover > .badge {
         background-color: $o-brand-primary;
         color: white;
@@ -13,10 +35,4 @@
     .row {
         --gutter-x: 0;
     }
-}
-
-// This is an ugly workaround to prevent having ugly borders in the Password confirmation dialog
-// TODO: remove me in master
-.modal .o_form_view .o_form_sheet_bg.bg-primary {
-    --background-color: #{$o-view-background-color};
 }

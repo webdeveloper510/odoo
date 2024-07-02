@@ -51,11 +51,11 @@ QUnit.module("mass_mailing", {}, function () {
         QUnit.test("unregister ResizeObserver on unmount", async (assert) => {
             patchWithCleanup(MassMailingFullWidthViewController.prototype, {
                 setup() {
-                    super.setup();
+                    this._super();
                     patchWithCleanup(this._resizeObserver, {
                         disconnect() {
                             assert.step("disconnect");
-                            return super.disconnect(...arguments);
+                            return this._super(...arguments);
                         },
                     });
                 },

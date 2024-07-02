@@ -1,6 +1,5 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+# -*- coding: utf-8 -*-
 
-from odoo import Command
 from odoo.tests import common, Form
 from odoo.tools import float_compare
 
@@ -20,6 +19,7 @@ class TestDeliveryCost(common.TransactionCase):
         self.Product = self.env['product.product']
 
         self.partner_18 = self.env['res.partner'].create({'name': 'My Test Customer'})
+        self.pricelist = self.env.ref('product.list0')
         self.product_4 = self.env['product.product'].create({'name': 'A product to deliver', 'weight': 1.0})
         self.product_uom_unit = self.env.ref('uom.product_uom_unit')
         self.product_delivery_normal = self.env['product.product'].create({
@@ -51,6 +51,7 @@ class TestDeliveryCost(common.TransactionCase):
         self.env.cr.execute(
             "UPDATE res_company SET currency_id = %s WHERE id = %s",
             [self.env.ref('base.USD').id, self.env.company.id])
+        self.pricelist.currency_id = self.env.ref('base.USD').id
         self.env.user.groups_id |= self.env.ref('uom.group_uom')
 
     def test_00_delivery_cost(self):
@@ -61,6 +62,7 @@ class TestDeliveryCost(common.TransactionCase):
             'partner_id': self.partner_18.id,
             'partner_invoice_id': self.partner_18.id,
             'partner_shipping_id': self.partner_18.id,
+            'pricelist_id': self.pricelist.id,
             'order_line': [(0, 0, {
                 'name': 'PC Assamble + 2GB RAM',
                 'product_id': self.product_4.id,
@@ -119,6 +121,7 @@ class TestDeliveryCost(common.TransactionCase):
             'partner_id': self.partner_4.id,
             'partner_invoice_id': self.partner_address_13.id,
             'partner_shipping_id': self.partner_address_13.id,
+            'pricelist_id': self.pricelist.id,
             'order_line': [(0, 0, {
                 'name': 'Service on demand',
                 'product_id': self.product_consultant.id,
@@ -274,10 +277,9 @@ class TestDeliveryCost(common.TransactionCase):
         self.normal_delivery.product_id.taxes_id = tax_price_include
 
         # Create sales order
-        # Required to see `pricelist_id` in the view
-        self.env.user.groups_id += self.env.ref('product.group_product_pricelist')
         order_form = Form(self.env['sale.order'].with_context(tracking_disable=True))
         order_form.partner_id = self.partner_18
+        order_form.pricelist_id = self.pricelist
         order_form.fiscal_position_id = fiscal_position
 
         # Try adding delivery product as a normal product
@@ -303,6 +305,74 @@ class TestDeliveryCost(common.TransactionCase):
 
         self.assertRecordValues(line, [{'price_subtotal': 9.09, 'price_total': 10.45}])
 
+    def test_delivery_real_cost(self):
+        """
+            ensure that the price is correctly set on the delivery line
+            in the case of a BackOrder
+        """
+        # Set up the carrier
+        product_delivery = self.env['product.product'].create({
+            'name': 'Delivery Charges',
+            'type': 'service',
+            'list_price': 40.0,
+            'categ_id': self.env.ref('delivery.product_category_deliveries').id,
+        })
+        delivery_carrier = self.env['delivery.carrier'].create({
+            'name': 'Delivery Now Free Over 100',
+            'fixed_price': 40,
+            'delivery_type': 'fixed',
+            'invoice_policy': 'real',
+            'product_id': product_delivery.id,
+            'free_over': False,
+        })
+
+        so = self.SaleOrder.create({
+            'partner_id': self.partner_18.id,
+            'partner_invoice_id': self.partner_18.id,
+            'partner_shipping_id': self.partner_18.id,
+            'pricelist_id': self.pricelist.id,
+            'order_line': [(0, 0, {
+                'name': 'PC Assamble + 2GB RAM',
+                'product_id': self.product_4.id,
+                'product_uom_qty': 2,
+                'product_uom': self.product_uom_unit.id,
+                'price_unit': 120.00,
+            })],
+        })
+
+        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
+            'default_order_id': so.id,
+            'default_carrier_id': delivery_carrier.id
+        }))
+        delivery_wizard.save().button_confirm()
+
+        delivery_line = so.order_line.filtered(lambda line: line.is_delivery)
+        self.assertEqual(len(delivery_line), 1)
+        self.assertEqual(delivery_line.price_unit, 0, "The invoicing policy of the carrier is set to 'real cost' and that cost is not yet known, hence the 0 value")
+        so.action_confirm()
+
+        picking = so.picking_ids[0]
+        self.assertEqual(picking.carrier_id.id, so.carrier_id.id)
+        picking.move_ids[0].quantity_done = 1.0
+        self.assertGreater(picking.shipping_weight, 0.0)
+
+        # Confirm picking for one quantiy and create a back order for the second
+        picking._action_done()
+        self.assertEqual(picking.carrier_price, 40.0)
+        # Check that the delivery cost (previously set to 0) has been correctly updated
+        self.assertEqual(delivery_line.price_unit, picking.carrier_price)
+
+        # confirm the back order
+        bo = picking.backorder_ids
+        bo.move_ids[0].quantity_done = 1.0
+        self.assertGreater(bo.shipping_weight, 0.0)
+        bo._action_done()
+        self.assertEqual(bo.carrier_price, 40.0)
+
+        new_delivery_line = so.order_line.filtered(lambda line: line.is_delivery) - delivery_line
+        self.assertEqual(len(new_delivery_line), 1)
+        self.assertEqual(new_delivery_line.price_unit, bo.carrier_price)
+
     def test_estimated_weight(self):
         """
         Test that negative qty SO lines are not included in the estimated weight calculation
@@ -325,35 +395,6 @@ class TestDeliveryCost(common.TransactionCase):
         })
         shipping_weight = sale_order._get_estimated_weight()
         self.assertEqual(shipping_weight, self.product_4.weight, "Only positive quantity products' weights should be included in estimated weight")
-
-    def test_fixed_price_margins(self):
-        """
-         margins should be ignored for fixed price carriers
-        """
-        sale_order = self.SaleOrder.create({
-            'partner_id': self.partner_18.id,
-            'name': 'SO - neg',
-            'order_line': [
-                (0, 0, {
-                    'product_id': self.product_4.id,
-                    'product_uom_qty': 1,
-                    'product_uom': self.product_uom_unit.id,
-                }),
-            ]
-        })
-        self.normal_delivery.fixed_margin = 100
-        self.normal_delivery.margin = 4.2
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context(default_order_id=sale_order.id,
-                          default_carrier_id=self.normal_delivery.id))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.button_confirm()
-
-        line = self.SaleOrderLine.search([
-            ('order_id', '=', sale_order.id),
-            ('product_id', '=', self.normal_delivery.product_id.id),
-            ('is_delivery', '=', True)
-        ])
-        self.assertEqual(line.price_unit, self.normal_delivery.fixed_price)
 
     def test_price_with_weight_volume_variable(self):
         """ Test that the price is correctly computed when the variable is weight*volume. """
@@ -392,86 +433,3 @@ class TestDeliveryCost(common.TransactionCase):
             qty * list_price * weight * volume,
             "The shipping price is not correctly computed with variable weight*volume.",
         )
-
-    def test_delivery_product_taxes_on_branch(self):
-        """ Check taxes populated on delivery line on branch company.
-            Taxes from the branch company should be taken with a fallback on parent company.
-        """
-        company = self.env.company
-        branch = self.env['res.company'].create({
-            'name': 'Branch',
-            'country_id': company.country_id.id,
-            'parent_id': company.id,
-        })
-        # create taxes for the parent company and its branch
-        tax_groups = self.env['account.tax.group'].create([{
-            'name': 'Tax Group A',
-            'company_id': company.id,
-        }, {
-            'name': 'Tax Group B',
-            'company_id': branch.id,
-        }])
-        tax_a = self.env['account.tax'].create({
-            'name': 'Tax A',
-            'type_tax_use': 'sale',
-            'amount_type': 'percent',
-            'amount': 10,
-            'tax_group_id': tax_groups[0].id,
-            'company_id': company.id,
-        })
-        tax_b = self.env['account.tax'].create({
-            'name': 'Tax B',
-            'type_tax_use': 'sale',
-            'amount_type': 'percent',
-            'amount': 20,
-            'tax_group_id': tax_groups[1].id,
-            'company_id': branch.id,
-        })
-        # create delivery product with taxes from both branch and parent company
-        delivery_product = self.env['product.product'].create({
-            'name': 'Delivery Product',
-            'taxes_id': [Command.set((tax_a + tax_b).ids)],
-        })
-        # create delivery
-        delivery = self.env['delivery.carrier'].create({
-            'name': 'Delivery Charges',
-            'delivery_type': 'fixed',
-            'product_id': delivery_product.id,
-            'company_id': branch.id,
-        })
-        # create a SO from Branch
-        sale_order = self.SaleOrder.create({
-            'partner_id': self.partner_4.id,
-            'company_id': branch.id,
-            'order_line': [Command.create({
-                'product_id': self.product_4.id,
-                'product_uom_qty': 1,
-                'product_uom': self.product_uom_unit.id,
-                'price_unit': 750.00,
-            })],
-        })
-        # add delivery
-        wizard = self.env['choose.delivery.carrier'].create({
-            'order_id': sale_order.id,
-            'carrier_id': delivery.id,
-            'company_id': branch.id,
-        })
-        wizard.button_confirm()
-        delivery_line = sale_order.order_line.filtered(lambda l: l.is_delivery)
-
-        # delivery line should have taxes from the branch company
-        self.assertRecordValues(delivery_line, [{'product_id': delivery_product.id, 'tax_id': tax_b.ids}])
-
-        # update delivery product by setting only the tax from parent company
-        delivery_product.write({'taxes_id': [Command.set((tax_a).ids)]})
-        # update delivery
-        wizard = self.env['choose.delivery.carrier'].create({
-            'order_id': sale_order.id,
-            'carrier_id': delivery.id,
-            'company_id': branch.id,
-        })
-        wizard.button_confirm()
-        delivery_line = sale_order.order_line.filtered(lambda l: l.is_delivery)
-
-        # delivery line should have taxes from the parent company as there is no tax from the branch company
-        self.assertRecordValues(delivery_line, [{'product_id': delivery_product.id, 'tax_id': tax_a.ids}])

@@ -12,7 +12,6 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
-from odoo.tools.parse_version import parse_version
 
 try:
     # class were renamed in PyPDF2 > 2.0
@@ -30,15 +29,13 @@ try:
 
     PyPDF2.PdfFileReader = PdfFileReader
     from PyPDF2 import PdfFileWriter, PdfFileReader
-    PdfFileReader.getFields = PdfFileReader.get_fields
     PdfFileWriter._addObject = PdfFileWriter._add_object
 except ImportError:
     from PyPDF2 import PdfFileWriter, PdfFileReader
 
-from PyPDF2.generic import ArrayObject, BooleanObject, ByteStringObject, DecodedStreamObject, DictionaryObject, IndirectObject, NameObject, NumberObject, createStringObject
+from PyPDF2.generic import DictionaryObject, NameObject, ArrayObject, DecodedStreamObject, NumberObject, createStringObject, ByteStringObject
 
 try:
-    import fontTools
     from fontTools.ttLib import TTFont
 except ImportError:
     TTFont = None
@@ -88,53 +85,10 @@ def merge_pdf(pdf_data):
         reader = PdfFileReader(io.BytesIO(document), strict=False)
         for page in range(0, reader.getNumPages()):
             writer.addPage(reader.getPage(page))
-
     with io.BytesIO() as _buffer:
         writer.write(_buffer)
         return _buffer.getvalue()
 
-def fill_form_fields_pdf(writer, form_fields):
-    ''' Fill in the form fields of a PDF
-    :param writer: a PdfFileWriter object
-    :param dict form_fields: a dictionary of form fields to update in the PDF
-    :return: a filled PDF datastring
-    '''
-
-    # This solves a known problem with PyPDF2, where with some pdf software, forms fields aren't
-    # correctly filled until the user click on it, see: https://github.com/py-pdf/pypdf/issues/355
-    if hasattr(writer, 'set_need_appearances_writer'):
-        writer.set_need_appearances_writer()
-        is_upper_version_pypdf2 = True
-    else:  # This method was renamed in PyPDF2 2.0
-        is_upper_version_pypdf2 = False
-        catalog = writer._root_object
-        # get the AcroForm tree
-        if "/AcroForm" not in catalog:
-            writer._root_object.update({
-                NameObject("/AcroForm"): IndirectObject(len(writer._objects), 0, writer)
-            })
-        writer._root_object["/AcroForm"][NameObject("/NeedAppearances")] = BooleanObject(True)
-
-    nbr_pages = len(writer.pages) if is_upper_version_pypdf2 else writer.getNumPages()
-
-    for page_id in range(0, nbr_pages):
-        page = writer.getPage(page_id)
-
-        if is_upper_version_pypdf2:
-            writer.update_page_form_field_values(page, form_fields)
-        else:
-            # This is a known bug on previous version of PyPDF2, fixed in 2.11
-            if not page.get('/Annots'):
-                _logger.info("No fields to update in this page")
-            else:
-                writer.updatePageFormFieldValues(page, form_fields)
-
-        for raw_annot in page.get('/Annots', []):
-            annot = raw_annot.getObject()
-            for field in form_fields:
-                # Mark filled fields as readonly to avoid the blue overlay:
-                if annot.get('/T') == field:
-                    annot.update({NameObject("/Ff"): NumberObject(1)})
 
 def rotate_pdf(pdf):
     ''' Rotate clockwise PDF (90°) into a new PDF.
@@ -415,10 +369,7 @@ class OdooPdfFileWriter(PdfFileWriter):
                 stream = io.BytesIO(decompress(font_file._data))
                 ttfont = TTFont(stream)
                 font_upm = ttfont['head'].unitsPerEm
-                if parse_version(fontTools.__version__) < parse_version('4.37.2'):
-                    glyphs = ttfont.getGlyphSet()._hmtx.metrics
-                else:
-                    glyphs = ttfont.getGlyphSet().hMetrics
+                glyphs = ttfont.getGlyphSet()._hmtx.metrics
                 glyph_widths = []
                 for key, values in glyphs.items():
                     if key[:5] == 'glyph':

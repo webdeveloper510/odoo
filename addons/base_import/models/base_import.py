@@ -24,7 +24,7 @@ from PIL import Image
 from odoo import api, fields, models
 from odoo.tools.translate import _
 from odoo.tools.mimetypes import guess_mimetype
-from odoo.tools import config, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, pycompat
+from odoo.tools import config, DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, pycompat, parse_version
 
 FIELDS_RECURSION_LIMIT = 3
 ERROR_PREVIEW_BYTES = 200
@@ -55,10 +55,21 @@ try:
 except ImportError:
     odf_ods_reader = None
 
+try:
+    from openpyxl import load_workbook
+except ImportError:
+    load_workbook = None
+
+
 FILE_TYPE_DICT = {
     'text/csv': ('csv', True, None),
     'application/vnd.ms-excel': ('xls', xlrd, 'xlrd'),
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ('xlsx', xlsx, 'xlrd >= 1.0.0'),
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': (
+        'xlsx',
+        load_workbook or xlsx,
+        # if xlrd 2.x then xlsx is not available, so don't suggest it
+        'openpyxl' if xlrd and parse_version(xlrd.__VERSION__) >= parse_version("2.0") else 'openpyxl or xlrd >= 1.0.0 < 2.0',
+    ),
     'application/vnd.oasis.opendocument.spreadsheet': ('ods', odf_ods_reader, 'odfpy')
 }
 EXTENSIONS = {
@@ -276,7 +287,7 @@ class Import(models.TransientModel):
             return importable_fields
 
         model_fields = Model.fields_get()
-        blacklist = models.MAGIC_COLUMNS
+        blacklist = models.MAGIC_COLUMNS + [Model.CONCURRENCY_CHECK_FIELD]
         for name, field in model_fields.items():
             if name in blacklist:
                 continue
@@ -285,7 +296,13 @@ class Import(models.TransientModel):
             if field.get('deprecated', False) is not False:
                 continue
             if field.get('readonly'):
-                continue
+                states = field.get('states')
+                if not states:
+                    continue
+                # states = {state: [(attr, value), (attr2, value2)], state2:...}
+                if not any(attr == 'readonly' and value is False
+                           for attr, value in itertools.chain.from_iterable(states.values())):
+                    continue
             field_value = {
                 'id': name,
                 'name': name,
@@ -430,7 +447,39 @@ class Import(models.TransientModel):
         return sheet.nrows, rows
 
     # use the same method for xlsx and xls files
-    _read_xlsx = _read_xls
+    def _read_xlsx(self, options):
+        if xlsx:
+            return self._read_xls(options)
+
+        import openpyxl.cell.cell as types
+        book = load_workbook(io.BytesIO(self.file or b''), read_only=True, data_only=True)
+        sheets = options['sheets'] = book.sheetnames
+        sheet_name = options['sheet'] = options.get('sheet') or sheets[0]
+        sheet = book[sheet_name]
+        rows = []
+        for rowx, row in enumerate(sheet.rows, 1):
+            values = []
+            for colx, cell in enumerate(row, 1):
+                if cell.data_type is types.TYPE_ERROR:
+                    raise ValueError(
+                        _("Invalid cell value at row %(row)s, column %(col)s: %(cell_value)s", row=rowx, col=colx, cell_value=cell.value)
+                    )
+
+                if isinstance(cell.value, float):
+                    if cell.value % 1 == 0:
+                        values.append(str(int(cell.value)))
+                    else:
+                        values.append(str(cell.value))
+                elif isinstance(cell.value, datetime.datetime):
+                    values.append(cell.value.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
+                elif isinstance(cell.value, datetime.date):
+                    values.append(cell.value.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                else:
+                    values.append(str(cell.value))
+
+            if any(x.strip() for x in values):
+                rows.append(values)
+        return sheet.max_row, rows
 
     def _read_ods(self, options):
         doc = odf_ods_reader.ODSReader(file=io.BytesIO(self.file or b''))
@@ -1346,9 +1395,7 @@ class Import(models.TransientModel):
             if dryrun:
                 self._cr.execute('ROLLBACK TO SAVEPOINT import')
                 # cancel all changes done to the registry/ormcache
-                # we need to clear the cache in case any created id was added to an ormcache and would be missing afterward
-                self.pool.clear_all_caches()
-                # don't propagate to other workers since it was rollbacked
+                self.pool.clear_caches()
                 self.pool.reset_changes()
             else:
                 self._cr.execute('RELEASE SAVEPOINT import')
@@ -1524,7 +1571,7 @@ class Import(models.TransientModel):
                     if fallback_values[field]['field_type'] == "boolean":
                         value = value if value.lower() in ('0', '1', 'true', 'false') else fallback_value
                     # Selection
-                    elif fallback_values[field]['field_type'] == "selection" and value.lower() not in fallback_values[field]["selection_values"]:
+                    elif value.lower() not in fallback_values[field]["selection_values"]:
                         value = fallback_value if fallback_value != 'skip' else None  # don't set any value if we skip
 
                     input_file_data[record_index][column_index] = value

@@ -20,7 +20,7 @@ class StockWarehouseOrderpoint(models.Model):
         self.ensure_one()
         domain = [('orderpoint_id', 'in', self.ids)]
         if self.env.context.get('written_after'):
-            domain = AND([domain, [('write_date', '>=', self.env.context.get('written_after'))]])
+            domain = AND([domain, [('write_date', '>', self.env.context.get('written_after'))]])
         production = self.env['mrp.production'].search(domain, limit=1)
         if production:
             action = self.env.ref('mrp.action_mrp_production_form')
@@ -65,8 +65,7 @@ class StockWarehouseOrderpoint(models.Model):
         res = super()._compute_days_to_order()
         for orderpoint in self:
             if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                boms = (orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids)
-                orderpoint.days_to_order = boms and boms[0].days_to_prepare_mo or 0
+                orderpoint.days_to_order = orderpoint.product_id.days_to_prepare_mo
         return res
 
     def _quantity_in_progress(self):
@@ -103,18 +102,15 @@ class StockWarehouseOrderpoint(models.Model):
 
         bom_manufacture = self.env['mrp.bom']._bom_find(orderpoints_without_kit.product_id, bom_type='normal')
         bom_manufacture = self.env['mrp.bom'].concat(*bom_manufacture.values())
-        productions_group = self.env['mrp.production']._read_group(
-            [
-                ('bom_id', 'in', bom_manufacture.ids),
-                ('state', '=', 'draft'),
-                ('orderpoint_id', 'in', orderpoints_without_kit.ids),
-                ('id', 'not in', self.env.context.get('ignore_mo_ids', [])),
-            ],
-            ['orderpoint_id', 'product_uom_id'],
-            ['product_qty:sum'])
-        for orderpoint, uom, product_qty_sum in productions_group:
+        productions_group = self.env['mrp.production'].read_group(
+            [('bom_id', 'in', bom_manufacture.ids), ('state', '=', 'draft'), ('orderpoint_id', 'in', orderpoints_without_kit.ids)],
+            ['orderpoint_id', 'product_qty', 'product_uom_id'],
+            ['orderpoint_id', 'product_uom_id'], lazy=False)
+        for p in productions_group:
+            uom = self.env['uom.uom'].browse(p['product_uom_id'][0])
+            orderpoint = self.env['stock.warehouse.orderpoint'].browse(p['orderpoint_id'][0])
             res[orderpoint.id] += uom._compute_quantity(
-                product_qty_sum, orderpoint.product_uom, round=False)
+                p['product_qty'], orderpoint.product_uom, round=False)
         return res
 
     def _get_qty_multiple_to_order(self):

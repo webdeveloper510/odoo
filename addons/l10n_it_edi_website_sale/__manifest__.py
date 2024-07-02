@@ -14,7 +14,10 @@ Contains features for Italian eCommerce eInvoicing
         'views/templates.xml',
         'data/data.xml'
     ],
+    'demo': [
+    ],
     'installable': True,
+    'application': False,
     'auto_install': True,
     'license': 'OEEL-1',
     'assets': {

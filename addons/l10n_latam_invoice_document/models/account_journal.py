@@ -23,12 +23,6 @@ class AccountJournal(models.Model):
         self.l10n_latam_use_documents = self.type in ['sale', 'purchase'] and \
             self.l10n_latam_company_use_documents
 
-    def _compute_has_sequence_holes(self):
-        use_documents_journals = self.filtered(lambda j: j.l10n_latam_use_documents)
-        use_documents_journals.has_sequence_holes = False
-        if other_journals := self - use_documents_journals:
-            super(AccountJournal, other_journals)._compute_has_sequence_holes()
-
     @api.constrains('l10n_latam_use_documents')
     def check_use_document(self):
         for rec in self:
@@ -42,3 +36,8 @@ class AccountJournal(models.Model):
         if self.l10n_latam_use_documents:
             self.refund_sequence = False
         return res
+
+    def _compute_has_sequence_holes(self):
+        journals_use_documents = self.filtered(lambda x: x.l10n_latam_use_documents)
+        journals_use_documents.has_sequence_holes = False
+        super(AccountJournal, self - journals_use_documents)._compute_has_sequence_holes()

@@ -1,43 +1,29 @@
 /** @odoo-module */
 
-import { _t } from "@web/core/l10n/translation";
-import * as spreadsheet from "@odoo/o-spreadsheet";
-import { AccountingPlugin } from "./plugins/accounting_plugin";
+import { _lt } from "@web/core/l10n/translation";
+import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import AccountingPlugin from "./plugins/accounting_plugin";
 import { getFirstAccountFunction, getNumberOfAccountFormulas } from "./utils";
 import { parseAccountingDate } from "./accounting_functions";
 import { camelToSnakeObject } from "@spreadsheet/helpers/helpers";
 
-const { cellMenuRegistry, featurePluginRegistry } = spreadsheet.registries;
+const { cellMenuRegistry, uiPluginRegistry } = spreadsheet.registries;
 const { astToFormula } = spreadsheet;
-const { toString, toBoolean, formatValue } = spreadsheet.helpers;
+const { toString, toBoolean } = spreadsheet.helpers;
 
-featurePluginRegistry.add("odooAccountingAggregates", AccountingPlugin);
+uiPluginRegistry.add("odooAccountingAggregates", AccountingPlugin);
 
 cellMenuRegistry.add("move_lines_see_records", {
-    name: _t("See records"),
+    name: _lt("See records"),
     sequence: 176,
-    async execute(env) {
-        const position = env.model.getters.getActivePosition();
-        const sheetId = position.sheetId;
-        const cell = env.model.getters.getCell(position);
-        const { args } = getFirstAccountFunction(cell.compiledFormula.tokens);
+    async action(env) {
+        const cell = env.model.getters.getActiveCell();
+        const { args } = getFirstAccountFunction(cell.content);
         let [codes, date_range, offset, companyId, includeUnposted] = args
             .map(astToFormula)
-            .map((arg) => env.model.getters.evaluateFormula(sheetId, arg));
+            .map((arg) => env.model.getters.evaluateFormula(arg));
         codes = toString(codes).split(",");
-        const locale = env.model.getters.getLocale();
-        if (args[1]?.type === "REFERENCE") {
-            const range = env.model.getters.getRangeFromSheetXC(sheetId, args[1].value);
-            const cell = env.model.getters.getEvaluatedCell({
-                sheetId: range.sheetId,
-                col: range.zone.left,
-                row: range.zone.top,
-            });
-            if (cell?.format) {
-                date_range = formatValue(date_range, { format: cell.format, locale });
-            }
-        }
-        const dateRange = parseAccountingDate(date_range, locale);
+        const dateRange = parseAccountingDate(date_range);
         offset = parseInt(offset) || 0;
         dateRange.year += offset || 0;
         companyId = parseInt(companyId) || null;
@@ -55,15 +41,12 @@ cellMenuRegistry.add("move_lines_see_records", {
         await env.services.action.doAction(action);
     },
     isVisible: (env) => {
-        const position = env.model.getters.getActivePosition();
-        const evaluatedCell = env.model.getters.getEvaluatedCell(position);
-        const cell = env.model.getters.getCell(position);
+        const cell = env.model.getters.getActiveCell();
         return (
-            !evaluatedCell.error &&
-            evaluatedCell.value !== "" &&
             cell &&
-            cell.isFormula &&
-            getNumberOfAccountFormulas(cell.compiledFormula.tokens) === 1
+            !cell.evaluated.error &&
+            cell.evaluated.value !== "" &&
+            getNumberOfAccountFormulas(cell.content) === 1
         );
     },
 });

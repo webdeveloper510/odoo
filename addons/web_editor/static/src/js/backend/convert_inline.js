@@ -1,4 +1,5 @@
-/** @odoo-module */
+/** @odoo-module alias=web_editor.convertInline */
+'use strict';
 
 import { getAdjacentPreviousSiblings, isBlock, rgbToHex, commonParentGet } from '../editor/odoo-editor/src/utils/utils';
 
@@ -442,7 +443,7 @@ function classToStyle($editable, cssRules) {
                 style = `${key}:${value};${style}`;
             }
         };
-        if (Object.keys(style || {}).length === 0) {
+        if (_.isEmpty(style)) {
             writes.push(() => { node.removeAttribute('style'); });
         } else {
             writes.push(() => {
@@ -680,7 +681,7 @@ function enforceImagesResponsivity(editable) {
  *                                   specificity: number;}>
  * @param {JQuery} [$iframe] the iframe containing the editable, if any
  */
-export async function toInline($editable, cssRules, $iframe) {
+async function toInline($editable, cssRules, $iframe) {
     $editable.removeClass('odoo-editor-editable');
     const editable = $editable.get(0);
     const iframe = $iframe && $iframe.get(0);
@@ -826,7 +827,7 @@ function flattenBackgroundImages(editable) {
  */
 function fontToImg($editable) {
     const editable = $editable.get(0);
-    const { fonts } = odoo.loader.modules.get("@web_editor/js/wysiwyg/fonts");
+    const fonts = odoo.__DEBUG__.services["wysiwyg.fonts"];
 
     for (const font of editable.querySelectorAll('.fa')) {
         let icon, content;
@@ -1049,7 +1050,7 @@ function formatTables($editable) {
  *                            style: {[styleName]: string};
  *                            specificity: number;}>
  */
-export function getCSSRules(doc) {
+function getCSSRules(doc) {
     const cssRules = [];
     for (const sheet of doc.styleSheets) {
         // try...catch because browser may not able to enumerate rules for cross-domain sheets
@@ -1644,12 +1645,7 @@ function _normalizeStyle(style) {
     const normalizedStyle = {};
     for (const styleName of style) {
         const value = style[styleName];
-        if (
-            value &&
-            !styleName.includes("animation") &&
-            !styleName.includes("-webkit") &&
-            typeof value === "string"
-        ) {
+        if (value && !styleName.includes('animation') && !styleName.includes('-webkit') && _.isString(value)) {
             const normalizedStyleName = styleName.replace(/-(.)/g, (a, b) => b.toUpperCase());
             normalizedStyle[styleName] = style[normalizedStyleName];
             if (style.getPropertyPriority(styleName) === 'important') {

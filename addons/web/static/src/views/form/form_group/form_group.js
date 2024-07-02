@@ -1,8 +1,7 @@
 /** @odoo-module */
-import { Component } from "@odoo/owl";
 import { sortBy } from "@web/core/utils/arrays";
 
-class Group extends Component {
+class Group extends owl.Component {
     _getItems() {
         const items = Object.entries(this.props.slots || {}).filter(([k, v]) => v.type === "item");
         return sortBy(items, (i) => i[1].sequence);

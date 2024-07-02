@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 21:56+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2024-02-06 13:32+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -35,11 +35,6 @@ msgid "API Key"
 msgstr ""
 
 #. module: payment_adyen
-#: model:ir.model.fields,field_description:payment_adyen.field_payment_provider__adyen_api_url_prefix
-msgid "API URL Prefix"
-msgstr ""
-
-#. module: payment_adyen
 #: model:ir.model.fields.selection,name:payment_adyen.selection__payment_provider__code__adyen
 msgid "Adyen"
 msgstr ""
@@ -56,7 +51,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/payment_adyen/static/src/js/payment_form.js:0
 #, python-format
-msgid "Cannot display the payment form"
+msgid "An error occurred when displayed this payment form."
+msgstr ""
+
+#. module: payment_adyen
+#: model:ir.model.fields,field_description:payment_adyen.field_payment_provider__adyen_checkout_api_url
+msgid "Checkout API URL"
 msgstr ""
 
 #. module: payment_adyen
@@ -82,15 +82,10 @@ msgid "HMAC Key"
 msgstr ""
 
 #. module: payment_adyen
-#: model:ir.model.fields,field_description:payment_adyen.field_payment_capture_wizard__has_adyen_tx
-msgid "Has Adyen Tx"
-msgstr ""
-
-#. module: payment_adyen
 #. odoo-javascript
 #: code:addons/payment_adyen/static/src/js/payment_form.js:0
 #, python-format
-msgid "Incorrect payment details"
+msgid "Incorrect Payment Details"
 msgstr ""
 
 #. module: payment_adyen
@@ -111,11 +106,6 @@ msgid "No transaction found matching reference %s."
 msgstr ""
 
 #. module: payment_adyen
-#: model:ir.model,name:payment_adyen.model_payment_capture_wizard
-msgid "Payment Capture Wizard"
-msgstr ""
-
-#. module: payment_adyen
 #: model:ir.model,name:payment_adyen.model_payment_provider
 msgid "Payment Provider"
 msgstr ""
@@ -128,22 +118,6 @@ msgstr ""
 #. module: payment_adyen
 #: model:ir.model,name:payment_adyen.model_payment_transaction
 msgid "Payment Transaction"
-msgstr ""
-
-#. module: payment_adyen
-#. odoo-javascript
-#: code:addons/payment_adyen/static/src/js/payment_form.js:0
-#: code:addons/payment_adyen/static/src/js/payment_form.js:0
-#: code:addons/payment_adyen/static/src/js/payment_form.js:0
-#, python-format
-msgid "Payment processing failed"
-msgstr ""
-
-#. module: payment_adyen
-#. odoo-python
-#: code:addons/payment_adyen/models/payment_transaction.py:0
-#, python-format
-msgid "Received data for child transaction with missing transaction values"
 msgstr ""
 
 #. module: payment_adyen
@@ -169,9 +143,31 @@ msgstr ""
 
 #. module: payment_adyen
 #. odoo-python
+#: code:addons/payment_adyen/models/payment_transaction.py:0
+#, python-format
+msgid "Received refund data with missing transaction values"
+msgstr ""
+
+#. module: payment_adyen
+#. odoo-python
 #: code:addons/payment_adyen/controllers/main.py:0
 #, python-format
 msgid "Received tampered payment request data."
+msgstr ""
+
+#. module: payment_adyen
+#: model:ir.model.fields,field_description:payment_adyen.field_payment_provider__adyen_recurring_api_url
+msgid "Recurring API URL"
+msgstr ""
+
+#. module: payment_adyen
+#. odoo-javascript
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#, python-format
+msgid "Server Error"
 msgstr ""
 
 #. module: payment_adyen
@@ -190,41 +186,28 @@ msgid "The HMAC key of the webhook"
 msgstr ""
 
 #. module: payment_adyen
-#. odoo-python
-#: code:addons/payment_adyen/models/payment_transaction.py:0
-#, python-format
-msgid ""
-"The amount processed by Adyen for the transaction %s is different than the "
-"one requested. Another transaction is created with the correct amount."
+#: model:ir.model.fields,help:payment_adyen.field_payment_provider__adyen_checkout_api_url
+msgid "The base URL for the Checkout API endpoints"
 msgstr ""
 
 #. module: payment_adyen
-#: model:ir.model.fields,help:payment_adyen.field_payment_provider__adyen_api_url_prefix
-msgid "The base URL for the API endpoints"
+#: model:ir.model.fields,help:payment_adyen.field_payment_provider__adyen_recurring_api_url
+msgid "The base URL for the Recurring API endpoints"
 msgstr ""
 
 #. module: payment_adyen
 #. odoo-python
-#: code:addons/payment_adyen/models/payment_transaction.py:0
 #: code:addons/payment_adyen/models/payment_transaction.py:0
 #, python-format
 msgid "The capture of the transaction with reference %s failed."
 msgstr ""
 
 #. module: payment_adyen
-#: model_terms:ir.ui.view,arch_db:payment_adyen.payment_capture_wizard_view_form
-msgid ""
-"The capture or void of the transaction might take a few minutes to be\n"
-"                    processed by Adyen and reflected in Odoo."
-msgstr ""
-
-#. module: payment_adyen
 #. odoo-python
 #: code:addons/payment_adyen/models/payment_transaction.py:0
 #, python-format
 msgid ""
-"The capture request of %(amount)s for the transaction with reference %(ref)s"
-" has been requested (%(provider_name)s)."
+"The capture of the transaction with reference %s has been requested (%s)."
 msgstr ""
 
 #. module: payment_adyen
@@ -241,7 +224,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_adyen/models/payment_provider.py:0
 #, python-format
-msgid "The communication with the API failed. Details: %s"
+msgid "The communication with the API failed."
 msgstr ""
 
 #. module: payment_adyen
@@ -264,9 +247,17 @@ msgstr ""
 #. module: payment_adyen
 #. odoo-python
 #: code:addons/payment_adyen/models/payment_transaction.py:0
-#: code:addons/payment_adyen/models/payment_transaction.py:0
 #, python-format
 msgid "The void of the transaction with reference %s failed."
+msgstr ""
+
+#. module: payment_adyen
+#. odoo-javascript
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#: code:addons/payment_adyen/static/src/js/payment_form.js:0
+#, python-format
+msgid "We are not able to process your payment."
 msgstr ""
 
 #. module: payment_adyen

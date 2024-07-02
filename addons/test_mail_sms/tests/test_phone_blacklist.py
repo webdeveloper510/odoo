@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.sms.tests.common import SMSCommon
-from odoo.addons.test_mail_sms.tests.common import TestSMSRecipients
+from odoo.addons.test_mail_sms.tests.common import TestSMSCommon, TestSMSRecipients
 
 
-class TestPhoneBlacklist(SMSCommon, TestSMSRecipients):
+class TestPhoneBlacklist(TestSMSCommon, TestSMSRecipients):
     """ Test phone blacklist management """
 
     @classmethod
@@ -20,6 +19,16 @@ class TestPhoneBlacklist(SMSCommon, TestSMSRecipients):
             'phone_nbr': cls.test_numbers[1],
         })
         cls.test_record = cls._reset_mail_context(cls.test_record)
+
+    def test_phone_blacklist_create_unblacklisted(self):
+        """Ensure that the API allows creating unblacklisted records."""
+        phone_number = self.test_numbers[0]
+        unblacklisted_record = self.env['phone.blacklist'].sudo().create([{'number': phone_number, 'active': False}])
+        self.assertFalse(unblacklisted_record.active, "Creating an unblacklisted record resulted in a blacklisted one")
+
+        # Make sure that an attempt to re-create unblacklisted number will leave the number as it was (unblacklisted)
+        still_unblacklisted_record = self.env['phone.blacklist'].sudo().create([{'number': phone_number, 'active': False}])
+        self.assertFalse(still_unblacklisted_record.active, "Attempt to re-create the unblacklisted record made it blacklisted")
 
     def test_phone_blacklist_internals(self):
         with self.with_user('employee'):
@@ -50,6 +59,26 @@ class TestPhoneBlacklist(SMSCommon, TestSMSRecipients):
             bl_record.unlink()
             rec = self.env['mail.test.sms.bl'].search([('phone_sanitized_blacklisted', '=', True)])
             self.assertEqual(rec, self.env['mail.test.sms.bl'])
+
+    def test_phone_blacklist_unblacklisted(self):
+        """ This test check for scenario where user:
+            1. Blacklists a number  -> creating new active record)
+            2. Unblacklists it      -> making record unactive (archived)
+            3. Blacklists it again (by attempting to create new record)
+        Last step should just make existing record active again, and this test checks it.
+        """
+        phone_number = self.test_numbers[0]
+        bl_record = self.env['phone.blacklist'].sudo().create([{'number': phone_number, 'active': True}])
+        num_of_records = self.env['phone.blacklist'].with_context(active_test=False).search_count([])
+
+        bl_record.action_archive()
+
+        # Attempt to blacklist unblacklisted
+        self.env['phone.blacklist'].sudo().create([{'number': phone_number}])
+
+        self.assertTrue(bl_record.active, "Attempting to blacklist already-unblacklisted, should make the record active again")
+        self.assertEqual(num_of_records, self.env['phone.blacklist'].with_context(active_test=False).search_count([]),
+            "Number of records shouldn't change. (Records probably were recreated, instead of activated)")
 
     def test_phone_sanitize_api(self):
         with self.with_user('employee'):

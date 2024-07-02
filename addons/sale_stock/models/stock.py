@@ -17,15 +17,6 @@ class StockMove(models.Model):
     sale_line_id = fields.Many2one('sale.order.line', 'Sale Line', index='btree_not_null')
 
     @api.model
-    def default_get(self, fields_list):
-        defaults = super().default_get(fields_list)
-        model = self.env.context.get('active_model')
-        so_id = self.env.context.get('active_id')
-        if model == 'sale.order' and so_id:
-            defaults['group_id'] = self.env[model].browse(so_id).procurement_group_id.id
-        return defaults
-
-    @api.model
     def _prepare_merge_moves_distinct_fields(self):
         distinct_fields = super(StockMove, self)._prepare_merge_moves_distinct_fields()
         distinct_fields.append('sale_line_id')
@@ -45,22 +36,16 @@ class StockMove(models.Model):
         res = super()._get_source_document()
         return self.sale_line_id.order_id or res
 
-    def _get_sale_order_lines(self):
-        """ Return all possible sale order lines for one stock move. """
-        self.ensure_one()
-        return (self + self.browse(self._rollup_move_origs() | self._rollup_move_dests())).sale_line_id
-
     def _assign_picking_post_process(self, new=False):
         super(StockMove, self)._assign_picking_post_process(new=new)
         if new:
             picking_id = self.mapped('picking_id')
             sale_order_ids = self.mapped('sale_line_id.order_id')
             for sale_order_id in sale_order_ids:
-                picking_id.message_post_with_source(
+                picking_id.message_post_with_view(
                     'mail.message_origin_link',
-                    render_values={'self': picking_id, 'origin': sale_order_id},
-                    subtype_xmlid='mail.mt_note',
-                )
+                    values={'self': picking_id, 'origin': sale_order_id},
+                    subtype_id=self.env.ref('mail.mt_note').id)
 
     def _get_all_related_sm(self, product):
         return super()._get_all_related_sm(product) | self.filtered(lambda m: m.sale_line_id.product_id == product)
@@ -83,7 +68,7 @@ class StockRule(models.Model):
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    sale_id = fields.Many2one(related="group_id.sale_id", string="Sales Order", store=True, index='btree_not_null')
+    sale_id = fields.Many2one(related="group_id.sale_id", string="Sales Order", store=True, readonly=False, index='btree_not_null')
 
     def _auto_init(self):
         """
@@ -104,7 +89,7 @@ class StockPicking(models.Model):
             sale_order = move.picking_id.sale_id
             # Creates new SO line only when pickings linked to a sale order and
             # for moves with qty. done and not already linked to a SO line.
-            if not sale_order or move.location_dest_id.usage != 'customer' or move.sale_line_id or not move.picked:
+            if not sale_order or move.location_dest_id.usage != 'customer' or move.sale_line_id or not move.quantity_done:
                 continue
             product = move.product_id
             so_line_vals = {
@@ -113,7 +98,7 @@ class StockPicking(models.Model):
                 'order_id': sale_order.id,
                 'product_id': product.id,
                 'product_uom_qty': 0,
-                'qty_delivered': move.quantity,
+                'qty_delivered': move.quantity_done,
                 'product_uom': move.product_uom.id,
             }
             if product.invoice_policy == 'delivery':

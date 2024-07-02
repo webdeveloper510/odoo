@@ -62,7 +62,7 @@ class MrpRoutingWorkcenter(models.Model):
     @api.depends('time_mode', 'time_mode_batch')
     def _compute_time_computed_on(self):
         for operation in self:
-            operation.time_computed_on = _('%i work orders', operation.time_mode_batch) if operation.time_mode != 'manual' else False
+            operation.time_computed_on = _('%i work orders') % operation.time_mode_batch if operation.time_mode != 'manual' else False
 
     @api.depends('time_cycle_manual', 'time_mode', 'workorder_ids')
     def _compute_time_cycle(self):
@@ -95,8 +95,8 @@ class MrpRoutingWorkcenter(models.Model):
     def _compute_workorder_count(self):
         data = self.env['mrp.workorder']._read_group([
             ('operation_id', 'in', self.ids),
-            ('state', '=', 'done')], ['operation_id'], ['__count'])
-        count_data = {operation.id: count for operation, count in data}
+            ('state', '=', 'done')], ['operation_id'], ['operation_id'])
+        count_data = dict((item['operation_id'][0], item['operation_id_count']) for item in data)
         for operation in self:
             operation.workorder_count = count_data.get(operation.id, 0)
 
@@ -105,27 +105,10 @@ class MrpRoutingWorkcenter(models.Model):
         if not self._check_m2m_recursion('blocked_by_operation_ids'):
             raise ValidationError(_("You cannot create cyclic dependency."))
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        res = super().create(vals_list)
-        res.bom_id._set_outdated_bom_in_productions()
-        return res
-
-    def write(self, vals):
-        res = super().write(vals)
-        self.bom_id._set_outdated_bom_in_productions()
-        return res
-
     def action_archive(self):
         res = super().action_archive()
         bom_lines = self.env['mrp.bom.line'].search([('operation_id', 'in', self.ids)])
         bom_lines.write({'operation_id': False})
-        self.bom_id._set_outdated_bom_in_productions()
-        return res
-
-    def action_unarchive(self):
-        res = super().action_unarchive()
-        self.bom_id._set_outdated_bom_in_productions()
         return res
 
     def copy_to_bom(self):
@@ -171,3 +154,11 @@ class MrpRoutingWorkcenter(models.Model):
             return False
         self.ensure_one()
         return tuple(self[key] for key in  ('name', 'company_id', 'workcenter_id', 'time_mode', 'time_cycle_manual', 'bom_product_template_attribute_value_ids'))
+
+    def write(self, values):
+        if 'bom_id' in values:
+            for op in self:
+                op.bom_id.bom_line_ids.filtered(lambda line: line.operation_id == op).operation_id = False
+                op.bom_id.byproduct_ids.filtered(lambda byproduct: byproduct.operation_id == op).operation_id = False
+                op.bom_id.operation_ids.filtered(lambda operation: operation.blocked_by_operation_ids == op).blocked_by_operation_ids = False
+        return super().write(values)

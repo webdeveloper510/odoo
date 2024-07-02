@@ -3,20 +3,23 @@
 # 	* sale_purchase
 # 
 # Translators:
-# Sergey Vilizhanin, 2023
-# Константин Коровин <korovin74@gmail.com>, 2023
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
-# Martin Trigaux, 2023
-# Ivan Kropotkin <yelizariev@itpp.dev>, 2023
+# ILMIR <karamov@it-projects.info>, 2022
+# Sergey Vilizhanin, 2022
+# Константин Коровин <korovin74@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Ivan Kropotkin <yelizariev@itpp.dev>, 2022
+# alenafairy, 2023
 # Wil Odoo, 2024
+# Сергей Шебанин <sergey@shebanin.ru>, 2024
+# Смородин Даниил, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"Last-Translator: Смородин Даниил, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,17 +35,17 @@ msgid ""
 "            Manual actions may be needed."
 msgstr ""
 ".\n"
-"            Возможно понадобится ручная действие."
+"            Возможно понадобится операция вручную."
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.product_template_form_view_inherit
 msgid "<span class=\"fa fa-lg fa-building-o fa-fw\" title=\"Service to Purchase\"/>"
-msgstr "<span class=\"fa fa-lg fa-building-o fa-fw\" title=\"Service to Purchase\"/>"
+msgstr "<span class=\"fa fa-lg fa-building-o fa-fw\" title=\"Услуга для закупки\"/>"
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.sale_order_inherited_form_purchase
 msgid "<span class=\"o_stat_text\">Purchase</span>"
-msgstr "<span class=\"o_stat_text\">Приобрести</span>"
+msgstr "<span class=\"o_stat_text\">Закупка</span>"
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.purchase_order_inherited_form_sale
@@ -53,39 +56,34 @@ msgstr "<span class=\"o_stat_text\">Продажа</span>"
 #: model_terms:ir.ui.view,arch_db:sale_purchase.sale_order_cancel_view_form
 msgid ""
 "<span id=\"display_invoice_alert\" position=\"after\">\n"
-"                <span id=\"display_purchase_orders_alert\" invisible=\"not display_purchase_orders_alert\">\n"
+"                <span id=\"display_purchase_orders_alert\" attrs=\"{'invisible': [('display_purchase_orders_alert', '=', False)]}\" groups=\"purchase.group_purchase_user\">\n"
 "                    There are active purchase orders linked to this sale order that are not cancelled automatically! <br/>\n"
 "                </span>\n"
 "            </span>"
 msgstr ""
-"<span id=\"display_invoice_alert\" position=\"after\">\n"
-"                <span id=\"display_purchase_orders_alert\" invisible=\"not display_purchase_orders_alert\">\n"
-"                    С этим заказом на продажу связаны активные заказы на покупку, которые не отменяются автоматически! <br/>\n"
-"                </span>\n"
-"            </span>"
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_sale_on_purchase_cancellation
 msgid "Exception(s) occurred on the purchase order(s):"
-msgstr "Исключения произошли в заказах на закупку:"
+msgstr "Исключения возникли в заказе на продажу:"
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_cancellation
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_quantity_decreased
 msgid "Exception(s) occurred on the sale order(s):"
-msgstr "Исключения произошли в заказах на продажу:"
+msgstr "Исключение произошло на заказе (ях) на продажу:"
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_cancellation
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_quantity_decreased
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_sale_on_purchase_cancellation
 msgid "Exception(s):"
-msgstr "Исключения:"
+msgstr "Исключение(я):"
 
 #. module: sale_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_sale_order_line__purchase_line_ids
 msgid "Generated Purchase Lines"
-msgstr "Сгенерированные строки закупок"
+msgstr "Созданные строки покупки"
 
 #. module: sale_purchase
 #: model:ir.model.fields,help:sale_purchase.field_product_product__service_to_purchase
@@ -95,14 +93,14 @@ msgid ""
 "automatically created to buy the product. Tip: don't forget to set a vendor "
 "on the product."
 msgstr ""
-"Если флажок установлен, каждый раз, когда вы продаете этот продукт через СЦ,"
-" автоматически создается RfQ для покупки продукта. Совет: не забудьте "
-"установить продавца для продукта."
+"Если обозначено, каждый раз, когда вы продаете этот товар через СНП, "
+"автоматически создается ЗНКП для покупки товара. Совет: не забудьте "
+"установить поставщика на товар."
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_quantity_decreased
 msgid "Manual actions may be needed."
-msgstr "Могут потребоваться ручные действия."
+msgstr "Могут быть необходимы действия вручную."
 
 #. module: sale_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_sale_order__purchase_order_count
@@ -117,7 +115,7 @@ msgstr "Количество источников продажи"
 #. module: sale_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_sale_order_line__purchase_line_count
 msgid "Number of generated purchase items"
-msgstr "Количество сгенерированных элементов покупки"
+msgstr "Количество произведенных позиций"
 
 #. module: sale_purchase
 #. odoo-python
@@ -129,7 +127,7 @@ msgstr "Заказанное количество уменьшилось!"
 #. module: sale_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_purchase_order_line__sale_line_id
 msgid "Origin Sale Item"
-msgstr "Происхождения Товаров"
+msgstr "происхождения товаров"
 
 #. module: sale_purchase
 #. odoo-python
@@ -145,19 +143,19 @@ msgstr ""
 #. module: sale_purchase
 #: model:ir.model,name:sale_purchase.model_product_template
 msgid "Product"
-msgstr "Товар"
+msgstr "Продукт"
 
 #. module: sale_purchase
 #. odoo-python
 #: code:addons/sale_purchase/models/product_template.py:0
 #, python-format
 msgid "Product that is not a service can not create RFQ."
-msgstr "Продукт, который не является услугой, не может создавать RFQ."
+msgstr "Товар, который не является услугой, не может создать ЗНКП."
 
 #. module: sale_purchase
 #: model:ir.model,name:sale_purchase.model_purchase_order
 msgid "Purchase Order"
-msgstr "Заказа на покупку"
+msgstr "Заказ на поставку"
 
 #. module: sale_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_sale_order_cancel__display_purchase_orders_alert
@@ -167,7 +165,7 @@ msgstr "Оповещение о заказах на поставку"
 #. module: sale_purchase
 #: model:ir.model,name:sale_purchase.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr "Позиция заказа на покупку"
+msgstr "Позиция заказа на поставку"
 
 #. module: sale_purchase
 #. odoo-python
@@ -182,13 +180,13 @@ msgid ""
 "Purchase line generated by this Sales item on order confirmation, or when "
 "the quantity was increased."
 msgstr ""
-"Строка закупки, созданная для данного элемента продажи при подтверждении "
-"заказа или при увеличении количества."
+"Строка покупки, созданные этим элементом продажи на подтверждении заказа или"
+" когда количество увеличивается."
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.product_template_form_view_inherit
 msgid "Reordering"
-msgstr "Повторный заказ"
+msgstr "Восполнение"
 
 #. module: sale_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_purchase_order_line__sale_order_id
@@ -221,7 +219,7 @@ msgstr "Источники Заказы на продажу %s"
 #: model:ir.model.fields,field_description:sale_purchase.field_product_product__service_to_purchase
 #: model:ir.model.fields,field_description:sale_purchase.field_product_template__service_to_purchase
 msgid "Subcontract Service"
-msgstr "Субподрядные услуги"
+msgstr "Услуги по субподряду"
 
 #. module: sale_purchase
 #. odoo-python
@@ -231,8 +229,8 @@ msgid ""
 "There is no vendor associated to the product %s. Please define a vendor for "
 "this product."
 msgstr ""
-"Нет поставщика, связанного с ТМЦ %s. Пожалуйста, определите поставщика для "
-"этого ТМЦ."
+"There is no vendor associated to the product %s. Please define a vendor for "
+"this product."
 
 #. module: sale_purchase
 #. odoo-python
@@ -242,14 +240,14 @@ msgid ""
 "You are decreasing the ordered quantity! Do not forget to manually update "
 "the purchase order if needed."
 msgstr ""
-"Вы уменьшаете заказанное количество! Не забудьте вручную обновить заказ на "
+"Вы уменьшаете количество заказа! Не забудьте вручную обновить заказ на "
 "покупку, если это необходимо."
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_cancellation
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_sale_on_purchase_cancellation
 msgid "cancelled"
-msgstr "отменен"
+msgstr "отменено"
 
 #. module: sale_purchase
 #: model_terms:ir.ui.view,arch_db:sale_purchase.exception_purchase_on_sale_cancellation

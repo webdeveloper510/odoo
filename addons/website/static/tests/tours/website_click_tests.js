@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from '@website/js/tours/tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 const cover = {
     id: 's_cover',
@@ -10,7 +10,7 @@ const cover = {
 wTourUtils.registerWebsitePreviewTour('website_click_tour', {
     test: true,
     url: '/',
-}, () => [
+}, [
     {
         content: "trigger a page navigation",
         trigger: 'iframe a[href="/contactus"]',
@@ -29,4 +29,9 @@ wTourUtils.registerWebsitePreviewTour('website_click_tour', {
     wTourUtils.dragNDrop(cover),
     wTourUtils.clickOnSnippet(cover),
     ...wTourUtils.clickOnSave(),
+    {
+        content: "wait for the iframe to be ready",
+        trigger: 'iframe body:not(.editor_enable)',
+        run: () => null, // it's a check
+    }
 ]);

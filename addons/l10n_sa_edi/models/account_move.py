@@ -73,7 +73,7 @@ class AccountMove(models.Model):
             Make sure credit/debit notes have a valid reason and reversal reference
         """
         self.ensure_one()
-        return self.reversed_entry_id and self.ref
+        return self.reversed_entry_id or self.ref
 
     @api.model
     def _l10n_sa_get_qr_code(self, journal_id, unsigned_xml, x509_cert, signature, is_b2c=False):
@@ -213,6 +213,17 @@ class AccountMove(models.Model):
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
+
+    def _apply_retention_tax_filter(self, tax_values):
+        return not tax_values['tax_id'].l10n_sa_is_retention
+
+    def _is_global_discount_line(self):
+        """
+            Any line that has a negative amount and is not linked to a down-payment is considered as a
+            global discount line. These can be created either manually, or through a promotions program.
+        """
+        self.ensure_one()
+        return not self._get_downpayment_lines() and self.price_subtotal < 0
 
     @api.depends('price_subtotal', 'price_total')
     def _compute_tax_amount(self):

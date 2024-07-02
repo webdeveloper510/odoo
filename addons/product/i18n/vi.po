@@ -3,35 +3,26 @@
 # 	* product
 # 
 # Translators:
-# Wil Odoo, 2023
-# Thi Huong Nguyen, 2024
+# Martin Trigaux, 2022
+# Dung Nguyen Thi <dungnt@trobz.com>, 2022
+# Vo Thanh Thuy, 2022
+# Duy BQ <duybq86@gmail.com>, 2022
+# Nancy Momoland <thanh.np2502@gmail.com>, 2023
+# Thi Huong Nguyen, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2024\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
+"Last-Translator: Thi Huong Nguyen, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_product.py:0
-#, python-format
-msgid ""
-"\n"
-"\n"
-"Note: products that you don't have access to will not be shown above."
-msgstr ""
-"\n"
-"\n"
-"Lưu ý: những sản phẩm bạn không có quyền truy cập sẽ không được hiển thị trên đây."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_count
@@ -43,16 +34,6 @@ msgstr "SL biến thể sản phẩm"
 #: model:ir.model.fields,field_description:product.field_product_category__product_count
 msgid "# Products"
 msgstr "SL sản phẩm"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$14.00"
-msgstr "14,00$"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "$15.00"
-msgstr "15,00$"
 
 #. module: product
 #. odoo-python
@@ -81,24 +62,20 @@ msgstr "%s %% chiếu khấu"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_tag.py:0
 #: code:addons/product/models/product_template.py:0
 #, python-format
 msgid "%s (copy)"
-msgstr "%s (bản sao)"
+msgstr "%s (sao chép)"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 #, python-format
-msgid "%s: end date (%s) should be greater than start date (%s)"
+msgid "%s : end date (%s) should be greater than start date (%s)"
 msgstr "%s: ngày kết thúc (%s) nên diễn ra sau ngày bắt đầu (%s)"
 
 #. module: product
-#: model:ir.actions.report,print_report_name:product.report_product_template_label_2x7
-#: model:ir.actions.report,print_report_name:product.report_product_template_label_4x12
-#: model:ir.actions.report,print_report_name:product.report_product_template_label_4x12_noprice
-#: model:ir.actions.report,print_report_name:product.report_product_template_label_4x7
+#: model:ir.actions.report,print_report_name:product.report_product_template_label
 #: model:ir.actions.report,print_report_name:product.report_product_template_label_dymo
 msgid "'Products Labels - %s' % (object.name)"
 msgstr "'Nhãn sản phẩm - %s' % (object.name)"
@@ -107,13 +84,6 @@ msgstr "'Nhãn sản phẩm - %s' % (object.name)"
 #: model:ir.actions.report,print_report_name:product.report_product_packaging
 msgid "'Products packaging - %s' % (object.name)"
 msgstr "'Bao bì sản phẩm - %s' % (object.name)"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_template.py:0
-#, python-format
-msgid "(e.g: product description, ebook, legal notice, ...)."
-msgstr "(VD: mô tả sản phẩm, ebook, yết thị,...)"
 
 #. module: product
 #. odoo-python
@@ -139,21 +109,6 @@ msgstr ""
 #: model:product.attribute.value,name:product.product_attribute_value_5
 msgid "1 year"
 msgstr "1 năm"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "10"
-msgstr "10"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "10 Units"
-msgstr "10 đơn vị"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "123456789012"
-msgstr "123456789012"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_4_product_template
@@ -202,17 +157,17 @@ msgstr "<i class=\"fa fa-money\" role=\"img\" aria-label=\"Tiền tệ\" title=\
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
+"<span attrs=\"{'invisible': [('pricelist_item_count', '=', 1)]}\">\n"
 "                                        Extra Prices\n"
 "                                    </span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
+"                                    <span attrs=\"{'invisible': [('pricelist_item_count', '!=', 1)]}\">\n"
 "                                        Extra Price\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"pricelist_item_count == 1\">\n"
+"<span attrs=\"{'invisible': [('pricelist_item_count', '=', 1)]}\">\n"
 "                                        Giá bổ sung\n"
 "                                    </span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"pricelist_item_count != 1\">\n"
+"                                    <span attrs=\"{'invisible': [('pricelist_item_count', '!=', 1)]}\">\n"
 "                                        Giá bổ sung\n"
 "                                    </span>"
 
@@ -227,16 +182,6 @@ msgid "<span class=\"o_stat_text\">Related Products</span>"
 msgstr "<span class=\"o_stat_text\">Sản phẩm tương tự</span>"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "<span class=\"text-bg-danger\">Archived</span>"
-msgstr "<span class=\"text-bg-danger\">Đã lưu trữ</span>"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "<span class=\"text-bg-secondary\">Variant</span>"
-msgstr "<span class=\"text-bg-secondary\">Biến thể</span>"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "<span>%</span>"
 msgstr "<span>%</span>"
@@ -248,20 +193,20 @@ msgstr ""
 "<span>Tất cả cài đặt tổng quát về sản phẩm này được quản lý trên</span>"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "<span>Variant </span>"
-msgstr "<span>Biến thể </span>"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "<strong>Qty: </strong>"
 msgstr "<strong>SL:</strong>"
 
 #. module: product
+#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
+msgid "<strong>Sales Order Line Quantities (price per unit)</strong>"
+msgstr "<strong>Số lượng dòng đơn bán hàng (giá cho mỗi đơn vị)</strong>"
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid ""
 "<strong>Save</strong> this page and come back\n"
-"                                here to set up the feature."
+"                                    here to set up the feature."
 msgstr ""
 "<strong>Lưu</strong> trang này và quay lại\n"
 "                                    đây để cài đặt tính năng."
@@ -291,8 +236,8 @@ msgid ""
 "Customer Invoice/Credit Note"
 msgstr ""
 "Mô tả sản phẩm mà bạn muốn giới thiệu cho khách hàng của mình. Mô tả này sẽ "
-"được sao chép vào mọi đơn bán hàng, phiếu xuất kho và hóa đơn bán hàng/giấy "
-"báo có."
+"được sao chép vào mọi Đơn bán hàng, Phiếu xuất kho và Hóa đơn khách "
+"hàng/Giấy báo có."
 
 #. module: product
 #. odoo-python
@@ -307,7 +252,7 @@ msgid ""
 "A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
 "            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"Giá là một tập hợp giá bán hoặc quy tắc để tính giá của chi tiết đơn bán hàng dựa trên sản phẩm, danh mục sản phẩm, ngày và số lượng đặt hàng.\n"
+"Giá là một tập hợp giá bán hoặc quy tắc để tính giá của chi tiết đơn bán hàng dựa trên sản phẩm, danh dòng sản phẩm, ngày và số lượng đặt hàng.\n"
 "            Đây là công cụ hoàn hảo để xử lý các phương thức định giá, giảm giá theo mùa,..."
 
 #. module: product
@@ -330,40 +275,23 @@ msgstr ""
 "Dịch vụ là sản phẩm phi vật chất mà bạn cung cấp."
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__access_token
-msgid "Access Token"
-msgstr "Token truy cập"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "Acme Widget"
-msgstr "Widget Acme"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "Acme Widget - Blue"
-msgstr "Widget Acme - Xanh lam"
-
-#. module: product
 #: model:product.template,name:product.product_product_25_product_template
 msgid "Acoustic Bloc Screens"
 msgstr "Màn cách âm"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_needaction
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction
 #: model:ir.model.fields,field_description:product.field_product_template__message_needaction
 msgid "Action Needed"
 msgstr "Hành động cần thiết"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__active
 #: model:ir.model.fields,field_description:product.field_product_pricelist__active
+#: model:ir.model.fields,field_description:product.field_product_pricelist_item__active
 #: model:ir.model.fields,field_description:product.field_product_product__active
 #: model:ir.model.fields,field_description:product.field_product_template__active
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__active
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__ptav_active
-#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_search
 msgid "Active"
@@ -375,50 +303,39 @@ msgid "Active Products"
 msgstr "Sản phẩm đang hoạt động"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_ids
 #: model:ir.model.fields,field_description:product.field_product_product__activity_ids
 #: model:ir.model.fields,field_description:product.field_product_template__activity_ids
 msgid "Activities"
 msgstr "Hoạt động"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_exception_decoration
 #: model:ir.model.fields,field_description:product.field_product_product__activity_exception_decoration
 #: model:ir.model.fields,field_description:product.field_product_template__activity_exception_decoration
 msgid "Activity Exception Decoration"
 msgstr "Hoạt động ngoại lệ"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_state
 #: model:ir.model.fields,field_description:product.field_product_product__activity_state
 #: model:ir.model.fields,field_description:product.field_product_template__activity_state
 msgid "Activity State"
 msgstr "Trạng thái hoạt động"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_type_icon
 #: model:ir.model.fields,field_description:product.field_product_product__activity_type_icon
 #: model:ir.model.fields,field_description:product.field_product_template__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Biểu tượng loại hoạt động"
+msgstr "Biểu tượng kiểu hoạt động"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
-#, python-format
-msgid "Add"
-msgstr "Thêm"
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: code:addons/product/static/src/xml/pricelist_report.xml:0
 #, python-format
 msgid "Add a quantity"
 msgstr "Thêm số lượng"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__additional_product_tag_ids
-msgid "Additional Product Tags"
+msgid "Additional Product Tag"
 msgstr "Thẻ sản phẩm bổ sung"
 
 #. module: product
@@ -446,17 +363,9 @@ msgstr "Tất cả biến thể sản phẩm sử dụng thẻ này"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__3_global
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 #, python-format
 msgid "All Products"
 msgstr "Tất cả sản phẩm"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/controllers/product_document.py:0
-#, python-format
-msgid "All files uploaded"
-msgstr "Tất cả tệp đã được tải lên"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__is_custom
@@ -495,7 +404,7 @@ msgid "Apply On"
 msgstr "Áp dụng cho"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_search
+#: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
@@ -512,36 +421,20 @@ msgstr "Thiết lập mức độ ưu tiên cho danh sách nhà cung cấp sản
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
+#: code:addons/product/static/src/js/product_pricelist_report.js:0
 #, python-format
 msgid ""
-"At most %s quantities can be displayed simultaneously. Remove a selected "
+"At most %d quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
 msgstr ""
-"Số lượng nhiều nhất có thể được hiển thị cùng lúc là %s. Hãy xóa số lượng đã"
-" chọn để thêm số lượng khác."
+"Số lượng nhiều nhất có thể được hiển thị cùng lúc là %d.  Hãy xóa số lượng "
+"đã chọn để thêm số lượng khác."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Attached To"
-msgstr "Đính kèm với"
-
-#. module: product
-#: model:ir.model,name:product.model_ir_attachment
-msgid "Attachment"
-msgstr "Tệp đính kèm"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_attachment_count
 #: model:ir.model.fields,field_description:product.field_product_product__message_attachment_count
 #: model:ir.model.fields,field_description:product.field_product_template__message_attachment_count
 msgid "Attachment Count"
 msgstr "Số lượng tệp đính kèm"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__local_url
-msgid "Attachment URL"
-msgstr "URL tệp đính kèm"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__name
@@ -573,7 +466,6 @@ msgstr "Giá trị thuộc tính"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_template_attribute_value_ids
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__value_ids
-#: model_terms:ir.ui.view,arch_db:product.product_attribute_value_list
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
 msgid "Attribute Values"
 msgstr "Giá trị thuộc tính"
@@ -582,7 +474,6 @@ msgstr "Giá trị thuộc tính"
 #: model:ir.actions.act_window,name:product.attribute_action
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_tree
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Attributes"
 msgstr "Thuộc tính"
 
@@ -595,20 +486,6 @@ msgstr "Thuộc tính & biến thể"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Availability"
 msgstr "Tình trạng còn hàng"
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/kanban_controller.js:0
-#, python-format
-msgid "Back to Order"
-msgstr "Quay lại đơn hàng"
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/kanban_controller.js:0
-#, python-format
-msgid "Back to Quotation"
-msgstr "Quay lại báo giá"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_packaging__barcode
@@ -645,8 +522,8 @@ msgstr ""
 msgid ""
 "Base price for computation.\n"
 "Sales Price: The base price will be the Sales Price.\n"
-"Cost Price: The base price will be the cost price.\n"
-"Other Pricelist: Computation of the base price based on another Pricelist."
+"Cost Price : The base price will be the cost price.\n"
+"Other Pricelist : Computation of the base price based on another Pricelist."
 msgstr ""
 "Giá cơ bản dùng cho tính toán.\n"
 "Giá bán: Giá cơ bản được dùng làm giá bán.\n"
@@ -711,11 +588,6 @@ msgid "Category: %s"
 msgstr "Danh mục: %s"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__checksum
-msgid "Checksum/SHA1"
-msgstr "Checksum/SHA1"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__child_id
 msgid "Child Categories"
 msgstr "Danh mục con"
@@ -767,7 +639,6 @@ msgid "Companies"
 msgstr "Công ty"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__company_id
 #: model:ir.model.fields,field_description:product.field_product_packaging__company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist__company_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__company_id
@@ -821,12 +692,6 @@ msgstr "Cấu hình"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid "Configure"
 msgstr "Cấu hình"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
-msgid "Configure tags"
-msgstr "Cấu hình thẻ"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
@@ -890,7 +755,7 @@ msgstr "Bàn góc ngồi bên phải"
 #: model:ir.model.fields,field_description:product.field_product_template__standard_price
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__base__standard_price
 msgid "Cost"
-msgstr "Chi phí"
+msgstr "Giá vốn"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__cost_currency_id
@@ -927,18 +792,10 @@ msgid "Create a new product variant"
 msgstr "Tạo biến thể sản phẩm mới"
 
 #. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
-#, python-format
-msgid "Create a product"
-msgstr "Tạo một sản phẩm"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__create_uid
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__create_uid
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__create_uid
 #: model:ir.model.fields,field_description:product.field_product_category__create_uid
-#: model:ir.model.fields,field_description:product.field_product_document__create_uid
 #: model:ir.model.fields,field_description:product.field_product_label_layout__create_uid
 #: model:ir.model.fields,field_description:product.field_product_packaging__create_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist__create_uid
@@ -958,7 +815,6 @@ msgstr "Được tạo bởi"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__create_date
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__create_date
 #: model:ir.model.fields,field_description:product.field_product_category__create_date
-#: model:ir.model.fields,field_description:product.field_product_document__create_date
 #: model:ir.model.fields,field_description:product.field_product_label_layout__create_date
 #: model:ir.model.fields,field_description:product.field_product_packaging__create_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist__create_date
@@ -972,11 +828,6 @@ msgstr "Được tạo bởi"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__create_date
 msgid "Created on"
 msgstr "Được tạo vào"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "Creation"
-msgstr "Tạo"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_volume_volume_in_cubic_feet__1
@@ -1015,11 +866,6 @@ msgid "Customizable Desk"
 msgstr "Bàn điều chỉnh được"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__db_datas
-msgid "Database Data"
-msgstr "Dữ liệu trong cơ sở dữ liệu"
-
-#. module: product
 #: model:ir.model,name:product.model_decimal_precision
 msgid "Decimal Precision"
 msgstr "Độ chính xác thập phân"
@@ -1027,14 +873,10 @@ msgstr "Độ chính xác thập phân"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/res_company.py:0
+#: code:addons/product/models/res_company.py:0
 #, python-format
-msgid "Default %s pricelist"
-msgstr "Bảng giá mặc định %s "
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_attribute_value__default_extra_price
-msgid "Default Extra Price"
-msgstr "Giá bổ sung mặc định"
+msgid "Default %(currency)s pricelist"
+msgstr "Bảng giá %(currency)s mặc định"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_packaging__product_uom_id
@@ -1070,17 +912,11 @@ msgid "Define your weight unit of measure"
 msgstr "Xác định đơn vị tính khối lượng của bạn"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Delete"
-msgstr "Xoá"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
 msgid "Delivery Lead Time"
 msgstr "Thời gian giao hàng"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__description
 #: model:ir.model.fields,field_description:product.field_product_product__description
 #: model:ir.model.fields,field_description:product.field_product_template__description
 msgid "Description"
@@ -1119,11 +955,6 @@ msgid "Discount"
 msgstr "Chiết khấu"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__discount
-msgid "Discount (%)"
-msgstr "Chiết khấu (%)"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist__discount_policy
 msgid "Discount Policy"
 msgstr "Chính sách chiết khấu"
@@ -1139,11 +970,6 @@ msgid "Discount on lines"
 msgstr "Chiết khấu theo dòng"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_supplierinfo__price_discounted
-msgid "Discounted Price"
-msgstr "Giá đã chiết khấu"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_discount_per_so_line
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 msgid "Discounts"
@@ -1154,7 +980,6 @@ msgstr "Chiết khấu"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__display_name
 #: model:ir.model.fields,field_description:product.field_product_category__display_name
-#: model:ir.model.fields,field_description:product.field_product_document__display_name
 #: model:ir.model.fields,field_description:product.field_product_label_layout__display_name
 #: model:ir.model.fields,field_description:product.field_product_packaging__display_name
 #: model:ir.model.fields,field_description:product.field_product_pricelist__display_name
@@ -1171,7 +996,7 @@ msgstr "Tên hiển thị"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: code:addons/product/static/src/xml/pricelist_report.xml:0
 #, python-format
 msgid "Display Pricelist"
 msgstr "Hiển thị bảng giá"
@@ -1184,42 +1009,9 @@ msgid "Display Type"
 msgstr "Loại hiển thị"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Document"
+#: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
+msgid "Documentation"
 msgstr "Tài liệu"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_template.py:0
-#: model:ir.model.fields,field_description:product.field_product_product__product_document_ids
-#: model:ir.model.fields,field_description:product.field_product_template__product_document_ids
-#: model_terms:ir.ui.view,arch_db:product.product_template_form_view
-#, python-format
-msgid "Documents"
-msgstr "Tài liệu"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__product_document_count
-#: model:ir.model.fields,field_description:product.field_product_template__product_document_count
-msgid "Documents Count"
-msgstr "Số lượng tài liệu"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_search
-msgid "Documents of this variant"
-msgstr "Tài liệu về biến thể này"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Download"
-msgstr "Tải xuống"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_template.py:0
-#, python-format
-msgid "Download examples"
-msgstr "Tải xuống ví dụ"
 
 #. module: product
 #: model:product.template,name:product.product_product_27_product_template
@@ -1256,17 +1048,6 @@ msgstr "Linh động"
 msgid "Each value should be defined only once per attribute per product."
 msgstr ""
 "Mỗi giá trị chỉ nên quy định 1 lần cho mỗi thuộc tính cho từng sản phẩm."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "Eco-friendly Wooden Chair"
-msgstr "Ghế gỗ thân thiện với môi trường"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-#: model_terms:ir.ui.view,arch_db:product.product_view_kanban_catalog
-msgid "Edit"
-msgstr "Chỉnh sửa"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__date_end
@@ -1332,24 +1113,8 @@ msgstr "Yêu thích"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Favorites"
 msgstr "Yêu thích"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__datas
-msgid "File Content (base64)"
-msgstr "Nội dung tệp (base64)"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__raw
-msgid "File Content (raw)"
-msgstr "Nội dung tệp (thô)"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__file_size
-msgid "File Size"
-msgstr "Dung lượng tệp"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__fixed_price
@@ -1363,25 +1128,22 @@ msgid "Flipover"
 msgstr "Lật ngược"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_follower_ids
 #: model:ir.model.fields,field_description:product.field_product_product__message_follower_ids
 #: model:ir.model.fields,field_description:product.field_product_template__message_follower_ids
 msgid "Followers"
 msgstr "Người theo dõi"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_partner_ids
 #: model:ir.model.fields,field_description:product.field_product_product__message_partner_ids
 #: model:ir.model.fields,field_description:product.field_product_template__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Người theo dõi (Đối tác)"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__activity_type_icon
 #: model:ir.model.fields,help:product.field_product_product__activity_type_icon
 #: model:ir.model.fields,help:product.field_product_template__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Font biểu tượng, ví dụ: fa-tasks"
+msgstr "Font biểu tượng ví dụ: fa-tasks"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
@@ -1415,7 +1177,7 @@ msgstr "Bàn làm việc văn phòng hiện đại cho 4 người"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Future Activities"
-msgstr "Hoạt động trong tương lai"
+msgstr "Hoạt động tương lai"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -1424,6 +1186,10 @@ msgstr "Thông tin chung"
 
 #. module: product
 #: model:ir.actions.server,name:product.action_product_price_list_report
+msgid "Generate Pricelist"
+msgstr "Tạo bảng giá"
+
+#. module: product
 #: model:ir.actions.server,name:product.action_product_template_price_list_report
 msgid "Generate Pricelist Report"
 msgstr "Tạo báo cáo bảng giá"
@@ -1446,11 +1212,6 @@ msgid "Gives the sequence order when displaying a product list"
 msgstr "Đưa ra trình tự khi hiển thị một danh sách sản phẩm"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "Gold Member Pricelist"
-msgstr "Bảng giá thành viên vàng"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Google Images"
 msgstr "Google Hình ảnh"
@@ -1459,7 +1220,6 @@ msgstr "Google Hình ảnh"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Group By"
 msgstr "Nhóm theo"
 
@@ -1469,7 +1229,6 @@ msgid "HTML Color Index"
 msgstr "Chỉ số màu sắc HTML"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__has_message
 #: model:ir.model.fields,field_description:product.field_product_product__has_message
 #: model:ir.model.fields,field_description:product.field_product_template__has_message
 msgid "Has Message"
@@ -1486,11 +1245,6 @@ msgstr ""
 "thị màu sắc nếu loại thuộc tính là 'Màu sắc'."
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "History"
-msgstr "Lịch sử"
-
-#. module: product
 #: model:product.template,name:product.expense_hotel_product_template
 msgid "Hotel Accommodation"
 msgstr "Lưu trú khách sạn"
@@ -1500,7 +1254,6 @@ msgstr "Lưu trú khách sạn"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__id
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__id
 #: model:ir.model.fields,field_description:product.field_product_category__id
-#: model:ir.model.fields,field_description:product.field_product_document__id
 #: model:ir.model.fields,field_description:product.field_product_label_layout__id
 #: model:ir.model.fields,field_description:product.field_product_packaging__id
 #: model:ir.model.fields,field_description:product.field_product_pricelist__id
@@ -1516,28 +1269,24 @@ msgid "ID"
 msgstr "ID"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_exception_icon
 #: model:ir.model.fields,field_description:product.field_product_product__activity_exception_icon
 #: model:ir.model.fields,field_description:product.field_product_template__activity_exception_icon
 msgid "Icon"
 msgstr "Biểu tượng"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__activity_exception_icon
 #: model:ir.model.fields,help:product.field_product_product__activity_exception_icon
 #: model:ir.model.fields,help:product.field_product_template__activity_exception_icon
 msgid "Icon to indicate an exception activity."
 msgstr "Biểu tượng cho thấy một hoạt động ngoại lệ."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__message_needaction
 #: model:ir.model.fields,help:product.field_product_product__message_needaction
 #: model:ir.model.fields,help:product.field_product_template__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Nếu chọn, bạn cần chú ý tới các tin nhắn mới."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__message_has_error
 #: model:ir.model.fields,help:product.field_product_product__message_has_error
 #: model:ir.model.fields,help:product.field_product_template__message_has_error
 msgid "If checked, some messages have a delivery error."
@@ -1553,6 +1302,7 @@ msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__active
+#: model:ir.model.fields,help:product.field_product_pricelist_item__active
 msgid ""
 "If unchecked, it will allow you to hide the pricelist without removing it."
 msgstr "Nếu bỏ chọn, bạn sẽ được phép ẩn bảng giá mà không cần xóa."
@@ -1565,10 +1315,8 @@ msgid ""
 msgstr "Nếu bỏ chọn, bạn sẽ được phép ẩn sản phẩm mà không cần xóa."
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_attribute_value__image
 #: model:ir.model.fields,field_description:product.field_product_product__image_1920
 #: model:ir.model.fields,field_description:product.field_product_template__image_1920
-#: model:ir.model.fields,field_description:product.field_product_template_attribute_value__image
 msgid "Image"
 msgstr "Hình ảnh"
 
@@ -1597,26 +1345,6 @@ msgid "Image 512"
 msgstr "Hình ảnh 512"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__image_height
-msgid "Image Height"
-msgstr "Chiều cao ảnh"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__image_src
-msgid "Image Src"
-msgstr "Nguồn ảnh"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__image_width
-msgid "Image Width"
-msgstr "Chiều rộng ảnh"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_kanban
-msgid "Image is a link"
-msgstr "Hình ảnh là một liên kết"
-
-#. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist.py:0
 #, python-format
@@ -1638,14 +1366,23 @@ msgid "Import Template for Vendor Pricelists"
 msgstr "Nhập mẫu bảng giá nhà cung cấp"
 
 #. module: product
+#: model:ir.model.fields,help:product.field_product_product__standard_price
+#: model:ir.model.fields,help:product.field_product_template__standard_price
+msgid ""
+"In Standard Price & AVCO: value of the product (automatically computed in AVCO).\n"
+"        In FIFO: value of the next unit that will leave the stock (automatically computed).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
+"        Used to compute margins on sale orders."
+msgstr ""
+"Trong Giá tiêu chuẩn & AVCO: giá trị của sản phẩm (được tính tự động trong AVCO).\n"
+"        Trong FIFO: giá trị của đơn vị tiếp theo sẽ xuất kho (được tính toán tự động).\n"
+"        Được sử dụng để định giá sản phẩm khi không biết chi phí mua hàng (ví dụ: điều chỉnh tồn kho).\n"
+"        Được sử dụng để tính toán lợi nhuận trên các đơn bán hàng."
+
+#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_attribute_value_view_search
 msgid "Inactive"
 msgstr "Không hoạt động"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__index_content
-msgid "Indexed Content"
-msgstr "Nội dung được lập chỉ mục"
 
 #. module: product
 #: model:product.template,name:product.product_product_24_product_template
@@ -1666,7 +1403,7 @@ msgstr "Ghi chú nội bộ"
 #: model:ir.model.fields,field_description:product.field_product_product__default_code
 #: model:ir.model.fields,field_description:product.field_product_template__default_code
 msgid "Internal Reference"
-msgstr "Mã tham chiếu nội bộ"
+msgstr "Mã nội bộ"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__barcode
@@ -1679,7 +1416,6 @@ msgid "Inventory"
 msgstr "Tồn kho"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_is_follower
 #: model:ir.model.fields,field_description:product.field_product_product__message_is_follower
 #: model:ir.model.fields,field_description:product.field_product_template__message_is_follower
 msgid "Is Follower"
@@ -1708,11 +1444,6 @@ msgid "Is custom value"
 msgstr "Giá trị tùy chỉnh"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__public
-msgid "Is public document"
-msgstr "Là tài liệu công khai"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__0
 msgid "Kilograms"
 msgstr "Kg"
@@ -1733,11 +1464,29 @@ msgid "Large Meeting Table"
 msgstr "Bàn họp lớn"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_attribute____last_update
+#: model:ir.model.fields,field_description:product.field_product_attribute_custom_value____last_update
+#: model:ir.model.fields,field_description:product.field_product_attribute_value____last_update
+#: model:ir.model.fields,field_description:product.field_product_category____last_update
+#: model:ir.model.fields,field_description:product.field_product_label_layout____last_update
+#: model:ir.model.fields,field_description:product.field_product_packaging____last_update
+#: model:ir.model.fields,field_description:product.field_product_pricelist____last_update
+#: model:ir.model.fields,field_description:product.field_product_pricelist_item____last_update
+#: model:ir.model.fields,field_description:product.field_product_product____last_update
+#: model:ir.model.fields,field_description:product.field_product_supplierinfo____last_update
+#: model:ir.model.fields,field_description:product.field_product_tag____last_update
+#: model:ir.model.fields,field_description:product.field_product_template____last_update
+#: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion____last_update
+#: model:ir.model.fields,field_description:product.field_product_template_attribute_line____last_update
+#: model:ir.model.fields,field_description:product.field_product_template_attribute_value____last_update
+msgid "Last Modified on"
+msgstr "Chỉnh sửa lần cuối vào"
+
+#. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__write_uid
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__write_uid
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__write_uid
 #: model:ir.model.fields,field_description:product.field_product_category__write_uid
-#: model:ir.model.fields,field_description:product.field_product_document__write_uid
 #: model:ir.model.fields,field_description:product.field_product_label_layout__write_uid
 #: model:ir.model.fields,field_description:product.field_product_packaging__write_uid
 #: model:ir.model.fields,field_description:product.field_product_pricelist__write_uid
@@ -1757,11 +1506,11 @@ msgstr "Cập nhật lần cuối bởi"
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__write_date
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__write_date
 #: model:ir.model.fields,field_description:product.field_product_category__write_date
-#: model:ir.model.fields,field_description:product.field_product_document__write_date
 #: model:ir.model.fields,field_description:product.field_product_label_layout__write_date
 #: model:ir.model.fields,field_description:product.field_product_packaging__write_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist__write_date
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__write_date
+#: model:ir.model.fields,field_description:product.field_product_product__write_date
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__write_date
 #: model:ir.model.fields,field_description:product.field_product_tag__write_date
 #: model:ir.model.fields,field_description:product.field_product_template__write_date
@@ -1819,6 +1568,12 @@ msgstr ""
 "có? Hãy liên hệ để nhận báo giá. "
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_product__message_main_attachment_id
+#: model:ir.model.fields,field_description:product.field_product_template__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Tệp đính kèm chính"
+
+#. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__exclude_for
 msgid ""
 "Make this attribute value not compatible with other values of the product or"
@@ -1854,23 +1609,16 @@ msgid "Max. Price Margin"
 msgstr "Biên lợi nhuận tối đa"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_has_error
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error
 msgid "Message Delivery error"
 msgstr "Lỗi gửi tin nhắn"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_ids
 #: model:ir.model.fields,field_description:product.field_product_product__message_ids
 #: model:ir.model.fields,field_description:product.field_product_template__message_ids
 msgid "Messages"
 msgstr "Tin nhắn"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__mimetype
-msgid "Mime Type"
-msgstr "Loại Mime"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -1888,17 +1636,6 @@ msgid "Min. Quantity"
 msgstr "Số lượng tối thiểu"
 
 #. module: product
-#: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__multi
-msgid "Multi-checkbox (option)"
-msgstr "Nhiều ô (tùy chọn)"
-
-#. module: product
-#: model:ir.model.constraint,message:product.constraint_product_attribute_check_multi_checkbox_no_variant
-msgid ""
-"Multi-checkbox display type is not compatible with the creation of variants"
-msgstr "Kiểu hiển thị nhiều ô không tương thích với việc tạo các biến thể"
-
-#. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_pricelist_setting__basic
 msgid "Multiple prices per product"
 msgstr "Nhiều giá cho một sản phẩm"
@@ -1913,7 +1650,6 @@ msgstr ""
 "Quy tắc nâng cao: bật quy tắc giá nâng cao cho bảng giá."
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__my_activity_date_deadline
 #: model:ir.model.fields,field_description:product.field_product_product__my_activity_date_deadline
 #: model:ir.model.fields,field_description:product.field_product_template__my_activity_date_deadline
 msgid "My Activity Deadline"
@@ -1922,10 +1658,8 @@ msgstr "Hạn chót hoạt động của tôi"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_custom_value__name
 #: model:ir.model.fields,field_description:product.field_product_category__name
-#: model:ir.model.fields,field_description:product.field_product_document__name
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__name
 #: model:ir.model.fields,field_description:product.field_product_product__name
-#: model:ir.model.fields,field_description:product.field_product_tag__name
 #: model:ir.model.fields,field_description:product.field_product_template__name
 msgid "Name"
 msgstr "Tên"
@@ -1936,28 +1670,24 @@ msgid "Never (option)"
 msgstr "Không bao giờ (tùy chọn)"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_calendar_event_id
 #: model:ir.model.fields,field_description:product.field_product_product__activity_calendar_event_id
 #: model:ir.model.fields,field_description:product.field_product_template__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
 msgstr "Sự kiện theo lịch cho hoạt động tiếp theo"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_date_deadline
 #: model:ir.model.fields,field_description:product.field_product_product__activity_date_deadline
 #: model:ir.model.fields,field_description:product.field_product_template__activity_date_deadline
 msgid "Next Activity Deadline"
 msgstr "Hạn chót cho hoạt động tiếp theo"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_summary
 #: model:ir.model.fields,field_description:product.field_product_product__activity_summary
 #: model:ir.model.fields,field_description:product.field_product_template__activity_summary
 msgid "Next Activity Summary"
 msgstr "Tóm tắt hoạt động tiếp theo"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_type_id
 #: model:ir.model.fields,field_description:product.field_product_product__activity_type_id
 #: model:ir.model.fields,field_description:product.field_product_template__activity_type_id
 msgid "Next Activity Type"
@@ -1973,13 +1703,6 @@ msgid ""
 msgstr ""
 "Không có sản phẩm nào để in, nếu sản phẩm được lưu trữ, vui lòng hủy lưu trữ"
 " trước khi in nhãn."
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
-#, python-format
-msgid "No products could be found."
-msgstr "Không tìm thấy sản phẩm nào."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
@@ -2005,28 +1728,24 @@ msgid "Number Related Products"
 msgstr "Số sản phẩm liên quan"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_needaction_counter
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Số lượng hành động"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__message_has_error_counter
 #: model:ir.model.fields,field_description:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,field_description:product.field_product_template__message_has_error_counter
 msgid "Number of errors"
-msgstr "Số lượng lỗi"
+msgstr "Số lỗi"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__message_needaction_counter
 #: model:ir.model.fields,help:product.field_product_product__message_needaction_counter
 #: model:ir.model.fields,help:product.field_product_template__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "Số tin nhắn cần xử lý"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__message_has_error_counter
 #: model:ir.model.fields,help:product.field_product_product__message_has_error_counter
 #: model:ir.model.fields,help:product.field_product_template__message_has_error_counter
 msgid "Number of messages with delivery error"
@@ -2060,41 +1779,30 @@ msgstr "Đèn văn phòng"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the"
-" attribute %(attribute)s because they do not match."
+"On the product %s you cannot associate the value %s with the attribute %s "
+"because they do not match."
 msgstr ""
-"Trên sản phẩm %(product)s bạn không thể liên kết giá trị %(value)s với thuộc"
-" tính %(attribute)s bởi vì chúng không khớp."
+"Trên sản phẩm %s bạn không thể liên kết giá trị %s với thuộc tính %s bởi vì "
+"chúng không khớp."
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
-"On the product %(product)s you cannot transform the attribute "
-"%(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %s you cannot transform the attribute %s into the attribute "
+"%s."
 msgstr ""
-"Trên sản phẩm %(product)s bạn không thể chuyển đổi thuộc tính "
-"%(attribute_src)s thành thuộc tính %(attribute_dest)s."
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__original_id
-msgid "Original (unoptimized, unresized) attachment"
-msgstr "Tệp đính kèm gốc (chưa tối ưu hóa, chưa chỉnh lại kích thước)"
+"Trên sản phẩm %s bạn không thể chuyển đổi thuộc tính %s thành thuộc tính %s."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__base_pricelist_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__base__pricelist
 msgid "Other Pricelist"
 msgstr "Bảng giá khác"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "Package Type A"
-msgstr "Kiện hàng loại A"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
@@ -2131,25 +1839,10 @@ msgstr "Viên "
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
+#: code:addons/product/static/src/js/product_pricelist_report.js:0
 #, python-format
-msgid "Please enter a positive whole number."
-msgstr "Vui lòng nhập một số nguyên dương."
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_document.py:0
-#, python-format
-msgid ""
-"Please enter a valid URL.\n"
-"Example: https://www.odoo.com\n"
-"\n"
-"Invalid URL: %s"
-msgstr ""
-"Vui lòng nhập một URL hợp lệ.\n"
-"Ví dụ: https://www.odoo.com\n"
-"\n"
-"URL không hợp lệ: %s"
+msgid "Please enter a positive whole number"
+msgstr "Vui lòng nhập một số nguyên dương"
 
 #. module: product
 #. odoo-python
@@ -2240,18 +1933,14 @@ msgid "Price:"
 msgstr "Giá:"
 
 #. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 #: model:ir.actions.report,name:product.action_report_pricelist
 #: model:ir.model,name:product.model_product_pricelist
-#: model:ir.model.fields,field_description:product.field_product_label_layout__pricelist_id
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__pricelist_id
 #: model:ir.model.fields,field_description:product.field_res_partner__property_product_pricelist
 #: model:ir.model.fields,field_description:product.field_res_users__property_product_pricelist
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_view_search
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
-#, python-format
 msgid "Pricelist"
 msgstr "Bảng giá"
 
@@ -2267,7 +1956,7 @@ msgstr "Tên bảng giá"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
+#: code:addons/product/static/src/js/product_pricelist_report.js:0
 #: model:ir.model,name:product.model_report_product_report_pricelist
 #, python-format
 msgid "Pricelist Report"
@@ -2287,7 +1976,10 @@ msgid "Pricelist Rules"
 msgstr "Quy tắc bảng giá"
 
 #. module: product
+#. odoo-javascript
+#: code:addons/product/static/src/xml/pricelist_report.xml:0
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
+#, python-format
 msgid "Pricelist:"
 msgstr "Bảng giá:"
 
@@ -2315,8 +2007,7 @@ msgstr "Định giá"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: code:addons/product/static/src/js/product_pricelist_report.js:0
 #, python-format
 msgid "Print"
 msgstr "In"
@@ -2347,8 +2038,6 @@ msgstr "In nhãn"
 #: model_terms:ir.ui.view,arch_db:product.product_template_kanban_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_kanban_catalog
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product"
 msgstr "Sản phẩm"
 
@@ -2381,11 +2070,6 @@ msgid "Product Attributes"
 msgstr "Thuộc tính sản phẩm"
 
 #. module: product
-#: model:ir.model,name:product.model_product_catalog_mixin
-msgid "Product Catalog Mixin"
-msgstr "Mixin danh mục sản phẩm"
-
-#. module: product
 #: model:ir.actions.act_window,name:product.product_category_action_form
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_category_search_view
@@ -2401,64 +2085,20 @@ msgstr "Danh mục sản phẩm"
 #: model_terms:ir.ui.view,arch_db:product.product_category_list_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product Category"
 msgstr "Danh mục sản phẩm"
 
 #. module: product
-#: model:ir.model,name:product.model_product_document
-msgid "Product Document"
-msgstr "Tài liệu sản phẩm"
-
-#. module: product
+#: model:ir.actions.report,name:product.report_product_template_label
 #: model:ir.actions.report,name:product.report_product_template_label_dymo
 msgid "Product Label (PDF)"
 msgstr "Nhãn sản phẩm (PDF)"
 
 #. module: product
-#: model:ir.actions.report,name:product.report_product_template_label_2x7
-msgid "Product Label 2x7 (PDF)"
-msgstr "Nhãn sản phẩm 2x7 (PDF)"
-
-#. module: product
-#: model:ir.actions.report,name:product.report_product_template_label_4x12
-msgid "Product Label 4x12 (PDF)"
-msgstr "Nhãn sản phẩm 4x12 (PDF)"
-
-#. module: product
-#: model:ir.actions.report,name:product.report_product_template_label_4x12_noprice
-msgid "Product Label 4x12 No Price (PDF)"
-msgstr "Nhãn sản phẩm 4x12 Không có giá (PDF)"
-
-#. module: product
-#: model:ir.actions.report,name:product.report_product_template_label_4x7
-msgid "Product Label 4x7 (PDF)"
-msgstr "Nhãn sản phẩm 4x7 (PDF)"
-
-#. module: product
+#: model:ir.model,name:product.model_report_product_report_producttemplatelabel
 #: model:ir.model,name:product.model_report_product_report_producttemplatelabel_dymo
 msgid "Product Label Report"
 msgstr "Báo cáo nhãn sản phẩm"
-
-#. module: product
-#: model:ir.model,name:product.model_report_product_report_producttemplatelabel2x7
-msgid "Product Label Report 2x7"
-msgstr "Báo cáo nhãn sản phẩm 2x7"
-
-#. module: product
-#: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x12
-msgid "Product Label Report 4x12"
-msgstr "Báo cáo nhãn sản phẩm 4x12"
-
-#. module: product
-#: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x12noprice
-msgid "Product Label Report 4x12 No Price"
-msgstr "Báo cáo nhãn sản phẩm 4x12 Không có giá"
-
-#. module: product
-#: model:ir.model,name:product.model_report_product_report_producttemplatelabel4x7
-msgid "Product Label Report 4x7"
-msgstr "Báo cáo nhãn sản phẩm 4x7"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -2493,9 +2133,9 @@ msgid "Product Packagings"
 msgstr "Bao bì sản phẩm"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_category__product_properties_definition
-msgid "Product Properties"
-msgstr "Thuộc tính sản phẩm"
+#: model:ir.model.fields,field_description:product.field_product_tag__product_product_ids
+msgid "Product Product"
+msgstr "Sản phẩm"
 
 #. module: product
 #: model:ir.model,name:product.model_product_tag
@@ -2505,6 +2145,8 @@ msgstr "Thẻ sản phẩm"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_tag_action
+#: model:ir.model.fields,field_description:product.field_product_product__product_tag_ids
+#: model:ir.model.fields,field_description:product.field_product_template__product_tag_ids
 #: model_terms:ir.ui.view,arch_db:product.product_tag_tree_view
 msgid "Product Tags"
 msgstr "Thẻ sản phẩm"
@@ -2512,11 +2154,11 @@ msgstr "Thẻ sản phẩm"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_tmpl_id
+#: model:ir.model.fields,field_description:product.field_product_tag__product_template_ids
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_exclusion__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__product_tmpl_id
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__product_tmpl_id
 #: model_terms:ir.ui.view,arch_db:product.product_search_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product Template"
 msgstr "Mẫu sản phẩm"
 
@@ -2536,17 +2178,9 @@ msgid "Product Template Attribute Value"
 msgstr "Giá trị thuộc tính mẫu sản phẩm"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__product_tag_ids
-#: model:ir.model.fields,field_description:product.field_product_template__product_tag_ids
+#: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Product Template Tags"
 msgstr "Thẻ mẫu sản phẩm"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_tag__product_template_ids
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_view_tree_tag
-msgid "Product Templates"
-msgstr "Mẫu sản phẩm"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_tmpl_ids
@@ -2563,7 +2197,6 @@ msgstr "Chú giải sản phẩm"
 #: model:ir.model.fields,field_description:product.field_product_product__detailed_type
 #: model:ir.model.fields,field_description:product.field_product_template__detailed_type
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product Type"
 msgstr "Loại sản phẩm"
 
@@ -2577,15 +2210,13 @@ msgstr "Đơn vị tính sản phẩm"
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__product_id
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_id
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__0_product_variant
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
 #: model_terms:ir.ui.view,arch_db:product.product_normal_form_view
-#: model_terms:ir.ui.view,arch_db:product.product_tag_tree_view
 msgid "Product Variant"
 msgstr "Biến thể sản phẩm"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid "Product Variant Values"
 msgstr "Giá trị biến thể sản phẩm"
@@ -2594,11 +2225,8 @@ msgstr "Giá trị biến thể sản phẩm"
 #: model:ir.actions.act_window,name:product.product_normal_action
 #: model:ir.actions.act_window,name:product.product_normal_action_sell
 #: model:ir.actions.act_window,name:product.product_variant_action
-#: model:ir.model.fields,field_description:product.field_product_tag__product_product_ids
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
 #: model_terms:ir.ui.view,arch_db:product.product_product_view_activity
-#: model_terms:ir.ui.view,arch_db:product.product_product_view_tree_tag
-#: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "Product Variants"
 msgstr "Biến thể sản phẩm"
 
@@ -2608,7 +2236,7 @@ msgstr "Biến thể sản phẩm"
 #, python-format
 msgid "Product model not defined, Please contact your administrator."
 msgstr ""
-"Mô hình sản phẩm chưa được xác định. Vui lòng liên hệ với quản trị viên của "
+"Model sản phẩm chưa được xác định. Vui lòng liên hệ với quản trị viên của "
 "bạn."
 
 #. module: product
@@ -2619,8 +2247,6 @@ msgid "Product: %s"
 msgstr "Sản phẩm: %s"
 
 #. module: product
-#. odoo-python
-#: code:addons/product/models/product_catalog_mixin.py:0
 #: model:ir.actions.act_window,name:product.product_template_action
 #: model:ir.actions.act_window,name:product.product_template_action_all
 #: model:ir.model.fields,field_description:product.field_product_product__product_variant_ids
@@ -2628,9 +2254,7 @@ msgstr "Sản phẩm: %s"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_template_view_activity
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 #: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-#, python-format
 msgid "Products"
 msgstr "Sản phẩm"
 
@@ -2670,10 +2294,9 @@ msgstr ""
 "thiết"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__product_properties
-#: model:ir.model.fields,field_description:product.field_product_template__product_properties
-msgid "Properties"
-msgstr "Thuộc tính"
+#: model:product.pricelist,name:product.list0
+msgid "Public Pricelist"
+msgstr "Bảng giá niêm yết"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -2694,15 +2317,10 @@ msgstr "ĐVT mua hàng"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: code:addons/product/static/src/xml/pricelist_report.xml:0
 #, python-format
-msgid "Quantities"
-msgstr "Số lượng"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "Quantities (Price)"
-msgstr "Số lượng (Giá)"
+msgid "Quantities:"
+msgstr "Số lượng:"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__custom_quantity
@@ -2712,10 +2330,10 @@ msgstr "Số lượng"
 
 #. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
+#: code:addons/product/static/src/js/product_pricelist_report.js:0
 #, python-format
-msgid "Quantity already present (%s)."
-msgstr "Số lượng đã có (%s)."
+msgid "Quantity already present (%d)."
+msgstr "Số lượng đã có (%d)."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_packaging__qty
@@ -2755,46 +2373,13 @@ msgid "Related Variants"
 msgstr "Biến thể liên quan"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__ir_attachment_id
-msgid "Related attachment"
-msgstr "Tệp đính kèm liên quan"
-
-#. module: product
 #. odoo-javascript
-#: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
-#, python-format
-msgid "Remove"
-msgstr "Xóa"
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
+#: code:addons/product/static/src/xml/pricelist_report.xml:0
 #, python-format
 msgid "Remove quantity"
 msgstr "Loại bỏ số lượng"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__res_field
-msgid "Resource Field"
-msgstr "Trường nguồn lực"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__res_id
-msgid "Resource ID"
-msgstr "ID nguồn lực"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__res_model
-msgid "Resource Model"
-msgstr "Mô hình nguồn lực"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__res_name
-msgid "Resource Name"
-msgstr "Tên nguồn lực"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_pricelist__activity_user_id
 #: model:ir.model.fields,field_description:product.field_product_product__activity_user_id
 #: model:ir.model.fields,field_description:product.field_product_template__activity_user_id
 msgid "Responsible User"
@@ -2865,7 +2450,6 @@ msgstr "Chọn"
 #: model:ir.model.fields,field_description:product.field_product_product__sequence
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__sequence
 #: model:ir.model.fields,field_description:product.field_product_template__sequence
-#: model:ir.model.fields,field_description:product.field_product_template_attribute_line__sequence
 msgid "Sequence"
 msgstr "Trình tự"
 
@@ -2877,7 +2461,6 @@ msgstr "Dịch vụ"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
-#: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Services"
 msgstr "Dịch vụ"
 
@@ -2895,8 +2478,7 @@ msgstr ""
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Show all records which has next action date is before today"
-msgstr ""
-"Hiển thị tất cả tập dữ liệu có ngày xử lý tiếp theo trước ngày hôm nay"
+msgstr "Hiển thị tất cả dữ liệu có ngày xử lý tiếp theo trước ngày hôm nay"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist__discount_policy__without_discount
@@ -2970,7 +2552,6 @@ msgstr ""
 "Giá trị được hiển thị phụ thuộc vào múi giờ được cài đặt trong tùy chọn của bạn."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__activity_state
 #: model:ir.model.fields,help:product.field_product_product__activity_state
 #: model:ir.model.fields,help:product.field_product_template__activity_state
 msgid ""
@@ -2995,18 +2576,18 @@ msgid "Storage Box"
 msgstr "Hộp lưu trữ"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__store_fname
-msgid "Stored Filename"
-msgstr "Tên tệp được lưu trữ"
-
-#. module: product
 #: model:ir.model,name:product.model_product_supplierinfo
 msgid "Supplier Pricelist"
 msgstr "Bảng giá nhà cung cấp"
 
 #. module: product
+#: model:ir.model.fields,field_description:product.field_product_tag__name
+msgid "Tag Name"
+msgstr "Tên thẻ"
+
+#. module: product
 #: model:ir.model.constraint,message:product.constraint_product_tag_name_uniq
-msgid "Tag name already exists!"
+msgid "Tag name already exists !"
 msgstr "Tên thẻ đã tồn tại!"
 
 #. module: product
@@ -3036,14 +2617,10 @@ msgstr "Loại của sản phẩm này không khớp với Loại chi tiết"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
-msgid ""
-"The attribute %(attribute)s must have at least one value for the product "
-"%(product)s."
-msgstr ""
-"Thuộc tính %(attribute)s phải có ít nhất một giá trị cho sản phẩm "
-"%(product)s."
+msgid "The attribute %s must have at least one value for the product %s."
+msgstr "Thuộc tính %s phải có ít nhất một giá trị cho sản phẩm %s."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -3109,15 +2686,15 @@ msgstr "Số lượng sản phẩm trong danh mục này (Không bao gồm danh 
 #: code:addons/product/models/product_template.py:0
 #, python-format
 msgid ""
-"The number of variants to generate is above allowed limit. You should either"
-" not generate variants for each combination or generate them on demand from "
-"the sales order. To do so, open the form view of attributes and change the "
-"mode of *Create Variants*."
+"The number of variants to generate is too high. You should either not "
+"generate variants for each combination or generate them on demand from the "
+"sales order. To do so, open the form view of attributes and change the mode "
+"of *Create Variants*."
 msgstr ""
-"Số lượng biến thể cần tạo vượt quá giới hạn cho phép. Bạn không nên tạo các "
-"biến thể cho mỗi kết hợp hay tạo chúng theo yêu cầu từ đơn bán hàng. Để thực"
-" hiện việc này, hãy mở chế độ xem biểu mẫu của các thuộc tính và thay đổi "
-"chế độ *Tạo biến thể*."
+"Số lượng biến thể cần tạo quá nhiều. Bạn không nên tạo các biến thể cho mỗi "
+"kết hợp hoặc tạo chúng theo yêu cầu từ đơn bán hàng. Để thực hiện việc này, "
+"hãy mở chế độ xem biểu mẫu của các thuộc tính và thay đổi chế độ *Tạo biến "
+"thể*."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -3160,14 +2737,10 @@ msgstr ""
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
-msgid ""
-"The value %(value)s is not defined for the attribute %(attribute)s on the "
-"product %(product)s."
-msgstr ""
-"Giá trị %(value)s không được xác định cho thuộc tính %(attribute)s của sản "
-"phẩm %(product)s."
+msgid "The value %s is not defined for the attribute %s on the product %s."
+msgstr "Giá trị %s không được xác định cho thuộc tính %s của sản phẩm %s."
 
 #. module: product
 #. odoo-python
@@ -3275,23 +2848,16 @@ msgid "Today Activities"
 msgstr "Hoạt động hôm nay"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__type
 #: model:ir.model.fields,field_description:product.field_product_product__type
 #: model:ir.model.fields,field_description:product.field_product_template__type
 msgid "Type"
 msgstr "Loại"
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_pricelist__activity_exception_decoration
 #: model:ir.model.fields,help:product.field_product_product__activity_exception_decoration
 #: model:ir.model.fields,help:product.field_product_template__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Loại hoạt động ngoại lệ trong tập dữ liệu."
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
-msgid "UOM"
-msgstr "ĐVT"
+msgstr "Loại hoạt động ngoại lệ trên tập dữ liệu."
 
 #. module: product
 #. odoo-python
@@ -3299,12 +2865,6 @@ msgstr "ĐVT"
 #, python-format
 msgid "Unable to find report template for %s format"
 msgstr "Không thể tìm thấy mẫu báo cáo cho %s định dạng"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
-#: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
-msgid "Unit"
-msgstr "Đơn vị"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -3326,36 +2886,15 @@ msgid "Unit of Measure Name"
 msgstr "Tên đơn vị tính"
 
 #. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
-#, python-format
-msgid "Unit price:"
-msgstr "Đơn giá:"
-
-#. module: product
-#: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
-msgid "Units"
-msgstr "Đơn vị"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__group_uom
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Units of Measure"
 msgstr "Đơn vị tính"
 
 #. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/js/product_document_kanban/product_document_kanban_controller.xml:0
-#, python-format
-msgid "Upload"
-msgstr "Tải lên"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_template.py:0
-#, python-format
-msgid "Upload files to your product"
-msgstr "Tải tệp lên sản phẩm của bạn"
+#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
+msgid "UoM"
+msgstr "ĐVT"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -3363,32 +2902,9 @@ msgid "Upsell & Cross-Sell"
 msgstr "Bán thêm & bán chéo"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__url
-msgid "Url"
-msgstr "Url"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/product_template.py:0
-#, python-format
-msgid ""
-"Use this feature to store any files you would like to share with your "
-"customers"
-msgstr ""
-"Sử dụng tính năng này để lưu lại bất kỳ tệp nào bạn muốn chia sẻ với khách "
-"hàng của mình"
-
-#. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_used_on_products
 msgid "Used on Products"
 msgstr "Dùng cho sản phẩm"
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
-#, python-format
-msgid "Username"
-msgstr "Tên đăng nhập"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__valid_product_template_attribute_line_ids
@@ -3417,18 +2933,6 @@ msgstr "Số giá trị"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__price_extra
 msgid "Value Price Extra"
 msgstr "Giá trị giá bổ sung"
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_product__standard_price
-#: model:ir.model.fields,help:product.field_product_template__standard_price
-msgid ""
-"Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
-"        Used to compute margins on sale orders."
-msgstr ""
-"Giá trị của sản phẩm (được tính tự động trong AVCO).\n"
-"        Được sử dụng để định giá sản phẩm khi không biết chi phí mua hàng (ví dụ: điều chỉnh tồn kho).\n"
-"        Được sử dụng để tính toán lợi nhuận trên các đơn bán hàng."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__value_ids
@@ -3525,7 +3029,7 @@ msgstr "Nhà cung cấp"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Vendor Bills"
-msgstr "Hoá đơn mua hàng"
+msgstr "Hoá đơn nhà cung cấp"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -3536,7 +3040,7 @@ msgstr "Thông tin nhà cung cấp"
 #. module: product
 #: model:ir.actions.act_window,name:product.product_supplierinfo_type_action
 msgid "Vendor Pricelists"
-msgstr "Bảng giá của nhà cung cấp"
+msgstr "Bảng giá nhà cung cấp"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__product_code
@@ -3561,14 +3065,8 @@ msgstr "Dàn dựng nhà ảo"
 
 #. module: product
 #: model:product.template,name:product.product_product_1_product_template
-#: model_terms:ir.ui.view,arch_db:product.report_pricelist_page
 msgid "Virtual Interior Design"
 msgstr "Thiết kế nội thất ảo"
-
-#. module: product
-#: model:ir.model.fields,field_description:product.field_product_document__voice_ids
-msgid "Voice"
-msgstr "Giọng nói"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__volume
@@ -3635,22 +3133,6 @@ msgid "White"
 msgstr "Trắng"
 
 #. module: product
-#: model:ir.model.fields,field_description:product.field_product_product__write_date
-msgid "Write Date"
-msgstr "Ghi ngày"
-
-#. module: product
-#. odoo-python
-#: code:addons/product/models/res_config_settings.py:0
-#, python-format
-msgid ""
-"You are deactivating the pricelist feature. Every active pricelist will be "
-"archived."
-msgstr ""
-"Bạn đang tắt tính năng bảng giá. Mọi bảng giá đang hoạt động sẽ được lưu "
-"trữ."
-
-#. module: product
 #. odoo-python
 #: code:addons/product/models/decimal_precision.py:0
 #, python-format
@@ -3681,31 +3163,6 @@ msgstr ""
 "báo giá mới."
 
 #. module: product
-#: model:ir.model.fields,help:product.field_product_document__type
-msgid ""
-"You can either upload a file from your computer or copy/paste an internet "
-"link to your file."
-msgstr ""
-"Bạn có thể tải tệp lên từ máy tính hoặc sao chép/dán liên kết internet vào "
-"tệp của bạn."
-
-#. module: product
-#: model:ir.model.fields,help:product.field_product_attribute_value__image
-#: model:ir.model.fields,help:product.field_product_template_attribute_value__image
-msgid ""
-"You can upload an image that will be used as the color of the attribute "
-"value."
-msgstr ""
-"Bạn có thể tải lên hình ảnh sẽ được sử dụng làm màu của giá trị thuộc tính."
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/order_line/order_line.xml:0
-#, python-format
-msgid "You can't edit this product in the catalog."
-msgstr "Bạn không thể chỉnh sửa sản phẩm này trong danh mục."
-
-#. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 #, python-format
@@ -3719,44 +3176,36 @@ msgstr ""
 #: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
-"%(products)s"
+"You cannot change the Variants Creation Mode of the attribute %s because it is used on the following products:\n"
+"%s"
 msgstr ""
-"Bạn không thể thay đổi Chế độ tạo biến thể của thuộc tính %(attribute)s bởi vì nó được sử dụng cho các sản phẩm sau:\n"
-"%(products)s"
+"Bạn không thể thay đổi Chế độ tạo biến thể của thuộc tính %s bởi vì nó được sử dụng cho các sản phẩm sau:\n"
+"%s"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on"
-" the following products: %(products)s"
+"You cannot change the attribute of the value %s because it is used on the "
+"following products:%s"
 msgstr ""
-"Bạn không thể thay đổi thuộc tính của giá trị %(value)s bởi vì nó được sử "
-"dụng cho các sản phẩm sau: %(products)s"
+"Bạn không thể thay đổi thuộc tính của giá trị %s bởi vì nó được sử dụng cho "
+"các sản phẩm sau:%s"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
-msgid ""
-"You cannot change the product of the value %(value)s set on product "
-"%(product)s."
-msgstr ""
-"Bạn không thể thay đổi sản phẩm của giá trị %(value)s được cài trên sản phẩm"
-" %(product)s."
+msgid "You cannot change the product of the value %s set on product %s."
+msgstr "Bạn không thể thay đổi giá trị sản phẩm %s cài trên sản phẩm%s."
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
-msgid ""
-"You cannot change the value of the value %(value)s set on product "
-"%(product)s."
-msgstr ""
-"Bạn không thể thay đổi giá trị của giá trị %(value)s được cài trên sản phẩm "
-"%(product)s."
+msgid "You cannot change the value of the value %s set on product %s."
+msgstr "Bạn không thể thay đổi giá trị của giá trị %s cài trên sản phẩm %s."
 
 #. module: product
 #. odoo-python
@@ -3794,23 +3243,23 @@ msgstr "Bạn không thể xóa danh mục sản phẩm %s."
 #: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
-"%(products)s"
+"You cannot delete the attribute %s because it is used on the following products:\n"
+"%s"
 msgstr ""
-"Bạn không thể xóa thuộc tính %(attribute)s bởi vì nó được sử dụng cho các sản phẩm sau:\n"
-"%(products)s"
+"Bạn không thể xóa thuộc tính %s bởi vì nó được sử dụng cho các sản phẩm sau:\n"
+"%s"
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following products:\n"
-"%(products)s\n"
+"You cannot delete the value %s because it is used on the following products:\n"
+"%s\n"
 " If the value has been associated to a product in the past, you will not be able to delete it."
 msgstr ""
-"Bạn không thể xoá giá trị %(value)s vì nó đang được sử dụng cho các sản phẩm sau:\n"
-"%(products)s\n"
+"Bạn không thể xoá giá trị %s vì nó đang được sử dụng cho các sản phẩm sau:\n"
+"%s\n"
 " Nếu trước đây giá trị đã được liên kết với sản phẩm, bạn sẽ không thể xoá giá trị đó."
 
 #. module: product
@@ -3839,7 +3288,7 @@ msgstr ""
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid "You cannot delete value %s because it was used in some products."
 msgstr ""
@@ -3847,19 +3296,28 @@ msgstr ""
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_line.py:0
+#: code:addons/product/models/product_pricelist_item.py:0
 #, python-format
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s"
-" to the product %(product_dest)s."
+"You cannot disable a pricelist rule, please delete it or archive its "
+"pricelist instead."
 msgstr ""
-"Bạn không thể chuyển thuộc tính %(attribute)s từ sản phẩm %(product_src)s "
-"sang sản phẩm %(product_dest)s."
+"Bạn không thể tắt quy tắc bảng giá, thay vào đó, vui lòng xóa hoặc lưu trữ "
+"bảng giá."
 
 #. module: product
 #. odoo-python
-#: code:addons/product/models/product_template_attribute_value.py:0
-#: code:addons/product/models/product_template_attribute_value.py:0
+#: code:addons/product/models/product_attribute.py:0
+#, python-format
+msgid ""
+"You cannot move the attribute %s from the product %s to the product %s."
+msgstr ""
+"Bạn không thể di chuyển thuộc tính %s từ sản phẩm %s sang sản phẩm %s."
+
+#. module: product
+#. odoo-python
+#: code:addons/product/models/product_attribute.py:0
+#: code:addons/product/models/product_attribute.py:0
 #, python-format
 msgid ""
 "You cannot update related variants from the values. Please update related "
@@ -3869,25 +3327,14 @@ msgstr ""
 "trị liên quan từ biến thể."
 
 #. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
-#, python-format
-msgid ""
-"You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or a service."
-msgstr ""
-"Bạn phải chỉ định một sản phẩm mỗi khi muốn bán hoặc mua hàng,\n"
-"                 dù đó là sản phẩm lưu kho, sản phẩm tiêu thụ hay dịch vụ."
-
-#. module: product
 #: model_terms:ir.actions.act_window,help:product.product_normal_action
 #: model_terms:ir.actions.act_window,help:product.product_template_action
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service."
 msgstr ""
-"Bạn phải chỉ định một sản phẩm mỗi khi muốn bán hoặc mua hàng.\n"
-"                 dù đó là một sản phẩm lưu kho, sản phẩm tiêu thụ hay dịch vụ."
+"Bạn phải xác định một sản phẩm mỗi khi muốn bán hoặc mua hàng,\n"
+"                liệu đó là một sản phẩm lưu kho, sản phẩm tiêu thụ hay dịch vụ."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_variant_action
@@ -3914,13 +3361,6 @@ msgstr ""
 "                sản phẩm tiêu thụ hay dịch vụ bạn cung cấp cho khách hàng.\n"
 "                Biểu mẫu sản phẩm chứa thông tin để đơn giản hóa quy trình bán hàng:\n"
 "                giá cả, ghi chú trong báo giá, dữ liệu kế toán, phương thức cung ứng,..."
-
-#. module: product
-#. odoo-javascript
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
-#, python-format
-msgid "You must leave at least one quantity."
-msgstr "Bạn phải để lại số lượng ít nhất là một."
 
 #. module: product
 #. odoo-python
@@ -3956,11 +3396,6 @@ msgid "e.g. USD Retailers"
 msgstr "VD: USD Retailers"
 
 #. module: product
-#: model_terms:ir.ui.view,arch_db:product.product_document_form
-msgid "on"
-msgstr "trên"
-
-#. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "per"
 msgstr "mỗi"
@@ -3986,4 +3421,4 @@ msgstr "mẫu sản phẩm."
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
 msgid "to"
-msgstr "đến"
+msgstr "tới"

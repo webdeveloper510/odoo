@@ -6,15 +6,13 @@ from unittest.mock import patch
 from lxml import objectify
 
 from odoo.fields import Command
-from odoo.osv.expression import AND
+from odoo.tests.common import TransactionCase
 from odoo.tools.misc import hmac as hmac_tool
-
-from odoo.addons.base.tests.common import BaseCommon
 
 _logger = logging.getLogger(__name__)
 
 
-class PaymentCommon(BaseCommon):
+class PaymentCommon(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
@@ -79,24 +77,11 @@ class PaymentCommon(BaseCommon):
             'code': 'none',
             'state': 'test',
             'is_published': True,
-            'payment_method_ids': [Command.set([cls.env.ref('payment.payment_method_unknown').id])],
             'allow_tokenization': True,
             'redirect_form_view_id': redirect_form.id,
-            'available_currency_ids': [Command.set(
-                (cls.currency_euro + cls.currency_usd + cls.env.company.currency_id).ids
-            )],
-        })
-        # Activate pm
-        cls.env.ref('payment.payment_method_unknown').write({
-            'active': True,
-            'support_tokenization': True,
         })
 
         cls.provider = cls.dummy_provider
-        cls.payment_methods = cls.provider.payment_method_ids
-        cls.payment_method = cls.payment_methods[:1]
-        cls.payment_method_id = cls.payment_method.id
-        cls.payment_method_code = cls.payment_method.code
         cls.amount = 1111.11
         cls.company = cls.env.company
         cls.company_id = cls.company.id
@@ -144,16 +129,14 @@ class PaymentCommon(BaseCommon):
         """
         company = company or cls.env.company
         update_values = update_values or {}
-        provider_domain = cls._get_provider_domain(code)
 
         provider = cls.env['payment.provider'].sudo().search(
-            AND([provider_domain, [('company_id', '=', company.id)]]), limit=1
+            [('code', '=', code), ('company_id', '=', company.id)], limit=1
         )
         if not provider:
-            if code != 'none':
-                base_provider = cls.env['payment.provider'].sudo().search(provider_domain, limit=1)
-            else:
-                base_provider = cls.provider
+            base_provider = cls.env['payment.provider'].sudo().search(
+                [('code', '=', code)], limit=1
+            )
             if not base_provider:
                 _logger.error("no payment.provider found for code %s", code)
                 return cls.env['payment.provider']
@@ -164,13 +147,8 @@ class PaymentCommon(BaseCommon):
         provider.write(update_values)
         return provider
 
-    @classmethod
-    def _get_provider_domain(cls, code):
-        return [('code', '=', code)]
-
     def _create_transaction(self, flow, sudo=True, **values):
         default_values = {
-            'payment_method_id': self.payment_method_id,
             'amount': self.amount,
             'currency_id': self.currency.id,
             'provider_id': self.provider.id,
@@ -182,9 +160,8 @@ class PaymentCommon(BaseCommon):
 
     def _create_token(self, sudo=True, **values):
         default_values = {
-            'provider_id': self.provider.id,
-            'payment_method_id': self.payment_method_id,
             'payment_details': "1234",
+            'provider_id': self.provider.id,
             'partner_id': self.partner.id,
             'provider_ref': "provider Ref (TEST)",
             'active': True,

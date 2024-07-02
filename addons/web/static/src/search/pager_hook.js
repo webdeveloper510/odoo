@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { useEnv, useSubEnv, useState, onWillRender } from "@odoo/owl";
+import { useEnv, useChildSubEnv, useState, onWillRender } from "@odoo/owl";
 
 /**
  * @typedef PagerUpdateParams
@@ -25,7 +25,7 @@ export function usePager(getProps) {
     const env = useEnv();
     const pagerState = useState({});
 
-    useSubEnv({
+    useChildSubEnv({
         config: {
             ...env.config,
             pagerProps: pagerState,

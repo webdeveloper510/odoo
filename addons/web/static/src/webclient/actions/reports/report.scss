@@ -6,6 +6,7 @@ $o-default-report-secondary-color: rgb(0, 0, 0) !default;
 // It doesn't support CSS's rgba function
 // We re-define here the .bg-[theme-colors] (and text)
 // In order to define them as a css rgb function
+// The gray scales are done in bootstrap_review.scss
 $report-extended-theme-colors: map-merge(
   $utilities-colors,
   (
@@ -20,15 +21,6 @@ $report-extended-theme-colors: map-merge(
     }
     .bg-#{$color-name} {
         background-color: RGB($color-value) if($enable-important-utilities, !important, null);
-    }
-}
-// Do a similar operation than before for grays.
-@each $color-name, $color-value in $grays {
-    .text-#{$color-name} {
-        color: $color-value if($enable-important-utilities, !important, null);
-    }
-    .bg-#{$color-name} {
-        background-color: $color-value if($enable-important-utilities, !important, null);
     }
 }
 
@@ -171,13 +163,14 @@ ol {
 }
 
 /* Checklist */
-ul.o_checklist {
-    > li {
-        list-style: none;
-        position: relative;
-        margin-left: 20px;
-
-        &:not(.oe-nested):before {
+ul {
+    &.o_checklist {
+        > li {
+            list-style: none;
+            position: relative;
+            margin-left: 20px;
+        }
+        > li:not(.oe-nested):before {
             content: '';
             position: absolute;
             left: -20px;
@@ -188,7 +181,7 @@ ul.o_checklist {
             border: 1px solid;
             cursor: pointer;
         }
-        &.o_checked:after {
+        > li.o_checked:after {
             content: "✓";
             transition: opacity .5s;
             position: absolute;

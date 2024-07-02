@@ -9,7 +9,6 @@ class UtmCampaign(models.Model):
     _description = 'UTM Campaign'
     _rec_name = 'title'
 
-    active = fields.Boolean('Active', default=True)
     name = fields.Char(string='Campaign Identifier', required=True, compute='_compute_name',
                        store=True, readonly=False, precompute=True, translate=False)
     title = fields.Char(string='Campaign Name', required=True, translate=True)
@@ -20,7 +19,7 @@ class UtmCampaign(models.Model):
     stage_id = fields.Many2one(
         'utm.stage', string='Stage', ondelete='restrict', required=True,
         default=lambda self: self.env['utm.stage'].search([], limit=1),
-        copy=False, group_expand='_group_expand_stage_ids')
+        group_expand='_group_expand_stage_ids')
     tag_ids = fields.Many2many(
         'utm.tag', 'utm_tag_rel',
         'tag_id', 'campaign_id', string='Tags')
@@ -34,7 +33,9 @@ class UtmCampaign(models.Model):
 
     @api.depends('title')
     def _compute_name(self):
-        new_names = self.env['utm.mixin']._get_unique_names(self._name, [c.title for c in self])
+        new_names = self.env['utm.mixin'].with_context(
+            utm_check_skip_record_ids=self.ids
+        )._get_unique_names(self._name, [c.title for c in self])
         for campaign, new_name in zip(self, new_names):
             campaign.name = new_name
 

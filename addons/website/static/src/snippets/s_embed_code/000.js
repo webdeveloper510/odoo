@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import publicWidget from "@web/legacy/js/public/public_widget";
+import publicWidget from "web.public.widget";
 import { _t } from "@web/core/l10n/translation";
-import { cloneContentEls } from "@website/js/utils";
+import { cloneContentEls } from "website.utils";
 
 const EmbedCodeWidget = publicWidget.Widget.extend({
     selector: ".s_embed_code",

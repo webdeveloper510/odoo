@@ -1,9 +1,10 @@
-/** @odoo-module **/
+odoo.define('website_blog.options', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import options from "@web_editor/js/editor/snippets.options";
-import "@website/js/editor/snippets.options";
-import { uniqueId } from "@web/core/utils/functions";
+require('web.dom_ready');
+const {_t} = require('web.core');
+const options = require('web_editor.snippets.options');
+require('website.editor.snippets.options');
 
 const NEW_TAG_PREFIX = 'new-blog-tag-';
 
@@ -58,12 +59,6 @@ options.registry.CoverProperties.include({
 });
 
 options.registry.BlogPostTagSelection = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-        this.notification = this.bindService("notification");
-    },
-
     /**
      * @override
      */
@@ -72,11 +67,11 @@ options.registry.BlogPostTagSelection = options.Class.extend({
 
         this.blogPostID = parseInt(this.$target[0].dataset.blogId);
         this.isEditingTags = false;
-        const tags = await this.orm.searchRead(
-            "blog.tag",
-            [],
-            ["id", "name", "display_name", "post_ids"]
-        );
+        const tags = await this._rpc({
+            model: 'blog.tag',
+            method: 'search_read',
+            args: [[], ['id', 'name', 'display_name', 'post_ids']],
+        });
         this.allTagsByID = {};
         this.tagIDs = [];
         for (const tag of tags) {
@@ -123,11 +118,12 @@ options.registry.BlogPostTagSelection = options.Class.extend({
                 && (typeof(tag.id) === 'number' || this.tagIDs.includes(tag.id));
         });
         if (existing) {
-            return this.notification.add(_t("This tag already exists"), {
+            return this.displayNotification({
                 type: 'warning',
+                message: _t("This tag already exists"),
             });
         }
-        const newTagID = uniqueId(NEW_TAG_PREFIX);
+        const newTagID = _.uniqueId(NEW_TAG_PREFIX);
         this.allTagsByID[newTagID] = {
             'id': newTagID,
             'name': widgetValue,
@@ -185,4 +181,5 @@ options.registry.BlogPostTagSelection = options.Class.extend({
     async _renderCustomXML(uiFragment) {
         uiFragment.querySelector('we-many2many').dataset.recordId = this.blogPostID;
     },
+});
 });

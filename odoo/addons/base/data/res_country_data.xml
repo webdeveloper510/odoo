@@ -246,7 +246,7 @@
             <field eval="'%(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s'" name="address_format" />
             <field name="currency_id" ref="CAD" />
             <field eval="1" name="phone_code" />
-            <field name="vat_label">GST/HST number</field>
+            <field name="vat_label">HST</field>
         </record>
         <record id="cc" model="res.country">
             <field name="name">Cocos (Keeling) Islands</field>
@@ -411,7 +411,6 @@
             <field name="currency_id" ref="USD" />
             <field eval="593" name="phone_code" />
             <field name="vat_label">RUC</field>
-            <field name='zip_required'>0</field>
         </record>
         <record id="ee" model="res.country">
             <field name="name">Estonia</field>
@@ -441,7 +440,7 @@
         <record id="es" model="res.country">
             <field name="name">Spain</field>
             <field name="code">es</field>
-            <field eval="'%(street)s\n%(street2)s\n%(zip)s %(city)s\n%(state_name)s\n%(country_name)s'" name="address_format"/>
+            <field eval="'%(street)s\n%(street2)s\n%(zip)s %(city)s (%(state_name)s)\n%(country_name)s'" name="address_format"/>
             <field name="currency_id" ref="EUR" />
             <field eval="34" name="phone_code" />
             <field name="vat_label">VAT</field>
@@ -1094,7 +1093,7 @@
             <field name="code">nz</field>
             <field name="currency_id" ref="NZD" />
             <field eval="64" name="phone_code" />
-            <field name="vat_label">GST</field>
+            <field name="vat_label">IRD/GST</field>
         </record>
         <record id="om" model="res.country">
             <field name="name">Oman</field>
@@ -1256,6 +1255,7 @@
         <record id="se" model="res.country">
             <field name="name">Sweden</field>
             <field name="code">se</field>
+            <field eval="'%(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s'" name="address_format" />
             <field name="currency_id" ref="SEK" />
             <field eval="46" name="phone_code" />
             <field name="vat_label">VAT</field>
@@ -1296,7 +1296,7 @@
         <record id="sl" model="res.country">
             <field name="name">Sierra Leone</field>
             <field name="code">sl</field>
-            <field name="currency_id" ref="SLE" />
+            <field name="currency_id" ref="SLL" />
             <field eval="232" name="phone_code" />
         </record>
         <record id="sm" model="res.country">
@@ -1468,7 +1468,6 @@
             <field name="code">ug</field>
             <field name="currency_id" ref="UGX" />
             <field eval="256" name="phone_code" />
-            <field name="vat_label">TIN</field>
         </record>
         <record id="uk" model="res.country">
             <field name="name">United Kingdom</field>
@@ -1498,7 +1497,6 @@
             <field name="code">uy</field>
             <field name="currency_id" ref="UYU" />
             <field eval="598" name="phone_code" />
-            <field name="vat_label">RUT</field>
         </record>
         <record id="uz" model="res.country">
             <field name="name">Uzbekistan</field>
@@ -1585,7 +1583,6 @@
             <field name="code">zm</field>
             <field name="currency_id" ref="ZMW" />
             <field eval="260" name="phone_code" />
-            <field name="vat_label">TPIN</field>
         </record>
         <record id="zw" model="res.country">
             <field name="name">Zimbabwe</field>
@@ -1601,7 +1598,7 @@
         </record>
 
         <record id="europe" model="res.country.group">
-            <field name="name">European Union</field>
+            <field name="name">Europe</field>
             <field name="country_ids" eval="[Command.set([
                 ref('at'),ref('be'),ref('bg'),ref('hr'),ref('cy'),
                 ref('cz'),ref('dk'),ref('ee'),ref('fi'),ref('fr'),
@@ -1638,12 +1635,6 @@
             <field name="name">Gulf Cooperation Council (GCC)</field>
             <field name="country_ids" eval="[(6,0, [ref('base.sa'), ref('base.ae'), ref('base.bh'), ref('base.om'), ref('base.qa'), ref('base.kw')])]"/>
         </record>
-
-        <record id="eurasian_economic_union" model="res.country.group">
-            <field name="name">Eurasian Economic Union</field>
-            <field name="country_ids" eval="[(6, 0, [ref('ru'),ref('by'),ref('am'),ref('kg'),ref('kz')])]"/>
-        </record>
-
         <record id="ch_and_li" model="res.country.group">
             <field name="name">Switzerland and Liechtenstein</field>
             <field name="country_ids" eval="[Command.set([ref('ch'), ref('li')])]"/>

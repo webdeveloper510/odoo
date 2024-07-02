@@ -3,15 +3,15 @@
 # 	* website_twitter
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2023
 # Tony Ng, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:10+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
 "Last-Translator: Tony Ng, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -35,11 +35,16 @@ msgstr "，按「<strong>提升</strong>」，然後按「<strong>套用</strong
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                            Show me how to obtain the Twitter API key and Twitter API secret"
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                Show me how to obtain the Twitter API key and Twitter API secret"
 msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                            教我如何獲取 Twitter API 密鑰及 Twitter API 秘密"
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                教我如何獲取 Twitter API 密鑰及 Twitter API 秘密"
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "<span class=\"o_form_label\">Twitter Roller</span>"
+msgstr "<span class=\"o_form_label\">Twitter 捲動器</span>"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -54,7 +59,7 @@ msgstr "<strong>描述：</strong> Odoo Twitter 整合"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "<strong>Name: </strong> Odoo Twitter Integration"
-msgstr "<strong>名稱：</strong> Odoo Twitter 整合"
+msgstr "<strong>名稱：</strong>Odoo Twitter 整合"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -65,13 +70,13 @@ msgstr "<strong>使用案例：</strong>在網站中嵌入推文"
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_key
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "API Key"
-msgstr "API 密鑰"
+msgstr "API 金鑰"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_api_secret
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "API secret"
-msgstr "API 秘密"
+msgstr "API 密鑰"
 
 #. module: website_twitter
 #. odoo-python
@@ -95,7 +100,7 @@ msgstr "將 API 密鑰以及 API 密鑰秘密值，複製貼上至上述欄位"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_uid
 msgid "Created by"
-msgstr "建立人員"
+msgstr "創立者"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_date
@@ -138,7 +143,7 @@ msgstr "如何設定 Twitter API"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__id
 msgid "ID"
-msgstr "識別號"
+msgstr "ID"
 
 #. module: website_twitter
 #. odoo-python
@@ -146,6 +151,11 @@ msgstr "識別號"
 #, python-format
 msgid "Internet connection refused: We failed to reach a twitter server."
 msgstr "網路連線被拒：我們無法訪問 Twitter 伺服器。"
+
+#. module: website_twitter
+#: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet____last_update
+msgid "Last Modified on"
+msgstr "最後修改於"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__write_uid
@@ -273,7 +283,7 @@ msgstr "推文"
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter API Credentials"
-msgstr "Twitter API 登入資訊"
+msgstr "Twitter API 憑證"
 
 #. module: website_twitter
 #: model:ir.model.fields,help:website_twitter.field_website__twitter_api_key
@@ -316,11 +326,6 @@ msgstr "Twitter 配置"
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid "Twitter Portal"
 msgstr "Twitter 門戶"
-
-#. module: website_twitter
-#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "Twitter Roller"
-msgstr "Twitter 捲動器"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.website_twitter_snippet
@@ -380,6 +385,7 @@ msgstr "Twitter的使用者"
 
 #. module: website_twitter
 #: model:ir.actions.server,name:website_twitter.ir_cron_twitter_actions_ir_actions_server
+#: model:ir.cron,cron_name:website_twitter.ir_cron_twitter_actions
 msgid "Twitter: Fetch new favorites"
 msgstr "Twitter：獲取新的最愛項目"
 

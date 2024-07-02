@@ -11,5 +11,5 @@ def migrate(cr, version):
         ('name', 'ilike', '%_cuenta102_02'),
         ('model', '=', 'account.account'),
     ]).mapped('res_id')
-    accounts_102 = env['account.account'].browse(account_102_ids)
+    accounts_102 = env['account.account'].search([('id', 'in', account_102_ids)])
     accounts_102.tag_ids = [Command.unlink(credit_tag.id), Command.link(debit_tag.id)]

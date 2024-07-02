@@ -1,16 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import timedelta
 
-from odoo import fields, http
+from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
-from odoo.tests import HttpCase, tagged
+from odoo.tests import HttpCase, TransactionCase, tagged
 
 from odoo.addons.sale.tests.test_sale_product_attribute_value_config import (
     TestSaleProductAttributeValueCommon,
 )
-from odoo.addons.website.tools import MockRequest
-from odoo.addons.website_sale_loyalty.controllers.main import WebsiteSale
 
 
 @tagged('post_install', '-at_install')
@@ -32,6 +30,16 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
         })
         cls.env.ref('base.user_admin').sudo().partner_id.company_id = cls.env.company
         cls.env.ref('website.default_website').company_id = cls.env.company
+        # set currency to not rely on demo data and avoid possible race condition
+        cls.currency_ratio = 1.0
+        pricelist = cls.env.ref('product.list0')
+        new_currency = cls._setup_currency(cls.currency_ratio)
+        pricelist.currency_id = new_currency
+        cls.env.user.partner_id.write({
+            'property_product_pricelist': pricelist.id,
+        })
+        (cls.env['product.pricelist'].search([]) - pricelist).write({'active': False})
+        cls.env.flush_all()
 
     def test_01_admin_shop_sale_loyalty_tour(self):
         if self.env['ir.module.module']._get('payment_custom').state != 'installed':
@@ -219,7 +227,7 @@ class WebsiteSaleLoyaltyTestUi(TestSaleProductAttributeValueCommon, HttpCase):
 
 
 @tagged('post_install', '-at_install')
-class TestWebsiteSaleCoupon(HttpCase):
+class TestWebsiteSaleCoupon(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
@@ -309,43 +317,7 @@ class TestWebsiteSaleCoupon(HttpCase):
 
         self.assertEqual(len(order.applied_coupon_ids), 0, "The coupon should've been removed from the order as more than 4 days")
 
-    def test_02_apply_discount_code_program_multi_rewards(self):
-        """
-            Check the triggering of a promotion program based on a promo code with multiple rewards
-        """
-        self.env['loyalty.program'].search([]).write({'active': False})
-        chair = self.env['product.product'].create({
-            'name': 'Super Chair', 'list_price': 1000, 'website_published': True
-        })
-        self.discount_code_program_multi_rewards = self.env['loyalty.program'].create({
-            'name': 'Discount code program',
-            'program_type': 'promo_code',
-            'applies_on': 'current',
-            'trigger': 'with_code',
-            'rule_ids': [(0, 0, {
-                'code': '12345',
-                'reward_point_amount': 1,
-                'reward_point_mode': 'order',
-            })],
-            'reward_ids': [
-                (0, 0, {
-                    'reward_type': 'discount',
-                    'discount': 10,
-                    'discount_applicability': 'specific',
-                    'required_points': 1,
-                    'discount_product_ids': chair,
-                }),
-                (0, 0, {
-                    'reward_type': 'discount',
-                    'discount': 50,
-                    'discount_applicability': 'order',
-                    'required_points': 1,
-                }),
-            ],
-        })
-        self.start_tour('/', 'apply_discount_code_program_multi_rewards', login='admin')
-
-    def test_03_remove_coupon(self):
+    def test_02_remove_coupon(self):
         # 1. Simulate a frontend order (website, product)
         order = self.empty_order
         order.website_id = self.env['website'].browse(1)
@@ -372,58 +344,6 @@ class TestWebsiteSaleCoupon(HttpCase):
 
         msg = "The coupon should've been removed from the order"
         self.assertEqual(len(order.applied_coupon_ids), 0, msg=msg)
-
-    def test_04_apply_coupon_code_twice(self):
-        """This test ensures that applying a coupon with code twice will:
-            1. Raise an error
-            2. Not delete the coupon
-        """
-        website = self.env['website'].browse(1)
-
-        # Create product
-        product = self.env['product.product'].create({
-            'name': 'Product',
-            'list_price': 100,
-            'sale_ok': True,
-            'taxes_id': [],
-        })
-
-        order = self.empty_order
-        order.write({
-            'website_id': website.id,
-            'order_line': [
-                Command.create({
-                    'product_id': product.id,
-                }),
-            ]
-        })
-
-        WebsiteSaleController = WebsiteSale()
-
-        installed_modules = set(self.env['ir.module.module'].search([
-            ('state', '=', 'installed'),
-        ]).mapped('name'))
-        for _ in http._generate_routing_rules(installed_modules, nodb_only=False):
-            pass
-
-        with MockRequest(self.env, website=website, sale_order_id=order.id) as request:
-            # Check the base cart value
-            self.assertEqual(order.amount_total, 100.0, "The base cart value is incorrect.")
-
-            # Apply coupon for the first time
-            WebsiteSaleController.pricelist(promo=self.coupon.code)
-
-            # Check that the coupon has been applied
-            self.assertEqual(order.amount_total, 90.0, "The coupon is not applied.")
-
-            # Apply the coupon again
-            WebsiteSaleController.pricelist(promo=self.coupon.code)
-            WebsiteSaleController.cart()
-            error_msg = request.session.get('error_promo_code')
-
-            # Check that the coupon stay applied
-            self.assertEqual(bool(error_msg), True, "Apply a coupon twice should display an error message")
-            self.assertEqual(order.amount_total, 90.0, "Apply a coupon twice shouldn't delete it")
 
     def test_03_remove_coupon_with_different_taxes_on_products(self):
         """

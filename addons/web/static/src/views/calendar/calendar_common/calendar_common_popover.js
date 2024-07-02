@@ -1,14 +1,12 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
-import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { is24HourFormat } from "@web/core/l10n/dates";
 import { Field } from "@web/views/fields/field";
-import { Record } from "@web/model/record";
-import { getFormattedDateSpan } from "@web/views/calendar/utils";
+import { Record } from "@web/views/record";
+import { getFormattedDateSpan } from '@web/views/calendar/utils';
 
-import { Component, useExternalListener } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 
 export class CalendarCommonPopover extends Component {
     setup() {
@@ -17,26 +15,14 @@ export class CalendarCommonPopover extends Component {
         this.date = null;
         this.dateDuration = null;
 
-        useExternalListener(window, "pointerdown", (e) => e.preventDefault(), { capture: true });
-
         this.computeDateTimeAndDuration();
     }
 
-    get activeFields() {
-        return this.props.model.activeFields;
-    }
     get isEventEditable() {
         return true;
     }
     get isEventDeletable() {
         return this.props.model.canDelete;
-    }
-    get hasFooter() {
-        return this.isEventEditable || this.isEventDeletable;
-    }
-
-    isInvisible(fieldNode, record) {
-        return evaluateBooleanExpr(fieldNode.invisible, record.evalContextWithVirtualIds);
     }
 
     computeDateTimeAndDuration() {
@@ -51,11 +37,13 @@ export class CalendarCommonPopover extends Component {
             const duration = end.diff(start, ["hours", "minutes"]);
             const formatParts = [];
             if (duration.hours > 0) {
-                const hourString = duration.hours === 1 ? _t("hour") : _t("hours");
+                const hourString =
+                    duration.hours === 1 ? this.env._t("hour") : this.env._t("hours");
                 formatParts.push(`h '${hourString}'`);
             }
             if (duration.minutes > 0) {
-                const minuteStr = duration.minutes === 1 ? _t("minute") : _t("minutes");
+                const minuteStr =
+                    duration.minutes === 1 ? this.env._t("minute") : this.env._t("minutes");
                 formatParts.push(`m '${minuteStr}'`);
             }
             this.timeDuration = duration.toFormat(formatParts.join(", "));
@@ -66,10 +54,10 @@ export class CalendarCommonPopover extends Component {
 
             if (record.isAllDay) {
                 if (isSameDay) {
-                    this.dateDuration = _t("All day");
+                    this.dateDuration = this.env._t("All day");
                 } else {
                     const duration = end.plus({ day: 1 }).diff(start, "days");
-                    this.dateDuration = duration.toFormat(`d '${_t("days")}'`);
+                    this.dateDuration = duration.toFormat(`d '${this.env._t("days")}'`);
                 }
             }
         }

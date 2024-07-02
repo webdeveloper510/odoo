@@ -6,10 +6,8 @@ import logging
 from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta, MO
-from markupsafe import Markup
 
-from odoo import _, api, exceptions, fields, models
-from odoo.http import SESSION_LIFETIME
+from odoo import api, models, fields, _, exceptions
 from odoo.tools import ustr
 
 _logger = logging.getLogger(__name__)
@@ -129,7 +127,7 @@ class Challenge(models.Model):
             ('yearly', "Yearly")
         ], default='never',
         string="Report Frequency", required=True)
-    report_message_group_id = fields.Many2one('discuss.channel', string="Send a copy to", help="Group that will receive a copy of the report in addition to the user")
+    report_message_group_id = fields.Many2one('mail.channel', string="Send a copy to", help="Group that will receive a copy of the report in addition to the user")
     report_template_id = fields.Many2one('mail.template', default=lambda self: self._get_report_template(), string="Report Template", required=True)
     remind_update_delay = fields.Integer("Non-updated manual goals will be reminded after", help="Never reminded if no value or zero is specified.")
     last_report_date = fields.Date("Last Report Date", default=fields.Date.today)
@@ -271,25 +269,20 @@ class Challenge(models.Model):
         Goals = self.env['gamification.goal']
 
         # include yesterday goals to update the goals that just ended
-        # exclude goals for users that have not interacted with the
-        # webclient since the last update or whose session is no longer
-        # valid.
+        # exclude goals for portal users that did not connect since the last update
         yesterday = fields.Date.to_string(date.today() - timedelta(days=1))
         self.env.cr.execute("""SELECT gg.id
                         FROM gamification_goal as gg
-                        JOIN bus_presence as bp ON bp.user_id = gg.user_id
-                       WHERE gg.write_date <= bp.last_presence
-                         AND bp.last_presence >= now() AT TIME ZONE 'UTC' - interval '%(session_lifetime)s seconds'
+                        JOIN res_users_log as log ON gg.user_id = log.create_uid
+                        JOIN res_users ru on log.create_uid = ru.id
+                       WHERE (gg.write_date < log.create_date OR ru.share IS NOT TRUE)
+                         AND ru.active IS TRUE
                          AND gg.closed IS NOT TRUE
-                         AND gg.challenge_id IN %(challenge_ids)s
+                         AND gg.challenge_id IN %s
                          AND (gg.state = 'inprogress'
-                              OR (gg.state = 'reached' AND gg.end_date >= %(yesterday)s))
+                              OR (gg.state = 'reached' AND gg.end_date >= %s))
                       GROUP BY gg.id
-        """, {
-            'session_lifetime': SESSION_LIFETIME,
-            'challenge_ids': tuple(self.ids),
-            'yesterday': yesterday
-        })
+        """, [tuple(self.ids), yesterday])
 
         Goals.browse(goal_id for [goal_id] in self.env.cr.fetchall()).update_goal()
 
@@ -527,27 +520,24 @@ class Challenge(models.Model):
 
                 domain.append(('user_id', '=', user.id))
 
-                goal = Goals.search_fetch(domain, ['current', 'completeness', 'state'], limit=1)
+                goal = Goals.search(domain, limit=1)
                 if not goal:
                     continue
 
                 if goal.state != 'reached':
                     return []
-                line_data.update({
-                    fname: goal[fname]
-                    for fname in ['id', 'current', 'completeness', 'state']
-                })
+                line_data.update(goal.read(['id', 'current', 'completeness', 'state'])[0])
                 res_lines.append(line_data)
                 continue
 
             line_data['own_goal_id'] = False,
             line_data['goals'] = []
-            goals = Goals.search(domain, order='id')
+            if line.condition=='higher':
+                goals = Goals.search(domain, order="completeness desc, current desc")
+            else:
+                goals = Goals.search(domain, order="completeness desc, current asc")
             if not goals:
                 continue
-            goals = goals.sorted(key=lambda goal: (
-                -goal.completeness, -goal.current if line.condition == 'higher' else goal.current
-            ))
 
             for ranking, goal in enumerate(goals):
                 if user and goal.user_id == user:
@@ -671,14 +661,15 @@ class Challenge(models.Model):
             challenge_ended = force or end_date == fields.Date.to_string(yesterday)
             if challenge.reward_id and (challenge_ended or challenge.reward_realtime):
                 # not using start_date as intemportal goals have a start date but no end_date
-                reached_goals = self.env['gamification.goal']._read_group([
+                reached_goals = self.env['gamification.goal'].read_group([
                     ('challenge_id', '=', challenge.id),
                     ('end_date', '=', end_date),
                     ('state', '=', 'reached')
-                ], groupby=['user_id'], aggregates=['__count'])
-                for user, count in reached_goals:
-                    if count == len(challenge.line_ids):
+                ], fields=['user_id'], groupby=['user_id'])
+                for reach_goals_user in reached_goals:
+                    if reach_goals_user['user_id_count'] == len(challenge.line_ids):
                         # the user has succeeded every assigned goal
+                        user = self.env['res.users'].browse(reach_goals_user['user_id'][0])
                         if challenge.reward_realtime:
                             badges = self.env['gamification.badge.user'].search_count([
                                 ('challenge_id', '=', challenge.id),
@@ -698,21 +689,22 @@ class Challenge(models.Model):
                 message_body = _("The challenge %s is finished.", challenge.name)
 
                 if rewarded_users:
-                    message_body += Markup("<br/>") + _(
-                        "Reward (badge %(badge_name)s) for every succeeding user was sent to %(users)s.",
+                    user_names = rewarded_users.name_get()
+                    message_body += _(
+                        "<br/>Reward (badge %(badge_name)s) for every succeeding user was sent to %(users)s.",
                         badge_name=challenge.reward_id.name,
-                        users=", ".join(rewarded_users.mapped('display_name'))
+                        users=", ".join(name for (user_id, name) in user_names)
                     )
                 else:
-                    message_body += Markup("<br/>") + _("Nobody has succeeded to reach every goal, no badge is rewarded for this challenge.")
+                    message_body += _("<br/>Nobody has succeeded to reach every goal, no badge is rewarded for this challenge.")
 
                 # reward bests
-                reward_message = Markup("<br/> %(rank)d. %(user_name)s - %(reward_name)s")
+                reward_message = _("<br/> %(rank)d. %(user_name)s - %(reward_name)s")
                 if challenge.reward_first_id:
                     (first_user, second_user, third_user) = challenge._get_topN_users(MAX_VISIBILITY_RANKING)
                     if first_user:
                         challenge._reward_user(first_user, challenge.reward_first_id)
-                        message_body += Markup("<br/>") + _("Special rewards were sent to the top competing users. The ranking for this challenge is:")
+                        message_body += _("<br/>Special rewards were sent to the top competing users. The ranking for this challenge is :")
                         message_body += reward_message % {
                             'rank': 1,
                             'user_name': first_user.name,

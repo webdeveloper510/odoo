@@ -31,6 +31,7 @@ from odoo.modules.registry import Registry
 from odoo.service import security
 from odoo.tools import get_lang, submap
 from odoo.tools.translate import code_translations
+from odoo.modules.module import get_resource_path, get_module_path
 
 _logger = logging.getLogger(__name__)
 
@@ -78,42 +79,6 @@ class SignedIntConverter(NumberConverter):
     num_convert = int
 
 
-class LazyCompiledBuilder:
-    def __init__(self, rule, _compile_builder, append_unknown):
-        self.rule = rule
-        self._callable = None
-        self._compile_builder = _compile_builder
-        self._append_unknown = append_unknown
-
-    def __get__(self, *args):
-        # Rule.compile will actually call
-        #
-        #   self._build = self._compile_builder(False).__get__(self, None)
-        #   self._build_unknown = self._compile_builder(True).__get__(self, None)
-        #
-        # meaning the _build and _build unkown will contain _compile_builder().__get__(self, None).
-        # This is why this override of __get__ is needed.
-        return self
-
-    def __call__(self, *args, **kwargs):
-        if self._callable is None:
-            self._callable = self._compile_builder(self._append_unknown).__get__(self.rule, None)
-            del self.rule
-            del self._compile_builder
-            del self._append_unknown
-        return self._callable(*args, **kwargs)
-
-
-class FasterRule(werkzeug.routing.Rule):
-    """
-    _compile_builder is a major part of the routing map generation and rules
-    are actually not build so often.
-    This classe makes calls to _compile_builder lazy
-    """
-    def _compile_builder(self, append_unknown=True):
-        return LazyCompiledBuilder(self, super()._compile_builder, append_unknown)
-
-
 class IrHttp(models.AbstractModel):
     _name = 'ir.http'
     _description = "HTTP Routing"
@@ -127,8 +92,8 @@ class IrHttp(models.AbstractModel):
         return {'model': ModelConverter, 'models': ModelsConverter, 'int': SignedIntConverter}
 
     @classmethod
-    def _match(cls, path_info):
-        rule, args = request.env['ir.http'].routing_map().bind_to_environ(request.httprequest.environ).match(path_info=path_info, return_rule=True)
+    def _match(cls, path_info, key=None):
+        rule, args = cls.routing_map().bind_to_environ(request.httprequest.environ).match(path_info=path_info, return_rule=True)
         return rule, args
 
     @classmethod
@@ -172,21 +137,6 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _pre_dispatch(cls, rule, args):
-        ICP = request.env['ir.config_parameter'].with_user(SUPERUSER_ID)
-
-        # Change the default database-wide 128MiB upload limit on the
-        # ICP value. Do it before calling http's generic pre_dispatch
-        # so that the per-route limit @route(..., max_content_length=x)
-        # takes over.
-        try:
-            key = 'web.max_file_upload_size'
-            if (value := ICP.get_param(key, None)) is not None:
-                request.httprequest.max_content_length = int(value)
-        except ValueError:  # better not crash on ALL requests
-            _logger.error("invalid %s: %r, using %s instead",
-                key, value, request.httprequest.max_content_length,
-            )
-
         request.dispatcher.pre_dispatch(rule, args)
 
         # Replace uid placeholder by the current request.env.uid
@@ -197,25 +147,7 @@ class IrHttp(models.AbstractModel):
         # verify the default language set in the context is valid,
         # otherwise fallback on the company lang, english or the first
         # lang installed
-        env = request.env if request.env.uid else request.env['base'].with_user(SUPERUSER_ID).env
-        request.update_context(lang=get_lang(env)._get_cached('code'))
-
-        for key, val in list(args.items()):
-            if not isinstance(val, models.BaseModel):
-                continue
-
-            try:
-                # explicitly crash now, instead of crashing later
-                args[key].check_access_rights('read')
-                args[key].check_access_rule('read')
-            except (odoo.exceptions.AccessError, odoo.exceptions.MissingError) as e:
-                # custom behavior in case a record is not accessible / has been removed
-                if handle_error := rule.endpoint.routing.get('handle_params_access_error'):
-                    if response := handle_error(e):
-                        werkzeug.exceptions.abort(response)
-                if isinstance(e, odoo.exceptions.MissingError):
-                    raise werkzeug.exceptions.NotFound() from e
-                raise
+        request.update_context(lang=get_lang(request.env)._get_cached('code'))
 
     @classmethod
     def _dispatch(cls, endpoint):
@@ -227,10 +159,6 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _post_dispatch(cls, response):
         request.dispatcher.post_dispatch(response)
-
-    @classmethod
-    def _post_logout(cls):
-        pass
 
     @classmethod
     def _handle_error(cls, exception):
@@ -247,30 +175,44 @@ class IrHttp(models.AbstractModel):
     def _redirect(cls, location, code=303):
         return werkzeug.utils.redirect(location, code=code, Response=Response)
 
-    def _generate_routing_rules(self, modules, converters):
+    @classmethod
+    def _generate_routing_rules(cls, modules, converters):
         return http._generate_routing_rules(modules, False, converters)
 
-    @tools.ormcache('key', cache='routing')
-    def routing_map(self, key=None):
-        _logger.info("Generating routing map for key %s", str(key))
-        registry = Registry(threading.current_thread().dbname)
-        installed = registry._init_modules.union(odoo.conf.server_wide_modules)
-        if tools.config['test_enable'] and odoo.modules.module.current_test:
-            installed.add(odoo.modules.module.current_test)
-        mods = sorted(installed)
-        # Note : when routing map is generated, we put it on the class `cls`
-        # to make it available for all instance. Since `env` create an new instance
-        # of the model, each instance will regenared its own routing map and thus
-        # regenerate its EndPoint. The routing map should be static.
-        routing_map = werkzeug.routing.Map(strict_slashes=False, converters=self._get_converters())
-        for url, endpoint in self._generate_routing_rules(mods, converters=self._get_converters()):
-            routing = submap(endpoint.routing, ROUTING_KEYS)
-            if routing['methods'] is not None and 'OPTIONS' not in routing['methods']:
-                routing['methods'] = routing['methods'] + ['OPTIONS']
-            rule = FasterRule(url, endpoint=endpoint, **routing)
-            rule.merge_slashes = False
-            routing_map.add(rule)
-        return routing_map
+    @classmethod
+    def routing_map(cls, key=None):
+
+        if not hasattr(cls, '_routing_map'):
+            cls._routing_map = {}
+            cls._rewrite_len = {}
+
+        if key not in cls._routing_map:
+            _logger.info("Generating routing map for key %s" % str(key))
+            registry = Registry(threading.current_thread().dbname)
+            installed = registry._init_modules.union(odoo.conf.server_wide_modules)
+            if tools.config['test_enable'] and odoo.modules.module.current_test:
+                installed.add(odoo.modules.module.current_test)
+            mods = sorted(installed)
+            # Note : when routing map is generated, we put it on the class `cls`
+            # to make it available for all instance. Since `env` create an new instance
+            # of the model, each instance will regenared its own routing map and thus
+            # regenerate its EndPoint. The routing map should be static.
+            routing_map = werkzeug.routing.Map(strict_slashes=False, converters=cls._get_converters())
+            for url, endpoint in cls._generate_routing_rules(mods, converters=cls._get_converters()):
+                routing = submap(endpoint.routing, ROUTING_KEYS)
+                if routing['methods'] is not None and 'OPTIONS' not in routing['methods']:
+                    routing['methods'] = routing['methods'] + ['OPTIONS']
+                rule = werkzeug.routing.Rule(url, endpoint=endpoint, **routing)
+                rule.merge_slashes = False
+                routing_map.add(rule)
+            cls._routing_map[key] = routing_map
+        return cls._routing_map[key]
+
+    @classmethod
+    def _clear_routing_map(cls):
+        if hasattr(cls, '_routing_map'):
+            cls._routing_map = {}
+            _logger.debug("Clear routing map")
 
     @api.autovacuum
     def _gc_sessions(self):
@@ -299,6 +241,8 @@ class IrHttp(models.AbstractModel):
             }
             lang_params['week_start'] = int(lang_params['week_start'])
             lang_params['code'] = lang
+            if lang_params["thousands_sep"]:
+                lang_params["thousands_sep"] = lang_params["thousands_sep"].replace(' ', '\N{NO-BREAK SPACE}')
 
         # Regional languages (ll_CC) must inherit/override their parent lang (ll), but this is
         # done server-side when the language is loaded, so we only need to load the user's lang.

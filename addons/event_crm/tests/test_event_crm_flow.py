@@ -2,12 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.event_crm.tests.common import TestEventCrmCommon
-from odoo.tests import tagged
 from odoo.tests.common import users
 from odoo.tools import mute_logger
 
 
-@tagged('event_flow')
 class TestEventCrmFlow(TestEventCrmCommon):
 
     @classmethod
@@ -105,16 +103,17 @@ class TestEventCrmFlow(TestEventCrmCommon):
     def test_event_crm_flow_per_attendee_single_wo_partner(self):
         """ Single registration, attendee based, no partner involved, check
         contact info propagation """
-        for name, email, phone in [
-            ('My Name', 'super.email@test.example.com', '0456442211'),
-            (False, 'super.email@test.example.com', False),
-            ('"My Name"', '"My Name" <my.name@test.example.com>', False),
+        for name, email, mobile, phone in [
+            ('My Name', 'super.email@test.example.com', '0456442211', '0456332211'),
+            (False, 'super.email@test.example.com', False, '0456442211'),
+            ('"My Name"', '"My Name" <my.name@test.example.com>', False, False),
         ]:
-            with self.subTest(name=name, email=email, phone=phone):
+            with self.subTest(name=name, email=email, mobile=mobile, phone=phone):
                 registration = self.env['event.registration'].create({
                     'name': name,
                     'partner_id': False,
                     'email': email,
+                    'mobile': mobile,
                     'phone': phone,
                     'event_id': self.event_0.id,
                 })
@@ -124,7 +123,8 @@ class TestEventCrmFlow(TestEventCrmCommon):
         registration = self.env['event.registration'].create({
             'partner_id': self.event_customer.id,
             'email': 'other.email@test.example.com',
-            'phone': '0456112233',
+            'phone': False,
+            'mobile': '0456112233',
             'event_id': self.event_0.id,
         })
         self.assertLeadConvertion(self.test_rule_attendee, registration, partner=None)
@@ -164,7 +164,8 @@ class TestEventCrmFlow(TestEventCrmCommon):
         registration = self.env['event.registration'].create({
             'partner_id': self.event_customer.id,
             'email': 'trigger.test@not.test.example.com',
-            'phone': '0456112233',
+            'phone': False,
+            'mobile': '0456112233',
             'event_id': self.event_0.id,
         })
 
@@ -191,6 +192,7 @@ class TestEventCrmFlow(TestEventCrmCommon):
             'partner_id': False,
             'email': 'super.email@test.example.com',
             'phone': False,
+            'mobile': '0456332211',
             'event_id': self.event_0.id,
         })
         self.assertEqual(len(self.test_rule_order.lead_ids), 1)

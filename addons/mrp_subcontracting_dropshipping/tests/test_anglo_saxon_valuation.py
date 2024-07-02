@@ -69,12 +69,12 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
         po.button_confirm()
 
         delivery = po.picking_ids
-        delivery.button_validate()
+        res = delivery.button_validate()
+        Form(self.env['stock.immediate.transfer'].with_context(res['context'])).save().process()
 
         stock_in_acc_id = self.categ_fifo_auto.property_stock_account_input_categ_id.id
         stock_out_acc_id = self.categ_fifo_auto.property_stock_account_output_categ_id.id
         stock_valu_acc_id = self.categ_fifo_auto.property_stock_valuation_account_id.id
-        stock_cop_acc_id = self.categ_fifo_auto.property_stock_account_production_cost_id.id
 
         amls = self.env['account.move.line'].search([('id', 'not in', all_amls_ids)])
         all_amls_ids += amls.ids
@@ -83,12 +83,11 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
             {'account_id': stock_valu_acc_id,   'product_id': self.product_a.id,    'debit': 0.0,   'credit': 20.0},
             {'account_id': stock_out_acc_id,    'product_id': self.product_a.id,    'debit': 20.0,  'credit': 0.0},
             # Receipt from subcontractor
+            {'account_id': stock_in_acc_id,     'product_id': self.product_a.id,    'debit': 0.0,   'credit': 220.0},
             {'account_id': stock_valu_acc_id,   'product_id': self.product_a.id,    'debit': 220.0, 'credit': 0.0},
-            {'account_id': stock_in_acc_id,     'product_id': self.product_a.id,    'debit': 0.0,   'credit': 200.0},
-            {'account_id': stock_cop_acc_id,    'product_id': self.product_a.id,    'debit': 0.0,   'credit': 20.0},
             # Delivery to subcontractor
             {'account_id': stock_valu_acc_id,   'product_id': self.product_b.id,    'debit': 0.0,   'credit': 20.0},
-            {'account_id': stock_cop_acc_id,    'product_id': self.product_b.id,    'debit': 20.0,  'credit': 0.0},
+            {'account_id': stock_out_acc_id,    'product_id': self.product_b.id,    'debit': 20.0,  'credit': 0.0},
             # Initial dropshipped value
             {'account_id': stock_valu_acc_id,   'product_id': self.product_a.id,    'debit': 0.0,   'credit': 200.0},
             {'account_id': stock_out_acc_id,    'product_id': self.product_a.id,    'debit': 200.0, 'credit': 0.0},
@@ -103,8 +102,7 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
         return_wizard = return_form.save()
         return_id, _ = return_wizard._create_returns()
         return_picking = self.env['stock.picking'].browse(return_id)
-        return_picking.move_ids.quantity = 1
-        return_picking.move_ids.picked = True
+        return_picking.move_ids.quantity_done = 1
         return_picking.button_validate()
 
         amls = self.env['account.move.line'].search([('id', 'not in', all_amls_ids)])
@@ -125,8 +123,7 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
         return_wizard = return_form.save()
         return_id, _ = return_wizard._create_returns()
         return_picking = self.env['stock.picking'].browse(return_id)
-        return_picking.move_ids.quantity = 1
-        return_picking.move_ids.picked = True
+        return_picking.move_ids.quantity_done = 1
         return_picking.button_validate()
 
         amls = self.env['account.move.line'].search([('id', 'not in', all_amls_ids)])

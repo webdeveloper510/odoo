@@ -3,15 +3,18 @@
 # 	* product_expiry
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
+# Wichanon Jamwutthipreecha, 2022
+# Seksan Poltree <seksan.poltree@gmail.com>, 2022
 # Rasareeyar Lappiam, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2023\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -23,22 +26,11 @@ msgstr ""
 #. module: product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.view_move_form_expiry
 msgid ""
-"<span class=\"badge text-bg-danger\" invisible=\"not "
-"product_expiry_alert\">Expiration Alert</span>"
+"<span class=\"badge text-bg-danger\" attrs=\"{'invisible': "
+"[('product_expiry_alert', '=', False)]}\">Expiration Alert</span>"
 msgstr ""
-"<span class=\"badge text-bg-danger\" invisible=\"not "
-"product_expiry_alert\">การแจ้งเตือนการหมดอายุ</span>"
-
-#. module: product_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_production_lot_view_kanban
-msgid ""
-"<span title=\"Alert\" class=\"fa fa-exclamation-triangle text-danger ms-2\" "
-"invisible=\"product_qty &lt;= 0 or not product_expiry_alert or not "
-"expiration_date\"/>"
-msgstr ""
-"<span title=\"การแจ้งเตือน\" class=\"fa fa-exclamation-triangle text-danger "
-"ms-2\" invisible=\"product_qty <= 0 or not product_expiry_alert or not "
-"expiration_date\"/>"
+"<span class=\"badge text-bg-danger\" attrs=\"{'invisible': "
+"[('product_expiry_alert', '=', False)]}\">การแจ้งเตือนการหมดอายุ</span>"
 
 #. module: product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.view_product_form_expiry
@@ -55,7 +47,7 @@ msgstr "<span> วันก่อนวันหมดอายุ</span>"
 #: model:ir.model.fields,field_description:product_expiry.field_product_template__alert_time
 #: model:ir.model.fields,field_description:product_expiry.field_stock_lot__alert_date
 msgid "Alert Date"
-msgstr "วันที่แจ้งเตือน"
+msgstr "วันที่แจ้ง"
 
 #. module: product_expiry
 #: model:mail.activity.type,name:product_expiry.mail_activity_type_alert_date_reached
@@ -71,12 +63,17 @@ msgstr "B.b."
 #: model:ir.model.fields,field_description:product_expiry.field_product_product__use_time
 #: model:ir.model.fields,field_description:product_expiry.field_product_template__use_time
 msgid "Best Before Date"
-msgstr "ใช้ก่อนวันที่"
+msgstr "ดีที่สุดก่อนวันที่"
 
 #. module: product_expiry
 #: model:ir.model.fields,field_description:product_expiry.field_stock_lot__use_date
 msgid "Best before Date"
 msgstr "ดีที่สุดก่อนวันที่"
+
+#. module: product_expiry
+#: model_terms:ir.ui.view,arch_db:product_expiry.report_lot_label_expiry
+msgid "Best before:"
+msgstr ""
 
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_res_config_settings
@@ -94,7 +91,6 @@ msgid "Confirm Expiry"
 msgstr "ยืนยันวันหมดอายุ"
 
 #. module: product_expiry
-#. odoo-python
 #: code:addons/product_expiry/models/stock_picking.py:0
 #: model_terms:ir.ui.view,arch_db:product_expiry.confirm_expiry_view
 #, python-format
@@ -162,7 +158,6 @@ msgstr "การแจ้งเตือนการหมดอายุ"
 #: model:ir.model.fields,field_description:product_expiry.field_product_template__expiration_time
 #: model:ir.model.fields,field_description:product_expiry.field_stock_lot__expiration_date
 #: model:ir.model.fields,field_description:product_expiry.field_stock_move_line__expiration_date
-#: model:ir.model.fields,field_description:product_expiry.field_stock_quant__expiration_date
 #: model_terms:ir.ui.view,arch_db:product_expiry.stock_report_delivery_document_inherit_product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.view_product_form_expiry
 msgid "Expiration Date"
@@ -174,11 +169,6 @@ msgid "Expiration dates will appear on the delivery slip"
 msgstr "วันหมดอายุจะแสดงบนใบส่งสินค้า"
 
 #. module: product_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_production_lot_view_kanban
-msgid "Expiration:"
-msgstr "วันหมดอายุ:"
-
-#. module: product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.confirm_expiry_view
 msgid "Expired Lot(s)"
 msgstr "ล็อตที่หมดอายุ"
@@ -186,12 +176,7 @@ msgstr "ล็อตที่หมดอายุ"
 #. module: product_expiry
 #: model:ir.model.fields,field_description:product_expiry.field_stock_lot__product_expiry_reminded
 msgid "Expiry has been reminded"
-msgstr "การหมดอายุได้รับการแจ้งเตือนแล้ว"
-
-#. module: product_expiry
-#: model:product.removal,name:product_expiry.removal_fefo
-msgid "First Expiry First Out (FEFO)"
-msgstr "First Expiry First Out (FEFO)"
+msgstr "การหมดอายุได้รับการเตือนแล้ว"
 
 #. module: product_expiry
 #: model:ir.model.fields,field_description:product_expiry.field_expiry_picking_confirmation__id
@@ -202,6 +187,11 @@ msgstr "ไอดี"
 #: model:res.groups,name:product_expiry.group_expiry_date_on_delivery_slip
 msgid "Include expiration dates on delivery slip"
 msgstr "รวมวันหมดอายุไว้ในใบส่งสินค้า"
+
+#. module: product_expiry
+#: model:ir.model.fields,field_description:product_expiry.field_expiry_picking_confirmation____last_update
+msgid "Last Modified on"
+msgstr "แก้ไขครั้งล่าสุดเมื่อ"
 
 #. module: product_expiry
 #: model:ir.model.fields,field_description:product_expiry.field_expiry_picking_confirmation__write_uid
@@ -296,12 +286,12 @@ msgstr "การแจ้งเตือนการหมดอายุขอ
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
-msgstr "ย้ายสินค้า (รายการเคลื่อนย้ายสต็อก)"
+msgstr "ย้ายสินค้า ( ไลน์เคลื่อนย้ายสต๊อก )"
 
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_product_product
 msgid "Product Variant"
-msgstr "ตัวเลือกสินค้า"
+msgstr "ตัวแปรสินค้า"
 
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_stock_quant
@@ -317,11 +307,6 @@ msgid "Removal Date"
 msgstr "วันที่นำออก"
 
 #. module: product_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_production_lot_view_kanban
-msgid "Removal:"
-msgstr "นำออก:"
-
-#. module: product_expiry
 #: model:ir.model.fields,field_description:product_expiry.field_expiry_picking_confirmation__show_lots
 msgid "Show Lots"
 msgstr "แสดงล็อต"
@@ -329,7 +314,7 @@ msgstr "แสดงล็อต"
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_stock_move
 msgid "Stock Move"
-msgstr "ย้ายสต็อก"
+msgstr "ย้ายสต๊อก"
 
 #. module: product_expiry
 #: model:ir.model.fields,help:product_expiry.field_stock_lot__product_expiry_alert
@@ -338,7 +323,6 @@ msgid "The Expiration Date has been reached."
 msgstr "ถึงวันที่หมดอายุแล้ว"
 
 #. module: product_expiry
-#. odoo-python
 #: code:addons/product_expiry/models/production_lot.py:0
 #, python-format
 msgid "The alert date has been reached for this lot/serial number"
@@ -347,7 +331,6 @@ msgstr "ถึงวันที่แจ้งเตือนสำหรับ
 #. module: product_expiry
 #: model:ir.model.fields,help:product_expiry.field_stock_lot__expiration_date
 #: model:ir.model.fields,help:product_expiry.field_stock_move_line__expiration_date
-#: model:ir.model.fields,help:product_expiry.field_stock_quant__expiration_date
 msgid ""
 "This is the date on which the goods with this Serial Number may become "
 "dangerous and must not be consumed."
@@ -400,6 +383,11 @@ msgid "Use Expiration Date"
 msgstr "ใช้วันหมดอายุ"
 
 #. module: product_expiry
+#: model_terms:ir.ui.view,arch_db:product_expiry.report_lot_label_expiry
+msgid "Use by:"
+msgstr ""
+
+#. module: product_expiry
 #: model:ir.model.fields,help:product_expiry.field_product_product__use_expiration_date
 #: model:ir.model.fields,help:product_expiry.field_product_template__use_expiration_date
 #: model:ir.model.fields,help:product_expiry.field_stock_lot__use_expiration_date
@@ -416,26 +404,20 @@ msgstr ""
 "และบนล็อต/หมายเลขซีเรียลที่เกี่ยวข้อง"
 
 #. module: product_expiry
-#. odoo-python
 #: code:addons/product_expiry/wizard/confirm_expiry.py:0
 #, python-format
 msgid ""
 "You are going to deliver some product expired lots.\n"
-"Do you confirm you want to proceed?"
+"Do you confirm you want to proceed ?"
 msgstr ""
-"คุณกำลังจะส่งล็อตสินค้าบางส่วนที่หมดอายุแล้ว\n"
-"คุณยืนยันว่าต้องการดำเนินการต่อหรือไม่?"
 
 #. module: product_expiry
-#. odoo-python
 #: code:addons/product_expiry/wizard/confirm_expiry.py:0
 #, python-format
 msgid ""
 "You are going to deliver the product %(product_name)s, %(lot_name)s which is expired.\n"
-"Do you confirm you want to proceed?"
+"Do you confirm you want to proceed ?"
 msgstr ""
-"คุณกำลังส่งสินค้า %(product_name)s, %(lot_name)s ที่หมดอายุแล้ว\n"
-"คุณยืนยันว่าต้องการดำเนินการต่อหรือไม่?"
 
 #. module: product_expiry
 #: model_terms:ir.ui.view,arch_db:product_expiry.label_lot_template_view_expiry
@@ -539,8 +521,3 @@ msgid ""
 msgstr ""
 "^FS\n"
 "^FO100,250^BY3"
-
-#. module: product_expiry
-#: model:product.removal,method:product_expiry.removal_fefo
-msgid "fefo"
-msgstr "fefo"
