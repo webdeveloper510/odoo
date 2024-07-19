@@ -1,9 +1,8 @@
 /** @odoo-module **/
-'use strict';
 
-import {qweb} from 'web.core';
+import { renderToElement } from "@web/core/utils/render";
 import {descendants, preserveCursor} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
-const rowSize = 50; // 50px.
+export const rowSize = 50; // 50px.
 // Maximum number of rows that can be added when dragging a grid item.
 export const additionalRowLimit = 10;
 const defaultGridPadding = 10; // 10px (see `--grid-item-padding-(x|y)` CSS variables).
@@ -31,7 +30,8 @@ export function _getGridProperties(rowEl) {
  * @param {Element} rowEl the parent grid element of the element
  */
 export function _setElementToMaxZindex(element, rowEl) {
-    const childrenEls = [...rowEl.children].filter(el => el !== element);
+    const childrenEls = [...rowEl.children].filter(el => el !== element
+        && !el.classList.contains("o_we_grid_preview"));
     element.style.zIndex = Math.max(...childrenEls.map(el => el.style.zIndex)) + 1;
 }
 /**
@@ -45,11 +45,11 @@ export function _addBackgroundGrid(rowEl, gridHeight) {
     const gridProp = _getGridProperties(rowEl);
     const rowCount = Math.max(rowEl.dataset.rowCount, gridHeight);
 
-    const backgroundGrid = qweb.render('web_editor.background_grid', {
+    const backgroundGrid = renderToElement('web_editor.background_grid', {
         rowCount: rowCount + 1, rowGap: gridProp.rowGap, rowSize: gridProp.rowSize,
         columnGap: gridProp.columnGap, columnSize: gridProp.columnSize,
     });
-    rowEl.insertAdjacentHTML("afterbegin", backgroundGrid);
+    rowEl.prepend(backgroundGrid);
     return rowEl.firstElementChild;
 }
 /**
@@ -165,26 +165,26 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
     let zIndex = 1;
     const imageColumns = []; // array of boolean telling if it is a column with only an image.
 
-    // Checking if all the columns have a background color to take that into
-    // account when computing their size and padding (to make them look good).
-    const allBackgroundColor = [...columnEls].every(columnEl => columnEl.classList.contains('o_cc'));
-
     for (const columnEl of columnEls) {
         // Finding out if the images are alone in their column.
         let isImageColumn = _checkIfImageColumn(columnEl);
         const imageEl = columnEl.querySelector('img');
+        // Checking if the column has a background color to take that into
+        // account when computing its size and padding (to make it look good).
+        const hasBackgroundColor = columnEl.classList.contains("o_cc");
+        const isImageWithoutPadding = isImageColumn && !hasBackgroundColor;
 
         // Placing the column.
         const style = window.getComputedStyle(columnEl);
         // Horizontal placement.
         const borderLeft = parseFloat(style.borderLeft);
-        const columnLeft = isImageColumn && !borderLeft ? imageEl.offsetLeft : columnEl.offsetLeft;
+        const columnLeft = isImageWithoutPadding && !borderLeft ? imageEl.offsetLeft : columnEl.offsetLeft;
         // Getting the width of the column.
         const paddingLeft = parseFloat(style.paddingLeft);
-        let width = isImageColumn ? parseFloat(imageEl.scrollWidth)
-            : parseFloat(columnEl.scrollWidth) - (allBackgroundColor ? 0 : 2 * paddingLeft);
+        let width = isImageWithoutPadding ? parseFloat(imageEl.scrollWidth)
+            : parseFloat(columnEl.scrollWidth) - (hasBackgroundColor ? 0 : 2 * paddingLeft);
         const borderX = borderLeft + parseFloat(style.borderRight);
-        width += borderX + (allBackgroundColor || isImageColumn ? 0 : 2 * defaultGridPadding);
+        width += borderX + (hasBackgroundColor || isImageColumn ? 0 : 2 * defaultGridPadding);
         let columnSpan = Math.round((width + columnGap) / (columnSize + columnGap));
         if (columnSpan < 1) {
             columnSpan = 1;
@@ -194,18 +194,18 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
 
         // Vertical placement.
         const borderTop = parseFloat(style.borderTop);
-        const columnTop = isImageColumn && !borderTop ? imageEl.offsetTop : columnEl.offsetTop;
+        const columnTop = isImageWithoutPadding && !borderTop ? imageEl.offsetTop : columnEl.offsetTop;
         // Getting the top and bottom paddings and computing the row offset.
         const paddingTop = parseFloat(style.paddingTop);
         const paddingBottom = parseFloat(style.paddingBottom);
         const rowOffsetTop = Math.floor((paddingTop + rowGap) / (rowSize + rowGap));
         // Getting the height of the column.
-        let height = isImageColumn ? parseFloat(imageEl.scrollHeight)
-            : parseFloat(columnEl.scrollHeight) - (allBackgroundColor ? 0 : paddingTop + paddingBottom);
+        let height = isImageWithoutPadding ? parseFloat(imageEl.scrollHeight)
+            : parseFloat(columnEl.scrollHeight) - (hasBackgroundColor ? 0 : paddingTop + paddingBottom);
         const borderY = borderTop + parseFloat(style.borderBottom);
-        height += borderY + (allBackgroundColor || isImageColumn ? 0 : 2 * defaultGridPadding);
+        height += borderY + (hasBackgroundColor || isImageColumn ? 0 : 2 * defaultGridPadding);
         const rowSpan = Math.ceil((height + rowGap) / (rowSize + rowGap));
-        const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + (allBackgroundColor || isImageColumn ? 0 : rowOffsetTop);
+        const rowStart = Math.round(columnTop / (rowSize + rowGap)) + 1 + (hasBackgroundColor || isImageWithoutPadding ? 0 : rowOffsetTop);
         const rowEnd = rowStart + rowSpan;
 
         columnEl.style.gridArea = `${rowStart} / ${columnStart} / ${rowEnd} / ${columnEnd}`;
@@ -213,10 +213,13 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
 
         // Adding the grid classes.
         columnEl.classList.add('g-col-lg-' + columnSpan, 'g-height-' + rowSpan);
-
         // Setting the initial z-index.
         columnEl.style.zIndex = zIndex++;
-
+        // Setting the paddings.
+        if (hasBackgroundColor) {
+            columnEl.style.setProperty("--grid-item-padding-y", `${paddingTop}px`);
+            columnEl.style.setProperty("--grid-item-padding-x", `${paddingLeft}px`);
+        }
         // Reload the images.
         _reloadLazyImages(columnEl);
 
@@ -225,20 +228,9 @@ function _placeColumns(columnEls, rowSize, rowGap, columnSize, columnGap) {
         imageColumns.push(isImageColumn);
     }
 
-    // If all the columns have a background color, set their padding to the
-    // original padding of the first column.
-    if (allBackgroundColor) {
-        const style = window.getComputedStyle(columnEls[0]);
-        const paddingY = style.paddingTop;
-        const paddingX = style.paddingLeft;
-        const rowEl = columnEls[0].parentNode;
-        rowEl.style.setProperty('--grid-item-padding-y', paddingY);
-        rowEl.style.setProperty('--grid-item-padding-x', paddingX);
-    }
-
     for (const [i, columnEl] of [...columnEls].entries()) {
         // Removing padding and offset classes.
-        const regex = /^(pt|pb|col-|offset-)/;
+        const regex = /^(((pt|pb)\d{1,3}$)|col-lg-|offset-lg-)/;
         const toRemove = [...columnEl.classList].filter(c => {
             return regex.test(c);
         });
@@ -307,6 +299,20 @@ export function _convertColumnToGrid(rowEl, columnEl, columnWidth, columnHeight)
     columnEl.classList.add('o_grid_item');
 
     return {columnColCount: columnColCount, columnRowCount: columnRowCount};
+}
+/**
+ * Removes the grid properties from the grid column when it becomes a normal
+ * column.
+ *
+ * @param {Element} columnEl
+ */
+export function _convertToNormalColumn(columnEl) {
+    const gridSizeClasses = columnEl.className.match(/(g-col-lg|g-height)-[0-9]+/g);
+    columnEl.classList.remove("o_grid_item", "o_grid_item_image", "o_grid_item_image_contain", ...gridSizeClasses);
+    columnEl.style.removeProperty("z-index");
+    columnEl.style.removeProperty("--grid-item-padding-x");
+    columnEl.style.removeProperty("--grid-item-padding-y");
+    columnEl.style.removeProperty("grid-area");
 }
 /**
  * Checks whether the column only contains an image or not. An image is

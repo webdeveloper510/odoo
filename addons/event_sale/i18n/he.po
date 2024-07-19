@@ -3,28 +3,29 @@
 # 	* event_sale
 # 
 # Translators:
-# NoaFarkash, 2022
-# שהאב חוסיין <shhab89@gmail.com>, 2022
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
-# Jonathan Spier, 2022
-# Martin Trigaux, 2022
-# ExcaliberX <excaliberx@gmail.com>, 2022
-# Yihya Hugirat <hugirat@gmail.com>, 2022
+# Jonathan Spier, 2023
+# שהאב חוסיין <shhab89@gmail.com>, 2023
+# ExcaliberX <excaliberx@gmail.com>, 2023
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2023
+# NoaFarkash, 2023
+# Martin Trigaux, 2023
+# Yihya Hugirat <hugirat@gmail.com>, 2023
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023
+# yael terner, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:52+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: yael terner, 2024\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: he\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
@@ -33,19 +34,17 @@ msgid ""
 "            <span>Manual actions may be needed.</span>"
 msgstr ""
 ".\n"
-"            ייתכן שיהיה צורך בפעולות ידניות."
+"          <span> ייתכן שיהיה צורך בפעולות ידניות.</span>"
+
+#. module: event_sale
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
+msgid "<span class=\"o_stat_text\">Sale Order</span>"
+msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
 msgid "<span class=\"o_stat_text\">Sales</span>"
 msgstr "<span class=\"o_stat_text\">מכירות</span>"
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
-msgid ""
-"<span>Not enough seats available. All registrations were created as "
-"\"Unconfirmed\" and can be updated later on.</span>"
-msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
@@ -177,6 +176,8 @@ msgstr "נוצר ב-"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event__currency_id
+#: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__currency_id
+#: model:ir.model.fields,field_description:event_sale.field_event_type_ticket__currency_id
 msgid "Currency"
 msgstr "מטבע"
 
@@ -243,11 +244,6 @@ msgid "Event End Date"
 msgstr "תאריך סיום האירוע"
 
 #. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__event_ok
-msgid "Event Ok"
-msgstr "אירוע OK"
-
-#. module: event_sale
 #: model:ir.model,name:event_sale.model_event_registration
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__event_registration_id
 msgid "Event Registration"
@@ -287,7 +283,7 @@ msgstr "תאריך התחלת האירוע"
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_event_type_ticket
 msgid "Event Template Ticket"
-msgstr "תבניות כרטיסים לארוע"
+msgstr "תבניות כרטיסים לאירוע"
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_event_event_ticket
@@ -321,8 +317,8 @@ msgid "Exception:"
 msgstr "חריג:"
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__payment_status__free
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__payment_status__free
+#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__free
+#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__free
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Free"
 msgstr "פנוי"
@@ -353,28 +349,9 @@ msgid "Invoice Address"
 msgstr "כתובת לחשבונית"
 
 #. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_registration__is_paid
-#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__is_paid
-msgid "Is Paid"
-msgstr "שולם"
-
-#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__active
 msgid "Is registration active (not archived)?"
 msgstr ""
-
-#. module: event_sale
-#: model:ir.model,name:event_sale.model_account_move
-msgid "Journal Entry"
-msgstr "פקודת יומן"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_event_configurator____last_update
-#: model:ir.model.fields,field_description:event_sale.field_event_sale_report____last_update
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor____last_update
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor_line____last_update
-msgid "Last Modified on"
-msgstr "שינוי אחרון ב"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__write_uid
@@ -391,19 +368,9 @@ msgid "Last Updated on"
 msgstr "עדכון אחרון ב"
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_order_state__done
-msgid "Locked"
-msgstr "נעולה"
-
-#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_registration__utm_medium_id
 msgid "Medium"
 msgstr "אמצעי תקשורת"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__mobile
-msgid "Mobile"
-msgstr "נייד"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__name
@@ -421,14 +388,10 @@ msgid "Non-free tickets"
 msgstr ""
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__payment_status__to_pay
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__payment_status__to_pay
-msgid "Not Paid"
-msgstr "לא שולם"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor__seats_available_insufficient
-msgid "Not enough seats for all registrations"
+#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__to_pay
+#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__to_pay
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
+msgid "Not Sold"
 msgstr ""
 
 #. module: event_sale
@@ -438,27 +401,13 @@ msgstr "אישור"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_order_date
-#: model_terms:ir.ui.view,arch_db:event_sale.event_report_template_full_page_ticket_inherit_sale
 msgid "Order Date"
 msgstr "תאריך הזמנה"
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_report_template_full_page_ticket_inherit_sale
-msgid "Order Ref"
-msgstr "מזהה הזמנה"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__registration_id
 msgid "Original Registration"
 msgstr "הרשמה מקורית"
-
-#. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__payment_status__paid
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__payment_status__paid
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
-#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
-msgid "Paid"
-msgstr "שולם"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
@@ -471,8 +420,7 @@ msgid "Past Events"
 msgstr "אירועים שעברו"
 
 #. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_registration__payment_status
-#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__payment_status
+#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_status
 msgid "Payment Status"
 msgstr "סטטוס תשלום"
 
@@ -487,9 +435,17 @@ msgid "Phone"
 msgstr "טלפון"
 
 #. module: event_sale
+#. odoo-python
+#: code:addons/event_sale/models/sale_order.py:0
+#, python-format
+msgid ""
+"Please make sure all your event related lines are configured before "
+"confirming this order:%s"
+msgstr ""
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__price
 #: model:ir.model.fields,field_description:event_sale.field_event_type_ticket__price
-#: model_terms:ir.ui.view,arch_db:event_sale.event_report_template_full_page_ticket_inherit_sale
 msgid "Price"
 msgstr "מחיר"
 
@@ -505,13 +461,16 @@ msgid "Price Reduce Tax inc"
 msgstr "הורדת מחיר מיסים כלולים"
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__price_incl
+msgid "Price include"
+msgstr ""
+
+#. module: event_sale
 #: model:ir.model,name:event_sale.model_product_template
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__product_id
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__product_id
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__product_id
 #: model:ir.model.fields,field_description:event_sale.field_event_type_ticket__product_id
-#: model:ir.model.fields,field_description:event_sale.field_sale_order_template_line__product_id
-#: model:ir.model.fields,field_description:event_sale.field_sale_order_template_option__product_id
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Product"
 msgstr "מוצר"
@@ -538,16 +497,6 @@ msgid "Quotation Sent"
 msgstr "הצעת המחיר נשלחה"
 
 #. module: event_sale
-#: model:ir.model,name:event_sale.model_sale_order_template_line
-msgid "Quotation Template Line"
-msgstr "שורת תבנית הצעת מחיר"
-
-#. module: event_sale
-#: model:ir.model,name:event_sale.model_sale_order_template_option
-msgid "Quotation Template Option"
-msgstr "אפשרות תבנית הצעת מחיר"
-
-#. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_form
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
 msgid "Registration"
@@ -571,6 +520,11 @@ msgid "Registration revenues"
 msgstr ""
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__registration_ids
+msgid "Registrations"
+msgstr "הרשמות"
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__event_registration_ids
 msgid "Registrations to Edit"
 msgstr "הרשמות לעריכה"
@@ -588,7 +542,6 @@ msgstr "הכנסות"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_order_id
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_form
 msgid "Sale Order"
 msgstr "הזמנת לקוח"
@@ -602,6 +555,11 @@ msgstr "שורת פריט בהזמנה"
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_order_state
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Sale Order Status"
+msgstr ""
+
+#. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_registration__sale_status
+msgid "Sale Status"
 msgstr ""
 
 #. module: event_sale
@@ -650,9 +608,22 @@ msgid "Skip"
 msgstr "דלג"
 
 #. module: event_sale
+#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__sold
+#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__sold
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
+#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
+msgid "Sold"
+msgstr "נמכר"
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_registration__utm_source_id
 msgid "Source"
 msgstr "מקור"
+
+#. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_registration__state
+msgid "Status"
+msgstr "סטטוס"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
@@ -672,7 +643,7 @@ msgstr ""
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
 msgid "Total sales for this event"
-msgstr "סך המכירות לאירוע זה"
+msgstr "סה\"כ מכירות לאירוע זה"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
@@ -683,6 +654,15 @@ msgstr "עסקה"
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__event_registration_state__draft
 msgid "Unconfirmed"
 msgstr "לא מאושר"
+
+#. module: event_sale
+#: model:ir.model.fields,help:event_sale.field_event_registration__state
+msgid ""
+"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
+"Registered: registrations considered taken by a client\n"
+"Attended: registrations for which the attendee attended the event\n"
+"Cancelled: registrations cancelled manually"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_price_untaxed

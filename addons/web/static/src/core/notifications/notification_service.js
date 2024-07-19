@@ -25,14 +25,20 @@ const AUTOCLOSE_DELAY = 4000;
  */
 
 export const notificationService = {
+    notificationContainer: NotificationContainer,
+
     start() {
         let notifId = 0;
         const notifications = reactive({});
 
-        registry.category("main_components").add("NotificationContainer", {
-            Component: NotificationContainer,
-            props: { notifications },
-        });
+        registry.category("main_components").add(
+            this.notificationContainer.name,
+            {
+                Component: this.notificationContainer,
+                props: { notifications },
+            },
+            { sequence: 100 }
+        );
 
         /**
          * @param {string} message
@@ -45,16 +51,43 @@ export const notificationService = {
             const sticky = props.sticky;
             delete props.sticky;
             delete props.onClose;
+            let closeTimeout;
+            const refresh = sticky
+                ? () => {}
+                : () => {
+                      closeTimeout = browser.setTimeout(closeFn, AUTOCLOSE_DELAY);
+                  };
+            const freeze = sticky
+                ? () => {}
+                : () => {
+                      browser.clearTimeout(closeTimeout);
+                  };
+            props.refresh = refreshAll;
+            props.freeze = freezeAll;
             const notification = {
                 id,
                 props,
                 onClose: options.onClose,
+                refresh,
+                freeze,
             };
             notifications[id] = notification;
             if (!sticky) {
-                browser.setTimeout(closeFn, AUTOCLOSE_DELAY);
+                closeTimeout = browser.setTimeout(closeFn, AUTOCLOSE_DELAY);
             }
             return closeFn;
+        }
+
+        function refreshAll() {
+            for (const id in notifications) {
+                notifications[id].refresh();
+            }
+        }
+
+        function freezeAll() {
+            for (const id in notifications) {
+                notifications[id].freeze();
+            }
         }
 
         function close(id) {

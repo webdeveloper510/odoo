@@ -152,7 +152,15 @@ class TestHttp(http.Controller):
     # =====================================================
     @http.route('/test_http/geoip', type='http', auth='none')
     def geoip(self):
-        return str(request.geoip)
+        return json.dumps({
+            'city': request.geoip.city.name,
+            'country_code': request.geoip.country.iso_code or request.geoip.continent.code,
+            'country_name': request.geoip.country.name or request.geoip.continent.name,
+            'latitude': request.geoip.location.latitude,
+            'longitude': request.geoip.location.longitude,
+            'region': request.geoip.subdivisions[0].iso_code if request.geoip.subdivisions else None,
+            'time_zone': request.geoip.location.time_zone,
+        })
 
     @http.route('/test_http/save_session', type='http', auth='none')
     def touch(self):
@@ -202,3 +210,14 @@ class TestHttp(http.Controller):
             raise SerializationFailureError()
 
         return data.decode()
+
+    # =====================================================
+    # Security
+    # =====================================================
+    @http.route('/test_http/httprequest_attrs', type='http', auth='none')
+    def request_attrs(self):
+        return json.dumps(dir(request.httprequest))
+
+    @http.route('/test_http/httprequest_environ', type='http', auth='none')
+    def request_environ(self):
+        return json.dumps(list(request.httprequest.environ.keys()))

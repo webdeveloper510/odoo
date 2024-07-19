@@ -1,6 +1,5 @@
 /** @odoo-module **/
 
-import { Component, xml } from "@odoo/owl";
 import {
     addRow,
     click,
@@ -17,6 +16,7 @@ import { editSearch, validateSearch } from "@web/../tests/search/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
+import { Deferred } from "@web/core/utils/concurrency";
 import { session } from "@web/session";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { companyService } from "@web/webclient/company_service";
@@ -221,7 +221,7 @@ QUnit.module("Fields", (hooks) => {
     QUnit.module("Many2ManyField");
 
     QUnit.test("many2many kanban: edition", async function (assert) {
-        assert.expect(31);
+        assert.expect(29);
 
         serverData.views = {
             "partner_type,false,form": '<form><field name="display_name"/></form>',
@@ -259,37 +259,41 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_kw/partner_type/write") {
+                if (
+                    route === "/web/dataset/call_kw/partner_type/web_save" &&
+                    args.args[0].length !== 0
+                ) {
                     assert.strictEqual(
                         args.args[1].display_name,
                         "new name",
                         "should write 'new_name'"
                     );
                 }
-                if (route === "/web/dataset/call_kw/partner_type/create") {
+                if (
+                    route === "/web/dataset/call_kw/partner_type/web_save" &&
+                    args.args[0].length === 0
+                ) {
                     assert.strictEqual(
-                        args.args[0].display_name,
+                        args.args[1].display_name,
                         "A new type",
                         "should create 'A new type'"
                     );
                 }
-                if (route === "/web/dataset/call_kw/partner/write") {
-                    var commands = args.args[1].timmy;
-                    assert.strictEqual(commands.length, 1, "should have generated one command");
-                    assert.strictEqual(
-                        commands[0][0],
-                        6,
-                        "generated command should be REPLACE WITH"
-                    );
+                if (
+                    route === "/web/dataset/call_kw/partner/web_save" &&
+                    args.args[0].length !== 0
+                ) {
+                    const commands = args.args[1].timmy;
                     // get the created type's id
-                    var createdType = _.findWhere(serverData.models.partner_type.records, {
-                        display_name: "A new type",
+                    const createdType = serverData.models.partner_type.records.find((record) => {
+                        return record.display_name === "A new type";
                     });
-                    var ids = _.sortBy([12, 15, 18].concat(createdType.id), _.identity.bind(_));
-                    assert.ok(
-                        _.isEqual(_.sortBy(commands[0][2], _.identity.bind(_)), ids),
-                        "new value should be " + ids
-                    );
+                    assert.deepEqual(commands, [
+                        [4, 15],
+                        [4, 18],
+                        [4, createdType.id],
+                        [3, 14],
+                    ]);
                 }
             },
         });
@@ -631,7 +635,7 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test(
-        "many2many list (non editable): create a new record and click on action button",
+        "many2many list (non editable): create a new record and click on action button 1",
         async function (assert) {
             serverData.views = {
                 "partner_type,false,list": '<tree><field name="display_name"/></tree>',
@@ -658,8 +662,8 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
                 mockRPC: async (route, args) => {
                     assert.step(args.method);
-                    if (args.method === "create") {
-                        assert.deepEqual(args.args[0], { display_name: "Hello" });
+                    if (args.method === "web_save") {
+                        assert.deepEqual(args.args[1], { display_name: "Hello" });
                     }
                 },
             });
@@ -672,20 +676,25 @@ QUnit.module("Fields", (hooks) => {
 
             let modal = target.querySelector(".modal");
             await click(modal, ".o_create_button");
-            assert.verifySteps(["get_views", "read", "get_views", "web_search_read", "onchange"]);
-
+            assert.verifySteps([
+                "get_views",
+                "web_read",
+                "get_views",
+                "web_search_read",
+                "onchange",
+            ]);
             modal = target.querySelector(".modal");
             await editInput(modal, "[name='display_name'] input", "Hello");
             assert.strictEqual(modal.querySelector("[name='display_name'] input").value, "Hello");
 
             await click(modal, ".o_statusbar_buttons [name='myaction']");
             assert.strictEqual(modal.querySelector("[name='display_name'] input").value, "Hello");
-            assert.verifySteps(["create", "read", "action: myaction"]);
+            assert.verifySteps(["web_save", "action: myaction"]);
         }
     );
 
     QUnit.test(
-        "many2many list (non editable): create a new record and click on action button",
+        "many2many list (non editable): create a new record and click on action button 2",
         async function (assert) {
             serverData.views = {
                 "partner_type,false,list": '<tree><field name="display_name"/></tree>',
@@ -712,8 +721,8 @@ QUnit.module("Fields", (hooks) => {
                 resId: 1,
                 mockRPC: async (route, args) => {
                     assert.step(args.method);
-                    if (args.method === "create") {
-                        assert.deepEqual(args.args[0], { display_name: "Hello" });
+                    if (args.method === "web_save" && args.args[0].length === 0) {
+                        assert.deepEqual(args.args[1], { display_name: "Hello" });
                     }
                 },
             });
@@ -726,7 +735,13 @@ QUnit.module("Fields", (hooks) => {
 
             let modal = target.querySelector(".modal");
             await click(modal, ".o_create_button");
-            assert.verifySteps(["get_views", "read", "get_views", "web_search_read", "onchange"]);
+            assert.verifySteps([
+                "get_views",
+                "web_read",
+                "get_views",
+                "web_search_read",
+                "onchange",
+            ]);
 
             modal = target.querySelector(".modal");
             await editInput(modal, "[name='display_name'] input", "Hello");
@@ -752,7 +767,7 @@ QUnit.module("Fields", (hooks) => {
                 ["Hello (edited)"]
             );
 
-            assert.verifySteps(["create", "read", "action: myaction", "write", "read", "read"]);
+            assert.verifySteps(["web_save", "action: myaction", "web_save", "web_read"]);
         }
     );
 
@@ -795,8 +810,6 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("many2many list (editable): edition", async function (assert) {
-        assert.expect(29);
-
         serverData.models.partner.records[0].timmy = [12, 14];
         serverData.models.partner_type.records.push({ id: 15, display_name: "bronze", color: 6 });
         serverData.models.partner_type.fields.float_field = { string: "Float", type: "float" };
@@ -819,9 +832,7 @@ QUnit.module("Fields", (hooks) => {
                     </field>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method !== "get_views") {
-                    assert.step(_.last(route.split("/")));
-                }
+                assert.step(args.method);
                 if (args.method === "write") {
                     assert.deepEqual(args.args[1].timmy, [
                         [6, false, [12, 15]],
@@ -894,7 +905,7 @@ QUnit.module("Fields", (hooks) => {
             "new name",
             "value of subrecord should have been updated"
         );
-        assert.verifySteps(["read", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
 
         // add new subrecords
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
@@ -942,11 +953,10 @@ QUnit.module("Fields", (hooks) => {
         );
 
         assert.verifySteps([
+            "get_views", // list view in dialog
             "web_search_read", // list view in dialog
-            "read", // relational field (updated)
-            "write", // save main record
-            "read", // main record
-            "read", // relational field
+            "web_read", // relational field (updated)
+            "web_save", // save main record
         ]);
     });
 
@@ -1049,14 +1059,20 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <field name="timmy" widget="many2many" can_create="false" can_write="false"/>
+                    <field name="timmy" widget="many2many" can_create="False" can_write="False"/>
                 </form>`,
             mockRPC(route, args) {
-                if (route === "/web/dataset/call_kw/partner/create") {
-                    assert.deepEqual(args.args[0], { timmy: [[6, false, [12]]] });
+                if (
+                    route === "/web/dataset/call_kw/partner/web_save" &&
+                    args.args[0].length === 0
+                ) {
+                    assert.deepEqual(args.args[1], { timmy: [[4, 12]] });
                 }
-                if (route === "/web/dataset/call_kw/partner/write") {
-                    assert.deepEqual(args.args[1], { timmy: [[6, false, []]] });
+                if (
+                    route === "/web/dataset/call_kw/partner/web_save" &&
+                    args.args[0].length !== 0
+                ) {
+                    assert.deepEqual(args.args[1], { timmy: [[3, 12]] });
                 }
             },
         });
@@ -1376,7 +1392,10 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("many2many list: list of id as default value", async function (assert) {
-        serverData.models.partner.fields.turtles.default = [2, 3];
+        serverData.models.partner.fields.turtles.default = [
+            [4, 2],
+            [4, 3],
+        ];
         serverData.models.partner.fields.turtles.type = "many2many";
 
         await makeView({
@@ -1399,6 +1418,49 @@ QUnit.module("Fields", (hooks) => {
             "should have loaded default data"
         );
     });
+
+    QUnit.test(
+        "context and domain dependent on an x2m must contain the list of current ids for the x2m",
+        async function (assert) {
+            assert.expect(2);
+
+            serverData.models.partner.fields.turtles.default = [
+                [4, 2],
+                [4, 3],
+            ];
+            serverData.models.partner.fields.turtles.type = "many2many";
+            serverData.views = {
+                "turtle,false,list": '<tree><field name="display_name"/></tree>',
+                "turtle,false,search": '<search><field name="display_name"/></search>',
+            };
+
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
+            <form>
+                <field name="turtles" context="{'test': turtles}" domain="[('id', 'in', turtles)]">
+                    <tree>
+                        <field name="turtle_foo"/>
+                    </tree>
+                </field>
+            </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "web_search_read") {
+                        assert.deepEqual(args.kwargs.domain, [
+                            "&",
+                            ["id", "in", [2, 3]],
+                            "!",
+                            ["id", "in", [2, 3]],
+                        ]);
+                        assert.deepEqual(args.kwargs.context.test, [2, 3]);
+                    }
+                },
+            });
+            await addRow(target);
+        }
+    );
 
     QUnit.test("many2many list with x2many: add a record", async function (assert) {
         serverData.models.partner_type.fields.m2m = {
@@ -1427,10 +1489,7 @@ QUnit.module("Fields", (hooks) => {
             resId: 1,
             mockRPC(route, args) {
                 if (args.method !== "get_views") {
-                    assert.step(_.last(route.split("/")) + " on " + args.model);
-                }
-                if (args.model === "turtle") {
-                    assert.step(JSON.stringify(args.args[0])); // the read ids
+                    assert.step(route.split("/").at(-1) + " on " + args.model);
                 }
             },
         });
@@ -1465,19 +1524,11 @@ QUnit.module("Fields", (hooks) => {
         );
 
         assert.verifySteps([
-            "read on partner",
+            "web_read on partner",
             "web_search_read on partner_type",
-            "read on turtle",
-            "[1,2,3]",
-            "read on partner_type",
-            "read on turtle",
-            "[1,2]",
+            "web_read on partner_type",
             "web_search_read on partner_type",
-            "read on turtle",
-            "[2,3]",
-            "read on partner_type",
-            "read on turtle",
-            "[2,3]",
+            "web_read on partner_type",
         ]);
     });
 
@@ -1536,18 +1587,69 @@ QUnit.module("Fields", (hooks) => {
                 assert.step(args.method);
             },
         });
-        assert.verifySteps(["get_views", "read", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
 
-        await click($(target).find("td.o_data_cell:first")[0]);
-        assert.verifySteps(["get_views", "read"]);
+        await click(target.querySelector("td.o_data_cell"));
+        assert.verifySteps(["get_views", "web_read"]);
 
-        await click($('.modal-body input[type="checkbox"]')[0]);
-        await click($(".modal .modal-footer .btn-primary").first()[0]);
-        assert.verifySteps(["write", "onchange", "read"]);
+        await click(target.querySelector(".modal-body input[type=checkbox]"));
+        await click(target.querySelector(".modal .modal-footer .btn-primary"));
+        assert.verifySteps(["web_save"]);
 
         // there is nothing left to save -> should not do a 'write' RPC
         await clickSave(target);
         assert.verifySteps([]);
+    });
+
+    QUnit.test("many2many concurrency edition", async function (assert) {
+        serverData.models.partner.fields.turtles.type = "many2many";
+        serverData.models.partner.onchanges.turtles = function () {};
+        serverData.models.turtle.records.push({
+            id: 4,
+            display_name: "Bloop",
+            turtle_bar: true,
+            turtle_foo: "Bloop",
+            partner_ids: [],
+        });
+        serverData.models.partner.records[0].turtles = [1, 2, 3, 4];
+        serverData.views = {
+            "turtle,false,list": '<tree><field name="display_name"/></tree>',
+            "turtle,false,search": '<search><field name="display_name" string="Name"/></search>',
+        };
+
+        const def = new Deferred();
+        let firstOnChange = false;
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="turtles">
+                        <tree>
+                            <field name="turtle_foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 1,
+            mockRPC: async (route, args) => {
+                if (args.method === "onchange") {
+                    if (!firstOnChange) {
+                        firstOnChange = true;
+                        await def;
+                    }
+                }
+            },
+        });
+        assert.containsN(target, ".o_data_row", 4);
+        await click(target.querySelector(".o_data_row .o_list_record_remove"));
+        await click(target.querySelector(".o_data_row .o_list_record_remove"));
+        await click(target, ".o_field_x2many_list_row_add a");
+        await click(target.querySelectorAll(".modal .o_data_row td.o_data_cell")[0]);
+        def.resolve();
+        await nextTick();
+        assert.containsN(target, ".o_data_row", 3);
     });
 
     QUnit.test(
@@ -1583,13 +1685,18 @@ QUnit.module("Fields", (hooks) => {
                             {},
                             [],
                             {
-                                turtle_trululu: "",
+                                turtle_foo: {},
+                                turtle_trululu: {
+                                    fields: {
+                                        display_name: {},
+                                    },
+                                },
                             },
                         ]);
                     }
                 },
             });
-            assert.verifySteps(["get_views", "read", "read"]);
+            assert.verifySteps(["get_views", "web_read"]);
 
             await addRow(target);
             assert.verifySteps(["get_views", "web_search_read"]);
@@ -1606,10 +1713,10 @@ QUnit.module("Fields", (hooks) => {
     QUnit.test("onchange with 40+ commands for a many2many", async function (assert) {
         // this test ensures that the basic_model correctly handles more LINK_TO
         // commands than the limit of the dataPoint (40 for x2many kanban)
-        assert.expect(25);
+        assert.expect(20);
 
         // create a lot of partner_types that will be linked by the onchange
-        var commands = [[5]];
+        const commands = [];
         for (var i = 0; i < 45; i++) {
             var id = 100 + i;
             serverData.models.partner_type.records.push({ id: id, display_name: "type " + id });
@@ -1642,22 +1749,20 @@ QUnit.module("Fields", (hooks) => {
             resId: 1,
             mockRPC(route, args) {
                 assert.step(args.method);
-                if (args.method === "write") {
-                    assert.strictEqual(args.args[1].timmy[0][0], 6, "should send a command 6");
-                    assert.strictEqual(
-                        args.args[1].timmy[0][2].length,
-                        45,
-                        "should replace with 45 ids"
+                if (args.method === "web_save") {
+                    assert.deepEqual(
+                        args.args[1].timmy,
+                        commands.map((c) => [c[0], c[1]]),
+                        "should send all commands"
                     );
                 }
             },
         });
 
-        assert.verifySteps(["get_views", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
 
         await editInput(target, ".o_field_widget[name=foo] input", "trigger onchange");
-
-        assert.verifySteps(["onchange", "read"]);
+        assert.verifySteps(["onchange"]);
         assert.strictEqual(
             $(target).find(".o_x2m_control_panel .o_pager_counter").text().trim(),
             "1-40 / 45",
@@ -1668,9 +1773,8 @@ QUnit.module("Fields", (hooks) => {
             40,
             "there should be 40 records displayed on page 1"
         );
-
         await click($(target).find(".o_field_widget[name=timmy] .o_pager_next")[0]);
-        assert.verifySteps(["read"]);
+        assert.verifySteps([]);
         assert.strictEqual(
             $(target).find(".o_x2m_control_panel .o_pager_counter").text().trim(),
             "41-45 / 45",
@@ -1719,21 +1823,15 @@ QUnit.module("Fields", (hooks) => {
             "there should be 40 records displayed on page 1"
         );
 
-        assert.verifySteps(["write", "read", "read", "read"]);
+        assert.verifySteps(["web_save", "web_read"]);
     });
 
     QUnit.test("default_get, onchange, onchange on m2m", async function (assert) {
         assert.expect(1);
 
-        serverData.models.partner.onchanges.int_field = function (obj) {
-            if (obj.int_field === 2) {
-                assert.deepEqual(obj.timmy, [
-                    [6, false, [12]],
-                    [1, 12, { display_name: "gold" }],
-                ]);
-            }
-            obj.timmy = [[5], [1, 12, { display_name: "gold" }]];
-        };
+        serverData.models.partner.onchanges.int_field = function () {};
+
+        let firstOnChange = true;
 
         await makeView({
             type: "form",
@@ -1750,14 +1848,30 @@ QUnit.module("Fields", (hooks) => {
                         <field name="int_field"/>
                     </sheet>
                 </form>`,
+            mockRPC(route, args) {
+                if (args.method === "onchange") {
+                    if (firstOnChange) {
+                        firstOnChange = false;
+                        return {
+                            value: {
+                                timmy: [[1, 12, { display_name: "gold" }]],
+                            },
+                        };
+                    } else {
+                        assert.deepEqual(args.args[1], {
+                            display_name: false,
+                            int_field: 2,
+                            timmy: [[1, 12, { display_name: "gold" }]],
+                        });
+                    }
+                }
+            },
         });
 
         await editInput(target, ".o_field_widget[name=int_field] input", 2);
     });
 
     QUnit.test("many2many list add *many* records, remove, re-add", async function (assert) {
-        assert.expect(5);
-
         serverData.models.partner.fields.timmy.domain = [["color", "=", 2]];
         serverData.models.partner.fields.timmy.onChange = true;
         serverData.models.partner_type.fields.product_ids = {
@@ -1766,8 +1880,8 @@ QUnit.module("Fields", (hooks) => {
             relation: "product",
         };
 
-        for (var i = 0; i < 50; i++) {
-            var new_record_partner_type = { id: 100 + i, display_name: "batch" + i, color: 2 };
+        for (let i = 0; i < 50; i++) {
+            const new_record_partner_type = { id: 100 + i, display_name: "batch" + i, color: 2 };
             serverData.models.partner_type.records.push(new_record_partner_type);
         }
 
@@ -1805,7 +1919,7 @@ QUnit.module("Fields", (hooks) => {
         // First round: add 51 records in batch
         await click(target.querySelector(".o_field_x2many_list_row_add a"));
 
-        var $modal = $(".modal-lg");
+        let $modal = $(".modal-lg");
 
         assert.equal($modal.length, 1, "There should be one modal");
 
@@ -1820,26 +1934,43 @@ QUnit.module("Fields", (hooks) => {
             "We should have added all the records present in the search view to the m2m field"
         ); // the 50 in batch + 'gold'
 
+        assert.containsNone(
+            target,
+            ".o_field_many2many.o_field_widget .o_field_x2many.o_field_x2many_list .o_cp_pager",
+            "pager should not be displayed"
+        );
+
         await clickSave(target);
 
+        assert.containsOnce(
+            target,
+            ".o_field_many2many.o_field_widget .o_field_x2many.o_field_x2many_list .o_cp_pager",
+            "pager should not be displayed"
+        );
+
+        const pagerValue = target.querySelector(
+            ".o_field_many2many.o_field_widget .o_field_x2many.o_field_x2many_list .o_pager_value"
+        );
+        assert.strictEqual(pagerValue.textContent, "1-40", "The pager should be updated.");
+
         // Secound round: remove one record
-        var trash_buttons = $(target).find(
+        const trash_buttons = $(target).find(
             ".o_field_many2many.o_field_widget .o_field_x2many.o_field_x2many_list .o_list_record_remove"
         );
 
         await click(trash_buttons.first()[0]);
 
-        var pager_limit = $(target).find(
+        const pager_limit = $(target).find(
             ".o_field_many2many.o_field_widget .o_field_x2many.o_field_x2many_list .o_pager_limit"
         );
-        assert.equal(pager_limit.text(), "50", "We should have 50 records in the m2m field");
+        assert.strictEqual(pager_limit.text(), "50", "We should have 50 records in the m2m field");
 
         // Third round: re-add 1 records
         await click($(target).find(".o_field_x2many_list_row_add a")[0]);
 
         $modal = $(".modal-lg");
 
-        assert.equal($modal.length, 1, "There should be one modal");
+        assert.strictEqual($modal.length, 1, "There should be one modal");
 
         await click($modal.find("thead input[type=checkbox]")[0]);
         await nextTick();
@@ -1848,8 +1979,8 @@ QUnit.module("Fields", (hooks) => {
 
         assert.strictEqual(
             $(target).find(".o_data_row").length,
-            51,
-            "We should have 51 records in the m2m field"
+            41,
+            "We should have 41 records in the m2m field"
         );
     });
 
@@ -1930,12 +2061,13 @@ QUnit.module("Fields", (hooks) => {
     });
 
     QUnit.test("many2many basic keys in field evalcontext -- in list", async (assert) => {
-        assert.expect(6);
+        assert.expect(5);
         serverData.models.partner_type.fields.partner_id = {
             string: "Partners",
             type: "many2one",
             relation: "partner",
         };
+        serverData.models.partner.records.push({ id: 7, display_name: "default partner" });
         serverData.views = {
             "partner_type,false,form": `<form><field name="partner_id" /></form>`,
         };
@@ -1963,13 +2095,12 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <tree editable="top">
-                    <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': active_id, 'ids': active_ids, 'model': active_model, 'company_id': current_company_id}"/>
+                    <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': uid, 'allowed_company_ids': allowed_company_ids, 'company_id': current_company_id}"/>
                 </tree>`,
             mockRPC(route, args) {
                 if (args.method === "onchange") {
-                    assert.strictEqual(args.kwargs.context.default_partner_id, 1);
-                    assert.strictEqual(args.kwargs.context.model, "partner");
-                    assert.deepEqual(args.kwargs.context.ids, [1]);
+                    assert.strictEqual(args.kwargs.context.uid, 7);
+                    assert.deepEqual(args.kwargs.context.allowed_company_ids, [3]);
                     assert.strictEqual(args.kwargs.context.company_id, 3);
                 }
             },
@@ -1977,22 +2108,22 @@ QUnit.module("Fields", (hooks) => {
 
         await click(target.querySelector(".o_data_cell"));
         await editInput(target, ".o_field_many2many_selection input", "indianapolis");
-        await nextTick();
         await clickOpenedDropdownItem(target, "timmy", "Create and edit...");
         assert.containsOnce(target, ".modal .o_field_many2one");
         assert.strictEqual(
             target.querySelector(".modal .o_field_many2one input").value,
-            "first record"
+            "default partner"
         );
     });
 
     QUnit.test("many2many basic keys in field evalcontext -- in form", async (assert) => {
-        assert.expect(6);
+        assert.expect(5);
         serverData.models.partner_type.fields.partner_id = {
             string: "Partners",
             type: "many2one",
             relation: "partner",
         };
+        serverData.models.partner.records.push({ id: 7, display_name: "default partner" });
         serverData.views = {
             "partner_type,false,form": `<form><field name="partner_id" /></form>`,
         };
@@ -2021,13 +2152,12 @@ QUnit.module("Fields", (hooks) => {
             serverData,
             arch: `
                 <form>
-                    <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': active_id, 'ids': active_ids, 'model': active_model, 'company_id': current_company_id}"/>
+                    <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': uid, 'allowed_company_ids': allowed_company_ids, 'company_id': current_company_id}"/>
                 </form>`,
             mockRPC(route, args) {
                 if (args.method === "onchange") {
-                    assert.strictEqual(args.kwargs.context.default_partner_id, 1);
-                    assert.strictEqual(args.kwargs.context.model, "partner");
-                    assert.deepEqual(args.kwargs.context.ids, [1]);
+                    assert.strictEqual(args.kwargs.context.default_partner_id, 7);
+                    assert.deepEqual(args.kwargs.context.allowed_company_ids, [3]);
                     assert.strictEqual(args.kwargs.context.company_id, 3);
                 }
             },
@@ -2039,19 +2169,20 @@ QUnit.module("Fields", (hooks) => {
         assert.containsOnce(target, ".modal .o_field_many2one");
         assert.strictEqual(
             target.querySelector(".modal .o_field_many2one input").value,
-            "first record"
+            "default partner"
         );
     });
 
     QUnit.test(
         "many2many basic keys in field evalcontext -- in a x2many in form",
         async (assert) => {
-            assert.expect(6);
+            assert.expect(5);
             serverData.models.partner_type.fields.partner_id = {
                 string: "Partners",
                 type: "many2one",
                 relation: "partner",
             };
+            serverData.models.partner.records.push({ id: 7, display_name: "default partner" });
             serverData.views = {
                 "partner_type,false,form": `<form><field name="partner_id" /></form>`,
             };
@@ -2084,15 +2215,14 @@ QUnit.module("Fields", (hooks) => {
                     <form>
                     <field name="p">
                         <tree editable="top">
-                            <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': active_id, 'ids': active_ids, 'model': active_model, 'company_id': current_company_id}"/>
+                            <field name="timmy" widget="many2many_tags" context="{ 'default_partner_id': uid, 'allowed_company_ids': allowed_company_ids, 'company_id': current_company_id}"/>
                         </tree>
                     </field>
                     </form>`,
                 mockRPC(route, args) {
                     if (args.method === "onchange") {
-                        assert.strictEqual(args.kwargs.context.default_partner_id, 1);
-                        assert.strictEqual(args.kwargs.context.model, "partner");
-                        assert.deepEqual(args.kwargs.context.ids, [1]);
+                        assert.strictEqual(args.kwargs.context.default_partner_id, 7);
+                        assert.deepEqual(args.kwargs.context.allowed_company_ids, [3]);
                         assert.strictEqual(args.kwargs.context.company_id, 3);
                     }
                 },
@@ -2104,38 +2234,8 @@ QUnit.module("Fields", (hooks) => {
             assert.containsOnce(target, ".modal .o_field_many2one");
             assert.strictEqual(
                 target.querySelector(".modal .o_field_many2one input").value,
-                "first record"
+                "default partner"
             );
         }
     );
-
-    QUnit.test("many2many field calling replaceWith (add + remove)", async function (assert) {
-        serverData.models.partner.records[0].p = [1];
-
-        class MyX2Many extends Component {
-            onClick() {
-                this.props.value.replaceWith([2, 3]);
-            }
-        }
-        MyX2Many.template = xml`
-            <span class="ids" t-esc="this.props.value.resIds"/>
-            <button class="my_btn" t-on-click="onClick">To id</button>`;
-
-        registry.category("fields").add("my_x2many", MyX2Many);
-
-        await makeView({
-            type: "form",
-            resModel: "turtle",
-            serverData,
-            arch: `
-                <form>
-                    <field name="partner_ids" widget="my_x2many"/>
-                </form>`,
-            resId: 2,
-        });
-
-        assert.strictEqual(target.querySelector(".ids").innerText, "2,4");
-        await click(target.querySelector(".my_btn"));
-        assert.strictEqual(target.querySelector(".ids").innerText, "2,3");
-    });
 });

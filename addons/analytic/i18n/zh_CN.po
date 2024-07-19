@@ -3,20 +3,18 @@
 # 	* analytic
 # 
 # Translators:
-# keecome <7017511@qq.com>, 2022
-# 稀饭~~ <wangwhai@qq.com>, 2022
-# Emily Jia <eji@odoo.com>, 2023
-# Martin Trigaux, 2023
-# Chloe Wang, 2023
+# 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2023
 # Jeffery CHEN <jeffery9@gmail.com>, 2023
+# Chloe Wang, 2023
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Jeffery CHEN <jeffery9@gmail.com>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,13 +30,6 @@ msgid "%s (copy)"
 msgstr "%s（副本）"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
-#, python-format
-msgid "(no accounts)"
-msgstr "(无账户)"
-
-#. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 msgid "<span class=\"o_stat_text\">Analytic Accounts</span>"
 msgstr "<span class=\"o_stat_text\">分析账户</span>"
@@ -46,7 +37,23 @@ msgstr "<span class=\"o_stat_text\">分析账户</span>"
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 msgid "<span class=\"o_stat_text\">Gross Margin</span>"
-msgstr "<span class=\"o_stat_text\">毛利</span>"
+msgstr "<span class=\"o_stat_text\">毛利率</span>"
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_plan.py:0
+#, python-format
+msgid ""
+"A 'Project' plan needs to exist and its id needs to be set as "
+"`analytic.project_plan` in the system variables"
+msgstr "\"项目\" 计划必须存在，其 id 必须在系统变量中设置为 \"analytic.project_plan\""
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Account field"
+msgstr "账户字段"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__account_ids
@@ -56,12 +63,24 @@ msgstr "账户"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_needaction
 msgid "Action Needed"
-msgstr "需要动作"
+msgstr "待处理"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__active
 msgid "Active"
-msgstr "启用"
+msgstr "已启用"
+
+#. module: analytic
+#: model:account.analytic.account,name:analytic.analytic_active_account
+msgid "Active account"
+msgstr "启用账户"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "Add a Line"
+msgstr "添加一行"
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.action_account_analytic_account_form
@@ -87,20 +106,24 @@ msgstr "金额"
 
 #. module: analytic
 #. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Amount field"
+msgstr "账户字段"
+
+#. module: analytic
+#. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_distribution
-#: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution
 #, python-format
 msgid "Analytic"
-msgstr "分析会计"
+msgstr "分析"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_account
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__name
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__account_id
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__auto_account_id
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_search
-#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Analytic Account"
 msgstr "分析账户"
 
@@ -122,9 +145,18 @@ msgid "Analytic Accounts Count"
 msgstr "分析帐户计数"
 
 #. module: analytic
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_distribution
+#: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution
+msgid "Analytic Distribution"
+msgstr "分析分配"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 #: model:ir.model,name:analytic.model_account_analytic_distribution_model
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_tree_view
+#, python-format
 msgid "Analytic Distribution Model"
 msgstr "分析分配模型"
 
@@ -137,19 +169,12 @@ msgstr "分析分配模型"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_distribution_search
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution_search
 msgid "Analytic Distribution Search"
-msgstr "分析分布搜索"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Analytic Distribution Template"
-msgstr "分析分配模板"
+msgstr "分析分配搜索"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_form
 msgid "Analytic Item"
-msgstr "分析项"
+msgstr "分析项目"
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.account_analytic_line_action_entries
@@ -157,7 +182,7 @@ msgstr "分析项"
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_pivot
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_tree
 msgid "Analytic Items"
-msgstr "分析项"
+msgstr "分析项目"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_line
@@ -176,14 +201,13 @@ msgstr "分析混入"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__analytic_plan_id
-#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Analytic Plan"
-msgstr "分析计划"
+msgstr "分析方案"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_applicability
 msgid "Analytic Plan's Applicabilities"
-msgstr "分析计划的适用范围"
+msgstr "分析方案的适用性"
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.account_analytic_plan_action
@@ -191,18 +215,13 @@ msgstr "分析计划的适用范围"
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_tree_view
 msgid "Analytic Plans"
-msgstr "分析计划"
+msgstr "分析方案"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_precision
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_precision
 msgid "Analytic Precision"
 msgstr "分析精度"
-
-#. module: analytic
-#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
-msgid "Analytic distribution to apply"
-msgstr "要应用的分析分配"
 
 #. module: analytic
 #. odoo-python
@@ -216,20 +235,20 @@ msgstr "分析帐户"
 #: code:addons/analytic/models/analytic_plan.py:0
 #, python-format
 msgid "Analytical Plans"
-msgstr "分析计划"
+msgstr "分析方案"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__applicability
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__applicability_ids
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 msgid "Applicability"
-msgstr "适用范围"
+msgstr "适用性"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_search
 msgid "Archived"
-msgstr "已归档"
+msgstr "已存档"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_search
@@ -255,7 +274,14 @@ msgstr "余额"
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_kanban
 msgid "Balance:"
-msgstr "余额:"
+msgstr "余额："
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Business domain"
+msgstr "商业域名"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_partners_camp_to_camp
@@ -280,7 +306,7 @@ msgstr "分析会计账户表"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__children_count
 msgid "Children Plans Count"
-msgstr "下级计划计数"
+msgstr "下级方案计数"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__children_ids
@@ -290,7 +316,14 @@ msgstr "下级"
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_plan_action
 msgid "Click to add a new analytic account plan."
-msgstr "点击添加新的分析帐户计划."
+msgstr "点击添加新的分析帐户方案."
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "Close"
+msgstr "关闭"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__color
@@ -300,7 +333,7 @@ msgstr "颜色"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__color
 msgid "Color Index"
-msgstr "颜色索引"
+msgstr "颜色指标"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_commercial_marketing
@@ -309,9 +342,9 @@ msgstr "商业和营销"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__company_id
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__company_id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__company_id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__company_id
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__company_id
 msgid "Company"
 msgstr "公司"
 
@@ -319,6 +352,11 @@ msgstr "公司"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__complete_name
 msgid "Complete Name"
 msgstr "完整名称"
+
+#. module: analytic
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
+msgid "Conditions to meet"
+msgstr "需满足的条件"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_res_config_settings
@@ -330,7 +368,7 @@ msgstr "配置设置"
 msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
-msgstr "计量单位转换只能基于转换比例对同一个类别进行转换。"
+msgstr "仅同类别的计量单位可以互相转换。根据比例进行转换。"
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action
@@ -358,7 +396,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__create_date
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__create_date
 msgid "Created on"
-msgstr "创建时间"
+msgstr "创建日期"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__credit
@@ -397,7 +435,7 @@ msgstr "支出"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_agrolait
 msgid "Deco Addict"
-msgstr "Deco Addict"
+msgstr "装饰成瘾者"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__default_applicability
@@ -407,18 +445,30 @@ msgstr "默认范围"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_deltapc
 msgid "Delta PC"
-msgstr "Delta PC"
+msgstr "台达电脑"
+
+#. module: analytic
+#: model:account.analytic.plan,name:analytic.analytic_plan_departments
+msgid "Departments"
+msgstr "部门"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__name
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__description
 msgid "Description"
-msgstr "说明"
+msgstr "描述"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_desertic_hispafuentes
 msgid "Desertic - Hispafuentes"
 msgstr "沙漠 - 伊斯帕富恩特斯"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Disable save"
+msgstr "禁用保存"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__display_name
@@ -430,9 +480,14 @@ msgid "Display Name"
 msgstr "显示名称"
 
 #. module: analytic
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
+msgid "Distribution to apply"
+msgstr "要应用的分布"
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__business_domain
 msgid "Domain"
-msgstr "领域"
+msgstr "域"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_follower_ids
@@ -442,7 +497,14 @@ msgstr "关注者"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "关注者(业务伙伴)"
+msgstr "关注者（合作伙伴）"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Force applicability"
+msgstr "强制适用性"
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.account_analytic_line_action
@@ -453,12 +515,12 @@ msgstr "毛利"
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_search
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Group By..."
-msgstr "分组"
+msgstr "分组原则......"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__has_message
 msgid "Has Message"
-msgstr "有信息"
+msgstr "有消息"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__id
@@ -472,12 +534,12 @@ msgstr "ID"
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_account__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "确认后, 出现提示消息."
+msgstr "如果勾选此项，则需要查看新消息。"
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_account__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "如果勾选此项， 某些消息将会产生传递错误。"
+msgstr "如果勾选此项， 某些消息将出现发送错误。"
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action
@@ -492,25 +554,14 @@ msgstr ""
 "                您的利润。"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Invalid"
-msgstr "无效"
+#: model:account.analytic.plan,name:analytic.analytic_plan_internal
+msgid "Internal"
+msgstr "内部"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_is_follower
 msgid "Is Follower"
 msgstr "是关注者"
-
-#. module: analytic
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_account____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan____last_update
-msgid "Last Modified on"
-msgstr "最后修改时间"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__write_uid
@@ -528,14 +579,7 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__write_date
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__write_date
 msgid "Last Updated on"
-msgstr "最后更新时间"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Loading..."
-msgstr "正在加载..."
+msgstr "上次更新日期"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_think_big_systems
@@ -545,26 +589,18 @@ msgstr "木材公司"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_luminous_technologies
 msgid "Luminous Technologies"
-msgstr "Luminous Technologies"
+msgstr "发光技术"
 
 #. module: analytic
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "主要附件"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__applicability__mandatory
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_plan__default_applicability__mandatory
-#, python-format
 msgid "Mandatory"
 msgstr "必填"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_has_error
 msgid "Message Delivery error"
-msgstr "消息传递错误"
+msgstr "消息发送错误"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_ids
@@ -574,7 +610,7 @@ msgstr "消息"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_millennium_industries
 msgid "Millennium Industries"
-msgstr "千禧产业"
+msgstr "Millennium Industries"
 
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__business_domain__general
@@ -593,13 +629,6 @@ msgid "Nebula"
 msgstr "星云"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "No Analytic Accounts for this plan"
-msgstr "没有分析账户的计划"
-
-#. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action_entries
 msgid "No activity yet"
 msgstr "还没有活动"
@@ -613,13 +642,13 @@ msgstr "这个账户目前没有活动"
 #. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
 #, python-format
-msgid "No plans available"
-msgstr "没有可用的计划"
+msgid "No analytic plans found"
+msgstr "未找到分析方案"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_needaction_counter
 msgid "Number of Actions"
-msgstr "动作数量"
+msgstr "操作数量"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_has_error_counter
@@ -634,14 +663,7 @@ msgstr "需要采取行动的消息数量"
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_account__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "发送错误的消息数量"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "OK"
-msgstr "OK"
+msgstr "发送错误的消息的数量"
 
 #. module: analytic
 #. odoo-python
@@ -660,14 +682,11 @@ msgstr "运营成本"
 #: code:addons/analytic/models/analytic_mixin.py:0
 #, python-format
 msgid "Operation not supported"
-msgstr "操作不支持"
+msgstr "不支持的操作"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__applicability__optional
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_plan__default_applicability__optional
-#, python-format
 msgid "Optional"
 msgstr "可选的"
 
@@ -689,13 +708,13 @@ msgstr "上级"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__parent_path
 msgid "Parent Path"
-msgstr "上级路径"
+msgstr "父级路径"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__partner_id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__partner_id
 msgid "Partner"
-msgstr "业务伙伴"
+msgstr "合作伙伴"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__partner_category_id
@@ -703,10 +722,33 @@ msgid "Partner Category"
 msgstr "上级类型"
 
 #. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Percentage"
+msgstr "百分比"
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__plan_id
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__plan_id
 msgid "Plan"
 msgstr "方案"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Product field"
+msgstr "产品字段"
+
+#. module: analytic
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__account_id
+msgid "Project Account"
+msgstr "项目账户"
+
+#. module: analytic
+#: model:account.analytic.plan,name:analytic.analytic_plan_projects
+msgid "Projects"
+msgstr "项目"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__unit_amount
@@ -715,16 +757,9 @@ msgid "Quantity"
 msgstr "数量"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Quick search: %s"
-msgstr "快速搜索: %s"
-
-#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__code
 msgid "Reference"
-msgstr "参考"
+msgstr "参考号"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_rd_department
@@ -746,9 +781,21 @@ msgstr ""
 " 费用（例如差旅费的再开票）创建客户开票单。"
 
 #. module: analytic
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__root_id
+msgid "Root"
+msgstr "根目录"
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__root_plan_id
 msgid "Root Plan"
 msgstr "根方案"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "Save as new analytic distribution model"
+msgstr "保存为新的分析分发模型"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_seagate_p2
@@ -759,20 +806,6 @@ msgstr "希捷 P2"
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Search Analytic Lines"
 msgstr "搜索分析明细行"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Search More..."
-msgstr "搜索更多..."
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Search: Analytic Account"
-msgstr "搜索：分析账户"
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_distribution_model__company_id
@@ -799,9 +832,9 @@ msgid ""
 msgstr "选择将使用分析分配的合作伙伴（例如，如果我们选择此合作伙伴，则创建新的客户发票或销售订单，它将自动将此作为分析帐户)"
 
 #. module: analytic
-#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
-msgid "Simultaneous conditions to meet"
-msgstr "同时满足条件"
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__sequence
+msgid "Sequence"
+msgstr "序列"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_spark
@@ -814,15 +847,6 @@ msgid "Subplans"
 msgstr "下级方案"
 
 #. module: analytic
-#. odoo-python
-#: code:addons/analytic/models/analytic_line.py:0
-#, python-format
-msgid ""
-"The selected account belongs to another company than the one you're trying "
-"to create an analytic item for"
-msgstr "您选择的正尝试创建一个分析会计项的账户属于另外一个公司为"
-
-#. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_absences
 msgid "Time Off"
 msgstr "休假"
@@ -830,7 +854,7 @@ msgstr "休假"
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_tree
 msgid "Total"
-msgstr "合计"
+msgstr "总计"
 
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__applicability__unavailable

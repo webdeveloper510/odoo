@@ -118,14 +118,13 @@ class LunchSupplier(models.Model):
          'Automatic Email Sending Time should be between 0 and 12'),
     ]
 
-    def name_get(self):
-        res = []
+    @api.depends('phone')
+    def _compute_display_name(self):
         for supplier in self:
             if supplier.phone:
-                res.append((supplier.id, '%s %s' % (supplier.name, supplier.phone)))
+                supplier.display_name = f'{supplier.name} {supplier.phone}'
             else:
-                res.append((supplier.id, supplier.name))
-        return res
+                supplier.display_name = supplier.name
 
     def _sync_cron(self):
         for supplier in self:
@@ -191,28 +190,30 @@ class LunchSupplier(models.Model):
 
     def write(self, values):
         for topping in values.get('topping_ids_2', []):
-            topping_values = topping[2]
+            topping_values = topping[2] if len(topping) > 2 else False
             if topping_values:
                 topping_values.update({'topping_category': 2})
         for topping in values.get('topping_ids_3', []):
-            topping_values = topping[2]
+            topping_values = topping[2] if len(topping) > 2 else False
             if topping_values:
                 topping_values.update({'topping_category': 3})
         if values.get('company_id'):
             self.env['lunch.order'].search([('supplier_id', 'in', self.ids)]).write({'company_id': values['company_id']})
-        super().write(values)
+        res = super().write(values)
         if not CRON_DEPENDS.isdisjoint(values):
             # flush automatic_email_time field to call _sql_constraints
             if 'automatic_email_time' in values:
                 self.flush_model(['automatic_email_time'])
             self._sync_cron()
+        return res
 
     def unlink(self):
         crons = self.cron_id.sudo()
         server_actions = crons.ir_actions_server_id
-        super().unlink()
+        res = super().unlink()
         crons.unlink()
         server_actions.unlink()
+        return res
 
     def toggle_active(self):
         """ Archiving related lunch product """
@@ -234,7 +235,7 @@ class LunchSupplier(models.Model):
             ('supplier_id', 'in', available_today.ids),
             ('state', '=', state),
             ('date', '=', fields.Date.context_today(self.with_context(tz=self.tz))),
-        ], order="user_id, name")
+        ], order="user_id, product_id")
         return orders
 
     def _send_auto_email(self):

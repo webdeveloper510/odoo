@@ -1,56 +1,66 @@
 /** @odoo-module */
 
 import { Dialog } from "../dialog/dialog";
-import { _lt } from "../l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { useChildRef } from "@web/core/utils/hooks";
 
 import { Component } from "@odoo/owl";
 
+export const deleteConfirmationMessage = _t(
+    `Ready to make your record disappear into thin air? Are you sure?
+It will be gone forever!
+
+Think twice before you click that 'Delete' button!`
+);
+
 export class ConfirmationDialog extends Component {
     setup() {
-        this.env.dialogData.close = () => this._cancel();
+        this.env.dialogData.dismiss = () => this._dismiss();
         this.modalRef = useChildRef();
-        this.isConfirmedOrCancelled = false; // ensures we do not confirm and/or cancel twice
+        this.isProcess = false;
     }
+
     async _cancel() {
-        if (this.isConfirmedOrCancelled) {
-            return;
-        }
-        this.isConfirmedOrCancelled = true;
-        this.disableButtons();
-        if (this.props.cancel) {
-            try {
-                await this.props.cancel();
-            } catch (e) {
-                this.props.close();
-                throw e;
-            }
-        }
-        this.props.close();
+        return this.execButton(this.props.cancel);
     }
+
     async _confirm() {
-        if (this.isConfirmedOrCancelled) {
-            return;
-        }
-        this.isConfirmedOrCancelled = true;
-        this.disableButtons();
-        if (this.props.confirm) {
-            try {
-                await this.props.confirm();
-            } catch (e) {
-                this.props.close();
-                throw e;
-            }
-        }
-        this.props.close();
+        return this.execButton(this.props.confirm);
     }
-    disableButtons() {
+
+    async _dismiss() {
+        return this.execButton(this.props.dismiss || this.props.cancel);
+    }
+
+    setButtonsDisabled(disabled) {
+        this.isProcess = disabled;
         if (!this.modalRef.el) {
             return; // safety belt for stable versions
         }
         for (const button of [...this.modalRef.el.querySelectorAll(".modal-footer button")]) {
-            button.disabled = true;
+            button.disabled = disabled;
         }
+    }
+
+    async execButton(callback) {
+        if (this.isProcess) {
+            return;
+        }
+        this.setButtonsDisabled(true);
+        if (callback) {
+            let shouldClose;
+            try {
+                shouldClose = await callback();
+            } catch (e) {
+                this.props.close();
+                throw e;
+            }
+            if (shouldClose === false) {
+                this.setButtonsDisabled(false);
+                return;
+            }
+        }
+        this.props.close();
     }
 }
 ConfirmationDialog.template = "web.ConfirmationDialog";
@@ -68,13 +78,16 @@ ConfirmationDialog.props = {
     body: String,
     confirm: { type: Function, optional: true },
     confirmLabel: { type: String, optional: true },
+    confirmClass: { type: String, optional: true },
     cancel: { type: Function, optional: true },
     cancelLabel: { type: String, optional: true },
+    dismiss: { type: Function, optional: true },
 };
 ConfirmationDialog.defaultProps = {
-    confirmLabel: _lt("Ok"),
-    cancelLabel: _lt("Cancel"),
-    title: _lt("Confirmation"),
+    confirmLabel: _t("Ok"),
+    cancelLabel: _t("Cancel"),
+    confirmClass: "btn-primary",
+    title: _t("Confirmation"),
 };
 
 export class AlertDialog extends ConfirmationDialog {}
@@ -85,5 +98,5 @@ AlertDialog.props = {
 };
 AlertDialog.defaultProps = {
     ...ConfirmationDialog.defaultProps,
-    title: _lt("Alert"),
+    title: _t("Alert"),
 };

@@ -3,18 +3,16 @@
 # 	* hr_contract
 # 
 # Translators:
-# Martin Trigaux, 2022
 # Daye Jeong, 2023
-# Wil Odoo, 2023
-# Sarah Park, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Sarah Park, 2024\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,43 +43,103 @@ msgid "/ month"
 msgstr "/ 월"
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
 msgid ""
-"<span attrs=\"{'invisible' : [('contracts_count', '!=', 1)]}\" class=\"o_stat_text text-danger\">\n"
-"                                    Contract\n"
-"                                </span>\n"
-"                                <span attrs=\"{'invisible' : [('contracts_count', '=', 1)]}\" class=\"o_stat_text text-danger\">\n"
-"                                    Contracts\n"
-"                                </span>"
-msgstr ""
-"<span attrs=\"{'invisible' : [('contracts_count', '!=', 1)]}\" class=\"o_stat_text text-danger\">\n"
-"                                    계약\n"
-"                                </span>\n"
-"                                <span attrs=\"{'invisible' : [('contracts_count', '=', 1)]}\" class=\"o_stat_text text-danger\">\n"
-"                                    계약\n"
-"                                </span>"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
-msgid ""
-"<span class=\"o_stat_text text-danger\" attrs=\"{'invisible' : [('contract_warning', '=', False)]}\" title=\"In Contract Since\">\n"
+"<span class=\"o_stat_text text-danger\" invisible=\"not contract_warning\" title=\"In Contract Since\">\n"
 "                                    In Contract Since\n"
 "                                </span>"
 msgstr ""
-"<span class=\"o_stat_text text-danger\" attrs=\"{'invisible' : [('contract_warning', '=', False)]}\" title=\"In Contract Since\">\n"
+"<span class=\"o_stat_text text-danger\" invisible=\"not contract_warning\" title=\"계약 중\">\n"
 "                                    계약 중\n"
 "                                </span>"
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
 msgid ""
-"<span class=\"o_stat_text text-success\" attrs=\"{'invisible' : "
-"[('contract_warning', '=', True)]}\" title=\"In Contract Since\"> In "
-"Contract Since</span>"
+"<span class=\"o_stat_text text-success\" invisible=\"contract_warning\" "
+"title=\"In Contract Since\"> In Contract Since</span>"
 msgstr ""
-"<span class=\"o_stat_text text-success\" attrs=\"{'invisible' : "
-"[('contract_warning', '=', True)]}\" title=\"In Contract Since\"> 계약 "
-"중</span>"
+"<span class=\"o_stat_text text-success\" invisible=\"contract_warning\" "
+"title=\"계약 중\"> 계약 중</span>"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
+msgid ""
+"<span class=\"o_stat_text\">\n"
+"                                            To\n"
+"                                        </span>"
+msgstr ""
+"<span class=\"o_stat_text\">\n"
+"                                            종료\n"
+"                                        </span>"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
+msgid ""
+"<span class=\"o_stat_text\">\n"
+"                                        From\n"
+"                                    </span>"
+msgstr ""
+"<span class=\"o_stat_text\">\n"
+"                                        시작\n"
+"                                    </span>"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
+msgid ""
+"<span invisible=\"contracts_count != 1\" class=\"o_stat_text text-danger\">\n"
+"                                    Contract\n"
+"                                </span>\n"
+"                                <span invisible=\"contracts_count == 1\" class=\"o_stat_text text-danger\">\n"
+"                                    Contracts\n"
+"                                </span>"
+msgstr ""
+"<span invisible=\"contracts_count != 1\" class=\"o_stat_text text-danger\">\n"
+"                                    계약\n"
+"                                </span>\n"
+"                                <span invisible=\"contracts_count == 1\" class=\"o_stat_text text-danger\">\n"
+"                                    계약\n"
+"                                </span>"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
+msgid ""
+"<span invisible=\"contracts_count == 1\" class=\"o_stat_text\">\n"
+"                                        Contracts\n"
+"                                    </span>\n"
+"                                    <span invisible=\"contracts_count &gt; 1\" class=\"o_stat_text\">\n"
+"                                        Contract\n"
+"                                    </span>"
+msgstr ""
+"<span invisible=\"contracts_count == 1\" class=\"o_stat_text\">\n"
+"                                        계약\n"
+"                                    </span>\n"
+"                                    <span invisible=\"contracts_count &gt; 1\" class=\"o_stat_text\">\n"
+"                                        계약\n"
+"                                    </span>"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.res_config_settings_view_form
+msgid "<span>Days</span>"
+msgstr "<span>일</span>"
+
+#. module: hr_contract
+#. odoo-python
+#: code:addons/hr_contract/models/hr_contract.py:0
+#, python-format
+msgid ""
+"According to Employee's Working Permit Expiration Date, this contract has "
+"been put in red on the %s. Please advise and correct."
+msgstr "직원의 취업 허가 만료일에 따라 이 계약은 %s이 빨간색으로 표시되어 있습니다. 확인 후 수정해주시기 바랍니다."
+
+#. module: hr_contract
+#. odoo-python
+#: code:addons/hr_contract/models/hr_contract.py:0
+#, python-format
+msgid ""
+"According to the contract's end date, this contract has been put in red on "
+"the %s. Please advise and correct."
+msgstr "계약 종료일에 따라, 이 계약은 %s이 빨간색으로 표시되어 있습니다. 확인 후 수정해주시기 바랍니다."
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_needaction
@@ -91,7 +149,7 @@ msgstr "조치 필요"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__active
 msgid "Active"
-msgstr "활성"
+msgstr "활성화"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__active_employee
@@ -125,6 +183,11 @@ msgid "Activity Type Icon"
 msgstr "활동 유형 아이콘"
 
 #. module: hr_contract
+#: model:ir.model,name:hr_contract.model_mail_activity_schedule
+msgid "Activity schedule plan Wizard"
+msgstr "활동 계획 마법사"
+
+#. module: hr_contract
 #: model:res.groups,name:hr_contract.group_hr_contract_manager
 msgid "Administrator"
 msgstr "관리자"
@@ -138,7 +201,7 @@ msgid ""
 "\n"
 "Employee: %(employee_name)s"
 msgstr ""
-"직원은 동시에 둘 이상의 근로 계약을 가질 수 없습니다. (초안으로 작성되었거나 반려된 근로 계약서는 제외)\n"
+"직원은 동시에 둘 이상의 근로 계약을 가질 수 없습니다. (초안으로 작성되었거나 반려된 근로 계약서는 제외됩니다.)\n"
 "\n"
 "직원: %(employee_name)s"
 
@@ -159,16 +222,36 @@ msgid "Bank Account Number"
 msgstr "은행 계좌 번호"
 
 #. module: hr_contract
+#: model:ir.model,name:hr_contract.model_hr_employee_base
+msgid "Basic Employee"
+msgstr "기본 직원"
+
+#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__calendar_mismatch
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__calendar_mismatch
 msgid "Calendar Mismatch"
 msgstr "일정 불일치"
 
 #. module: hr_contract
+#. odoo-javascript
+#: code:addons/hr_contract/static/src/widgets/tooltip_warning_widget.js:0
+#, python-format
+msgid ""
+"Calendar Mismatch: The employee's calendar does not match this contract's "
+"calendar. This could lead to unexpected behaviors."
+msgstr ""
+"캘린더가 일치하지 않음: 직원의 캘린더가 이 계약의 캘린더와 일치하지 않습니다. 이로 인해 예기치 않은 동작이 발생할 수 있습니다."
+
+#. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__state__cancel
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__state__cancel
 msgid "Cancelled"
-msgstr "취소 됨"
+msgstr "취소됨"
+
+#. module: hr_contract
+#: model:ir.model,name:hr_contract.model_res_company
+msgid "Companies"
+msgstr "회사"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__company_id
@@ -189,9 +272,15 @@ msgid "Company country"
 msgstr "회사 소속 국가"
 
 #. module: hr_contract
+#: model:ir.model,name:hr_contract.model_res_config_settings
+msgid "Config Settings"
+msgstr "환경설정"
+
+#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__contract_id
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_departure_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:hr_contract.res_config_settings_view_form
 msgid "Contract"
 msgstr "근로 계약"
 
@@ -205,6 +294,7 @@ msgid ""
 msgstr "계약 %(contract)s: 계약 시작일(%(start)s)은 계약 종료일(%(end)s)보다 빨라야 합니다."
 
 #. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__contracts_count
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contracts_count
 msgid "Contract Count"
 msgstr "근로 계약 건수"
@@ -219,6 +309,17 @@ msgstr "근로 계약 세부 사항"
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_departure_wizard_view_form
 msgid "Contract End Date"
 msgstr "계약 종료일"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.res_config_settings_view_form
+msgid "Contract Expiration Notice Period"
+msgstr "계약 만료 통지 기간"
+
+#. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_res_company__contract_expiration_notice_period
+#: model:ir.model.fields,field_description:hr_contract.field_res_config_settings__contract_expiration_notice_period
+msgid "Contract Expiry Notice Period"
+msgstr "계약 만료 통지 기간"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_form
@@ -255,7 +356,6 @@ msgstr "계약 임금"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contract_warning
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_view_search
 msgid "Contract Warning"
 msgstr "근로 계약 경고"
 
@@ -284,7 +384,7 @@ msgstr "근로 계약 갱신"
 #: model:ir.actions.act_window,name:hr_contract.action_hr_contract
 #: model:ir.actions.act_window,name:hr_contract.hr_contract_history_view_form_action
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__contract_ids
-#: model:ir.ui.menu,name:hr_contract.hr_menu_contract_history
+#: model:ir.ui.menu,name:hr_contract.hr_menu_contract
 #: model:ir.ui.menu,name:hr_contract.menu_human_resources_configuration_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_list
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_activity
@@ -300,6 +400,11 @@ msgid "Contracts to Review"
 msgstr "검토할 계약서"
 
 #. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
+msgid "Contracts to review"
+msgstr "검토할 계약서"
+
+#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__under_contract_state
 msgid "Contractual Status"
 msgstr "계약 상태"
@@ -312,6 +417,7 @@ msgstr "국가"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__country_code
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__country_code
+#: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type__country_code
 msgid "Country Code"
 msgstr "국가 코드"
 
@@ -377,6 +483,7 @@ msgstr "삭제"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__department_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__department_id
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Department"
 msgstr "부서"
 
@@ -402,18 +509,8 @@ msgstr "표시명"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
-msgid "Dropdown menu"
-msgstr "드롭다운 메뉴"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
 msgid "Edit Contract"
 msgstr "근로 계약 편집"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-msgid "Employed"
-msgstr "고용됨"
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_employee
@@ -426,7 +523,7 @@ msgstr "임직원"
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_contract
 msgid "Employee Contract"
-msgstr "근로계약서"
+msgstr "근로 계약서"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contract_ids
@@ -446,7 +543,7 @@ msgstr "직원 관리자"
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_res_users__bank_account_id
 msgid "Employee bank account to pay salaries"
-msgstr "급여 지급용 직원 은행 계좌 정보"
+msgstr "급여 지급을 위한 직원의 은행 계좌 정보입니다."
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__wage
@@ -462,6 +559,7 @@ msgstr "임직원 관리"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__date_end
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__date_end
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "End Date"
 msgstr "종료일"
 
@@ -473,7 +571,7 @@ msgstr "계약 종료일 (기간이 정해진 근로 계약인 경우)."
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__trial_date_end
 msgid "End date of the trial period (if there is one)."
-msgstr "수습 기간 종료일(있는 경우)"
+msgstr "수습 기간 종료일 (수습이 있는 경우)"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__trial_date_end
@@ -502,12 +600,12 @@ msgstr "팔로워"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "팔로워 (파트너)"
+msgstr "팔로워 (협력사)"
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "멋진 아이콘 폰트 예 : fa-tasks"
+msgstr "멋진 아이콘 폰트 예: fa-tasks"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
@@ -532,7 +630,6 @@ msgstr "그룹별"
 
 #. module: hr_contract
 #: model:ir.actions.server,name:hr_contract.ir_cron_data_contract_update_state_ir_actions_server
-#: model:ir.cron,cron_name:hr_contract.ir_cron_data_contract_update_state
 msgid "HR Contract: update state"
 msgstr "인사 관리 근로 계약 : 상태 업데이트"
 
@@ -576,6 +673,7 @@ msgstr "만약 선택하였으면, 신규 메시지에 주의를 기울여야 �
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_has_error
+#: model:ir.model.fields,help:hr_contract.field_hr_contract__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "이 옵션을 선택하면 일부 정보가 전달 오류를 생성합니다."
 
@@ -603,13 +701,6 @@ msgid "Kanban State"
 msgstr "칸반 상태"
 
 #. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract____last_update
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history____last_update
-#: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type____last_update
-msgid "Last Modified on"
-msgstr "최근 수정일"
-
-#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__write_uid
 #: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type__write_uid
 msgid "Last Updated by"
@@ -625,11 +716,6 @@ msgstr "최근 갱신 일자"
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Late Activities"
 msgstr "지연된 활동"
-
-#. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "주요 첨부 파일"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_has_error
@@ -658,13 +744,6 @@ msgid "New"
 msgstr "신규"
 
 #. module: hr_contract
-#. odoo-javascript
-#: code:addons/hr_contract/static/src/js/hr_contract_history_list_controller.js:0
-#, python-format
-msgid "New Employee"
-msgstr ""
-
-#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
 msgstr "다음 활동 캘린더 행사"
@@ -682,7 +761,7 @@ msgstr "다음 활동 요약"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_type_id
 msgid "Next Activity Type"
-msgstr "다음 활동 유형"
+msgstr "업무 유형 유형"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
@@ -693,11 +772,6 @@ msgstr "계약 없음"
 #: model_terms:ir.actions.act_window,help:hr_contract.hr_contract_history_view_list_action
 msgid "No data to display"
 msgstr "표시할 데이터가 없습니다"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-msgid "Not Running"
-msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__under_contract_state__blocked
@@ -716,6 +790,20 @@ msgid "Number of Actions"
 msgstr "작업 수"
 
 #. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.res_config_settings_view_form
+msgid ""
+"Number of days prior to the contract end date that a contract expiration "
+"warning is triggered."
+msgstr "계약 만료 알림이 트리거되도록 설정된 계약 종료일 전 일수입니다."
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.res_config_settings_view_form
+msgid ""
+"Number of days prior to the work permit expiration date that a warning is "
+"triggered."
+msgstr "경고 알림이 트리거되도록 설정된 취업 허가 만료일 전 일수입니다."
+
+#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_has_error_counter
 msgid "Number of errors"
 msgstr "오류 횟수"
@@ -728,7 +816,7 @@ msgstr "조치가 필요한 메시지 수"
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "전송 오류 메시지 수"
+msgstr "전송 오류가 발생한 메시지 수입니다."
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_form
@@ -746,6 +834,11 @@ msgid "Public Employee"
 msgstr "일반 직원"
 
 #. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__rating_ids
+msgid "Ratings"
+msgstr "평가"
+
+#. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__kanban_state__blocked
 msgid "Red"
 msgstr "빨간색"
@@ -755,11 +848,6 @@ msgstr "빨간색"
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 msgid "Reference Working Time"
 msgstr "기준 근무 시간"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_public_view_form
-msgid "Related User"
-msgstr "관련 사용자"
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_resource_calendar
@@ -779,14 +867,19 @@ msgstr "담당 사용자"
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__state__open
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__state__open
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Running"
 msgstr "실행 중"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Running Contracts"
 msgstr "실행 중인 계약"
+
+#. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "SMS 전송 에러"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
@@ -840,7 +933,6 @@ msgstr "시작일"
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__state
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_public_view_form
 msgid "Status"
 msgstr "상태"
 
@@ -853,10 +945,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"활동에 기조한 상태입니다\n"
-"기한초과: 이미 기한이 지났습니다\n"
-"오늘: 활동 날짜가 오늘입니다\n"
-"계획: 향후 활동입니다."
+"활동 기준 상태\n"
+"기한 초과: 기한이 이미 지났습니다.\n"
+"오늘: 활동 날짜가 오늘입니다.\n"
+"예정: 향후 계획된 활동입니다."
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__state
@@ -866,6 +958,7 @@ msgstr "근로 게약 상태"
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__country_code
 #: model:ir.model.fields,help:hr_contract.field_hr_contract_history__country_code
+#: model:ir.model.fields,help:hr_contract.field_hr_payroll_structure_type__country_code
 msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
@@ -879,6 +972,13 @@ msgstr ""
 #, python-format
 msgid "The contract of %s is about to expire."
 msgstr "%s의 계약이 곧 만료됩니다."
+
+#. module: hr_contract
+#. odoo-python
+#: code:addons/hr_contract/models/hr_contract.py:0
+#, python-format
+msgid "The work permit of %s is about to expire."
+msgstr "%s의 취업 허가가 곧 만료됩니다."
 
 #. module: hr_contract
 #: model:mail.message.subtype,name:hr_contract.mt_contract_pending
@@ -911,11 +1011,6 @@ msgid "User"
 msgstr "사용자"
 
 #. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__visa_expire
-msgid "Visa Expiration Date"
-msgstr "비자 만료일"
-
-#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__visa_no
 msgid "Visa No"
 msgstr "비자 번호"
@@ -925,6 +1020,27 @@ msgstr "비자 번호"
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__wage
 msgid "Wage"
 msgstr "임금"
+
+#. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__website_message_ids
+msgid "Website Messages"
+msgstr "웹사이트 메시지"
+
+#. module: hr_contract
+#: model:ir.model.fields,help:hr_contract.field_hr_contract__website_message_ids
+msgid "Website communication history"
+msgstr "웹사이트 대화 기록"
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.res_config_settings_view_form
+msgid "Work Permit Expiration Notice Period"
+msgstr "취업 허가 만료 통지 기간"
+
+#. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_res_company__work_permit_expiration_notice_period
+#: model:ir.model.fields,field_description:hr_contract.field_res_config_settings__work_permit_expiration_notice_period
+msgid "Work Permit Expiry Notice Period"
+msgstr "취업 허가 만료 통지 기간"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__permit_no

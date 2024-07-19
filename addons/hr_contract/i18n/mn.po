@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* hr_contract
-# 
+#
 # Translators:
 # Munkhbaatar g <muuguu17@gmail.com>, 2022
 # Ganbaatar Buriad <Ganbaatar@asterisk-tech.mn>, 2022
@@ -9,30 +9,28 @@
 # Batmunkh Ganbat <batmunkh.g@bumanit.mn>, 2022
 # Батболд <batbold.ts@gmail.com>, 2022
 # baaska sh <sh.baaskash@gmail.com>, 2022
-# 486aab72cd7cb5d98a82d40b0db4c5f2_4397374 <25b041e3e1ecd3f217ca34118196bd3e_836923>, 2022
-# Batmunkh Ganbat <batmunkh2522@gmail.com>, 2022
+# Khoschuluu Khuderchuluu <khoschuluu@gmail.com>, 2022
+# Батмөнх Ганбат <batmunkh2522@gmail.com>, 2022
 # Munkhbilguun Altankhuyag <munkhbilguunaltankhuyag@gmail.com>, 2022
 # Bayarkhuu Bataa, 2022
 # tumenjargal hadbaatar <tumenjargal7903@gmail.com>, 2022
 # Baasansuren Sharavsuren <baasansuren@bumanit.mn>, 2022
 # tserendavaa tsogtoo <tseegii011929@gmail.com>, 2022
-# Sanjaajamts Badamjunai <b.sanjaajamtsfc@gmail.com>, 2023
-# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2023
-# Martin Trigaux, 2023
-# Torbat Jargalsaikhan, 2023
-# 
+# Martin Trigaux, 2022
+# Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2022
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2023-05-16 13:48+0000\n"
 "PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Torbat Jargalsaikhan, 2023\n"
+"Last-Translator: Baskhuu Lodoikhuu <baskhuujacara@gmail.com>, 2022\n"
 "Language-Team: Mongolian (https://app.transifex.com/odoo/teams/41243/mn/)\n"
+"Language: mn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: mn\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: hr_contract
@@ -58,7 +56,7 @@ msgid "/ month"
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
 msgid ""
 "<span attrs=\"{'invisible' : [('contracts_count', '!=', 1)]}\" class=\"o_stat_text text-danger\">\n"
 "                                    Contract\n"
@@ -69,7 +67,18 @@ msgid ""
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
+msgid ""
+"<span attrs=\"{'invisible' : [('contracts_count', '=', 1)]}\" class=\"o_stat_text\">\n"
+"                                        Contracts\n"
+"                                    </span>\n"
+"                                    <span attrs=\"{'invisible' : [('contracts_count', '&gt;', 1)]}\" class=\"o_stat_text\">\n"
+"                                        Contract\n"
+"                                    </span>"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
 msgid ""
 "<span class=\"o_stat_text text-danger\" attrs=\"{'invisible' : [('contract_warning', '=', False)]}\" title=\"In Contract Since\">\n"
 "                                    In Contract Since\n"
@@ -77,11 +86,31 @@ msgid ""
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
+msgid "<span class=\"o_stat_text text-success\" attrs=\"{'invisible' : [('contract_warning', '=', True)]}\" title=\"In Contract Since\"> In Contract Since</span>"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
 msgid ""
-"<span class=\"o_stat_text text-success\" attrs=\"{'invisible' : "
-"[('contract_warning', '=', True)]}\" title=\"In Contract Since\"> In "
-"Contract Since</span>"
+"<span class=\"o_stat_text\">\n"
+"                                            To\n"
+"                                        </span>"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
+msgid ""
+"<span class=\"o_stat_text\">\n"
+"                                        From\n"
+"                                    </span>"
+msgstr ""
+
+#. module: hr_contract
+#. odoo-python
+#: code:addons/hr_contract/models/hr_contract.py:0
+#, python-format
+msgid "According to the contract's end date, this contract has been put in red on the %s. Please advise and correct."
 msgstr ""
 
 #. module: hr_contract
@@ -97,7 +126,7 @@ msgstr "Идэвхтэй"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__active_employee
 msgid "Active Employee"
-msgstr "Идэвхитэй ажилчид"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
@@ -163,6 +192,13 @@ msgid "Calendar Mismatch"
 msgstr ""
 
 #. module: hr_contract
+#. odoo-javascript
+#: code:addons/hr_contract/static/src/widgets/tooltip_warning_widget.js:0
+#, python-format
+msgid "Calendar Mismatch: The employee's calendar does not match this contract's calendar. This could lead to unexpected behaviors."
+msgstr ""
+
+#. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__state__cancel
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__state__cancel
 msgid "Cancelled"
@@ -197,12 +233,11 @@ msgstr "Гэрээ"
 #. odoo-python
 #: code:addons/hr_contract/models/hr_contract.py:0
 #, python-format
-msgid ""
-"Contract %(contract)s: start date (%(start)s) must be earlier than contract "
-"end date (%(end)s)."
+msgid "Contract %(contract)s: start date (%(start)s) must be earlier than contract end date (%(end)s)."
 msgstr ""
 
 #. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__contracts_count
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contracts_count
 msgid "Contract Count"
 msgstr "Гэрээний тоо"
@@ -271,7 +306,7 @@ msgstr "Хугацаа нь дууссан гэрээ"
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_contract_history
 msgid "Contract history"
-msgstr "Гэрээний түүх"
+msgstr ""
 
 #. module: hr_contract
 #: model:mail.message.subtype,name:hr_contract.mt_department_contract_pending
@@ -282,7 +317,6 @@ msgstr "Сунгах шаардлагатай гэрээ"
 #: model:ir.actions.act_window,name:hr_contract.action_hr_contract
 #: model:ir.actions.act_window,name:hr_contract.hr_contract_history_view_form_action
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__contract_ids
-#: model:ir.ui.menu,name:hr_contract.hr_menu_contract_history
 #: model:ir.ui.menu,name:hr_contract.menu_human_resources_configuration_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_list
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_activity
@@ -295,6 +329,11 @@ msgstr "Гэрээнүүд"
 #: model:ir.actions.act_window,name:hr_contract.hr_contract_history_to_review_view_list_action
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 msgid "Contracts to Review"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
+msgid "Contracts to review"
 msgstr ""
 
 #. module: hr_contract
@@ -375,6 +414,7 @@ msgstr "Устгах"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__department_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__department_id
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Department"
 msgstr "Алба нэгж"
 
@@ -387,8 +427,7 @@ msgstr "Ажлаас чөлөөлөлт"
 #. odoo-python
 #: code:addons/hr_contract/wizard/hr_departure_wizard.py:0
 #, python-format
-msgid ""
-"Departure date can't be earlier than the start date of current contract."
+msgid "Departure date can't be earlier than the start date of current contract."
 msgstr ""
 
 #. module: hr_contract
@@ -400,18 +439,8 @@ msgstr "Дэлгэрэнгүй нэр"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
-msgid "Dropdown menu"
-msgstr "Эвхэгддэг цэс"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
 msgid "Edit Contract"
 msgstr "Гэрээ засварлах"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-msgid "Employed"
-msgstr "Ажилтай"
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_employee
@@ -460,6 +489,7 @@ msgstr "Хүний нөөц"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__date_end
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__date_end
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "End Date"
 msgstr "Дуусах огноо"
 
@@ -488,7 +518,6 @@ msgstr "Хугацаа дууссан"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__first_contract_date
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__first_contract_date
-#: model:ir.model.fields,field_description:hr_contract.field_hr_employee_public__first_contract_date
 msgid "First Contract Date"
 msgstr "Анхны гэрээний огноо"
 
@@ -530,7 +559,6 @@ msgstr "Бүлэглэлт"
 
 #. module: hr_contract
 #: model:ir.actions.server,name:hr_contract.ir_cron_data_contract_update_state_ir_actions_server
-#: model:ir.cron,cron_name:hr_contract.ir_cron_data_contract_update_state
 msgid "HR Contract: update state"
 msgstr "HR гэрээ: төлөв шинэчлэх"
 
@@ -601,13 +629,6 @@ msgid "Kanban State"
 msgstr "Канбан Төлөв"
 
 #. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract____last_update
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history____last_update
-#: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type____last_update
-msgid "Last Modified on"
-msgstr "Сүүлд зассан огноо"
-
-#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__write_uid
 #: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type__write_uid
 msgid "Last Updated by"
@@ -623,11 +644,6 @@ msgstr "Сүүлд зассан огноо"
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Late Activities"
 msgstr "Хоцорсон ажилбар"
-
-#. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Үндсэн хавсралт"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_has_error
@@ -656,16 +672,9 @@ msgid "New"
 msgstr "Шинэ"
 
 #. module: hr_contract
-#. odoo-javascript
-#: code:addons/hr_contract/static/src/js/hr_contract_history_list_controller.js:0
-#, python-format
-msgid "New Employee"
-msgstr ""
-
-#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Календар дээрх дараагийн Үйл ажиллагаа"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_date_deadline
@@ -685,16 +694,6 @@ msgstr "Дараагийн ажилбарын төрөл"
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 msgid "No Contracts"
-msgstr ""
-
-#. module: hr_contract
-#: model_terms:ir.actions.act_window,help:hr_contract.hr_contract_history_view_list_action
-msgid "No data to display"
-msgstr "Харуулах өгөгдөл алга"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-msgid "Not Running"
 msgstr ""
 
 #. module: hr_contract
@@ -720,8 +719,8 @@ msgstr "Алдааны тоо"
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_needaction_counter
-msgid "Number of messages requiring action"
-msgstr ""
+msgid "Number of messages which requires an action"
+msgstr "Үйлдэл шаардсан зурвасын тоо"
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_has_error_counter
@@ -739,9 +738,9 @@ msgid "Person responsible for validating the employee's contracts."
 msgstr ""
 
 #. module: hr_contract
-#: model:ir.model,name:hr_contract.model_hr_employee_public
-msgid "Public Employee"
-msgstr "Ажилтны нээлттэй мэдээлэл"
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__rating_ids
+msgid "Ratings"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__kanban_state__blocked
@@ -753,11 +752,6 @@ msgstr "Улаан"
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 msgid "Reference Working Time"
 msgstr ""
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_public_view_form
-msgid "Related User"
-msgstr "Холбоотой хэрэглэгч"
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_resource_calendar
@@ -777,12 +771,12 @@ msgstr "Эд хариуцагч"
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__state__open
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__state__open
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Running"
 msgstr "Ажиллаж байгаа"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Running Contracts"
 msgstr ""
 
@@ -838,7 +832,6 @@ msgstr "Эхлэх огноо"
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__state
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_public_view_form
 msgid "Status"
 msgstr "Төлөв"
 
@@ -910,8 +903,8 @@ msgstr "Хэрэглэгч"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__visa_expire
-msgid "Visa Expiration Date"
-msgstr ""
+msgid "Visa Expire Date"
+msgstr "Виз дуусах хугацаа"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__visa_no
@@ -935,3 +928,8 @@ msgstr "Ажлын үнэмлэхний дугаар"
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Working Schedule"
 msgstr "Ажлын цагийн хуваарь"
+
+#. module: hr_contract
+#: model:ir.ui.menu,name:hr_contract.menu_resource_calendar_view
+msgid "Working Times"
+msgstr ""

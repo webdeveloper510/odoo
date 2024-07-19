@@ -10,19 +10,10 @@ from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 @tagged('post_install', '-at_install')
 class TestGetCurrentWebsite(HttpCaseWithUserDemo):
 
-    def setUp(self):
-        super().setUp()
-        # Unlink unused website(s) to avoid messing with the expected results
-        self.website = self.env.ref('website.default_website')
-        for w in self.env['website'].search([('id', '!=', self.website.id)]):
-            try:
-                # Website are impossible to delete most often than not, as if
-                # there is critical business data linked to it, it will prevent
-                # the unlink. Could easily happen with a bridge module adding
-                # some custom data.
-                w.unlink()
-            except Exception:
-                pass
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.website = cls.env.ref('website.default_website')
 
     def test_01_get_current_website_id(self):
         """Make sure `_get_current_website_id works`."""
@@ -130,7 +121,7 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
         # Ensure the cache is invalidated, it is not needed at the time but some
         # code might one day go through get_current_website_id before reaching
         # this code, making this test useless
-        Website.clear_caches()
+        self.env.registry.clear_cache()
         failed = False
         # website is added in ir.rule context only when in frontend
         with MockRequest(self.env, website=self.website):

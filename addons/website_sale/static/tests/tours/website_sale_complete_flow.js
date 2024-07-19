@@ -1,14 +1,14 @@
-odoo.define('website_sale_tour.tour', function (require) {
-    'use strict';
+/** @odoo-module **/
 
-    var tour = require("web_tour.tour");
-    var rpc = require("web.rpc");
-    const tourUtils = require('website_sale.tour_utils');
+    import { jsonrpc } from "@web/core/network/rpc_service";
+    import { registry } from "@web/core/registry";
+    import tourUtils from "@website_sale/js/tours/tour_utils";
 
-    tour.register('website_sale_tour_1', {
+    registry.category("web_tour.tours").add('website_sale_tour_1', {
         test: true,
+        checkDelay: 250,
         url: '/shop?search=Storage Box Test',
-    }, [
+        steps: () => [
     // Testing b2c with Tax-Excluded Prices
     {
         content: "Open product page",
@@ -30,24 +30,14 @@ odoo.define('website_sale_tour.tour', function (require) {
         tourUtils.goToCart({quantity: 2}),
     {
         content: "Check for 2 products in cart and proceed to checkout",
-        extra_trigger: '#cart_products tr:contains("Storage Box Test") input.js_quantity:propValue(2)',
+        extra_trigger: '#cart_products div:has(a>h6:contains("Storage Box Test")) input.js_quantity:propValue(2)',
         trigger: 'a[href*="/shop/checkout"]',
     },
-    {
-        content: "Check Price b2b subtotal",
-        trigger: 'tr#order_total_untaxed .oe_currency_value:containsExact(158.00)',
-        run: function () {}, // it's a check
-    },
-    {
-        content: "Check Price b2b Sale Tax(15%)",
-        trigger: 'tr#order_total_taxes .oe_currency_value:containsExact(23.70)',
-        run: function () {}, // it's a check
-    },
-    {
-        content: "Check Price b2b Total amount",
-        trigger: 'tr#order_total .oe_currency_value:containsExact(181.70)',
-        run: function () {}, // it's a check
-    },
+    ...tourUtils.assertCartAmounts({
+        taxes: '23.70',
+        untaxed: '158.00',
+        total: '181.70',
+    }),
     {
         content: "Fulfill billing address form",
         trigger: 'select[name="country_id"]',
@@ -67,12 +57,12 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
+        trigger: '.oe_cart .btn:contains("Continue checkout")',
     },
     {
         content: "Fulfill shipping address form",
         trigger: 'select[name="country_id"]',
-        extra_trigger: 'h2:contains("Shipping Address")',
+        extra_trigger: 'h3:contains("Shipping address")',
         run: function () {
             $('input[name="name"]').val('def');
             $('input[name="phone"]').val('8888888888');
@@ -84,7 +74,7 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
+        trigger: '.oe_cart .btn:contains("Save address")',
     },
     {
         content: "Check selected billing address is same as typed in previous step",
@@ -107,7 +97,7 @@ odoo.define('website_sale_tour.tour', function (require) {
     {
         content: "Change billing address form",
         trigger: 'select[name="country_id"]',
-        extra_trigger: 'h2:contains("Your Address")',
+        extra_trigger: 'h3:contains("Billing address")',
         run: function () {
             $('input[name="name"]').val('abcd');
             $('input[name="phone"]').val('11111111');
@@ -117,7 +107,7 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
+        trigger: '.oe_cart .btn:contains("Save address")',
     },
     {
         content: "Confirm Address",
@@ -130,12 +120,12 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Select `Wire Transfer` payment method",
-        trigger: '#payment_method label:contains("Wire Transfer")',
+        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
     },
     {
         content: "Pay Now",
-        // extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible:not(:disabled)',
+        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
+        trigger: 'button[name="o_payment_submit_button"]:not(:disabled)',
     },
     {
         content: "Sign up",
@@ -152,12 +142,13 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "See Quotations",
-        trigger: '.o_portal_docs a:contains("Quotations")',
+        trigger: '.o_portal_docs a:contains("Quotations to review")',
     },
     // Sign in as admin change config auth_signup -> b2b, sale_show_tax -> total and Logout
     {
         content: "Open Dropdown for logout",
-        trigger: '#top_menu li.dropdown:visible a:contains("abcd")',
+        extra_trigger: ".o_header_standard:not(.o_transitioning)",
+        trigger: 'header#top li.dropdown:visible a:contains("abcd")',
     },
     {
         content: "Logout",
@@ -182,21 +173,21 @@ odoo.define('website_sale_tour.tour', function (require) {
         extra_trigger: '.o_frontend_to_backend_nav', // Check if the user is connected
         trigger: '#wrapwrap',
         run: function () {
-            var def1 = rpc.query({
-                model: 'res.config.settings',
-                method: 'create',
+            var def1 = jsonrpc(`/web/dataset/call_kw/res.config.settings/create`, {
+                model: "res.config.settings",
+                method: "create",
                 args: [{
                     'auth_signup_uninvited': 'b2b',
                     'show_line_subtotals_tax_selection': 'tax_included',
-                    'group_show_line_subtotals_tax_excluded': false,
-                    'group_show_line_subtotals_tax_included': true,
                 }],
+                kwargs: {},
             });
             var def2 = def1.then(function (resId) {
-                return rpc.query({
-                    model: 'res.config.settings',
-                    method: 'execute',
+                return jsonrpc(`/web/dataset/call_kw/res.config.settings/execute`, {
+                    model: "res.config.settings",
+                    method: "execute",
                     args: [[resId]],
+                    kwargs: {},
                 });
             });
             def2.then(function () {
@@ -225,24 +216,14 @@ odoo.define('website_sale_tour.tour', function (require) {
         tourUtils.goToCart({quantity: 2}),
     {
         content: "Check for 2 products in cart and proceed to checkout",
-        extra_trigger: '#cart_products tr:contains("Storage Box Test") input.js_quantity:propValue(2)',
+        extra_trigger: '#cart_products div:has(a>h6:contains("Storage Box Test")) input.js_quantity:propValue(2)',
         trigger: 'a[href*="/shop/checkout"]',
     },
-    {
-        content: "Check Price b2c total",
-        trigger: 'tr#order_total_untaxed .oe_currency_value:containsExact(158.00)',
-        run: function () {}, // it's a check
-    },
-    {
-        content: "Check Price b2c Sale Tax(15%)",
-        trigger: 'tr#order_total_taxes .oe_currency_value:containsExact(23.70)',
-        run: function () {}, // it's a check
-    },
-    {
-        content: "Check Price b2c Total amount",
-        trigger: 'tr#order_total .oe_currency_value:containsExact(181.70)',
-        run: function () {}, // it's a check
-    },
+    ...tourUtils.assertCartAmounts({
+        taxes: '23.70',
+        untaxed: '158.00',
+        total: '181.70',
+    }),
     {
         content: "Click on Sign in Button",
         trigger: '.oe_cart a:contains(" Sign in")',
@@ -258,7 +239,7 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Add new shipping address",
-        trigger: '.one_kanban form[action^="/shop/address"] .btn',
+        trigger: '.all_shipping a[href^="/shop/address"]:contains("Add address")',
     },
     {
         content: "Fulfill shipping address form",
@@ -274,36 +255,33 @@ odoo.define('website_sale_tour.tour', function (require) {
     },
     {
         content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
+        trigger: '.oe_cart .btn:contains("Save address")',
     },
     {
         content: "Select `Wire Transfer` payment method",
-        trigger: '#payment_method label:contains("Wire Transfer")',
+        trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]',
     },
     {
         content: "Pay Now",
-        extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible:not(:disabled)',
+        extra_trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
+        trigger: 'button[name="o_payment_submit_button"]:not(:disabled)',
     },
     {
         content: "Open Dropdown for See quotation",
         extra_trigger: '.oe_cart .oe_website_sale_tx_status',
-        trigger: '#top_menu li.dropdown:visible a:contains("abc")',
+        trigger: 'header#top li.dropdown:visible a:contains("abc")',
     },
     {
         content: "My account",
-        extra_trigger: '#top_menu li.dropdown .js_usermenu.show',
-        trigger: '#top_menu .dropdown-menu a[href="/my/home"]:visible',
-    },
-    {
-        content: "See Quotations",
-        trigger: '.o_portal_docs a:contains("Quotations") .badge:containsExact(2)',
+        extra_trigger: 'header#top li.dropdown .js_usermenu.show',
+        trigger: 'header#top .dropdown-menu a[href="/my/home"]:visible',
     },
 
     // enable extra step on website checkout and check extra step on checkout process
     {
         content: "Open Dropdown for logout",
-        trigger: '#top_menu li.dropdown:visible a:contains("abc")',
+        extra_trigger: ".o_header_standard:not(.o_transitioning)",
+        trigger: 'header#top li.dropdown:visible a:contains("abc")',
     },
     {
         content: "Logout",
@@ -322,16 +300,16 @@ odoo.define('website_sale_tour.tour', function (require) {
             $('.oe_login_form input[name="redirect"]').val("/shop/cart");
             $('.oe_login_form').submit();
         },
-    }]);
+    }]});
 
-    tour.register('website_sale_tour_2', {
+    registry.category("web_tour.tours").add('website_sale_tour_2', {
         test: true,
         url: '/shop/cart',
-    }, [
+        steps: () => [
     {
         content: "Open Dropdown for logout",
-        extra_trigger: '.progress-wizard-step:contains("Extra Info")',
-        trigger: '#top_menu li.dropdown:visible a:contains("Mitchell Admin")',
+        extra_trigger: '.o_wizard:contains("Extra Info")',
+        trigger: 'header#top li.dropdown:visible a:contains("Mitchell Admin")',
     },
     {
         content: "Logout",
@@ -360,13 +338,10 @@ odoo.define('website_sale_tour.tour', function (require) {
         trigger: '#add_to_cart',
     },
         tourUtils.goToCart(),
+        tourUtils.goToCheckout(),
     {
-        content: "Proceed to checkout",
-        trigger: 'a[href*="/shop/checkout"]',
-    },
-    {
-        content: "Click on next button",
-        trigger: '.oe_cart .btn:contains("Next")',
+        content: "Click on 'Continue checkout' button",
+        trigger: '.oe_cart .btn:contains("Continue checkout")',
     },
     {
         content: "Check selected billing address is same as typed in previous step",
@@ -378,13 +353,9 @@ odoo.define('website_sale_tour.tour', function (require) {
         trigger: '#shipping_and_billing:contains(SO2New Shipping Street, 5):contains(SO2NewShipping):contains(Afghanistan)',
         run: function () {}, // it's a check
     },
+    ...tourUtils.payWithTransfer(),
     {
-        content: "Select `Wire Transfer` payment method",
-        trigger: '#payment_method label:contains("Wire Transfer")',
-    },
-    {
-        content: "Pay Now",
-        extra_trigger: '#payment_method label:contains("Wire Transfer") input:checked,#payment_method:not(:has("input:radio:visible"))',
-        trigger: 'button[name="o_payment_submit_button"]:visible',
-    }]);
-});
+        content: "Check payment status confirmation window",
+        trigger: ".oe_website_sale_tx_status[data-order-tracking-info]",
+        isCheck: true,
+    }]});

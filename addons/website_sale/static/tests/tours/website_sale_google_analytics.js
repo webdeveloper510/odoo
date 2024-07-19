@@ -1,26 +1,30 @@
-odoo.define('website_sale.google_analytics', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const tour = require("web_tour.tour");
-const websiteSaleTracking = require('website_sale.tracking');
+import { registry } from "@web/core/registry";
+import tourUtils from "@website_sale/js/tours/tour_utils";
+
+odoo.loader.bus.addEventListener("module-started", (e) => {
+    if (e.detail.moduleName === "@website_sale/js/website_sale_tracking") {
+        //import websiteSaleTracking from "@website_sale/js/website_sale_tracking";
+        e.detail.module[Symbol.for("default")].include({
+            // Purposely don't call super to avoid call to third party (GA) during tests
+            _onViewItem(event, data) {
+                $('body').attr('view-event-id', data.item_id);
+            },
+            _onAddToCart(event, data) {
+                $('body').attr('cart-event-id', data.item_id);
+            },
+        });
+    }
+});
 
 let itemId;
 
-websiteSaleTracking.include({
-    // Purposely don't call super to avoid call to third party (GA) during tests
-    _onViewItem(event, data) {
-        $('body').attr('view-event-id', data.item_id);
-    },
-    _onAddToCart(event, data) {
-        $('body').attr('cart-event-id', data.item_id);
-    },
-});
 
-tour.register('google_analytics_view_item', {
+registry.category("web_tour.tours").add('google_analytics_view_item', {
     test: true,
     url: '/shop?search=Customizable Desk',
-},
-[
+    steps: () => [
     {
         content: "select customizable desk",
         trigger: '.oe_product_cart a:contains("Customizable Desk")',
@@ -47,21 +51,13 @@ tour.register('google_analytics_view_item', {
         timeout: 25000,
         run: () => {}, // it's a check
     },
-]);
+]});
 
-tour.register('google_analytics_add_to_cart', {
+registry.category("web_tour.tours").add('google_analytics_add_to_cart', {
     test: true,
     url: '/shop?search=Acoustic Bloc Screens',
-},
-[
-    {
-        content: "select Acoustic Bloc Screens",
-        trigger: '.oe_product_cart a:contains("Acoustic Bloc Screens")',
-    },
-    {
-        content: "click add to cart button on product page",
-        trigger: '#add_to_cart',
-    },
+    steps: () => [
+    ...tourUtils.addToCart({productName: 'Acoustic Bloc Screens', search: false}),
     {
         content: 'check add to cart event',
         extra_trigger: 'body[cart-event-id]',
@@ -69,6 +65,4 @@ tour.register('google_analytics_add_to_cart', {
         timeout: 25000,
         run: () => {}, // it's a check
     },
-]);
-
-});
+]});

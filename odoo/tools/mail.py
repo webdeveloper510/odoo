@@ -33,12 +33,12 @@ safe_attrs = defs.safe_attrs | frozenset(
     ['style',
      'data-o-mail-quote', 'data-o-mail-quote-node',  # quote detection
      'data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-type', 'data-oe-expression', 'data-oe-translation-initial-sha', 'data-oe-nodeid',
-     'data-last-history-steps',
+     'data-last-history-steps', 'data-oe-protected', 'data-oe-transient-content',
      'data-publish', 'data-id', 'data-res_id', 'data-interval', 'data-member_id', 'data-scroll-background-ratio', 'data-view-id',
      'data-class', 'data-mimetype', 'data-original-src', 'data-original-id', 'data-gl-filter', 'data-quality', 'data-resize-width',
      'data-shape', 'data-shape-colors', 'data-file-name', 'data-original-mimetype',
-     'data-oe-protected',  # editor
      'data-behavior-props', 'data-prop-name',  # knowledge commands
+     'data-mimetype-before-conversion',
      ])
 SANITIZE_TAGS = {
     # allow new semantic HTML5 tags
@@ -380,15 +380,6 @@ def html2plaintext(html, body_id=None, encoding='utf-8'):
             link.text = '%s [%s]' % (link.text, i)
             url_index.append(url)
 
-    for img in tree.findall('.//img'):
-        src = img.get('src')
-        if src:
-            i += 1
-            img.tag = 'span'
-            img_name = re.search(r'[^/]+(?=\.[a-zA-Z]+(?:\?|$))', src)
-            img.text = '%s [%s]' % (img_name.group(0) if img_name else 'Image', i)
-            url_index.append(src)
-
     html = ustr(etree.tostring(tree, encoding=encoding))
     # \r char is converted into &#13;, must remove it
     html = html.replace('&#13;', '')
@@ -407,7 +398,7 @@ def html2plaintext(html, body_id=None, encoding='utf-8'):
     html = html.replace('&gt;', '>')
     html = html.replace('&lt;', '<')
     html = html.replace('&amp;', '&')
-    html = html.replace('&nbsp;', u'\N{NO-BREAK SPACE}')
+    html = html.replace('&nbsp;', '\N{NO-BREAK SPACE}')
 
     # strip all lines
     html = '\n'.join([x.strip() for x in html.splitlines()])
@@ -764,3 +755,30 @@ def encapsulate_email(old_email, new_email):
         name_part,
         new_email_split[0][1],
     ))
+
+def parse_contact_from_email(text):
+    """ Parse contact name and email (given by text) in order to find contact
+    information, able to populate records like partners, leads, ...
+    Supported syntax:
+
+      * Raoul <raoul@grosbedon.fr>
+      * "Raoul le Grand" <raoul@grosbedon.fr>
+      * Raoul raoul@grosbedon.fr (strange fault tolerant support from
+        df40926d2a57c101a3e2d221ecfd08fbb4fea30e now supported directly
+        in 'email_split_tuples';
+
+    Otherwise: default, text is set as name.
+
+    :return: name, email (normalized if possible)
+    """
+    if not text or not text.strip():
+        return '', ''
+    split_results = email_split_tuples(text)
+    name, email = split_results[0] if split_results else ('', '')
+
+    if email:
+        email_normalized = email_normalize(email, strict=False) or email
+    else:
+        name, email_normalized = text, ''
+
+    return name, email_normalized

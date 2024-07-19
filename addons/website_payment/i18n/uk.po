@@ -3,16 +3,17 @@
 # 	* website_payment
 # 
 # Translators:
-# Martin Trigaux, 2023
-# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
+# Wil Odoo, 2023
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
+# Kseina Tyshchenko, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:24+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
-"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Kseina Tyshchenko, 2024\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -66,7 +67,7 @@ msgid "<b>Payment Method:</b>"
 msgstr "<b>Метод оплати:</b>"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "<option value=\"\">Country...</option>"
 msgstr "<option value=\"\">Країна...</option>"
 
@@ -102,6 +103,7 @@ msgid "Activate Payments"
 msgstr "Активувати платежі"
 
 #. module: website_payment
+#: model:ir.actions.server,name:website_payment.action_activate_stripe
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Activate Stripe"
 msgstr "Активувати Stripe"
@@ -129,7 +131,7 @@ msgid "Amount"
 msgstr "Сума"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Amount ("
 msgstr "Сума ("
 
@@ -163,26 +165,21 @@ msgid "Configure %s"
 msgstr "Налаштувати %s"
 
 #. module: website_payment
-#: model:ir.actions.server,name:website_payment.action_stripe_connect_account
-msgid "Connect to Stripe"
-msgstr "Підключитис до Stripe"
-
-#. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #: model:ir.model,name:website_payment.model_res_country
 #, python-format
 msgid "Country"
 msgstr "Країна"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid ""
 "Country\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "Країна\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-python
@@ -222,14 +219,20 @@ msgid "Display Options"
 msgstr "Відобразити параметри"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#. odoo-python
+#: code:addons/website_payment/controllers/portal.py:0
+#, python-format
+msgid "Donate"
+msgstr "Донат"
+
+#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "Donate Now"
 msgstr "Донатьте зараз"
 
 #. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 #: model_terms:ir.ui.view,arch_db:website_payment.snippets
 msgid "Donation"
 msgstr "Донати"
@@ -260,23 +263,23 @@ msgstr "Сповіщення донату"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Email"
 msgstr "Ел. пошта"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid ""
 "Email\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "Email\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Email is invalid"
 msgstr "Email недійсний"
@@ -290,7 +293,7 @@ msgstr "Необхідний Email."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Field '%s' is mandatory"
 msgstr "Поле '%s' є обов'язковим"
@@ -338,19 +341,19 @@ msgstr "Мінімум"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Name"
-msgstr "Назва"
+msgstr "Ім'я"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid ""
 "Name\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"Ім'я\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"Назва\n"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-python
@@ -381,7 +384,7 @@ msgid "Other than Paypal"
 msgstr "Окрім Paypal"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Payment Details"
 msgstr "Деталі платежу"
 
@@ -396,6 +399,13 @@ msgid "Payment Transaction"
 msgstr "Платіжна операція"
 
 #. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/js/payment_form.js:0
+#, python-format
+msgid "Payment processing failed"
+msgstr "Обробка платежу не вдалася"
+
+#. module: website_payment
 #. odoo-python
 #: code:addons/website_payment/models/payment_transaction.py:0
 #, python-format
@@ -406,11 +416,6 @@ msgstr "Оплата, отримана від пожертвування з на
 #: model:ir.model,name:website_payment.model_account_payment
 msgid "Payments"
 msgstr "Платежі"
-
-#. module: website_payment
-#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__module_payment_paypal
-msgid "Paypal - Express Checkout"
-msgstr "Paypal - Швидкий чекаут"
 
 #. module: website_payment
 #: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__paypal_only
@@ -440,13 +445,6 @@ msgid "Recipient Email"
 msgstr "Email одержувача"
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
-#, python-format
-msgid "Server Error"
-msgstr "Помилка сервера"
-
-#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Shop - Payment"
 msgstr "Магазин - Платіж"
@@ -463,7 +461,7 @@ msgstr "Маленький чи великий, ваш внесок важлив
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Some information is missing to process your payment."
 msgstr "Для обробки вашого платежу відсутня деяка інформація."
@@ -509,13 +507,6 @@ msgid "There is nothing to pay."
 msgstr "Немає нічого для оплати."
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
-#, python-format
-msgid "Validation Error"
-msgstr "Помилка затвердження"
-
-#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "View Alternatives"
 msgstr "Переглянути альтернативи"
@@ -524,13 +515,6 @@ msgstr "Переглянути альтернативи"
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "View other providers"
 msgstr "Переглянути інших провайдерів"
-
-#. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
-#, python-format
-msgid "We could not obtain payment fees."
-msgstr "Ми не змогли отримати комісію за оплату."
 
 #. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_payment_provider__website_id
@@ -543,12 +527,12 @@ msgid "Website: Donation"
 msgstr "Веб-сайт: донати"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Write us a comment"
 msgstr "Напишіть нам коментар"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Your comment"
 msgstr "Ваш коментар"
 

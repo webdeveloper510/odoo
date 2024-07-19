@@ -21,19 +21,18 @@ compress = functools.partial(re.sub, r'\s', '')
 class Users(models.Model):
     _inherit = 'res.users'
 
-    totp_secret = fields.Char(copy=False, groups=fields.NO_ACCESS, compute='_compute_totp_secret', inverse='_inverse_totp_secret', search='_search_totp_enable')
-    totp_enabled = fields.Boolean(string="Two-factor authentication", compute='_compute_totp_enabled', search='_search_totp_enable')
+    totp_secret = fields.Char(copy=False, groups=fields.NO_ACCESS, compute='_compute_totp_secret', inverse='_inverse_token')
+    totp_enabled = fields.Boolean(string="Two-factor authentication", compute='_compute_totp_enabled', search='_totp_enable_search')
     totp_trusted_device_ids = fields.One2many('auth_totp.device', 'user_id', string="Trusted Devices")
+
+    def init(self):
+        super().init()
+        if not sql.column_exists(self.env.cr, self._table, "totp_secret"):
+            self.env.cr.execute("ALTER TABLE res_users ADD COLUMN totp_secret varchar")
 
     @property
     def SELF_READABLE_FIELDS(self):
         return super().SELF_READABLE_FIELDS + ['totp_enabled', 'totp_trusted_device_ids']
-
-    def init(self):
-        init_res = super().init()
-        if not sql.column_exists(self.env.cr, self._table, "totp_secret"):
-            self.env.cr.execute("ALTER TABLE res_users ADD COLUMN totp_secret varchar")
-        return init_res
 
     def _mfa_type(self):
         r = super()._mfa_type()
@@ -41,6 +40,24 @@ class Users(models.Model):
             return r
         if self.totp_enabled:
             return 'totp'
+
+    def _should_alert_new_device(self):
+        """ Determine if an alert should be sent to the user regarding a new device
+        - 2FA enabled -> only for new device
+        - Not enabled -> no alert
+
+        To be overriden if needs to be disabled for other 2FA providers
+        """
+        if request and self._mfa_type():
+            key = request.httprequest.cookies.get('td_id')
+            if key:
+                if request.env['auth_totp.device']._check_credentials_for_uid(
+                    scope="browser", key=key, uid=self.id):
+                    # the device is known
+                    return False
+            # 2FA enabled but not a trusted device
+            return True
+        return super()._should_alert_new_device()
 
     def _mfa_url(self):
         r = super()._mfa_url()
@@ -158,16 +175,16 @@ class Users(models.Model):
         return super().change_password(old_passwd, new_passwd)
 
     def _compute_totp_secret(self):
-        for user in self.filtered('id'):
+        for user in self:
             self.env.cr.execute('SELECT totp_secret FROM res_users WHERE id=%s', (user.id,))
             user.totp_secret = self.env.cr.fetchone()[0]
 
-    def _inverse_totp_secret(self):
-        for user in self.filtered('id'):
+    def _inverse_token(self):
+        for user in self:
             secret = user.totp_secret if user.totp_secret else None
             self.env.cr.execute('UPDATE res_users SET totp_secret = %s WHERE id=%s', (secret, user.id))
 
-    def _search_totp_enable(self, operator, value):
+    def _totp_enable_search(self, operator, value):
         value = not value if operator == '!=' else value
         if value:
             self.env.cr.execute("SELECT id FROM res_users WHERE totp_secret IS NOT NULL")

@@ -3,19 +3,18 @@
 # 	* onboarding
 # 
 # Translators:
-# Dorin Hongu <dhongu@gmail.com>, 2022
-# Cozmin Candea <office@terrabit.ro>, 2022
-# Foldi Robert <foldirobert@nexterp.ro>, 2022
-# Martin Trigaux, 2022
-# Claudia Baisan, 2023
+# Cozmin Candea <office@terrabit.ro>, 2024
+# Claudia Baisan, 2024
+# Dorin Hongu <dhongu@gmail.com>, 2024
+# Martin Trigaux, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Claudia Baisan, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Martin Trigaux, 2024\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,9 +23,19 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "#{alt}"
+msgstr ""
+
+#. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__progress_ids
 msgid "All Onboarding Progress Records (across companies)."
 msgstr ""
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "All done!"
+msgstr "Totul este gata!"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__progress_ids
@@ -34,18 +43,47 @@ msgid "All related Onboarding Progress Step Records (across companies)"
 msgstr ""
 
 #. module: onboarding
-#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
-msgid "Background color"
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_alt
+msgid "Alt Text for the Step Image"
 msgstr ""
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__blue
-msgid "Blue"
-msgstr "Albastru"
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
+#, python-format
+msgid ""
+"An \"Opening Action\" is required for the following steps to be linked to an"
+" onboarding panel: %(step_titles)s"
+msgstr ""
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Are you sure you want to hide these configuration steps?"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__button_text
 msgid "Button text"
+msgstr ""
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Cancel"
+msgstr "Anulează"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close"
+msgstr "Închide"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close Panel"
+msgstr ""
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close the onboarding panel"
 msgstr ""
 
 #. module: onboarding
@@ -54,12 +92,8 @@ msgid "Closing action"
 msgstr ""
 
 #. module: onboarding
-#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__panel_background_color
-msgid "Color gradient added to the panel's background."
-msgstr ""
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__company_id
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__company_id
 msgid "Company"
 msgstr "Companie"
 
@@ -112,6 +146,16 @@ msgid "Font Awesome Icon when completed"
 msgstr ""
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Get them out of my sight!"
+msgstr ""
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Hide Onboarding Tips"
+msgstr ""
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__id
@@ -120,20 +164,17 @@ msgid "ID"
 msgstr "ID"
 
 #. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__is_per_company
+msgid "Is per company"
+msgstr ""
+
+#. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding_step__current_step_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress__onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress_step__step_state__just_done
 msgid "Just done"
 msgstr "Doar făcut"
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step____last_update
-msgid "Last Modified on"
-msgstr "Ultima modificare la"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__write_uid
@@ -152,10 +193,17 @@ msgid "Last Updated on"
 msgstr "Ultima actualizare pe"
 
 #. module: onboarding
-#: code:addons/onboarding/models/onboarding_step.py:0
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 #, python-format
 msgid "Let's do it"
 msgstr "S-o facem"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__text_completed
+msgid "Message at completion"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__name
@@ -175,9 +223,11 @@ msgid ""
 msgstr ""
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__none
-msgid "None"
-msgstr "Fără"
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding.py:0
+#, python-format
+msgid "Nice work! Your configuration is done."
+msgstr "Bună treabă! Configurarea dvs. este gata."
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__not_done
@@ -189,8 +239,6 @@ msgstr "Nerealizat"
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__onboarding_id
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__onboarding_id
 msgid "Onboarding"
 msgstr "Onboarding"
 
@@ -263,7 +311,9 @@ msgstr ""
 
 #. module: onboarding
 #: model:ir.actions.act_window,name:onboarding.action_view_onboarding_onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__onboarding_ids
 #: model:ir.ui.menu,name:onboarding.menu_onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_step_view_form
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_tree
 msgid "Onboardings"
 msgstr ""
@@ -284,27 +334,12 @@ msgid "Opening action"
 msgstr ""
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__orange
-msgid "Orange"
-msgstr "Portocaliu"
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_background_color
-msgid "Panel's Background color"
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_background_image
-msgid "Panel's background image"
-msgstr ""
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__progress_step_ids
 msgid "Progress Steps Trackers"
 msgstr ""
 
 #. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_id
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_ids
 msgid "Related Onboarding Progress Tracker"
 msgstr ""
 
@@ -325,10 +360,26 @@ msgid "Should be done per company?"
 msgstr ""
 
 #. module: onboarding
-#: code:addons/onboarding/models/onboarding_step.py:0
+#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__step_image_alt
+msgid "Show when impossible to load the image"
+msgstr ""
+
+#. module: onboarding
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 #, python-format
-msgid "Step Completed! - Click to review"
-msgstr "Pas finalizat! - Faceți clic pentru a revizui"
+msgid "Step Completed!"
+msgstr "Pasul a fost finalizat!"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image
+msgid "Step Image"
+msgstr ""
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_filename
+msgid "Step Image Filename"
+msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__current_progress_step_id
@@ -336,27 +387,23 @@ msgid "Step Progress"
 msgstr ""
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
+msgid "Steps"
+msgstr "Pași"
+
+#. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__button_text
 msgid "Text on the panel's button to start this step"
 msgstr ""
 
 #. module: onboarding
+#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__text_completed
+msgid "Text shown on onboarding when completed"
+msgstr ""
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__done_text
 msgid "Text to show when step is completed"
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.constraint,message:onboarding.constraint_onboarding_progress_onboarding_company_uniq
-msgid ""
-"There cannot be multiple records of the same onboarding completion for the "
-"same company."
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.constraint,message:onboarding.constraint_onboarding_progress_step_progress_step_uniq
-msgid ""
-"There cannot be multiple records of the same onboarding step completion for "
-"the same Progress record."
 msgstr ""
 
 #. module: onboarding
@@ -371,14 +418,14 @@ msgid "Toggle visibility"
 msgstr ""
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__violet
-msgid "Violet"
-msgstr "Violet"
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_onboarding_closed
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__is_onboarding_closed
 msgid "Was panel closed?"
+msgstr ""
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "o_onboarding_confetti"
 msgstr ""
 
 #. module: onboarding

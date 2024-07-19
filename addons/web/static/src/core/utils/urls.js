@@ -1,6 +1,9 @@
 /** @odoo-module **/
 
+import { session } from "@web/session";
 import { browser } from "../browser/browser";
+
+export class RedirectionError extends Error {}
 
 /**
  * Transforms a key value mapping to a string formatted as url hash, e.g.
@@ -39,7 +42,7 @@ export function getOrigin(origin) {
  * @param {string} [options.origin]: a precomputed origin
  */
 export function url(route, queryParams, options = {}) {
-    const origin = getOrigin(options.origin);
+    const origin = getOrigin(options.origin ?? session.origin);
     if (!route) {
         return origin;
     }
@@ -81,4 +84,19 @@ export function getDataURLFromFile(file) {
         reader.addEventListener("error", reject);
         reader.readAsDataURL(file);
     });
+}
+
+/**
+ * Safely redirects to the given url within the same origin.
+ *
+ * @param {string} url
+ * @throws {RedirectionError} if the given url has a different origin
+ */
+export function redirect(url) {
+    const { origin, pathname } = browser.location;
+    const _url = new URL(url, `${origin}${pathname}`);
+    if (_url.origin !== origin) {
+        throw new RedirectionError("Can't redirect to another origin");
+    }
+    browser.location = _url.href;
 }

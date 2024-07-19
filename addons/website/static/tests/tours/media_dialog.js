@@ -1,12 +1,13 @@
 /** @odoo-module */
 
-import wTourUtils from 'website.tour_utils';
+import { TourError } from "@web_tour/tour_service/tour_utils";
+import wTourUtils from '@website/js/tours/tour_utils';
 
 wTourUtils.registerWebsitePreviewTour("website_media_dialog_undraw", {
     test: true,
     url: '/',
     edition: true,
-}, [
+}, () => [
 wTourUtils.dragNDrop({
     id: 's_text_image',
     name: 'Text - Image',
@@ -30,7 +31,7 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_external_library", {
     test: true,
     url: "/",
     edition: true,
-}, [
+}, () => [
     wTourUtils.dragNDrop({
         id: "s_text_image",
         name: "Text - Image",
@@ -69,7 +70,7 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_external_library", {
             const imgName = this.$anchor[0].querySelector(selector).title;
             const uploadedImgs = this.$anchor[0].querySelectorAll(`${selector}[title='${imgName}']`);
             if (uploadedImgs.length !== 1) {
-                throw new Error(`error: ${uploadedImgs.length} attachment(s) were found. Exactly 1 should have been created.`);
+                throw new TourError(`${uploadedImgs.length} attachment(s) were found. Exactly 1 should have been created.`);
             }
         },
     },
@@ -79,7 +80,7 @@ wTourUtils.registerWebsitePreviewTour('website_media_dialog_icons', {
     test: true,
     url: '/',
     edition: true,
-}, [
+}, () => [
     wTourUtils.dragNDrop({
         id: 's_process_steps',
         name: 'Steps',
@@ -119,7 +120,7 @@ wTourUtils.registerWebsitePreviewTour("website_media_dialog_image_shape", {
     test: true,
     url: "/",
     edition: true,
-}, [
+}, () => [
     wTourUtils.dragNDrop({
         id: "s_text_image",
         name: "Text - Image",

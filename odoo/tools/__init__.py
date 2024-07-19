@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-SUPPORTED_DEBUGGER = {'pdb', 'ipdb', 'wdb', 'pudb'}
 from . import _monkeypatches
 from . import _monkeypatches_pytz
 
@@ -12,6 +11,7 @@ if not hasattr(urls, 'url_join'):
 
 from . import appdirs
 from . import cloc
+from . import constants
 from . import pdf
 from . import pycompat
 from . import win32

@@ -1,14 +1,17 @@
 /** @odoo-module **/
 
+import { App, Component, onMounted, onPatched, useRef, useState, xml } from "@odoo/owl";
+import { templates } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
-import { DateTimePicker } from "@web/core/datepicker/datepicker";
+import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { registerCleanup } from "../helpers/cleanup";
-import { makeTestEnv } from "../helpers/mock_env";
+import { clearRegistryWithCleanup, makeTestEnv } from "../helpers/mock_env";
 import { makeFakeLocalizationService } from "../helpers/mock_services";
 import {
     click,
@@ -16,15 +19,18 @@ import {
     makeDeferred,
     mount,
     mouseEnter,
+    mouseLeave,
     nextTick,
     patchWithCleanup,
     triggerEvent,
     triggerHotkey,
 } from "../helpers/utils";
 import { makeParent } from "./tooltip/tooltip_service_tests";
-import { templates } from "@web/core/assets";
+import { getPickerCell } from "./datetime/datetime_test_helpers";
+import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
+import { Dialog } from "@web/core/dialog/dialog";
+import { dialogService } from "@web/core/dialog/dialog_service";
 
-import { App, Component, onMounted, onPatched, useRef, useState, xml } from "@odoo/owl";
 const serviceRegistry = registry.category("services");
 
 let env;
@@ -51,7 +57,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         await mount(Parent, target, { env });
         assert.strictEqual(
             target.querySelector(".dropdown").outerHTML,
-            '<div class="o-dropdown dropdown o-dropdown--no-caret"><button class="dropdown-toggle" tabindex="0" aria-expanded="false"></button></div>'
+            '<div class="o-dropdown dropdown o-dropdown--no-caret"><button type="button" class="dropdown-toggle" tabindex="0" aria-expanded="false"></button></div>'
         );
         assert.containsOnce(target, "button.dropdown-toggle");
         assert.containsNone(target, ".dropdown-menu");
@@ -88,7 +94,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         patchWithCleanup(DropdownItem.prototype, {
             onClick(ev) {
                 assert.ok(!ev.defaultPrevented);
-                this._super(...arguments);
+                super.onClick(...arguments);
                 const href = ev.target.getAttribute("href");
                 // defaultPrevented only if props.href is defined
                 assert.ok(href !== null ? ev.defaultPrevented : !ev.defaultPrevented);
@@ -183,7 +189,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         patchWithCleanup(Dropdown.prototype, {
             close() {
                 assert.step("dropdown will close");
-                this._super();
+                super.close();
             },
         });
         class Parent extends Component {
@@ -222,6 +228,74 @@ QUnit.module("Components", ({ beforeEach }) => {
         await click(target, "button.dropdown-toggle");
         await click(target, ".dropdown-menu .dropdown-item");
         assert.containsNone(target, ".dropdown-menu");
+    });
+
+    QUnit.test("hold position on hover", async (assert) => {
+        let parentState;
+        class Parent extends Component {
+            setup() {
+                this.state = useState({ filler: false });
+                parentState = this.state;
+            }
+            static template = xml`
+                <div t-if="state.filler" class="filler" style="height: 100px;"/>
+                <Dropdown holdOnHover="true">
+                </Dropdown>
+            `;
+            static components = { Dropdown };
+        }
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu");
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        const menuBox1 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+
+        // Pointer enter the dropdown menu
+        await mouseEnter(target, ".dropdown-menu");
+
+        // Add a filler to the parent
+        assert.containsNone(target, ".filler");
+        parentState.filler = true;
+        await nextTick();
+        assert.containsOnce(target, ".filler");
+        const menuBox2 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+        assert.strictEqual(menuBox2.top - menuBox1.top, 0);
+
+        // Pointer leave the dropdown menu
+        await mouseLeave(target, ".dropdown-menu");
+        const menuBox3 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+        assert.strictEqual(menuBox3.top - menuBox1.top, 100);
+    });
+
+    QUnit.test("unlock position after close", async (assert) => {
+        class Parent extends Component {
+            static template = xml`
+                <div style="margin-left: 200px;">
+                    <Dropdown holdOnHover="true" position="'bottom-end'">
+                    </Dropdown>
+                </div>
+            `;
+            static components = { Dropdown };
+        }
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        assert.containsNone(target, ".dropdown-menu");
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        const menuBox1 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+
+        // Pointer enter the dropdown menu to lock the menu
+        await mouseEnter(target, ".dropdown-menu");
+        // close the menu
+        await click(target);
+        assert.containsNone(target, ".dropdown-menu");
+
+        // and reopen it
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        const menuBox2 = target.querySelector(".dropdown-menu").getBoundingClientRect();
+        assert.strictEqual(menuBox2.left - menuBox1.left, 0);
     });
 
     QUnit.test("payload received on item selection", async (assert) => {
@@ -559,13 +633,14 @@ QUnit.module("Components", ({ beforeEach }) => {
         }
     );
 
-    QUnit.test("siblings dropdowns with manualOnly props", async (assert) => {
-        assert.expect(7);
+    QUnit.test("siblings dropdowns with autoOpen", async (assert) => {
         class Parent extends Component {}
         Parent.template = xml`
         <div>
-          <Dropdown class="'one'" manualOnly="true"/>
-          <Dropdown class="'two'" manualOnly="true"/>
+          <Dropdown class="'one'" autoOpen="false"/>
+          <Dropdown class="'two'" autoOpen="false"/>
+          <Dropdown class="'three'"/>
+          <Dropdown class="'four'"/>
           <div class="outside">OUTSIDE</div>
         </div>
       `;
@@ -575,22 +650,37 @@ QUnit.module("Components", ({ beforeEach }) => {
         // Click on one
         await click(target, ".one button");
         assert.containsOnce(target, ".dropdown-menu");
-        // Click on two
-        await click(target, ".two button");
-        assert.containsN(target, ".dropdown-menu", 2);
-        // Click on one again
-        await click(target, ".one button");
-        assert.containsOnce(target, ".dropdown-menu");
-        assert.containsNone(target.querySelector(".one"), ".dropdown-menu");
-        // Hover on one
-        const one = target.querySelector(".one");
-        one.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
+        assert.containsOnce(target, ".one .dropdown-menu");
+        // Hover on two
+        const two = target.querySelector(".two");
+        two.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
         await nextTick();
         assert.containsOnce(target, ".dropdown-menu");
-        assert.containsNone(target.querySelector(".one"), ".dropdown-menu");
+        assert.containsOnce(target, ".one .dropdown-menu");
+        // Hover on three
+        const three = target.querySelector(".three");
+        three.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
+        await nextTick();
+        assert.containsOnce(target, ".dropdown-menu");
+        assert.containsOnce(target, ".one .dropdown-menu");
         // Click outside
         await click(target, "div.outside");
+        assert.containsNone(target, ".dropdown-menu");
+        // Click on three
+        await click(target, ".three button");
         assert.containsOnce(target, ".dropdown-menu");
+        assert.containsOnce(target, ".three .dropdown-menu");
+        // Hover on two
+        two.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
+        await nextTick();
+        assert.containsOnce(target, ".dropdown-menu");
+        assert.containsOnce(target, ".three .dropdown-menu");
+        // Hover on four
+        const four = target.querySelector(".four");
+        four.querySelector("button").dispatchEvent(new MouseEvent("mouseenter"));
+        await nextTick();
+        assert.containsOnce(target, ".dropdown-menu");
+        assert.containsOnce(target, ".four .dropdown-menu");
     });
 
     QUnit.test("siblings dropdowns: toggler focused on mouseenter", async (assert) => {
@@ -736,9 +826,6 @@ QUnit.module("Components", ({ beforeEach }) => {
             // Define the ArrowDown key with standard API (for hotkey_service)
             key: "ArrowDown",
             code: "ArrowDown",
-            // Define the ArrowDown key with deprecated API (for bootstrap)
-            keyCode: 40,
-            which: 40,
         });
         select.dispatchEvent(ev);
         await nextTick();
@@ -748,9 +835,6 @@ QUnit.module("Components", ({ beforeEach }) => {
             // Define the ESC key with standard API (for hotkey_service)
             key: "Escape",
             code: "Escape",
-            // Define the ESC key with deprecated API (for bootstrap)
-            keyCode: 27,
-            which: 27,
         });
         select.dispatchEvent(ev);
         await nextTick();
@@ -977,7 +1061,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         assert.expect(9);
         patchWithCleanup(Dropdown.prototype, {
             setup() {
-                this._super(...arguments);
+                super.setup(...arguments);
                 const isSubmenu = Boolean(this.parentDropdown);
                 if (isSubmenu) {
                     onMounted(() => {
@@ -1061,6 +1145,46 @@ QUnit.module("Components", ({ beforeEach }) => {
         );
     });
 
+    QUnit.test("caret should be repositioned to default direction when closed", async (assert) => {
+        class Parent extends Component {
+            static components = { Dropdown };
+            static template = xml`
+                <div style="height: 384px;"/> <!-- filler: takes half the runbot's browser_size -->
+                <Dropdown showCaret="true">
+                    <t t-set-slot="toggler">🍋</t>
+                    <div style="height: 400px; width: 50px;"/> <!-- menu filler -->
+                </Dropdown>
+            `;
+        }
+        // The fixture should be shown for this test, as the positioning container is the html node
+        target.style.position = "fixed";
+        target.style.top = "0";
+        target.style.left = "0";
+
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        const dropdown = target.querySelector(".o-dropdown");
+        assert.doesNotHaveClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropdown");
+
+        // open
+        await click(target, ".dropdown-toggle");
+        await nextTick(); // awaits for the caret to get patched
+        assert.hasClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropend");
+
+        // close
+        await click(target, ".dropdown-toggle");
+        assert.doesNotHaveClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropdown");
+
+        // open
+        await click(target, ".dropdown-toggle");
+        await nextTick(); // awaits for the caret to get patched
+        assert.hasClass(dropdown, "show");
+        assert.hasClass(dropdown, "dropend");
+    });
+
     QUnit.test(
         "multi-level dropdown: mouseentering a dropdown item should close any subdropdown",
         async (assert) => {
@@ -1106,7 +1230,7 @@ QUnit.module("Components", ({ beforeEach }) => {
         let hotkeyRegistrationsCount = 0;
         patchWithCleanup(env.services.hotkey, {
             add() {
-                const remove = this._super(...arguments);
+                const remove = super.add(...arguments);
                 hotkeyRegistrationsCount += 1;
                 return () => {
                     remove();
@@ -1171,8 +1295,8 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test("Dropdown with a tooltip", async (assert) => {
         assert.expect(2);
 
-        class MyComponent extends owl.Component {}
-        MyComponent.template = owl.xml`
+        class MyComponent extends Component {}
+        MyComponent.template = xml`
             <Dropdown tooltip="'My tooltip'">
                 <DropdownItem/>
             </Dropdown>`;
@@ -1187,16 +1311,17 @@ QUnit.module("Components", ({ beforeEach }) => {
     QUnit.test(
         "Dropdown with a date picker inside do not close when a click occurs in date picker",
         async (assert) => {
-            class MyComponent extends owl.Component {}
-            MyComponent.template = owl.xml`
+            registry.category("services").add("datetime_picker", datetimePickerService);
+            class MyComponent extends Component {}
+            MyComponent.template = xml`
                 <Dropdown>
                     <t t-set-slot="toggler">
                         Dropdown toggler
                     </t>
-                    <DateTimePicker onDateTimeChanged="() => {}" date="false"/>
+                    <DateTimeInput />
                 </Dropdown>
             `;
-            MyComponent.components = { Dropdown, DateTimePicker };
+            MyComponent.components = { DateTimeInput, Dropdown };
 
             await makeParent(MyComponent);
 
@@ -1205,20 +1330,152 @@ QUnit.module("Components", ({ beforeEach }) => {
             await click(target, ".dropdown-toggle");
 
             assert.containsOnce(target, ".o-dropdown--menu");
-            assert.containsNone(document.body, ".bootstrap-datetimepicker-widget");
-            assert.strictEqual(target.querySelector(".o_datepicker_input").value, "");
+            assert.containsNone(target, ".o_datetime_picker");
+            assert.strictEqual(target.querySelector(".o_datetime_input").value, "");
 
-            await click(target, ".o_datepicker_input");
-
-            assert.containsOnce(target, ".o-dropdown--menu");
-            assert.containsOnce(document.body, ".bootstrap-datetimepicker-widget");
-            assert.strictEqual(target.querySelector(".o_datepicker_input").value, "");
-
-            await click(document.querySelectorAll(".datepicker table td")[15]); // select some day
+            await click(target, ".o_datetime_input");
 
             assert.containsOnce(target, ".o-dropdown--menu");
-            assert.containsOnce(document.body, ".bootstrap-datetimepicker-widget");
-            assert.notOk(target.querySelector(".o_datepicker_input").value === "");
+            assert.containsOnce(target, ".o_datetime_picker");
+            assert.strictEqual(target.querySelector(".o_datetime_input").value, "");
+
+            await click(getPickerCell("15")); // select some day
+
+            assert.containsOnce(target, ".o-dropdown--menu");
+            assert.containsOnce(target, ".o_datetime_picker");
+            assert.notOk(target.querySelector(".o_datetime_input").value === "");
         }
     );
+
+    QUnit.test("onOpened callback props called after the menu has been mounted", async (assert) => {
+        const beforeOpenProm = makeDeferred();
+        class Parent extends Component {
+            beforeOpenCallback() {
+                assert.step("beforeOpened");
+                return beforeOpenProm;
+            }
+            onOpenedCallback() {
+                assert.step("onOpened");
+            }
+        }
+        Parent.template = xml`
+            <Dropdown onOpened.bind="onOpenedCallback" beforeOpen.bind="beforeOpenCallback" />
+        `;
+        Parent.components = { Dropdown, DropdownItem };
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        await click(target, "button.dropdown-toggle");
+        assert.verifySteps(["beforeOpened"]);
+        beforeOpenProm.resolve();
+        await nextTick();
+        assert.verifySteps(["onOpened"]);
+    });
+
+    QUnit.test("dropdown button can be disabled", async (assert) => {
+        class Parent extends Component {}
+        Parent.template = xml`<Dropdown disabled="true"/>`;
+        Parent.components = { Dropdown };
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        assert.strictEqual(
+            target.querySelector(".dropdown").outerHTML,
+            '<div class="o-dropdown dropdown o-dropdown--no-caret"><button type="button" class="dropdown-toggle" disabled="" tabindex="0" aria-expanded="false"></button></div>'
+        );
+    });
+
+    QUnit.test("Dropdown with CheckboxItem: toggle value", async (assert) => {
+        class Parent extends Component {
+            setup() {
+                this.state = useState({ checked: false });
+            }
+            onSelected() {
+                this.state.checked = !this.state.checked;
+            }
+        }
+        Parent.template = xml`
+            <Dropdown>
+                <t t-set-slot="toggler">Click to open</t>
+                <CheckboxItem
+                    class="{ selected: state.checked }"
+                    checked="state.checked"
+                    parentClosingMode="'none'"
+                    onSelected.bind="onSelected">
+                    My checkbox item
+                </CheckboxItem>
+            </Dropdown>`;
+        Parent.components = { Dropdown, CheckboxItem };
+        env = await makeTestEnv();
+        await mount(Parent, target, { env });
+        await click(target, ".dropdown-toggle");
+        assert.strictEqual(
+            target.querySelector(".dropdown-item").outerHTML,
+            `<span class="dropdown-item" role="menuitemcheckbox" tabindex="0" aria-checked="false"> My checkbox item </span>`
+        );
+        await click(target, ".dropdown-item");
+        assert.strictEqual(
+            target.querySelector(".dropdown-item").outerHTML,
+            `<span class="dropdown-item selected" role="menuitemcheckbox" tabindex="0" aria-checked="true"> My checkbox item </span>`
+        );
+    });
+
+    QUnit.test("don't close dropdown outside the active element", async (assert) => {
+        // This test checks that if a dropdown element opens a dialog with a dropdown inside,
+        // opening this dropdown will not close the first dropdown.
+        class CustomDialog extends Component {}
+        CustomDialog.template = xml`
+            <Dialog title="'Welcome'">
+                <Dropdown>
+                    <DropdownItem>Item</DropdownItem>
+                </Dropdown>
+                <div class="outside_dialog">Outside Dialog</div>
+            </Dialog>`;
+        CustomDialog.components = { Dialog, Dropdown, DropdownItem };
+
+        const mainComponentRegistry = registry.category("main_components");
+        clearRegistryWithCleanup(mainComponentRegistry);
+        serviceRegistry.add("dialog", dialogService);
+        serviceRegistry.add("l10n", makeFakeLocalizationService());
+
+        class PseudoWebClient extends Component {
+            setup() {
+                this.Components = mainComponentRegistry.getEntries();
+            }
+            clicked() {
+                env.services.dialog.add(CustomDialog);
+            }
+        }
+        PseudoWebClient.template = xml`
+                <div>
+                    <div>
+                        <t t-foreach="Components" t-as="C" t-key="C[0]">
+                            <t t-component="C[1].Component" t-props="C[1].props"/>
+                        </t>
+                    </div>
+                    <div>
+                        <Dropdown>
+                            <button class="click-me" t-on-click="clicked">Click me</button>
+                        </Dropdown>
+                        <div class="outside_parent">Outside Parent</div>
+                    </div>
+                </div>
+            `;
+        PseudoWebClient.components = { Dropdown };
+
+        env = await makeTestEnv();
+        await mount(PseudoWebClient, target, { env });
+        await click(target, "button.dropdown-toggle");
+        assert.containsOnce(target, ".dropdown-menu");
+        await click(target, "button.click-me");
+        assert.containsOnce(target, ".modal-dialog");
+        await click(target, ".modal-dialog button.dropdown-toggle");
+        assert.containsN(target, ".dropdown-menu", 2);
+        await click(target, ".outside_dialog");
+        assert.containsOnce(target, ".modal-dialog");
+        assert.containsN(target, ".dropdown-menu", 1);
+        await click(target, ".modal-dialog .btn-primary");
+        assert.containsNone(target, ".modal-dialog");
+        assert.containsN(target, ".dropdown-menu", 1);
+        await click(target, ".outside_parent");
+        assert.containsNone(target, ".dropdown-menu");
+    });
 });

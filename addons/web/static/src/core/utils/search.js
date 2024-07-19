@@ -3,6 +3,22 @@
 import { unaccent } from "./strings";
 
 /**
+ * @param {string} pattern
+ * @param {string|string[]} strs
+ * @returns {number}
+ */
+function match(pattern, strs) {
+    if (!Array.isArray(strs)) {
+        strs = [strs];
+    }
+    let globalScore = 0;
+    for (const str of strs) {
+        globalScore = Math.max(globalScore, _match(pattern, str));
+    }
+    return globalScore;
+}
+
+/**
  * This private function computes a score that represent the fact that the
  * string contains the pattern, or not
  *
@@ -12,8 +28,12 @@ import { unaccent } from "./strings";
  *
  * Better matches will get a higher score: consecutive letters are better,
  * and a match closer to the beginning of the string is also scored higher.
+ *
+ * @param {string} pattern
+ * @param {string} str
+ * @returns {number}
  */
-function match(pattern, str) {
+function _match(pattern, str) {
     let totalScore = 0;
     let currentScore = 0;
     const len = str.length;
@@ -39,6 +59,12 @@ function match(pattern, str) {
  * Return a list of things that matches a pattern, ordered by their 'score' (
  * higher score first). An higher score means that the match is better. For
  * example, consecutive letters are considered a better match.
+ *
+ * @template T
+ * @param {string} pattern
+ * @param {T[]} list
+ * @param {(element: T) => (string|string[])} fn
+ * @returns {T[]}
  */
 export function fuzzyLookup(pattern, list, fn) {
     const results = [];
@@ -56,6 +82,11 @@ export function fuzzyLookup(pattern, list, fn) {
 }
 
 // Does `pattern` fuzzy match `string`?
+/**
+ * @param {string} pattern
+ * @param {string} string
+ * @returns {boolean}
+ */
 export function fuzzyTest(pattern, string) {
-    return match(pattern, string) !== 0;
+    return _match(pattern, string) !== 0;
 }

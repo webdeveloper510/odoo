@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models, _
+from odoo import api, Command, fields, models, _
 from odoo.exceptions import ValidationError
+from odoo.osv import expression
 from odoo.tools import format_amount
 
-ACCOUNT_DOMAIN = "['&', '&', '&', ('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card')), ('company_id', '=', current_company_id), ('is_off_balance', '=', False)]"
+ACCOUNT_DOMAIN = "['&', ('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card','off_balance'))]"
 
 class ProductCategory(models.Model):
     _inherit = "product.category"
@@ -25,10 +26,14 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     taxes_id = fields.Many2many('account.tax', 'product_taxes_rel', 'prod_id', 'tax_id', help="Default taxes used when selling the product.", string='Customer Taxes',
-        domain=[('type_tax_use', '=', 'sale')], default=lambda self: self.env.company.account_sale_tax_id)
+        domain=[('type_tax_use', '=', 'sale')],
+        default=lambda self: self.env.companies.account_sale_tax_id or self.env.companies.root_id.sudo().account_sale_tax_id,
+    )
     tax_string = fields.Char(compute='_compute_tax_string')
     supplier_taxes_id = fields.Many2many('account.tax', 'product_supplier_taxes_rel', 'prod_id', 'tax_id', string='Vendor Taxes', help='Default taxes used when buying the product.',
-        domain=[('type_tax_use', '=', 'purchase')], default=lambda self: self.env.company.account_purchase_tax_id)
+        domain=[('type_tax_use', '=', 'purchase')],
+        default=lambda self: self.env.companies.account_purchase_tax_id or self.env.companies.root_id.sudo().account_purchase_tax_id,
+    )
     property_account_income_id = fields.Many2one('account.account', company_dependent=True,
         string="Income Account",
         domain=ACCOUNT_DOMAIN,
@@ -42,6 +47,7 @@ class ProductTemplate(models.Model):
         comodel_name='account.account.tag',
         domain="[('applicability', '=', 'products')]",
         help="Tags to be set on the base and tax journal items created for this product.")
+    fiscal_country_codes = fields.Char(compute='_compute_fiscal_country_codes')
 
     def _get_product_accounts(self):
         return {
@@ -60,6 +66,13 @@ class ProductTemplate(models.Model):
         if not fiscal_pos:
             fiscal_pos = self.env['account.fiscal.position']
         return fiscal_pos.map_accounts(accounts)
+
+    @api.depends('company_id')
+    @api.depends_context('allowed_company_ids')
+    def _compute_fiscal_country_codes(self):
+        for record in self:
+            allowed_companies = record.company_id or self.env.companies
+            record.fiscal_country_codes = ",".join(allowed_companies.mapped('account_fiscal_country_id.code'))
 
     @api.depends('taxes_id', 'list_price')
     def _compute_tax_string(self):
@@ -105,6 +118,27 @@ class ProductTemplate(models.Model):
                 "If you want to change its Unit of Measure, please archive this product and create a new one."
             ))
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        products = super().create(vals_list)
+        # If no company was set for the product, the product will be available for all companies and therefore should
+        # have the default taxes of the other companies as well. sudo() is used since we're going to need to fetch all
+        # the other companies default taxes which the user may not have access to.
+        other_companies = self.env['res.company'].sudo().search([('id', 'not in', self.env.companies.ids)])
+        if not other_companies:
+            return products
+
+        default_customer_tax_ids = other_companies.filtered('account_sale_tax_id').account_sale_tax_id.ids
+        default_supplier_tax_ids = other_companies.filtered('account_purchase_tax_id').account_purchase_tax_id.ids
+
+        products_without_company = products.filtered(lambda p: not p.company_id).sudo()
+        products_without_company.taxes_id = [Command.link(tax) for tax in default_customer_tax_ids]
+        products_without_company.supplier_taxes_id = [Command.link(tax) for tax in default_supplier_tax_ids]
+
+        products_without_company.invalidate_recordset(['taxes_id', 'supplier_taxes_id'])
+        products.invalidate_recordset(['taxes_id', 'supplier_taxes_id'])
+        return products
+
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
@@ -121,6 +155,8 @@ class ProductProduct(models.Model):
         """ Helper to get the price unit from different models.
             This is needed to compute the same unit price in different models (sale order, account move, etc.) with same parameters.
         """
+        self.ensure_one()
+        company.ensure_one()
 
         product = self
 
@@ -215,3 +251,45 @@ class ProductProduct(models.Model):
     def _compute_tax_string(self):
         for record in self:
             record.tax_string = record.product_tmpl_id._construct_tax_string(record.lst_price)
+
+    # -------------------------------------------------------------------------
+    # EDI
+    # -------------------------------------------------------------------------
+
+    def _retrieve_product(self, name=None, default_code=None, barcode=None, company=None, extra_domain=None):
+        '''Search all products and find one that matches one of the parameters.
+
+        :param name:            The name of the product.
+        :param default_code:    The default_code of the product.
+        :param barcode:         The barcode of the product.
+        :param company:         The company of the product.
+        :param extra_domain:    Any extra domain to add to the search.
+        :returns:               A product or an empty recordset if not found.
+        '''
+        if name and '\n' in name:
+            # cut Sales Description from the name
+            name = name.split('\n')[0]
+        domains = []
+        if default_code:
+            domains.append([('default_code', '=', default_code)])
+        if barcode:
+            domains.append([('barcode', '=', barcode)])
+
+        # Search for the product with the exact name, then ilike the name
+        name_domains = [('name', '=', name)], [('name', 'ilike', name)] if name else []
+        company = company or self.env.company
+        for name_domain in name_domains:
+            for extra_domain in (
+                [*self.env['res.partner']._check_company_domain(company), ('company_id', '!=', False)],
+                [('company_id', '=', False)],
+            ):
+                product = self.env['product.product'].search(
+                    expression.AND([
+                        expression.OR(domains + [name_domain]),
+                        extra_domain,
+                    ]),
+                    limit=1,
+                )
+                if product:
+                    return product
+        return self.env['product.product']

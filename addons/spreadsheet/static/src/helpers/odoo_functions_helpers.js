@@ -1,36 +1,39 @@
 /** @odoo-module **/
 
-import spreadsheet from "../o_spreadsheet/o_spreadsheet_extended";
+import * as spreadsheet from "@odoo/o-spreadsheet";
 
-const { parse } = spreadsheet;
+const { parseTokens, iterateAstNodes } = spreadsheet;
 
 /**
  * @typedef {Object} OdooFunctionDescription
  * @property {string} functionName Name of the function
  * @property {Array<string>} args Arguments of the function
- * @property {boolean} isMatched True if the function is matched by the matcher function
+ *
+ * @typedef {Object} Token
+ * @property {string} type
+ * @property {string} value
+
  */
 
 /**
  * This function is used to search for the functions which match the given matcher
  * from the given formula
  *
- * @param {string} formula
+ * @param {Token[]} tokens
  * @param {string[]} functionNames e.g. ["ODOO.LIST", "ODOO.LIST.HEADER"]
  * @private
  * @returns {Array<OdooFunctionDescription>}
  */
-export function getOdooFunctions(formula, functionNames) {
-    const formulaUpperCased = formula.toUpperCase();
+export function getOdooFunctions(tokens, functionNames) {
     // Parsing is an expensive operation, so we first check if the
     // formula contains one of the function names
-    if (!functionNames.some((fn) => formulaUpperCased.includes(fn.toUpperCase()))) {
+    if (!tokens.some((t) => t.type === "SYMBOL" && functionNames.includes(t.value.toUpperCase()))) {
         return [];
     }
     let ast;
     try {
-        ast = parse(formula);
-    } catch (_) {
+        ast = parseTokens(tokens);
+    } catch {
         return [];
     }
     return _getOdooFunctionsFromAST(ast, functionNames);
@@ -47,24 +50,7 @@ export function getOdooFunctions(formula, functionNames) {
  * @returns {Array<OdooFunctionDescription>}
  */
 function _getOdooFunctionsFromAST(ast, functionNames) {
-    switch (ast.type) {
-        case "UNARY_OPERATION":
-            return _getOdooFunctionsFromAST(ast.operand, functionNames);
-        case "BIN_OPERATION": {
-            return _getOdooFunctionsFromAST(ast.left, functionNames).concat(
-                _getOdooFunctionsFromAST(ast.right, functionNames)
-            );
-        }
-        case "FUNCALL": {
-            const functionName = ast.value.toUpperCase();
-
-            if (functionNames.includes(functionName)) {
-                return [{ functionName, args: ast.args, isMatched: true }];
-            } else {
-                return ast.args.map((arg) => _getOdooFunctionsFromAST(arg, functionNames)).flat();
-            }
-        }
-        default:
-            return [];
-    }
+    return iterateAstNodes(ast)
+        .filter((ast) => ast.type === "FUNCALL" && functionNames.includes(ast.value.toUpperCase()))
+        .map((ast) => ({ functionName: ast.value.toUpperCase(), args: ast.args }));
 }

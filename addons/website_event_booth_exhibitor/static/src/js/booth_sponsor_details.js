@@ -1,7 +1,6 @@
-odoo.define('website_event_booth_exhibitor.booth_sponsor_details', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var publicWidget = require('web.public.widget');
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.boothSponsorDetails = publicWidget.Widget.extend({
     selector: '#o_wbooth_contact_details_form',
@@ -22,8 +21,6 @@ publicWidget.registry.boothSponsorDetails = publicWidget.Widget.extend({
 
 });
 
-    return {
-        boothSponsorDetails: publicWidget.registry.boothSponsorDetails,
-    };
-
-});
+export default {
+    boothSponsorDetails: publicWidget.registry.boothSponsorDetails,
+};

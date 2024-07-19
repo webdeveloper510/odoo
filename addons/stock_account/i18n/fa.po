@@ -5,20 +5,21 @@
 # Translators:
 # Hamid Reza Kaveh <hamidrkp@riseup.net>, 2023
 # Hamid Darabi, 2023
+# Hamid Ahmadimoghaddam, 2023
+# Yousef Shadmanesh <y.shadmanesh@gmail.com>, 2023
 # Faraz Sadri Alamdari <ifarazir@gmail.com>, 2023
 # Mohsen Mohammadi <iammohsen.123@gmail.com>, 2023
 # Hamed Mohammadi <hamed@dehongi.com>, 2023
 # Martin Trigaux, 2023
-# Hanna Kheradroosta, 2023
-# Hamid Ahmadimoghaddam, 2023
+# Hanna Kheradroosta, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Hamid Ahmadimoghaddam, 2023\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Hanna Kheradroosta, 2024\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -69,8 +70,18 @@ msgid ""
 msgstr ""
 
 #. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
+msgid "6.00"
+msgstr ""
+
+#. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_category_property_form
 msgid "<b>Set other input/output accounts on specific </b>"
+msgstr ""
+
+#. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_picking
+msgid "<span class=\"o_stat_text\">Valuation</span>"
 msgstr ""
 
 #. module: stock_account
@@ -152,14 +163,29 @@ msgstr ""
 "بین محصولات تقسیم کنید تا قیمت تمام شده آنها بروز شود."
 
 #. module: stock_account
-#: model:ir.model.fields,field_description:stock_account.field_stock_move__analytic_account_line_id
+#: model:ir.model,name:stock_account.model_account_analytic_account
+msgid "Analytic Account"
+msgstr "حساب تحلیلی"
+
+#. module: stock_account
+#: model:ir.model.fields,field_description:stock_account.field_stock_move__analytic_account_line_ids
 msgid "Analytic Account Line"
 msgstr "سطر حساب تحلیلی"
+
+#. module: stock_account
+#: model:ir.model,name:stock_account.model_account_analytic_plan
+msgid "Analytic Plans"
+msgstr "برنامه‌های تحلیلی"
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_valuation__real_time
 msgid "Automated"
 msgstr "خودکار"
+
+#. module: stock_account
+#: model:ir.model.fields,field_description:stock_account.field_res_config_settings__group_stock_accounting_automatic
+msgid "Automatic Stock Accounting"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__avg_cost
@@ -170,6 +196,16 @@ msgstr "میانگین هزینه"
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_cost_method__average
 msgid "Average Cost (AVCO)"
 msgstr "میانگین هزینه (AVCO)"
+
+#. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
+msgid "BC46282798"
+msgstr ""
+
+#. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
+msgid "Bacon"
+msgstr "بیکن"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_revaluation_form_view
@@ -216,8 +252,14 @@ msgid "Choose a date to get the valuation at that date"
 msgstr ""
 
 #. module: stock_account
+#: model:ir.model.fields,field_description:stock_account.field_account_move_line__cogs_origin_id
+msgid "Cogs Origin"
+msgstr ""
+
+#. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__company_id
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__company_id
+#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Company"
 msgstr "شرکت"
 
@@ -306,6 +348,7 @@ msgstr "ارزش کنونی"
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_form
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
+#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Date"
 msgstr "تاریخ"
 
@@ -337,7 +380,7 @@ msgstr "نمایش سری ساخت و شماره سریال در فاکتوره�
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__display_name
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__display_name
 msgid "Display Name"
-msgstr "نام نمایشی"
+msgstr "نام نمایش داده شده"
 
 #. module: stock_account
 #: model:res.groups,name:stock_account.group_lot_on_invoice
@@ -345,21 +388,13 @@ msgid "Display Serial & Lot Number on Invoices"
 msgstr "نمایش شماره سریال و سری ساخت روی فاکتورها"
 
 #. module: stock_account
-#: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
-msgid "Documentation"
-msgstr "مستندات"
-
-#. module: stock_account
 #. odoo-python
 #: code:addons/stock_account/models/product.py:0
 #, python-format
 msgid ""
-"Due to a change of product category (from %s to %s), the costing method"
-"                                has changed for product template %s: from %s"
-" to %s."
+"Due to a change of product category (from %s to %s), the costing method has "
+"changed for product template %s: from %s to %s."
 msgstr ""
-"به دلیل تغییر دسته محصول (از %s به %s)، روش هزینه یابی برای الگوی محصول %s "
-"تغییر کرده است: از %s به %s."
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_cost_method__fifo
@@ -388,14 +423,18 @@ msgid "Incoming"
 msgstr "پیش رو"
 
 #. module: stock_account
+#: model:ir.actions.act_window,name:stock_account.inventory_aging_action
+#: model:ir.ui.menu,name:stock_account.menu_inventory_aging
+msgid "Inventory Aging"
+msgstr ""
+
+#. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_location
 msgid "Inventory Locations"
 msgstr "مکان های انبارداری"
 
 #. module: stock_account
 #. odoo-python
-#: code:addons/stock_account/__init__.py:0
-#: code:addons/stock_account/__init__.py:0
 #: code:addons/stock_account/models/account_chart_template.py:0
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_valuation
 #: model:ir.model.fields,field_description:stock_account.field_product_product__valuation
@@ -425,13 +464,14 @@ msgstr "روزنامه"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_move
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__account_move_id
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
 msgid "Journal Entry"
-msgstr "داده روزنامه"
+msgstr "سند دفترروزنامه‌"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_move_line
 msgid "Journal Item"
-msgstr "آیتم روزنامه"
+msgstr "آیتم دفترروزنامه"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_config_settings__module_stock_landed_costs
@@ -439,16 +479,10 @@ msgid "Landed Costs"
 msgstr "هزینه های سربار"
 
 #. module: stock_account
-#: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer____last_update
-#: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation____last_update
-msgid "Last Modified on"
-msgstr "آخرین اصلاح در"
-
-#. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__write_uid
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer_revaluation__write_uid
 msgid "Last Updated by"
-msgstr "آخرین تغییر توسط"
+msgstr "آخرین بروز رسانی توسط"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__write_date
@@ -463,8 +497,8 @@ msgstr "لینک شده به"
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
-msgid "Lots &amp; Serial numbers will appear on the invoice"
-msgstr "سری ساخت &amp; شماره سریال روی فاکتور ظاهر می شود"
+msgid "Lots & Serial numbers will appear on the invoice"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_valuation__manual_periodic
@@ -515,11 +549,6 @@ msgid "New value by quantity"
 msgstr "ارزش جدید بر اساس کمیت"
 
 #. module: stock_account
-#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
-msgid "Open Valuation Layer"
-msgstr ""
-
-#. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_form
 msgid "Other Info"
 msgstr "اطلاعات دیگر"
@@ -539,13 +568,14 @@ msgstr "محصول"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_category
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__categ_id
+#: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Product Category"
-msgstr "دسته محصول"
+msgstr "دسته بندی محصول"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
-msgstr "انتقال محصول (سطر انتقال کوجودی)"
+msgstr "انتقال محصول (مسیر انتقال موجودی)"
 
 #. module: stock_account
 #. odoo-python
@@ -596,6 +626,11 @@ msgstr "علت"
 #: model:ir.model.fields,help:stock_account.field_stock_valuation_layer_revaluation__reason
 msgid "Reason of the revaluation"
 msgstr "دلیل ارزیابی مجدد"
+
+#. module: stock_account
+#: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__warehouse_id
+msgid "Receipt WH"
+msgstr ""
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__reference
@@ -661,6 +696,11 @@ msgstr ""
 "         "
 
 #. module: stock_account
+#: model:res.groups,name:stock_account.group_stock_accounting_automatic
+msgid "Stock Accounting Automatic"
+msgstr ""
+
+#. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_category__property_stock_account_input_categ_id
 msgid "Stock Input Account"
 msgstr "حساب ورودی موجودی"
@@ -690,7 +730,7 @@ msgid "Stock Quantity History"
 msgstr "تاریخچه کمیت موجودی"
 
 #. module: stock_account
-#: model:ir.model,name:stock_account.model_report_stock_report_product_product_replenishment
+#: model:ir.model,name:stock_account.model_stock_forecasted_product_product
 msgid "Stock Replenishment Report"
 msgstr "گزارش جایگزینی انبار"
 
@@ -816,6 +856,16 @@ msgstr ""
 "خطوط انتقال در حالت ثابتی نیستند: آنها شرکت مبدا یا مقصد یکسانی ندارند."
 
 #. module: stock_account
+#. odoo-python
+#: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
+#, python-format
+msgid ""
+"The value of a stock valuation layer cannot be negative. Landed cost could "
+"be use to correct a specific transfer."
+msgstr ""
+
+#. module: stock_account
+#: model_terms:ir.actions.act_window,help:stock_account.inventory_aging_action
 #: model_terms:ir.actions.act_window,help:stock_account.stock_valuation_layer_action
 #: model_terms:ir.actions.act_window,help:stock_account.stock_valuation_layer_report_action
 msgid ""
@@ -824,12 +874,19 @@ msgid ""
 msgstr ""
 
 #. module: stock_account
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
+msgid "Total Moved Quantity"
+msgstr ""
+
+#. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_report_tree
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
 msgid "Total Remaining Quantity"
 msgstr ""
 
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_report_tree
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
 msgid "Total Remaining Value"
 msgstr ""
 
@@ -911,7 +968,6 @@ msgstr ""
 #: model:ir.ui.menu,name:stock_account.menu_valuation
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_form
-#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_picking
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_quant_tree_editable_inherit
 msgid "Valuation"
 msgstr "ارزش گذاری"
@@ -927,10 +983,8 @@ msgid "Valuation Report"
 msgstr ""
 
 #. module: stock_account
-#. odoo-javascript
-#: code:addons/stock_account/static/src/xml/inventory_report.xml:0
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
 #: model_terms:ir.ui.view,arch_db:stock_account.view_stock_quantity_history_inherit_stock_account
-#, python-format
 msgid "Valuation at Date"
 msgstr ""
 
@@ -1098,8 +1152,6 @@ msgid "locations"
 msgstr "مکان ها"
 
 #. module: stock_account
-#: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
-msgid ""
-"'The value of a stock valuation layer cannot be negative. Landed cost could "
-"be use to correct a specific transfer."
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:stock_account.stock_account_report_invoice_document
+msgid "units"
+msgstr "واحدها"

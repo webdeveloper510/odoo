@@ -45,7 +45,7 @@ class TestMailGroup(TestMailListCommon):
 
         self.test_group.alias_id.alias_contact = 'followers'
         self.test_group.access_mode = 'groups'
-        err_msg = self.test_group._alias_get_error_message({}, {'email_from': group_user_not_member.email}, self.test_group.alias_id)
+        err_msg = self.test_group._alias_get_error({}, {'email_from': group_user_not_member.email}, self.test_group.alias_id)
         self.assertFalse(err_msg, "Mail with sender belonging to allowed user group (not a member of the mail group) was rejected")
 
     def test_find_member(self):
@@ -125,7 +125,7 @@ class TestMailGroup(TestMailListCommon):
             'email_from': user2.email,
         }
         self.test_group.alias_id.alias_contact = 'followers'
-        self.assertFalse(self.test_group._alias_get_error_message({}, msg_dict, self.test_group.alias_id))
+        self.assertFalse(self.test_group._alias_get_error({}, msg_dict, self.test_group.alias_id))
 
     @users('employee')
     def test_join_group(self):

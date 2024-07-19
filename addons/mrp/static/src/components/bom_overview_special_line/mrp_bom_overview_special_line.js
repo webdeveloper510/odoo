@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
 import { formatFloat, formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
-
-const { Component } = owl;
+import { Component } from "@odoo/owl";
 
 export class BomOverviewSpecialLine extends Component {
     setup() {

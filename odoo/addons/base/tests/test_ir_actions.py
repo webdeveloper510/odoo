@@ -2,12 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import date
+import json
 from psycopg2 import IntegrityError, ProgrammingError
+import requests
+from unittest.mock import patch
 
 import odoo
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.tools import mute_logger
-from odoo.tests import common
+from odoo.tests import common, tagged
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo import Command
 
@@ -22,6 +25,7 @@ class TestServerActionsBase(TransactionCaseWithUserDemo):
             'name': 'TestingCountry',
             'code': 'TY',
             'address_format': 'SuperFormat',
+            'name_position': 'before',
         })
         self.test_partner = self.env['res.partner'].create({
             'city': 'OrigCity',
@@ -45,10 +49,10 @@ class TestServerActionsBase(TransactionCaseWithUserDemo):
         self.res_partner_parent_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'parent_id')])
         self.res_partner_children_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'child_ids')])
         self.res_partner_category_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'category_id')])
-        self.res_partner_latitude_field = Fields.search([('model', '=', 'res.partner'), ('name', '=', 'partner_latitude')])
         self.res_country_model = Model.search([('model', '=', 'res.country')])
         self.res_country_name_field = Fields.search([('model', '=', 'res.country'), ('name', '=', 'name')])
         self.res_country_code_field = Fields.search([('model', '=', 'res.country'), ('name', '=', 'code')])
+        self.res_country_name_position_field = Fields.search([('model', '=', 'res.country'), ('name', '=', 'name_position')])
         self.res_partner_category_model = Model.search([('model', '=', 'res.partner.category')])
         self.res_partner_category_name_field = Fields.search([('model', '=', 'res.partner.category'), ('name', '=', 'name')])
 
@@ -61,8 +65,40 @@ class TestServerActionsBase(TransactionCaseWithUserDemo):
             'code': 'record.write({"comment": "%s"})' % self.comment_html,
         })
 
+        server_action_model = Model.search([('model', '=', 'ir.actions.server')])
+        self.test_server_action = self.env['ir.actions.server'].create({
+            'name': 'TestDummyServerAction',
+            'model_id': server_action_model.id,
+            'state': 'code',
+            'code':
+"""
+_logger.log(10, "This is a %s debug %s", "test", "log")
+_logger.info("This is a %s info %s", "test", "log")
+_logger.warning("This is a %s warning %s", "test", "log")
+_logger.error("This is a %s error %s", "test", "log")
+try:
+    0/0
+except:
+    _logger.exception("This is a %s exception %s", "test", "log")
+""",
+        })
+
 
 class TestServerActions(TestServerActionsBase):
+    def test_00_server_action(self):
+        with self.assertLogs('odoo.addons.base.models.ir_actions.server_action_safe_eval',
+                             level='DEBUG') as log_catcher:
+            self.test_server_action.run()
+            self.assertEqual(log_catcher.output, [
+                'DEBUG:odoo.addons.base.models.ir_actions.server_action_safe_eval:This is a test debug log',
+                'INFO:odoo.addons.base.models.ir_actions.server_action_safe_eval:This is a test info log',
+                'WARNING:odoo.addons.base.models.ir_actions.server_action_safe_eval:This is a test warning log',
+                'ERROR:odoo.addons.base.models.ir_actions.server_action_safe_eval:This is a test error log',
+"""ERROR:odoo.addons.base.models.ir_actions.server_action_safe_eval:This is a test exception log
+Traceback (most recent call last):
+  File "ir.actions.server(%d,)", line 6, in <module>
+ZeroDivisionError: division by zero""" % self.test_server_action.id
+            ])
 
     def test_00_action(self):
         self.action.with_context(self.context).run()
@@ -93,56 +129,48 @@ class TestServerActions(TestServerActionsBase):
         # Do: create a new record in another model
         self.action.write({
             'state': 'object_create',
-            'crud_model_id': self.res_country_model.id,
+            'crud_model_id': self.res_partner_model.id,
             'link_field_id': False,
-            'fields_lines': [Command.clear(),
-                             Command.create({'col1': self.res_country_name_field.id, 'value': 'record.name', 'evaluation_type': 'equation'}),
-                             Command.create({'col1': self.res_country_code_field.id, 'value': 'record.name[0:2]', 'evaluation_type': 'equation'})],
+            'value': 'TestingPartner2'
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
-        # Test: new country created
-        country = self.test_country.search([('name', 'ilike', 'TestingPartner')])
-        self.assertEqual(len(country), 1, 'ir_actions_server: TODO')
-        self.assertEqual(country.code, 'TE', 'ir_actions_server: TODO')
+        # Test: new partner created
+        partner = self.test_partner.search([('name', 'ilike', 'TestingPartner2')])
+        self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
 
     def test_20_crud_create_link_many2one(self):
-        _city = 'TestCity'
-        _name = 'TestNew'
 
         # Do: create a new record in the same model and link it with a many2one
         self.action.write({
             'state': 'object_create',
-            'crud_model_id': self.action.model_id.id,
+            'crud_model_id': self.res_partner_model.id,
             'link_field_id': self.res_partner_parent_field.id,
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': _name}),
-                             Command.create({'col1': self.res_partner_city_field.id, 'value': _city})],
+            'value': "TestNew"
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
         # Test: new partner created
-        partner = self.test_partner.search([('name', 'ilike', _name)])
+        partner = self.test_partner.search([('name', 'ilike', 'TestNew')])
         self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
-        self.assertEqual(partner.city, _city, 'ir_actions_server: TODO')
         # Test: new partner linked
         self.assertEqual(self.test_partner.parent_id, partner, 'ir_actions_server: TODO')
 
     def test_20_crud_create_link_one2many(self):
-        _name = 'TestNew'
 
         # Do: create a new record in the same model and link it with a one2many
         self.action.write({
             'state': 'object_create',
-            'crud_model_id': self.action.model_id.id,
+            'crud_model_id': self.res_partner_model.id,
             'link_field_id': self.res_partner_children_field.id,
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': _name})],
+            'value': 'TestNew',
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
         # Test: new partner created
-        partner = self.test_partner.search([('name', 'ilike', _name)])
+        partner = self.test_partner.search([('name', 'ilike', 'TestNew')])
         self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
-        self.assertEqual(partner.name, _name, 'ir_actions_server: TODO')
+        self.assertEqual(partner.name, 'TestNew', 'ir_actions_server: TODO')
         # Test: new partner linked
         self.assertIn(partner, self.test_partner.child_ids, 'ir_actions_server: TODO')
 
@@ -152,7 +180,7 @@ class TestServerActions(TestServerActionsBase):
             'state': 'object_create',
             'crud_model_id': self.res_partner_category_model.id,
             'link_field_id': self.res_partner_category_field.id,
-            'fields_lines': [Command.create({'col1': self.res_partner_category_name_field.id, 'value': 'record.name', 'evaluation_type': 'equation'})],
+            'value': 'TestingPartner'
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
@@ -162,19 +190,147 @@ class TestServerActions(TestServerActionsBase):
         self.assertIn(category, self.test_partner.category_id)
 
     def test_30_crud_write(self):
-        _name = 'TestNew'
-
         # Do: update partner name
         self.action.write({
             'state': 'object_write',
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': _name})],
+            'update_path': 'name',
+            'value': 'TestNew',
         })
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
         # Test: partner updated
-        partner = self.test_partner.search([('name', 'ilike', _name)])
+        partner = self.test_partner.search([('name', 'ilike', 'TestNew')])
         self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
         self.assertEqual(partner.city, 'OrigCity', 'ir_actions_server: TODO')
+
+    def test_35_crud_write_selection(self):
+        # Don't want to use res.partner because no 'normal selection field' exists there
+        # we'll use a speficic action for this test instead of the one from the test setup
+        # Do: update country name_position field
+        selection_value = self.res_country_name_position_field.selection_ids.filtered(lambda s: s.value == 'after')
+        action = self.env['ir.actions.server'].create({
+            'name': 'TestAction',
+            'model_id': self.res_country_model.id,
+            'model_name': 'res.country',
+            'state': 'object_write',
+            'update_path': 'name_position',
+            'selection_value': selection_value.id,
+        })
+        action._set_selection_value()  # manual onchange
+        self.assertEqual(action.value, selection_value.value)
+        context = {
+            'active_model': 'res.country',
+            'active_id': self.test_country.id,
+        }
+        run_res = action.with_context(context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: country updated
+        self.assertEqual(self.test_country.name_position, 'after')
+
+    def test_36_crud_write_m2m_ops(self):
+        """ Test that m2m operations work as expected """
+        categ_1 = self.env['res.partner.category'].create({'name': 'TestCateg1'})
+        categ_2 = self.env['res.partner.category'].create({'name': 'TestCateg2'})
+        # set partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'set',
+            'resource_ref': categ_1,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertIn(categ_1, self.test_partner.category_id, 'ir_actions_server: tag should have been set')
+
+        # add partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'add',
+            'resource_ref': categ_2,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertIn(categ_2, self.test_partner.category_id, 'ir_actions_server: new tag should have been added')
+        self.assertIn(categ_1, self.test_partner.category_id, 'ir_actions_server: old tag should still be there')
+
+        # remove partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'remove',
+            'resource_ref': categ_1,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertNotIn(categ_1, self.test_partner.category_id, 'ir_actions_server: tag should have been removed')
+        self.assertIn(categ_2, self.test_partner.category_id, 'ir_actions_server: tag should still be there')
+
+        # clear partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'clear',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertFalse(self.test_partner.category_id, 'ir_actions_server: tags should have been cleared')
+
+    def test_37_field_path_traversal(self):
+        """ Test the update_path field traversal - allowing records to be updated along relational links """
+        # update the country's name via the partner
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'country_id.name',
+            'value': 'TestUpdatedCountry',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertEqual(self.test_partner.country_id.name, 'TestUpdatedCountry', 'ir_actions_server: country name should have been updated through relation')
+
+        # input an invalid path
+        with self.assertRaises(ValidationError):
+            self.action.write({
+                'state': 'object_write',
+                'update_path': 'country_id.name.foo',
+                'value': 'DoesNotMatter',
+            })
+            self.action.flush_recordset(['update_path', 'update_field_id'])
+
+        # update a readonly field
+            self.action.write({
+                'state': 'object_write',
+                'update_path': 'country_id.id',
+                'value': 0,
+            })
+            self.action.flush_recordset(['update_path', 'update_field_id'])
+
+    def test_39_boolean_update(self):
+        """ Test that boolean fields can be updated """
+        # update the country's name via the partner
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'active',
+            'update_boolean_value': 'false',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertFalse(self.test_partner.active, 'ir_actions_server: partner should have been deactivated')
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'active',
+            'update_boolean_value': 'true',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertTrue(self.test_partner.active, 'ir_actions_server: partner should have been reactivated')
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_40_multi(self):
@@ -192,19 +348,26 @@ class TestServerActions(TestServerActionsBase):
             'model_id': self.res_partner_model.id,
             'crud_model_id': self.res_partner_model.id,
             'state': 'object_create',
-            'fields_lines': [Command.create({'col1': self.res_partner_name_field.id, 'value': 'RaoulettePoiluchette'}),
-                             Command.create({'col1': self.res_partner_city_field.id, 'value': 'TestingCity'})],
+            'value': 'RaoulettePoiluchette',
         })
         action3 = self.action.create({
-            'name': 'Subaction3',
+            'name': 'Subaction2',
             'sequence': 3,
+            'model_id': self.res_partner_model.id,
+            'state': 'object_write',
+            'update_path': 'city',
+            'value': 'RaoulettePoiluchette',
+        })
+        action4 = self.action.create({
+            'name': 'Subaction3',
+            'sequence': 4,
             'model_id': self.res_partner_model.id,
             'state': 'code',
             'code': 'action = {"type": "ir.actions.act_url"}',
         })
         self.action.write({
             'state': 'multi',
-            'child_ids': [Command.set([action1.id, action2.id, action3.id])],
+            'child_ids': [Command.set([action1.id, action2.id, action3.id, action4.id])],
         })
 
         # Do: run the action
@@ -309,25 +472,55 @@ class TestServerActions(TestServerActionsBase):
         self_demo.with_context(self.context).run()
         self.assertEqual(self.test_partner.date, date.today())
 
-        # but can not write on private address
-        self.test_partner.type = "private"
-        with self.assertRaises(AccessError):
-            self.test_partner.with_user(user_demo.id).check_access_rule("write")
-        # nor execute a server action on it
-        with self.assertRaises(AccessError), mute_logger('odoo.addons.base.models.ir_actions'):
-            self_demo.with_context(self.context).run()
+    def test_90_webhook(self):
+        self.action.write({
+            'state': 'webhook',
+            'webhook_field_ids': [
+                Command.link(self.res_partner_name_field.id),
+                Command.link(self.res_partner_city_field.id),
+                Command.link(self.res_partner_country_field.id),
+                ],
+            'webhook_url': 'http://example.com/webhook',
+        })
+        # write a mock for the requests.post method that checks the data
+        # and returns a 200 response
+        num_requests = 0
+        def _patched_post(*args, **kwargs):
+            nonlocal num_requests
+            response = requests.Response()
+            response.status_code = 200 if num_requests == 0 else 400
+            self.assertEqual(args[0], 'http://example.com/webhook')
+            self.assertEqual(kwargs['data'], json.dumps({
+                '_action': "%s(#%s)" % (self.action.name, self.action.id),
+                '_id': self.test_partner.id,
+                '_model': self.test_partner._name,
+                'city': self.test_partner.city,
+                'country_id': self.test_partner.country_id.id,
+                'id': self.test_partner.id,
+                'name': self.test_partner.name,
+            }))
+            num_requests += 1
+            return response
+
+        with patch.object(requests, 'post', _patched_post), mute_logger('odoo.addons.base.models.ir_actions'):
+            # first run: 200
+            self.action.with_context(self.context).run()
+            # second run: 400, should *not* raise but
+            # should warn in logs (hence mute_logger)
+            self.action.with_context(self.context).run()
+        self.assertEqual(num_requests, 2)
 
     def test_90_convert_to_float(self):
         # make sure eval_value convert the value into float for float-type fields
         self.action.write({
             'state': 'object_write',
-            'fields_lines': [Command.create({'col1': self.res_partner_latitude_field.id, 'value': '20.99'})],
+            'update_path': 'partner_latitude',
+            'value': '20.99',
         })
-        line = self.action.fields_lines[0]
-        self.assertEqual(line.eval_value()[line.id], 20.99)
+        self.assertEqual(self.action._eval_value()[self.action.id], 20.99)
 
 
-class TestCustomFields(common.TransactionCase):
+class TestCommonCustomFields(common.TransactionCase):
     MODEL = 'res.partner'
     COMODEL = 'res.users'
 
@@ -340,7 +533,7 @@ class TestCustomFields(common.TransactionCase):
             assert set(self.registry[self.MODEL]._fields) == fnames
 
         self.addCleanup(self.registry.reset_changes)
-        self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.registry.clear_all_caches)
 
         super().setUp()
 
@@ -364,16 +557,18 @@ class TestCustomFields(common.TransactionCase):
             'arch': '<tree string="X"><field name="%s"/></tree>' % name,
         })
 
+
+class TestCustomFields(TestCommonCustomFields):
     def test_create_custom(self):
         """ custom field names must be start with 'x_' """
-        with self.assertRaises(ValidationError):
-            self.create_field('foo')
+        with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
+            self.create_field('xyz')
 
     def test_rename_custom(self):
         """ custom field names must be start with 'x_' """
-        field = self.create_field('x_foo')
-        with self.assertRaises(ValidationError):
-            field.name = 'foo'
+        field = self.create_field('x_xyz')
+        with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
+            field.name = 'xyz'
 
     def test_create_valid(self):
         """ field names must be valid pg identifiers """
@@ -551,9 +746,9 @@ class TestCustomFields(common.TransactionCase):
 
         # create a non-computed field, and assert how many queries it takes
         model_id = self.env['ir.model']._get_id('res.partner')
-        query_count = 41
+        query_count = 48
         with self.assertQueryCount(query_count):
-            self.env.registry.clear_caches()
+            self.env.registry.clear_cache()
             self.env['ir.model.fields'].create({
                 'model_id': model_id,
                 'name': 'x_oh_box',
@@ -564,7 +759,7 @@ class TestCustomFields(common.TransactionCase):
 
         # same with a related field, it only takes 8 extra queries
         with self.assertQueryCount(query_count + 8):
-            self.env.registry.clear_caches()
+            self.env.registry.clear_cache()
             self.env['ir.model.fields'].create({
                 'model_id': model_id,
                 'name': 'x_oh_boy',
@@ -647,3 +842,26 @@ class TestCustomFields(common.TransactionCase):
         self.assertEqual(rec1.x_sel, False)
         self.assertEqual(rec2.x_sel, 'quux')
         self.assertEqual(rec3.x_sel, 'baz')
+
+
+@tagged('post_install', '-at_install')
+class TestCustomFieldsPostInstall(TestCommonCustomFields):
+    def test_add_field_valid(self):
+        """ custom field names must start with 'x_', even when bypassing the constraints
+
+        If a user bypasses all constraints to add a custom field not starting by `x_`,
+        it must not be loaded in the registry.
+
+        This is to forbid users to override class attributes.
+        """
+        field = self.create_field('x_foo')
+        # Drop the SQL constraint, to bypass it,
+        # as a user could do through a SQL shell or a `cr.execute` in a server action
+        self.env.cr.execute("ALTER TABLE ir_model_fields DROP CONSTRAINT ir_model_fields_name_manual_field")
+        self.env.cr.execute("UPDATE ir_model_fields SET name = 'foo' WHERE id = %s", [field.id])
+        with self.assertLogs('odoo.addons.base.models.ir_model') as log_catcher:
+            # Trick to reload the registry. The above rename done through SQL didn't reload the registry. This will.
+            self.env.registry.setup_models(self.cr)
+            self.assertIn(
+                f'The field `{field.name}` is not defined in the `{field.model}` Python class', log_catcher.output[0]
+            )

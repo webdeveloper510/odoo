@@ -1,16 +1,15 @@
-odoo.define('test_website.json_auth', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var tour = require('web_tour.tour');
-var session = require('web.session')
+import { registry } from "@web/core/registry";
+import { jsonrpc } from "@web/core/network/rpc_service";
 
-tour.register('test_json_auth', {
+registry.category("web_tour.tours").add('test_json_auth', {
     test: true,
-}, [{
+    steps: () => [{
     trigger: 'body',
     run: async function () {
-        await session.rpc('/test_get_dbname').then( function (result){
-            return session.rpc("/web/session/authenticate", {
+        await jsonrpc('/test_get_dbname').then( function (result){
+            return jsonrpc("/web/session/authenticate", {
                 db: result,
                 login: 'admin',
                 password: 'admin'
@@ -22,5 +21,4 @@ tour.register('test_json_auth', {
     trigger: 'span:contains(Mitchell Admin), span:contains(Administrator)',
     run: function () {},
 }
-]);
-});
+]});

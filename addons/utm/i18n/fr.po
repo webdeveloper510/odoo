@@ -3,17 +3,16 @@
 # 	* utm
 # 
 # Translators:
-# Cécile Collart <cco@odoo.com>, 2022
-# Martin Trigaux, 2022
-# Jolien De Paepe, 2023
+# Wil Odoo, 2023
+# Jolien De Paepe, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-04 09:26+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jolien De Paepe, 2024\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,12 +21,14 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: utm
+#. odoo-python
 #: code:addons/utm/models/utm_source.py:0
 #, python-format
 msgid "%(content)s (%(model_description)s created on %(create_date)s)"
 msgstr "%(content)s (%(model_description)s créé(es) le %(create_date)s)"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_utm_campaign__active
 #: model:ir.model.fields,field_description:utm.field_utm_medium__active
 msgid "Active"
 msgstr "Actif"
@@ -38,21 +39,28 @@ msgid "Allows us to filter relevant Campaigns"
 msgstr "Nous permet de filtrer les campagnes pertinentes"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Approval-based Flow"
 msgstr "Flux basé sur l'approbation"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Approved"
 msgstr "Approuvé"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
+msgid "Archive"
+msgstr "Archive"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Archived"
 msgstr "Archivé"
 
@@ -64,7 +72,7 @@ msgstr ""
 "les suivre."
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Audience-driven Flow"
@@ -120,12 +128,17 @@ msgstr ""
 "suivre leurs résultats."
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
+msgid "Campaigns that are assigned to me"
+msgstr "Campagnes qui me sont assignées"
+
+#. module: utm
 #: model:utm.campaign,title:utm.utm_campaign_christmas_special
 msgid "Christmas Special"
 msgstr "Offre de Noël"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Collect ideas, design creative content and publish it once reviewed."
@@ -140,7 +153,7 @@ msgid "Color Index"
 msgstr "Couleur"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Copywriting"
@@ -185,7 +198,7 @@ msgid "Created on"
 msgstr "Créé le"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Creative Flow"
@@ -197,21 +210,21 @@ msgid "Delete"
 msgstr "Supprimer"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Deploy"
 msgstr "Déployer"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Deployed"
 msgstr "Déployé"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: model:utm.stage,name:utm.campaign_stage_2
@@ -229,18 +242,13 @@ msgid "Display Name"
 msgstr "Nom d'affichage"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Done"
 msgstr "Fait"
-
-#. module: utm
-#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
-msgid "Dropdown menu"
-msgstr "Menu déroulant"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
@@ -258,21 +266,21 @@ msgid "Email Campaign - Services"
 msgstr "Campagne d'email - Services"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Event-driven Flow"
 msgstr "Flux événementiel"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Gather Data"
 msgstr "Recueillir des données"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid ""
@@ -302,21 +310,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Ideas"
 msgstr "Idées"
-
-#. module: utm
-#: model:ir.model.fields,field_description:utm.field_utm_campaign____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_medium____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_source____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_stage____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_tag____last_update
-msgid "Last Modified on"
-msgstr "Dernière modification le"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__write_uid
@@ -325,7 +324,7 @@ msgstr "Dernière modification le"
 #: model:ir.model.fields,field_description:utm.field_utm_stage__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_tag__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr "Mis à jour par"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__write_date
@@ -334,10 +333,10 @@ msgstr "Dernière mise à jour par"
 #: model:ir.model.fields,field_description:utm.field_utm_stage__write_date
 #: model:ir.model.fields,field_description:utm.field_utm_tag__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "Mis à jour le"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Later"
@@ -349,7 +348,7 @@ msgid "Link Tracker"
 msgstr "Tracker de liens"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "List-Building"
@@ -364,7 +363,7 @@ msgstr "Marketing"
 #: model:ir.model.fields,field_description:utm.field_utm_mixin__medium_id
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_form
 msgid "Medium"
-msgstr "Medium"
+msgstr "Médium"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_medium__name
@@ -379,9 +378,15 @@ msgid "Mediums"
 msgstr "Mediums"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
+msgid "My Campaigns"
+msgstr "Mes campagnes"
+
+#. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_source_mixin__name
 #: model:ir.model.fields,field_description:utm.field_utm_stage__name
 #: model:ir.model.fields,field_description:utm.field_utm_tag__name
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_tree
 msgid "Name"
 msgstr "Nom"
 
@@ -396,14 +401,14 @@ msgid "No Sources yet!"
 msgstr "Aucune source pour le moment !"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Pre-Launch"
 msgstr "Pré-lancement"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Prepare Campaigns and get them approved before making them go live."
@@ -411,7 +416,7 @@ msgstr ""
 "Préparez des campagnes et faites-les approuver avant de les mettre en ligne."
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid ""
@@ -422,7 +427,7 @@ msgstr ""
 "déployez-la entièrement par la suite."
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Report"
@@ -435,15 +440,20 @@ msgid "Responsible"
 msgstr "Responsable"
 
 #. module: utm
-#. openerp-web
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
+msgid "Restore"
+msgstr "Restaurer"
+
+#. module: utm
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Review"
-msgstr "Revoir"
+msgstr "Examiner"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Running"
@@ -465,7 +475,7 @@ msgid "Search UTM Medium"
 msgstr "Chercher les mediums UTM"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
@@ -473,7 +483,7 @@ msgid "Send"
 msgstr "Envoyer"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #: model:utm.stage,name:utm.campaign_stage_3
@@ -487,14 +497,14 @@ msgid "Sequence"
 msgstr "Séquence"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Soft-Launch"
 msgstr "Lancement en douceur"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Soft-Launch Flow"
@@ -526,6 +536,7 @@ msgid "Stage"
 msgstr "Étape"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_search
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_tree
 msgid "Stages"
@@ -534,11 +545,11 @@ msgstr "Étapes"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid ""
-"Stages allow you to organize your workflow  (e.g. : plan, design, in "
-"progress,  done, …)."
+"Stages allow you to organize your workflow  (e.g. plan, design, in progress,"
+" done, …)."
 msgstr ""
-"Les étapes vous permettent d’organiser votre flux de travail (par ex. "
-"planification, conception, en cours, terminé,…)."
+"Les étapes vous permettent d'organiser votre flux de travail (par ex. "
+"planification, conception, en cours, fait,...)."
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_tag__color
@@ -552,15 +563,17 @@ msgstr ""
 
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
-msgid "Tag name already exists !"
+msgid "Tag name already exists!"
 msgstr "Ce nom d'étiquette existe déjà !"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__tag_ids
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Tags"
 msgstr "Étiquettes"
 
 #. module: utm
+#. odoo-python
 #: code:addons/utm/models/utm_medium.py:0
 #, python-format
 msgid ""
@@ -579,14 +592,14 @@ msgid "The name must be unique"
 msgstr "Le nom doit être unique"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "This Month"
 msgstr "Ce mois"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "This Week"
@@ -617,22 +630,22 @@ msgstr ""
 " liste d'adresses email"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "To be Approved"
 msgstr "À approuver"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid ""
-"Track incoming events (e.g. : Christmas, Black Friday, ...) and publish "
-"timely content."
+"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely"
+" content."
 msgstr ""
-"Gardez un œil sur les événements à venir (ex : Noël, Black Friday, ...) et "
-"publiez du contenu en temps opportun."
+"Gardez un œil sur les événements à venir (par ex. Noël, Black Friday,...) et"
+" publiez du contenu en temps opportun."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_campaign
@@ -700,11 +713,26 @@ msgid "UTMs"
 msgstr "UTMs"
 
 #. module: utm
-#. openerp-web
+#. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Use This For My Campaigns"
 msgstr "Utiliser ceci pour mes campagnes"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
+msgid "e.g. \"Brainstorming\""
+msgstr "par ex. \"Brainstorming\""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_source_view_tree
+msgid "e.g. \"Christmas Mailing\""
+msgstr "par ex. \"Mailing de Noël\""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_tree
+msgid "e.g. \"Email\""
+msgstr "par ex. \"Email\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form

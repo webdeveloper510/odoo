@@ -1,18 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-#    Module programed and financed by:
-#    Vauxoo, C.A. (<http://vauxoo.com>).
-#    Our Community team mantain this module:
-#    https://launchpad.net/~openerp-venezuela
-
 {
-    'name' : 'Venezuela - Accounting',
-    'version': '1.1',
-    'author': ['Odoo S.A.', 'Vauxoo'],
+    'name': 'Venezuela - Accounting',
+    'website': 'https://www.odoo.com/documentation/17.0/applications/finance/fiscal_localizations.html',
+    'icon': '/account/static/description/l10n.png',
+    'countries': ['ve'],
+    'author': 'Odoo S.A., Vauxoo',
     'category': 'Accounting/Localizations/Account Charts',
-    'description':
-"""
+    'description': """
 Chart of Account for Venezuela.
 ===============================
 
@@ -41,15 +35,8 @@ stocks as Venezuela does with out invoices.
 If you install this module, and select Custom chart a basic chart will be proposed,
 but you will need set manually account defaults for taxes.
 """,
-    'depends': ['account',
-    ],
-    'data': [
-             'data/l10n_ve_chart_data.xml',
-             'data/account.account.template.csv',
-             'data/l10n_ve_chart_post_data.xml',
-             'data/account_tax_group_data.xml',
-             'data/account_tax_data.xml',
-             'data/account_chart_template_data.xml'
+    'depends': [
+        'account',
     ],
     'demo': [
         'demo/demo_company.xml',

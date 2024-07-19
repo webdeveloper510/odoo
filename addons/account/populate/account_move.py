@@ -39,7 +39,10 @@ class AccountMove(models.Model):
                                payable, receivable, liquidity, other, False.
             :return (Model<account.account>): the recordset of accounts found.
             """
-            domain = [('company_id', '=', company_id), ('account_type', '!=', 'off_balance')]
+            domain = [
+                *self.env['account.account']._check_company_domain(company_id),
+                ('account_type', '!=', 'off_balance'),
+            ]
             if types:
                 domain += [('account_type', 'in', types)]
             return self.env['account.account'].search(domain)
@@ -56,7 +59,7 @@ class AccountMove(models.Model):
             :return (list<int>): the ids of the journals of a company and a certain type
             """
             return self.env['account.journal'].search([
-                ('company_id', '=', company_id),
+                *self.env['account.journal']._check_company_domain(company_id),
                 ('currency_id', 'in', (False, currency_id)),
                 ('type', '=', journal_type),
             ]).ids
@@ -70,7 +73,7 @@ class AccountMove(models.Model):
             :return (Model<product.product>): all the products te company has access to
             """
             return self.env['product.product'].search([
-                ('company_id', 'in', (False, company_id)),
+                *self.env['product.product']._check_company_domain(company_id),
                 ('id', 'in', self.env.registry.populated_models['product.product']),
             ])
 
@@ -83,7 +86,7 @@ class AccountMove(models.Model):
             :return (list<int>): the ids of partner the company has access to.
             """
             return self.env['res.partner'].search([
-                '|', ('company_id', '=', company_id), ('company_id', '=', False),
+                *self.env['res.partner']._check_company_domain(company_id),
                 ('id', 'in', self.env.registry.populated_models['res.partner']),
             ]).ids
 
@@ -202,7 +205,7 @@ class AccountMove(models.Model):
             return False
 
         company_ids = self.env['res.company'].search([
-            ('chart_template_id', '!=', False),
+            ('chart_template', '!=', False),
             ('id', 'in', self.env.registry.populated_models['res.company']),
         ])
         currencies = self.env['res.currency'].search([
@@ -230,14 +233,4 @@ class AccountMove(models.Model):
         _logger.info('Posting Journal Entries')
         to_post = records.filtered(lambda r: r.date < fields.Date.today())
         to_post.action_post()
-
-        # TODO add some reconciliations. Not done initially because of perfs.
-        # _logger.info('Registering Payments for Invoices and Bills')
-        # random = populate.Random('account.move+register_payment')
-        # for invoice in to_post:
-        #     if invoice.is_invoice() and random.uniform(0, 1) < 0.9:  # 90% of invoices are at least partialy paid
-        #         payment_wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({})
-        #         if random.uniform(0, 1) > 0.9:  # 90% of paid invoices have the exact amount, others vary a little
-        #             payment_wizard.amount *= random.uniform(0.5, 1.5)
-        #         payment_wizard._create_payments()
         return records

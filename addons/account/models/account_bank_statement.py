@@ -3,6 +3,7 @@ from contextlib import contextmanager
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError
+from odoo.tools import create_index
 from odoo.tools.misc import formatLang
 
 class AccountBankStatement(models.Model):
@@ -101,6 +102,13 @@ class AccountBankStatement(models.Model):
         comodel_name='ir.attachment',
         string="Attachments",
     )
+
+    def init(self):
+        super().init()
+        create_index(self.env.cr,
+                     indexname='account_bank_statement_journal_id_date_desc_id_desc_idx',
+                     tablename='account_bank_statement',
+                     expressions=['journal_id', 'date DESC', 'id DESC'])
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -261,7 +269,7 @@ class AccountBankStatement(models.Model):
         if 'line_ids' not in fields_list:
             return defaults
 
-        active_ids = self._context.get('active_ids')
+        active_ids = self._context.get('active_ids', [])
         context_split_line_id = self._context.get('split_line_id')
         context_st_line_id = self._context.get('st_line_id')
         lines = None

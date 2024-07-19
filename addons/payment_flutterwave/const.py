@@ -7,6 +7,7 @@
 SUPPORTED_CURRENCIES = [
     'GBP',
     'CAD',
+    'XAF',
     'CLP',
     'COP',
     'EGP',
@@ -24,11 +25,9 @@ SUPPORTED_CURRENCIES = [
     'TZS',
     'UGX',
     'USD',
-    'XAF',
     'XOF',
     'ZMW',
 ]
-
 
 # Mapping of transaction states to Flutterwave payment statuses.
 PAYMENT_STATUS_MAPPING = {
@@ -36,4 +35,20 @@ PAYMENT_STATUS_MAPPING = {
     'done': ['successful'],
     'cancel': ['cancelled'],
     'error': ['failed'],
+}
+
+# The codes of the payment methods to activate when Flutterwave is activated.
+DEFAULT_PAYMENT_METHODS_CODES = [
+    # Primary payment methods.
+    'card',
+    'mpesa',
+    # Brand payment methods.
+    'visa',
+    'mastercard',
+    'amex',
+    'discover',
+]
+
+PAYMENT_METHODS_MAPPING = {
+    'bank_transfer': 'banktransfer',
 }

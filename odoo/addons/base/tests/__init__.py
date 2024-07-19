@@ -10,6 +10,7 @@ from . import test_cache
 from . import test_date_utils
 from . import test_deprecation
 from . import test_db_cursor
+from . import test_display_name
 from . import test_expression
 from . import test_float
 from . import test_format_address_mixin
@@ -23,6 +24,7 @@ from . import test_ir_cron
 from . import test_ir_filters
 from . import test_ir_http
 from . import test_ir_mail_server
+from . import test_ir_mail_server_smtpd
 from . import test_ir_model
 from . import test_ir_module
 from . import test_ir_sequence
@@ -36,11 +38,14 @@ from . import test_module
 from . import test_orm
 from . import test_ormcache
 from . import test_osv
+from . import test_overrides
 from . import test_qweb_field
 from . import test_qweb
 from . import test_res_config
 from . import test_res_lang
 from . import test_search
+from . import test_split_table
+from . import test_sql
 from . import test_translate
 from . import test_tz
 # from . import test_uninstall  # loop
@@ -57,6 +62,7 @@ from . import test_reports
 from . import test_test_retry
 from . import test_test_suite
 from . import test_tests_tags
+from . import test_transactions
 from . import test_form_create
 from . import test_cloc
 from . import test_profiler

@@ -3,21 +3,17 @@
 # 	* stock_picking_batch
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Raymond Yu <cl_yu@hotmail.com>, 2022
-# 徐 文郁 (info@ro-cd.com), 2022
-# digitalliuzg8888, 2022
-# Jeffery CHEN <jeffery9@gmail.com>, 2022
-# Chloe Wang, 2023
+# 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2023
 # Wil Odoo, 2024
+# Jeffery CHEN <jeffery9@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"POT-Creation-Date: 2024-01-05 12:32+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jeffery CHEN <jeffery9@gmail.com>, 2024\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,13 +22,16 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "2023-08-20"
+msgstr "2023-08-20"
+
+#. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
 msgid ""
-"<span class=\"o_form_label fw-bold\" attrs=\"{'invisible':[('auto_batch', "
-"'=', False)]}\">Group by</span>"
-msgstr ""
-"<span class=\"o_form_label fw-bold\" attrs=\"{'invisible':[('auto_batch', "
-"'=', False)]}\">分组于</span>"
+"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Group "
+"by</span>"
+msgstr "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">组别</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -75,7 +74,7 @@ msgid ""
 "A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"如果将传输添加到超过此行数的批中，则不会自动向其添加传输。\n"
+"如果将调拨添加到超过此行数的批中，则不会自动向其添加调拨。\n"
 "如果没有行限制，则将此值保留为“0”。"
 
 #. module: stock_picking_batch
@@ -84,13 +83,13 @@ msgid ""
 "A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"传输将不会自动添加到超过此传输数量的批中。\n"
-"如果没有传输限制，则将此值保留为“0”。"
+"调拨将不会自动添加到超过此调拨数量的批中。\n"
+"如果没有调拨限制，则将此值保留为“0”。"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_needaction
 msgid "Action Needed"
-msgstr "需要动作"
+msgstr "所需操作"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_ids
@@ -100,7 +99,7 @@ msgstr "活动"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "活动异常勋章"
+msgstr "活动异常标示"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_state
@@ -214,9 +213,15 @@ msgid "Barcode"
 msgstr "条码"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_form_inherit
 msgid "Batch"
 msgstr "批"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Batch Name"
+msgstr "批次名称"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -260,7 +265,7 @@ msgstr "关联到此调拨的批"
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
 msgid "Batches"
-msgstr "批"
+msgstr "批量"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_add_to_wave_form
@@ -299,11 +304,6 @@ msgstr "选择标签布局"
 #, python-format
 msgid "Choose Type of Labels To Print"
 msgstr "请选择要打印的标签类型"
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
-msgid "Clear quantities"
-msgstr "清除数量"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__company_id
@@ -355,7 +355,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__create_date
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__create_date
 msgid "Created on"
-msgstr "创建时间"
+msgstr "创建日期"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_destination
@@ -383,7 +383,7 @@ msgstr "显示名称"
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_picking_batch__state__done
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Done"
-msgstr "完成"
+msgstr "已完成"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__is_create_draft
@@ -400,12 +400,12 @@ msgstr "关注者"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "关注者(业务伙伴)"
+msgstr "关注者（合作伙伴）"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "完美的图标，例如FA任务"
+msgstr "Font Awesome图标，例如：fa-tasks"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -415,12 +415,17 @@ msgstr "未来活动"
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Group By"
-msgstr "分组"
+msgstr "分组方式"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Gujarat"
+msgstr "古吉拉特"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__has_message
 msgid "Has Message"
-msgstr "有信息"
+msgstr "有消息"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__id
@@ -437,18 +442,18 @@ msgstr "图标"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "表示异常活动的图标。"
+msgstr "指示异常活动的图标。"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "确认后, 出现提示消息."
+msgstr "如果勾选此项，则需要查看新消息。"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_has_error
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "如果勾选此项， 某些消息将会产生传递错误。"
+msgstr "如果勾选此项， 某些消息将出现发送错误。"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -472,14 +477,12 @@ msgstr "进行中"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_is_follower
 msgid "Is Follower"
-msgstr "关注者"
+msgstr "是关注者"
 
 #. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave____last_update
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch____last_update
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch____last_update
-msgid "Last Modified on"
-msgstr "最后修改时间"
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "John Doe"
+msgstr "John Doe"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__write_uid
@@ -493,12 +496,12 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__write_date
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__write_date
 msgid "Last Updated on"
-msgstr "最后更新时间"
+msgstr "上次更新日期"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Late Activities"
-msgstr "最近的活动"
+msgstr "最近活动"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__line_ids
@@ -511,9 +514,19 @@ msgid "List of transfers associated to this batch"
 msgstr "关联到此批量操作的调拨清单"
 
 #. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "主要附件"
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Location From Name"
+msgstr "地点 从名称"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Location To Name"
+msgstr "地点 至 名称"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Lot Number"
+msgstr "地段编号"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_lines
@@ -523,12 +536,12 @@ msgstr "每批最多生产线数"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid "Maximum transfers per batch"
-msgstr "每批最大转账数"
+msgstr "每批最大调拨数"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_error
 msgid "Message Delivery error"
-msgstr "消息传递错误"
+msgstr "消息发送错误"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_ids
@@ -559,7 +572,7 @@ msgstr "我的调拨"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "下一个活动日历事件"
+msgstr "下一活动日历事件"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_date_deadline
@@ -579,12 +592,12 @@ msgstr "下一活动类型"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_needaction_counter
 msgid "Number of Actions"
-msgstr "动作数量"
+msgstr "操作数量"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_error_counter
 msgid "Number of errors"
-msgstr "错误数"
+msgstr "错误数量"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_needaction_counter
@@ -594,7 +607,7 @@ msgstr "需要采取行动的消息数量"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "发送错误的消息数量"
+msgstr "发送错误的消息的数量"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__picking_type_id
@@ -605,6 +618,11 @@ msgstr "作业类型"
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
 msgid "Operations"
 msgstr "作业"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Package ID"
+msgstr "套餐 ID"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__picking_ids
@@ -640,9 +658,19 @@ msgid "Product"
 msgstr "产品"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Product Barcode"
+msgstr "产品条形码"
+
+#. module: stock_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
 msgstr "产品移动(移库明细)"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Product Name"
+msgstr "产品名称"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -655,6 +683,16 @@ msgid "Quantity"
 msgstr "数量"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Quantity Done"
+msgstr "完成数量"
+
+#. module: stock_picking_batch
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__rating_ids
+msgid "Ratings"
+msgstr "点评"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__user_id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__user_id
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch__user_id
@@ -665,12 +703,17 @@ msgstr "负责人"
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_user_id
 msgid "Responsible User"
-msgstr "负责用户"
+msgstr "责任用户"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Result Package ID"
+msgstr "结果包 ID"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "短信息发送错误"
+msgstr "短信发送错误"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__scheduled_date
@@ -694,11 +737,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Search Batch Transfer"
 msgstr "搜索批量调拨"
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
-msgid "Set quantities"
-msgstr "设置数量"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_allocation
@@ -726,14 +764,9 @@ msgid "Show Set Qty Button"
 msgstr "显示设置数量按钮"
 
 #. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_validate
-msgid "Show Validate Button"
-msgstr "显示验证按钮"
-
-#. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Show all records which has next action date is before today"
-msgstr "显示所有的在今天之前的下一个行动日期的记录"
+msgstr "显示下一操作日期早于今天的所有记录"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_group_by_src_loc
@@ -765,10 +798,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"基于活动的状态 \n"
-" 逾期：已经超过截止日期 \n"
-" 现今：活动日期是当天 \n"
-" 计划：未来活动。"
+"基于活动的状态\n"
+"逾期：超出到期日期\n"
+"今天：活动日期是今天\n"
+"计划：未来活动。"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -806,13 +839,13 @@ msgstr "摘要:"
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, python-format
 msgid ""
-"The following transfers cannot be added to batch transfer %s. Please check their states and operation types, if they aren't immediate transfers.\n"
+"The following transfers cannot be added to batch transfer %s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %s"
 msgstr ""
-"以下移动不能被添加到批量移动%s。请检查它们的状态和作业类型，如果它们不是即时调拨。\n"
+"以下调拨不能添加到批量调拨 %s。请检查它们的状态和作业类型。\n"
 "\n"
-"不兼容的情况。%s"
+"不兼容：%s"
 
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
@@ -835,7 +868,7 @@ msgid ""
 "                    It may also be useful to assign jobs (one person = one batch) or\n"
 "                    help the timing management of operations (tasks to be done at 1pm)."
 msgstr ""
-"波传输的目标是将来自不同传输的操作分组在一起，以提高它们的效率。分配工作(一个人=一批)或帮助操作的时间管理(任务在下午1点完成)也可能很有用。"
+"波调拨的目标是将来自不同调拨的作业分组在一起，以提高它们的效率。分配工作(一个人=一批)或帮助作业的时间管理(任务在下午1点完成)也可能很有用。"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -878,13 +911,23 @@ msgstr "待办"
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
 msgid "Today Activities"
-msgstr "今天的活动"
+msgstr "今日活动"
 
 #. module: stock_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_picking
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
 msgid "Transfer"
 msgstr "调拨"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Transfer Display Name"
+msgstr "调拨显示名称"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Transfer Name"
+msgstr "调拨名称"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -907,7 +950,17 @@ msgstr "作业类型"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "记录的异常活动类型。"
+msgstr "记录中异常活动的类型。"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
+msgid "Unit of Measure"
+msgstr "计量单位"
+
+#. module: stock_picking_batch
+#: model:ir.actions.server,name:stock_picking_batch.action_unreserve_batch_picking
+msgid "Unreserve"
+msgstr "取消预留"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -948,7 +1001,7 @@ msgstr "网站消息"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__website_message_ids
 msgid "Website communication history"
-msgstr "网上沟通记录"
+msgstr "网站沟通记录"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_to_batch__is_create_draft

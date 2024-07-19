@@ -1,12 +1,12 @@
-odoo.define('portal.composer', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var ajax = require('web.ajax');
-var core = require('web.core');
-var publicWidget = require('web.public.widget');
-
-var qweb = core.qweb;
-var _t = core._t;
+import { _t } from "@web/core/l10n/translation";
+import { escape } from "@web/core/utils/strings";
+import { renderToElement } from "@web/core/utils/render";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { post } from "@web/core/network/http_service";
+import { Component } from "@odoo/owl";
+import { RPCError } from "@web/core/network/rpc_service";
 
 /**
  * Widget PortalComposer
@@ -28,15 +28,17 @@ var PortalComposer = publicWidget.Widget.extend({
      */
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.options = _.defaults(options || {}, {
+        this.options = Object.assign({
             'allow_composer': true,
             'display_composer': false,
             'csrf_token': odoo.csrf_token,
             'token': false,
             'res_model': false,
             'res_id': false,
-        });
+        }, options || {});
         this.attachments = [];
+        this.rpc = this.bindService("rpc");
+        this.notification = this.bindService("notification");
     },
     /**
      * @override
@@ -52,7 +54,7 @@ var PortalComposer = publicWidget.Widget.extend({
         return this._super.apply(this, arguments).then(function () {
             if (self.options.default_attachment_ids) {
                 self.attachments = self.options.default_attachment_ids || [];
-                _.each(self.attachments, function(attachment) {
+                self.attachments.forEach((attachment) => {
                     attachment.state = 'done';
                 });
                 self._updateAttachments();
@@ -79,20 +81,17 @@ var PortalComposer = publicWidget.Widget.extend({
     _onAttachmentDeleteClick: function (ev) {
         var self = this;
         var attachmentId = $(ev.currentTarget).closest('.o_portal_chatter_attachment').data('id');
-        var accessToken = _.find(this.attachments, {'id': attachmentId}).access_token;
+        var accessToken = this.attachments.find(attachment => attachment.id === attachmentId).access_token;
         ev.preventDefault();
         ev.stopPropagation();
 
         this.$sendButton.prop('disabled', true);
 
-        return this._rpc({
-            route: '/portal/attachment/remove',
-            params: {
-                'attachment_id': attachmentId,
-                'access_token': accessToken,
-            },
+        return this.rpc('/portal/attachment/remove', {
+            'attachment_id': attachmentId,
+            'access_token': accessToken,
         }).then(function () {
-            self.attachments = _.reject(self.attachments, {'id': attachmentId});
+            self.attachments = self.attachments.filter(attachment => attachment.id !== attachmentId);
             self._updateAttachments();
             self.$sendButton.prop('disabled', false);
         });
@@ -115,22 +114,25 @@ var PortalComposer = publicWidget.Widget.extend({
 
         this.$sendButton.prop('disabled', true);
 
-        return Promise.all(_.map(this.$fileInput[0].files, function (file) {
+        return Promise.all([...this.$fileInput[0].files].map((file) => {
             return new Promise(function (resolve, reject) {
                 var data = self._prepareAttachmentData(file);
-                ajax.post('/portal/attachment/add', data).then(function (attachment) {
+                if (odoo.csrf_token) {
+                    data.csrf_token = odoo.csrf_token;
+                }
+                post('/portal/attachment/add', data).then(function (attachment) {
                     attachment.state = 'pending';
                     self.attachments.push(attachment);
                     self._updateAttachments();
                     resolve();
-                }).guardedCatch(function (error) {
-                    self.displayNotification({
-                        message: _.str.sprintf(_t("Could not save file <strong>%s</strong>"),
-                            _.escape(file.name)),
-                        type: 'warning',
-                        sticky: true,
-                    });
-                    resolve();
+                }).catch(function (error) {
+                    if (error instanceof RPCError) {
+                        self.notification.add(
+                            _t("Could not save file <strong>%s</strong>", escape(file.name)),
+                            { type: 'warning', sticky: true }
+                        );
+                        resolve();
+                    }
                 });
             });
         })).then(function () {
@@ -147,8 +149,8 @@ var PortalComposer = publicWidget.Widget.extend({
     _prepareMessageData: function () {
         return Object.assign(this.options || {}, {
             'message': this.$('textarea[name="message"]').val(),
-            'attachment_ids': _.pluck(this.attachments, 'id'),
-            'attachment_tokens': _.pluck(this.attachments, 'access_token'),
+            attachment_ids: this.attachments.map((a) => a.id),
+            attachment_tokens: this.attachments.map((a) => a.access_token),
         });
     },
     /**
@@ -184,7 +186,7 @@ var PortalComposer = publicWidget.Widget.extend({
      * @private
      */
     _updateAttachments: function () {
-        this.$attachments.html(qweb.render('portal.Chatter.Attachments', {
+        this.$attachments.empty().append(renderToElement('portal.Chatter.Attachments', {
             attachments: this.attachments,
             showDelete: true,
         }));
@@ -197,16 +199,12 @@ var PortalComposer = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _chatterPostMessage: async function (route) {
-        const result = await this._rpc({
-            route: route,
-            params: this._prepareMessageData(),
-        });
-        core.bus.trigger('reload_chatter_content', result);
+        const result = await this.rpc(route, this._prepareMessageData());
+        Component.env.bus.trigger('reload_chatter_content', result);
         return result;
     },
 });
 
-return {
+export default {
     PortalComposer: PortalComposer,
 };
-});

@@ -43,6 +43,8 @@
                 <field name="quantity" optional="hide" sum="Total"/>
                 <field name="price_subtotal" optional="show" sum="Total"/>
                 <field name="price_total" optional="show" sum="Total"/>
+                <field name="price_margin" optional="hide"/>
+                <field name="inventory_value" optional="hide" sum="Total"/>
                 <field name="state" optional="hide"/>
                 <field name="payment_state" optional="hide"/>
                 <field name="move_type" optional="hide"/>
@@ -132,7 +134,7 @@
         <field name="name">Invoices Analysis</field>
         <field name="res_model">account.invoice.report</field>
         <field name="view_mode">graph,pivot</field>
-        <field name="context">{'search_default_current':1, 'search_default_supplier': 1, 'group_by':['invoice_date'], 'group_by_no_leaf':1}</field>
+        <field name="context">{'search_default_current':1, 'search_default_supplier': 1, 'group_by':['invoice_date:month'], 'group_by_no_leaf':1}</field>
         <field name="search_view_id" ref="view_account_invoice_report_search"/>
         <field name="help">From this report, you can have an overview of the amount invoiced from your vendors. The search tool can also be used to personalise your Invoices reports and so, match this analysis to your needs.</field>
     </record>
@@ -140,7 +142,7 @@
         <field name="name">Invoices Analysis</field>
         <field name="res_model">account.invoice.report</field>
         <field name="view_mode">graph,pivot</field>
-        <field name="context">{'search_default_current':1, 'search_default_customer': 1, 'group_by':['invoice_date'], 'group_by_no_leaf':1}</field>
+        <field name="context">{'search_default_current':1, 'search_default_customer': 1, 'group_by':['invoice_date:month'], 'group_by_no_leaf':1}</field>
         <field name="search_view_id" ref="view_account_invoice_report_search"/>
         <field name="help">From this report, you can have an overview of the amount invoiced to your customers. The search tool can also be used to personalise your Invoices reports and so, match this analysis to your needs.</field>
     </record>

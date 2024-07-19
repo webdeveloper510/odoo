@@ -3,34 +3,27 @@
 import { addToBoardItem } from "@board/add_to_board/add_to_board";
 import {
     click,
+    editInput,
     getFixture,
     patchWithCleanup,
     mouseEnter,
     triggerEvent,
 } from "@web/../tests/helpers/utils";
 import {
-    applyFilter,
-    applyGroup,
-    editConditionField,
-    editConditionOperator,
-    editConditionValue,
+    openAddCustomFilterDialog,
     removeFacet,
-    toggleAddCustomFilter,
-    toggleAddCustomGroup,
-    toggleComparisonMenu,
-    toggleFavoriteMenu,
-    toggleFilterMenu,
-    toggleGroupByMenu,
+    switchView,
+    toggleSearchBarMenu,
     toggleMenuItem,
     toggleMenuItemOption,
+    selectGroup,
 } from "@web/../tests/search/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
-import LegacyAddToBoard from "board.AddToBoardMenu";
-import LegacyFavoriteMenu from "web.FavoriteMenu";
-import testUtils from "web.test_utils";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
 import { makeFakeUserService } from "@web/../tests/helpers/mock_services";
+import * as dsHelpers from "@web/../tests/core/domain_selector_tests";
 
 const patchDate = testUtils.mock.patchDate;
 const favoriteMenuRegistry = registry.category("favoriteMenu");
@@ -84,7 +77,6 @@ QUnit.module("Board", (hooks) => {
             },
         };
 
-        LegacyFavoriteMenu.registry.add("add-to-board-menu", LegacyAddToBoard, 10);
         favoriteMenuRegistry.add("add-to-board", addToBoardItem, { sequence: 10 });
         serverData = { models };
         target = getFixture();
@@ -147,13 +139,10 @@ QUnit.module("Board", (hooks) => {
         await click(document.querySelector(".o_column_sortable"));
 
         // Group It
-        await toggleGroupByMenu(target);
-        await toggleAddCustomGroup(target);
-        await applyGroup(target);
+        await toggleSearchBarMenu(target);
+        await selectGroup(target, "foo");
 
         // add this action to dashboard
-        await toggleFavoriteMenu(target);
-
         await testUtils.dom.triggerEvent($(".o_add_to_board button.dropdown-toggle"), "mouseenter");
         await testUtils.fields.editInput($(".o_add_to_board input"), "a name");
         await testUtils.dom.click($(".o_add_to_board .dropdown-menu button"));
@@ -166,7 +155,12 @@ QUnit.module("Board", (hooks) => {
         patchWithCleanup(browser, { setTimeout: (fn) => fn() });
         serverData.views = {
             "partner,false,list": '<list><field name="foo"/></list>',
-            "partner,false,search": "<search></search>",
+            "partner,false,search": `
+                <search>
+                    <filter name="filter_on_a" string="Filter on a" domain="[['display_name', 'ilike', 'a']]"/>
+                    <filter name="filter_on_b" string="Filter on b" domain="[['display_name', 'ilike', 'b']]"/>
+                </search>
+            `,
         };
 
         const mockRPC = (route, args) => {
@@ -202,26 +196,21 @@ QUnit.module("Board", (hooks) => {
 
         var filter_count = 0;
         // Add a first filter
-        await toggleFilterMenu(target);
-        await toggleAddCustomFilter(target);
-        await editConditionValue(target, 0, "a");
-        await applyFilter(target);
+        await toggleSearchBarMenu(target);
+        await toggleMenuItem(target, "Filter on a");
 
         // Add it to dashboard
-        await toggleFavoriteMenu(target);
         await testUtils.dom.triggerEvent($(".o_add_to_board button.dropdown-toggle"), "mouseenter");
         await testUtils.dom.click($(".o_add_to_board .dropdown-menu button"));
 
         // Remove it
-        await testUtils.dom.click(target.querySelector(".o_facet_remove"));
+        await removeFacet(target);
 
         // Add the second filter
-        await toggleFilterMenu(target);
-        await toggleAddCustomFilter(target);
-        await editConditionValue(target, 0, "b");
-        await applyFilter(target);
+        await toggleSearchBarMenu(target);
+        await toggleMenuItem(target, "Filter on b");
+
         // Add it to dashboard
-        await toggleFavoriteMenu(target);
         await testUtils.dom.triggerEvent(
             target.querySelector(".o_add_to_board button.dropdown-toggle"),
             "mouseenter"
@@ -229,7 +218,7 @@ QUnit.module("Board", (hooks) => {
         await testUtils.dom.click(target.querySelector(".o_add_to_board .dropdown-menu button"));
     });
 
-    QUnit.test("save a action domain to dashboard", async function (assert) {
+    QUnit.test("save an action domain to dashboard", async function (assert) {
         // View domains are to be added to the dashboard domain
         assert.expect(1);
 
@@ -241,7 +230,11 @@ QUnit.module("Board", (hooks) => {
 
         serverData.views = {
             "partner,false,list": '<list><field name="foo"/></list>',
-            "partner,false,search": "<search></search>",
+            "partner,false,search": `
+                <search>
+                    <filter name="filter" string="Filter" domain="[['display_name', 'ilike', 'b']]"/>
+                </search>
+            `,
         };
 
         const mockRPC = (route, args) => {
@@ -262,12 +255,10 @@ QUnit.module("Board", (hooks) => {
         });
 
         // Add a filter
-        await toggleFilterMenu(target);
-        await toggleAddCustomFilter(target);
-        await editConditionValue(target, 0, "b");
-        await applyFilter(target);
+        await toggleSearchBarMenu(target);
+        await toggleMenuItem(target, "Filter");
+
         // Add it to dashboard
-        await toggleFavoriteMenu(target);
         await testUtils.dom.triggerEvent(
             target.querySelector(".o_add_to_board button.dropdown-toggle"),
             "mouseenter"
@@ -292,7 +283,7 @@ QUnit.module("Board", (hooks) => {
             type: "ir.actions.act_window",
             views: [[false, "pivot"]],
         });
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         assert.containsNone(target, ".o_add_to_board");
 
         // Sanity check
@@ -302,7 +293,7 @@ QUnit.module("Board", (hooks) => {
             type: "ir.actions.act_window",
             views: [[false, "pivot"]],
         });
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         assert.containsOnce(target, ".o_add_to_board");
     });
 
@@ -365,16 +356,14 @@ QUnit.module("Board", (hooks) => {
             });
 
             // filter on July 2020
-            await toggleFilterMenu(target);
+            await toggleSearchBarMenu(target);
             await toggleMenuItem(target, "Date");
             await toggleMenuItemOption(target, "Date", "July");
 
             // compare July 2020 to June 2020
-            await toggleComparisonMenu(target);
-            await toggleMenuItem(target, 0);
+            await toggleMenuItem(target.querySelector(".o_comparison_menu"), 0);
 
             // add the view to the dashboard
-            await toggleFavoriteMenu(target);
 
             await mouseEnter(target.querySelector(".o_add_to_board .dropdown-toggle"));
             const input = target.querySelector(".o_add_to_board .dropdown-menu input");
@@ -411,7 +400,7 @@ QUnit.module("Board", (hooks) => {
             views: [[false, "pivot"]],
         });
 
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         await mouseEnter(target.querySelector(".o_add_to_board .dropdown-toggle"));
         const input = target.querySelector(".o_add_to_board .dropdown-menu input");
         await testUtils.fields.editInput(input, "Pipeline");
@@ -453,7 +442,7 @@ QUnit.module("Board", (hooks) => {
             context: { search_default_filter: 1 },
         });
 
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         await mouseEnter(target.querySelector(".o_add_to_board .dropdown-toggle"));
         const input = target.querySelector(".o_add_to_board .dropdown-menu input");
         await testUtils.fields.editInput(input, "Pipeline");
@@ -474,6 +463,7 @@ QUnit.module("Board", (hooks) => {
 
         registry.category("services").add("user", makeFakeUserService());
         patchWithCleanup(browser, { setTimeout: (fn) => fn() }); // makes mouseEnter work
+        patchWithCleanup(odoo, { debug: true });
 
         const mockRPC = (route, args) => {
             if (route === "/board/add_to_dashboard") {
@@ -487,6 +477,9 @@ QUnit.module("Board", (hooks) => {
                     dashboard_merge_domains_contexts: false,
                 });
                 return Promise.resolve(true);
+            }
+            if (route === "/web/domain/validate") {
+                return true;
             }
         };
 
@@ -503,24 +496,56 @@ QUnit.module("Board", (hooks) => {
             context: { search_default_filter: 1 },
         });
 
-        await click(target, ".o_switch_view.o_pivot");
+        await switchView(target, "pivot");
 
         // Remove default filter ['foo', '!=', 'yop']
         await removeFacet(target);
 
         // Add a filter ['foo', '=', 'yop']
-        await toggleFilterMenu(target);
-        await toggleAddCustomFilter(target);
-        await editConditionField(target, 0, "foo");
-        await editConditionOperator(target, 0, "=");
-        await editConditionValue(target, 0, "yop");
-        await applyFilter(target);
+        await toggleSearchBarMenu(target);
+        await openAddCustomFilterDialog(target);
+        await editInput(target, dsHelpers.SELECTORS.debugArea, `[("foo", "=", "yop")]`);
+        await click(target.querySelector(".modal footer button"));
 
         // Add to dashboard
-        await toggleFavoriteMenu(target);
+        await toggleSearchBarMenu(target);
         await mouseEnter(target.querySelector(".o_add_to_board .dropdown-toggle"));
         const input = target.querySelector(".o_add_to_board .dropdown-menu input");
         await testUtils.fields.editInput(input, "Pipeline");
         await triggerEvent(input, null, "keydown", { key: "Enter" });
+    });
+
+    QUnit.test("Add to my dashboard is not available in form views", async function (assert) {
+        serverData.views = {
+            "partner,false,list": '<list><field name="foo"/></list>',
+            "partner,false,form": '<form><field name="foo"/></form>',
+            "partner,false,search": "<search></search>",
+        };
+
+        const webClient = await createWebClient({ serverData });
+        await doAction(webClient, {
+            id: 1,
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            context: { fire: "on the bayou" },
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
+        });
+
+        assert.containsOnce(target, ".o_list_view", "should display the list view");
+
+        // sanity check
+        await click(target, ".o_cp_action_menus .dropdown-toggle");
+        assert.containsOnce(target, ".o_cp_action_menus .dropdown-menu .o_add_to_board");
+
+        // open form view
+        await click(target.querySelector(".o_data_cell"));
+        assert.containsOnce(target, ".o_form_view");
+
+        await click(target, ".o_cp_action_menus .dropdown-toggle");
+        assert.containsOnce(target, ".o_cp_action_menus .dropdown-menu");
+        assert.containsNone(target, ".o_cp_action_menus .dropdown-menu .o_add_to_board");
     });
 });

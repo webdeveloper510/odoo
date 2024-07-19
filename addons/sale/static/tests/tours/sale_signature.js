@@ -1,14 +1,12 @@
-odoo.define('sale.tour_sale_signature', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var tour = require('web_tour.tour');
+import { registry } from "@web/core/registry";
 
 // This tour relies on data created on the Python test.
-tour.register('sale_signature', {
+registry.category("web_tour.tours").add('sale_signature', {
     test: true,
     url: '/my/quotes',
-},
-[
+    steps: () => [
     {
         content: "open the test SO",
         trigger: 'a:containsExact("test SO")',
@@ -24,11 +22,11 @@ tour.register('sale_signature', {
     },
     {
         content: "click select style",
-        trigger: '.o_web_sign_auto_select_style a',
+        trigger: '.o_web_sign_auto_select_style button',
     },
     {
         content: "click style 4",
-        trigger: '.o_web_sign_auto_font_selection a:eq(3)',
+        trigger: '.o_web_sign_auto_select_style .dropdown-item:eq(3)',
     },
     {
         content: "click submit",
@@ -47,5 +45,4 @@ tour.register('sale_signature', {
         trigger: 'nav',
         run: function() {},
     }
-]);
-});
+]});

@@ -53,12 +53,12 @@ class ResPartner(models.Model):
             partner.signup_url = result.get(partner.id, False)
 
     def _compute_token(self):
-        for partner in self.filtered('id'):
+        for partner in self:
             self.env.cr.execute('SELECT signup_token FROM res_partner WHERE id=%s', (partner._origin.id,))
             partner.signup_token = self.env.cr.fetchone()[0]
 
     def _inverse_token(self):
-        for partner in self.filtered('id'):
+        for partner in self:
             self.env.cr.execute('UPDATE res_partner SET signup_token = %s WHERE id=%s', (partner.signup_token or None, partner.id))
 
     def _get_signup_url_for_action(self, url=None, action=None, view_type=None, menu_id=None, res_id=None, model=None):

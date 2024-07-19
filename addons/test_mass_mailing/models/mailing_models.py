@@ -61,6 +61,7 @@ class MailingBLacklist(models.Model):
     _description = 'Mailing Blacklist Enabled'
     _name = 'mailing.test.blacklist'
     _inherit = ['mail.thread.blacklist']
+    _order = 'name ASC, id DESC'
     _primary_email = 'email_from'
 
     name = fields.Char()
@@ -116,6 +117,7 @@ class MailingOptOut(models.Model):
                     'partner_ids': record.customer_id.ids,
                 }
         return default_recipients
+
 
 class MailingTestPartner(models.Model):
     _description = 'Mailing Model with partner_id'

@@ -1,24 +1,13 @@
 /** @odoo-module **/
 
-import { constructDateDomain } from "@web/search/utils/dates";
 import { defaultLocalization } from "@web/../tests/helpers/mock_services";
+import { patchDate, patchTimeZone, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { Domain } from "@web/core/domain";
 import { localization } from "@web/core/l10n/localization";
-import { patch, unpatch } from "@web/core/utils/patch";
-import { patchDate } from "@web/../tests/helpers/utils";
-import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import { translatedTerms } from "@web/core/l10n/translation";
+import { constructDateDomain } from "@web/search/utils/dates";
 
 const { DateTime } = luxon;
-
-function patchTimeZone(offset) {
-    const fixedZone = new luxon.FixedOffsetZone.instance(offset);
-    const originalZone = luxon.Settings.defaultZone;
-    luxon.Settings.defaultZone = fixedZone.name;
-    registerCleanup(() => {
-        luxon.Settings.defaultZone = originalZone;
-    });
-}
 
 QUnit.module("Search", () => {
     QUnit.module("SearchUtils", {
@@ -497,7 +486,7 @@ QUnit.module("Search", () => {
     QUnit.test("Quarter option: custom translation", async function (assert) {
         patchDate(2020, 5, 1, 13, 0, 0);
         const referenceMoment = DateTime.local().setLocale("en");
-        patch(translatedTerms, "add_translations", { Q2: "Deuxième trimestre de l'an de grâce" });
+        patchWithCleanup(translatedTerms, { Q2: "Deuxième trimestre de l'an de grâce" });
         assert.deepEqual(
             constructDateDomain(referenceMoment, "date_field", "date", [
                 "second_quarter",
@@ -511,17 +500,12 @@ QUnit.module("Search", () => {
             },
             "Quarter term should be translated"
         );
-        unpatch(translatedTerms, "add_translations");
     });
 
     QUnit.test("Quarter option: right to left", async function (assert) {
         patchDate(2020, 5, 1, 13, 0, 0);
         const referenceMoment = DateTime.local().setLocale("en");
-        patch(
-            localization,
-            "rtl_localization",
-            Object.assign({}, defaultLocalization, { direction: "rtl" })
-        );
+        patchWithCleanup(localization, { ...defaultLocalization, direction: "rtl" });
         assert.deepEqual(
             constructDateDomain(referenceMoment, "date_field", "date", [
                 "second_quarter",
@@ -535,18 +519,13 @@ QUnit.module("Search", () => {
             },
             "Notation should be right to left"
         );
-        unpatch(localization, "rtl_localization");
     });
 
     QUnit.test("Quarter option: custom translation and right to left", async function (assert) {
         patchDate(2020, 5, 1, 13, 0, 0);
         const referenceMoment = DateTime.local().setLocale("en");
-        patch(
-            localization,
-            "rtl_localization",
-            Object.assign({}, defaultLocalization, { direction: "rtl" })
-        );
-        patch(translatedTerms, "add_translations", { Q2: "2e Trimestre" });
+        patchWithCleanup(localization, { ...defaultLocalization, direction: "rtl" });
+        patchWithCleanup(translatedTerms, { Q2: "2e Trimestre" });
         assert.deepEqual(
             constructDateDomain(referenceMoment, "date_field", "date", [
                 "second_quarter",
@@ -560,34 +539,5 @@ QUnit.module("Search", () => {
             },
             "Quarter term should be translated and notation should be right to left"
         );
-        unpatch(localization, "rtl_localization");
-        unpatch(translatedTerms, "add_translations");
     });
-
-    QUnit.skip(
-        "Moment.js localization does not affect formatted domain dates",
-        async function (assert) {
-            patchDate(2020, 5, 1, 13, 0, 0);
-            const initialLocale = moment.locale();
-            moment.defineLocale("addoneForTest", {
-                postformat: function (string) {
-                    return string.replace(/\d/g, (match) => (1 + parseInt(match)) % 10);
-                },
-            });
-            const referenceMoment = moment().locale("addoneForTest");
-            assert.deepEqual(
-                constructDateDomain(referenceMoment, "date_field", "date", [
-                    "this_month",
-                    "this_year",
-                ]),
-                {
-                    domain: `["&", ["date_field", ">=", "2020-06-01"], ["date_field", "<=", "2020-06-30"]]`,
-                    description: "June 3131",
-                },
-                "Numbers in domain should not use addoneForTest locale"
-            );
-            moment.locale(initialLocale);
-            moment.updateLocale("addoneForTest", null);
-        }
-    );
 });

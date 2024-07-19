@@ -1,8 +1,7 @@
 /** @odoo-module **/
 
-import options from 'web_editor.snippets.options';
-import weUtils from 'web_editor.utils';
-import {SIZES, MEDIAS_BREAKPOINTS} from '@web/core/ui/ui_service';
+import options from '@web_editor/js/editor/snippets.options';
+import weUtils from '@web_editor/js/common/utils';
 
 options.registry.StepsConnector = options.Class.extend({
     /**
@@ -80,9 +79,7 @@ options.registry.StepsConnector = options.Class.extend({
         // We don't use the service_context_get intentionally because the
         // connectors are hidden as soon as the page is smaller than 992px
         // (the BS lg breakpoint).
-        const mobileViewThreshold = MEDIAS_BREAKPOINTS[SIZES.LG].minWidth;
-        const isMobileView = this.$target[0].ownerDocument.documentElement.clientWidth <
-            mobileViewThreshold;
+        const isMobileView = weUtils.isMobileView(this.$target[0]);
         return !isMobileView && this._super(...arguments);
     },
     /**
@@ -96,21 +93,20 @@ options.registry.StepsConnector = options.Class.extend({
         const type = possibleTypes.find(possibleType => possibleType && this.$target[0].classList.contains(possibleType)) || '';
         // As the connectors are only visible in desktop, we can ignore the
         // steps that are only visible in mobile.
-        // TODO master: rename the variable to stepsEls.
-        const steps = this.$target[0].querySelectorAll('.s_process_step:not(.o_snippet_desktop_invisible)');
+        const stepsEls = this.$target[0].querySelectorAll('.s_process_step:not(.o_snippet_desktop_invisible)');
         const nbBootstrapCols = 12;
         let colsInRow = 0;
 
-        for (let i = 0; i < steps.length - 1; i++) {
-            const connectorEl = steps[i].querySelector('.s_process_step_connector');
-            const stepMainElementRect = this._getStepMainElementRect(steps[i]);
-            const nextStepMainElementRect = this._getStepMainElementRect(steps[i + 1]);
-            const stepSize = this._getClassSuffixedInteger(steps[i], 'col-lg-');
-            const nextStepSize = this._getClassSuffixedInteger(steps[i + 1], 'col-lg-');
-            const stepOffset = this._getClassSuffixedInteger(steps[i], 'offset-lg-');
-            const nextStepOffset = this._getClassSuffixedInteger(steps[i + 1], 'offset-lg-');
-            const stepPaddingTop = this._getClassSuffixedInteger(steps[i], 'pt');
-            const nextStepPaddingTop = this._getClassSuffixedInteger(steps[i + 1], 'pt');
+        for (let i = 0; i < stepsEls.length - 1; i++) {
+            const connectorEl = stepsEls[i].querySelector('.s_process_step_connector');
+            const stepMainElementRect = this._getStepMainElementRect(stepsEls[i]);
+            const nextStepMainElementRect = this._getStepMainElementRect(stepsEls[i + 1]);
+            const stepSize = this._getClassSuffixedInteger(stepsEls[i], 'col-lg-');
+            const nextStepSize = this._getClassSuffixedInteger(stepsEls[i + 1], 'col-lg-');
+            const stepOffset = this._getClassSuffixedInteger(stepsEls[i], 'offset-lg-');
+            const nextStepOffset = this._getClassSuffixedInteger(stepsEls[i + 1], 'offset-lg-');
+            const stepPaddingTop = this._getClassSuffixedInteger(stepsEls[i], 'pt');
+            const nextStepPaddingTop = this._getClassSuffixedInteger(stepsEls[i + 1], 'pt');
 
             connectorEl.style.left = `calc(50% + ${stepMainElementRect.width / 2}px)`;
             connectorEl.style.height = `${stepMainElementRect.height}px`;
@@ -169,33 +165,6 @@ options.registry.StepsConnector = options.Class.extend({
             });
         }
         return {};
-    },
-    /**
-     * This function is deprecated and will be removed in master.
-     * Returns the size of the step, as a number of bootstrap lg-col.
-     *
-     * @private
-     * @param {HTMLElement}
-     * @returns {integer}
-     */
-    _getStepColSize(stepEl) {
-        const classPrefix = 'col-lg-';
-        const colClass = stepEl.className.split(' ').find(cl => cl.startsWith(classPrefix));
-        return parseInt(colClass.replace(classPrefix, ''));
-    },
-    /**
-     * This function is deprecated and will be removed in master.
-     * Returns the padding of the step, as a number of bootstrap lg-col.
-     *
-     * @private
-     * @param {HTMLElement}
-     * @returns {integer}
-     */
-    _getStepColPadding(stepEl) {
-        const classPrefix = 'offset-lg-';
-        const paddingClass = stepEl.className.split(' ').find(cl => cl.startsWith(classPrefix));
-        return paddingClass ? parseInt(paddingClass.replace(classPrefix, '')) : 0;
-
     },
     /**
      * Returns the svg path based on the type of connector.

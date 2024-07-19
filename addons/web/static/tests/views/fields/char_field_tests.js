@@ -190,7 +190,7 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 resId: 1,
                 mockRPC(route, { args, method }) {
-                    if (method === "write") {
+                    if (method === "web_save") {
                         assert.strictEqual(args[1].foo, false, "the foo value should be false");
                     }
                 },
@@ -407,60 +407,63 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("translation dialog should close if field is not there anymore", async function (assert) {
-        // In this test, we simulate the case where the field is removed from the view
-        // this can happend for example if the user click the back button of the browser.
-        serverData.models.partner.fields.foo.translate = true;
-        serviceRegistry.add("localization", makeFakeLocalizationService({ multiLang: true }), {
-            force: true,
-        });
-        patchWithCleanup(session.user_context, {
-            lang: "en_US",
-        });
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: `
+    QUnit.test(
+        "translation dialog should close if field is not there anymore",
+        async function (assert) {
+            // In this test, we simulate the case where the field is removed from the view
+            // this can happend for example if the user click the back button of the browser.
+            serverData.models.partner.fields.foo.translate = true;
+            serviceRegistry.add("localization", makeFakeLocalizationService({ multiLang: true }), {
+                force: true,
+            });
+            patchWithCleanup(session.user_context, {
+                lang: "en_US",
+            });
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                resId: 1,
+                serverData,
+                arch: `
                 <form>
                     <sheet>
                         <group>
                             <field name="int_field" />
-                            <field name="foo"  attrs="{'invisible': [('int_field', '==', 9)]}"/>
+                            <field name="foo"  invisible="int_field == 9"/>
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { args, method, model }) {
-                if (route === "/web/dataset/call_kw/res.lang/get_installed") {
-                    return Promise.resolve([
-                        ["en_US", "English"],
-                        ["fr_BE", "French (Belgium)"],
-                        ["es_ES", "Spanish"],
-                    ]);
-                }
-                if (route === "/web/dataset/call_kw/partner/get_field_translations") {
-                    return Promise.resolve([
-                        [
-                            { lang: "en_US", source: "yop", value: "yop" },
-                            { lang: "fr_BE", source: "yop", value: "valeur français" },
-                            { lang: "es_ES", source: "yop", value: "yop español" },
-                        ],
-                        { translation_type: "char", translation_show_source: false },
-                    ]);
-                }
-            },
-        });
+                mockRPC(route, { args, method, model }) {
+                    if (route === "/web/dataset/call_kw/res.lang/get_installed") {
+                        return Promise.resolve([
+                            ["en_US", "English"],
+                            ["fr_BE", "French (Belgium)"],
+                            ["es_ES", "Spanish"],
+                        ]);
+                    }
+                    if (route === "/web/dataset/call_kw/partner/get_field_translations") {
+                        return Promise.resolve([
+                            [
+                                { lang: "en_US", source: "yop", value: "yop" },
+                                { lang: "fr_BE", source: "yop", value: "valeur français" },
+                                { lang: "es_ES", source: "yop", value: "yop español" },
+                            ],
+                            { translation_type: "char", translation_show_source: false },
+                        ]);
+                    }
+                },
+            });
 
-        assert.hasClass(target.querySelector("[name=foo] input"), "o_field_translate");
+            assert.hasClass(target.querySelector("[name=foo] input"), "o_field_translate");
 
-        await click(target, ".o_field_char .btn.o_field_translate");
-        assert.containsOnce(target, ".modal", "a translate modal should be visible");
-        await editInput(target, ".o_field_widget[name=int_field] input", "9");
-        await nextTick();
-        assert.containsNone(target, "[name=foo] input", "the field foo should be invisible");
-        assert.containsNone(target, ".modal", "a translate modal should not be visible");
-    });
+            await click(target, ".o_field_char .btn.o_field_translate");
+            assert.containsOnce(target, ".modal", "a translate modal should be visible");
+            await editInput(target, ".o_field_widget[name=int_field] input", "9");
+            await nextTick();
+            assert.containsNone(target, "[name=foo] input", "the field foo should be invisible");
+            assert.containsNone(target, ".modal", "a translate modal should not be visible");
+        }
+    );
 
     QUnit.test("html field translatable", async function (assert) {
         assert.expect(5);
@@ -719,6 +722,77 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test(
+        "input field: change value before pending onchange returns (2)",
+        async function (assert) {
+            serverData.models.partner.onchanges = {
+                int_field(obj) {
+                    if (obj.int_field === 7) {
+                        obj.foo = "blabla";
+                    } else {
+                        obj.foo = "tralala";
+                    }
+                },
+            };
+
+            const def = makeDeferred();
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                resId: 1,
+                serverData,
+                arch: `
+                    <form>
+                        <sheet>
+                            <field name="int_field" />
+                            <field name="foo" />
+                        </sheet>
+                    </form>`,
+                async mockRPC(route, { method }) {
+                    if (method === "onchange") {
+                        await def;
+                    }
+                },
+            });
+            assert.strictEqual(
+                target.querySelector(".o_field_widget[name='foo'] input").value,
+                "yop",
+                "should contain the correct value"
+            );
+
+            // trigger a deferred onchange
+            await editInput(target, ".o_field_widget[name='int_field'] input", "7");
+
+            // insert a value in input foo
+            target.querySelector(".o_field_widget[name=foo] input").value = "test";
+            await triggerEvent(target, ".o_field_widget[name=foo] input", "input");
+
+            // complete the onchange
+            def.resolve();
+            await nextTick();
+            assert.strictEqual(
+                target.querySelector(".o_field_widget[name='foo'] input").value,
+                "test",
+                "The onchange value should not be applied because the input is in edition"
+            );
+
+            // apply the value of the input foo
+            await triggerEvent(target, ".o_field_widget[name=foo] input", "change");
+            assert.strictEqual(
+                target.querySelector(".o_field_widget[name='foo'] input").value,
+                "test"
+            );
+
+            // trigger another onchange (not deferred)
+            await editInput(target, ".o_field_widget[name='int_field'] input", "10");
+            assert.strictEqual(
+                target.querySelector(".o_field_widget[name='foo'] input").value,
+                "tralala",
+                "the onchange value should be applied because the input is not in edition"
+            );
+        }
+    );
+
+    QUnit.test(
         "input field: change value before pending onchange returns (with fieldDebounce)",
         async function (assert) {
             // this test is exactly the same as the previous one, except that in
@@ -791,6 +865,30 @@ QUnit.module("Fields", (hooks) => {
             );
         }
     );
+
+    QUnit.test("onchange return value before editing input", async function (assert) {
+        serverData.models.partner.onchanges = {
+            foo(obj) {
+                obj.foo = "yop";
+            },
+        };
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="foo" />
+                </form>`,
+        });
+
+        assert.strictEqual(target.querySelector("[name='foo'] input").value, "yop");
+
+        await editInput(target, "[name='foo'] input", "tralala");
+        assert.strictEqual(target.querySelector("[name='foo'] input").value, "yop");
+    });
 
     QUnit.test(
         "input field: change value before pending onchange renaming",
@@ -1047,4 +1145,94 @@ QUnit.module("Fields", (hooks) => {
             "Placeholder"
         );
     });
+
+    QUnit.test(
+        "char field: correct value is used to evaluate the modifiers",
+        async function (assert) {
+            serverData.models.partner.onchanges = {
+                foo: (obj) => {
+                    if (obj.foo === "a") {
+                        obj.display_name = false;
+                    } else if (obj.foo === "b") {
+                        obj.display_name = "";
+                    }
+                },
+            };
+            serverData.models.partner.records[0].foo = false;
+            serverData.models.partner.records[0].display_name = false;
+
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                resId: 1,
+                arch: `
+                <form>
+                    <field name="foo" />
+                    <field name="display_name" invisible="'' == display_name"/>
+                </form>`,
+            });
+            assert.containsOnce(target, "[name='display_name'] input");
+
+            await editInput(target, "[name='foo'] input", "a");
+            assert.containsOnce(target, "[name='display_name'] input");
+
+            await editInput(target, "[name='foo'] input", "b");
+            assert.containsNone(target, "[name='display_name'] input");
+        }
+    );
+
+    QUnit.test(
+        "edit a char field should display the status indicator buttons without flickering",
+        async function (assert) {
+            serverData.models.partner.records[0].p = [2];
+            serverData.models.partner.onchanges = {
+                foo() {},
+            };
+
+            const def = makeDeferred();
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                resId: 1,
+                arch: `
+                    <form>
+                        <field name="p">
+                            <tree editable="bottom">
+                                <field name="foo"/>
+                            </tree>
+                        </field>
+                    </form>`,
+                async mockRPC(route, { method }) {
+                    if (method === "onchange") {
+                        assert.step("onchange");
+                        await def;
+                    }
+                },
+            });
+            assert.containsOnce(
+                target,
+                ".o_form_status_indicator_buttons.invisible",
+                "form view is not dirty"
+            );
+
+            await click(target, ".o_data_cell");
+            await editInput(target, "[name='foo'] input", "a");
+            assert.verifySteps(["onchange"]);
+            assert.containsOnce(
+                target,
+                ".o_form_status_indicator_buttons:not(.invisible)",
+                "form view is dirty"
+            );
+
+            def.resolve();
+            await nextTick();
+            assert.containsOnce(
+                target,
+                ".o_form_status_indicator_buttons:not(.invisible)",
+                "form view is dirty"
+            );
+        }
+    );
 });

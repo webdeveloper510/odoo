@@ -151,6 +151,9 @@ class TestAccountMove(TestAccountMoveStockCommon):
         ''' Test manually editing tax amount, cogs creation should not reset tax amount '''
         move_form = Form(self.env["account.move"].with_context(default_move_type="out_invoice"))
         move_form.partner_id = self.partner_a
+        self.company_data["default_account_revenue"].write({
+            'tax_ids': [(6, 0, [self.env.company.account_sale_tax_id.id])]
+        })
         with move_form.invoice_line_ids.new() as line_form:
             line_form.product_id = self.product_A
         invoice = move_form.save()
@@ -169,7 +172,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
                 'groups_by_subtotal': {
                     'Untaxed Amount': [{
                         'group_key': 2,
-                        'tax_group_id': 2,
+                        'tax_group_id': invoice.invoice_line_ids.tax_ids.tax_group_id.id,
                         'tax_group_name': 'Tax 15%',
                         'tax_group_amount': 14,
                         'tax_group_base_amount': 100,
@@ -189,7 +192,9 @@ class TestAccountMove(TestAccountMoveStockCommon):
         invoice.write(vals)
 
         self.assertEqual(len(invoice.mapped("line_ids")), 3)
-        self.assertAlmostEqual(114.0, invoice.amount_total)
+        self.assertEqual(invoice.amount_total, 114)
+        self.assertEqual(invoice.amount_untaxed, 100)
+        self.assertEqual(invoice.amount_tax, 14)
 
         invoice._post()
 
@@ -229,12 +234,11 @@ class TestAccountMove(TestAccountMoveStockCommon):
             self.assertEqual(bill.invoice_line_ids.account_id, product_accounts['expense'])
 
     def test_product_valuation_method_change_to_automated_negative_on_hand_qty(self):
-        """
-        We have a product whose category has manual valuation and on-hand quantity is negative:
-            Upon switching to an automated valuation method for the product category, the following
-            entries should be generated in the stock journal:
-                1. CREDIT to valuation account
-                2. DEBIT to stock output account
+        """ We have a product whose category has manual valuation and on-hand quantity is negative:
+        Upon switching to an automated valuation method for the product category, the following
+        entries should be generated in the stock journal:
+            1. CREDIT to valuation account
+            2. DEBIT to stock output account
         """
         stock_location = self.env['stock.warehouse'].search([
             ('company_id', '=', self.env.company.id),
@@ -261,7 +265,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
             'picking_id': out_picking.id,
         })
         out_picking.action_confirm()
-        sm.quantity_done = 1
+        sm.quantity = 1
         out_picking.button_validate()
 
         categ.write({

@@ -1,8 +1,7 @@
-odoo.define('website.s_table_of_content', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const publicWidget = require('web.public.widget');
-const {extraMenuUpdateCallbacks} = require('website.content.menu');
+import publicWidget from "@web/legacy/js/public/public_widget";
+import {extraMenuUpdateCallbacks} from "@website/js/content/menu";
 
 const TableOfContent = publicWidget.Widget.extend({
     selector: 'section .s_table_of_content_navbar_sticky',
@@ -29,8 +28,8 @@ const TableOfContent = publicWidget.Widget.extend({
         if (indexCallback >= 0) {
             extraMenuUpdateCallbacks.splice(indexCallback, 1);
         }
-        this.$target.css('top', '');
-        this.$target.find('.s_table_of_content_navbar').css({top: '', maxHeight: ''});
+        this.$el.css('top', '');
+        this.$el.find('.s_table_of_content_navbar').css({top: '', maxHeight: ''});
         this._super(...arguments);
     },
 
@@ -57,25 +56,25 @@ const TableOfContent = publicWidget.Widget.extend({
      * @private
      */
     _updateTableOfContentNavbarPosition() {
-        if (!this.$target[0].querySelector('a.table_of_content_link')) {
+        if (!this.el.querySelector('a.table_of_content_link')) {
             // Do not start the scrollspy if the TOC is empty.
             return;
         }
         let position = 0;
         const $fixedElements = $('.o_top_fixed_element');
-        _.each($fixedElements, el => position += $(el).outerHeight());
-        const isHorizontalNavbar = this.$target.hasClass('s_table_of_content_horizontal_navbar');
-        this.$target.css('top', isHorizontalNavbar ? position : '');
-        this.$target.find('.s_table_of_content_navbar').css('top', isHorizontalNavbar ? '' : position + 20);
-        position += isHorizontalNavbar ? this.$target.outerHeight() : 0;
-        this.$target.find('.s_table_of_content_navbar').css('maxHeight', isHorizontalNavbar ? '' : `calc(100vh - ${position + 40}px)`);
+        $fixedElements.toArray().forEach((el) => position += $(el).outerHeight());
+        const isHorizontalNavbar = this.$el.hasClass('s_table_of_content_horizontal_navbar');
+        this.$el.css('top', isHorizontalNavbar ? position : '');
+        this.$el.find('.s_table_of_content_navbar').css('top', isHorizontalNavbar ? '' : position + 20);
+        position += isHorizontalNavbar ? this.$el.outerHeight() : 0;
+        this.$el.find('.s_table_of_content_navbar').css('maxHeight', isHorizontalNavbar ? '' : `calc(100vh - ${position + 40}px)`);
         if (this.previousPosition !== position) {
             const target = this.$scrollingTarget[0];
             new ScrollSpy(target instanceof Window ? target.document.body : target, {
-                target: this.$target.find('.s_table_of_content_navbar'),
+                target: this.$el.find('.s_table_of_content_navbar'),
                 method: 'offset',
                 offset: position + 100,
-                alwaysKeepFirstActive: true,
+                alwaysKeepFirstActive: true
             });
             this.previousPosition = position;
         }
@@ -109,5 +108,4 @@ publicWidget.registry.anchorSlide.include({
 
 publicWidget.registry.snippetTableOfContent = TableOfContent;
 
-return TableOfContent;
-});
+export default TableOfContent;

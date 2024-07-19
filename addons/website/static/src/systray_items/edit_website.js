@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from '@web/core/utils/hooks';
-
-const { Component, useState, useEffect } = owl;
+import { Component, useState, useEffect } from "@odoo/owl";
 
 class EditWebsiteSystray extends Component {
     setup() {
@@ -33,9 +33,9 @@ class EditWebsiteSystray extends Component {
 
     get label() {
         if (this.translatable) {
-            return this.env._t("or edit master");
+            return _t("or edit master");
         }
-        return this.env._t("Edit");
+        return _t("Edit");
     }
 
     startEdit() {

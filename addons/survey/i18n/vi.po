@@ -3,19 +3,15 @@
 # 	* survey
 # 
 # Translators:
-# Nancy Momoland <thanh.np2502@gmail.com>, 2022
-# Trinh Tran Thi Phuong <trinhttp@trobz.com>, 2022
-# Dung Nguyen Thi <dungnt@trobz.com>, 2022
-# Duy BQ <duybq86@gmail.com>, 2022
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
 # Thi Huong Nguyen, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2024\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -71,6 +67,13 @@ msgstr "% completed"
 
 #. module: survey
 #. odoo-python
+#: code:addons/survey/models/survey_user_input.py:0
+#, python-format
+msgid "%(participant)s just participated in \"%(survey_title)s\"."
+msgstr "%(participant)s vừa tham gia \"%(survey_title)s\"."
+
+#. module: survey
+#. odoo-python
 #: code:addons/survey/models/survey_survey.py:0
 #, python-format
 msgid "%s (copy)"
@@ -81,19 +84,24 @@ msgstr "%s (sao chép)"
 #: code:addons/survey/models/survey_survey.py:0
 #, python-format
 msgid "%s certification passed"
-msgstr "%s certification passed"
+msgstr "%s chứng nhận đã đạt được"
 
 #. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_survey.py:0
 #, python-format
 msgid "%s challenge certification"
-msgstr "%s challenge certification"
+msgstr "%s chứng nhận thử thách"
 
 #. module: survey
 #: model:ir.actions.report,print_report_name:survey.certification_report
 msgid "'Certification - %s' % (object.survey_id.display_name)"
 msgstr "'Certification - %s' % (object.survey_id.display_name)"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid "0000000010"
+msgstr "0000000010"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug2
@@ -141,6 +149,11 @@ msgid "16.2 kg"
 msgstr "16.2 kg"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid "2023-08-18"
+msgstr "2023-08-18"
+
+#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug2
 msgid "3700 km"
 msgstr "3700 km"
@@ -171,8 +184,7 @@ msgid "99 years"
 msgstr "99 năm"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid ""
 "<b>Certificate</b>\n"
 "                            <br/>"
@@ -208,10 +220,9 @@ msgstr ""
 "                                <span class=\"text-muted\">Thời lượng trung bình</span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
-msgid "<br/>by"
-msgstr "<br/>bởi"
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid "<br/> <span>by</span>"
+msgstr "<br/> <span>theo</span>"
 
 #. module: survey
 #: model:mail.template,body_html:survey.mail_template_certification
@@ -221,7 +232,7 @@ msgid ""
 "        <tbody>\n"
 "            <tr><td>\n"
 "                <!-- We use the logo of the company that created the survey (to handle multi company cases) -->\n"
-"                <a href=\"/\"><img t-attf-src=\"/logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" style=\"vertical-align:baseline;max-width:100px;\"></a>\n"
+"                <a href=\"/\"><img t-if=\"not object.survey_id.create_uid.company_id.uses_default_logo\" t-attf-src=\"/logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" style=\"vertical-align:baseline;max-width:100px;\"></a>\n"
 "            </td><td style=\"text-align:right;vertical-align:middle;\">\n"
 "                    Certification: <t t-out=\"object.survey_id.display_name or ''\">Feedback Form</t>\n"
 "            </td></tr>\n"
@@ -236,13 +247,39 @@ msgid ""
 "                        <strong t-out=\"object.survey_id.display_name or ''\">Furniture Creation</strong>\n"
 "                    certification\n"
 "                </p>\n"
-"                <p>Congratulations for passing the test with a score of <strong t-out=\"object.scoring_percentage\"></strong>% !</p>\n"
+"                <p>Congratulations for passing the test with a score of <strong t-out=\"object.scoring_percentage\"></strong>%!</p>\n"
 "            </td></tr>\n"
 "        </tbody>\n"
 "    </table>\n"
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
+"    <table style=\"width:600px;margin:5px auto;\">\n"
+"        <tbody>\n"
+"            <tr><td>\n"
+"                <!-- Chúng tôi sử dụng logo của công ty đã tạo khảo sát (để xử lý các trường hợp liên quan đến nhiều công ty) -->\n"
+"                <a href=\"/\"><img t-if=\"not object.survey_id.create_uid.company_id.uses_default_logo\" t-attf-src=\"/logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" style=\"vertical-align:baseline;max-width:100px;\"></a>\n"
+"            </td><td style=\"text-align:right;vertical-align:middle;\">\n"
+"                    Chứng nhận: <t t-out=\"object.survey_id.display_name or ''\">Biểu mẫu phản hồi</t>\n"
+"            </td></tr>\n"
+"        </tbody>\n"
+"    </table>\n"
+"    <table style=\"width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;\">\n"
+"        <tbody>\n"
+"            <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
+"                <p>Xin chào <span t-out=\"object.partner_id.name or 'participant'\">bạn</span></p>\n"
+"                <p>\n"
+"                    Tệp đính kèm là chứng nhận\n"
+"                        <strong t-out=\"object.survey_id.display_name or ''\">Chế tạo Nội thất</strong>\n"
+"                    của bạn.\n"
+"                </p>\n"
+"                <p>Chúc mừng bạn đã vượt qua bài kiểm tra với số điểm là <strong t-out=\"object.scoring_percentage\"></strong>%!</p>\n"
+"            </td></tr>\n"
+"        </tbody>\n"
+"    </table>\n"
+"</div>\n"
+"            "
 
 #. module: survey
 #: model:mail.template,body_html:survey.mail_template_user_input_invite
@@ -319,17 +356,17 @@ msgstr "<i class=\"fa fa-bar-chart me-1\"/>Biểu đồ"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
 msgid "<i class=\"fa fa-bar-chart\"/> Results"
-msgstr "<i class=\"fa fa-bar-chart\"/> Results"
+msgstr "<i class=\"fa fa-bar-chart\"/> Kết quả"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<i class=\"fa fa-check-square-o fa-lg me-2\"/>answer"
-msgstr "<i class=\"fa fa-check-square-o fa-lg me-2\"/>trả lời"
+msgstr "<i class=\"fa fa-check-square-o fa-lg me-2\"/>câu trả lời"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<i class=\"fa fa-circle-o  fa-lg me-2\"/>answer"
-msgstr "<i class=\"fa fa-circle-o  fa-lg me-2\"/>trả lời"
+msgstr "<i class=\"fa fa-circle-o  fa-lg me-2\"/>câu trả lời"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -348,7 +385,7 @@ msgstr "<i class=\"fa fa-close\"/> Close"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<i class=\"fa fa-dot-circle-o fa-lg me-2\"/>answer"
-msgstr "<i class=\"fa fa-dot-circle-o fa-lg me-2\"/>trả lời"
+msgstr "<i class=\"fa fa-dot-circle-o fa-lg me-2\"/>câu trả lời"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -361,8 +398,12 @@ msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Edit Survey"
+msgid ""
+"<i class=\"fa fa-exclamation-triangle\"/> It is currently not possible to "
+"pass this assessment because no question is configured to give any points."
 msgstr ""
+"<i class=\"fa fa-exclamation-triangle\"/> Hiện tại không thể vượt qua bài "
+"đánh giá này, vì theo cấu hình, không có câu hỏi nào cho điểm."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
@@ -391,31 +432,22 @@ msgstr "<i class=\"fa fa-list-ol me-1\"/>Phổ biến nhất"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"Arrow\"/>"
+msgstr ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Hình mũi tên\" "
+"title=\"Mũi tên\"/>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
+msgid "<i class=\"fa fa-print\"/> Print"
+msgstr "<i class=\"fa fa-print\"/> In"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<i class=\"fa fa-square-o fa-lg me-2\"/>answer"
 msgstr "<i class=\"fa fa-square-o fa-lg me-2\"/>trả lời"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
-msgid "<i class=\"fa fa-trash me-1\"/>Remove all filters"
-msgstr "<i class=\"fa fa-trash me-1\"/>Xoá tất cả bộ lọc"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid ""
-"<span attrs=\"{'invisible': [('is_scored_question', '!=', "
-"True)]}\">Points</span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('is_scored_question', '!=', "
-"True)]}\">Điểm</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid ""
-"<span attrs=\"{'invisible': [('is_time_limited', '=', False)]}\"> "
-"seconds</span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('is_time_limited', '=', False)]}\"> "
-"seconds</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
@@ -445,18 +477,60 @@ msgstr ""
 " </span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
-msgid "<span class=\"fa fa-filter me-1\"/>Filters"
-msgstr "<span class=\"fa fa-filter me-1\"/>Bộ lọc"
+#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+msgid ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Avg "
+"</span>"
+msgstr ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Trung "
+"bình </span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+msgid ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Max "
+"</span>"
+msgstr ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Tối đa "
+"</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+msgid ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Min "
+"</span>"
+msgstr ""
+"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Tối thiểu"
+" </span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"d-block text-muted\">Responded</span>"
+msgstr "<span class=\"d-block text-muted\">Đã trả lời</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"d-block text-muted\">Skipped</span>"
+msgstr "<span class=\"d-block text-muted\">Đã bỏ qua</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"d-block text-success\">Correct</span>"
+msgstr "<span class=\"d-block text-success\">Đúng</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"d-block text-warning\">Partial</span>"
+msgstr "<span class=\"d-block text-warning\">Một phần</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
 msgid ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\" id=\"enter-"
-"tooltip\"> or press Enter</span>"
+"tooltip\"> or press CTRL+Enter</span>"
 msgstr ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\" id=\"enter-"
-"tooltip\"> hoặc nhấn Enter</span>"
+"tooltip\"> hoặc nhấn CTRL+Enter</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
@@ -473,30 +547,35 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
 msgid ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
-"                        <span id=\"enter-tooltip\">or press Enter</span>\n"
-"                    </span>"
+"                    <span id=\"enter-tooltip\">or press CTRL+Enter</span>\n"
+"                </span>"
 msgstr ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
-"                        <span id=\"enter-tooltip\">hoặc nhấn Enter</span>\n"
-"                    </span>"
+"                    <span id=\"enter-tooltip\">hoặc nhấn CTRL+Enter</span>\n"
+"                </span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
+msgid "<span class=\"mx-1\">-</span>"
+msgstr "<span class=\"mx-1\">-</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.res_partner_view_form
 msgid ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&lt;', 2)]}\">Certifications</span>\n"
-"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&gt;', 1)]}\">Certification</span>"
+"<span class=\"o_stat_text\" invisible=\"certifications_company_count &lt; 2\">Certifications</span>\n"
+"                        <span class=\"o_stat_text\" invisible=\"certifications_company_count &gt; 1\">Certification</span>"
 msgstr ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&lt;', 2)]}\">Certifications</span>\n"
-"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&gt;', 1)]}\">Certification</span>"
+"<span class=\"o_stat_text\" invisible=\"certifications_company_count &lt; 2\">Chứng nhận</span>\n"
+"                        <span class=\"o_stat_text\" invisible=\"certifications_company_count &gt; 1\">Chứng nhận</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.res_partner_view_form
 msgid ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&lt;', 2)]}\">Certifications</span>\n"
-"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&gt;', 1)]}\">Certification</span>"
+"<span class=\"o_stat_text\" invisible=\"certifications_count &lt; 2\">Certifications</span>\n"
+"                        <span class=\"o_stat_text\" invisible=\"certifications_count &gt; 1\">Certification</span>"
 msgstr ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&lt;', 2)]}\">Certifications</span>\n"
-"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&gt;', 1)]}\">Certification</span>"
+"<span class=\"o_stat_text\" invisible=\"certifications_count &lt; 2\">Chứng nhận</span>\n"
+"                        <span class=\"o_stat_text\" invisible=\"certifications_count &gt; 1\">Chứng nhận</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_start
@@ -519,6 +598,17 @@ msgstr ""
 "position-relative\">Khoá</span></span>"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
+msgid ""
+"<span class=\"o_survey_results_topbar_clear_filters text-primary\">\n"
+"                                <i class=\"fa fa-trash me-1\"/>Remove all filters\n"
+"                            </span>"
+msgstr ""
+"<span class=\"o_survey_results_topbar_clear_filters text-primary\">\n"
+"                                <i class=\"fa fa-trash me-1\"/>Xóa tất cả bộ lọc\n"
+"                            </span>"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
 msgid ""
 "<span class=\"o_survey_session_answer_count\">0</span>\n"
@@ -526,6 +616,15 @@ msgid ""
 msgstr ""
 "<span class=\"o_survey_session_answer_count\">0</span>\n"
 "                                     /"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.user_input_session_open
+msgid ""
+"<span class=\"o_survey_session_navigation_next_label me-2 fw-bold\">Start</span>\n"
+"                        <i class=\"fw-bold oi oi-chevron-right\"/>"
+msgstr ""
+"<span class=\"o_survey_session_navigation_next_label me-2 fw-bold\">Bắt đầu</span>\n"
+"                        <i class=\"fw-bold oi oi-chevron-right\"/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -543,9 +642,39 @@ msgid "<span class=\"text-muted\">Registered</span>"
 msgstr "<span class=\"text-muted\">Đã đăng ký</span>"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"text-muted\">Responded</span>"
+msgstr "<span class=\"text-muted\">Đã phản hồi</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"text-muted\">Skipped</span>"
+msgstr "<span class=\"text-muted\">Đã bỏ qua</span>"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 msgid "<span class=\"text-muted\">Success</span>"
 msgstr "<span class=\"text-muted\">Success</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"text-success\">Correct</span>"
+msgstr "<span class=\"text-success\">Đúng</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "<span class=\"text-warning\">Partial</span>"
+msgstr "<span class=\"text-warning\">Một phần</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "<span invisible=\"not is_scored_question\">Points</span>"
+msgstr "<span invisible=\"not is_scored_question\">Điểm</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "<span invisible=\"not is_time_limited\"> seconds</span>"
+msgstr "<span invisible=\"not is_time_limited\"> giây</span>"
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p3_q1
@@ -573,21 +702,11 @@ msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
-msgid ""
-"<span>Click on the filter icon (<span class=\"fa fa-filter text-primary\"/>)\n"
-"                                    next to an answer to filter surveys on similar answers only.</span>"
-msgstr ""
-"<span>Nhấp vào biểu tượng bộ lọc (<span class=\"fa fa-filter text-primary\"/>)\n"
-"                                    bên cạnh câu trả lời để lọc khảo sát chỉ dựa trên các câu trả lời tương tự.</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
 msgid "<span>Completed surveys</span>"
 msgstr "<span>Khảo sát đã hoàn thành</span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "<span>Date</span>"
 msgstr "<span>Ngày</span>"
 
@@ -641,13 +760,15 @@ msgstr "<span>Số lần làm còn lại</span>:"
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p2_q1
-msgid "<span>Our famous Leader !</span>"
-msgstr ""
+msgid "<span>Our famous Leader!</span>"
+msgstr "<span>Nhà lãnh đạo nổi danh của chúng tôi!</span>"
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p3_q3
-msgid "<span>Our sales people have an advantage, but you can do it !</span>"
+msgid "<span>Our sales people have an advantage, but you can do it!</span>"
 msgstr ""
+"<span>Nhân viên kinh doanh của chúng tôi có lợi thế, nhưng bạn có thể làm "
+"được!</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
@@ -658,6 +779,24 @@ msgstr "<span>Đạt và không đạt</span>"
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
 msgid "<span>Passed only</span>"
 msgstr "<span>Chỉ đạt</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid ""
+"<span>This certificate is presented to</span>\n"
+"                                <br/>"
+msgstr ""
+"<span>Chứng nhận này được trao cho</span>\n"
+"                                <br/>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
+msgid ""
+"<span>This is a Test Survey Entry. </span><i class=\"oi oi-fw oi-arrow-"
+"right\"/>Edit Survey"
+msgstr ""
+"<span>Đây là một mục khảo sát thử nghiệm. </span><i class=\"oi oi-fw oi-"
+"arrow-right\"/>Chỉnh sửa khảo sát"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
@@ -689,6 +828,15 @@ msgstr "<span>Cái nào có màu vàng?</span><br/>"
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<span>Which is yellow?</span><br/>"
 msgstr "<span>Cái nào có màu vàng?</span><br/>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid ""
+"<span>for successfully completing</span>\n"
+"                                <br/>"
+msgstr ""
+"<span>để hoàn thành thành công</span>\n"
+"                                <br/>"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q4
@@ -740,6 +888,17 @@ msgid "A question can either be skipped or answered, not both."
 msgstr "Có thể bỏ qua hoặc trả lời câu hỏi, không được thao tác cả hai."
 
 #. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"A scored survey needs at least one question that gives points.\n"
+"Please check answers and their scores."
+msgstr ""
+"Một khảo sát tính điểm cần có ít nhất một câu hỏi để cho điểm.\n"
+"Vui lòng kiểm tra các câu trả lời và điểm số của chúng."
+
+#. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2
 msgid "About our ecommerce"
 msgstr "Giới thiệu thương mại điện tử của chúng tôi "
@@ -780,13 +939,13 @@ msgstr "Đang hoạt động"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_ids
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_ids
 msgid "Activities"
-msgstr "Các hoạt động"
+msgstr "Hoạt động"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_exception_decoration
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Hành động ngoại lệ"
+msgstr "Hoạt động ngoại lệ"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_state
@@ -798,14 +957,7 @@ msgstr "Trạng thái hoạt động"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_type_icon
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Biểu tượng kiểu hoạt động"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
-msgid ""
-"Add a list of email recipients (separated by commas, semicolons or line "
-"breaks). They will not be converted into contacts."
-msgstr ""
+msgstr "Biểu tượng loại hoạt động"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -815,7 +967,7 @@ msgstr "Add a question"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Add a section"
-msgstr "Thêm phần"
+msgstr "Thêm phân đoạn"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
@@ -826,8 +978,8 @@ msgstr "Thêm một danh bạ có sẵn"
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
 msgid "Add some fun to your presentations by sharing questions live"
 msgstr ""
-"Thêm chút thú vị vào bản thuyết trình của bạn bằng cách chia sẻ câu hỏi trực"
-" tiếp"
+"Thêm chút thú vị vào bản trình bày của bạn bằng cách chia sẻ câu hỏi trực "
+"tiếp"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__emails
@@ -837,7 +989,7 @@ msgstr "Additional emails"
 #. module: survey
 #: model:res.groups,name:survey.group_survey_manager
 msgid "Administrator"
-msgstr "Người quản trị"
+msgstr "Quản trị viên"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q4_sug1
@@ -848,8 +1000,10 @@ msgstr "Châu Phi"
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q6
 msgid ""
 "After watching this video, will you swear that you are not going to "
-"procrastinate to trim your hedge this year ?"
+"procrastinate to trim your hedge this year?"
 msgstr ""
+"Sau khi xem video này, bạn có dám thề rằng mình sẽ không trì hoãn việc cắt "
+"tỉa hàng rào trong năm nay không?"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_feedback_p2_q2_col3
@@ -885,6 +1039,16 @@ msgid "All surveys"
 msgstr "All surveys"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
+msgid "Allow Roaming"
+msgstr "Cho phép chuyển trang"
+
+#. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_question__allowed_triggering_question_ids
+msgid "Allowed Triggering Questions"
+msgstr "Câu hỏi kích hoạt được phép"
+
+#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q2_sug2
 msgid "Amenhotep"
 msgstr "Amenhotep"
@@ -912,6 +1076,7 @@ msgstr "Nặc danh"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_tree
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Answer"
 msgstr "Trả lời"
@@ -927,17 +1092,12 @@ msgid "Answer deadline"
 msgstr "Answer deadline"
 
 #. module: survey
-#: model:ir.model.fields,help:survey.field_survey_question__triggering_answer_id
-msgid "Answer that will trigger the display of the current question."
-msgstr "Câu trả lời sẽ kích hoạt việc hiển thị câu hỏi hiện tại."
-
-#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__user_input_line_ids
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__user_input_line_ids
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Answers"
-msgstr "Trả lời"
+msgstr "Câu trả lời"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__session_answer_count
@@ -969,7 +1129,12 @@ msgstr "Táo"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Archived"
-msgstr "Đã lưu"
+msgstr "Đã lưu trữ"
+
+#. module: survey
+#: model:survey.question,title:survey.survey_demo_food_preferences_q1
+msgid "Are you vegetarian?"
+msgstr "Bạn có phải là người ăn chay không?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5
@@ -988,10 +1153,16 @@ msgid "Asia"
 msgstr "Châu Á"
 
 #. module: survey
+#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__assessment
+#: model_terms:ir.actions.act_window,help:survey.action_survey_form
+msgid "Assessment"
+msgstr "Kiểm tra"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_attachment_count
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_attachment_count
 msgid "Attachment Count"
-msgstr "Số lượng tập tin đính kèm"
+msgstr "Số lượng tệp đính kèm"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__attachment_ids
@@ -1045,8 +1216,8 @@ msgid ""
 "Automated email sent to the user when they succeed the certification, "
 "containing their certification document."
 msgstr ""
-"Email tự động được gửi đến người dùng khi họ đạt được chứng nhận, chứa tài "
-"liệu chứng nhận của họ."
+"Email tự động được gửi đến người dùng khi họ đạt được chứng nhận, chứa giấy "
+"chứng nhận của họ."
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q6_sug3
@@ -1060,8 +1231,14 @@ msgstr "Trung bình"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__answer_duration_avg
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 msgid "Average Duration"
 msgstr "Thời lượng trung bình"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
+msgid "Average Score"
+msgstr "Điểm trung bình"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__answer_duration_avg
@@ -1079,15 +1256,10 @@ msgid "Avicii"
 msgstr "Avicii"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
-msgid "Back Button"
-msgstr "Back Button"
-
-#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__background_image
 #: model:ir.model.fields,field_description:survey.field_survey_survey__background_image
 msgid "Background Image"
-msgstr "Hình Nền"
+msgstr "Hình nền"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__background_image_url
@@ -1112,8 +1284,8 @@ msgstr "Con ong"
 
 #. module: survey
 #: model:survey.question,question_placeholder:survey.vendor_certification_page_3_question_3
-msgid "Beware of leap years !"
-msgstr ""
+msgid "Beware of leap years!"
+msgstr "Hãy cẩn thận với những năm nhuận!"
 
 #. module: survey
 #. odoo-python
@@ -1121,6 +1293,11 @@ msgstr ""
 #, python-format
 msgid "Blue Pen"
 msgstr "Bút màu xanh"
+
+#. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_invite__body_has_template_value
+msgid "Body content is the same as the template"
+msgstr "Nội dung chính giống với mẫu"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q4_sug4
@@ -1162,22 +1339,16 @@ msgstr "Cây xương rồng"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__can_edit_body
 msgid "Can Edit Body"
-msgstr "Có thể sửa thân bài"
+msgstr "Có thể sửa nội dung chính"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q3
-msgid "Can Humans ever directly see a photon ?"
-msgstr ""
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
-msgid "Cancel"
-msgstr "Hủy"
+msgid "Can Humans ever directly see a photon?"
+msgstr "Con người có thể trực tiếp nhìn thấy photon không?"
 
 #. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
-#: model_terms:ir.actions.act_window,help:survey.action_survey_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_tree
 #, python-format
 msgid "Certification"
@@ -1201,24 +1372,12 @@ msgid "Certification Badge is not configured for the survey %(survey_name)s"
 msgstr "Huy hiệu chứng nhận không được cấu hình cho khảo sát %(survey_name)s"
 
 #. module: survey
-#: model:mail.template,report_name:survey.mail_template_certification
-msgid "Certification Document"
-msgstr "Certification Document"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "Certification Failed"
 msgstr "Certification Failed"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
-msgid "Certification Title"
-msgstr "Tiêu đề chứng nhận"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "Certification n°"
 msgstr "Chứng nhận số"
 
@@ -1236,7 +1395,7 @@ msgstr "Chứng nhận: {{ object.survey_id.display_name }}"
 #: model:ir.actions.report,name:survey.certification_report
 #: model:ir.model.fields.selection,name:survey.selection__gamification_challenge__challenge_category__certification
 msgid "Certifications"
-msgstr "Chứng chỉ"
+msgstr "Chứng nhận"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_res_partner__certifications_count
@@ -1266,11 +1425,6 @@ msgid "Chair floor protection"
 msgstr "Bọc chân ghế"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
-msgid "Chart"
-msgstr "Biểu đồ"
-
-#. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #, python-format
@@ -1296,8 +1450,19 @@ msgstr "Các Lựa chọn"
 
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_demo_burger_quiz
-msgid "Choose your favourite subject and show how good you are. Ready ?"
+msgid "Choose your favourite subject and show how good you are. Ready?"
 msgstr ""
+"Hãy chọn chủ đề yêu thích và thể hiện trình độ của mình. Bạn sẵn sàng chưa?"
+
+#. module: survey
+#: model:survey.question,title:survey.survey_demo_food_preferences_q3
+msgid "Choose your green meal"
+msgstr "Chọn món ăn \"xanh\" của bạn"
+
+#. module: survey
+#: model:survey.question,title:survey.survey_demo_food_preferences_q4
+msgid "Choose your meal"
+msgstr "Chọn món ăn của bạn"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__certification_report_layout__classic_blue
@@ -1326,6 +1491,7 @@ msgstr "Cliff Burton"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Close"
 msgstr "Đóng"
@@ -1345,6 +1511,17 @@ msgstr "Màu sắc"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__color
 msgid "Color Index"
 msgstr "Mã màu"
+
+#. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_survey.py:0
+#, python-format
+msgid ""
+"Combining roaming and \"Scoring with answers after each page\" is not possible; please update the following surveys:\n"
+"- %(survey_names)s"
+msgstr ""
+"Không thể kết hợp chuyển trang và \"Tính điểm kèm đáp án sau mỗi trang\"; vui lòng cập nhật các khảo sát sau:\n"
+"- %(survey_names)s"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_question_form
@@ -1374,6 +1551,7 @@ msgstr "Company Certifications Count"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_user_input__state__done
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_search
 msgid "Completed"
 msgstr "Đã hoàn thành"
@@ -1396,9 +1574,19 @@ msgid "Computing score requires a question in arguments."
 msgstr "Computing score requires a question in arguments."
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__is_conditional
-msgid "Conditional Display"
-msgstr "Conditional Display"
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "Conditional display"
+msgstr "Hiển thị có điều kiện"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+#, python-format
+msgid ""
+"Conditional display is not available when questions are randomly picked."
+msgstr ""
+"Hiển thị có điều kiện không khả dụng khi các câu hỏi được chọn ngẫu nhiên."
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_2_choice_3
@@ -1464,7 +1652,7 @@ msgstr "Bánh quy"
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 #, python-format
-msgid "Copied !"
+msgid "Copied!"
 msgstr "Đã sao chép!"
 
 #. module: survey
@@ -1484,7 +1672,6 @@ msgstr "Bàn góc ngồi bên phải"
 #: code:addons/survey/static/src/js/survey_result.js:0
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__is_correct
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__answer_is_correct
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 #, python-format
 msgid "Correct"
 msgstr "Chính xác"
@@ -1538,6 +1725,11 @@ msgstr "Tia vũ trụ"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Create Live Session"
 msgstr "Create Live Session"
+
+#. module: survey
+#: model_terms:ir.actions.act_window,help:survey.action_survey_form
+msgid "Create a custom survey from scratch"
+msgstr "Tạo một khảo sát tùy chỉnh từ đầu"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__create_uid
@@ -1617,6 +1809,12 @@ msgid "Currently only supported for live sessions."
 msgstr "Currently only supported for live sessions."
 
 #. module: survey
+#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__custom
+#: model_terms:ir.actions.act_window,help:survey.action_survey_form
+msgid "Custom"
+msgstr "Tùy chỉnh"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid ""
 "Customers will receive a new token and be able to completely retake the "
@@ -1634,6 +1832,11 @@ msgstr "Customers will receive the same token."
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_2_choice_5
 msgid "Customizable Lamp"
 msgstr "Đèn có thể điều chỉnh"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid "DEMO_CERTIFIED_NAME"
+msgstr "DEMO_CERTIFIED_NAME"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_question__question_type__date
@@ -1717,14 +1920,26 @@ msgid "Display Progress as"
 msgstr "Hiển thị tiến trình dưới dạng"
 
 #. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
+#, python-format
+msgid "Displayed if \"%s\"."
+msgstr "Được hiển thị nếu \"%s\"."
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "Displayed when the answer entered is not valid."
+msgstr "Được hiển thị khi câu trả lời đã nhập không hợp lệ."
+
+#. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_1
 msgid "Do we sell Acoustic Bloc Screens?"
 msgstr "Chúng tôi có bán màn cách âm không?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q3
-msgid "Do you have any other comments, questions, or concerns ?"
-msgstr ""
+msgid "Do you have any other comments, questions, or concerns?"
+msgstr "Bạn có bất kỳ ý kiến, câu hỏi hoặc thắc mắc nào khác không?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_5
@@ -1740,8 +1955,8 @@ msgstr "Con chó"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q1
-msgid "Dogwood is from which family of trees ?"
-msgstr ""
+msgid "Dogwood is from which family of trees?"
+msgstr "Dogwood thuộc họ cây nào?"
 
 #. module: survey
 #: model:survey.question,question_placeholder:survey.survey_demo_quiz_p1_q2
@@ -1751,7 +1966,7 @@ msgstr "Đừng ngại ngùng, hãy bùng nổ!"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q5_sug1
 msgid "Douglas Fir"
-msgstr "Douglas Fir"
+msgstr "Linh sam Douglas"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_2_choice_4
@@ -1759,9 +1974,9 @@ msgid "Drawer"
 msgstr "Ngăn khéo"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
-msgid "Dropdown menu"
-msgstr "Trình đơn thả xuống"
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
+msgid "Duplicate Question"
+msgstr "Sao chép câu hỏi"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -1788,12 +2003,19 @@ msgstr "Kết thúc phiên trực tiếp"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__description_done
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "End Message"
-msgstr "End Message"
+msgstr "Thông điệp kết thúc"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__end_datetime
 msgid "End date and time"
 msgstr "Ngày và giờ kết thúc"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
+#, python-format
+msgid "End of Survey"
+msgstr "Kết thúc khảo sát"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_session_code
@@ -1836,12 +2058,9 @@ msgid "Eyjafjallajökull (Iceland)"
 msgstr "Eyjafjallajökull (Iceland)"
 
 #. module: survey
-#. odoo-python
-#: code:addons/survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
-#, python-format
 msgid "Failed"
-msgstr "Thất bại"
+msgstr "Không đạt"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
@@ -1857,7 +2076,6 @@ msgstr "Fanta"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #: model:survey.survey,title:survey.survey_feedback
-#: model_terms:ir.actions.act_window,help:survey.action_survey_form
 #, python-format
 msgid "Feedback Form"
 msgstr "Biểu mẫu phản hồi"
@@ -1870,6 +2088,8 @@ msgstr "Ficus"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 #: model_terms:ir.ui.view,arch_db:survey.question_result_matrix
+#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+#: model_terms:ir.ui.view,arch_db:survey.question_result_text
 msgid "Filter surveys"
 msgstr "Lọc khảo sát"
 
@@ -1880,6 +2100,11 @@ msgstr "Lọc khảo sát"
 #, python-format
 msgid "Final Leaderboard"
 msgstr "Final Leaderboard"
+
+#. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q4_sug2
+msgid "Fish"
+msgstr "Cá"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_follower_ids
@@ -1897,7 +2122,12 @@ msgstr "Người theo dõi (Đối tác)"
 #: model:ir.model.fields,help:survey.field_survey_survey__activity_type_icon
 #: model:ir.model.fields,help:survey.field_survey_user_input__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Font biểu tượng ví dụ: fa-tasks"
+msgstr "Font biểu tượng, ví dụ: fa-tasks"
+
+#. module: survey
+#: model:survey.survey,title:survey.survey_demo_food_preferences
+msgid "Food Preferences"
+msgstr "Sở thích ăn uống"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_user_input_line__answer_type__text_box
@@ -1910,14 +2140,9 @@ msgid "Free Text answer"
 msgstr "Câu trả lời theo văn bản tự do"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_invite__email_from
-msgid "From"
-msgstr "Từ"
-
-#. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q4
-msgid "From which continent is native the Scots pine (pinus sylvestris) ?"
-msgstr ""
+msgid "From which continent is native the Scots pine (pinus sylvestris)?"
+msgstr "Cây thông Scots (pinus sylvestris) có nguồn gốc từ lục địa nào?"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q1_sug1
@@ -1928,6 +2153,11 @@ msgstr "Trái cây"
 #: model:survey.question,title:survey.survey_demo_quiz_p3
 msgid "Fruits and vegetables"
 msgstr "Trái cây và rau củ"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid "Functional Training"
+msgstr "Đào tạo về tính năng"
 
 #. module: survey
 #: model:ir.model,name:survey.model_gamification_badge
@@ -1963,7 +2193,7 @@ msgstr "Nêu danh sách tất cả các loại gỗ chúng tôi bán."
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p5_q1_sug1
 msgid "Good"
-msgstr "Tốt"
+msgstr "Tuyệt"
 
 #. module: survey
 #. odoo-python
@@ -1978,6 +2208,11 @@ msgid "Good value for money"
 msgstr "Chất lượng hợp giá tiền"
 
 #. module: survey
+#: model_terms:survey.survey,description_done:survey.survey_demo_food_preferences
+msgid "Got it!"
+msgstr "Đã hiểu!"
+
+#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q4_sug2
 msgid "Grapefruits"
 msgstr "Bưởi chùm"
@@ -1985,7 +2220,7 @@ msgstr "Bưởi chùm"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 msgid "Graph"
-msgstr "Đồ thị"
+msgstr "Biểu đồ"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_search
@@ -2053,8 +2288,8 @@ msgstr "Lịch sử"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q3
-msgid "How frequently do you buy products online ?"
-msgstr ""
+msgid "How frequently do you buy products online?"
+msgstr "Bạn có thường xuyên mua hàng online không?"
 
 #. module: survey
 #. odoo-python
@@ -2100,12 +2335,12 @@ msgstr "Chính sách hoàn tiền của chúng tôi là trong vòng bao nhiêu n
 #: code:addons/survey/models/survey_survey_template.py:0
 #, python-format
 msgid "How many orders did you pass during the last 6 months?"
-msgstr "Bạn đã vượt qua bao nhiêu đơn hàng trong 6 tháng qua?"
+msgstr "Bạn đã đặt bao nhiêu đơn hàng trong 6 tháng qua?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q4
-msgid "How many times did you order products on our website ?"
-msgstr ""
+msgid "How many times did you order products on our website?"
+msgstr "Bạn đã đặt hàng trên trang web của chúng tôi bao nhiêu lần?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_4
@@ -2114,8 +2349,8 @@ msgstr "Chúng tôi có bao nhiêu phiên bản bàn góc?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q3
-msgid "How many years did the 100 years war last ?"
-msgstr ""
+msgid "How many years did the 100 years war last?"
+msgstr "Chiến tranh Trăm Năm đã kéo dài trong bao nhiêu năm?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2_question_1
@@ -2125,12 +2360,12 @@ msgstr "Chúng tôi bán Hộp quản lý cáp với giá bao nhiêu?"
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q5
 msgid "How often should you water those plants"
-msgstr "Bao nhiêu lâu bạn nên tưới các cây này cây một lần?"
+msgstr "Bao nhiêu lâu bạn nên tưới các cây này một lần?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q4
-msgid "How old are you ?"
-msgstr ""
+msgid "How old are you?"
+msgstr "Bạn bao nhiêu tuổi?"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug4
@@ -2162,8 +2397,8 @@ msgstr "Tôi không có ý kiến gì!"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug3
-msgid "I've been noticing gravity since I was very young !"
-msgstr ""
+msgid "I've been noticing gravity since I was very young!"
+msgstr "Tôi đã nhận thấy trọng lực từ khi còn rất nhỏ!"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__id
@@ -2185,7 +2420,7 @@ msgstr "Biểu tượng"
 #: model:ir.model.fields,help:survey.field_survey_survey__activity_exception_icon
 #: model:ir.model.fields,help:survey.field_survey_user_input__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Biểu tượng để chỉ ra một hoạt động ngoại lệ."
+msgstr "Biểu tượng cho thấy một hoạt động ngoại lệ."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__access_token
@@ -2208,7 +2443,7 @@ msgid ""
 "expect the warranty to expire?"
 msgstr ""
 "Nếu khách hàng mua bảo hành 1 năm vào ngày 6 tháng 1 năm 2020, thời hạn bảo "
-"hành dự kiến sẽ kết thúc khi nào?"
+"hành dự kiến của chúng tôi sẽ kết thúc khi nào?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_3_question_2
@@ -2223,7 +2458,7 @@ msgstr ""
 #: model:ir.model.fields,help:survey.field_survey_survey__message_needaction
 #: model:ir.model.fields,help:survey.field_survey_user_input__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Nếu chọn, các tin nhắn mới yêu cầu sự có mặt của bạn."
+msgstr "Nếu chọn, bạn cần chú ý tới các tin nhắn mới."
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__message_has_error
@@ -2231,7 +2466,7 @@ msgstr "Nếu chọn, các tin nhắn mới yêu cầu sự có mặt của bạ
 #: model:ir.model.fields,help:survey.field_survey_user_input__message_has_error
 #: model:ir.model.fields,help:survey.field_survey_user_input__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Nếu đánh dấu thì một số thông điệp có lỗi."
+msgstr "Nếu chọn, một số tin nhắn sẽ có lỗi gửi."
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__save_as_email
@@ -2244,13 +2479,6 @@ msgstr ""
 #: model:ir.model.fields,help:survey.field_survey_question__save_as_nickname
 msgid "If checked, this option will save the user's answer as its nickname."
 msgstr "If checked, this option will save the user's answer as its nickname."
-
-#. module: survey
-#: model:ir.model.fields,help:survey.field_survey_question__is_conditional
-msgid ""
-"If checked, this question will be displayed only\n"
-"        if the specified conditional answer have been selected in a previous question"
-msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__users_can_go_back
@@ -2301,6 +2529,7 @@ msgstr "Nếu muốn, bạn có thể"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__value_image
+#: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 msgid "Image"
 msgstr "Hình ảnh"
 
@@ -2340,8 +2569,8 @@ msgstr "Chọn tất cả các cây lá kim trong danh sách dưới đây."
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q2
-msgid "In which country did the bonsai technique develop ?"
-msgstr ""
+msgid "In which country did the bonsai technique develop?"
+msgstr "Kỹ thuật cây cảnh bonsai phát triển ở nước nào?"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__is_scored_question
@@ -2390,7 +2619,7 @@ msgstr "Là biên tập"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_is_follower
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_is_follower
 msgid "Is Follower"
-msgstr "Trở thành người theo dõi"
+msgstr "Là người theo dõi"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__certification
@@ -2409,6 +2638,11 @@ msgid "Is in a Session"
 msgstr "Is in a Session"
 
 #. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_question__is_placed_before_trigger
+msgid "Is misplaced?"
+msgstr "Bị đặt nhầm chỗ?"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Is not a Certification"
 msgstr "Không phải là chứng nhận"
@@ -2416,17 +2650,29 @@ msgstr "Không phải là chứng nhận"
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_user_input__is_session_answer
 msgid "Is that user input part of a survey session or not."
-msgstr "Is that user input part of a survey session or not."
+msgstr ""
+"Có phải dữ liệu người dùng nhập vào là một phần của phiên khảo sát hay "
+"không."
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q3
-msgid "Is the wood of a coniferous hard or soft ?"
-msgstr ""
+msgid "Is the wood of a coniferous hard or soft?"
+msgstr "Gỗ của cây lá kim cứng hay mềm?"
+
+#. module: survey
+#: model:ir.model.fields,help:survey.field_survey_question__is_placed_before_trigger
+msgid "Is this question placed before any of its trigger questions?"
+msgstr "Câu hỏi này có được đặt trước bất kỳ câu hỏi kích hoạt nào không?"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q2_sug4
 msgid "Istanbul"
 msgstr "Istanbul"
+
+#. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug3
+msgid "It depends"
+msgstr "Tuỳ thời điểm"
 
 #. module: survey
 #. odoo-python
@@ -2447,7 +2693,7 @@ msgstr "Nó giúp người tham gia tập trung vào những gì bạn muốn tr
 #: code:addons/survey/models/survey_survey_template.py:0
 #, python-format
 msgid "It helps attendees remember the content of your presentation"
-msgstr "Nó giúp người tham gia ghi nhớ nội dung bài thuyết trình của bạn"
+msgstr "Nó giúp người tham gia ghi nhớ nội dung bản trình bày của bạn"
 
 #. module: survey
 #. odoo-python
@@ -2455,7 +2701,7 @@ msgstr "Nó giúp người tham gia ghi nhớ nội dung bài thuyết trình c�
 #, python-format
 msgid "It is a small bit of text, displayed to help participants answer"
 msgstr ""
-"Đó là một đoạn văn bản ngắn, được hiển thị để giúp người tham gia trả lời"
+"Đây là một đoạn văn bản ngắn, được hiển thị để giúp người tham gia trả lời"
 
 #. module: survey
 #. odoo-python
@@ -2549,17 +2795,7 @@ msgstr "Ngôn ngữ"
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_2_question_2_choice_4
 msgid "Large Desk"
-msgstr "Bàn lớn"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_invite____last_update
-#: model:ir.model.fields,field_description:survey.field_survey_question____last_update
-#: model:ir.model.fields,field_description:survey.field_survey_question_answer____last_update
-#: model:ir.model.fields,field_description:survey.field_survey_survey____last_update
-#: model:ir.model.fields,field_description:survey.field_survey_user_input____last_update
-#: model:ir.model.fields,field_description:survey.field_survey_user_input_line____last_update
-msgid "Last Modified on"
-msgstr "Sửa lần cuối vào"
+msgstr "Bàn làm việc lớn"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__write_uid
@@ -2569,7 +2805,7 @@ msgstr "Sửa lần cuối vào"
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__write_uid
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__write_uid
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Cập nhật lần cuối bởi"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__write_date
@@ -2589,7 +2825,7 @@ msgstr "Last displayed question/page"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Late Activities"
-msgstr "Hoạt động trễ"
+msgstr "Hoạt động chậm trễ"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_session_code
@@ -2597,15 +2833,15 @@ msgid "Launch Session"
 msgstr "Bắt đầu phiên"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "Layout"
-msgstr "Bố cục"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
 msgid "Leaderboard"
-msgstr "Bảng thành tích"
+msgstr "Bảng xếp hạng"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_access_error
+msgid "Leave"
+msgstr "Nghỉ"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_3_choice_4
@@ -2667,12 +2903,8 @@ msgstr "Limited number of attempts"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
-#, python-format
-msgid "Live Presentation"
-msgstr ""
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
+#, python-format
 msgid "Live Session"
 msgstr "Live Session"
 
@@ -2680,6 +2912,11 @@ msgstr "Live Session"
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Live Sessions"
 msgstr "Live Sessions"
+
+#. module: survey
+#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__live_session
+msgid "Live session"
+msgstr "Phiên trực tiếp"
 
 #. module: survey
 #. odoo-javascript
@@ -2697,12 +2934,6 @@ msgstr "Yêu cầu phải đăng nhập"
 #: model:ir.model.fields,field_description:survey.field_survey_invite__template_id
 msgid "Mail Template"
 msgstr "Mẫu mail"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_survey__message_main_attachment_id
-#: model:ir.model.fields,field_description:survey.field_survey_user_input__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Tệp đính kèm chính"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__constr_mandatory
@@ -2747,6 +2978,7 @@ msgstr "Giá trị tối đa không thể nhỏ hơn giá trị nhỏ nhất!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Maximum"
 msgstr "Tối đa"
 
@@ -2766,6 +2998,11 @@ msgid "Maximum Text Length"
 msgstr "Độ dài văn bản tối đa"
 
 #. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_survey__scoring_max_obtainable
+msgid "Maximum obtainable score"
+msgstr "Điểm tối đa có thể đạt được"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__validation_max_float_value
 msgid "Maximum value"
 msgstr "Giá trị tối đa"
@@ -2779,16 +3016,22 @@ msgstr "Có thể bạn đang tìm"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_has_error
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_has_error
 msgid "Message Delivery error"
-msgstr "Thông báo gửi đi gặp lỗi"
+msgstr "Lỗi gửi tin nhắn"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_ids
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_ids
 msgid "Messages"
-msgstr "Thông báo"
+msgstr "Tin nhắn"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "Min/Max Limits"
+msgstr "Giới hạn tối thiểu/tối đa"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Minimum"
 msgstr "Nhỏ nhất"
 
@@ -2886,7 +3129,7 @@ msgstr "Nhiều lựa chọn cho mỗi dòng"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__my_activity_date_deadline
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "Hạn chót hoạt động"
+msgstr "Hạn chót hoạt động của tôi"
 
 #. module: survey
 #: model:gamification.badge,name:survey.vendor_certification_badge
@@ -2928,16 +3171,29 @@ msgid "New invite"
 msgstr "New invite"
 
 #. module: survey
+#: model:mail.message.subtype,description:survey.mt_survey_survey_user_input_completed
+msgid "New participation completed."
+msgstr "Lượt tham gia mới đã hoàn thành."
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
+#: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
+#, python-format
+msgid "Next"
+msgstr "Tiếp theo"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_calendar_event_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Sự kiện lịch hoạt động tiếp theo"
+msgstr "Sự kiện theo lịch cho hoạt động tiếp theo"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_date_deadline
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Hạn chót cho hành động kế tiếp"
+msgstr "Hạn chót cho hoạt động tiếp theo"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_summary
@@ -2949,7 +3205,12 @@ msgstr "Tóm tắt hoạt động tiếp theo"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_type_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_type_id
 msgid "Next Activity Type"
-msgstr "Kiểu hoạt động kế tiếp"
+msgstr "Loại hoạt động tiếp theo"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
+msgid "Next Skipped"
+msgstr "Tiếp theo bỏ qua"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__nickname
@@ -2957,6 +3218,8 @@ msgid "Nickname"
 msgstr "Nickname"
 
 #. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug2
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q2_sug2
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q6_sug2
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_1_choice_1
 msgid "No"
@@ -2974,6 +3237,7 @@ msgstr "Không tìm thấy khảo sát nào"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_user_input
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid "No answers yet!"
 msgstr "Chưa có câu trả lời nào!"
 
@@ -2985,11 +3249,6 @@ msgid "No attempts left."
 msgstr "No attempts left."
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "No one answered this question."
-msgstr ""
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_void_content
 msgid "No question yet, come back later."
 msgstr "Chưa có câu hỏi nào, hãy quay lại sau."
@@ -2997,7 +3256,7 @@ msgstr "Chưa có câu hỏi nào, hãy quay lại sau."
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__no_scoring
 msgid "No scoring"
-msgstr "No scoring"
+msgstr "Không tính điểm"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.survey_question_answer_action
@@ -3011,8 +3270,8 @@ msgstr "Không tìm thấy dòng dữ liệu đầu vào của người dùng"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q3_sug2
-msgid "No, it's to small for the human eye."
-msgstr ""
+msgid "No, it's too small for the human eye."
+msgstr "Không, nó quá nhỏ để mắt người có thể nhìn thấy."
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q5_sug2
@@ -3070,7 +3329,7 @@ msgstr "Số lượng ngăn kéo"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_has_error_counter
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_has_error_counter
 msgid "Number of errors"
-msgstr "Số lỗi"
+msgstr "Số lượng lỗi"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__message_needaction_counter
@@ -3082,7 +3341,7 @@ msgstr "Số tin nhắn cần xử lý"
 #: model:ir.model.fields,help:survey.field_survey_survey__message_has_error_counter
 #: model:ir.model.fields,help:survey.field_survey_user_input__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Số lượng tin gửi đi bị lỗi"
+msgstr "Số tin nhắn bị gửi lỗi"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_question__question_type__numerical_box
@@ -3105,6 +3364,11 @@ msgstr "Tổ chức mở hướng đối tượng"
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
 msgid "Occurrence"
 msgstr "Tần suất"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+msgid "Odoo"
+msgstr "Odoo"
 
 #. module: survey
 #. odoo-python
@@ -3184,7 +3448,7 @@ msgstr "One page per question"
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__questions_layout__page_per_section
 msgid "One page per section"
-msgstr "One page per section"
+msgstr "Mỗi phần một trang"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__questions_layout__one_page
@@ -3201,6 +3465,8 @@ msgstr "Chỉ còn một câu hỏi duy nhất!"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 #: model_terms:ir.ui.view,arch_db:survey.question_result_matrix
+#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
+#: model_terms:ir.ui.view,arch_db:survey.question_result_text
 msgid "Only show survey results having selected this answer"
 msgstr "Chỉ hiển thị kết quả khảo sát khi chọn câu trả lời này"
 
@@ -3218,6 +3484,15 @@ msgid "Oops! No survey matches this code."
 msgstr "Rất tiếc! Không có khảo sát nào khớp với mã này."
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_access_error
+msgid ""
+"Oopsie! We could not let you open this survey. Make sure you are using the correct link and are allowed to\n"
+"                        participate or get in touch with its organizer."
+msgstr ""
+"Rất tiếc! Bạn không thể mở khảo sát này. Hãy đảm bảo rằng bạn đang sử dụng đúng liên kết và được phép\n"
+"                        tham gia hoặc liên hệ với người tạo khảo sát."
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Open Session Manager"
 msgstr "Open Session Manager"
@@ -3230,6 +3505,11 @@ msgid "Open section"
 msgstr "Mở phần"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "Optional previous answers required"
+msgstr "Cần có câu trả lời tùy chọn trước đó"
+
+#. module: survey
 #: model:ir.model.fields,help:survey.field_survey_invite__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
@@ -3237,9 +3517,9 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. {{ "
 "object.partner_id.lang }}."
 msgstr ""
-"Tùy chọn ngôn ngữ dịch (mã ISO) khi gửi đi email. Nếu không đặt, phiên bản "
-"tiếng Anh sẽ được sử dụng. Đây thường là một biểu thức giữ chỗ cung cấp ngôn"
-" ngữ phù hợp, ví dụ: {{ object.partner_id.lang }}."
+"Ngôn ngữ dịch tuỳ chọn (mã ISO) để chọn khi gửi email. Nếu không đặt, phiên "
+"bản tiếng Anh sẽ được sử dụng. Đây luôn là biểu thức placeholder cung cấp "
+"ngôn ngữ thích hợp, VD: {{ object.partner_id.lang }}."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -3305,11 +3585,6 @@ msgid "Papyrus"
 msgstr "Papyrus"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "Partial"
-msgstr "Một phần"
-
-#. module: survey
 #. odoo-javascript
 #. odoo-python
 #: code:addons/survey/models/survey_user_input.py:0
@@ -3326,12 +3601,30 @@ msgstr "Người tham gia"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Participants"
-msgstr "Những người tham gia"
+msgstr "Người tham gia"
+
+#. module: survey
+#. odoo-python
+#: code:addons/survey/wizard/survey_invite.py:0
+#, python-format
+msgid "Participate to %(survey_name)s"
+msgstr "Tham gia %(survey_name)s"
 
 #. module: survey
 #: model:mail.template,subject:survey.mail_template_user_input_invite
 msgid "Participate to {{ object.survey_id.display_name }} survey"
 msgstr "Tham gia {{ object.survey_id.display_name }} survey"
+
+#. module: survey
+#: model:mail.message.subtype,name:survey.mt_survey_survey_user_input_completed
+#: model:mail.message.subtype,name:survey.mt_survey_user_input_completed
+msgid "Participation completed"
+msgstr "Lượt tham gia đã hoàn thành"
+
+#. module: survey
+#: model:mail.message.subtype,description:survey.mt_survey_user_input_completed
+msgid "Participation completed."
+msgstr "Lượt tham gia đã hoàn thành."
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_user_input
@@ -3346,18 +3639,15 @@ msgid "Partner"
 msgstr "Đối tác"
 
 #. module: survey
-#. odoo-python
-#: code:addons/survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
-#, python-format
 msgid "Passed"
-msgstr "Đã đạt"
+msgstr "Đạt"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
 msgid "Passed and Failed"
-msgstr "Đã đạt và không đạt"
+msgstr "Đạt và không đạt"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
@@ -3412,6 +3702,15 @@ msgid "Pick a subject"
 msgstr "Chọn một chủ đề"
 
 #. module: survey
+#: model:ir.model.fields,help:survey.field_survey_question__triggering_answer_ids
+msgid ""
+"Picking any of these answers will trigger this question.\n"
+"Leave the field empty if the question should always be displayed."
+msgstr ""
+"Việc chọn bất kỳ câu trả lời nào trong số các câu trả lời này sẽ kích hoạt câu hỏi này.\n"
+"Để trống trường nếu câu hỏi luôn được hiển thị."
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 msgid "Pie Graph"
 msgstr "Pie Graph"
@@ -3443,6 +3742,12 @@ msgstr ""
 #, python-format
 msgid "Please enter at least one valid recipient."
 msgstr "Vui lòng chọn ít nhất một người nhận hợp lệ."
+
+#. module: survey
+#: model_terms:survey.survey,description:survey.survey_demo_food_preferences
+msgid "Please give us your preferences for this event's dinner!"
+msgstr ""
+"Hãy cho chúng tôi biết bạn mong đợi gì cho bữa tối của sự kiện này nhé!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_void_content
@@ -3491,6 +3796,7 @@ msgid "Prices"
 msgstr "Giá"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Print"
@@ -3500,6 +3806,11 @@ msgstr "In"
 #: model:survey.question,title:survey.vendor_certification_page_1
 msgid "Products"
 msgstr "Sản phẩm"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
+msgid "Progress bar"
+msgstr "Thanh tiến trình"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__question_id
@@ -3552,13 +3863,6 @@ msgid "Question Type"
 msgstr "Loại câu hỏi"
 
 #. module: survey
-#: model:ir.model.fields,help:survey.field_survey_question__triggering_question_id
-msgid ""
-"Question containing the triggering answer to display the current question."
-msgstr ""
-"Question containing the triggering answer to display the current question."
-
-#. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 #, python-format
@@ -3570,6 +3874,7 @@ msgstr "Loại câu hỏi cho các trang này phải trống: %s"
 #: model:ir.model.fields,field_description:survey.field_survey_question__question_ids
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_ids
 #: model:ir.ui.menu,name:survey.menu_survey_question_form1
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Questions"
 msgstr "Câu hỏi"
@@ -3580,9 +3885,17 @@ msgid "Questions & Answers"
 msgstr "Câu hỏi và trả lời"
 
 #. module: survey
+#: model:ir.model.fields,help:survey.field_survey_question__triggering_question_ids
+msgid ""
+"Questions containing the triggering answer(s) to display the current "
+"question."
+msgstr ""
+"Các câu hỏi chứa (các) câu trả lời kích hoạt để hiển thị câu hỏi hiện tại."
+
+#. module: survey
 #: model:survey.survey,title:survey.survey_demo_quiz
 msgid "Quiz about our Company"
-msgstr "Câu hỏi về Công ty chúng tôi"
+msgstr "Kiểm tra về Công ty chúng tôi"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__scoring_success
@@ -3607,6 +3920,12 @@ msgid "Rarely (1-3 times per month)"
 msgstr "Hiếm khi (1-3 lần mỗi tháng)"
 
 #. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_survey__rating_ids
+#: model:ir.model.fields,field_description:survey.field_survey_user_input__rating_ids
+msgid "Ratings"
+msgstr "Đánh giá"
+
+#. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__session_state__ready
 msgid "Ready"
 msgstr "Sẵn sàng"
@@ -3620,8 +3939,8 @@ msgstr "Bạn đã sẵn sàng thay đổi cách <b>thu thập dữ liệu</b>?"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
-msgid "Ready to test? Pick a sample..."
-msgstr ""
+msgid "Ready to test? Pick a sample or create one from scratch..."
+msgstr "Bạn đã sẵn sàng thử chưa? Hãy chọn một mẫu hoặc tự tạo từ đầu..."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__partner_ids
@@ -3637,9 +3956,10 @@ msgstr "Bút đỏ"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__answer_count
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Registered"
-msgstr "Đã đăng kiểm"
+msgstr "Đã đăng ký"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__render_model
@@ -3678,15 +3998,10 @@ msgid "Resend invite"
 msgstr "Resend invite"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "Responded"
-msgstr ""
-
-#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__user_id
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Responsible"
-msgstr "Phụ trách"
+msgstr "Người phụ trách"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_user_id
@@ -3748,7 +4063,7 @@ msgstr "Lỗi gửi SMS"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q1_sug4
 msgid "Salicaceae"
-msgstr "Họ Salicaceae"
+msgstr "Họ liễu"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__save_as_email
@@ -3795,23 +4110,28 @@ msgstr "Scored"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__scoring_type
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__scoring_type
 msgid "Scoring"
-msgstr "Chấm điểm tiềm năng"
+msgstr "Tính điểm"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__scoring_type
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__scoring_type
 msgid "Scoring Type"
-msgstr "Scoring Type"
+msgstr "Cách tính điểm"
+
+#. module: survey
+#: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_with_answers_after_page
+msgid "Scoring with answers after each page"
+msgstr "Tính điểm kèm đáp án sau mỗi trang"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_with_answers
 msgid "Scoring with answers at the end"
-msgstr "Scoring with answers at the end"
+msgstr "Tính điểm kèm đáp án khi hoàn thành"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_without_answers
-msgid "Scoring without answers at the end"
-msgstr "Scoring without answers at the end"
+msgid "Scoring without answers"
+msgstr "Tính điểm không hiện đáp án"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_search
@@ -3837,7 +4157,7 @@ msgstr "Kiếm các dòng mà người dùng nhập"
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__page_id
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Section"
-msgstr "Mục"
+msgstr "Phần"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_and_page_ids
@@ -3849,6 +4169,11 @@ msgstr "Sections and Questions"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 msgid "See results"
 msgstr "See results"
+
+#. module: survey
+#: model_terms:survey.survey,description_done:survey.survey_demo_food_preferences
+msgid "See you soon!"
+msgstr "Hẹn sớm gặp bạn!"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_3
@@ -3875,6 +4200,16 @@ msgstr "Chọn những cây tạo ra doanh số hơn 20 nghìn trong năm nay"
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid "Send"
 msgstr "Gửi"
+
+#. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_invite__send_email
+msgid "Send Email"
+msgstr "Gửi email"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Send by Email"
+msgstr "Gửi qua email"
 
 #. module: survey
 #: model:mail.template,description:survey.mail_template_certification
@@ -3931,9 +4266,42 @@ msgid "Share a Survey"
 msgstr "Chia sẻ khảo sát"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.question_table_pagination
+msgid "Show All"
+msgstr "Hiện thị tất cả"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__comments_allowed
 msgid "Show Comments Field"
 msgstr "Hiển thị trường bình luận"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
+#, python-format
+msgid "Show Correct Answer(s)"
+msgstr "Hiển thị (các) câu trả lời đúng"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
+#, python-format
+msgid "Show Final Leaderboard"
+msgstr "Hiển thị bảng xếp hạng cuối cùng"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
+#, python-format
+msgid "Show Leaderboard"
+msgstr "Hiển thị bảng xếp hạng"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
+#, python-format
+msgid "Show Results"
+msgstr "Hiển thị kết quả"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__session_show_leaderboard
@@ -3943,7 +4311,8 @@ msgstr "Show Session Leaderboard"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Show all records which has next action date is before today"
-msgstr "Hiển thị tất cả dữ liệu có ngày xử lý tiếp theo trước ngày hôm nay"
+msgstr ""
+"Hiển thị tất cả tập dữ liệu có ngày xử lý tiếp theo trước ngày hôm nay"
 
 #. module: survey
 #. odoo-python
@@ -3962,7 +4331,6 @@ msgstr "Hộp văn bản 1 dòng"
 #: code:addons/survey/models/survey_user_input.py:0
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__skipped
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_print
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 #, python-format
 msgid "Skipped"
 msgstr "Bị bỏ qua"
@@ -3993,6 +4361,13 @@ msgstr ""
 msgid "Some questions about our company. Do you really know us?"
 msgstr ""
 "Một số câu hỏi về công ty chúng tôi. Liệu bạn có thực sự biết đến chúng tôi?"
+
+#. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_user_input.py:0
+#, python-format
+msgid "Someone just participated in \"%(survey_title)s\"."
+msgstr "Có người vừa tham gia \"%(survey_title)s\"."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
@@ -4039,9 +4414,12 @@ msgid "Spring"
 msgstr "Mùa xuân"
 
 #. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_session_manage.js:0
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p1
+#, python-format
 msgid "Start"
-msgstr "Khởi động"
+msgstr "Bắt đầu"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_start
@@ -4078,9 +4456,14 @@ msgid ""
 "Planned: Future activities."
 msgstr ""
 "Trạng thái dựa trên hoạt động\n"
-"Quá hạn: Ngày đến hạn phải được chuyển\n"
+"Quá hạn: Hạn chót hạn đã qua\n"
 "Hôm nay: Hôm nay là ngày phải thực hiện\n"
-"Kế hoạch: Các hoạt động trong tương lai."
+"Kế hoạch: Cần thực hiện trong tương lai."
+
+#. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q4_sug1
+msgid "Steak with french fries"
+msgstr "Bít tết và khoai tây chiên"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q6_row2
@@ -4090,7 +4473,7 @@ msgstr "Dâu tây"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__subject
 msgid "Subject"
-msgstr "Chủ đề"
+msgstr "Tiêu đề"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
@@ -4114,8 +4497,8 @@ msgstr "Tỷ lệ đạt (%)"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
-msgid "Success rate:"
-msgstr "Success rate:"
+msgid "Success rate"
+msgstr "Tỷ lệ đạt"
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.survey_question_answer_action
@@ -4150,7 +4533,10 @@ msgstr "Mùa hè"
 #: model:ir.model.fields,field_description:survey.field_survey_question__survey_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__survey_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__survey_id
+#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__survey
+#: model_terms:ir.actions.act_window,help:survey.action_survey_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_search
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_activity
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_tree
@@ -4160,9 +4546,19 @@ msgid "Survey"
 msgstr "Khảo sát"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_access_error
+msgid "Survey Access Error"
+msgstr "Lỗi truy cập khảo sát"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_response_line_view_tree
 msgid "Survey Answer Line"
 msgstr "Dòng trả lời khảo sát"
+
+#. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_user_input__survey_first_submitted
+msgid "Survey First Submitted"
+msgstr "Khảo sát được gửi lần đầu"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_gamification_badge__survey_ids
@@ -4179,6 +4575,11 @@ msgstr "Survey Invitation Wizard"
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_tree
 msgid "Survey Label"
 msgstr "Nhãn khảo sát"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Survey Link"
+msgstr "Liên kết khảo sát"
 
 #. module: survey
 #. odoo-python
@@ -4206,9 +4607,13 @@ msgstr "Survey Time Limit Reached"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__title
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Survey Title"
 msgstr "Tiêu đề Khảo sát"
+
+#. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_survey__survey_type
+msgid "Survey Type"
+msgstr "Loại khảo sát"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__survey_start_url
@@ -4223,13 +4628,13 @@ msgstr "Dữ liệu người dùng nhập vào khảo sát"
 #. module: survey
 #: model:ir.model,name:survey.model_survey_user_input_line
 msgid "Survey User Input Line"
-msgstr "Các dòng nhập liệu của người dùng khảo sát"
+msgstr "Dòng dữ liệu người dùng nhập vào khảo sát"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_tree
 msgid "Survey User inputs"
-msgstr "Nhập liệu của Người dùng khảo sát"
+msgstr "Dữ liệu người dùng nhập vào khảo sát"
 
 #. module: survey
 #: model:mail.template,name:survey.mail_template_certification
@@ -4316,8 +4721,10 @@ msgstr "Cảm ơn bạn đã tham gia và hi vọng bạn đã có một trải 
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #, python-format
-msgid "Thank you very much for your feedback. We highly value your opinion !"
+msgid "Thank you very much for your feedback. We highly value your opinion!"
 msgstr ""
+"Cảm ơn bạn rất nhiều vì đã phản hồi. Chúng tôi rất trân trọng ý kiến ​​của "
+"bạn!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
@@ -4345,7 +4752,6 @@ msgstr "Câu trả lời phải đúng loại"
 #: code:addons/survey/models/survey_question.py:0
 #: code:addons/survey/models/survey_question.py:0
 #: model_terms:ir.ui.view,arch_db:survey.question_container
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 #, python-format
 msgid "The answer you entered is not valid."
 msgstr "The answer you entered is not valid."
@@ -4378,20 +4784,6 @@ msgstr "Câu trả lời đúng là: "
 #: model:ir.model.fields,help:survey.field_survey_survey__session_question_id
 msgid "The current question of the survey session."
 msgstr "The current question of the survey session."
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_form.js:0
-#, python-format
-msgid "The date you selected is greater than the maximum date: "
-msgstr "The date you selected is greater than the maximum date: "
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_form.js:0
-#, python-format
-msgid "The date you selected is lower than the minimum date: "
-msgstr "The date you selected is lower than the minimum date: "
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__description
@@ -4523,6 +4915,13 @@ msgstr "Chúng là các thông số kỹ thuật đảm bảo khả năng phản
 
 #. module: survey
 #. odoo-python
+#: code:addons/survey/models/survey_user_input.py:0
+#, python-format
+msgid "This answer cannot be overwritten."
+msgstr "Không thể ghi đè câu trả lời này."
+
+#. module: survey
+#. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 #: code:addons/survey/tests/test_survey.py:0
 #, python-format
@@ -4537,18 +4936,6 @@ msgid "This answer must be an email address."
 msgstr "This answer must be an email address."
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-msgid "This certificate is presented to"
-msgstr ""
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
-msgid ""
-"This certificate is presented to\n"
-"                                <br/>"
-msgstr ""
-
-#. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__session_code
 msgid ""
 "This code will be used by your attendees to reach your session. Feel free to"
@@ -4556,11 +4943,6 @@ msgid ""
 msgstr ""
 "This code will be used by your attendees to reach your session. Feel free to"
 " customize it however you like!"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
-msgid "This is a Test Survey."
-msgstr "Đây là Khảo sát thử."
 
 #. module: survey
 #. odoo-javascript
@@ -4581,23 +4963,9 @@ msgid "This is not a number"
 msgstr "Đây không phải là một số"
 
 #. module: survey
-#: model:ir.model.fields,help:survey.field_survey_invite__emails
-msgid ""
-"This list of emails of recipients will not be converted in contacts.        "
-"Emails must be separated by commas, semicolons or newline."
-msgstr ""
-"Email phải được cách nhau bởi dấu phẩy, dấu chấm phẩy hoặc xuống dòng."
-
-#. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__description_done
 msgid "This message will be displayed when survey is completed"
 msgstr "Thông điệp này sẽ được hiển thị khi khảo sát được hoàn thành"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_tree
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
-msgid "This question depends on another question's answer."
-msgstr "This question depends on another question's answer."
 
 #. module: survey
 #. odoo-python
@@ -4632,8 +5000,10 @@ msgstr "Phần này hỏi về trải nghiệm Thương mại điện tử của
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_demo_quiz
 msgid ""
-"This small quiz will test your knowledge about our Company. Be prepared !"
+"This small quiz will test your knowledge about our Company. Be prepared!"
 msgstr ""
+"Bài kiểm tra nhỏ này sẽ kiểm tra kiến thức của bạn về Công ty chúng tôi. Hãy"
+" sẵn sàng!"
 
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_feedback
@@ -4657,8 +5027,8 @@ msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_closed_expired
-msgid "This survey is now closed. Thank you for your interest !"
-msgstr "This survey is now closed. Thank you for your interest !"
+msgid "This survey is now closed. Thank you for your interest!"
+msgstr "Khảo sát này hiện đã đóng. Cảm ơn bạn đã quan tâm!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_auth_required
@@ -4713,7 +5083,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Today Activities"
-msgstr "Các oạt động hôm nay"
+msgstr "Hoạt động hôm nay"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q2_sug2
@@ -4741,14 +5111,25 @@ msgid "Trees"
 msgstr "Cây"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_answer_id
-msgid "Triggering Answer"
-msgstr "Triggering Answer"
+#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_answer_ids
+msgid "Triggering Answers"
+msgstr "Câu trả lời kích hoạt"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_question_id
-msgid "Triggering Question"
-msgstr "Triggering Question"
+#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_question_ids
+msgid "Triggering Questions"
+msgstr "Câu hỏi kích hoạt"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
+#, python-format
+msgid ""
+"Triggers based on the following questions will not work because they are positioned after this question:\n"
+"\"%s\"."
+msgstr ""
+"Trình kích hoạt dựa trên các câu hỏi sau sẽ không hoạt động vì chúng được đặt sau câu hỏi này:\n"
+"\"%s\"."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_search
@@ -4759,7 +5140,7 @@ msgstr "Loại"
 #: model:ir.model.fields,help:survey.field_survey_survey__activity_exception_decoration
 #: model:ir.model.fields,help:survey.field_survey_user_input__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Loại hoạt động ngoại lệ trên hồ sơ."
+msgstr "Loại hoạt động ngoại lệ trong tập dữ liệu."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__suggested_answer_ids
@@ -4777,7 +5158,8 @@ msgstr "Họ du"
 #, python-format
 msgid "Unable to post message, please configure the sender's email address."
 msgstr ""
-"Không thể đăng tin, vui lòng cấu hình địa chỉ email của người gửi tin."
+"Không thể gửi tin nhắn, vui lòng định cấu hình địa chỉ email của người gửi "
+"tin."
 
 #. module: survey
 #. odoo-javascript
@@ -4843,7 +5225,7 @@ msgstr "Thêm chút hài hước và pha trò"
 #: code:addons/survey/static/src/js/tours/survey_tour.js:0
 #, python-format
 msgid "Use the breadcrumbs to quickly go back to the dashboard."
-msgstr "Sử dụng thanh điều hướng để nhanh chóng quay lại trang tổng quan."
+msgstr "Sử dụng thanh điều hướng để nhanh chóng quay lại trang chủ."
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__description
@@ -4917,14 +5299,27 @@ msgid "Validate entry"
 msgstr "Xác nhận"
 
 #. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/question_page/question_page_one2many_field.js:0
 #: model:ir.model.fields,field_description:survey.field_survey_question__validation_error_msg
-msgid "Validation Error message"
-msgstr "Thông điệp báo lỗi xác nhận"
+#, python-format
+msgid "Validation Error"
+msgstr "Lỗi xác nhận"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q1_sug2
 msgid "Vegetables"
 msgstr "Rau củ"
+
+#. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q3_sug2
+msgid "Vegetarian burger"
+msgstr "Bánh mì kẹp chay"
+
+#. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q3_sug1
+msgid "Vegetarian pizza"
+msgstr "Pizza chay"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_2_question_3_choice_1
@@ -4962,13 +5357,13 @@ msgstr "Chúng tôi quan tâm đến ý kiến đóng góp của bạn."
 #: model:ir.model.fields,field_description:survey.field_survey_survey__website_message_ids
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__website_message_ids
 msgid "Website Messages"
-msgstr "Thông báo Website"
+msgstr "Thông báo trên trang web"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__website_message_ids
 #: model:ir.model.fields,help:survey.field_survey_user_input__website_message_ids
 msgid "Website communication history"
-msgstr "Lịch sử thông tin liên lạc website"
+msgstr "Lịch sử trao đổi qua trang web"
 
 #. module: survey
 #. odoo-python
@@ -5001,8 +5396,8 @@ msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q2
-msgid "What do you think about our new eCommerce ?"
-msgstr ""
+msgid "What do you think about our new eCommerce?"
+msgstr "Bạn nghĩ gì về sàn Thương mại điện tử mới của chúng tôi?"
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2_question_3
@@ -5011,8 +5406,8 @@ msgstr "Bạn nghĩ gì về giá của chúng tôi (không được xếp hạn
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p5_q1
-msgid "What do you think about this survey ?"
-msgstr ""
+msgid "What do you think about this survey?"
+msgstr "Bạn nghĩ gì về khảo sát này?"
 
 #. module: survey
 #. odoo-python
@@ -5044,33 +5439,33 @@ msgstr "Cách tốt nhất để thu hút sự chú ý của khán giả là gì
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2_q2
-msgid "What is the biggest city in the world ?"
-msgstr ""
+msgid "What is the biggest city in the world?"
+msgstr "Thành phố lớn nhất trên thế giới là gì?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q1
-msgid "What is your email ?"
-msgstr ""
+msgid "What is your email?"
+msgstr "Email của bạn là gì?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q2
-msgid "What is your nickname ?"
-msgstr ""
+msgid "What is your nickname?"
+msgstr "Biệt danh của bạn là gì?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q2
-msgid "What is, approximately, the critical mass of plutonium-239 ?"
-msgstr ""
+msgid "What is, approximately, the critical mass of plutonium-239?"
+msgstr "Khối lượng tới hạn của plutonium-239 xấp xỉ bằng bao nhiêu?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q1
-msgid "When did Genghis Khan die ?"
-msgstr ""
+msgid "When did Genghis Khan die?"
+msgstr "Thành Cát Tư Hãn qua đời khi nào?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p2_q2
-msgid "When did precisely Marc Demo crop its first apple tree ?"
-msgstr ""
+msgid "When did precisely Marc Demo crop its first apple tree?"
+msgstr "Chính xác thì Marc Demo đã trồng cây táo đầu tiên vào lúc nào?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q6
@@ -5079,13 +5474,13 @@ msgstr "Khi nào bạn thu hoạch những trái cây đó?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p2_q1
-msgid "When is Mitchell Admin born ?"
-msgstr ""
+msgid "When is Mitchell Admin born?"
+msgstr "Mitchell Admin được sinh ra khi nào?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q2
-msgid "When is your date of birth ?"
-msgstr ""
+msgid "When is your date of birth?"
+msgstr "Ngày sinh của bạn là ngày nào?"
 
 #. module: survey
 #. odoo-javascript
@@ -5096,13 +5491,13 @@ msgstr "Sau khi bạn chọn một câu trả lời, Odoo sẽ lưu lại cho b�
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q3
-msgid "Where are you from ?"
-msgstr ""
+msgid "Where are you from?"
+msgstr "Bạn đến từ đâu?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q1
-msgid "Where do you live ?"
-msgstr ""
+msgid "Where do you live?"
+msgstr "Bạn sống ở đâu?"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__session_show_leaderboard
@@ -5113,8 +5508,8 @@ msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q1
-msgid "Which Musician is not in the 27th Club ?"
-msgstr ""
+msgid "Which Musician is not in the 27th Club?"
+msgstr "Nhạc sĩ nào không thuộc Câu lạc bộ 27?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q1
@@ -5123,13 +5518,13 @@ msgstr "Cà chua thuộc loại nào"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2_q3
-msgid "Which is the highest volcano in Europe ?"
-msgstr ""
+msgid "Which is the highest volcano in Europe?"
+msgstr "Ngọn núi lửa nào cao nhất ở châu Âu?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q1
-msgid "Which of the following words would you use to describe our products ?"
-msgstr ""
+msgid "Which of the following words would you use to describe our products?"
+msgstr "Bạn sẽ sử dụng từ nào sau đây để mô tả sản phẩm của chúng tôi?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q2
@@ -5138,8 +5533,8 @@ msgstr "Con vật nào sau đây có thể thụ phấn"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q2
-msgid "Which painting/drawing was not made by Pablo Picasso ?"
-msgstr ""
+msgid "Which painting/drawing was not made by Pablo Picasso?"
+msgstr "Bức tranh/bức vẽ nào không phải do Pablo Picasso vẽ ra?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q3
@@ -5148,20 +5543,22 @@ msgstr "Câu nói nào là của Jean-Claude Van Damme"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1
-msgid "Who are you ?"
-msgstr ""
+msgid "Who are you?"
+msgstr "Bạn là ai?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q2
-msgid "Who is the architect of the Great Pyramid of Giza ?"
-msgstr ""
+msgid "Who is the architect of the Great Pyramid of Giza?"
+msgstr "Kiến trúc sư của Đại Kim tự tháp Giza là ai?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q1
 msgid ""
 "Who received a Nobel prize in Physics for the discovery of neutrino "
-"oscillations, which shows that neutrinos have mass ?"
+"oscillations, which shows that neutrinos have mass?"
 msgstr ""
+"Ai đã nhận được giải Nobel Vật lý cho việc phát hiện ra các dao động "
+"neutrino, điều chứng tỏ neutrino có khối lượng?"
 
 #. module: survey
 #. odoo-python
@@ -5189,6 +5586,11 @@ msgid "Winter"
 msgstr "Mùa đông"
 
 #. module: survey
+#: model:survey.question,title:survey.survey_demo_food_preferences_q2
+msgid "Would you prefer a veggie meal if possible?"
+msgstr "Bạn có muốn ăn chay nếu có thể không?"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid ""
 "YYYY-MM-DD\n"
@@ -5214,6 +5616,8 @@ msgid "Yellow Pen"
 msgstr "Bút vàng"
 
 #. module: survey
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug1
+#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q2_sug1
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q6_sug1
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_1_choice_2
 msgid "Yes"
@@ -5229,9 +5633,7 @@ msgstr "Có. Đó là thứ duy nhất mà mắt người có thể nhìn thấy
 msgid ""
 "You can only create certifications for surveys that have a scoring "
 "mechanism."
-msgstr ""
-"You can only create certifications for surveys that have a scoring "
-"mechanism."
+msgstr "Bạn chỉ có thể tạo chứng nhận cho các khảo sát có cơ chế tính điểm."
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_user_input
@@ -5339,6 +5741,13 @@ msgid "Zoomed Image"
 msgstr "Hình ảnh được thu phóng"
 
 #. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_question.py:0
+#, python-format
+msgid "[Question Title]"
+msgstr "[Tiêu đề câu hỏi]"
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "ans"
 msgstr "ans"
@@ -5359,6 +5768,13 @@ msgstr "lần làm"
 #, python-format
 msgid "close"
 msgstr "đóng"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid ""
+"e.g.  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
+msgstr ""
+"VD:  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -5406,14 +5822,6 @@ msgid "ex@mple.com"
 msgstr "ex@mple.com"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
-msgid ""
-"for successfully completing\n"
-"                                <br/>"
-msgstr ""
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_auth_required
 msgid "log in"
 msgstr "đăng nhập"
@@ -5429,8 +5837,7 @@ msgid "of"
 msgstr "của"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
 msgid "of achievement"
 msgstr "thành tích"
 
@@ -5483,4 +5890,13 @@ msgstr "trang này"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "to"
-msgstr "tới"
+msgstr "đến"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid ""
+"⚠️ This question is positioned before some or all of its triggers and could "
+"be skipped."
+msgstr ""
+"⚠️ Câu hỏi này được đặt trước một số hoặc tất cả câu hỏi kích hoạt và có thể"
+" được bỏ qua."

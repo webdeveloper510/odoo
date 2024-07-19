@@ -1,9 +1,8 @@
 /** @odoo-module */
 
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { ListRenderer } from "@web/views/list/list_renderer";
-import { evalDomain } from "@web/views/utils";
-
-const { onWillUpdateProps } = owl;
+import { onWillUpdateProps } from "@odoo/owl";
 
 export class ProjectSharingListRenderer extends ListRenderer {
     setup() {
@@ -19,14 +18,8 @@ export class ProjectSharingListRenderer extends ListRenderer {
             const allColumns = [];
             const firstRecord = this.props.list.records[0];
             for (const column of columns) {
-                if (
-                    column.modifiers.column_invisible &&
-                    column.modifiers.column_invisible instanceof Array
-                ) {
-                    const result = evalDomain(column.modifiers.column_invisible, firstRecord.evalContext);
-                    if (result) {
-                        continue;
-                    }
+                if (evaluateBooleanExpr(column.column_invisible, firstRecord.evalContextWithVirtualIds)) {
+                    continue;
                 }
                 allColumns.push(column);
             }

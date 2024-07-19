@@ -1,28 +1,28 @@
-odoo.define("website.tour.snippet_version", function (require) {
-"use strict";
+/** @odoo-module **/
 
-const wTourUtils = require('website.tour_utils');
+import wTourUtils from "@website/js/tours/tour_utils";
 
 wTourUtils.registerWebsitePreviewTour("snippet_version", {
     edition: true,
     url: "/",
     test: true,
-}, [{
-    content: "Drop s_test_snip snippet",
-    trigger: '#oe_snippets .oe_snippet:has(.s_test_snip) .oe_snippet_thumbnail',
-    run: "drag_and_drop iframe #wrap",
-}, {
-    content: "Drop s_text_image snippet",
-    trigger: '#oe_snippets .oe_snippet:has(.s_text_image) .oe_snippet_thumbnail:not(.o_we_already_dragging)',
-    run: "drag_and_drop iframe #wrap",
-}, {
+}, () => [
+    wTourUtils.dragNDrop({
+        id: 's_test_snip',
+        name: 'Test snip',
+    }),
+    wTourUtils.dragNDrop({
+        id: 's_text_image',
+        name: 'Text - Image',
+    }),
+    {
     content: "Test t-snippet and t-snippet-call: snippets have data-snippet set",
-    trigger: '#oe_snippets .o_panel_body > .oe_snippet.ui-draggable',
+    trigger: '#oe_snippets .o_panel_body > .oe_snippet',
     run: function () {
         // Tests done here as all these are not visible on the page
-        const draggableSnippets = document.querySelectorAll('#oe_snippets .o_panel_body > .oe_snippet.ui-draggable > :nth-child(2)');
-        if (![...draggableSnippets].every(el => el.dataset.snippet)) {
-            console.error("error Some t-snippet are missing their template name");
+        const draggableSnippets = [...document.querySelectorAll('#oe_snippets .o_panel_body > .oe_snippet:not([data-module-id]) > :nth-child(2)')];
+        if (draggableSnippets.length && !draggableSnippets.every(el => el.dataset.snippet)) {
+            console.error("error Some t-snippet are missing their template name or there are no snippets to drop");
         }
         if (!document.querySelector('#oe_snippets [data-snippet="s_test_snip"] [data-snippet="s_share"]')) {
             console.error("error s_share t-called inside s_test_snip is missing template name");
@@ -57,5 +57,5 @@ wTourUtils.registerWebsitePreviewTour("snippet_version", {
     content: "s_share is outdated",
     extra_trigger: 'we-customizeblock-options:contains(Share) .snippet-option-VersionControl > we-alert',
     trigger: 'iframe body',
+    isCheck: true,
 }]);
-});

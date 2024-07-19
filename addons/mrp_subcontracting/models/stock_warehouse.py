@@ -10,19 +10,19 @@ class StockWarehouse(models.Model):
     subcontracting_to_resupply = fields.Boolean(
         'Resupply Subcontractors', default=True)
     subcontracting_mto_pull_id = fields.Many2one(
-        'stock.rule', 'Subcontracting MTO Rule')
+        'stock.rule', 'Subcontracting MTO Rule', copy=False)
     subcontracting_pull_id = fields.Many2one(
-        'stock.rule', 'Subcontracting MTS Rule'
+        'stock.rule', 'Subcontracting MTS Rule', copy=False
     )
 
-    subcontracting_route_id = fields.Many2one('stock.route', 'Resupply Subcontractor', ondelete='restrict')
+    subcontracting_route_id = fields.Many2one('stock.route', 'Resupply Subcontractor', ondelete='restrict', copy=False)
 
     subcontracting_type_id = fields.Many2one(
         'stock.picking.type', 'Subcontracting Operation Type',
-        domain=[('code', '=', 'mrp_operation')])
+        domain=[('code', '=', 'mrp_operation')], copy=False)
     subcontracting_resupply_type_id = fields.Many2one(
         'stock.picking.type', 'Subcontracting Resupply Operation Type',
-        domain=[('code', '=', 'outgoing')])
+        domain=[('code', '=', 'outgoing')], copy=False)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -86,8 +86,8 @@ class StockWarehouse(models.Model):
         })
         return routes
 
-    def _get_global_route_rules_values(self):
-        rules = super(StockWarehouse, self)._get_global_route_rules_values()
+    def _generate_global_route_rules_values(self):
+        rules = super()._generate_global_route_rules_values()
         subcontract_location_id = self._get_subcontracting_location()
         production_location_id = self._get_production_location()
         rules.update({
@@ -98,7 +98,7 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'route_id': self._find_or_create_global_route('stock.route_warehouse0_mto', _('Make To Order')).id,
+                    'route_id': self._find_or_create_global_route('stock.route_warehouse0_mto', _('Replenish on Order (MTO)')).id,
                     'name': self._format_rulename(self.lot_stock_id, subcontract_location_id, 'MTO'),
                     'location_dest_id': subcontract_location_id.id,
                     'location_src_id': self.lot_stock_id.id,
@@ -115,8 +115,7 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'route_id': self._find_or_create_global_route('mrp_subcontracting.route_resupply_subcontractor_mto',
-                                                        _('Resupply Subcontractor on Order')).id,
+                    'route_id': self._find_or_create_global_route('mrp_subcontracting.route_resupply_subcontractor_mto', _('Resupply Subcontractor on Order')).id,
                     'name': self._format_rulename(subcontract_location_id, production_location_id, False),
                     'location_dest_id': production_location_id.id,
                     'location_src_id': subcontract_location_id.id,
@@ -156,7 +155,7 @@ class StockWarehouse(models.Model):
 
     def _get_sequence_values(self, name=False, code=False):
         values = super(StockWarehouse, self)._get_sequence_values(name=name, code=code)
-        count = self.env['ir.sequence'].search_count([('prefix', 'like', self.code + '/SBC%/%')])
+        count = self.env['ir.sequence'].search_count([('prefix', '=like', self.code + '/SBC%/%')])
         values.update({
             'subcontracting_type_id': {
                 'name': self.name + ' ' + _('Sequence subcontracting'),

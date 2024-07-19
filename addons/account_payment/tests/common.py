@@ -11,9 +11,7 @@ class AccountPaymentCommon(PaymentCommon, AccountTestInvoicingCommon):
 
     @classmethod
     def setUpClass(cls, *kw):
-        # chart_template_ref is dropped on purpose because not needed for account_payment tests.
         super().setUpClass()
-
         with cls.mocked_get_payment_method_information(cls):
             cls.dummy_provider_method = cls.env['account.payment.method'].sudo().create({
                 'name': 'Dummy method',
@@ -70,25 +68,3 @@ class AccountPaymentCommon(PaymentCommon, AccountTestInvoicingCommon):
 
         with patch.object(self.env.registry['payment.provider'], '_get_default_payment_method_id', _get_default_payment_method_id):
             yield
-
-    @classmethod
-    def _prepare_provider(cls, provider_code='none', company=None, update_values=None):
-        """ Override of `payment` to prepare and return the first provider matching the given
-        provider and company.
-
-        If no provider is found in the given company, we duplicate the one from the base company.
-        All other providers belonging to the same company are disabled to avoid any interferences.
-
-        :param str provider_code: The code of the provider to prepare.
-        :param recordset company: The company of the provider to prepare, as a `res.company` record.
-        :param dict update_values: The values used to update the provider.
-        :return: The provider to prepare, if found.
-        :rtype: recordset of `payment.provider`
-        """
-        provider = super()._prepare_provider(provider_code, company, update_values)
-        if not provider.journal_id:
-            provider.journal_id = cls.env['account.journal'].search(
-                [('company_id', '=', provider.company_id.id), ('type', '=', 'bank')],
-                limit=1,
-            )
-        return provider

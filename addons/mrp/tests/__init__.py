@@ -8,6 +8,7 @@ from . import test_stock
 from . import test_stock_report
 from . import test_warehouse_multistep_manufacturing
 from . import test_procurement
+from . import test_replenish
 from . import test_unbuild
 from . import test_oee
 from . import test_traceability
@@ -15,5 +16,5 @@ from . import test_multicompany
 from . import test_backorder
 from . import test_smp
 from . import test_performance
-from . import test_consume_tracked_component
+from . import test_consume_component
 from . import test_manual_consumption

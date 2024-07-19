@@ -55,7 +55,7 @@ class EventLeadRule(models.Model):
 
     If conditions are met, leads are created with pre-filled informations defined
     on the rule (type, user_id, team_id). Contact information coming from the
-    registrations are computed (customer, name, email, phone, mobile, contact_name).
+    registrations are computed (customer, name, email, phone, contact_name).
 
     SPECIFICATIONS: OTHER POINTS
 
@@ -77,15 +77,15 @@ class EventLeadRule(models.Model):
     lead_creation_basis = fields.Selection([
         ('attendee', 'Per Attendee'), ('order', 'Per Order')],
         string='Create', default='attendee', required=True,
-        help='Per Attendee : A Lead is created for each Attendee (B2C).\n'
-             'Per Order : A single Lead is created per Ticket Batch/Sale Order (B2B)')
+        help='Per Attendee: A Lead is created for each Attendee (B2C).\n'
+             'Per Order: A single Lead is created per Ticket Batch/Sale Order (B2B)')
     lead_creation_trigger = fields.Selection([
         ('create', 'Attendees are created'),
-        ('confirm', 'Attendees are confirmed'),
+        ('confirm', 'Attendees are registered'),
         ('done', 'Attendees attended')],
         string='When', default='create', required=True,
         help='Creation: at attendee creation;\n'
-             'Confirmation: when attendee is confirmed, manually or automatically;\n'
+             'Registered: at attendee registration, manually or automatically;\n'
              'Attended: when attendance is confirmed and registration set to done;')
     # Filters
     event_type_ids = fields.Many2many(

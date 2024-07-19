@@ -3,24 +3,24 @@
 # 	* stock_landed_costs
 # 
 # Translators:
-# Kovács Tibor <kovika@gmail.com>, 2022
-# Tibor Kőnig <konig.tibor@evitalit.hu>, 2022
-# Zsolt Godó <zsolttokio@gmail.com>, 2022
-# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2022
-# Tamás Dombos, 2022
-# krnkris, 2022
-# Martin Trigaux, 2022
-# Ákos Nagy <akos.nagy@oregional.hu>, 2022
-# Tamás Németh <ntomasz81@gmail.com>, 2022
+# Kovács Tibor <kovika@gmail.com>, 2023
+# Tibor Kőnig <konig.tibor@evitalit.hu>, 2023
+# Zsolt Godó <zsolttokio@gmail.com>, 2023
+# Tamás Dombos, 2023
+# Ákos Nagy <akos.nagy@oregional.hu>, 2023
+# krnkris, 2023
+# Martin Trigaux, 2023
+# Tamás Németh <ntomasz81@gmail.com>, 2023
 # gezza <geza.nagy@oregional.hu>, 2023
+# 5768b353f27900ae76ad88cc42dfd5b8_3bb349f, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: gezza <geza.nagy@oregional.hu>, 2023\n"
+"POT-Creation-Date: 2024-01-29 10:44+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: 5768b353f27900ae76ad88cc42dfd5b8_3bb349f, 2023\n"
 "Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,6 +29,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
@@ -40,6 +41,11 @@ msgstr " már kint lévő"
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
 msgid "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgstr ""
+
+#. module: stock_landed_costs
+#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
+msgid "<span class=\"o_stat_text\">Valuation</span>"
 msgstr ""
 
 #. module: stock_landed_costs
@@ -56,7 +62,7 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__account_id
 msgid "Account"
-msgstr "Számla"
+msgstr "Főkönyvi számla"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__account_journal_id
@@ -66,7 +72,7 @@ msgstr "Napló"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_needaction
 msgid "Action Needed"
-msgstr "Művelet szükséges"
+msgstr "Akció szükséges"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_ids
@@ -135,12 +141,12 @@ msgstr "Súly szerint"
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
 msgid "Cancel"
-msgstr "Mégse"
+msgstr "Töröl"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost__state__cancel
 msgid "Cancelled"
-msgstr "Törölve"
+msgstr "Visszavonva"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_res_company
@@ -151,11 +157,6 @@ msgstr "Vállalatok"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__company_id
 msgid "Company"
 msgstr "Vállalat"
-
-#. module: stock_landed_costs
-#: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__company_id
-msgid "Company related to this journal"
-msgstr "Ehhez a naplóhoz kapcsolt vállalat"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
@@ -184,6 +185,7 @@ msgid "Cost Lines"
 msgstr "Költség tételsorok"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -265,7 +267,7 @@ msgstr "Megjelenített név"
 #: model:mail.message.subtype,name:stock_landed_costs.mt_stock_landed_cost_open
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Done"
-msgstr "Kész"
+msgstr "Befejezve"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost__state__draft
@@ -282,17 +284,12 @@ msgstr "Egyenlő"
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost_lines__split_method
 msgid ""
-"Equal : Cost will be equally divided.\n"
-"By Quantity : Cost will be divided according to product's quantity.\n"
-"By Current cost : Cost will be divided according to product's current cost.\n"
-"By Weight : Cost will be divided depending on its weight.\n"
-"By Volume : Cost will be divided depending on its volume."
+"Equal: Cost will be equally divided.\n"
+"By Quantity: Cost will be divided according to product's quantity.\n"
+"By Current cost: Cost will be divided according to product's current cost.\n"
+"By Weight: Cost will be divided depending on its weight.\n"
+"By Volume: Cost will be divided depending on its volume."
 msgstr ""
-"Egyenlő : Költségeket egyenlő részekre osztja.\n"
-"Mennyiségenként : Költségeket a termékek mennyisége szerint osztja el.\n"
-"Jelenlegi költségenként : Költségeket a termékek jelenlegi költségeiknek megfelelően osztja el.\n"
-"Súlyonként : Költségeket a súlyok szerint osztja el.\n"
-"Térfogatonként : Költségeket a térfogatok szerint osztja el."
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_follower_ids
@@ -396,7 +393,7 @@ msgstr "Könyvelési tétel"
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_account_move_line
 msgid "Journal Item"
-msgstr "Könyvelési tételsor"
+msgstr "Napló tétel"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__cost_id
@@ -433,11 +430,11 @@ msgid "Landed cost validated"
 msgstr "Jóváhagyott összes költség"
 
 #. module: stock_landed_costs
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost____last_update
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines____last_update
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines____last_update
-msgid "Last Modified on"
-msgstr "Legutóbb frissítve"
+#: model_terms:ir.actions.act_window,help:stock_landed_costs.action_stock_landed_cost
+msgid ""
+"Landed costs allow you to include additional costs (shipment, insurance, "
+"customs duties, etc) into the cost of the product."
+msgstr ""
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_uid
@@ -451,7 +448,7 @@ msgstr "Frissítette"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__write_date
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__write_date
 msgid "Last Updated on"
-msgstr "Frissítve ekkor"
+msgstr "Frissítve"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -462,11 +459,6 @@ msgstr "Késő tevékenységek"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_res_company__lc_journal_id
 msgid "Lc Journal"
 msgstr ""
-
-#. module: stock_landed_costs
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Fő melléklet"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_has_error
@@ -490,6 +482,7 @@ msgid "Name"
 msgstr "Név"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
@@ -515,7 +508,7 @@ msgstr "Következő tevékenység határideje"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_summary
 msgid "Next Activity Summary"
-msgstr "Következő tevékenység összegzés"
+msgstr "Következő tevékenység összegzése"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_type_id
@@ -525,7 +518,7 @@ msgstr "Következő tevékenység típusa"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Műveletek száma"
+msgstr "Akciók száma"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_has_error_counter
@@ -543,6 +536,7 @@ msgid "Number of messages with delivery error"
 msgstr "Kézbesítési hibával rendelkező üzenetek száma"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Only draft landed costs can be validated"
@@ -559,6 +553,7 @@ msgid "Picking"
 msgstr "Kigyűjtés"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Please configure Stock Expense Account for product: %s."
@@ -566,6 +561,7 @@ msgstr ""
 "Kérem állítson be Készlet költség könyvelési számlát ehhez a termékhez: %s."
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Please define %s on which those additional costs should apply."
@@ -599,6 +595,11 @@ msgid "Quantity"
 msgstr "Mennyiség"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__rating_ids
+msgid "Ratings"
+msgstr "Értékelések"
+
+#. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_user_id
 msgid "Responsible User"
 msgstr "Felelős felhasználó"
@@ -612,8 +613,8 @@ msgstr "SMS kézbesítési hiba"
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Az összes olyan rekord megjelenítése, melynél a következő művelet dátuma a "
-"mai nap előtti"
+"Az összes olyan rekord megjelenítése, melynél a következő akció dátuma a mai"
+" nap előtti"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__split_method
@@ -623,12 +624,12 @@ msgstr "Szétválasztási mód"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__state
 msgid "State"
-msgstr "Állam"
+msgstr "Állapot"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Status"
-msgstr "Állapot"
+msgstr "Státusz"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__activity_state
@@ -678,7 +679,7 @@ msgstr "Összesen"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__picking_ids
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost__target_model__picking
 msgid "Transfers"
-msgstr "Transzferek"
+msgstr "Átmozgatások"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__activity_exception_decoration
@@ -691,6 +692,7 @@ msgid "Validate"
 msgstr "Jóváhagyás"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -699,11 +701,6 @@ msgid ""
 msgstr ""
 "Jóváhagyott teljes költségek visszavonhatóak, de létrehozhat negatív teljes "
 "költségeket is a költségek visszaszolgáltatásához"
-
-#. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
-msgid "Valuation"
-msgstr "Értékelés"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_stock_valuation_adjustment_lines
@@ -729,19 +726,20 @@ msgstr "Térfogat"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__website_message_ids
 msgid "Website Messages"
-msgstr "Honlap üzenetek"
+msgstr "Weboldal üzenetek"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__website_message_ids
 msgid "Website communication history"
-msgstr "Weboldali kommunikációs előzmények"
+msgstr "Weboldal kommunikációs előzmények"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__weight
 msgid "Weight"
-msgstr "Tömeg"
+msgstr "Súly"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -750,6 +748,7 @@ msgid ""
 msgstr ""
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 #, python-format
 msgid ""

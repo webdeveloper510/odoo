@@ -2,18 +2,42 @@
 
 import { registry } from "./registry";
 import { session } from "@web/session";
+import { Cache } from "./utils/cache";
 
 export const userService = {
     dependencies: ["rpc"],
     async: ["hasGroup"],
     start(env, { rpc }) {
-        const groupProms = {};
+        const groupCache = new Cache((group) => {
+            if (!context.uid) {
+                return Promise.resolve(false);
+            }
+            return rpc("/web/dataset/call_kw/res.users/has_group", {
+                model: "res.users",
+                method: "has_group",
+                args: [group],
+                kwargs: { context },
+            });
+        });
+        groupCache.cache["base.group_user"] = session.is_internal_user;
+        groupCache.cache["base.group_system"] = session.is_system;
+        const accessRightCache = new Cache((model, operation) => {
+            const url = `/web/dataset/call_kw/${model}/check_access_rights`;
+            return rpc(url, {
+                model,
+                method: "check_access_rights",
+                args: [operation, false],
+                kwargs: { context },
+            });
+        });
 
         const context = {
             ...session.user_context,
             // the user id is in uid in backend session_info and in user_id in frontend session_info
             uid: session.uid || session.user_id,
         };
+        let settings = session.user_settings;
+        delete session.user_settings;
         return {
             get context() {
                 return Object.assign({}, context);
@@ -25,18 +49,26 @@ export const userService = {
                 Object.assign(context, update);
             },
             hasGroup(group) {
-                if (!context.uid) {
-                    return Promise.resolve(false);
-                }
-                if (!groupProms[group]) {
-                    groupProms[group] = rpc("/web/dataset/call_kw/res.users/has_group", {
-                        model: "res.users",
-                        method: "has_group",
-                        args: [group],
-                        kwargs: { context },
-                    });
-                }
-                return groupProms[group];
+                return groupCache.read(group);
+            },
+            async checkAccessRight(model, operation) {
+                return accessRightCache.read(model, operation);
+            },
+            get settings() {
+                return settings;
+            },
+            async setUserSettings(key, value) {
+                const changedSettings = await env.services.orm.call(
+                    "res.users.settings",
+                    "set_res_users_settings",
+                    [[this.settings.id]],
+                    {
+                        new_settings: {
+                            [key]: value,
+                        },
+                    }
+                );
+                Object.assign(settings, changedSettings);
             },
             name: session.name,
             userName: session.username,

@@ -9,21 +9,23 @@ from unittest.mock import patch
 from unittest.mock import DEFAULT
 
 import pytz
+import random
 
 from odoo import fields, exceptions, tests
-from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.addons.test_mail.tests.common import TestMailCommon
+from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
 from odoo.addons.test_mail.models.test_mail_models import MailTestActivity
 from odoo.tools import mute_logger
-from odoo.tests.common import Form, users
+from odoo.tests.common import Form, users, HttpCase, tagged
 
 
-class TestActivityCommon(TestMailCommon):
+class TestActivityCommon(MailCommon):
 
     @classmethod
     def setUpClass(cls):
         super(TestActivityCommon, cls).setUpClass()
-        cls.test_record = cls.env['mail.test.activity'].with_context(cls._test_context).create({'name': 'Test'})
+        cls.test_record, cls.test_record_2 = cls.env['mail.test.activity'].with_context(cls._test_context).create([
+            {'name': 'Test'}, {'name': 'Test_2'},
+        ])
         # reset ctx
         cls._reset_mail_context(cls.test_record)
 
@@ -82,13 +84,13 @@ class TestActivityRights(TestActivityCommon):
 
         # can _search activities if access to the document
         self.env['mail.activity'].with_user(self.user_employee)._search(
-            [('id', '=', test_activity.id)], count=False)
+            [('id', '=', test_activity.id)])
 
         # cannot _search activities if no access to the document
         with patch.object(MailTestActivity, 'check_access_rights', autospec=True, side_effect=_employee_crash):
             with self.assertRaises(exceptions.AccessError):
                 searched_activity = self.env['mail.activity'].with_user(self.user_employee)._search(
-                    [('id', '=', test_activity.id)], count=False)
+                    [('id', '=', test_activity.id)])
 
         # can read_group activities if access to the document
         read_group_result = self.env['mail.activity'].with_user(self.user_employee).read_group(
@@ -122,15 +124,14 @@ class TestActivityRights(TestActivityCommon):
                     [('id', '=', test_activity.id)],
                     ['summary'])
 
-        # cannot create activities for people that cannot access record
+        # can create activities for people that cannot access record
         with patch.object(MailTestActivity, 'check_access_rights', autospec=True, side_effect=_employee_crash):
-            with self.assertRaises(exceptions.UserError):
-                activity = self.env['mail.activity'].create({
-                    'activity_type_id': self.env.ref('test_mail.mail_act_test_todo').id,
-                    'res_model_id': self.env.ref('test_mail.model_mail_test_activity').id,
-                    'res_id': self.test_record.id,
-                    'user_id': self.user_employee.id,
-                })
+            self.env['mail.activity'].create({
+                'activity_type_id': self.env.ref('test_mail.mail_act_test_todo').id,
+                'res_model_id': self.env.ref('test_mail.model_mail_test_activity').id,
+                'res_id': self.test_record.id,
+                'user_id': self.user_employee.id,
+            })
 
         # cannot create activities if no access to the document
         with patch.object(MailTestActivity, 'check_access_rights', autospec=True, side_effect=_employee_crash):
@@ -138,6 +139,26 @@ class TestActivityRights(TestActivityCommon):
                 activity = self.test_record.with_user(self.user_employee).activity_schedule(
                     'test_mail.mail_act_test_todo',
                     user_id=self.user_admin.id)
+
+        test_activity.user_id = self.user_employee
+        test_activity.flush_recordset()
+
+        # user can read activities assigned to him even if he has no access to the document
+        with patch.object(MailTestActivity, 'check_access_rights', autospec=True, side_effect=_employee_crash):
+            found = self.env['mail.activity'].with_user(self.user_employee).search(
+                [('id', '=', test_activity.id)])
+            self.assertEqual(found, test_activity)
+            found.read(['summary'])
+
+        # user can read_group activities assigned to him even if he has no access to the document
+        with patch.object(MailTestActivity, 'check_access_rights', autospec=True, side_effect=_employee_crash):
+            read_group_result = self.env['mail.activity'].with_user(self.user_employee).read_group(
+                [('id', '=', test_activity.id)],
+                ['summary'],
+                ['summary'],
+            )
+            self.assertEqual(1, read_group_result[0]['summary_count'])
+            self.assertEqual('Summary', read_group_result[0]['summary'])
 
 
 @tests.tagged('mail_activity')
@@ -341,6 +362,7 @@ class TestActivityMixin(TestActivityCommon):
                 user_id=self.user_admin.id,
                 feedback='Test feedback',)
             self.assertEqual(self.test_record.activity_ids, act2 | act3)
+            self.assertFalse(act1.exists())
 
             # Reschedule all activities, should update the record state
             self.assertEqual(self.test_record.activity_state, 'overdue')
@@ -354,6 +376,7 @@ class TestActivityMixin(TestActivityCommon):
             self.test_record.activity_feedback(
                 ['test_mail.mail_act_test_todo'],
                 feedback='Test feedback')
+            self.assertFalse(act3.exists())
 
             # Setting activities as done should delete them and post messages
             self.assertEqual(self.test_record.activity_ids, act2)
@@ -366,6 +389,8 @@ class TestActivityMixin(TestActivityCommon):
             # Canceling activities should simply remove them
             self.assertEqual(self.test_record.activity_ids, self.env['mail.activity'])
             self.assertEqual(len(self.test_record.message_ids), 2)
+            self.assertFalse(self.test_record.activity_state)
+            self.assertFalse(act2.exists())
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_activity_mixin_archive(self):
@@ -380,6 +405,29 @@ class TestActivityMixin(TestActivityCommon):
         rec.toggle_active()
         self.assertEqual(rec.active, True)
         self.assertEqual(rec.activity_ids, self.env['mail.activity'])
+
+    @mute_logger('odoo.addons.mail.models.mail_mail')
+    def test_activity_mixin_archive_user(self):
+        """
+        Test when archiving an user, we unlink all his related activities
+        """
+        test_users = self.env['res.users']
+        for i in range(5):
+            test_users += mail_new_test_user(self.env, name=f'test_user_{i}', login=f'test_password_{i}')
+        for user in test_users:
+            self.test_record.activity_schedule(user_id=user.id)
+        archived_users = self.env['res.users'].browse(map(lambda x: x.id, random.sample(test_users, 2)))  # pick 2 users to archive
+        archived_users.action_archive()
+        active_users = test_users - archived_users
+
+        activities = self.env['mail.activity'].search([('user_id', 'in', archived_users.ids)])
+        self.assertFalse(activities, "Activities of archived users should be deleted.")
+
+        # activities of active users shouldn't be touched, each has exactly 1 activity present
+        activities = self.env['mail.activity'].search([('user_id', 'in', active_users.ids)])
+        self.assertEqual(len(activities), 3, "We should have only 3 activities in total linked to our active users")
+        self.assertEqual(activities.mapped('user_id'), active_users,
+                         "We should have 3 different users linked to the activities of the active users")
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_activity_mixin_reschedule_user(self):
@@ -552,12 +600,14 @@ class TestActivityMixin(TestActivityCommon):
         ])
 
         origin_1, origin_2 = self.env['mail.test.activity'].search([], limit=2)
+        activity_type = self.env.ref('test_mail.mail_act_test_todo')
+        activity_type.sudo().keep_done = True
 
         with patch('odoo.addons.mail.models.mail_activity.datetime', MockedDatetime), \
             patch('odoo.addons.mail.models.mail_activity_mixin.datetime', MockedDatetime):
             origin_1_activity_1 = self.env['mail.activity'].create({
                 'summary': 'Test',
-                'activity_type_id': 1,
+                'activity_type_id': activity_type.id,
                 'res_model_id': self.env.ref('test_mail.model_mail_test_activity').id,
                 'res_id': origin_1.id,
                 'date_deadline': today_utc,
@@ -575,7 +625,7 @@ class TestActivityMixin(TestActivityCommon):
 
             origin_2_activity_1 = self.env['mail.activity'].create({
                 'summary': 'Test',
-                'activity_type_id': 1,
+                'activity_type_id': activity_type.id,
                 'res_model_id': self.env.ref('test_mail.model_mail_test_activity').id,
                 'res_id': origin_2.id,
                 'date_deadline': today_utc + relativedelta(hours=8),
@@ -625,6 +675,22 @@ class TestActivityMixin(TestActivityCommon):
             result = self.env['mail.test.activity'].search([('activity_state', 'in', ('today', False))])
             self.assertTrue(len(result) > 0)
             self.assertEqual(result, all_activity_mixin_record.filtered(lambda p: p.activity_state in ('today', False)))
+
+            # Check that activity done are not taken into account by group and search by activity_state.
+            Model = self.env['mail.test.activity']
+            search_params = {
+                'domain': [('id', 'in', (origin_1 | origin_2).ids), ('activity_state', '=', 'overdue')]}
+            read_group_params = {'domain': [('id', 'in', (origin_1 | origin_2).ids)], 'fields': ['id:array_agg'],
+                                 'groupby': ['activity_state']}
+            self.assertEqual(Model.search(**search_params), origin_1)
+            self.assertEqual(
+                {(e['activity_state'], e['activity_state_count']) for e in Model.read_group(**read_group_params)},
+                {('today', 1), ('overdue', 1)})
+            origin_1_activity_2.action_feedback(feedback='Done')
+            self.assertFalse(Model.search(**search_params))
+            self.assertEqual(
+                {(e['activity_state'], e['activity_state_count']) for e in Model.read_group(**read_group_params)},
+                {('today', 2)})
 
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.tests')
     def test_mail_activity_mixin_search_state_different_day_but_close_time(self):
@@ -695,6 +761,181 @@ class TestActivityMixin(TestActivityCommon):
 
 
 @tests.tagged('mail_activity')
+class TestActivitySystray(TestActivityCommon):
+    """Test for systray_get_activities"""
+
+    def test_systray_activities_for_archived_records(self):
+        """Check that activities made on archived records are shown in the
+        systray activities. """
+        test_record = self.test_record.with_user(self.user_employee)
+        test_record.action_archive()
+        test_record.activity_schedule(
+            'test_mail.mail_act_test_todo',
+            user_id=self.env.user.id,
+        )
+
+        total_count = sum(
+            record['total_count'] for record in self.env.user.systray_get_activities()
+            if record.get('model') == test_record._name
+        )
+        self.assertEqual(total_count, 1)
+
+
+@tests.tagged('mail_activity')
+class TestActivityViewHelpers(TestActivityCommon):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.type_todo = cls.env.ref('test_mail.mail_act_test_todo')
+        cls.type_call = cls.env.ref('test_mail.mail_act_test_call')
+        cls.type_upload = cls.env.ref('test_mail.mail_act_test_upload_document')
+        cls.user_employee_2 = mail_new_test_user(
+            cls.env,
+            name='Employee2',
+            login='employee2',
+        )
+        cls.attachment_1, cls.attachment_2 = cls.env['ir.attachment'].create([{
+            'name': f"Uploaded doc_{idx + 1}",
+            'raw': b'bar',
+            'res_model': cls.test_record_2._name,
+            'res_id': cls.test_record_2.id,
+        } for idx in range(2)])
+        cls.upload_type = cls.env.ref('test_mail.mail_act_test_upload_document')
+        cls.upload_type.sudo().keep_done = True
+        cls.user_employee.tz = cls.user_admin.tz
+
+    @freeze_time("2023-10-18 06:00:00")
+    def test_get_activity_data(self):
+        get_activity_data = self.env['mail.activity'].get_activity_data
+        with self.with_user('employee'):
+            # Setup activities: 3 for the first record, 2 "done" and 2 ongoing for the second
+            test_record, test_record_2 = self.env['mail.test.activity'].browse(
+                (self.test_record + self.test_record_2).ids
+            )
+            now_utc = datetime.now(pytz.UTC)
+            now_user = now_utc.astimezone(pytz.timezone(self.env.user.tz or 'UTC'))
+            today_user = now_user.date()
+
+            for days, user_id in ((-1, self.user_employee_2), (0, self.user_employee), (1, self.user_admin)):
+                test_record.activity_schedule(
+                    'test_mail.mail_act_test_upload_document',
+                    today_user + relativedelta(days=days),
+                    user_id=user_id.id)
+            for days, user_id in ((-2, self.user_admin), (0, self.user_employee), (2, self.user_employee_2),
+                                  (3, self.user_admin)):
+                test_record_2.activity_schedule(
+                    'test_mail.mail_act_test_upload_document',
+                    today_user + relativedelta(days=days),
+                    user_id=user_id.id)
+            record_activities = test_record.activity_ids
+            record_2_activities = test_record_2.activity_ids
+            record_2_activities[0].action_feedback(feedback='Done', attachment_ids=self.attachment_1.ids)
+            record_2_activities[1].action_feedback(feedback='Done', attachment_ids=self.attachment_2.ids)
+
+            # Check get activity data
+            activity_data = get_activity_data('mail.test.activity', None, fetch_done=True)
+            self.assertEqual(activity_data['activity_res_ids'], [test_record.id, test_record_2.id])
+            self.assertDictEqual(
+                next((t for t in activity_data['activity_types'] if t['id'] == self.upload_type.id), {}),
+                {
+                    'id': self.upload_type.id,
+                    'name': 'Upload Document',
+                    'template_ids': [],
+                    'keep_done': True,
+                })
+
+            grouped = activity_data['grouped_activities'][test_record.id][self.upload_type.id]
+            grouped['ids'] = set(grouped['ids'])  # ids order doesn't matter
+            self.assertDictEqual(grouped, {
+                'state': 'overdue',
+                'count_by_state': {'overdue': 1, 'planned': 1, 'today': 1},
+                'ids': set(record_activities.ids),
+                'reporting_date': record_activities[0].date_deadline,
+                'user_assigned_ids': record_activities.user_id.ids,
+            })
+
+            grouped = activity_data['grouped_activities'][test_record_2.id][self.upload_type.id]
+            grouped['ids'] = set(grouped['ids'])
+            self.assertDictEqual(grouped, {
+                'state': 'planned',
+                'count_by_state': {'done': 2, 'planned': 2},
+                'ids': set(record_2_activities.ids),
+                'reporting_date': record_2_activities[2].date_deadline,
+                'user_assigned_ids': record_2_activities[2:].user_id.ids,
+                'attachments_info': {
+                    'count': 2, 'most_recent_id': self.attachment_2.id, 'most_recent_name': 'Uploaded doc_2'}
+            })
+
+            # Mark all first record activities as "done" and check activity data
+            record_activities.action_feedback(feedback='Done', attachment_ids=self.attachment_1.ids)
+            self.assertEqual(record_activities[2].date_done, date.today())  # Thanks to freeze_time
+            activity_data = get_activity_data('mail.test.activity', None, fetch_done=True)
+            grouped = activity_data['grouped_activities'][test_record.id][self.upload_type.id]
+            grouped['ids'] = set(grouped['ids'])
+            self.assertDictEqual(grouped, {
+                'state': 'done',
+                'count_by_state': {'done': 3},
+                'ids': set(record_activities.ids),
+                'reporting_date': record_activities[2].date_done,
+                'user_assigned_ids': [],
+                'attachments_info': {
+                    'count': 1,  # 1 instead of 3 because all attachments are the same one
+                    'most_recent_id': self.attachment_1.id,
+                    'most_recent_name': self.attachment_1.name,
+                }
+            })
+            self.assertEqual(activity_data['activity_res_ids'], [test_record_2.id, test_record.id])
+
+            # Check filters (domain, pagination and fetch_done)
+            self.assertEqual(
+                get_activity_data('mail.test.activity', domain=[('id', 'in', test_record.ids)],
+                                  fetch_done=True)['activity_res_ids'],
+                [test_record.id])
+            self.assertEqual(get_activity_data('mail.test.activity', None, fetch_done=False)['activity_res_ids'],
+                             [test_record_2.id])
+            # Note that the records are ordered by ids not by deadline (so we get the "wrong" order)
+            self.assertEqual(
+                get_activity_data('mail.test.activity', None, offset=1, fetch_done=True)['activity_res_ids'],
+                [test_record_2.id])
+            self.assertEqual(
+                get_activity_data('mail.test.activity', None, limit=1, fetch_done=True)['activity_res_ids'],
+                [test_record.id])
+
+            # Unset keep done and check activity data: record with only "done" activities must not be returned
+            self.upload_type.sudo().keep_done = False
+            activity_data = get_activity_data('mail.test.activity', None, fetch_done=True)
+            self.assertDictEqual(
+                next((t for t in activity_data['activity_types'] if t['id'] == self.upload_type.id), {}),
+                {
+                    'id': self.upload_type.id,
+                    'name': 'Upload Document',
+                    'template_ids': [],
+                    'keep_done': False,
+                })
+            self.assertEqual(activity_data['activity_res_ids'], [test_record_2.id])
+
+            # Unarchiving activities should restore the activity
+            record_activities.action_unarchive()
+            self.assertFalse(any(act.date_done for act in record_activities))
+            self.assertTrue(all(act.date_deadline for act in record_activities))
+            self.upload_type.sudo().keep_done = True
+            activity_data = get_activity_data('mail.test.activity', None, fetch_done=True)
+            grouped = activity_data['grouped_activities'][test_record.id][self.upload_type.id]
+            self.assertEqual(grouped['state'], 'overdue')
+            self.assertEqual(grouped['count_by_state'], {'overdue': 1, 'planned': 1, 'today': 1})
+            self.assertEqual(grouped['reporting_date'], record_activities[0].date_deadline)
+            self.assertEqual(activity_data['activity_res_ids'], [test_record.id, test_record_2.id])
+            grouped['ids'] = set(grouped['ids'])
+            self.assertDictEqual(grouped, {
+                'state': 'overdue',
+                'count_by_state': {'overdue': 1, 'planned': 1, 'today': 1},
+                'ids': set(record_activities.ids),
+                'reporting_date': record_activities[0].date_deadline,
+                'user_assigned_ids': record_activities.user_id.ids,
+            })
+
+
+@tests.tagged('mail_activity')
 class TestORM(TestActivityCommon):
     """Test for read_progress_bar"""
 
@@ -760,3 +1001,64 @@ class TestORM(TestActivityCommon):
         self.assertEqual(groups[0][groupby], pg_groups["overdue"])
         self.assertEqual(groups[1][groupby], pg_groups["today"])
         self.assertEqual(groups[2][groupby], pg_groups["planned"])
+
+
+@tagged('post_install', '-at_install')
+class TestTours(HttpCase):
+    def test_activity_view_data_with_offset(self):
+        self.patch(MailTestActivity, '_order', 'date desc, id desc')
+        MailTestActivityModel = self.env['mail.test.activity']
+        MailTestActivityCtx = MailTestActivityModel.with_context({"lang": "en_US"})
+        MailTestActivityModel.create({
+            'date': '2021-05-02',
+            'name': "Task 1",
+        }).activity_schedule(
+            'test_mail.mail_act_test_todo',
+            summary="Activity 1",
+            date_deadline=fields.Date.context_today(MailTestActivityCtx) - timedelta(days=7),
+        )
+        MailTestActivityModel.create({
+            'date': '2021-05-16',
+            'name': "Task 1 without activity",
+        })
+        MailTestActivityModel.create({
+            'date': '2021-05-09',
+            'name': "Task 2",
+        }).activity_schedule(
+            'test_mail.mail_act_test_todo',
+            summary="Activity 2",
+            date_deadline=fields.Date.context_today(MailTestActivityCtx),
+        )
+        MailTestActivityModel.create({
+            'date': '2021-05-16',
+            'name': "Task 3",
+        }).activity_schedule(
+            'test_mail.mail_act_test_todo',
+            summary="Activity 3",
+            date_deadline=fields.Date.context_today(MailTestActivityCtx) + timedelta(days=7),
+        )
+        MailTestActivityModel.create({
+            'date': '2021-05-16',
+            'name': "Task 2 without activity",
+        })
+
+        self.env["ir.ui.view"].create({
+            "name": "Test Activity View",
+            "model": "mail.test.activity",
+            "type": 'activity',
+            "arch": """
+                <activity string="OrderedMailTestActivity">
+                    <templates>
+                        <div t-name="activity-box">
+                            <field name="name"/>
+                        </div>
+                    </templates>
+                </activity>
+            """,
+        })
+        self.start_tour(
+            "/web?debug=1",
+            "mail_activity_view",
+            login="admin",
+            timeout=600000
+        )

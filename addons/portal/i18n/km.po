@@ -1,24 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* portal
-# 
+# * portal
+#
 # Translators:
-# Chan Nath <channath@gmail.com>, 2023
-# Sengtha Chay <sengtha@gmail.com>, 2023
-# Lux Sok <sok.lux@gmail.com>, 2023
-# 
+# Sengtha Chay <sengtha@gmail.com>, 2018
+# Chan Nath <channath@gmail.com>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2023\n"
-"Language-Team: Khmer (https://app.transifex.com/odoo/teams/41243/km/)\n"
+"POT-Creation-Date: 2023-05-16 13:50+0000\n"
+"PO-Revision-Date: 2018-09-21 13:18+0000\n"
+"Last-Translator: Chan Nath <channath@gmail.com>, 2018\n"
+"Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
+"Language: km\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: km\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: portal
@@ -30,7 +28,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_sidebar.js:0
 #, python-format
-msgid "%1d days overdue"
+msgid "%s days overdue"
 msgstr ""
 
 #. module: portal
@@ -44,25 +42,6 @@ msgid ""
 "2. Confirm you want to delete your account by\n"
 "                                        copying down your login ("
 msgstr ""
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
-msgid "<i class=\"fa fa-arrow-right me-1\"/>Back to edit mode"
-msgstr ""
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.record_pager
-msgid ""
-"<i class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
-msgstr ""
-"<i class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.record_pager
-msgid "<i class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
-msgstr "<i class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
@@ -87,7 +66,22 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_layout
 msgid "<i class=\"fa fa-pencil\"/> Edit"
-msgstr "<i class=\"fa fa-pencil\"/>កែសម្រួល"
+msgstr ""
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
+msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
+msgstr ""
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.record_pager
+msgid "<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" title=\"Previous\"/>"
+msgstr ""
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.record_pager
+msgid "<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -106,22 +100,7 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid ""
-"<small class=\"form-text text-muted\">Changing company name or VAT number is"
-" not allowed once document(s) have been issued for your account. <br/>Please"
-" contact us directly for this operation.</small>"
-msgstr ""
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.pager
-msgid ""
-"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
-msgstr ""
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.pager
-msgid "<span class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgid "<small class=\"form-text text-muted\">Changing company name or VAT number is not allowed once document(s) have been issued for your account. <br/>Please contact us directly for this operation.</small>"
 msgstr ""
 
 #. module: portal
@@ -142,7 +121,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_template
 msgid "<strong>Open </strong>"
-msgstr "<strong>បើក </strong>"
+msgstr ""
 
 #. module: portal
 #: model:mail.template,body_html:portal.mail_template_data_portal_welcome
@@ -157,7 +136,7 @@ msgid ""
 "                <tr><td valign=\"middle\">\n"
 "                    <span style=\"font-size: 10px;\">Your Account</span><br>\n"
 "                    <span style=\"font-size: 20px; font-weight: bold;\" t-out=\"object.user_id.name or ''\">Marc Demo</span>\n"
-"                </td><td valign=\"middle\" align=\"right\">\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not object.user_id.company_id.uses_default_logo\">\n"
 "                    <img t-attf-src=\"/logo.png?company={{ object.user_id.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"object.user_id.company_id.name\">\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
@@ -241,13 +220,13 @@ msgstr ""
 #: code:addons/portal/static/src/js/portal_signature.js:0
 #, python-format
 msgid "Accept & Sign"
-msgstr "ព្រមទទួលនិងចុះហត្ថលេខា"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_mixin__access_warning
 #: model:ir.model.fields,field_description:portal.field_portal_share__access_warning
 msgid "Access warning"
-msgstr "ដំណើររការនៃការពិន័យ"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_layout
@@ -264,7 +243,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_wizard
 msgid "Add a note"
-msgstr "បន្ថែមចំណាំ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -276,12 +255,12 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_wizard
 msgid "Add contacts to share the document..."
-msgstr "បន្ថែមទំនាក់ទំនងដើម្បីចែករំលែកឯកសារ ..."
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,help:portal.field_portal_share__note
 msgid "Add extra content to display in the email"
-msgstr "បន្ថែមមាតិកាបន្ថែមដើម្បីបង្ហាញនៅក្នុងអ៊ីម៉ែល។"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -294,6 +273,13 @@ msgid "Already Registered"
 msgstr ""
 
 #. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/mail.py:0
+#, python-format
+msgid "An access token must be provided for each attachment."
+msgstr ""
+
+#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Are you sure you want to do this?"
 msgstr ""
@@ -303,7 +289,7 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Avatar"
-msgstr "រូបតំណាង"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -317,28 +303,20 @@ msgstr "លុបចោល"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Change Password"
-msgstr "ប្ដូរពាក្យសំងាត់"
+msgstr ""
 
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
 #, python-format
-msgid ""
-"Changing VAT number is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
+msgid "Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
 msgstr ""
-"ការផ្លាស់ប្តូរលេខពន្ធមិនត្រូវបានអនុញ្ញាតនៅពេលឯកសារ()ត្រូវបានចេញសម្រាប់គណនីរបស់អ្នក។"
-" សូមទាក់ទងមកយើងដោយផ្ទាល់សម្រាប់ប្រតិបត្តិការនេះ។"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
-msgid ""
-"Changing company name is not allowed once document(s) have been issued for "
-"your account. Please contact us directly for this operation."
+msgid "Changing company name is not allowed once document(s) have been issued for your account. Please contact us directly for this operation."
 msgstr ""
-"ការផ្លាស់ប្តូរឈ្មោះក្រុមហ៊ុនមិនត្រូវបានអនុញ្ញាតទេនៅពេលឯកសារ()ត្រូវបានចេញសម្រាប់គណនីរបស់អ្នក។"
-" សូមទាក់ទងមកយើងដោយផ្ទាល់សម្រាប់ប្រតិបត្តិការនេះ។"
 
 #. module: portal
 #. odoo-javascript
@@ -357,7 +335,7 @@ msgstr "ក្រុង"
 #: code:addons/portal/static/src/xml/portal_signature.xml:0
 #, python-format
 msgid "Click here to see your document."
-msgstr "ចុចត្រង់នេះដើម្បីមើលឯកសាររបស់អ្នក"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -376,14 +354,14 @@ msgstr "ឈ្មោះក្រុមហ៊ុន"
 #. module: portal
 #: model:ir.model,name:portal.model_res_config_settings
 msgid "Config Settings"
-msgstr "កំណត់រចនាសម្ព័ន្ធ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal.js:0
 #, python-format
 msgid "Confirm"
-msgstr "បញ្ជាក់"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
@@ -391,15 +369,13 @@ msgid ""
 "Confirm\n"
 "                                <span class=\"fa fa-long-arrow-right\"/>"
 msgstr ""
-"បញ្ជាក់\n"
-"                                <span class=\"fa fa-long-arrow-right\"/>"
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal.js:0
 #, python-format
 msgid "Confirm Password"
-msgstr "បញ្ជាក់លេខសំងាត់"
+msgstr ""
 
 #. module: portal
 #: model:ir.model,name:portal.model_res_partner
@@ -447,18 +423,14 @@ msgstr "បង្កើតនៅ"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
-msgid ""
-"Currently available to everyone viewing this document, click to restrict to "
-"internal employees."
+msgid "Currently available to everyone viewing this document, click to restrict to internal employees."
 msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
-msgid ""
-"Currently restricted to internal employees, click to make it available to "
-"everyone viewing this document."
+msgid "Currently restricted to internal employees, click to make it available to everyone viewing this document."
 msgstr ""
 
 #. module: portal
@@ -472,16 +444,21 @@ msgid "Customer Portal URL"
 msgstr "អាសយដ្ឋានវិបផតថលរបស់អតិថិជន"
 
 #. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.res_config_settings_view_form
+msgid "Customers can generate API Keys"
+msgstr ""
+
+#. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_template
 msgid "Dear"
-msgstr "ជូនចំពោះ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Delete"
-msgstr "លុប"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -491,13 +468,13 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Description"
-msgstr "ការពិពណ៌​នា​"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
 #: model_terms:ir.ui.view,arch_db:portal.portal_layout
 msgid "Details"
-msgstr "ពិស្តារ"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -519,7 +496,7 @@ msgstr ""
 #: code:addons/portal/static/src/js/portal.js:0
 #, python-format
 msgid "Discard"
-msgstr "បោះបង់"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__display_name
@@ -531,13 +508,13 @@ msgstr "ឈ្មោះសំរាប់បង្ហាញ"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_home
 msgid "Documents"
-msgstr "ឯកសារ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_sidebar.js:0
 #, python-format
-msgid "Due in %1d days"
+msgid "Due in %s days"
 msgstr ""
 
 #. module: portal
@@ -545,7 +522,7 @@ msgstr ""
 #: code:addons/portal/static/src/js/portal_sidebar.js:0
 #, python-format
 msgid "Due today"
-msgstr "ដល់ថ្ងៃនេះ"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__email
@@ -561,7 +538,7 @@ msgstr ""
 #. module: portal
 #: model:ir.model,name:portal.model_mail_thread
 msgid "Email Thread"
-msgstr "អ៊ីម៉ែលខ្សែស្រឡាយ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -592,7 +569,7 @@ msgstr ""
 #. module: portal
 #: model:ir.model,name:portal.model_portal_wizard
 msgid "Grant Portal Access"
-msgstr "ផ្តល់សិទ្ធិចូលផតថល"
+msgstr ""
 
 #. module: portal
 #: model:ir.actions.act_window,name:portal.partner_wizard_action
@@ -603,7 +580,7 @@ msgstr ""
 #. module: portal
 #: model:ir.model,name:portal.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP ជុំវិញ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -617,14 +594,14 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
 msgid "Home"
-msgstr "ផ្ទះ"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__id
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__id
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__id
 msgid "ID"
-msgstr "អត្តសញ្ញាណ"
+msgstr "ID"
 
 #. module: portal
 #. odoo-javascript
@@ -638,12 +615,12 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Internal Note"
-msgstr "ចំណាំផ្ទៃក្នុង"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid "Internal User"
-msgstr "អ្នកប្រើប្រាស់ផ្ទៃក្នុង។"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -674,7 +651,7 @@ msgstr "អុីម៉ែលមិនត្រឹមត្រូវ! សូម�
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
 msgid "Invalid report type: %s"
-msgstr "ប្រភេទរបាយការណ៍មិនត្រឹមត្រូវ៖%s"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__welcome_message
@@ -706,13 +683,6 @@ msgid ""
 msgstr ""
 
 #. module: portal
-#: model:ir.model.fields,field_description:portal.field_portal_share____last_update
-#: model:ir.model.fields,field_description:portal.field_portal_wizard____last_update
-#: model:ir.model.fields,field_description:portal.field_portal_wizard_user____last_update
-msgid "Last Modified on"
-msgstr "កាលបរិច្ឆេតកែប្រែចុងក្រោយ"
-
-#. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__write_uid
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__write_uid
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__write_uid
@@ -736,30 +706,23 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Leave a comment"
-msgstr "ទុកឱ្យសេចក្តីអធិប្បាយ"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.res_config_settings_view_form
-msgid "Let your customers create developer API keys"
 msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__share_link
 msgid "Link"
-msgstr "តំណ"
+msgstr ""
 
 #. module: portal
 #: model:ir.model,name:portal.model_mail_message
 msgid "Message"
-msgstr "សារ"
+msgstr ""
 
 #. module: portal
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
 #, python-format
-msgid ""
-"Model %(model_name)s does not support token signature, as it does not have "
-"%(field_name)s field."
+msgid "Model %(model_name)s does not support token signature, as it does not have %(field_name)s field."
 msgstr ""
 
 #. module: portal
@@ -772,7 +735,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
 msgid "Name"
-msgstr "ឈ្មោះ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -797,10 +760,10 @@ msgstr ""
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
-#: code:addons/portal/static/src/xml/portal_chatter.xml:0
+#: model_terms:ir.ui.view,arch_db:portal.pager
 #, python-format
 msgid "Next"
-msgstr "បន្ទាប់"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_home
@@ -810,7 +773,7 @@ msgstr ""
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__note
 msgid "Note"
-msgstr "កំណត់សម្គាល់"
+msgstr "កំណត់សំគាល់"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
@@ -829,17 +792,17 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Oops! Something went wrong. Try to reload the page and log in."
-msgstr "អូ! មាន​អ្វីមួយ​មិន​ប្រក្រតី។ ព្យាយាមផ្ទុកទំព័រឡើងវិញហើយចូល។"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__partner_ids
 msgid "Partners"
-msgstr "ដៃគូសហការណ៌"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Password"
-msgstr "លេខសំងាត់"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -879,12 +842,12 @@ msgstr "URL ចូលដំណើរការវិបផតថល"
 #. module: portal
 #: model:ir.model,name:portal.model_portal_mixin
 msgid "Portal Mixin"
-msgstr "ផតថល Mixin"
+msgstr ""
 
 #. module: portal
 #: model:ir.model,name:portal.model_portal_share
 msgid "Portal Sharing"
-msgstr "ការចែកចាយវិបផតថល"
+msgstr ""
 
 #. module: portal
 #: model:ir.model,name:portal.model_portal_wizard_user
@@ -899,34 +862,36 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
 msgid "Powered by"
-msgstr "ឧបត្ថម្ភដោយ"
+msgstr ""
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.pager
+msgid "Prev"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
-#: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Previous"
-msgstr "មុន"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_chatter.js:0
 #, python-format
 msgid "Published on %s"
-msgstr "បោះពុម្ភផ្សាយ %s"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted "
-"again"
+msgid "Put my email and phone in a block list to make sure I'm never contacted again"
 msgstr ""
 
 #. module: portal
 #: model:ir.model,name:portal.model_ir_qweb
 msgid "Qweb"
-msgstr "Qweb"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -951,7 +916,7 @@ msgstr "លេខសម្គាល់ឯកសារដែលទាក់ទង
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__res_model
 msgid "Related Document Model"
-msgstr "គំរូឯកសារដែលទាក់ទង"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -961,17 +926,17 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Scope"
-msgstr "វិសាលភាព"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_searchbar
 msgid "Search"
-msgstr "ការស្រាវជ្រាវ"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Security"
-msgstr "សន្ដិសុខ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -983,7 +948,7 @@ msgstr ""
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_mixin__access_token
 msgid "Security Token"
-msgstr "ពាក្យសម្ងាត់សុវត្ថិភាព"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -1008,7 +973,7 @@ msgstr "បញ្ជូន"
 #: model:ir.actions.act_window,name:portal.portal_share_action
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_wizard
 msgid "Share Document"
-msgstr "ចែករំលែកឯកសារ"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_ir_ui_view__customize_show
@@ -1018,15 +983,13 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_sign_in
 msgid "Sign in"
-msgstr "ចូល"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/js/portal_composer.js:0
 #, python-format
-msgid ""
-"Some fields are required. Please make sure to write a message or attach a "
-"document"
+msgid "Some fields are required. Please make sure to write a message or attach a document"
 msgstr ""
 
 #. module: portal
@@ -1044,7 +1007,7 @@ msgstr "ខេត្តក្រុង"
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__email_state
 msgid "Status"
-msgstr "ស្ថានភាព"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
@@ -1069,16 +1032,21 @@ msgstr ""
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
-msgid ""
-"The attachment %s cannot be removed because it is not in a pending state."
+msgid "The attachment %s cannot be removed because it is not in a pending state."
+msgstr ""
+
+#. module: portal
+#. odoo-python
+#: code:addons/portal/controllers/mail.py:0
+#, python-format
+msgid "The attachment %s does not exist or you do not have the rights to access it."
 msgstr ""
 
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
-msgid ""
-"The attachment does not exist or you do not have the rights to access it."
+msgid "The attachment does not exist or you do not have the rights to access it."
 msgstr ""
 
 #. module: portal
@@ -1099,8 +1067,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
-msgid ""
-"The document does not exist or you do not have the rights to access it."
+msgid "The document does not exist or you do not have the rights to access it."
 msgstr ""
 
 #. module: portal
@@ -1121,8 +1088,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
-msgid ""
-"The old password you provided is incorrect, your password was not changed."
+msgid "The old password you provided is incorrect, your password was not changed."
 msgstr ""
 
 #. module: portal
@@ -1143,9 +1109,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/portal/wizard/portal_wizard.py:0
 #, python-format
-msgid ""
-"The template \"Portal: new user\" not found for sending email to the portal "
-"user."
+msgid "The template \"Portal: new user\" not found for sending email to the portal user."
 msgstr ""
 
 #. module: portal
@@ -1153,31 +1117,28 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "There are no comments for now."
-msgstr "មិនមានមតិយោបល់សម្រាប់ពេលនេះទេ។"
+msgstr ""
 
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
 msgid "This document does not exist."
-msgstr "ឯកសារនេះមិនមានទេ"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
 msgid "This is a preview of the customer portal."
-msgstr "នេះគឺជាការមើលជាមុននៃវិបផតថលរបស់អតិថិជន។"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid ""
-"This partner is linked to an internal User and already has access to the "
-"Portal."
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid ""
-"This text is included at the end of the email sent to new portal users."
+msgid "This partner is linked to an internal User and already has access to the Portal."
+msgstr ""
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.wizard_view
+msgid "This text is included at the end of the email sent to new portal users."
 msgstr ""
 
 #. module: portal
@@ -1188,12 +1149,12 @@ msgstr "អត្ថបទនេះនឹងបង្ហាញក្នុងអ
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_searchbar
 msgid "Toggle filters"
-msgstr "បិទ / បើកតម្រង"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__user_id
 msgid "User"
-msgstr "អ្នកប្រើប្រាស់"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__user_ids
@@ -1208,7 +1169,7 @@ msgstr "លេខសំគាល់ VAT"
 #. module: portal
 #: model:ir.model.fields.selection,name:portal.selection__portal_wizard_user__email_state__ok
 msgid "Valid"
-msgstr "មានសុពលភាព"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -1223,20 +1184,21 @@ msgstr ""
 #. module: portal
 #: model:ir.model,name:portal.model_ir_ui_view
 msgid "View"
-msgstr "មើល"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Visible"
-msgstr "ដែល​អាច​មើលឃើញ"
+msgstr ""
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_account_analytic_account__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_calendar_event__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_crm_team__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_crm_team_member__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_discuss_channel__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_fleet_vehicle__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_fleet_vehicle_log_contract__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_fleet_vehicle_log_services__website_message_ids
@@ -1248,13 +1210,14 @@ msgstr "ដែល​អាច​មើលឃើញ"
 #: model:ir.model.fields,field_description:portal.field_hr_job__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_hr_leave__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_hr_leave_allocation__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_hr_plan_employee_activity__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_loyalty_card__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_lunch_supplier__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_blacklist__website_message_ids
-#: model:ir.model.fields,field_description:portal.field_mail_channel__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread_blacklist__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread_cc__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_mail_thread_main_attachment__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_mail_thread_phone__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_maintenance_equipment__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_maintenance_equipment_category__website_message_ids
@@ -1263,6 +1226,7 @@ msgstr "ដែល​អាច​មើលឃើញ"
 #: model:ir.model.fields,field_description:portal.field_phone_blacklist__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_product_product__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_product_template__website_message_ids
+#: model:ir.model.fields,field_description:portal.field_rating_mixin__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_res_partner__website_message_ids
 #: model:ir.model.fields,field_description:portal.field_res_users__website_message_ids
 msgid "Website Messages"
@@ -1273,6 +1237,7 @@ msgstr "សារវែបសាយ"
 #: model:ir.model.fields,help:portal.field_calendar_event__website_message_ids
 #: model:ir.model.fields,help:portal.field_crm_team__website_message_ids
 #: model:ir.model.fields,help:portal.field_crm_team_member__website_message_ids
+#: model:ir.model.fields,help:portal.field_discuss_channel__website_message_ids
 #: model:ir.model.fields,help:portal.field_fleet_vehicle__website_message_ids
 #: model:ir.model.fields,help:portal.field_fleet_vehicle_log_contract__website_message_ids
 #: model:ir.model.fields,help:portal.field_fleet_vehicle_log_services__website_message_ids
@@ -1284,13 +1249,14 @@ msgstr "សារវែបសាយ"
 #: model:ir.model.fields,help:portal.field_hr_job__website_message_ids
 #: model:ir.model.fields,help:portal.field_hr_leave__website_message_ids
 #: model:ir.model.fields,help:portal.field_hr_leave_allocation__website_message_ids
+#: model:ir.model.fields,help:portal.field_hr_plan_employee_activity__website_message_ids
 #: model:ir.model.fields,help:portal.field_loyalty_card__website_message_ids
 #: model:ir.model.fields,help:portal.field_lunch_supplier__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_blacklist__website_message_ids
-#: model:ir.model.fields,help:portal.field_mail_channel__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread_blacklist__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread_cc__website_message_ids
+#: model:ir.model.fields,help:portal.field_mail_thread_main_attachment__website_message_ids
 #: model:ir.model.fields,help:portal.field_mail_thread_phone__website_message_ids
 #: model:ir.model.fields,help:portal.field_maintenance_equipment__website_message_ids
 #: model:ir.model.fields,help:portal.field_maintenance_equipment_category__website_message_ids
@@ -1299,6 +1265,7 @@ msgstr "សារវែបសាយ"
 #: model:ir.model.fields,help:portal.field_phone_blacklist__website_message_ids
 #: model:ir.model.fields,help:portal.field_product_product__website_message_ids
 #: model:ir.model.fields,help:portal.field_product_template__website_message_ids
+#: model:ir.model.fields,help:portal.field_rating_mixin__website_message_ids
 #: model:ir.model.fields,help:portal.field_res_partner__website_message_ids
 #: model:ir.model.fields,help:portal.field_res_users__website_message_ids
 msgid "Website communication history"
@@ -1321,7 +1288,7 @@ msgstr "ទំរង់ណែនាំ"
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "Write a message..."
-msgstr "សរសេរសារ ..."
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -1338,10 +1305,9 @@ msgstr ""
 #. module: portal
 #. odoo-python
 #: code:addons/portal/wizard/portal_share.py:0
-#: code:addons/portal/wizard/portal_share.py:0
 #, python-format
 msgid "You are invited to access %s"
-msgstr "អ្នកត្រូវបានអញ្ជើញឱ្យចូលប្រើ%s"
+msgstr ""
 
 #. module: portal
 #. odoo-python
@@ -1353,14 +1319,14 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_share_template
 msgid "You have been invited to access the following document:"
-msgstr "អ្នកត្រូវបានអញ្ជើញឱ្យចូលមើលឯកសារដូចខាងក្រោមៈ"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "You must be"
-msgstr "អ្នក​ត្រូវតែ​ជា"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -1382,7 +1348,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_contact
 msgid "Your contact"
-msgstr "ទំនាក់ទំនងរបស់អ្នក"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details_fields
@@ -1394,21 +1360,21 @@ msgstr "លេខប៉ុស្តិ៍"
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "avatar"
-msgstr "រូបតំណាង"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "comment"
-msgstr "មតិយោបល់"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "comments"
-msgstr "មតិយោបល់"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript
@@ -1431,12 +1397,12 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "logged in"
-msgstr "បានចូល"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
 msgid "odoo"
-msgstr "odoo"
+msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -1448,7 +1414,7 @@ msgstr ""
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #, python-format
 msgid "to post a comment."
-msgstr "ដើម្បី​ប្រកាស​មតិយោបល់"
+msgstr ""
 
 #. module: portal
 #. odoo-javascript

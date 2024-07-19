@@ -8,7 +8,7 @@ import { LoadingDataError } from "../o_spreadsheet/errors";
 import { DisplayNameRepository } from "./display_name_repository";
 import { LabelsRepository } from "./labels_repository";
 
-const { EventBus } = owl;
+import { EventBus } from "@odoo/owl";
 
 /**
  * @typedef {object} Field
@@ -31,15 +31,19 @@ const { EventBus } = owl;
  *
  * Implementation note:
  * For the labels, when someone is asking for a display name which is not loaded yet,
- * the proxy returns directly (undefined) and a request for a name_get will
+ * the proxy returns directly (undefined) and a request to read display_name will
  * be triggered. All the requests created are batched and send, with only one
  * request per model, after a clock cycle.
  * At the end of this process, an event is triggered (labels-fetched)
  */
 export class MetadataRepository extends EventBus {
-    constructor(orm) {
+    /**
+     * @param {import("@web/env").OdooEnv} env
+     */
+    constructor(env) {
         super();
-        this.orm = orm;
+        this.orm = env.services.orm.silent;
+        this.nameService = env.services.name;
 
         this.serverData = new ServerData(this.orm, {
             whenDataIsFetched: () => this.trigger("labels-fetched"),
@@ -47,7 +51,7 @@ export class MetadataRepository extends EventBus {
 
         this.labelsRepository = new LabelsRepository();
 
-        this.displayNameRepository = new DisplayNameRepository(this.orm, {
+        this.displayNameRepository = new DisplayNameRepository(env, {
             whenDataIsFetched: () => this.trigger("labels-fetched"),
         });
     }
@@ -98,7 +102,7 @@ export class MetadataRepository extends EventBus {
     }
 
     /**
-     * Save the result of a name_get request in the cache
+     * Save the result of display_name read request in the cache
      */
     setDisplayName(model, id, result) {
         this.displayNameRepository.setDisplayName(model, id, result);

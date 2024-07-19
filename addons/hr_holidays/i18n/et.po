@@ -3,52 +3,39 @@
 # 	* hr_holidays
 # 
 # Translators:
-# Martin Aavastik <martin@avalah.ee>, 2022
-# Andre Roomet <andreroomet@gmail.com>, 2022
-# Arma Gedonsky <armagedonsky@hot.ee>, 2022
-# Helen Sulaoja <helen@avalah.ee>, 2022
-# Egon Raamat <egon@avalah.ee>, 2022
-# Algo Kärp <algokarp@gmail.com>, 2022
-# Piia Paurson <piia@avalah.ee>, 2022
-# Aveli Kannel <aveli@avalah.ee>, 2022
-# Martin Trigaux, 2022
-# Patrick-Jordan Kiudorv, 2022
-# Anna, 2023
-# JanaAvalah, 2023
+# Andre Roomet <andreroomet@gmail.com>, 2023
+# Helen Sulaoja <helen@avalah.ee>, 2023
+# Patrick-Jordan Kiudorv, 2023
+# Birgit Vijar, 2023
+# Aveli Kannel <aveli@avalah.ee>, 2023
+# Eneli Õigus <enelioigus@gmail.com>, 2023
+# Martin Aavastik <martin@avalah.ee>, 2023
+# Arma Gedonsky <armagedonsky@hot.ee>, 2023
+# Martin Trigaux, 2023
+# Piia Paurson <piia@avalah.ee>, 2023
 # Triine Aavik <triine@avalah.ee>, 2023
-# Leaanika Randmets, 2023
-# Rivo Zängov <eraser@eraser.ee>, 2023
+# Algo Kärp <algokarp@gmail.com>, 2023
+# JanaAvalah, 2023
+# Marten, 2023
 # Mihkel avalah, 2023
-# Eneli Õigus <enelioigus@gmail.com>, 2024
+# Leaanika Randmets, 2023
+# Anna, 2023
+# Rivo Zängov <eraser@eraser.ee>, 2024
 # Katrin Kampura, 2024
-# Stevin Lilla, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Stevin Lilla, 2024\n"
+"POT-Creation-Date: 2024-01-30 14:15+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Katrin Kampura, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: et\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid ""
-"\n"
-"The employees that lack allocation days are:\n"
-"%s"
-msgstr ""
-"\n"
-"Töötajad, kellel puuduvad eraldatud päevad:\n"
-"%s"
 
 #. module: hr_holidays
 #. odoo-python
@@ -93,9 +80,30 @@ msgstr "!oluline; font-size: 8px; min-width: 18px\"&gt;"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
-msgid "%(employee_name)s - From %(date_from)s To %(date_to)s - %(state)s"
-msgstr ""
-"%(employee_name)s - Kellelt %(date_from)s kellele %(date_to)s - %(state)s"
+msgid "%(employee_name)s - from %(date_from)s to %(date_to)s - %(state)s"
+msgstr "%(employee_name)s - alates %(date_from)s kuni %(date_to)s - %(state)s"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#, python-format
+msgid "%(first)s, %(second)s and %(amount)s others"
+msgstr "%(first)s, %(second)s ja %(amount)s teised"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "%(holiday_name)s has been refused."
+msgstr "%(holiday_name)s on keeldutud. "
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid ""
+"%(leave_name)s has been cancelled with the justification: <br/> %(reason)s."
+msgstr "%(leave_name)s tühistatud, põhjus: <br/> %(reason)s."
 
 #. module: hr_holidays
 #. odoo-python
@@ -108,16 +116,36 @@ msgstr "%(leave_type)s: %(duration).2f päev(a) (%(start)s)"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
+msgid "%(leave_type)s: %(duration).2f hours on %(date)s"
+msgstr "%(leave_type)s: %(duration).2f tundi%(date)s"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
 msgid "%(person)s on %(leave_type)s: %(duration).2f days (%(start)s)"
 msgstr "%(person)s %(leave_type)s: %(duration).2f päev(a) (%(start)s)"
 
 #. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
-#: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
 msgid "%(person)s on %(leave_type)s: %(duration).2f hours on %(date)s"
 msgstr "%(person)s on %(leave_type)s: %(duration).2f hours on %(date)s"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "%(person)s: %(duration).2f days (%(start)s)"
+msgstr "%(person)s: %(duration).2f päeva (%(start)s)"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "%(person)s: %(duration).2f hours on %(date)s"
+msgstr "%(person)s: %(duration).2f tundi %(date)s"
 
 #. module: hr_holidays
 #. odoo-python
@@ -149,17 +177,10 @@ msgstr "%s (alates %s kuni lõpmatuseni)"
 
 #. module: hr_holidays
 #. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #, python-format
-msgid "%s : %.2f days"
-msgstr "%s : %.2f päev(a)"
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid "%s : %.2f hours"
-msgstr "%s : %.2f tund(i)"
+msgid "%s allocation request (%s %s)"
+msgstr "%s puhkuse eraldamise taotlus (%s %s)"
 
 #. module: hr_holidays
 #. odoo-python
@@ -174,6 +195,20 @@ msgstr "%s puudumisi : %.2f päev(a)"
 #, python-format
 msgid "%s on Time Off : %.2f hour(s)"
 msgstr "%s puudumisi : %.2f tund(i)"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "%s: %.2f days"
+msgstr "%s: %.2f päeva"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "%s: %.2f hours"
+msgstr "%s: %.2f tundi"
 
 #. module: hr_holidays
 #. odoo-python
@@ -215,11 +250,6 @@ msgstr "&lt;td style=background-color:"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 msgid "&lt;th class=\"text-center\" colspan="
 msgstr "&lt;th class=\"text-center\" colspan="
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "(based on worked time)"
-msgstr "(põhineb töötatud ajal)"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -526,28 +556,26 @@ msgstr "<i class=\"fa fa-check\"/> Kinnita"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\" attrs=\"{'invisible': ['|', ('allocation_type', '=', "
-"'accrual'), ('state', 'not in', ('draft', 'confirm'))]}\"/>"
+"title=\"Arrow\" invisible=\"allocation_type == 'accrual' or state != "
+"'confirm'\"/>"
 msgstr ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\" attrs=\"{'invisible': ['|', ('allocation_type', '=', "
-"'accrual'), ('state', 'not in', ('draft', 'confirm'))]}\"/>"
+"title=\"Arrow\" invisible=\"allocation_type == 'accrual' or state != "
+"'confirm'\"/>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\" attrs=\"{'invisible': [('allocation_type', '=', "
-"'accrual')]}\"/>"
+"title=\"Arrow\" invisible=\"allocation_type == 'accrual'\"/>"
 msgstr ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\" attrs=\"{'invisible': [('allocation_type', '=', "
-"'accrual')]}\"/>"
+"title=\"Arrow\" invisible=\"allocation_type == 'accrual'\"/>"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_stress_day_view_form
-msgid "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" title=\"To\"/>"
-msgstr "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" title=\"To\"/>"
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
+msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
+msgstr "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
@@ -561,69 +589,18 @@ msgid "<i class=\"fa fa-times\"/> Refuse"
 msgstr "<i class=\"fa fa-times\"/> Keeldu"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
+msgid ""
+"<span class=\"ml8\" invisible=\"type_request_unit == 'hour'\">Days</span>\n"
+"                                <span class=\"ml8\" invisible=\"type_request_unit != 'hour'\">Hours</span>"
+msgstr ""
+"<span class=\"ml8\" invisible=\"type_request_unit == 'hour'\">Päevad</span>\n"
+"                                <span class=\"ml8\" invisible=\"type_request_unit != 'hour'\">Tunnid</span>"
+
+#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
-msgid ""
-"<span attrs=\"{'invisible': [('holiday_type', '!=', 'employee')]}\">\n"
-"                        The employee has a different timezone than yours! Here dates and times are displayed in the employee's timezone\n"
-"                    </span>\n"
-"                    <span attrs=\"{'invisible': [('holiday_type', '!=', 'department')]}\">\n"
-"                        The department's company has a different timezone than yours! Here dates and times are displayed in the company's timezone\n"
-"                    </span>\n"
-"                    <span attrs=\"{'invisible': [('holiday_type', '!=', 'company')]}\">\n"
-"                        The company has a different timezone than yours! Here dates and times are displayed in the company's timezone\n"
-"                    </span>\n"
-"                    ("
-msgstr ""
-"<span attrs=\"{'invisible': [('holiday_type', '!=', 'töötaja')]}\">\n"
-"                         Töötajal on sinu omast erinev ajavöönd! Siin kuvatakse kuupäevad ja kellaajad töötaja ajavööndis\n"
-"                     </span>\n"
-"                     <span attrs=\"{'invisible': [('holiday_type', '!=', 'osakond')]}\">\n"
-"                         Osakonna ettevõttel on teistsugune ajavöönd kui teil! Siin kuvatakse kuupäevad ja kellaajad ettevõtte ajavööndis\n"
-"                     </span>\n"
-"                     <span attrs=\"{'invisible': [('holiday_type', '!=', 'ettevõte')]}\">\n"
-"                         Ettevõtte ajavöönd on Teie omast erinev! Siin kuvatakse kuupäevad ja kellaajad ettevõtte ajavööndis\n"
-"                     </span>\n"
-"                     ("
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_kanban_view_employees_kanban
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_kanban_view_public_employees_kanban
-msgid ""
-"<span class=\"fa fa-plane text-success\" role=\"img\" aria-label=\"Present but on leave\" title=\"Present but on leave\" name=\"presence_absent_active\">\n"
-"                    </span>"
-msgstr ""
-"<span class=\"fa fa-plane text-success\" role=\"img\" aria-label=\"Present but on leave\" title=\"Present but on leave\" name=\"presence_absent_active\">\n"
-"                    </span>"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_kanban_view_employees_kanban
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_kanban_view_public_employees_kanban
-msgid ""
-"<span class=\"fa fa-plane text-warning\" role=\"img\" aria-label=\"To "
-"define\" title=\"On Leave\"/>"
-msgstr ""
-"<span class=\"fa fa-plane text-warning\" role=\"img\" aria-label=\"To "
-"define\" title=\"On Leave\"/>"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
-msgid ""
-"<span class=\"ml8\" attrs=\"{'invisible': [('type_request_unit', '=', 'hour')]}\">Days</span>\n"
-"                                <span class=\"ml8\" attrs=\"{'invisible': [('type_request_unit', '!=', 'hour')]}\">Hours</span>"
-msgstr ""
-"<span class=\"ml8\" attrs=\"{'invisible': [('type_request_unit', '=', 'hour')]}\">päev(a)</span>\n"
-"                                <span class=\"ml8\" attrs=\"{'invisible': [('type_request_unit', '!=', 'hour')]}\">tundi</span>"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
-msgid ""
-"<span class=\"o_stat_text\">\n"
-"                                    Time Off\n"
-"                                </span>"
-msgstr ""
-"<span class=\"o_stat_text\">\n"
-"                                    Puudumised\n"
-"                                </span>"
+msgid "<span class=\"ms-3\">Days</span>"
+msgstr "<span class=\"ms-3\">Päevad</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_employee_public_form_view_inherit
@@ -683,24 +660,31 @@ msgid "<span class=\"text-muted\"> to </span>"
 msgstr ""
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
-msgid "<span class=\"text-muted\">From</span>"
-msgstr "<span class=\"text-muted\">Alates</span>"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
-msgid "<span class=\"text-muted\">To</span>"
-msgstr "<span class=\"text-muted\">kuni</span>"
-
-#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
 msgid "<span class=\"text-muted\">from </span>"
 msgstr "<span class=\"text-muted\">alates </span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
-msgid "<span>Days</span>"
-msgstr "<span>päev(a)</span>"
+msgid ""
+"<span invisible=\"holiday_type != 'employee'\">\n"
+"                        The employee has a different timezone than yours! Here dates and times are displayed in the employee's timezone\n"
+"                    </span>\n"
+"                    <span invisible=\"holiday_type != 'department'\">\n"
+"                        The department's company has a different timezone than yours! Here dates and times are displayed in the company's timezone\n"
+"                    </span>\n"
+"                    <span invisible=\"holiday_type != 'company'\">\n"
+"                        The company has a different timezone than yours! Here dates and times are displayed in the company's timezone\n"
+"                    </span>\n"
+"                    ("
+msgstr ""
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
+msgid ""
+"<span>You can only take this time off in whole days, so if your schedule has"
+" half days, it won't be used efficiently.</span>"
+msgstr ""
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
@@ -771,10 +755,17 @@ msgstr "Puuduvad töötajad"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee__is_absent
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_base__is_absent
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_public__is_absent
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__is_absent
 #: model:ir.model.fields,field_description:hr_holidays.field_res_users__is_absent
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_employee_view_search
 msgid "Absent Today"
 msgstr "Täna puuduvad"
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid "Accrual (Future):"
+msgstr "Tekkepõhine (tulevikus):"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__allocation_type__accrual
@@ -793,6 +784,11 @@ msgstr "Tekkepõhine tase"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
 msgid "Accrual Plan"
 msgstr "Tekkepõhine plaan"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__has_accrual_plan
+msgid "Accrual Plan Available"
+msgstr "Tekkepõhine plaan on saadaval"
 
 #. module: hr_holidays
 #: model:ir.model,name:hr_holidays.model_hr_leave_accrual_level
@@ -815,7 +811,6 @@ msgstr "Tekkepõhised plaanid"
 
 #. module: hr_holidays
 #: model:ir.actions.server,name:hr_holidays.hr_leave_allocation_cron_accrual_ir_actions_server
-#: model:ir.cron,cron_name:hr_holidays.hr_leave_allocation_cron_accrual
 msgid "Accrual Time Off: Updates the number of time off"
 msgstr "Tekkepõhine jaotus: Värskendab puhkusepäevade jaotust"
 
@@ -830,6 +825,12 @@ msgid "Accruals count"
 msgstr "Accruals count"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__accrued_gain_time
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__accrued_gain_time
+msgid "Accrued Gain Time"
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_needaction
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_needaction
 msgid "Action Needed"
@@ -837,9 +838,10 @@ msgstr "Vajalik toiming"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__active
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__active
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__active
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__active
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__active
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 msgid "Active"
 msgstr "Aktiivne"
 
@@ -851,9 +853,7 @@ msgstr "Aktiivsed taotlused"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__active_employee
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__active_employee
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__active_employee
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Active Employee"
 msgstr "Aktiivne töötaja"
@@ -864,7 +864,6 @@ msgid "Active Time Off"
 msgstr "Aktiivsed puudumised"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Active Types"
 msgstr "Aktiivsuse tüübid"
@@ -879,7 +878,7 @@ msgstr "Tegevused"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__activity_exception_decoration
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Tegevuse erandi tüüp"
+msgstr "Tegevuse erandlik kohendus"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__activity_state
@@ -905,11 +904,6 @@ msgid "Add a description..."
 msgstr "Lisa kirjeldus..."
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "Add a new level"
-msgstr "Lisa uus tase"
-
-#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid "Add a reason..."
 msgstr "Lisa põhjus ..."
@@ -923,13 +917,9 @@ msgstr "Lisage selgitus inimestele, kes selle dokumendi kinnitab"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__added_value_type
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__added_value_type
 msgid "Added Value Type"
 msgstr "Lisatud väärtuse tüüp"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "Adds"
-msgstr "Lisad"
 
 #. module: hr_holidays
 #: model:res.groups,name:hr_holidays.group_hr_holidays_manager
@@ -963,25 +953,34 @@ msgid "All Time Off"
 msgstr "Kõik puudumised"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__duration_display
-msgid "Allocated (Days/Hours)"
-msgstr "Jagatud (päevi/tunde)"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__action_with_unused_accruals__all
+msgid "All accrued time carried over"
+msgstr ""
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__last_several_days
+msgid "All day"
+msgstr "Kogu päev"
 
 #. module: hr_holidays
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #, python-format
-msgid "Allocated:"
-msgstr "Jaotatud:"
+msgid "Allocated ("
+msgstr "Jaotatud ("
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__holiday_allocation_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__duration_display
+msgid "Allocated (Days/Hours)"
+msgstr "Jagatud (päevi/tunde)"
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__allocation_ids
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__closest_allocation_to_expire
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__leave_type__allocation
 #: model:mail.message.subtype,name:hr_holidays.mt_leave_allocation
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid "Allocation"
-msgstr "Taotlus"
+msgstr "Toodete eraldamine"
 
 #. module: hr_holidays
 #: model:mail.activity.type,name:hr_holidays.mail_act_leave_allocation_approval
@@ -1022,9 +1021,8 @@ msgid "Allocation Remaining Display"
 msgstr "Järelejäänud puhkuseeraldiste vaade"
 
 #. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/views/calendar/calendar_controller.xml:0
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__allocation_id
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #: model:mail.message.subtype,description:hr_holidays.mt_leave_allocation
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 #, python-format
@@ -1040,11 +1038,6 @@ msgid "Allocation Requests"
 msgstr "Puhkuse eraldamise taotlused"
 
 #. module: hr_holidays
-#: model:mail.activity.type,name:hr_holidays.mail_act_leave_allocation_second_approval
-msgid "Allocation Second Approve"
-msgstr "Taotluse teine kinnitamine"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__allocation_type
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Allocation Type"
@@ -1054,26 +1047,13 @@ msgstr "Taotluse tüüp"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #, python-format
-msgid ""
-"Allocation of %(allocation_name)s : %(duration).2f %(duration_type)s to "
-"%(person)s"
-msgstr ""
-"Taotlus %(allocation_name)s : %(duration).2f %(duration_type)s töötajale "
-"%(person)s"
+msgid "Allocation of %s: %.2f %s to %s"
+msgstr "Taotlus %s: %.2f %s kuni %s"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__week_day
 msgid "Allocation on"
 msgstr "Allocation on"
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
-#, python-format
-msgid "Allocation request must be confirmed in order to approve it."
-msgstr ""
-"Puhkuse eraldamise taotlus peab olema kinnitatud enne nõusoleku kinnituse "
-"saamist."
 
 #. module: hr_holidays
 #. odoo-python
@@ -1086,28 +1066,6 @@ msgstr ""
 "valideeritud."
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
-#, python-format
-msgid ""
-"Allocation request must be in Draft state (\"To Submit\") in order to "
-"confirm it."
-msgstr ""
-"Puhkuse eraldamise taotlus peab olema \"Mustand\" staatuses "
-"(\"Kinnitamiseks\"), et seda saaks kinnitada."
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
-#, python-format
-msgid ""
-"Allocation request state must be \"Refused\" or \"To Approve\" in order to "
-"be reset to Draft."
-msgstr ""
-"Puhkuse eraldamise taotlus peab olema eelnevalt \"Keeldutud\" või "
-"\"Kinnitamiseks\" staatuses, et lähtestada see \"Mustand\" staatusesse."
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_department__allocation_to_approve_count
 msgid "Allocation to Approve"
 msgstr "Kinnitamist ootavad puudumiste/puhkuste taotlused"
@@ -1117,8 +1075,14 @@ msgstr "Kinnitamist ootavad puudumiste/puhkuste taotlused"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__allocation_count
 #: model:ir.ui.menu,name:hr_holidays.hr_holidays_menu_manager_approve_allocations
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_departure_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 msgid "Allocations"
 msgstr "Puhkuste jaotamine"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__allows_negative
+msgid "Allow Negative Cap"
+msgstr "Luba negatiivne piirang"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
@@ -1141,6 +1105,28 @@ msgstr ""
 "- Töötaja sildi järgi: kõik konkreetsete töötajate rühma kategooria töötajad"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__already_accrued
+msgid "Already Accrued"
+msgstr "Juba kogunenud"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_tree
+msgid "Amount"
+msgstr "Summa"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__max_allowed_negative
+msgid "Amount in Negative"
+msgstr "Summa on negatiivne"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "An employee already booked time off which overlaps with this period:%s"
+msgstr "Üks töötaja on juba valinud puhkuse, mis kattub antud perioodiga:%s"
+
+#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 msgid "Analyze from"
 msgstr "Analüüsige alates"
@@ -1157,19 +1143,16 @@ msgid "Approval"
 msgstr "Kinnitamine"
 
 #. module: hr_holidays
-#: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_approvals
-msgid "Approvals"
-msgstr "Kinnitused"
-
-#. module: hr_holidays
+#. odoo-javascript
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#: code:addons/hr_holidays/static/src/views/view_dialog/form_view_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_tree
 #, python-format
 msgid "Approve"
-msgstr "Nõustu"
+msgstr "Kinnita"
 
 #. module: hr_holidays
 #: model:ir.actions.server,name:hr_holidays.ir_actions_server_approve_allocations
@@ -1187,23 +1170,16 @@ msgstr "Kinnita taotlused"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__state__validate
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report_calendar__state__validate
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view_search
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form_dashboard_new_time_off
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Approved"
 msgstr "Kinnitatud"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
-msgid "Approved Allocations"
-msgstr "Kinnitatud taotlused"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 msgid "Approved Requests"
 msgstr "Kinnitatud taotlused"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
-msgid "Approved Time Off"
-msgstr "Kinnitatud puudumised"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__allocation_validation_type__officer
@@ -1220,6 +1196,7 @@ msgstr "Kinnitatud:"
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__apr
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__apr
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__apr
 msgid "April"
 msgstr "Aprill"
 
@@ -1230,8 +1207,10 @@ msgstr "Arhiveeri töötajate taotlused"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_holidays_status_filter
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Archived"
 msgstr "Arhiveeritud"
@@ -1242,21 +1221,41 @@ msgid "Archived Time Off"
 msgstr "Arhiveeritud puudumised"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_search_my
+msgid "Archived Time Off Type"
+msgstr "Arhiveeritud puudumise tüüp"
+
+#. module: hr_holidays
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_controller.js:0
 #, python-format
-msgid "Are you sure you want to delete this record ?"
-msgstr "Kas oled kindel, et soovid selle kirje kustutada?"
+msgid "Are you sure you want to delete this record?"
+msgstr "Kas olete kindel, et soovite selle kirje kustutada?"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__action_with_unused_accruals
-msgid "At the end of the calendar year, unused accruals will be"
-msgstr "Kalendriaasta lõpus kasutamata jäänud puhkepäevade arv"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_date__allocation
+msgid "At the allocation date"
+msgstr "eraldamise kuupäeval"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "At the end of the year, unused accruals will be"
-msgstr "Aasta lõpus kasutamata jäänud puhkepäevad"
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__accrued_gain_time__end
+msgid "At the end of the accrual period"
+msgstr "Tekkeperioodi lõpus"
+
+#. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__accrued_gain_time__start
+msgid "At the start of the accrual period"
+msgstr "Tekkeperioodi alguses"
+
+#. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_date__year_start
+msgid "At the start of the year"
+msgstr "Aasta alguses"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_employee_view_search
+msgid "At work"
+msgstr "Tööl"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__supported_attachment_ids
@@ -1277,6 +1276,7 @@ msgstr "Manused"
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__second_month__aug
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__aug
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__aug
 msgid "August"
 msgstr "August"
 
@@ -1289,14 +1289,27 @@ msgstr "Saadaval"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
-#: code:addons/hr_holidays/static/src/components/thread_icon/thread_icon.xml:0
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid "Available:"
+msgstr "Saadaval:"
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/thread_icon.patch.xml:0
 #, python-format
 msgid "Away"
 msgstr "Eemal"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__is_based_on_worked_time
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_dashboard.xml:0
+#, python-format
+msgid "Balance at the"
+msgstr "Saldo"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__is_based_on_worked_time
 msgid "Based on worked time"
 msgstr "Põhineb töötatud ajal"
 
@@ -1306,24 +1319,9 @@ msgid "Basic Employee"
 msgstr "Keskmine töötaja"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__black
-msgid "Black"
-msgstr "Must"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__blue
-msgid "Blue"
-msgstr "Sinine"
-
-#. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_holidays_summary_employee__holiday_type__both
 msgid "Both Approved and Confirmed"
 msgstr "Nii kinnituse ootel kui ka kinnitatud"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__brown
-msgid "Brown"
-msgstr "Pruun"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave__holiday_type__company
@@ -1387,8 +1385,12 @@ msgid "Can Cancel"
 msgstr "Võib tühistada"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__can_modify_value_type
+msgid "Can Modify Value Type"
+msgstr "Saab muuta väärtuse tüüp"
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__can_reset
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__can_reset
 msgid "Can reset"
 msgstr "Võib lähtestada"
 
@@ -1400,13 +1402,8 @@ msgstr "Tühista"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_departure_wizard__cancel_leaves
-msgid "Cancel Future Leaves"
-msgstr "Tühista tulevased puudumised"
-
-#. module: hr_holidays
-#: model:ir.model,name:hr_holidays.model_hr_holidays_cancel_leave
-msgid "Cancel Leave Wizard"
-msgstr "Tühista lahkumiste Wizard"
+msgid "Cancel Future Time Off"
+msgstr "Tühista puudumine, mis on tulevikus"
 
 #. module: hr_holidays
 #. odoo-python
@@ -1415,6 +1412,11 @@ msgstr "Tühista lahkumiste Wizard"
 #, python-format
 msgid "Cancel Time Off"
 msgstr "Tühista puudumised"
+
+#. module: hr_holidays
+#: model:ir.model,name:hr_holidays.model_hr_holidays_cancel_leave
+msgid "Cancel Time Off Wizard"
+msgstr "Tühista puhkuse viisard"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_departure_wizard__cancel_leaves
@@ -1427,20 +1429,73 @@ msgid "Canceled"
 msgstr "Tühistatud"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "Canceled Time Off"
+msgstr "Tühistatud puudumine"
+
+#. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee__current_leave_state__cancel
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee_base__current_leave_state__cancel
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee_public__current_leave_state__cancel
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__state__cancel
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__state__cancel
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__state__cancel
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report_calendar__state__cancel
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 msgid "Cancelled"
 msgstr "Tühistatud"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
-msgid "Cancelled Time Off"
-msgstr "Tühistatud puudumised"
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__cap_accrued_time
+msgid "Cap accrued time"
+msgstr "Kogunenud aja ülempiir"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "Cap:"
+msgstr "Cap:"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__action_with_unused_accruals
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
+msgid "Carry over"
+msgstr "Kanna üle"
+
+#. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__action_with_unused_accruals__maximum
+msgid "Carry over with a maximum"
+msgstr "Kanna üle maksimaalselt"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "Carry over:"
+msgstr "Kanna üle:"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "Carry-Over Date"
+msgstr "Kandmise kuupäev"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__carryover_date
+msgid "Carry-Over Time"
+msgstr ""
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__carryover_day
+msgid "Carryover Day"
+msgstr ""
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__carryover_day_display
+msgid "Carryover Day Display"
+msgstr ""
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__carryover_month
+msgid "Carryover Month"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__category_id
@@ -1448,18 +1503,27 @@ msgid "Category of Employee"
 msgstr "Töötajate kategooriad"
 
 #. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__maximum_leave
-msgid "Choose a cap for this accrual. 0 means no cap."
-msgstr "Valige piirmäär. 0 tähendab, et varud puuduvad."
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_employee.py:0
+#, python-format
+msgid ""
+"Changing this working schedule results in the affected employee(s) not "
+"having enough leaves allocated to accomodate for their leaves already taken "
+"in the future. Please review this employee's leaves and adjust their "
+"allocation accordingly."
+msgstr ""
 
 #. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__responsible_id
-msgid ""
-"Choose the Time Off Officer who will be notified to approve allocation or "
-"Time Off request"
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__maximum_leave
+msgid "Choose a cap for this accrual."
 msgstr ""
-"Vali puudumiste eest vastutaja, kes määratakse kinnitama puudumiste "
-"taotlusi."
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__responsible_ids
+msgid ""
+"Choose the Time Off Officers who will be notified to approve allocation or "
+"Time Off Request. If empty, nobody will be notified"
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -1471,26 +1535,24 @@ msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__color
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__color
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__color
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__color
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 msgid "Color"
 msgstr "Värv"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__color_name
-msgid "Color in Report"
-msgstr "Värv aruandes"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__employee_company_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__company_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__company_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__employee_company_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__company_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__company_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__company_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__company_id
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__company_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__company_id
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_mandatory_day_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form_manager
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
@@ -1512,14 +1574,14 @@ msgstr "Kompenseeritavad päevad"
 
 #. module: hr_holidays
 #: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_configuration
+#: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
 msgid "Configuration"
-msgstr "Seadistus"
+msgstr "Seaded"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 msgid "Confirm"
-msgstr "Kinnita"
+msgstr "Kinnitage"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -1591,10 +1653,10 @@ msgstr "Loo uus puhkuse eraldamise taotlus"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__create_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__create_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__create_uid
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__create_uid
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__create_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__create_uid
 msgid "Created by"
-msgstr "Loonud"
+msgstr "Loodud (kelle poolt?)"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave__create_date
@@ -1603,7 +1665,7 @@ msgstr "Loonud"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__create_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__create_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__create_date
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__create_date
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__create_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__create_date
 msgid "Created on"
 msgstr "Loodud"
@@ -1624,9 +1686,13 @@ msgstr "Praegune puudumise tüüp"
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Current Year"
 msgstr "Käesolev aasta"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
+msgid "Currently Valid"
+msgstr "Hetkel kehtiv"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__request_unit_hours
@@ -1636,7 +1702,7 @@ msgstr "Kohandatud tunnid"
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__frequency__daily
 msgid "Daily"
-msgstr "Igapäevaselt"
+msgstr "Igapäevane"
 
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.hr_leave_action_new_request
@@ -1665,12 +1731,13 @@ msgid "Date of the next accrual allocation"
 msgstr "Järgmise tekkepõhise jaotuse kuupäev"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_stress_day_view_form
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_mandatory_day_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 msgid "Dates"
-msgstr "Periood"
+msgstr "Kuupäevad"
 
 #. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__type_request_unit__day
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__request_unit__day
 msgid "Day"
 msgstr "Päev"
@@ -1679,18 +1746,28 @@ msgstr "Päev"
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__added_value_type__days
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__added_value_type__day
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__start_type__day
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__added_value_type__day
 #: model_terms:ir.ui.view,arch_db:hr_holidays.res_users_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_employee_form_leave_inherit
 #, python-format
 msgid "Days"
-msgstr "päev(a)"
+msgstr "päevad"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__second_month__dec
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__dec
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__dec
 msgid "December"
 msgstr "Detsember"
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__max_allowed_negative
+msgid ""
+"Define the maximum level of negative days this kind of time off can reach. "
+"Value must be at least 1."
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -1720,6 +1797,7 @@ msgstr "Kustuta puudumine"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__department_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__department_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__department_id
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_mandatory_day_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Department"
@@ -1731,14 +1809,14 @@ msgid "Department search"
 msgstr "Osakonna otsing"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__department_ids
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__department_ids
 msgid "Departments"
 msgstr "Osakonnad"
 
 #. module: hr_holidays
 #: model:ir.model,name:hr_holidays.model_hr_departure_wizard
 msgid "Departure Wizard"
-msgstr "Lahkumise wizard"
+msgstr "Lahkumise Wizard"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__name
@@ -1765,12 +1843,12 @@ msgstr "Loobu"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__display_name
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__display_name
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__display_name
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__display_name
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__display_name
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__display_name
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__display_name
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__display_name
 msgid "Display Name"
-msgstr "Näidatav nimi"
+msgstr "Kuvatav nimi"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
@@ -1783,10 +1861,23 @@ msgid "Display Time Off in Calendar"
 msgstr "Kuva puudumist kalendris"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_kanban
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
-msgid "Dropdown menu"
-msgstr "Rippmenüü"
+#. odoo-python
+#: code:addons/hr_holidays/models/resource.py:0
+#, python-format
+msgid ""
+"Due to a change in global time offs, %s extra day(s) have been taken from "
+"your allocation. Please review this leave if you need it to be changed."
+msgstr ""
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/resource.py:0
+#, python-format
+msgid ""
+"Due to a change in global time offs, this leave no longer has the required "
+"amount of available allocation and has been set to refused. Please review "
+"this leave."
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-python
@@ -1798,8 +1889,6 @@ msgstr "Riiklike puhkepäevade muutumise tõttu on Teile antud %s päeva tagasi.
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__duration
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_tree
 msgid "Duration"
@@ -1807,8 +1896,14 @@ msgstr "Kestus"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__number_of_days
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_graph
 msgid "Duration (Days)"
 msgstr "Kestus (päevades)"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__number_of_hours
+msgid "Duration (Hours)"
+msgstr "Kestus (tundides)"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__number_of_days_display
@@ -1865,6 +1960,11 @@ msgid "Employee Active"
 msgstr "Töötaja aktiivne"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__employee_company_id
+msgid "Employee Company"
+msgstr "Töötaja ettevõte"
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__employee_requests
 msgid "Employee Requests"
 msgstr "Töötaja taotlused"
@@ -1875,6 +1975,11 @@ msgstr "Töötaja taotlused"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__category_id
 msgid "Employee Tag"
 msgstr "Töötaja silt"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
+msgid "Employee accrue"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_summary_employee__emp
@@ -1890,11 +1995,16 @@ msgid "Employees"
 msgstr "Töötajad"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view_search
+msgid "Employees Off Today"
+msgstr "Töötajad, kes täna puuduvad"
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__date_to
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__date_to
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__date_to
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__end_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__date_to
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__end_date
 msgid "End Date"
 msgstr "Lõppkuupäev"
 
@@ -1917,6 +2027,7 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__feb
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__feb
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__feb
 msgid "February"
 msgstr "Veebruar"
 
@@ -1941,24 +2052,14 @@ msgstr ""
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid ""
-"Filters only on allocations that belong to an time off type that is 'active'"
-" (active field is True)"
-msgstr ""
-"Filtreerib ainult puhkuse eraldisi, mis kuuluvad puhkeaja tüüpi ja on "
-"staatuses \"Aktiivne\" (aktiivne väli on Tõene)"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
-msgid ""
-"Filters only on requests that belong to an time off type that is 'active' "
+"Filters only on allocations that belong to a time off type that is 'active' "
 "(active field is True)"
 msgstr ""
-"Filtreerib ainult taotlusi, mis kuuluvad puhkeaja tüüpi ja on staatuses "
-"\"Aktiivne\" (aktiivne väli on Tõene)"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__first_approver_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__approver_id
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 msgid "First Approval"
 msgstr "Esimene heakskiitmine"
 
@@ -1997,7 +2098,7 @@ msgstr "Jälgijad"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_partner_ids
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Jälgijad (partnerid)"
+msgstr "Jälgijad(Partnerid)"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__activity_type_icon
@@ -2006,11 +2107,13 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Font awesome icon nt. fa-tasks"
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/report/holidays_summary_report.py:0
-#, python-format
-msgid "Form content is missing, this report cannot be printed."
-msgstr "Vormi sisu on puudu, ei saa trükkida aruannet."
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__number_of_days_display
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__number_of_hours_display
+msgid ""
+"For an Accrual Allocation, this field contains the theorical amount of time "
+"given to the employee, due to a previous start date, on the first run of the"
+" plan. This can be manually edited."
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__frequency
@@ -2030,23 +2133,11 @@ msgid "From"
 msgstr "Kellelt?"
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid "From %(date_from)s To %(date_to)s - %(state)s"
-msgstr "Alates %(date_from)s kuni %(date_to)s - %(state)s"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee__leave_date_from
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_base__leave_date_from
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_public__leave_date_from
 msgid "From Date"
 msgstr "Kuupäevast"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
-msgid "From:"
-msgstr "Lähtekoht:"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
@@ -2055,6 +2146,15 @@ msgid "Future Activities"
 msgstr "Tulevased tegevused"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_dashboard.xml:0
+#, python-format
+msgid "Grant Time"
+msgstr ""
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_search
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_mandatory_day_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
@@ -2083,20 +2183,21 @@ msgstr "HR puudumiste kokkuvõte töötaja lõikes"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__request_unit_half
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__type_request_unit__half_day
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__request_unit__half_day
 msgid "Half Day"
 msgstr "Pool päeva"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__has_mandatory_day
+msgid "Has Mandatory Day"
+msgstr "Kohustuslik päev"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__has_message
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__has_message
 msgid "Has Message"
 msgstr "On sõnum"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__has_stress_day
-msgid "Has Stress Day"
-msgstr "Kiire tööperiood"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__has_valid_allocation
@@ -2142,16 +2243,23 @@ msgid "Hour to"
 msgstr "Tund kuni"
 
 #. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__frequency__hourly
+msgid "Hourly"
+msgstr "Tunniti"
+
+#. module: hr_holidays
 #. odoo-javascript
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__added_value_type__hours
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__added_value_type__hour
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__added_value_type__hour
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__type_request_unit__hour
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__request_unit__hour
 #, python-format
 msgid "Hours"
-msgstr "Tunnid"
+msgstr "Tund(i)"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee__hr_icon_display
@@ -2169,9 +2277,9 @@ msgstr "HR ikooni ekraan"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__id
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__id
 msgid "ID"
 msgstr "ID"
@@ -2180,48 +2288,49 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__activity_exception_icon
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__activity_exception_icon
 msgid "Icon"
-msgstr "Ikoon"
+msgstr "sümbolit."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__activity_exception_icon
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Ikoon, mis näitab erandi tegevust"
+msgstr "Ikoon, mis näitab erandi tegevust."
 
 #. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__number_of_days_display
-msgid "If Accrual Allocation: Days given by the accrual system."
-msgstr ""
-
-#. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__number_of_hours_display
-msgid ""
-"If Accrual Allocation: Number of hours allocated in addition to the ones you"
-" will get via the accrual' system."
-msgstr ""
-"Tekkepõhine jaotamine: Tundide arv, mis on eraldatud lisaks tekkepõhise "
-"süsteemi kaudu saadavatele tundidele."
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/avatar_card_popover_patch.xml:0
+#: code:addons/hr_holidays/static/src/im_status_patch.xml:0
+#, python-format
+msgid "Idle"
+msgstr "Idle"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_needaction
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Kui kontrollitud, siis uued sõnumid nõuavad Su tähelepanu."
+msgstr "Kui kontrollitud, siis uued sõnumid nõuavad Teie tähelepanu."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_has_error
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_has_sms_error
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_has_error
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Kui valitud, on mõningatel sõnumitel saatmiserror."
+msgstr "Kui valitud, on mõningate sõnumitel saatmiserror."
 
 #. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__is_based_on_worked_time
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_plan__is_based_on_worked_time
 msgid ""
-"If checked, the rate will be prorated on time off type where type is set on "
-"Working Time in the configuration."
+"If checked, the accrual period will be calculated according to the work "
+"days, not calendar days."
 msgstr ""
-"Kui see on märgitud, jaotatakse määr proportsionaalselt puhkeaja tüübile, "
-"kui tüübiks on konfiguratsioonis määratud tööaeg."
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__allows_negative
+msgid ""
+"If checked, users request can exceed the allocated days and balance can go "
+"in negative."
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__active_employee
@@ -2241,11 +2350,6 @@ msgstr ""
 "peita ilma seda eemaldamata."
 
 #. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__parent_id
-msgid "If this field is empty, this level is the first one."
-msgstr "Kui antud väli on tühi, on see tase esimene."
-
-#. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_duration_check
 msgid ""
 "If you want to change the number of days you should use the 'period' mode"
@@ -2255,15 +2359,6 @@ msgstr "Kui soovite päevade arvu muuta, peaksite kasutama perioodi režiimi"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__transition_mode__immediately
 msgid "Immediately"
 msgstr "Koheselt"
-
-#. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_plan__transition_mode
-msgid ""
-"Immediately: When the date corresponds to the new level, your accrual is automatically computed, granted and you switch to new level\n"
-"                After this accrual's period: When the accrual is complete (a week, a month), and granted, you switch to next level if allocation date corresponds"
-msgstr ""
-"Immediately: When the date corresponds to the new level, your accrual is automatically computed, granted and you switch to new level\n"
-"                After this accrual's period: When the accrual is complete (a week, a month), and granted, you switch to next level if allocation date corresponds"
 
 #. module: hr_holidays
 #. odoo-python
@@ -2276,7 +2371,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_is_follower
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_is_follower
 msgid "Is Follower"
-msgstr "Jälgija"
+msgstr "On jälgija"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__is_officer
@@ -2289,13 +2384,14 @@ msgid "Is Unpaid"
 msgstr "Maksmata"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__ivory
-msgid "Ivory"
-msgstr "Elevandiluu"
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__is_user_only_responsible
+msgid "Is User Only Responsible"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__jan
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__jan
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__jan
 msgid "January"
 msgstr "Jaanuar"
 
@@ -2312,12 +2408,14 @@ msgstr "Ametikoht"
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__second_month__jul
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__jul
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__jul
 msgid "July"
 msgstr "Juuli"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__jun
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__jun
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__jun
 msgid "June"
 msgstr "Juuni"
 
@@ -2333,31 +2431,16 @@ msgid "Kind of Time Off"
 msgstr "Kind of Time Off"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_summary_employee____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day____last_update
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type____last_update
-msgid "Last Modified on"
-msgstr "Viimati muudetud (millal)"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave__write_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_summary_employee__write_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__write_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__write_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__write_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__write_uid
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__write_uid
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__write_uid
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud (kelle poolt)"
+msgstr "Viimati uuendatud"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave__write_date
@@ -2366,7 +2449,7 @@ msgstr "Viimati uuendatud (kelle poolt)"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__write_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__write_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__write_date
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__write_date
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__write_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__write_date
 msgid "Last Updated on"
 msgstr "Viimati uuendatud"
@@ -2378,53 +2461,14 @@ msgid "Late Activities"
 msgstr "Hilinenud tegevused"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lavender
-msgid "Lavender"
-msgstr "Lavendel (Kahvatulilla)"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave__leave_id
-msgid "Leave"
-msgstr "Puudumine"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_resource_calendar__associated_leaves_count
-msgid "Leave Count"
-msgstr "Puudumiste arv"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__leave_id
-#: model:ir.model.fields,field_description:hr_holidays.field_resource_calendar_leaves__holiday_id
-msgid "Leave Request"
-msgstr "Puudumise taotlus"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__leave_type
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__holiday_status_id
-msgid "Leave Type"
-msgstr "Puudumise tüüp"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__leave_validation_type
-msgid "Leave Validation"
-msgstr "Puudumise kinnitamine"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__leaves_taken
-msgid "Leaves Taken"
-msgstr "Võetud puudumised"
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__leave_type_increases_duration
+msgid "Leave Type Increases Duration"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__holiday_status__left
 msgid "Left"
 msgstr "Jääk"
-
-#. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
-#, python-format
-msgid "Left:"
-msgstr "Jääk:"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -2462,64 +2506,9 @@ msgid "Let's try to create a Sick Time Off, select it in the list"
 msgstr "Proovime luua puudumise haiguse tõttu, vali see loetelust"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__level_ids
-msgid "Level"
-msgstr "Etapp"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "Level <span class=\"o_hr_holidays_plan_level_level\"/>"
-msgstr "Etapp <span class=\"o_hr_holidays_plan_level_level\"/>"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__transition_mode
-msgid "Level Transition"
-msgstr "Etapi üleminek"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__level_count
 msgid "Levels"
 msgstr "Tasemed"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightblue
-msgid "Light Blue"
-msgstr "Helesinine"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightcoral
-msgid "Light Coral"
-msgstr "Hele korall"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightcyan
-msgid "Light Cyan"
-msgstr "Heletsüaan"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightgreen
-msgid "Light Green"
-msgstr "Heleroheline"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightpink
-msgid "Light Pink"
-msgstr "Heleroosa"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightsalmon
-msgid "Light Salmon"
-msgstr "Helekollane"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__lightyellow
-msgid "Light Yellow"
-msgstr "Helekollane"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "Limit of"
-msgstr "Piirang"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__maximum_leave
@@ -2533,20 +2522,14 @@ msgid "Linked Requests"
 msgstr "Seotud taotlus"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__action_with_unused_accruals__lost
-msgid "Lost"
-msgstr "Kaotatud"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__magenta
-msgid "Magenta"
-msgstr "Fuksiinpunane"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_main_attachment_id
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Peamine manus"
+
+#. module: hr_holidays
+#: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_management
+msgid "Management"
+msgstr "Projektide haldus"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__manager_id
@@ -2560,13 +2543,28 @@ msgid "Manager Approval"
 msgstr "Juhi kinnitus"
 
 #. module: hr_holidays
+#: model:ir.model,name:hr_holidays.model_hr_leave_mandatory_day
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_mandatory_day_view_search
+msgid "Mandatory Day"
+msgstr "Kohustuslik päev"
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
+#: model:ir.actions.act_window,name:hr_holidays.hr_leave_mandatory_day_action
+#: model:ir.ui.menu,name:hr_holidays.hr_holidays_mandatory_day_menu_configuration
+#, python-format
+msgid "Mandatory Days"
+msgstr "Kohustuslikud päevad"
+
+#. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__mar
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__mar
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__mar
 msgid "March"
 msgstr "Märts"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 msgid "Mark as Draft"
 msgstr "Märgi mustandiks"
@@ -2587,11 +2585,6 @@ msgid "Maximum Allowed"
 msgstr "Maksimaalselt lubatud"
 
 #. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__remaining_leaves
-msgid "Maximum Time Off Allowed - Time Off Already Taken"
-msgstr "Maksimaalselt lubatud puudumised - Puudumised juba võetud"
-
-#. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__virtual_remaining_leaves
 msgid ""
 "Maximum Time Off Allowed - Time Off Already Taken - Time Off Waiting "
@@ -2608,6 +2601,7 @@ msgstr "Ülekantavate puhkepäevade arv"
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__may
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__may
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__may
 msgid "May"
 msgstr "Mai"
 
@@ -2626,7 +2620,7 @@ msgstr "Kalendrisse lisamine"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_has_error
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_has_error
 msgid "Message Delivery error"
-msgstr "Sõnumi edastamise veateade"
+msgstr "Sõnumi saatmise veateade"
 
 #. module: hr_holidays
 #: model:ir.model,name:hr_holidays.model_mail_message_subtype
@@ -2637,7 +2631,22 @@ msgstr "Sõnumite alamtüübid"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_ids
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_ids
 msgid "Messages"
-msgstr "Sõnumid"
+msgstr "Sõnum"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__level_ids
+msgid "Milestone"
+msgstr "Eesmärk"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__transition_mode
+msgid "Milestone Transition"
+msgstr ""
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
+msgid "Milestone reached"
+msgstr "Eesmärk saavutatud"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
@@ -2660,6 +2669,11 @@ msgstr "Kuu"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__frequency__monthly
 msgid "Monthly"
 msgstr "Igakuine"
+
+#. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__start_type__month
+msgid "Months"
+msgstr "kuu(d)"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave__request_date_from_period__am
@@ -2703,28 +2717,32 @@ msgstr "Minu taotlused"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "My Team"
-msgstr "Minu tiim"
+msgstr "Minu meeskond"
+
+#. module: hr_holidays
+#: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_my_leaves
+msgid "My Time"
+msgstr "Minu puudumised"
 
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.hr_leave_action_my
 #: model:ir.ui.menu,name:hr_holidays.hr_leave_menu_my
-#: model:ir.ui.menu,name:hr_holidays.menu_hr_holidays_my_leaves
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 msgid "My Time Off"
 msgstr "Minu puudumised"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__name
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__name
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__name
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__name
 #: model_terms:ir.ui.view,arch_db:hr_holidays.resource_calendar_leaves_tree_inherit
 msgid "Name"
 msgstr "Nimi"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
-msgid "Need Second Approval"
-msgstr "Ootab teist kinnitamist"
+#: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
+msgid "Negative Cap"
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -2745,10 +2763,17 @@ msgstr "Uue %(leave_type)s taotluse tegi %(user)s"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/views/calendar/calendar_controller.js:0
+#: code:addons/hr_holidays/static/src/views/hooks.js:0
 #, python-format
 msgid "New Allocation"
 msgstr "Uus taotlus"
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_dashboard.xml:0
+#, python-format
+msgid "New Allocation Request"
+msgstr "Uus puhkepäevade jaotamise taotlus"
 
 #. module: hr_holidays
 #. odoo-python
@@ -2762,9 +2787,13 @@ msgstr ""
 "%(allocation_type)s"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "New Milestone"
+msgstr "Uus eesmärk"
+
+#. module: hr_holidays
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_controller.js:0
-#: code:addons/hr_holidays/static/src/views/calendar/calendar_controller.xml:0
 #, python-format
 msgid "New Time Off"
 msgstr "Uus puudumine"
@@ -2779,7 +2808,7 @@ msgstr "Järgmine tegevus kalendris"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__activity_date_deadline
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Järgmise tegevuse kuupäev"
+msgstr "Järgmise tegevuse tähtaeg"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__activity_summary
@@ -2806,9 +2835,9 @@ msgid "No Validation"
 msgstr "Kinnitamiseta"
 
 #. module: hr_holidays
+#: model_terms:ir.actions.act_window,help:hr_holidays.act_hr_employee_holiday_type
 #: model_terms:ir.actions.act_window,help:hr_holidays.action_hr_available_holidays_report
 #: model_terms:ir.actions.act_window,help:hr_holidays.mail_activity_type_action_config_hr_holidays
-#: model_terms:ir.actions.server,help:hr_holidays.act_hr_employee_holiday_request
 msgid "No data to display"
 msgstr "Pole andmeid, mida näidata"
 
@@ -2834,6 +2863,11 @@ msgid "No validation needed"
 msgstr "Kinnitamist pole vaja"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
+msgid "Nobody will be notified"
+msgstr "Kellelegi ei teavitata."
+
+#. module: hr_holidays
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/leave_stats/leave_stats.xml:0
 #: code:addons/hr_holidays/static/src/leave_stats/leave_stats.xml:0
@@ -2842,13 +2876,24 @@ msgid "None"
 msgstr "Pole"
 
 #. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__action_with_unused_accruals__lost
+msgid "None. Accrued time reset to 0"
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__employee_requests__no
 msgid "Not Allowed"
 msgstr "Pole lubatud"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__responsible_ids
+msgid "Notified Time Off Officer"
+msgstr "Teavitatud puudumiste kinnitajat"
+
+#. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__second_month__nov
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__nov
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__nov
 msgid "November"
 msgstr "November"
 
@@ -2861,13 +2906,14 @@ msgstr "Tundide arv-Tekst"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_needaction_counter
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Toimingute arv"
+msgstr "Tegevuste arv"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__number_of_days
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__number_of_days
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__number_of_days
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_tree
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_holiday_list
 msgid "Number of Days"
 msgstr "Päevade arv"
 
@@ -2889,18 +2935,14 @@ msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__number_of_days
-msgid ""
-"Number of days of the time off request. Used in the calculation. To manually"
-" correct the duration, use this field."
+msgid "Number of days of the time off request. Used in the calculation."
 msgstr ""
-"Puudumiste taotlemise päevade arv vastavalt teie töögraafikule. Kasutatud "
-"arvutamisel"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_has_error_counter
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_has_error_counter
 msgid "Number of errors"
-msgstr "Veateadete arv"
+msgstr "Vigade arv"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__number_of_hours_display
@@ -2912,6 +2954,11 @@ msgstr ""
 "liidese jaoks."
 
 #. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave__number_of_hours
+msgid "Number of hours of the time off request. Used in the calculation."
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_needaction_counter
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_needaction_counter
 msgid "Number of messages requiring action"
@@ -2921,11 +2968,12 @@ msgstr "Tegevust nõudvate sõnumite arv"
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_has_error_counter
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Kohaletoimetamise veateatega sõnumite arv"
+msgstr "Veateatega sõnumite arv"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__second_month__oct
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__oct
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__oct
 msgid "October"
 msgstr "Oktoober"
 
@@ -2943,13 +2991,13 @@ msgstr "Täna eemal"
 
 #. module: hr_holidays
 #: model:res.groups,name:hr_holidays.group_hr_holidays_user
-msgid "Officer : Manage all requests"
-msgstr "Ametnik: hallake kõiki taotlusi"
+msgid "Officer: Manage all requests"
+msgstr "Puudumiste kinnitaja: Halda kõiki taotlusi"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_employee_form_leave_inherit
-msgid "On Leave"
-msgstr "Puhkusel"
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_employee_view_search
+msgid "On Time Off"
+msgstr "Puudumise ajal"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee__hr_icon_display__presence_holiday_absent
@@ -2960,19 +3008,19 @@ msgstr "Puhkusel"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
-#: code:addons/hr_holidays/static/src/components/thread_icon/thread_icon.xml:0
+#: code:addons/hr_holidays/static/src/avatar_card_popover_patch.xml:0
+#: code:addons/hr_holidays/static/src/im_status_patch.xml:0
+#: code:addons/hr_holidays/static/src/thread_icon.patch.xml:0
 #, python-format
 msgid "Online"
 msgstr "Online"
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #, python-format
-msgid "Only a Time Off Manager can approve/refuse its own requests."
-msgstr ""
-"Ainult puudumiste kinnitaja saab oma taotlusi kinnitada/tagasi lükata."
+msgid "Only"
+msgstr "Ainult"
 
 #. module: hr_holidays
 #. odoo-python
@@ -2997,18 +3045,18 @@ msgstr "Ainult puhkuste haldur saab lähtestada teiste inimeste lahkumisi."
 
 #. module: hr_holidays
 #. odoo-python
-#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
-msgid "Only a time off Manager can approve its own requests."
-msgstr "Ainult puudumiste kinnitaja saab enda taotlusi kinnitada."
+msgid ""
+"Only a Time Off Officer or Manager can approve/refuse its own requests."
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #, python-format
-msgid "Only a time off Manager can reset other people allocation."
-msgstr ""
-"Ainult puhkuste haldur saab lähtestada teiste inimeste puhkuse jaotamisi."
+msgid "Only a time off Manager can approve its own requests."
+msgstr "Ainult puudumiste kinnitaja saab enda taotlusi kinnitada."
 
 #. module: hr_holidays
 #. odoo-python
@@ -3022,11 +3070,6 @@ msgstr ""
 " või tagasi lükata."
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_tree
-msgid "Open"
-msgstr "Avatud"
-
-#. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_employee.py:0
 #, python-format
@@ -3034,16 +3077,22 @@ msgid "Operation not supported"
 msgstr "Toiming pole toetatud"
 
 #. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_date__other
+msgid "Other"
+msgstr "Meeldetuletuse lisamine"
+
+#. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
-#: code:addons/hr_holidays/static/src/components/thread_icon/thread_icon.xml:0
+#: code:addons/hr_holidays/static/src/avatar_card_popover_patch.xml:0
+#: code:addons/hr_holidays/static/src/im_status_patch.xml:0
+#: code:addons/hr_holidays/static/src/thread_icon.patch.xml:0
 #, python-format
 msgid "Out of office"
 msgstr "Kontorist väljas"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/models/partner.js:0
+#: code:addons/hr_holidays/static/src/persona_service_patch.js:0
 #, python-format
 msgid "Out of office until %s"
 msgstr "Kontorist väljas kuni %s"
@@ -3070,7 +3119,7 @@ msgid "Parental Leaves"
 msgstr "Lapsehoolduspuhkus"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_stress_day_view_search
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_mandatory_day_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_search_hr_holidays_employee_type_report
 msgid "Period"
 msgstr "Periood"
@@ -3091,14 +3140,8 @@ msgstr "Planeeritud:"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee__hr_icon_display__presence_holiday_present
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee_base__hr_icon_display__presence_holiday_present
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee_public__hr_icon_display__presence_holiday_present
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_employee_form_leave_inherit
 msgid "Present but on leave"
 msgstr "Kohal, kuid puhkusel"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__parent_id
-msgid "Previous Level"
-msgstr "Eelmine tase"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_summary_employee
@@ -3107,20 +3150,13 @@ msgstr "Prindi"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_holidays_cancel_leave_form
-msgid "Provide a reason for cancellation of an approved time off"
-msgstr "Esitage kinnitatud puhkusetaotluse tühistamise põhjus"
+msgid "Provide a reason to delete an approved time off"
+msgstr ""
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.resource_calendar_form_inherit
 msgid "Public"
 msgstr "Avalik"
-
-#. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
-#, python-format
-msgid "Public Holiday"
-msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -3137,6 +3173,12 @@ msgid "Rate"
 msgstr "Määr"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__rating_ids
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__rating_ids
+msgid "Ratings"
+msgstr "Hinnangud"
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave__reason
 msgid "Reason"
 msgstr "Põhjus"
@@ -3148,14 +3190,11 @@ msgid "Reasons"
 msgstr "Põhjused"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__red
-msgid "Red"
-msgstr "Punane"
-
-#. module: hr_holidays
+#. odoo-javascript
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#: code:addons/hr_holidays/static/src/views/view_dialog/form_view_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
@@ -3175,9 +3214,17 @@ msgstr "Keeldu"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__state__refuse
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__state__refuse
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report_calendar__state__refuse
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form_dashboard_new_time_off
 #, python-format
 msgid "Refused"
 msgstr "Tagasi lükatud"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "Refused Time Off"
+msgstr "Tagasi lükatud puudumine"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__allocation_type__regular
@@ -3200,11 +3247,6 @@ msgstr "Järelejäänud päevi"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_public__remaining_leaves
 msgid "Remaining Paid Time Off"
 msgstr "Tasustatud puudumiste jääk"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__remaining_leaves
-msgid "Remaining Time Off"
-msgstr "Järelejäänud puhkepäevade arv"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.res_users_view_form
@@ -3258,6 +3300,11 @@ msgid "Requires allocation"
 msgstr "Nõuab jaotamist"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__resource_calendar_id
+msgid "Resource Calendar"
+msgstr "Ressursside kalender"
+
+#. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.resource_calendar_global_leaves_action_from_calendar
 msgid "Resource Time Off"
 msgstr "Ressursi puudumised"
@@ -3271,11 +3318,6 @@ msgstr "Ressursi puudumise detailid"
 #: model:ir.model,name:hr_holidays.model_resource_calendar
 msgid "Resource Working Time"
 msgstr "Tööaja ressurss"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__responsible_id
-msgid "Responsible Time Off Officer"
-msgstr "Vastutav puhkuste haldur"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__activity_user_id
@@ -3292,6 +3334,12 @@ msgstr "Reeglid"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid "Run until"
 msgstr "kuni"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_has_sms_error
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Sõnumi kohaletoimetamise viga"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__week_day__sat
@@ -3328,6 +3376,7 @@ msgstr "Otsi taotlusi"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__state__validate1
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__state__validate1
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report_calendar__state__validate1
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 msgid "Second Approval"
 msgstr "Teine kinnitamine"
 
@@ -3355,6 +3404,13 @@ msgstr "Teise kuu päev"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__second_month_day_display
 msgid "Second Month Day Display"
 msgstr "Teise kuu päeva vaade"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "Second approval request for %(leave_type)s"
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -3402,13 +3458,14 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__second_month__sep
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__yearly_month__sep
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_plan__carryover_month__sep
 msgid "September"
 msgstr "September"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__sequence
 msgid "Sequence"
-msgstr "Järjestus"
+msgstr "Jada"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__sequence
@@ -3417,12 +3474,8 @@ msgstr "Sequence is generated automatically by start time delta."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__postpone_max_days
-msgid ""
-"Set a maximum of days an allocation keeps at the end of the year. 0 for no "
-"limit."
+msgid "Set a maximum of accruals an allocation keeps at the end of the year."
 msgstr ""
-"Määrake maksimaalne päevade arv, mida eraldamine aasta lõpus säilitab. 0 "
-"ilma piiranguteta."
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__show_transition_mode
@@ -3434,7 +3487,8 @@ msgstr "Näita üleminekurežiimi"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 msgid "Show all records which has next action date is before today"
 msgstr ""
-"Näita kõiki andmeid, mille järgmise tegevuse kuupäev on enne tänast kuupäeva"
+"Näita kõiki andmeid, mille järgmise tegevuse kuupäev on ennem tänast "
+"kuupäeva"
 
 #. module: hr_holidays
 #: model:hr.leave.type,name:hr_holidays.holiday_status_sl
@@ -3442,6 +3496,13 @@ msgstr ""
 #: model:mail.message.subtype,name:hr_holidays.mt_leave_sick
 msgid "Sick Time Off"
 msgstr "Haiguse tõttu puudumine"
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid "Some leaves cannot be linked to any allocation. To see those leaves,"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_plan__time_off_type_id
@@ -3453,11 +3514,22 @@ msgstr ""
 "                 Jätke tühjaks, kui seda tekkeplaani saab kasutada mis tahes puhkeaja tüübiga."
 
 #. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_plan__transition_mode
+msgid ""
+"Specify what occurs if a level transition takes place in the middle of a pay period.\n"
+"\n"
+"                'Immediately' will switch the employee to the new accrual level on the exact date during the ongoing pay period.\n"
+"\n"
+"                'After this accrual's period' will keep the employee on the same accrual level until the ongoing pay period is complete.\n"
+"                After it is complete, the new level will take effect when the next pay period begins."
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__date_from
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__date_from
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__date_from
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__start_date
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__date_from
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__start_date
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
@@ -3470,26 +3542,9 @@ msgid "Start after"
 msgstr "Alusta pärast"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "Starts"
-msgstr "Algab"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "Starts immediately after allocation start date"
-msgstr "Algab koheselt peale jaotamise alguskuupäeva"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__state
 msgid "State"
-msgstr "Maakond"
-
-#. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/tours/hr_holidays_tour.js:0
-#, python-format
-msgid "State is now confirmed. We can go back to the calendar"
-msgstr "Maakond on kinnitatud. Võite minna tagasi kalendrisse"
+msgstr "Staatus"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__state
@@ -3513,25 +3568,7 @@ msgstr ""
 "Tegevuspõhised staatused\n"
 "Üle aja: Tähtaeg on juba möödas\n"
 "Täna: Tegevuse tähtaeg on täna\n"
-"Planeeritud: Tulevased tegevused"
-
-#. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
-#: model:ir.model,name:hr_holidays.model_hr_leave_stress_day
-#, python-format
-msgid "Stress Day"
-msgstr "Ettevõtte kiired tööpäevad"
-
-#. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
-#: model:ir.actions.act_window,name:hr_holidays.hr_leave_stress_day_action
-#: model:ir.ui.menu,name:hr_holidays.hr_holidays_stress_day_menu_configuration
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_stress_day_view_search
-#, python-format
-msgid "Stress Days"
-msgstr "Ettevõtte kiired tööpäevad"
+"Planeeritud: Tulevased tegevused."
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__is_striked
@@ -3547,21 +3584,9 @@ msgid "Submit your request"
 msgstr "Esita taotlus"
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid "Such grouping is not allowed."
-msgstr "Taoline grupeering pole lubatud."
-
-#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 msgid "Sum"
 msgstr "Kokku"
-
-#. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__virtual_leaves_taken
-msgid "Sum of validated and non validated time off requests."
-msgstr "Kinnitatud ja kinnitamata puhkusetaotluste summa."
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__week_day__sun
@@ -3589,7 +3614,6 @@ msgstr "Tõendavad dokumendid"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__leave_type_request_unit
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__type_request_unit
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__request_unit
 msgid "Take Time Off in"
 msgstr "Puudumise aeg"
@@ -3603,9 +3627,12 @@ msgid "Taken"
 msgstr "Võetud"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__taken_leave_ids
-msgid "Taken Leave"
-msgstr "Võetud puhkus"
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#, python-format
+msgid ""
+"The Start Date of the Validity Period must be anterior to the End Date."
+msgstr "Alguskuupäev peab olema enne lõppkuupäeva."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__start_count
@@ -3663,6 +3690,22 @@ msgstr ""
 " %s"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid ""
+"The leaves planned in the future are exceeding the maximum value of the allocation.\n"
+"                It will not be possible to take all of them."
+msgstr ""
+
+#. module: hr_holidays
+#: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_type_check_negative
+msgid ""
+"The negative amount must be greater than 0. If you want to set 0, disable "
+"the negative cap instead."
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__added_value
 msgid ""
 "The number of hours/days that will be incremented in the specified Time Off "
@@ -3672,26 +3715,20 @@ msgstr ""
 "tüübi järgi"
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
+#: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_date_check3
 msgid ""
-"The number of remaining time off is not sufficient for this time off type.\n"
-"Please also check the time off waiting for validation."
+"The request start date must be before or equal to the request end date."
 msgstr ""
-"Järelejäänud puhkepäevade arv ei ole selle puhkeaja tüübi jaoks piisav.\n"
-"Kontrollige ka kinnitamise ootamise aega."
 
 #. module: hr_holidays
-#: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_stress_day_date_from_after_day_to
+#: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_mandatory_day_date_from_after_day_to
 msgid "The start date must be anterior than the end date."
 msgstr "Alguskuupäev peab olema lõppkuupäevast varasem."
 
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_date_check2
-msgid "The start date must be anterior to the end date."
-msgstr "Alguskuupäev peab olema enne lõpukuupäeva."
+msgid "The start date must be before or equal to the end date."
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__state
@@ -3741,16 +3778,20 @@ msgstr "Väikseima järjestusega tüüp on puhkusetaotluse vaikeväärtus"
 
 #. module: hr_holidays
 #. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "There is no valid allocation to cover that request."
+msgstr ""
+
+#. module: hr_holidays
+#. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #, python-format
 msgid ""
 "This allocation have already ran once, any modification won't be effective "
 "to the days allocated to the employee. If you need to change the "
-"configuration of the allocation, cancel and create a new one."
+"configuration of the allocation, delete and create a new one."
 msgstr ""
-"Seda jaotust on juba korra tehtud, kõik muudatused ei kehti töötajale "
-"eraldatud päevade suhtes. Kui Teil on vaja jaotus seadistusi muuta, "
-"tühistage see ja looge uus."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__first_approver_id
@@ -3772,15 +3813,6 @@ msgstr ""
 msgid ""
 "This area is automatically filled by the user who validates the allocation"
 msgstr "Selle välja täidab automaatselt kasutaja, kes jaotuse kinnitab"
-
-#. module: hr_holidays
-#: model:ir.model.fields,help:hr_holidays.field_hr_leave_type__color_name
-msgid ""
-"This color will be used in the time off summary located in Reporting > Time "
-"off by Department."
-msgstr ""
-"Seda värvi kasutatakse puhkuste kokkuvõttes, mis asub jaotises Aruandlus > "
-"Puhkus osakonna järgi."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__start_type
@@ -3831,6 +3863,8 @@ msgid "Thursday"
 msgstr "Neljapäev"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
 #: model:ir.actions.act_window,name:hr_holidays.hr_leave_action_holiday_allocation_id
 #: model:ir.model,name:hr_holidays.model_hr_leave
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee__leave_manager_id
@@ -3845,6 +3879,7 @@ msgstr "Neljapäev"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_departure_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view_form
+#, python-format
 msgid "Time Off"
 msgstr "Puudumised"
 
@@ -3856,7 +3891,7 @@ msgstr "Puudumiste jaotamine"
 #. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/report/hr_leave_employee_type_report.py:0
-#: code:addons/hr_holidays/report/hr_leave_report.py:0
+#: model:ir.actions.act_window,name:hr_holidays.act_hr_employee_holiday_type
 #: model:ir.actions.act_window,name:hr_holidays.action_hr_available_holidays_report
 #: model:ir.actions.act_window,name:hr_holidays.hr_leave_action_action_department
 #, python-format
@@ -3877,6 +3912,11 @@ msgstr "Puudumiste kinnitaja"
 #: model:ir.model,name:hr_holidays.model_hr_leave_report_calendar
 msgid "Time Off Calendar"
 msgstr "Puudumiste kalender"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_resource_calendar__associated_leaves_count
+msgid "Time Off Count"
+msgstr "Puudumiste arv"
 
 #. module: hr_holidays
 #. odoo-python
@@ -3910,6 +3950,9 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/views/calendar/calendar_controller.js:0
 #: model:ir.actions.act_window,name:hr_holidays.hr_leave_action_my_request
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_cancel_leave__leave_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__leave_id
+#: model:ir.model.fields,field_description:hr_holidays.field_resource_calendar_leaves__holiday_id
 #: model:mail.message.subtype,description:hr_holidays.mt_leave
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_employee_view_dashboard
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
@@ -3940,9 +3983,9 @@ msgstr "Puudumise teine kinnitamine"
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.action_hr_holidays_summary_employee
 #: model:ir.actions.report,name:hr_holidays.action_report_holidayssummary
-#: model:ir.actions.report,name:hr_holidays.action_report_holidayssummary2
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_holiday_graph
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_holiday_list
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_holiday_pivot
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_summary_employee
 msgid "Time Off Summary"
@@ -3964,8 +4007,11 @@ msgstr "Puudumisi võetud:"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__holiday_status_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__time_off_type_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__holiday_status_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__leave_type
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__holiday_status_id
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__name
 #: model_terms:ir.ui.view,arch_db:hr_holidays.edit_holiday_status_form
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_search
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_holiday_status_normal_tree
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
@@ -3978,6 +4024,11 @@ msgstr "Puudumise tüüp"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_holidays_status_filter
 msgid "Time Off Types"
 msgstr "Puudumiste tüübid"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__leave_validation_type
+msgid "Time Off Validation"
+msgstr "Puudumise kinnitamine"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
@@ -3995,14 +4046,19 @@ msgid "Time Off."
 msgstr "Puudumised."
 
 #. module: hr_holidays
+#: model:ir.actions.server,name:hr_holidays.hr_leave_cron_cancel_invalid_ir_actions_server
+msgid "Time Off: Cancel invalid leaves"
+msgstr "Puudumised: Tühista kehtetud puudumised"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
+msgid "Time off"
+msgstr "Puudumised"
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__leaves_taken
 msgid "Time off Already Taken"
 msgstr "Puudumised juba võetud"
-
-#. module: hr_holidays
-#: model:ir.actions.server,name:hr_holidays.act_hr_employee_holiday_request
-msgid "Time off Analysis"
-msgstr "Puudumiste analüüs"
 
 #. module: hr_holidays
 #: model:ir.actions.server,name:hr_holidays.action_hr_holidays_by_employee_and_type_report
@@ -4010,9 +4066,15 @@ msgid "Time off Analysis by Employee and Time Off Type"
 msgstr "Puudumiste analüüs ja puudumiste tüüp töötaja kohta"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
-msgid "Time off Taken/Total Allocated"
-msgstr "Puudumised võetud/Jaotamine tehtud"
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_graph
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_pivot
+msgid "Time off Summary"
+msgstr "Puudumise kokkuvõte"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__leaves_taken
+msgid "Time off Taken"
+msgstr "Puudumisi võetud"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
@@ -4075,7 +4137,7 @@ msgstr "Ajavöönd"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__stop_datetime
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 msgid "To"
-msgstr "Kuhu"
+msgstr "Saaja"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -4085,7 +4147,6 @@ msgstr "Kuhu"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__state__confirm
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__state__confirm
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report_calendar__state__confirm
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter_report
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_leave_allocation_filter
 #, python-format
@@ -4098,11 +4159,6 @@ msgid "To Approve or Approved Allocations"
 msgstr "Kinnitatud või kinnitatud puhkuste eraldamine"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
-msgid "To Approve or Need Second Approval or Approved Time Off"
-msgstr "Kinnitamiseks/teise kinnituse ootel/kinnitatud puudumine"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee__leave_date_to
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_base__leave_date_to
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_employee_public__leave_date_to
@@ -4112,7 +4168,6 @@ msgstr "Kuupäevani"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave__state__draft
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_allocation__state__draft
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__state__draft
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report__state__draft
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_report_calendar__state__draft
@@ -4120,9 +4175,11 @@ msgid "To Submit"
 msgstr "Esitamise ootel"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
-msgid "To:"
-msgstr "Saaja:"
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_dashboard.xml:0
+#, python-format
+msgid "Today"
+msgstr "Täna"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
@@ -4164,11 +4221,6 @@ msgid "Training Time Off"
 msgstr "Training Time Off"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__action_with_unused_accruals__postponed
-msgid "Transferred to the next year"
-msgstr "Ülekantud järgmisse aastasse"
-
-#. module: hr_holidays
 #: model_terms:ir.actions.act_window,help:hr_holidays.mail_activity_type_action_config_hr_holidays
 msgid ""
 "Try to add some records, or make sure that there is no active filter in the "
@@ -4206,6 +4258,11 @@ msgid "Type"
 msgstr "Tüüp"
 
 #. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__type_request_unit
+msgid "Type Request Unit"
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__activity_exception_decoration
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__activity_exception_decoration
 msgid "Type of the exception activity on record."
@@ -4222,9 +4279,14 @@ msgid "Tz Mismatch"
 msgstr "Tz Mismatch"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "Unlimited"
+msgstr "Piiramatu"
+
+#. module: hr_holidays
 #: model:hr.leave.type,name:hr_holidays.holiday_status_unpaid
 msgid "Unpaid"
-msgstr "Tasustamata"
+msgstr "Tasumata"
 
 #. module: hr_holidays
 #: model:mail.message.subtype,description:hr_holidays.mt_leave_unpaid
@@ -4238,11 +4300,9 @@ msgid "Unread Messages"
 msgstr "Lugemata sõnumid"
 
 #. module: hr_holidays
-#. odoo-javascript
-#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
-#, python-format
-msgid "Usable:"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
+msgid "Up to"
+msgstr "Kuni"
 
 #. module: hr_holidays
 #: model:ir.model,name:hr_holidays.model_res_users
@@ -4252,32 +4312,38 @@ msgstr "Kasutaja"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
+#: code:addons/hr_holidays/static/src/avatar_card_popover_patch.xml:0
+#: code:addons/hr_holidays/static/src/im_status_patch.xml:0
 #, python-format
-msgid "User is away"
-msgstr "Kasutaja on eemal"
+msgid "User is idle"
+msgstr "Kasutaja on tegevusetu"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
+#: code:addons/hr_holidays/static/src/avatar_card_popover_patch.xml:0
+#: code:addons/hr_holidays/static/src/im_status_patch.xml:0
 #, python-format
 msgid "User is online"
-msgstr "Kasutaja on Online"
+msgstr "Kasutaja on online"
 
 #. module: hr_holidays
 #. odoo-javascript
-#: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
+#: code:addons/hr_holidays/static/src/avatar_card_popover_patch.xml:0
+#: code:addons/hr_holidays/static/src/im_status_patch.xml:0
 #, python-format
 msgid "User is out of office"
 msgstr "Kasutaja on kontorist väljas"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/views/view_dialog/form_view_dialog.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_tree
+#, python-format
 msgid "Validate"
-msgstr "Kinnita"
+msgstr "Valideeri"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -4309,19 +4375,9 @@ msgid "Validity Stop"
 msgstr "Kehtivuse lõpp"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__violet
-msgid "Violet"
-msgstr "Violetne"
-
-#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__virtual_remaining_leaves
 msgid "Virtual Remaining Time Off"
 msgstr "Virtuaalne kasutamata puudumiste jääk"
-
-#. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__virtual_leaves_taken
-msgid "Virtual Time Off Already Taken"
-msgstr "Juba võetud puudumised virtuaalselt"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee__current_leave_state__confirm
@@ -4329,6 +4385,11 @@ msgstr "Juba võetud puudumised virtuaalselt"
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee_public__current_leave_state__confirm
 msgid "Waiting Approval"
 msgstr "Ootab heakskiitu"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.view_hr_holidays_filter
+msgid "Waiting For Me"
+msgstr "Ootel"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_employee__current_leave_state__validate1
@@ -4341,6 +4402,18 @@ msgstr "Ootab teist heakskiitu"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_report_calendar_view_search
 msgid "Waiting for Approval"
 msgstr "Ootab kinnitust"
+
+#. module: hr_holidays
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__website_message_ids
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__website_message_ids
+msgid "Website Messages"
+msgstr "Veebilehe sõnumid"
+
+#. module: hr_holidays
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave__website_message_ids
+#: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__website_message_ids
+msgid "Website communication history"
+msgstr "Veebilehe suhtluse ajalugu"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__week_day__wed
@@ -4360,24 +4433,19 @@ msgid "Weekly"
 msgstr "Iganädalane"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__color_name__wheat
-msgid "Wheat"
-msgstr "Nisukarva"
-
-#. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__time_type__other
 msgid "Worked Time"
 msgstr "Töötatud aeg"
 
 #. module: hr_holidays
-#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_stress_day__resource_calendar_id
+#: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_mandatory_day__resource_calendar_id
 msgid "Working Hours"
 msgstr "Tööaeg"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__frequency__yearly
 msgid "Yearly"
-msgstr "Iga-aastaselt"
+msgstr "Aastane"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__yearly_day
@@ -4393,6 +4461,11 @@ msgstr "Iga-aastase päeva vaade"
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__yearly_month
 msgid "Yearly Month"
 msgstr "Iga-aastane kuu"
+
+#. module: hr_holidays
+#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__start_type__year
+msgid "Years"
+msgstr "Aastas"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__requires_allocation__yes
@@ -4414,9 +4487,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
-msgid "You are not allowed to request a time off on a Stress Day."
-msgstr ""
-"Ettevõtte kiirel tööperioodil ei ole lubatud puudumise avaldust esitada."
+msgid "You are not allowed to request a time off on a Mandatory Day."
+msgstr "Sul ei ole lubatud taotleda vaba päeva kohustuslikul päeval."
 
 #. module: hr_holidays
 #. odoo-python
@@ -4424,45 +4496,6 @@ msgstr ""
 #, python-format
 msgid "You can not have 2 time off that overlaps on the same day."
 msgstr "Teil ei saa olla 2 kattuvat puudumist."
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid ""
-"You can not set two time off that overlap on the same day for the same employee.\n"
-"Existing time off:\n"
-"%s"
-msgstr ""
-"Samal päeval ei saa samale töötajale määrata kahte puudumist, mis kattuvad.\n"
-"Olemasolev puhkeaeg:\n"
-"%s"
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid ""
-"You can not set two time off that overlap on the same day for the same employees.\n"
-"Existing time off:\n"
-"%s"
-msgstr ""
-"Samal päeval ei saa samadele töötajatele määrata kahte kattuvat puudumist.\n"
-"Olemasolev puhkeaeg:\n"
-"%s"
-
-#. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/hr_leave.py:0
-#, python-format
-msgid ""
-"You can not set two time off that overlap on the same day.\n"
-"Existing time off:\n"
-"%s"
-msgstr ""
-"Samal päeval ei saa määrata kahte kattuvat puudumist.\n"
-"Olemasolev puhkeaeg:\n"
-"%s"
 
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_accrual_level_start_count_check
@@ -4543,6 +4576,15 @@ msgstr ""
 
 #. module: hr_holidays
 #. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#, python-format
+msgid ""
+"You cannot refuse this allocation request since the employee has already "
+"taken leaves for it. Please refuse or delete those leaves first."
+msgstr ""
+
+#. module: hr_holidays
+#. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
 msgid ""
@@ -4596,6 +4638,16 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, python-format
+msgid ""
+"You've already booked time off which overlaps with this period:\n"
+"%s\n"
+"Attempting to double-book your time off won't magically make your vacation 2x better!\n"
+msgstr ""
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
 msgid "Your %(leave_type)s planned on %(date)s has been accepted"
 msgstr "Teie %(leave_type)s perioodiks %(date)s on kinnitatud"
 
@@ -4608,27 +4660,37 @@ msgstr "Teie %(leave_type)s perioodiks %(date)s on tagasi lükatud"
 
 #. module: hr_holidays
 #. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "Your Time Off"
+msgstr "Sinu puudumised"
+
+#. module: hr_holidays
+#. odoo-python
 #: code:addons/hr_holidays/wizard/hr_holidays_cancel_leave.py:0
 #, python-format
 msgid "Your time off has been canceled."
 msgstr "Teie puhkus on tühistatud."
 
 #. module: hr_holidays
-#. odoo-python
-#: code:addons/hr_holidays/models/resource.py:0
-#, python-format
-msgid "a new public holiday completely overrides this leave."
-msgstr "a new public holiday completely overrides this leave."
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "after"
+msgstr "pärast"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
-msgid "after allocation date"
-msgstr "pärast eraldamise kuupäeva"
+msgid "after allocation start date"
+msgstr "pärast eraldamise alguskuupäeva"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "after allocation start date"
-msgstr "pärast eraldamise alguskuupäeva"
+msgid "all"
+msgstr "kõik"
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
+msgid "and"
+msgstr "ja"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
@@ -4654,6 +4716,20 @@ msgid "by Type"
 msgstr "Tüübi järgi"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid "can be used before the allocation expires."
+msgstr ""
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid "click here"
+msgstr ""
+
+#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
 msgid "day of the month"
 msgstr "päev kuus"
@@ -4662,7 +4738,6 @@ msgstr "päev kuus"
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/leave_stats/leave_stats.xml:0
 #: code:addons/hr_holidays/static/src/leave_stats/leave_stats.xml:0
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__start_type__day
 #, python-format
 msgid "day(s)"
 msgstr "päev(a)"
@@ -4675,9 +4750,8 @@ msgstr "päev(a)"
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_activity
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_kanban
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
 #, python-format
 msgid "days"
@@ -4689,6 +4763,19 @@ msgid "days of the months"
 msgstr "kuude päevad"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_activity
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
+msgid "days)"
+msgstr "päevad)"
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "deleted by %s (uid=%d)."
+msgstr "kustutatud %s poolt (uid=%d)."
+
+#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 msgid "e.g. Time Off type (From validity start to validity end / no limit)"
@@ -4697,11 +4784,19 @@ msgstr ""
 "piiranguta)"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "from %(date_from)s to %(date_to)s - %(state)s"
+msgstr "alates %(date_from)s kuni %(date_to)s - %(state)s"
+
+#. module: hr_holidays
 #. odoo-javascript
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #, python-format
@@ -4716,6 +4811,11 @@ msgid "in"
 msgstr "tollid"
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "initially"
+msgstr "alguses"
+
+#. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_accrual_plan_level.py:0
 #, python-format
@@ -4723,17 +4823,20 @@ msgid "last day"
 msgstr "viimane päev"
 
 #. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "lost"
-msgstr "kadunud"
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
+#, python-format
+msgid "new request"
+msgstr "Uus taotlus"
 
 #. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__start_type__month
-msgid "month(s)"
-msgstr "kuu(d)"
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "no"
+msgstr "ei"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
 msgid "of"
 msgstr "punkti"
 
@@ -4751,18 +4854,13 @@ msgstr "of the month"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
 msgid "on"
-msgstr " on"
+msgstr ","
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_level_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
 msgid "on the"
 msgstr "on the"
-
-#. module: hr_holidays
-#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
-msgid "postponed"
-msgstr "edasi lükatud"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_kanban
@@ -4783,6 +4881,13 @@ msgid "taken"
 msgstr "võetud"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave.py:0
+#, python-format
+msgid "the accruated amount is insufficient for that duration."
+msgstr ""
+
+#. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 msgid "to"
 msgstr "kuni"
@@ -4791,6 +4896,11 @@ msgstr "kuni"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
 msgid "to refuse"
 msgstr ""
+
+#. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
+msgid "up to"
+msgstr "kuni"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -4809,8 +4919,3 @@ msgstr "kinnitada"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
 msgid "validated"
 msgstr "kinnitatud"
-
-#. module: hr_holidays
-#: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__start_type__year
-msgid "year(s)"
-msgstr "aasta(d)"

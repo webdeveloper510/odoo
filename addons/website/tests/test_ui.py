@@ -33,7 +33,7 @@ class TestUiCustomizeTheme(odoo.tests.HttpCase):
         website_test = Website.create({'name': 'Website Test'})
 
         # simulate attachment state when editing 2 theme through customize
-        custom_url = '/TEST/website/static/src/scss/options/colors/user_theme_color_palette.custom.web.assets_frontend.scss'
+        custom_url = '/_custom/web.assets_frontend/TEST/website/static/src/scss/options/colors/user_theme_color_palette.scss'
         scss_attachment = Attachment.create({
             'name': custom_url,
             'type': 'binary',
@@ -65,44 +65,6 @@ class TestUiCustomizeTheme(odoo.tests.HttpCase):
 
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUiHtmlEditor(HttpCaseWithUserDemo):
-
-    def test_html_editor_language(self):
-        Page = self.env['website.page']
-
-        default_website = self.env.ref('website.default_website')
-        parseltongue = self.env['res.lang'].create({
-            'name': 'Parseltongue',
-            'code': 'pa_GB',
-            'iso_code': 'pa_GB',
-            'url_code': 'pa_GB',
-        })
-        self.env['res.lang']._activate_lang(parseltongue.code)
-        default_website.language_ids += parseltongue
-        default_website.default_lang_id = parseltongue.id
-
-        page = Page.create({
-            'name': 'Test page',
-            'type': 'qweb',
-            'arch': '''
-                <t t-call="website.layout">
-                    <div>rumbler</div>
-                </t>
-            ''',
-            'key': 'test.generic_view',
-            'website_id': default_website.id,
-            'is_published': True,
-            'url': '/test_page',
-        })
-
-        page.view_id.update_field_translations('arch_db', {
-            parseltongue.code: {
-                'rumbler': 'rommelpot',
-            }
-        })
-        self.env.ref('base.user_admin').lang = parseltongue.code
-        self.start_tour(self.env['website'].get_client_action_url('/test_page'), 'html_editor_language', login='admin')
-        self.assertIn("rumbler", page.view_id.with_context(lang='en_US').arch)
-        self.assertIn("rommelpot", page.view_id.with_context(lang='pa_GB').arch)
 
     def test_html_editor_multiple_templates(self):
         Website = self.env['website']
@@ -291,7 +253,9 @@ class TestUi(odoo.tests.HttpCase):
         self.start_tour("/", 'website_navbar_menu')
 
     def test_05_specific_website_editor(self):
+        asset_bundle_xmlid = 'website.assets_wysiwyg'
         website_default = self.env['website'].search([], limit=1)
+
         new_website = self.env['website'].create({'name': 'New Website'})
 
         code = b"document.body.dataset.hello = 'world';"
@@ -300,7 +264,7 @@ class TestUi(odoo.tests.HttpCase):
             'mimetype': 'text/javascript',
             'datas': base64.b64encode(code),
         })
-        custom_url = '/web/content/%s/%s' % (attach.id, attach.name)
+        custom_url = '/_custom/web/content/%s/%s' % (attach.id, attach.name)
         attach.url = custom_url
 
         self.env['ir.asset'].create({
@@ -309,6 +273,17 @@ class TestUi(odoo.tests.HttpCase):
             'path': custom_url,
             'website_id': new_website.id,
         })
+
+        base_website_bundle = self.env['ir.qweb']._get_asset_bundle(asset_bundle_xmlid, assets_params={'website_id': website_default.id})
+        self.assertNotIn(custom_url, [f['url'] for f in base_website_bundle.files])
+        base_website_css_version = base_website_bundle.get_version('css')
+        base_website_js_version = base_website_bundle.get_version('js')
+
+        new_website_bundle_modified = self.env['ir.qweb']._get_asset_bundle('website.assets_wysiwyg', assets_params={'website_id': new_website.id})
+        self.assertIn(custom_url, [f['url'] for f in new_website_bundle_modified.files])
+        self.assertEqual(new_website_bundle_modified.get_version('css'), base_website_css_version)
+        self.assertNotEqual(new_website_bundle_modified.get_version('js'), base_website_js_version, "js version for new website should now have been changed")
+
         url_params = url_encode({'path': '/@/'})
         self.start_tour(f'/website/force/{website_default.id}?{url_params}', "generic_website_editor", login='admin')
         self.start_tour(f'/website/force/{new_website.id}?{url_params}', "specific_website_editor", login='admin')
@@ -486,11 +461,8 @@ class TestUi(odoo.tests.HttpCase):
     def test_27_website_clicks(self):
         self.start_tour('/web', 'website_click_tour', login='admin')
 
-    def test_28_website_text_edition(self):
+    def test_29_website_text_edition(self):
         self.start_tour('/@/', 'website_text_edition', login='admin')
-
-    def test_20_website_edit_megamenu_big_icons_subtitles(self):
-        self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_megamenu_big_icons_subtitles', login='admin')
 
     def test_29_website_backend_menus_redirect(self):
         Menu = self.env['ir.ui.menu']
@@ -507,8 +479,20 @@ class TestUi(odoo.tests.HttpCase):
     def test_30_website_text_animations(self):
         self.start_tour("/", 'text_animations', login='admin')
 
+    def test_31_website_edit_megamenu_big_icons_subtitles(self):
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_megamenu_big_icons_subtitles', login='admin')
+
     def test_website_media_dialog_image_shape(self):
         self.start_tour("/", 'website_media_dialog_image_shape', login='admin')
+
+    def test_website_text_font_size(self):
+        self.start_tour('/@/', 'website_text_font_size', login='admin', timeout=300)
+
+    def test_update_column_count(self):
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'website_update_column_count', login="admin", step_delay=100)
+
+    def test_website_text_highlights(self):
+        self.start_tour("/", 'text_highlights', login='admin')
 
     def test_website_extra_items_no_dirty_page(self):
         """
@@ -560,3 +544,76 @@ class TestUi(odoo.tests.HttpCase):
             'path': 'website/static/tests/tour_utils/widget_lifecycle_patch_wysiwyg.js',
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'widget_lifecycle', login='admin')
+
+    def test_drop_404_ir_attachment_url(self):
+        website_snippets = self.env.ref('website.snippets')
+        self.env['ir.ui.view'].create([{
+            'name': '404 Snippet',
+            'type': 'qweb',
+            'key': 'website.s_404_snippet',
+            'arch': """
+                <section class="s_404_snippet">
+                    <div class="container">
+                        <img class="img-responsive img-thumbnail" src="/web/image/website.404_ir_attachment"/>
+                    </div>
+                </section>
+            """,
+        }, {
+            'type': 'qweb',
+            'inherit_id': website_snippets.id,
+            'arch': """
+                <xpath expr="//t[@t-snippet='website.s_parallax']" position="after">
+                    <t t-snippet="website.s_404_snippet"
+                       t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg"/>
+                </xpath>
+            """,
+        }])
+        attachment = self.env['ir.attachment'].create({
+            'name': '404_ir_attachment',
+            'type': 'url',
+            'url': '/web/static/__some__typo__.png',
+            'mimetype': 'image/png',
+        })
+        self.env['ir.model.data'].create({
+            'name': '404_ir_attachment',
+            'module': 'website',
+            'model': 'ir.attachment',
+            'res_id': attachment.id,
+        })
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'drop_404_ir_attachment_url', login='admin')
+
+    def test_mobile_order_with_drag_and_drop(self):
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'website_mobile_order_with_drag_and_drop', login='admin')
+
+    def test_website_no_dirty_lazy_image(self):
+        website = self.env['website'].browse(1)
+        # Enable multiple langs to reduce the chance of the test being silently
+        # broken by ensuring that it receives a lot of extra o_dirty elements.
+        # This is done to account for potential later changes in the number of
+        # o_dirty elements caused by legitimate modifications in the code.
+        # Perfs: `_activate_lang()` does not load .pot so it is perf friendly
+        lang_fr = self.env['res.lang']._activate_lang('fr_FR')
+        lang_es = self.env['res.lang']._activate_lang('es_AR')
+        lang_zh = self.env['res.lang']._activate_lang('zh_HK')
+        lang_ar = self.env['res.lang']._activate_lang('ar_SY')
+        website.language_ids = self.env.ref('base.lang_en') + lang_fr + lang_es + lang_zh + lang_ar
+        # Select "dropdown with image" language selector template
+        for key, active in [
+            # footer
+            ('portal.footer_language_selector', True),
+            ('website.footer_language_selector_inline', False),
+            ('website.footer_language_selector_flag', True),
+            ('website.footer_language_selector_no_text', False),
+            ('website.footer_language_selector_flag', True),
+            ('website.footer_language_selector_no_text', False),
+            # header
+            ('website.header_language_selector', True),
+            ('website.header_language_selector_inline', False),
+            ('website.header_language_selector_flag', True),
+            ('website.header_language_selector_no_text', False),
+            ('website.header_language_selector_flag', True),
+            ('website.header_language_selector_no_text', False),
+        ]:
+            self.env['website'].with_context(website_id=website.id).viewref(key).active = active
+
+        self.start_tour('/', 'website_no_dirty_lazy_image', login='admin')

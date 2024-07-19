@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloat, formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
-
-const { Component } = owl;
+import { Component } from "@odoo/owl";
 
 export class BomOverviewLine extends Component {
     setup() {
@@ -53,7 +53,7 @@ export class BomOverviewLine extends Component {
 
     async goToAttachment() {
         return this.actionService.doAction({
-            name: this.env._t("Attachments"),
+            name: _t("Attachments"),
             type: "ir.actions.act_window",
             res_model: "mrp.document",
             domain: [["id", "in", this.data.attachment_ids]],

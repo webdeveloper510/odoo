@@ -1,15 +1,13 @@
-odoo.define('website_slides_survey.upload_modal', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var core = require('web.core');
-var _t = core._t;
-var SlidesUpload = require('@website_slides/js/slides_upload')[Symbol.for("default")];
+import { _t } from "@web/core/l10n/translation";
+import SlidesUpload from "@website_slides/js/slides_upload";
 
 /**
  * Management of the new 'certification' slide_category
  */
 SlidesUpload.SlideUploadDialog.include({
-    events: _.extend({}, SlidesUpload.SlideUploadDialog.prototype.events || {}, {
+    events: Object.assign({}, SlidesUpload.SlideUploadDialog.prototype.events || {}, {
         'change input#certification_id': '_onChangeCertification'
     }),
 
@@ -61,11 +59,8 @@ SlidesUpload.SlideUploadDialog.include({
         var self = this;
         this.$('#certification_id').select2(this._select2Wrapper(_t('Certification'), false,
             function () {
-                return self._rpc({
-                    route: '/slides_survey/certification/search_read',
-                    params: {
-                        fields: ['title'],
-                    }
+                return self.rpc('/slides_survey/certification/search_read', {
+                    fields: ['title'],
                 });
             }, 'title')
         );
@@ -121,6 +116,4 @@ SlidesUpload.SlideUploadDialog.include({
         result['survey'] = survey;
         return result;
     },
-});
-
 });

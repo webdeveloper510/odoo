@@ -3,17 +3,17 @@
 # 	* account_edi
 # 
 # Translators:
-# Uros Kalajdzic <ukalajdzic@gmail.com>, 2022
-# Martin Trigaux, 2022
-# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2022
+# Milan Bojovic <mbojovic@outlook.com>, 2023
+# Martin Trigaux, 2023
+# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
 # コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: コフスタジオ, 2024\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
@@ -27,14 +27,14 @@ msgstr ""
 #: code:addons/account_edi/models/account_move.py:0
 #, python-format
 msgid " Electronic invoicing error(s)"
-msgstr "Elektronska greška(e) pri fakturisanju"
+msgstr "Elektronska faktura greška(e) "
 
 #. module: account_edi
 #. odoo-python
 #: code:addons/account_edi/models/account_move.py:0
 #, python-format
 msgid " Electronic invoicing info(s)"
-msgstr "Elektronska faktura  informacije"
+msgstr "Elektronska faktura informacija(e)"
 
 #. module: account_edi
 #. odoo-python
@@ -56,6 +56,11 @@ msgstr "Otkazivanje EDI-ja je zatraženo."
 #, python-format
 msgid "A request for cancellation of the EDI has been called off."
 msgstr "Zahtev za otkazivanje EDI-ja je povučen."
+
+#. module: account_edi
+#: model:ir.model,name:account_edi.model_account_move_send
+msgid "Account Move Send"
+msgstr "Prenos računa poslat"
 
 #. module: account_edi
 #: model:ir.model,name:account_edi.model_ir_attachment
@@ -132,27 +137,12 @@ msgid "Display Name"
 msgstr "Naziv za prikaz"
 
 #. module: account_edi
-#. odoo-python
-#: code:addons/account_edi/models/account_edi_format.py:0
-#, python-format
-msgid "Display the currency"
-msgstr ""
-
-#. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "Download"
 msgstr "Preuzmi"
 
 #. module: account_edi
-#: model:ir.actions.server,name:account_edi.ir_cron_edi_network_ir_actions_server
-#: model:ir.cron,cron_name:account_edi.ir_cron_edi_network
-msgid "EDI : Perform web services operations"
-msgstr ""
-
-#. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "EDI Documents"
 msgstr "EDI Dokumenti"
 
@@ -165,6 +155,11 @@ msgstr "EDI format"
 #: model:ir.model.fields,help:account_edi.field_account_journal__compatible_edi_ids
 msgid "EDI format that support moves in this journal"
 msgstr "EDI format koji podržava pomeranja u ovom izveštaju"
+
+#. module: account_edi
+#: model:ir.actions.server,name:account_edi.ir_cron_edi_network_ir_actions_server
+msgid "EDI: Perform web services operations"
+msgstr "EDI: Izvršite operacije veb servisa"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_bank_statement_line__edi_blocking_level
@@ -226,18 +221,12 @@ msgid "Edi Web Services To Process"
 msgstr "Edi Web Servisi za obradu"
 
 #. module: account_edi
-#: model_terms:ir.ui.view,arch_db:account_edi.view_account_journal_form_inherited
-msgid "Electronic Data Interchange"
-msgstr "Elektronska razmena podataka"
-
-#. module: account_edi
 #: model:ir.model,name:account_edi.model_account_edi_document
 msgid "Electronic Document for an account.move"
 msgstr "Elektronski dokument za account.move"
 
 #. module: account_edi
 #: model:ir.actions.act_window,name:account_edi.action_open_edi_documents
-#: model:ir.actions.act_window,name:account_edi.action_open_payment_edi_documents
 #: model:ir.model.fields,field_description:account_edi.field_account_bank_statement_line__edi_state
 #: model:ir.model.fields,field_description:account_edi.field_account_journal__edi_format_ids
 #: model:ir.model.fields,field_description:account_edi.field_account_move__edi_state
@@ -256,11 +245,6 @@ msgid "Electronic invoicing state"
 msgstr "Elektronsko fakturisanje stanje"
 
 #. module: account_edi
-#: model:ir.model,name:account_edi.model_mail_template
-msgid "Email Templates"
-msgstr "Sabloni Poruka"
-
-#. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__error
 #: model:ir.model.fields.selection,name:account_edi.selection__account_edi_document__blocking_level__error
 #: model:ir.model.fields.selection,name:account_edi.selection__account_move__edi_blocking_level__error
@@ -276,8 +260,8 @@ msgstr "Format naziv"
 #: model:ir.model.fields,help:account_edi.field_account_bank_statement_line__edi_error_count
 #: model:ir.model.fields,help:account_edi.field_account_move__edi_error_count
 #: model:ir.model.fields,help:account_edi.field_account_payment__edi_error_count
-msgid "How many EDIs are in error for this move ?"
-msgstr ""
+msgid "How many EDIs are in error for this move?"
+msgstr "Koliko ima EDI-ja sa greškom za ovaj potez?"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__id
@@ -315,27 +299,16 @@ msgid "Journal Entry"
 msgstr "Sadržaj dnevnika"
 
 #. module: account_edi
-#: model:ir.model,name:account_edi.model_account_move_line
-msgid "Journal Item"
-msgstr "Stavka izveštaja"
-
-#. module: account_edi
-#: model:ir.model.fields,field_description:account_edi.field_account_edi_document____last_update
-#: model:ir.model.fields,field_description:account_edi.field_account_edi_format____last_update
-msgid "Last Modified on"
-msgstr "Poslednja izmena dana"
-
-#. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__write_uid
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__write_uid
 msgid "Last Updated by"
-msgstr "Poslednje izmenio/la"
+msgstr "Poslednji put ažurirao"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__write_date
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__write_date
 msgid "Last Updated on"
-msgstr "Poslednje ažuriranje dana"
+msgstr "Poslednji put ažurirano"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__move_id
@@ -346,7 +319,7 @@ msgstr "Pomeri"
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__name
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__name
 msgid "Name"
-msgstr "Ime"
+msgstr "Naziv"
 
 #. module: account_edi
 #: model:ir.model.constraint,message:account_edi.constraint_account_edi_document_unique_edi_document_by_move_by_format
@@ -354,20 +327,9 @@ msgid "Only one edi document by move by format"
 msgstr "Samo jedan edi dokument premeštajem po formatu"
 
 #. module: account_edi
-#: model:ir.model,name:account_edi.model_account_payment
-msgid "Payments"
-msgstr "Placanja"
-
-#. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "Process now"
 msgstr "Procesiraj sada"
-
-#. module: account_edi
-#: model:ir.model,name:account_edi.model_uom_uom
-msgid "Product Unit of Measure"
-msgstr "Jedinica mere proizvoda"
 
 #. module: account_edi
 #: model:ir.model,name:account_edi.model_ir_actions_report
@@ -381,7 +343,6 @@ msgstr "Zahtev za otkazivanje EDI-a"
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "Retry"
 msgstr "Ponovi"
 
@@ -399,7 +360,7 @@ msgstr "Poslato"
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__state
 msgid "State"
-msgstr "Stanje"
+msgstr "Država"
 
 #. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_bank_statement_line__edi_state
@@ -407,15 +368,6 @@ msgstr "Stanje"
 #: model:ir.model.fields,help:account_edi.field_account_payment__edi_state
 msgid "The aggregated state of all the EDIs with web-service of this move"
 msgstr "Aggregirano stanje svih EDI-ja sa veb-servisom ovog poteza"
-
-#. module: account_edi
-#. odoo-python
-#: code:addons/account_edi/models/account_edi_format.py:0
-#, python-format
-msgid ""
-"The currency (%s) of the document you are uploading is not active in this database.\n"
-"Please activate it and update the currency rate if needed before trying again to import."
-msgstr ""
 
 #. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_edi_document__attachment_id
@@ -428,17 +380,8 @@ msgstr ""
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-msgid ""
-"The invoice will be processed asynchronously by the following E-invoicing "
-"service :"
-msgstr ""
-
-#. module: account_edi
-#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
-msgid ""
-"The payment will be processed asynchronously by the following E-invoicing "
-"service :"
-msgstr ""
+msgid "The invoice will soon be sent to"
+msgstr "Faktura će uskoro biti poslata na"
 
 #. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_edi_document__error
@@ -476,7 +419,7 @@ msgstr "Za slanje"
 #: model:ir.model.fields.selection,name:account_edi.selection__account_edi_document__blocking_level__warning
 #: model:ir.model.fields.selection,name:account_edi.selection__account_move__edi_blocking_level__warning
 msgid "Warning"
-msgstr "Upozorenje"
+msgstr "Pažnja"
 
 #. module: account_edi
 #. odoo-python
@@ -500,6 +443,5 @@ msgstr "Ne možete odvojiti prilog koji je EDI dokument poslat vladi."
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "⇒ See errors"
 msgstr "⇒ Pogledaj greške"

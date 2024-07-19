@@ -1,14 +1,14 @@
-odoo.define("website_sale.tour_shop", function (require) {
-    "use strict";
+/** @odoo-module **/
 
-    const {_t} = require("web.core");
-    const {Markup} = require('web.utils');
-    const wTourUtils = require("website.tour_utils");
+    import { _t } from "@web/core/l10n/translation";
+    import wTourUtils from "@website/js/tours/tour_utils";
+
+    import { markup } from "@odoo/owl";
 
     wTourUtils.registerWebsitePreviewTour("shop", {
         url: '/shop',
         sequence: 130,
-    }, [{
+    }, () => [{
         trigger: ".o_menu_systray .o_new_content_container > a",
         content: _t("Let's create your first product."),
         extra_trigger: "iframe .js_sale",
@@ -16,7 +16,7 @@ odoo.define("website_sale.tour_shop", function (require) {
         position: "bottom",
     }, {
         trigger: "a[data-module-xml-id='base.module_website_sale']",
-        content: Markup(_t("Select <b>New Product</b> to create it and manage its properties to boost your sales.")),
+        content: markup(_t("Select <b>New Product</b> to create it and manage its properties to boost your sales.")),
         position: "bottom",
     }, {
         trigger: ".modal-dialog input[type=text]",
@@ -24,7 +24,7 @@ odoo.define("website_sale.tour_shop", function (require) {
         position: "left",
     }, {
         trigger: ".modal-footer button.btn-primary",
-        content: Markup(_t("Click on <em>Save</em> to create the product.")),
+        content: markup(_t("Click on <em>Save</em> to create the product.")),
         position: "right",
     }, {
         trigger: "iframe .product_price .oe_currency_value:visible",
@@ -49,18 +49,17 @@ odoo.define("website_sale.tour_shop", function (require) {
             actions.auto(".modal-footer .btn-secondary");
         },
         auto: true,
-    }, {
-        trigger: "button.o_we_add_snippet_btn",
-        auto: true,
-    }, {
+    },
+    wTourUtils.goBackToBlocks(),
+    {
         trigger: "#snippet_structure .oe_snippet:eq(3) .oe_snippet_thumbnail",
         extra_trigger: "body:not(.modal-open)",
         content: _t("Drag this website block and drop it in your page."),
         position: "bottom",
-        run: "drag_and_drop",
+        run: "drag_and_drop_native iframe #wrapwrap > main",
     }, {
         trigger: "button[data-action=save]",
-        content: Markup(_t("Once you click on <b>Save</b>, your product is updated.")),
+        content: markup(_t("Once you click on <b>Save</b>, your product is updated.")),
         position: "bottom",
         // Wait until the drag and drop is resolved (causing a history step)
         // before clicking save.
@@ -78,6 +77,6 @@ odoo.define("website_sale.tour_shop", function (require) {
         trigger: "a[data-menu-xmlid='website.menu_website_dashboard'], a[data-menu-xmlid='website.menu_website_analytics']",
         content: _t("Let's now take a look at your eCommerce dashboard to get your eCommerce website ready in no time."),
         position: "bottom",
-        run: "click",
+        // Just check during test mode. Otherwise, clicking it will result to random error on loading the Chart.js script.
+        run: () => {},
     }]);
-});

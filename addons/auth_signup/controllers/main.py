@@ -57,8 +57,8 @@ class AuthSignupHome(Home):
                 if request.env["res.users"].sudo().search([("login", "=", qcontext.get("login"))]):
                     qcontext["error"] = _("Another user is already registered using this email address.")
                 else:
-                    _logger.error("%s", e)
-                    qcontext['error'] = _("Could not create a new account.")
+                    _logger.warning("%s", e)
+                    qcontext['error'] = _("Could not create a new account.") + "\n" + str(e)
 
         elif 'signup_email' in qcontext:
             user = request.env['res.users'].sudo().search([('email', '=', qcontext.get('signup_email')), ('state', '!=', 'new')], limit=1)
@@ -161,7 +161,7 @@ class AuthSignupHome(Home):
             raise SignupError(_('Authentication Failed.'))
 
 class AuthBaseSetup(BaseSetup):
-    @http.route('/base_setup/data', type='json', auth='user')
+    @http.route()
     def base_setup_data(self, **kwargs):
         res = super().base_setup_data(**kwargs)
         res.update({'resend_invitation': True})

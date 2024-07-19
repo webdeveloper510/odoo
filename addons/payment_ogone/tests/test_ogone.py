@@ -64,6 +64,7 @@ class OgoneTest(OgoneCommon, PaymentHttpCommon):
             'CURRENCY': self.currency.name,
             'LANGUAGE': self.partner.lang,
             'EMAIL': self.partner.email,
+            'CN': self.partner.name,
             'OWNERZIP': self.partner.zip,
             'OWNERADDRESS': payment_utils.format_partner_address(
                 self.partner.street, self.partner.street2
@@ -79,6 +80,7 @@ class OgoneTest(OgoneCommon, PaymentHttpCommon):
             'CANCELURL': return_url,
             'ALIAS': None,
             'ALIASUSAGE': None,
+            'PM': self.payment_method_code,
         }
         expected_values['SHASIGN'] = self.ogone._ogone_generate_signature(
             expected_values, incoming=False

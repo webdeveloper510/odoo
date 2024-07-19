@@ -26,6 +26,28 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
             'default_code': 'PROD_ORDER',
             'taxes_id': False,
         })
+        cls.product_order_other_price = cls.env['product.product'].create({
+            'name': "Zed+ Antivirus",
+            'standard_price': 240.0,
+            'list_price': 290.0,
+            'type': 'consu',
+            'uom_id': uom_unit.id,
+            'uom_po_id': uom_unit.id,
+            'purchase_method': 'purchase',
+            'default_code': 'PROD_ORDER',
+            'taxes_id': False,
+        })
+        cls.product_order_var_name = cls.env['product.product'].create({
+            'name': "Zed+ Antivirus Var Name",
+            'standard_price': 235.0,
+            'list_price': 280.0,
+            'type': 'consu',
+            'uom_id': uom_unit.id,
+            'uom_po_id': uom_unit.id,
+            'purchase_method': 'purchase',
+            'default_code': 'PROD_ORDER_VAR_NAME',
+            'taxes_id': False,
+        })
         cls.service_deliver = cls.env['product.product'].create({
             'name': "Cost-plus Contract",
             'standard_price': 200.0,
@@ -352,7 +374,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         """
         # Required for `analytic.group_analytic_accounting` to be visible in the view
         self.env.user.groups_id += self.env.ref('analytic.group_analytic_accounting')
-        analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test', 'company_id': False})
+        analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
         analytic_account_default = self.env['account.analytic.account'].create({'name': 'default', 'plan_id': analytic_plan.id})
         analytic_account_manual = self.env['account.analytic.account'].create({'name': 'manual', 'plan_id': analytic_plan.id})
 
@@ -382,7 +404,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         self.env.user.groups_id += self.env.ref('account.group_account_readonly')
         self.env.user.groups_id += self.env.ref('analytic.group_analytic_accounting')
 
-        analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test', 'company_id': False})
+        analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
         analytic_account_super = self.env['account.analytic.account'].create({'name': 'Super Account', 'plan_id': analytic_plan.id})
         analytic_account_great = self.env['account.analytic.account'].create({'name': 'Great Account', 'plan_id': analytic_plan.id})
 
@@ -627,6 +649,61 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         po_line.write({'product_qty': 4})
         self.assertEqual(40.0, po_line.price_unit, "Unit price should be set to 40.0 for 4 quantity")
 
+    def test_supplier_discounted_price(self):
+        """ Check the lower price (discount included) is used.
+        """
+        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        supplierinfo_common_vals = {
+            'partner_id': self.partner_a.id,
+            'product_id': self.product_order.id,
+            'product_tmpl_id': self.product_order.product_tmpl_id.id,
+        }
+        supplierinfo = self.env['product.supplierinfo'].create([
+            {
+                **supplierinfo_common_vals,
+                'price': 100.0,
+                'discount': 0,  # Real price by unit: 100.00
+            }, {
+                **supplierinfo_common_vals,
+                'price': 120.0,
+                'discount': 20,  # Real price by unit: 96.00
+            }, {
+                **supplierinfo_common_vals,
+                'min_qty': 10,
+                'price': 140.0,
+                'discount': 50,  # Real price by unit: 70.00
+            },
+        ])
+        self.assertRecordValues(supplierinfo, [
+            {'price_discounted': 100},
+            {'price_discounted': 96},
+            {'price_discounted': 70},
+        ])
+
+        po_form = Form(self.env['purchase.order'])
+        po_form.partner_id = self.partner_a
+        with po_form.order_line.new() as po_line_form:
+            po_line_form.product_id = self.product_order
+            po_line_form.product_qty = 1
+        po = po_form.save()
+        po_line = po.order_line[0]
+        self.assertEqual(120.0, po_line.price_unit)
+        self.assertEqual(20, po_line.discount)
+        self.assertEqual(96.0, po_line.price_unit_discounted)
+        self.assertEqual(96.0, po_line.price_subtotal)
+
+        # Increase the PO line quantity: it should take another price if min. qty. is reached.
+        po_form = Form(po)
+        with po_form.order_line.edit(0) as po_line_form:
+            po_line_form.product_uom = uom_dozen
+            po_line_form.product_qty = 3
+        po = po_form.save()
+        po_line = po.order_line[0]
+
+        self.assertEqual(1680.0, po_line.price_unit, "140.0 * 12 = 1680.0")
+        self.assertEqual(50, po_line.discount)
+        self.assertEqual(840.0, po_line.price_unit_discounted, "1680.0 * 0.5 = 840.0")
+        self.assertEqual(2520.0, po_line.price_subtotal, "840.0 * 3 = 2520.0")
 
 @tagged('post_install', '-at_install')
 class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
@@ -651,54 +728,122 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         self.assertTrue(invoice.id in po.invoice_ids.ids)
         self.assertEqual(invoice.amount_total, po.amount_total)
 
-    def test_subset_total_match_prefer_purchase(self):
+    def test_subset_total_match_from_ocr(self):
         po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
         invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order])
 
         invoice._find_and_set_purchase_orders(
-            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, prefer_purchase_line=True)
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=True)
         additional_unmatch_po_line = po.order_line.filtered(lambda l: l.product_id == self.service_order)
 
         self.assertTrue(invoice.id in po.invoice_ids.ids)
         self.assertTrue(additional_unmatch_po_line.id in invoice.line_ids.purchase_line_id.ids)
         self.assertTrue(invoice.line_ids.filtered(lambda l: l.purchase_line_id == additional_unmatch_po_line).quantity == 0)
 
-    def test_subset_total_match_reject_purchase(self):
+    def test_subset_match_from_edi_full(self):
+        """An invoice totally matches a purchase order line by line
+        """
+        po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
+        invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order, self.service_order])
+
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
+
+        self.assertTrue(invoice.id in po.invoice_ids.ids)
+        invoice_lines = invoice.line_ids.filtered(lambda l: l.price_unit)
+        self.assertEqual(len(invoice_lines), 2)
+        for line in invoice_lines:
+            self.assertTrue(line.purchase_line_id in po.order_line)
+        self.assertEqual(invoice.amount_total, po.amount_total)
+
+    def test_subset_match_from_edi_partial_po(self):
+        """A line of the invoice totally matches a 1-line purchase order
+        """
+        po = self.init_purchase(confirm=True, products=[self.product_order])
+        invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order, self.service_order])
+
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
+
+        self.assertTrue(invoice.id in po.invoice_ids.ids)
+        invoice_lines = invoice.line_ids.filtered(lambda l: l.price_unit)
+        self.assertEqual(len(invoice_lines), 2)
+        for line in po.order_line:
+            self.assertTrue(line in invoice_lines.purchase_line_id)
+
+    def test_subset_match_from_edi_partial_inv(self):
+        """An invoice totally matches some purchase order line
+        """
         po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
         invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order])
 
         invoice._find_and_set_purchase_orders(
-            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, prefer_purchase_line=False)
-        additional_unmatch_po_line = po.order_line.filtered(lambda l: l.product_id == self.service_order)
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
 
         self.assertTrue(invoice.id in po.invoice_ids.ids)
-        self.assertTrue(additional_unmatch_po_line.id not in invoice.line_ids.purchase_line_id.ids)
+        invoice_lines = invoice.line_ids.filtered(lambda l: l.price_unit)
+        self.assertEqual(len(invoice_lines), 1)
+        for line in invoice_lines:
+            self.assertTrue(line.purchase_line_id in po.order_line)
 
-    def test_po_match_prefer_purchase(self):
+    def test_subset_match_from_edi_same_unit_price(self):
+        """An invoice matches some purchase order line by unit price
+        """
+        po = self.init_purchase(confirm=True, products=[self.product_order_var_name, self.product_order])
+        invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order])
+
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
+
+        self.assertTrue(invoice.id in po.invoice_ids.ids)
+        invoice_lines = invoice.line_ids.filtered(lambda l: l.price_unit)
+        self.assertEqual(len(invoice_lines), 1)
+        for line in invoice_lines:
+            self.assertTrue(line.purchase_line_id in po.order_line)
+
+    def test_subset_match_from_edi_and_diff_unit_price(self):
+        """An invoice matches some purchase order line but not another one because of a unit price difference
+        """
+        po = self.init_purchase(confirm=True, products=[self.product_order_var_name, self.product_order])
+        invoice = self.init_invoice('in_invoice', partner=self.partner_a, products=[self.product_order, self.product_order_other_price])
+
+        invoice._find_and_set_purchase_orders(
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
+
+        self.assertTrue(invoice.id in po.invoice_ids.ids)
+        invoice_lines = invoice.line_ids.filtered(lambda l: l.price_unit)
+        self.assertEqual(len(invoice_lines), 2)
+        for line in invoice_lines:
+            if (line.product_id == self.product_order):
+                self.assertTrue(line.purchase_line_id in po.order_line)
+            else:
+                self.assertFalse(line.purchase_line_id in po.order_line)
+
+
+    def test_po_match_from_ocr(self):
         po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
         invoice = self.init_invoice('in_invoice', products=[self.product_a])
 
         invoice._find_and_set_purchase_orders(
-            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, prefer_purchase_line=True)
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=True)
 
         self.assertTrue(invoice.id in po.invoice_ids.ids)
 
-    def test_po_match_reject_purchase(self):
+    def test_no_match_same_reference(self):
         po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
         invoice = self.init_invoice('in_invoice', products=[self.product_a])
 
         invoice._find_and_set_purchase_orders(
-            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, prefer_purchase_line=False)
+            ['my_match_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
 
         self.assertTrue(invoice.id not in po.invoice_ids.ids)
-        self.assertNotEqual(invoice.amount_total, po.amount_total)
 
     def test_no_match(self):
         po = self.init_purchase(confirm=True, products=[self.product_order, self.service_order])
         invoice = self.init_invoice('in_invoice', products=[self.product_a])
 
         invoice._find_and_set_purchase_orders(
-            ['other_reference'], invoice.partner_id.id, invoice.amount_total, prefer_purchase_line=False)
+            ['other_reference'], invoice.partner_id.id, invoice.amount_total, from_ocr=False)
 
         self.assertTrue(invoice.id not in po.invoice_ids.ids)
 
@@ -847,7 +992,7 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
 
     def test_invoice_user_id_on_bill(self):
         """
-        Test that the invoice_user_id field is set to current user when creating a vendor bill from a PO
+        Test that the invoice_user_id field is False when creating a vendor bill from a PO
         or when using Auto-Complete feature of a vendor bill.
         """
         group_purchase_user = self.env.ref('purchase.group_purchase_user')
@@ -878,9 +1023,9 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
         po1.order_line.qty_received = 1
         po1.action_create_invoice()
         invoice1 = po1.invoice_ids
-        self.assertEqual(invoice1.invoice_user_id, self.env.user)
+        self.assertFalse(invoice1.invoice_user_id)
         # creating bill with Auto_complete feature
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
         move_form.purchase_vendor_bill_id = self.env['purchase.bill.union'].browse(-po2.id)
         invoice2 = move_form.save()
-        self.assertEqual(invoice2.invoice_user_id, self.env.user)
+        self.assertFalse(invoice2.invoice_user_id)

@@ -2,14 +2,18 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date, formatLang
+from odoo.tools.float_utils import float_repr
+from odoo.tools import groupby
 
 from collections import defaultdict
-from odoo.tools import groupby, frozendict
+from markupsafe import Markup, escape
+from odoo.tools import frozendict
 import json
 
 class AutomaticEntryWizard(models.TransientModel):
     _name = 'account.automatic.entry.wizard'
     _description = 'Create Automatic Entries'
+    _check_company_auto = True
 
     # General
     action = fields.Selection([('change_period', 'Change Period'), ('change_account', 'Change Account')], required=True)
@@ -22,7 +26,8 @@ class AutomaticEntryWizard(models.TransientModel):
     percentage = fields.Float("Percentage", compute='_compute_percentage', readonly=False, store=True, help="Percentage of each line to execute the action on.")
     total_amount = fields.Monetary(compute='_compute_total_amount', store=True, readonly=False, currency_field='company_currency_id', help="Total amount impacted by the automatic entry.")
     journal_id = fields.Many2one('account.journal', required=True, readonly=False, string="Journal",
-        domain="[('company_id', '=', company_id), ('type', '=', 'general')]",
+        check_company=True,
+        domain="[('type', '=', 'general')]",
         compute="_compute_journal_id",
         inverse="_inverse_journal_id",
         help="Journal where to create the entry.")
@@ -30,23 +35,21 @@ class AutomaticEntryWizard(models.TransientModel):
     # change period
     account_type = fields.Selection([('income', 'Revenue'), ('expense', 'Expense')], compute='_compute_account_type', store=True)
     expense_accrual_account = fields.Many2one('account.account', readonly=False,
-        domain="[('company_id', '=', company_id),"
-               "('account_type', 'not in', ('asset_receivable', 'liability_payable')),"
-               "('is_off_balance', '=', False)]",
+        check_company=True,
+        domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
         compute="_compute_expense_accrual_account",
         inverse="_inverse_expense_accrual_account",
     )
     revenue_accrual_account = fields.Many2one('account.account', readonly=False,
-        domain="[('company_id', '=', company_id),"
-               "('account_type', 'not in', ('asset_receivable', 'liability_payable')),"
-               "('is_off_balance', '=', False)]",
+        check_company=True,
+        domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
         compute="_compute_revenue_accrual_account",
         inverse="_inverse_revenue_accrual_account",
     )
     lock_date_message = fields.Char(string="Lock Date Message", compute="_compute_lock_date_message")
 
     # change account
-    destination_account_id = fields.Many2one(string="To", comodel_name='account.account', help="Account to transfer to.")
+    destination_account_id = fields.Many2one(string="To", comodel_name='account.account', help="Account to transfer to.", check_company=True)
     display_currency_helper = fields.Boolean(string="Currency Conversion Helper", compute='_compute_display_currency_helper')
     # Technical field. Used to indicate whether or not to display the currency conversion tooltip. The tooltip informs a currency conversion will be performed with the transfer.
 
@@ -139,9 +142,9 @@ class AutomaticEntryWizard(models.TransientModel):
             raise UserError(_('You can only change the period/account for posted journal items.'))
         if any(move_line.reconciled for move_line in move_line_ids):
             raise UserError(_('You can only change the period/account for items that are not yet reconciled.'))
-        if any(line.company_id != move_line_ids[0].company_id for line in move_line_ids):
+        if any(line.company_id.root_id != move_line_ids[0].company_id.root_id for line in move_line_ids):
             raise UserError(_('You cannot use this wizard on journal entries belonging to different companies.'))
-        res['company_id'] = move_line_ids[0].company_id.id
+        res['company_id'] = move_line_ids[0].company_id.root_id.id
 
         allowed_actions = set(dict(self._fields['action'].selection))
         if self.env.context.get('default_action'):
@@ -230,10 +233,16 @@ class AutomaticEntryWizard(models.TransientModel):
                     'analytic_distribution': analytic_distribution,
                 })
 
+        # Get the lowest child company based on accounts used to avoid access error
+        accounts = self.env['account.account'].browse([line['account_id'] for line in line_vals])
+        companies = accounts.company_id | self.env.company
+        lowest_child_company = max(companies, key=lambda company: len(company.parent_ids))
+
         return [{
             'currency_id': self.journal_id.currency_id.id or self.journal_id.company_id.currency_id.id,
             'move_type': 'entry',
             'journal_id': self.journal_id.id,
+            'company_id': lowest_child_company.id,
             'date': fields.Date.to_string(self.date),
             'ref': self.destination_account_id.display_name and _("Transfer entry to %s", self.destination_account_id.display_name or ''),
             'line_ids': [(0, 0, line) for line in line_vals],
@@ -259,7 +268,7 @@ class AutomaticEntryWizard(models.TransientModel):
                     'analytic_distribution': aml.analytic_distribution,
                 }),
                 (0, 0, {
-                    'name': self._format_strings(_('{percent:0.2f}% to recognize on {new_date}'), aml.move_id),
+                    'name': self._format_strings(_('{percent}% recognized on {new_date}'), aml.move_id),
                     'debit': reported_credit,
                     'credit': reported_debit,
                     'amount_currency': -reported_amount_currency,
@@ -281,7 +290,7 @@ class AutomaticEntryWizard(models.TransientModel):
                 'analytic_distribution': aml.analytic_distribution,
             }),
             (0, 0, {
-                'name': self._format_strings(_('{percent:0.2f}% to recognize on {new_date}'), aml.move_id),
+                'name': self._format_strings(_('{percent}% recognized on {new_date}'), aml.move_id),
                 'debit': reported_debit,
                 'credit': reported_credit,
                 'amount_currency': reported_amount_currency,
@@ -324,7 +333,7 @@ class AutomaticEntryWizard(models.TransientModel):
 
         # compute the account.move.lines and the total amount per move
         for aml in self.move_line_ids:
-            for date in (get_lock_safe_date(aml), 'new_date'):
+            for date in ('new_date', get_lock_safe_date(aml)):
                 move_data[date]['line_ids'] += self._get_move_line_dict_vals_change_period(aml, date)
 
         move_vals = [m for m in move_data.values()]
@@ -396,17 +405,30 @@ class AutomaticEntryWizard(models.TransientModel):
                 accrual_move_lines = accrual_move.mapped('line_ids').filtered(lambda line: line.account_id == accrual_account)[accrual_move_offsets[accrual_move]:accrual_move_offsets[accrual_move]+2]
                 accrual_move_offsets[accrual_move] += 2
                 (accrual_move_lines + destination_move_lines).filtered(lambda line: not line.currency_id.is_zero(line.balance)).reconcile()
-            move.message_post(body=self._format_strings(_('Adjusting Entries have been created for this invoice:<ul><li>%(link1)s cancelling '
-                                                          '{percent:.2f}%% of {amount}</li><li>%(link0)s postponing it to {new_date}</li></ul>',
-                                                          link0=self._format_move_link(destination_move),
-                                                          link1=self._format_move_link(accrual_move),
-                                                          ), move, amount))
-            destination_messages += [self._format_strings(_('Adjusting Entry {link}: {percent:.2f}% of {amount} recognized from {date}'), move, amount)]
-            accrual_move_messages[accrual_move] += [self._format_strings(_('Adjusting Entry for {link}: {percent:.2f}% of {amount} recognized on {new_date}'), move, amount)]
+            body = Markup("%(title)s<ul><li>%(link1)s %(second)s</li><li>%(link2)s %(third)s</li></ul>") % {
+                'title': _("Adjusting Entries have been created for this invoice:"),
+                'link1': self._format_move_link(accrual_move),
+                'second': self._format_strings(_("cancelling {percent}%% of {amount}"), move, amount),
+                'link2': self._format_move_link(destination_move),
+                'third': self._format_strings(_("postponing it to {new_date}"), move, amount),
+            }
+            move.message_post(body=body)
+            destination_messages += [
+                self._format_strings(
+                    escape(_("Adjusting Entry {link} {percent}%% of {amount} recognized from {date}")),
+                    move, amount,
+                )
+            ]
+            accrual_move_messages[accrual_move] += [
+                self._format_strings(
+                    escape(_("Adjusting Entry {link} {percent}%% of {amount} recognized on {new_date}")),
+                    move, amount,
+                )
+            ]
 
-        destination_move.message_post(body='<br/>\n'.join(destination_messages))
+        destination_move.message_post(body=Markup('<br/>\n').join(destination_messages))
         for accrual_move, messages in accrual_move_messages.items():
-            accrual_move.message_post(body='<br/>\n'.join(messages))
+            accrual_move.message_post(body=Markup('<br/>\n').join(messages))
 
         # open the generated entries
         action = {
@@ -457,7 +479,6 @@ class AutomaticEntryWizard(models.TransientModel):
         return {
             'name': _("Transfer"),
             'type': 'ir.actions.act_window',
-            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'account.move',
             'res_id': new_move.id,
@@ -465,31 +486,41 @@ class AutomaticEntryWizard(models.TransientModel):
 
     # Transfer utils
     def _format_new_transfer_move_log(self, acc_transfer_per_move):
-        format = _("<li>{amount} ({debit_credit}) from {link}, <strong>%(account_source_name)s</strong></li>")
-        rslt = _("This entry transfers the following amounts to <strong>%(destination)s</strong> <ul>", destination=self.destination_account_id.display_name)
-        for move, balances_per_account in acc_transfer_per_move.items():
-            for account, balance in balances_per_account.items():
-                if account != self.destination_account_id:  # Otherwise, logging it here is confusing for the user
-                    rslt += self._format_strings(format % {'account_source_name': account.display_name}, move, balance)
-
-        rslt += '</ul>'
+        transfer_format = Markup("<li>%s, <strong>%%(account_source_name)s</strong></li>") % \
+            _("{amount} ({debit_credit}) from {link}")
+        rslt = Markup(_("This entry transfers the following amounts to %(destination)s") + "<ul>%(transfer_logs)s</ul>") % {
+            'destination': Markup("<strong>%s</strong>") % self.destination_account_id.display_name,
+            'transfer_logs': Markup().join([
+                self._format_strings(transfer_format % {'account_source_name': account.display_name}, move, balance)
+                for move, balances_per_account in acc_transfer_per_move.items()
+                for account, balance in balances_per_account.items()
+                if account != self.destination_account_id  # Otherwise, logging it here is confusing for the user
+            ])
+        }
         return rslt
 
     def _format_transfer_source_log(self, balances_per_account, transfer_move):
-        transfer_format = _("<li>{amount} ({debit_credit}) from <strong>%s</strong> were transferred to <strong>{account_target_name}</strong> by {link}</li>")
-        content = ''
-        for account, balance in balances_per_account.items():
-            if account != self.destination_account_id:
-                content += self._format_strings(transfer_format % account.display_name, transfer_move, balance)
-        return content and '<ul>' + content + '</ul>' or None
+        if not balances_per_account:
+            return None
+
+        transfer_format = Markup(
+            _("{amount} ({debit_credit}) from %s were transferred to <strong>{account_target_name}</strong> by {link}")
+        )
+
+        return Markup("<ul>%s</ul>") % Markup().join([
+            Markup("<li>%s</li>") % \
+                self._format_strings(transfer_format % (Markup("<strong>%s</strong>") % account.display_name), transfer_move, balance)
+            for account, balance in balances_per_account.items()
+            if account != self.destination_account_id
+        ])
 
     def _format_move_link(self, move):
         return move._get_html_link()
 
     def _format_strings(self, string, move, amount=None):
         return string.format(
-            label=move.name or 'Adjusting Entry',
-            percent=self.percentage,
+            label=move.name or _('Adjusting Entry'),
+            percent=float_repr(self.percentage, 2),
             name=move.name,
             id=move.id,
             amount=formatLang(self.env, abs(amount), currency_obj=self.company_id.currency_id) if amount else '',

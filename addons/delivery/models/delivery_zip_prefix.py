@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
@@ -18,10 +17,11 @@ class DeliveryZipPrefix(models.Model):
             # we cannot easily convert a list of prefix names into upper to compare with partner zips
             # later on, so let's ensure they are always upper
             vals['name'] = vals['name'].upper()
-        return super(DeliveryZipPrefix, self).create(vals_list)
+        return super().create(vals_list)
 
     def write(self, vals):
-        vals['name'] = vals['name'].upper()
+        if 'name' in vals:
+            vals['name'] = vals['name'].upper()
         return super().write(vals)
 
     _sql_constraints = [

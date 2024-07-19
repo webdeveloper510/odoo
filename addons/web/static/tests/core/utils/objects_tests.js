@@ -57,4 +57,16 @@ QUnit.module("utils", () => {
         assert.ok(shallowEqual({ a: fn }, { a: fn }));
         assert.notOk(shallowEqual({ a: () => {} }, { a: () => {} }));
     });
+
+    QUnit.test("shallowEqual: custom comparison function", function (assert) {
+        const dateA = new Date();
+        const dateB = new Date(dateA);
+
+        assert.notOk(shallowEqual({ a: 1, date: dateA }, { a: 1, date: dateB }));
+        assert.ok(
+            shallowEqual({ a: 1, date: dateA }, { a: 1, date: dateB }, (a, b) =>
+                a instanceof Date ? Number(a) === Number(b) : a === b
+            )
+        );
+    });
 });

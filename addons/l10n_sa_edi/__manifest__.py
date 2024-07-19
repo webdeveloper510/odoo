@@ -3,20 +3,19 @@
 
 {
     'name': 'Saudi Arabia - E-invoicing',
-    'icon': '/l10n_sa/static/description/icon.png',
+    'countries': ['sa'],
     'version': '0.1',
     'depends': [
+        'account_edi',
         'account_edi_ubl_cii',
         'account_debit_note',
         'l10n_sa',
         'base_vat'
     ],
     'author': 'Odoo',
-    'summary': """
-        E-Invoicing, Universal Business Language
-    """,
+    'summary': "E-Invoicing, Universal Business Language",
     'description': """
-        E-invoice implementation for the Kingdom of Saudi Arabia
+E-invoice implementation for the Kingdom of Saudi Arabia
     """,
     'category': 'Accounting/Localizations/EDI',
     'license': 'LGPL-3',

@@ -1,14 +1,12 @@
-odoo.define('l10n_it_edi_website_sale.tour', function (require) {
-'use strict';
+/** @odoo-module alias=l10n_it_edi_website_sale.tour **/
 
-var tour = require("web_tour.tour");
-const tourUtils = require('website_sale.tour_utils');
+import { registry } from "@web/core/registry";
+import tourUtils from "@website_sale/js/tours/tour_utils";
 
-tour.register('shop_checkout_address', {
+registry.category("web_tour.tours").add('shop_checkout_address', {
     test: true,
     url: '/shop',
-},
-    [
+    steps: () => [
         {
             content: "search Storage Box",
             trigger: 'form input[name="search"]',
@@ -44,6 +42,4 @@ tour.register('shop_checkout_address', {
             run: "text 12345678901",
         },
     ]
-);
-
 });

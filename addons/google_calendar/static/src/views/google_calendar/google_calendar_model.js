@@ -2,26 +2,29 @@
 
 import { AttendeeCalendarModel } from "@calendar/views/attendee_calendar/attendee_calendar_model";
 import { patch } from "@web/core/utils/patch";
+import { useState } from "@odoo/owl";
 
-patch(AttendeeCalendarModel, "google_calendar_google_calendar_model", {
+patch(AttendeeCalendarModel, {
     services: [...AttendeeCalendarModel.services, "rpc"],
 });
 
-patch(AttendeeCalendarModel.prototype, "google_calendar_google_calendar_model_functions", {
+patch(AttendeeCalendarModel.prototype, {
     setup(params, { rpc }) {
-        this._super(...arguments);
+        super.setup(...arguments);
         this.rpc = rpc;
-        this.googleIsSync = true;
         this.googlePendingSync = false;
+        this.state = useState({
+            googleIsSync: true,
+            googleIsPaused: false,
+        });
     },
 
     /**
      * @override
      */
     async updateData() {
-        const _super = this._super.bind(this);
         if (this.googlePendingSync) {
-            return _super(...arguments);
+            return super.updateData(...arguments);
         }
         try {
             await Promise.race([
@@ -35,7 +38,7 @@ patch(AttendeeCalendarModel.prototype, "google_calendar_google_calendar_model_fu
             console.error("Could not synchronize Google events now.", error);
             this.googlePendingSync = false;
         }
-        return _super(...arguments);
+        return super.updateData(...arguments);
     },
 
     async syncGoogleCalendar(silent = false) {
@@ -50,12 +53,17 @@ patch(AttendeeCalendarModel.prototype, "google_calendar_google_calendar_model_fu
                 silent,
             },
         );
-        if (["need_config_from_admin", "need_auth", "sync_stopped"].includes(result.status)) {
-            this.googleIsSync = false;
+        if (["need_config_from_admin", "need_auth", "sync_stopped", "sync_paused"].includes(result.status)) {
+            this.state.googleIsSync = false;
         } else if (result.status === "no_new_event_from_google" || result.status === "need_refresh") {
-            this.googleIsSync = true;
+            this.state.googleIsSync = true;
         }
+        this.state.googleIsPaused = result.status == "sync_paused";
         this.googlePendingSync = false;
         return result;
     },
+
+    get googleCredentialsSet() {
+        return this.credentialStatus['google_calendar'] ?? false;
+    }
 });

@@ -27,7 +27,7 @@ class HrExpenseSheet(models.Model):
                 - name
         """
         # Get the product account move lines created by an expense
-        expensed_amls = self.account_move_id.line_ids.filtered(lambda aml: aml.expense_id.sale_order_id and aml.balance >= 0 and not aml.tax_line_id)
+        expensed_amls = self.account_move_ids.line_ids.filtered(lambda aml: aml.expense_id.sale_order_id and aml.balance >= 0 and not aml.tax_line_id)
         if not expensed_amls:
             return self.env['sale.order.line']
 
@@ -83,8 +83,8 @@ class HrExpenseSheet(models.Model):
         sale_order_lines = self._get_sale_order_lines()
         sale_order_lines.write({'qty_delivered': 0.0, 'product_uom_qty': 0.0})
 
-    def reset_expense_sheets(self):
-        super().reset_expense_sheets()
+    def action_reset_expense_sheets(self):
+        super().action_reset_expense_sheets()
         self._sale_expense_reset_sol_quantities()
         return True
 
@@ -109,3 +109,17 @@ class HrExpenseSheet(models.Model):
             'name': _('Reinvoiced Sales Orders'),
             'domain': [('id', 'in', self.expense_line_ids.sale_order_id.ids)],
         }
+
+    def _do_create_moves(self):
+        """ When posting expense, if the AA is given, we will track cost in that
+            If a SO is set, this means we want to reinvoice the expense. But to do so, we
+            need the analytic entries to be generated, so a AA is required to reinvoice. So,
+            we ensure the AA if a SO is given.
+        """
+        for expense in self.expense_line_ids.filtered(lambda expense: expense.sale_order_id and not expense.analytic_distribution):
+            if not expense.sale_order_id.analytic_account_id:
+                expense.sale_order_id._create_analytic_account()
+            expense.write({
+                'analytic_distribution': {expense.sale_order_id.analytic_account_id.id: 100}
+            })
+        return super()._do_create_moves()

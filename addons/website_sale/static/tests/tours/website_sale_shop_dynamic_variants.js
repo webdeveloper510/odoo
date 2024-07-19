@@ -1,15 +1,13 @@
-odoo.define('website_sale.tour_shop_dynamic_variants', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var tour = require('web_tour.tour');
-const tourUtils = require('website_sale.tour_utils');
+import { registry } from "@web/core/registry";
+import tourUtils from "@website_sale/js/tours/tour_utils";
 
 // This tour relies on a data created from the python test.
-tour.register('tour_shop_dynamic_variants', {
+registry.category("web_tour.tours").add('tour_shop_dynamic_variants', {
     test: true,
     url: '/shop?search=Dynamic Product',
-},
-[
+    steps: () => [
     {
         content: "select Dynamic Product",
         trigger: '.oe_product_cart a:containsExact("Dynamic Product")',
@@ -31,7 +29,7 @@ tour.register('tour_shop_dynamic_variants', {
         tourUtils.goToCart(),
     {
         content: "check the variant is in the cart",
-        trigger: 'td.td-product_name:contains(Dynamic Product (Dynamic Value 2))',
+        trigger: 'div>a>h6:contains(Dynamic Product (Dynamic Value 2))',
+        isCheck: true,
     },
-]);
-});
+]});

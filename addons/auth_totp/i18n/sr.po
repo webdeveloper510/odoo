@@ -3,18 +3,17 @@
 # 	* auth_totp
 # 
 # Translators:
-# Uros Kalajdzic <ukalajdzic@gmail.com>, 2022
-# Martin Trigaux, 2022
 # Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
+# Martin Trigaux, 2023
 # Milan Bojovic <mbojovic@outlook.com>, 2023
 # コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:22+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: コフスタジオ, 2024\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
@@ -24,6 +23,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/controllers/home.py:0
 #, python-format
 msgid "%(browser)s on %(platform)s"
@@ -32,9 +32,10 @@ msgstr "%(browser)s na %(platform)s"
 #. module: auth_totp
 #: model:ir.model,name:auth_totp.model_auth_totp_wizard
 msgid "2-Factor Setup Wizard"
-msgstr "2-Faktor Postavljanje čarobnjaka"
+msgstr "2-Faktorsko  Postavljanje čarobnjaka"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format
 msgid "2-Factor authentication is now enabled."
@@ -57,20 +58,6 @@ msgid ""
 msgstr ""
 "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>\n"
 "                            Saznaj više"
-
-#. module: auth_totp
-#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
-msgid ""
-"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
-"muted\">This account is protected!</span>"
-msgstr ""
-
-#. module: auth_totp
-#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
-msgid ""
-"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
-"muted\">Your account is protected!</span>"
-msgstr ""
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
@@ -98,6 +85,24 @@ msgid ""
 msgstr ""
 "<span class=\"text-muted\">Popularni su Authy, Google Authenticator ili "
 "Microsoft Authenticator.</span>"
+
+#. module: auth_totp
+#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
+msgid ""
+"<span invisible=\"not totp_enabled\" class=\"text-muted\">This account is "
+"protected!</span>"
+msgstr ""
+"<span invisible=\"not totp_enabled\" class=\"text-muted\">Ovaj nalog je "
+"zaštićen!</span>"
+
+#. module: auth_totp
+#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
+msgid ""
+"<span invisible=\"not totp_enabled\" class=\"text-muted\">Your account is "
+"protected!</span>"
+msgstr ""
+"<span invisible=\"not totp_enabled\" class=\"text-muted\">Vaš nalog je "
+"zaštićen!</span>"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
@@ -178,7 +183,7 @@ msgstr "Kreirano"
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device__create_date
 msgid "Creation Date"
-msgstr "Datum Kreiranja"
+msgstr "Datum kreiranja"
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device__name
@@ -236,26 +241,21 @@ msgid "ID"
 msgstr "ID"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/controllers/home.py:0
 #, python-format
 msgid "Invalid authentication code format."
 msgstr "Neispravan format koda za autentikaciju."
 
 #. module: auth_totp
-#: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device____last_update
-#: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard____last_update
-msgid "Last Modified on"
-msgstr "Poslednja izmena dana"
-
-#. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__write_uid
 msgid "Last Updated by"
-msgstr "Poslednje izmenio/la"
+msgstr "Poslednji put ažurirao"
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__write_date
 msgid "Last Updated on"
-msgstr "Poslednje ažuriranje dana"
+msgstr "Poslednji put ažurirano"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.auth_totp_form
@@ -312,6 +312,7 @@ msgid "Secret"
 msgstr "Tajna"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format
 msgid "The verification code should only contain numbers"
@@ -339,6 +340,7 @@ msgid "Trusted Devices"
 msgstr "Pouzdani uređaji"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-Factor Authentication Activation"
@@ -389,18 +391,21 @@ msgid "Two-factor authentication Enabled"
 msgstr "Dvofaktorska autentifikacija omogućena"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication already enabled"
 msgstr "Dvofaktorska autentifikacija već je omogućena"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication can only be enabled for yourself"
 msgstr "Dvofaktorska autentifikacija može biti omogućena samo za sebe."
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication disabled for the following user(s): %s"
@@ -425,6 +430,7 @@ msgid "Verification Code"
 msgstr "Verifikacioni kod"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format

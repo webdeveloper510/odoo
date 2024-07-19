@@ -2,22 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from odoo import _
 from odoo.http import request, route
 
 from odoo.addons.website_event.controllers.main import WebsiteEventController
 
 
 class WebsiteEventSaleController(WebsiteEventController):
-
-    @route()
-    def event_register(self, event, **post):
-        event = event.with_context(pricelist=request.website.id)
-        if not request.context.get('pricelist'):
-            pricelist = request.website.pricelist_id
-            if pricelist:
-                event = event.with_context(pricelist=pricelist.id)
-        return super().event_register(event, **post)
 
     def _process_tickets_form(self, event, form_details):
         """ Add price information on ticket order """
@@ -72,6 +62,7 @@ class WebsiteEventSaleController(WebsiteEventController):
         if any(info['event_ticket_id'] for info in registrations):
             order_sudo = request.website.sale_get_order()
             if order_sudo.amount_total:
+                request.session['sale_last_order_id'] = order_sudo.id
                 return request.redirect("/shop/checkout")
             # free tickets -> order with amount = 0: auto-confirm, no checkout
             elif order_sudo:

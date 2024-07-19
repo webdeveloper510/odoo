@@ -17,6 +17,6 @@ class PeopleRole(models.Model):
         ('name_uniq', 'unique (name)', 'Role name already exists!'),
     ]
 
-    @api.depends('name')
-    def name_get(self):
-        return [(role.id, role.name.replace('_', ' ').title()) for role in self]
+    def _compute_display_name(self):
+        for role in self:
+            role.display_name = (role.name or '').replace('_', ' ').title()

@@ -3,20 +3,19 @@
 # 	* barcodes_gs1_nomenclature
 # 
 # Translators:
-# Evgeniia Kotova, 2022
-# ILMIR <karamov@it-projects.info>, 2022
-# Martin Trigaux, 2022
-# Сергей Шебанин <sergey@shebanin.ru>, 2022
-# Vasiliy Korobatov <korobatov@gmail.com>, 2022
 # alenafairy, 2023
+# Vasiliy Korobatov <korobatov@gmail.com>, 2023
+# ILMIR <karamov@it-projects.info>, 2023
+# Martin Trigaux, 2023
+# Сергей Шебанин <sergey@shebanin.ru>, 2023
 # Collex100, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:50+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Collex100, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -92,7 +91,7 @@ msgstr "Сепаратор FNC1"
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields,field_description:barcodes_gs1_nomenclature.field_barcode_rule__gs1_content_type
 msgid "GS1 Content Type"
-msgstr "Тип содержимого GS1 "
+msgstr "GS1 Тип содержимого"
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__encoding__gs1-128
@@ -124,18 +123,18 @@ msgstr "Неверный штрих-код: невозможно отформа�
 #: code:addons/barcodes_gs1_nomenclature/static/src/js/barcode_parser.js:0
 #, python-format
 msgid "Invalid barcode: the check digit is incorrect"
-msgstr "Недействительный штрих-код: контрольная цифра неверна "
+msgstr "Неверный штрихкод: контрольная цифра неверна"
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields,field_description:barcodes_gs1_nomenclature.field_barcode_nomenclature__is_gs1_nomenclature
 #: model:ir.model.fields,field_description:barcodes_gs1_nomenclature.field_barcode_rule__is_gs1_nomenclature
 msgid "Is GS1 Nomenclature"
-msgstr "Номенклатура GS1 "
+msgstr "Является ли номенклатура GS1"
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__type__location
 msgid "Location"
-msgstr "Место"
+msgstr "Место хранения"
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__type__lot
@@ -150,7 +149,7 @@ msgstr "Измерение"
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__gs1_content_type__identifier
 msgid "Numeric Identifier"
-msgstr "Числовой идентификатор "
+msgstr "Числовой идентификатор"
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__type__pack_date
@@ -160,7 +159,7 @@ msgstr "Дата упаковки"
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__type__package
 msgid "Package"
-msgstr "пакет"
+msgstr "Пакет"
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields.selection,name:barcodes_gs1_nomenclature.selection__barcode_rule__type__package_type
@@ -210,9 +209,9 @@ msgid ""
 "\t- A first one for the Application Identifier (usually 2 to 4 digits);\n"
 "\t- A second one to catch the value."
 msgstr ""
-"Шаблон правила \"%s\" недействителен, необходимы две группы: \n"
-"\t- Первый для идентификатора приложения (обычно от 2 до 4 цифр);\n"
-"\t - Второй, чтобы взять значение. "
+"Шаблон правила \"%s\" не подходит, ему нужны две группы:\n"
+"\t- Первая - для идентификатора приложения (обычно от 2 до 4 цифр);\n"
+"\t- Вторая - для определения значения."
 
 #. module: barcodes_gs1_nomenclature
 #. odoo-python
@@ -223,9 +222,9 @@ msgid ""
 "If this rule uses decimal, check it can't get sometime else than a digit as last char for the Application Identifier.\n"
 "Check also the possible matched values can only be digits, otherwise the value can't be casted as a measure."
 msgstr ""
-"Что-то не так с шаблоном правила штрих-кода \"%s\". \n"
-"Если в этом правиле используется десятичная дробь, убедитесь, что в качестве последнего символа для идентификатора приложения не указано ничего, кроме цифры. \n"
-"Проверьте также, что возможные совпадающие значения являются только цифрами, иначе значение не может быть приведено в качестве меры. "
+"Что-то не так с шаблоном правила штрихкода \"%s\".\n"
+"Если это правило использует десятичную систему счисления, проверьте, не может ли оно получить в качестве последнего символа идентификатора приложения что-то еще, кроме цифры.\n"
+"Проверьте также, что возможные совпадающие значения могут быть только цифрами, иначе значение не может быть преобразовано в меру."
 
 #. module: barcodes_gs1_nomenclature
 #: model:ir.model.fields,help:barcodes_gs1_nomenclature.field_barcode_nomenclature__is_gs1_nomenclature
@@ -234,8 +233,8 @@ msgid ""
 "This Nomenclature use the GS1 specification, only GS1-128 encoding rules is "
 "accepted is this kind of nomenclature."
 msgstr ""
-"В данной номенклатуре используется спецификация GS1, в этой номенклатуре "
-"принимаются только правила кодирования GS1-128. "
+"Данная номенклатура использует спецификацию GS1, только правила кодирования "
+"GS1-128 приняты для этого вида номенклатуры."
 
 #. module: barcodes_gs1_nomenclature
 #. odoo-javascript

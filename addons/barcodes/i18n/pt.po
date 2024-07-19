@@ -3,22 +3,15 @@
 # 	* barcodes
 # 
 # Translators:
-# Pedro Castro Silva <pedrocs@exo.pt>, 2022
-# Diogo Fonseca <dsf@thinkopensolutions.pt>, 2022
-# Nuno Silva <nuno.silva@arxi.pt>, 2022
-# Reinaldo Ramos <reinaldo.ramos@arxi.pt>, 2022
-# Pedro Filipe <pedro2.10@hotmail.com>, 2022
-# Vitor Fernandes <vmlf01@gmail.com>, 2022
-# Manuela Silva <mmsrs@sky.com>, 2022
-# Vasco Rodrigues, 2022
+# Wil Odoo, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Vasco Rodrigues, 2022\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Portuguese (https://app.transifex.com/odoo/teams/41243/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,11 +20,11 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: barcodes
+#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
-msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*' ?"
+msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*'?"
 msgstr ""
-" '*' não é um Padrão de Código de Barras Regex válido. Quis dizer '.*' ?"
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -89,6 +82,13 @@ msgid "Any"
 msgstr "Qualquer"
 
 #. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
+#, python-format
+msgid "Barcode"
+msgstr "Código de Barras"
+
+#. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
 msgid "Barcode Event Mixin"
 msgstr ""
@@ -124,7 +124,7 @@ msgid "Barcode Scanned"
 msgstr "Código de Barras lido"
 
 #. module: barcodes
-#. openerp-web
+#. odoo-javascript
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Barcode: "
@@ -185,12 +185,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: barcodes
-#: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature____last_update
-#: model:ir.model.fields,field_description:barcodes.field_barcode_rule____last_update
-msgid "Last Modified on"
-msgstr "Última Modificação em"
-
-#. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_uid
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__write_uid
 msgid "Last Updated by"
@@ -217,17 +211,18 @@ msgstr "Nomenclatura"
 msgid ""
 "Patterns can also define how numerical values, such as weight or price, can be\n"
 "                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n"
-"                                define where the number's digits are encoded. Floats are also supported with the \n"
-"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases, \n"
-"                                the barcode field on the associated records <i>must</i> show these digits as \n"
+"                                define where the number's digits are encoded. Floats are also supported with the\n"
+"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n"
+"                                the barcode field on the associated records <i>must</i> show these digits as\n"
 "                                zeroes."
 msgstr ""
-"Os padrões também podem definir como valores numéricos, tais como o peso ou preço,\n"
-"podem ser codificados em código de barras. Eles são indicados por <code>[NNN]</code>\n"
-"onde os N's definem onde os dígitos do número são codificados. Os números de\n"
-"virgula flutuante também são suportados com os decimais indicados por D's, tal como\n"
-"<code>[NNNDD]</code>. Nestes casos, o campo do código de barras nos registos\n"
-"associados <i>deve</i> mostrar estes dígitos como zeros."
+
+#. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/barcode_scanner.js:0
+#, python-format
+msgid "Please, Scan again!"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__name
@@ -250,6 +245,13 @@ msgid "Tables"
 msgstr "Tabelas"
 
 #. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
+#, python-format
+msgid "Tap to scan"
+msgstr "Toque para digitalizar"
+
+#. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern
 msgid "The barcode matching pattern"
 msgstr "O padrão correspondente do código de barras"
@@ -265,6 +267,7 @@ msgid "The matched pattern will alias to this barcode"
 msgstr "O padrão combinado vai apelidar este código de barras"
 
 #. module: barcodes
+#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -273,6 +276,7 @@ msgid ""
 msgstr ""
 
 #. module: barcodes
+#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -283,6 +287,7 @@ msgstr ""
 "apenas pode conter N's seguidos de D's."
 
 #. module: barcodes
+#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -338,7 +343,7 @@ msgid "Unit Product"
 msgstr "Artigo Unitário"
 
 #. module: barcodes
-#. openerp-web
+#. odoo-javascript
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Unknown barcode command"

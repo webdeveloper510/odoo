@@ -3,22 +3,22 @@
 # 	* account_debit_note
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
-# Pekka Ikonen, 2022
-# Tommi Rintala <tommi.rintala@gmail.com>, 2022
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2022
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Pekka Ikonen, 2023
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2023
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2023
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2023
+# Tommi Rintala <tommi.rintala@gmail.com>, 2023
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023
+# Martin Trigaux, 2023
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~15.3\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-19 13:57+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
@@ -31,11 +31,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
 msgid "<span class=\"o_stat_text\">Debit Notes</span>"
 msgstr "<span class=\"o_stat_text\">Veloituslaskut</span>"
-
-#. module: account_debit_note
-#: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
-msgid "Add Debit Note"
-msgstr "Lisää veloituslasku"
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_debit_note
@@ -74,12 +69,18 @@ msgid "Created on"
 msgstr "Luotu"
 
 #. module: account_debit_note
+#: model:ir.actions.server,name:account_debit_note.action_move_debit_note
+msgid "Debit Note"
+msgstr "Veloituslasku"
+
+#. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__date
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_account_debit_note
 msgid "Debit Note Date"
 msgstr "Veloituslaskun päiväys"
 
 #. module: account_debit_note
+#. odoo-python
 #: code:addons/account_debit_note/models/account_move.py:0
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #: model:ir.model.fields,field_description:account_debit_note.field_account_bank_statement_line__debit_note_ids
@@ -112,7 +113,7 @@ msgid ""
 "copy them.  We won't copy them for debit notes from credit notes. "
 msgstr ""
 "Mikäli korjauksia täytyy tehdä jokaiselle riville, voi olla kätevintä "
-"kopioida ne. Odoo ei kopioi hyvityslaskuista huomioita veloituslaskuihin."
+"kopioida ne. Odoo ei kopioi hyvityslaskuista huomioita veloituslaskuihin. "
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_move
@@ -123,11 +124,6 @@ msgstr "Päiväkirjan kirjaus"
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__journal_type
 msgid "Journal Type"
 msgstr "Päiväkirjan tyyppi"
-
-#. module: account_debit_note
-#: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note____last_update
-msgid "Last Modified on"
-msgstr "Viimeksi muokattu"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__write_uid
@@ -185,6 +181,7 @@ msgid "The debit notes created for this invoice"
 msgstr "Tähän laskuun luodut veloituslaskut"
 
 #. module: account_debit_note
+#. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #, python-format
 msgid "This debit note was created from: %s"
@@ -196,7 +193,30 @@ msgid "Use Specific Journal"
 msgstr "Käytä erityistä päiväkirjaa"
 
 #. module: account_debit_note
+#. odoo-python
+#: code:addons/account_debit_note/wizard/account_debit_note.py:0
+#, python-format
+msgid ""
+"You can make a debit note only for a Customer Invoice, a Customer Credit "
+"Note, a Vendor Bill or a Vendor Credit Note."
+msgstr ""
+"Voit tehdä veloitusilmoituksen vain asiakaslaskulle, asiakashyvityslaskussa,"
+" myyjän laskulle tai myyjän hyvityslaskussa."
+
+#. module: account_debit_note
+#. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #, python-format
 msgid "You can only debit posted moves."
 msgstr "Veloituslaskuja voi luoda vain kirjauksista."
+
+#. module: account_debit_note
+#. odoo-python
+#: code:addons/account_debit_note/wizard/account_debit_note.py:0
+#, python-format
+msgid ""
+"You can't make a debit note for an invoice that is already linked to a debit"
+" note."
+msgstr ""
+"Et voi tehdä veloitusilmoitusta laskulle, joka on jo linkitetty "
+"veloitusilmoitukseen."

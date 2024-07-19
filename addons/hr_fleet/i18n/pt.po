@@ -3,20 +3,16 @@
 # 	* hr_fleet
 # 
 # Translators:
-# Cristina Loureiro <cloureiro@live.com>, 2022
-# Diogo Fonseca <dsf@thinkopensolutions.pt>, 2022
-# Reinaldo Ramos <reinaldo.ramos@arxi.pt>, 2022
-# Martin Trigaux, 2022
-# Pedro Filipe <pedro2.10@hotmail.com>, 2022
-# Manuela Silva <mmsrs@sky.com>, 2023
+# Wil Odoo, 2023
+# Samuel Afonso, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Manuela Silva <mmsrs@sky.com>, 2023\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Samuel Afonso, 2024\n"
 "Language-Team: Portuguese (https://app.transifex.com/odoo/teams/41243/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,9 +28,14 @@ msgid ""
 msgstr ""
 
 #. module: hr_fleet
-#: model_terms:ir.ui.view,arch_db:hr_fleet.view_employee_form
-msgid "Application Settings"
+#: model:ir.model,name:hr_fleet.model_mail_activity_plan_template
+msgid "Activity plan template"
 msgstr ""
+
+#. module: hr_fleet
+#: model:ir.model.fields,field_description:hr_fleet.field_mail_activity_plan_template__responsible_type
+msgid "Assignment"
+msgstr "Atribuição"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_employee_view_list
@@ -43,6 +44,7 @@ msgid "Attachments"
 msgstr "Anexos"
 
 #. module: hr_fleet
+#. odoo-python
 #: code:addons/hr_fleet/models/employee.py:0
 #, python-format
 msgid "Cannot remove address from employees with linked cars."
@@ -62,11 +64,6 @@ msgstr ""
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_employee_view_list
 msgid "Current Driver"
-msgstr ""
-
-#. module: hr_fleet
-#: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_view_search_inherit_hr
-msgid "Current Driver (Employee)"
 msgstr ""
 
 #. module: hr_fleet
@@ -101,9 +98,28 @@ msgid "Employee"
 msgstr "Funcionário"
 
 #. module: hr_fleet
+#. odoo-python
+#: code:addons/hr_fleet/models/mail_activity_plan_template.py:0
+#, python-format
+msgid "Employee %s is not linked to a vehicle."
+msgstr ""
+
+#. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle__driver_employee_name
 msgid "Employee Name"
 msgstr "Nome do Funcionário"
+
+#. module: hr_fleet
+#: model:ir.model.fields.selection,name:hr_fleet.selection__mail_activity_plan_template__responsible_type__fleet_manager
+msgid "Fleet Manager"
+msgstr ""
+
+#. module: hr_fleet
+#. odoo-python
+#: code:addons/hr_fleet/models/mail_activity_plan_template.py:0
+#, python-format
+msgid "Fleet Manager is limited to Employee plans."
+msgstr ""
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.view_employee_form
@@ -116,7 +132,7 @@ msgid "Future Driver (Employee)"
 msgstr ""
 
 #. module: hr_fleet
-#: model_terms:ir.ui.view,arch_db:hr_fleet.view_employee_filter
+#: model:ir.model.fields,field_description:hr_fleet.field_hr_employee__license_plate
 msgid "License Plate"
 msgstr "Matrícula"
 
@@ -143,6 +159,7 @@ msgid "Public Employee"
 msgstr ""
 
 #. module: hr_fleet
+#. odoo-python
 #: code:addons/hr_fleet/models/fleet_vehicle.py:0
 #, python-format
 msgid "Related Employee"
@@ -159,7 +176,14 @@ msgid "Services for vehicles"
 msgstr "Serviços para veículos"
 
 #. module: hr_fleet
-#. openerp-web
+#. odoo-python
+#: code:addons/hr_fleet/models/mail_activity_plan_template.py:0
+#, python-format
+msgid "The vehicle of employee %(employee)s is not linked to a fleet manager."
+msgstr ""
+
+#. module: hr_fleet
+#. odoo-javascript
 #: code:addons/hr_fleet/static/src/views/hr_fleet_kanban/hr_fleet_kanban_controller.xml:0
 #, python-format
 msgid "Upload"

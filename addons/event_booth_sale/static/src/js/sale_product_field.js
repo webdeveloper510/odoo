@@ -1,27 +1,28 @@
 /** @odoo-module **/
 
-import { patch } from "@web/core/utils/patch";
 import { SaleOrderLineProductField } from '@sale/js/sale_product_field';
+import { x2ManyCommands } from "@web/core/orm_service";
+import { patch } from "@web/core/utils/patch";
 
 
-patch(SaleOrderLineProductField.prototype, 'event_booth_sale', {
+patch(SaleOrderLineProductField.prototype, {
 
     async _onProductUpdate() {
-        this._super(...arguments);
+        super._onProductUpdate(...arguments);
         if (this.props.record.data.product_type === 'event_booth') {
             this._openEventBoothConfigurator(false);
         }
     },
 
     _editLineConfiguration() {
-        this._super(...arguments);
+        super._editLineConfiguration(...arguments);
         if (this.props.record.data.product_type === 'event_booth') {
             this._openEventBoothConfigurator(true);
         }
     },
 
     get isConfigurableLine() {
-        return this._super(...arguments) || Boolean(this.props.record.data.event_booth_category_id);
+        return super.isConfigurableLine || this.props.record.data.product_type === 'event_booth';
     },
 
     async _openEventBoothConfigurator(edit) {
@@ -39,7 +40,7 @@ patch(SaleOrderLineProductField.prototype, 'event_booth_sale', {
             if (recordData.event_booth_pending_ids) {
                 actionContext.default_event_booth_ids = recordData.event_booth_pending_ids.records.map(
                     record => {
-                        return [4, record.data.id];
+                        return [4, record.resId];
                     }
                 );
             }
@@ -58,11 +59,12 @@ patch(SaleOrderLineProductField.prototype, 'event_booth_sale', {
                             });
                         }
                     } else {
-                        const eventBoothConfiguration = closeInfo.eventBoothConfiguration;
+                        const { event_id, event_booth_category_id, event_booth_pending_ids } =
+                            closeInfo.eventBoothConfiguration;
                         this.props.record.update({
-                            event_id: eventBoothConfiguration.event_id,
-                            event_booth_category_id: eventBoothConfiguration.event_booth_category_id,
-                            event_booth_pending_ids: eventBoothConfiguration.event_booth_pending_ids,
+                            event_id,
+                            event_booth_category_id,
+                            event_booth_pending_ids: [x2ManyCommands.set(event_booth_pending_ids)],
                         });
                     }
                 }

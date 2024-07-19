@@ -3,16 +3,16 @@
 # 	* auth_totp_mail
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2022
+# Martin Trigaux, 2023
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2023
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -59,11 +59,37 @@ msgstr ""
 "        "
 
 #. module: auth_totp_mail
+#: model_terms:ir.ui.view,arch_db:auth_totp_mail.account_security_setting_update
+msgid "<span>Consider</span>"
+msgstr "<span>Överväga</span>"
+
+#. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/auth_totp_device.py:0
+#, python-format
+msgid "A trusted device has just been added to your account: %(device_name)s"
+msgstr "En betrodd enhet har just lagts till i ditt konto: %(device_name)s"
+
+#. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/auth_totp_device.py:0
+#, python-format
+msgid ""
+"A trusted device has just been removed from your account: %(device_names)s"
+msgstr ""
+"En betrodd enhet har just tagits bort från ditt konto: %(device_names)s"
+
+#. module: auth_totp_mail
 #. odoo-python
 #: code:addons/auth_totp_mail/models/res_users.py:0
 #, python-format
 msgid "Account Security"
 msgstr "Kontosäkerhet"
+
+#. module: auth_totp_mail
+#: model:ir.model,name:auth_totp_mail.model_auth_totp_device
+msgid "Authentication Device"
+msgstr "Autentiseringsenhet"
 
 #. module: auth_totp_mail
 #: model:mail.template,subject:auth_totp_mail.mail_template_totp_invite
@@ -102,11 +128,58 @@ msgid "Open two-factor authentication configuration"
 msgstr "Öppna konfigurationen för tvåfaktorsautentisering"
 
 #. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/res_users.py:0
+#, python-format
+msgid "Security Update: 2FA Activated"
+msgstr "Säkerhetsuppdatering: 2FA aktiverad"
+
+#. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/res_users.py:0
+#, python-format
+msgid "Security Update: 2FA Deactivated"
+msgstr "Säkerhetsuppdatering: 2FA avaktiverad"
+
+#. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/auth_totp_device.py:0
+#, python-format
+msgid "Security Update: Device Added"
+msgstr "Säkerhetsuppdatering: Enhet tillagd"
+
+#. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/auth_totp_device.py:0
+#, python-format
+msgid "Security Update: Device Removed"
+msgstr "Säkerhetsuppdatering: Enhet borttagen"
+
+#. module: auth_totp_mail
 #: model:mail.template,name:auth_totp_mail.mail_template_totp_invite
 msgid "Settings: 2Fa Invitation"
 msgstr "Inställningar: 2Fa Inbjudan"
 
 #. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/res_users.py:0
+#, python-format
+msgid "Two-factor authentication has been activated on your account"
+msgstr "Tvåfaktorsautentisering har aktiverats på ditt konto"
+
+#. module: auth_totp_mail
+#. odoo-python
+#: code:addons/auth_totp_mail/models/res_users.py:0
+#, python-format
+msgid "Two-factor authentication has been deactivated on your account"
+msgstr "Tvåfaktorsautentisering har avaktiverats på ditt konto"
+
+#. module: auth_totp_mail
 #: model:ir.model,name:auth_totp_mail.model_res_users
 msgid "User"
 msgstr "Användare"
+
+#. module: auth_totp_mail
+#: model_terms:ir.ui.view,arch_db:auth_totp_mail.account_security_setting_update
+msgid "activating Two-factor Authentication"
+msgstr "aktivera tvåfaktorsautentisering"

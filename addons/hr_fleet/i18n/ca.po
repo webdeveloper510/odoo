@@ -3,23 +3,23 @@
 # 	* hr_fleet
 # 
 # Translators:
-# Arnau Ros, 2022
-# RGB Consulting <odoo@rgbconsulting.com>, 2022
-# Quim - eccit <quim@eccit.com>, 2022
-# Martin Trigaux, 2022
-# marcescu, 2022
-# Josep Anton Belchi, 2022
-# Harcogourmet, 2022
-# Óscar Fonseca <tecnico@pyming.com>, 2022
-# Ivan Espinola, 2022
+# Ivan Espinola, 2023
+# RGB Consulting <odoo@rgbconsulting.com>, 2023
+# Arnau Ros, 2023
+# Martin Trigaux, 2023
+# Quim - eccit <quim@eccit.com>, 2023
+# marcescu, 2023
+# Óscar Fonseca <tecnico@pyming.com>, 2023
+# Josep Anton Belchi, 2023
+# Iván Infantes Castarnado, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Ivan Espinola, 2022\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Iván Infantes Castarnado, 2024\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,6 +35,16 @@ msgid ""
 msgstr ""
 "<span class=\"o_stat_value\">1</span>\n"
 "                        <span class=\"o_stat_text\">Empleat</span>"
+
+#. module: hr_fleet
+#: model:ir.model,name:hr_fleet.model_mail_activity_plan_template
+msgid "Activity plan template"
+msgstr "Plantilla del pla d'activitat"
+
+#. module: hr_fleet
+#: model:ir.model.fields,field_description:hr_fleet.field_mail_activity_plan_template__responsible_type
+msgid "Assignment"
+msgstr "Asignació"
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_employee_view_list
@@ -64,11 +74,6 @@ msgstr "Cotxe d'empresa"
 #: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_assignation_log_employee_view_list
 msgid "Current Driver"
 msgstr "Conductor actual"
-
-#. module: hr_fleet
-#: model_terms:ir.ui.view,arch_db:hr_fleet.fleet_vehicle_view_search_inherit_hr
-msgid "Current Driver (Employee)"
-msgstr "Conductor actual (empleat)"
 
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_hr_departure_wizard
@@ -102,9 +107,28 @@ msgid "Employee"
 msgstr "Empleat"
 
 #. module: hr_fleet
+#. odoo-python
+#: code:addons/hr_fleet/models/mail_activity_plan_template.py:0
+#, python-format
+msgid "Employee %s is not linked to a vehicle."
+msgstr ""
+
+#. module: hr_fleet
 #: model:ir.model.fields,field_description:hr_fleet.field_fleet_vehicle__driver_employee_name
 msgid "Employee Name"
 msgstr "Nom de l'empleat"
+
+#. module: hr_fleet
+#: model:ir.model.fields.selection,name:hr_fleet.selection__mail_activity_plan_template__responsible_type__fleet_manager
+msgid "Fleet Manager"
+msgstr "Gestor del Parc automobilístic"
+
+#. module: hr_fleet
+#. odoo-python
+#: code:addons/hr_fleet/models/mail_activity_plan_template.py:0
+#, python-format
+msgid "Fleet Manager is limited to Employee plans."
+msgstr ""
 
 #. module: hr_fleet
 #: model_terms:ir.ui.view,arch_db:hr_fleet.view_employee_form
@@ -117,7 +141,7 @@ msgid "Future Driver (Employee)"
 msgstr "Futur conductor (empleat)"
 
 #. module: hr_fleet
-#: model_terms:ir.ui.view,arch_db:hr_fleet.view_employee_filter
+#: model:ir.model.fields,field_description:hr_fleet.field_hr_employee__license_plate
 msgid "License Plate"
 msgstr "Matricula"
 
@@ -141,7 +165,7 @@ msgstr "Registre de l'hodòmetre per un vehicle"
 #. module: hr_fleet
 #: model:ir.model,name:hr_fleet.model_hr_employee_public
 msgid "Public Employee"
-msgstr "Empleat Públic"
+msgstr "Empleat públic"
 
 #. module: hr_fleet
 #. odoo-python
@@ -159,6 +183,13 @@ msgstr "Alliberar el cotxe de l'empresa"
 #: model:ir.model,name:hr_fleet.model_fleet_vehicle_log_services
 msgid "Services for vehicles"
 msgstr "Serveis pels vehicles"
+
+#. module: hr_fleet
+#. odoo-python
+#: code:addons/hr_fleet/models/mail_activity_plan_template.py:0
+#, python-format
+msgid "The vehicle of employee %(employee)s is not linked to a fleet manager."
+msgstr ""
 
 #. module: hr_fleet
 #. odoo-javascript

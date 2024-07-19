@@ -3,23 +3,22 @@
 # 	* purchase_stock
 # 
 # Translators:
-# Kovács Tibor <kovika@gmail.com>, 2022
-# Zsolt Godó <zsolttokio@gmail.com>, 2022
-# Ákos Nagy <akos.nagy@oregional.hu>, 2022
-# Tamás Dombos, 2022
-# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2022
-# Martin Trigaux, 2022
-# krnkris, 2022
-# gezza <geza.nagy@oregional.hu>, 2022
+# Kovács Tibor <kovika@gmail.com>, 2023
+# Zsolt Godó <zsolttokio@gmail.com>, 2023
+# Tamás Dombos, 2023
+# Ákos Nagy <akos.nagy@oregional.hu>, 2023
+# Martin Trigaux, 2023
 # Tamás Németh <ntomasz81@gmail.com>, 2023
+# krnkris, 2023
+# gezza <geza.nagy@oregional.hu>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:49+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Tamás Németh <ntomasz81@gmail.com>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: gezza <geza.nagy@oregional.hu>, 2023\n"
 "Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,35 +41,6 @@ msgid "+ %d day(s)"
 msgstr "+ %d nap"
 
 #. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_view_form_inherit
-msgid ""
-"<span attrs=\"{'invisible': [('on_time_rate', '&gt;=', 0)]}\">No On-time "
-"Delivery Data</span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('on_time_rate', '&gt;=', 0)]}\">Nincs "
-"határidőre szállítási adat</span>"
-
-#. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\"/>"
-
-#. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" groups=\"base.group_multi_company\"/>"
-
-#. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
 msgid "<span class=\"o_stat_text\">On-time Rate</span>"
 msgstr "<span class=\"o_stat_text\">Határidő ráta</span>"
@@ -84,6 +54,21 @@ msgstr "<span class=\"o_stat_text\">Beszerzések</span>"
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
 msgid "<span class=\"o_stat_value\">%</span>"
 msgstr "<span class=\"o_stat_value\">%</span>"
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_view_form_inherit
+msgid "<span invisible=\"on_time_rate &gt;= 0\">No On-time Delivery Data</span>"
+msgstr ""
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
+msgid "<span> days</span>"
+msgstr ""
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_kanban_catalog_purchase_only
+msgid "<span>Forecasted: </span>"
+msgstr ""
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.report_purchaseorder_document
@@ -100,7 +85,7 @@ msgstr "<strong>Szállítási cím:</strong>"
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_purchase_order_line__qty_received_method
 msgid ""
-"According to product configuration, the received quantity can be automatically computed by mechanism :\n"
+"According to product configuration, the received quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
@@ -108,26 +93,12 @@ msgstr ""
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_rule__action
 msgid "Action"
-msgstr "Művelet"
-
-#. module: purchase_stock
-#: model:ir.model.fields,help:purchase_stock.field_purchase_report__avg_receipt_delay
-msgid ""
-"Amount of time between expected and effective receipt date. Due to a hack "
-"needed to calculate this,               every record will show the same "
-"average value, therefore only use this as an aggregated value with "
-"group_operator=avg"
-msgstr ""
+msgstr "Akció"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__effective_date
 msgid "Arrival"
 msgstr ""
-
-#. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_purchase_report__avg_receipt_delay
-msgid "Average Receipt Delay"
-msgstr "Átlagos számla késés"
 
 #. module: purchase_stock
 #. odoo-python
@@ -171,15 +142,15 @@ msgstr "Kapcsolat"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid "Corresponding receipt not found."
 msgstr ""
 
 #. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_stock_move__created_purchase_line_id
-msgid "Created Purchase Order Line"
-msgstr "Létrehozott beszerzési rendelés sor"
+#: model:ir.model.fields,field_description:purchase_stock.field_stock_move__created_purchase_line_ids
+msgid "Created Purchase Order Lines"
+msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
@@ -239,15 +210,9 @@ msgid "Display Name"
 msgstr "Megjelenített név"
 
 #. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_purchase
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
-msgid "Documentation"
-msgstr "Dokumentáció"
-
-#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order_line__move_dest_ids
-msgid "Downstream Moves"
-msgstr "Követő mozgások"
+msgid "Downstream moves alt"
+msgstr ""
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__dest_address_id
@@ -282,7 +247,7 @@ msgstr "Kivételek:"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "For the product %s, the warehouse of the operation type (%s) is inconsistent"
@@ -322,6 +287,13 @@ msgstr ""
 "generálásához."
 
 #. module: purchase_stock
+#. odoo-python
+#: code:addons/purchase_stock/wizard/product_replenish.py:0
+#, python-format
+msgid "Go on the product form and add the list of vendors"
+msgstr ""
+
+#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report__id
 msgid "ID"
 msgstr "Azonosító"
@@ -337,23 +309,9 @@ msgid "Incoming Shipments"
 msgstr "Beérkező szállítmányok"
 
 #. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__incoterm_id
-msgid "Incoterm"
-msgstr "Nemzetközi Kereskedelmi Feltétel"
-
-#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__incoterm_location
 msgid "Incoterm Location"
 msgstr ""
-
-#. module: purchase_stock
-#: model:ir.model.fields,help:purchase_stock.field_purchase_order__incoterm_id
-msgid ""
-"International Commercial Terms are a series of predefined commercial terms "
-"used in international transactions."
-msgstr ""
-"A Nemzetközi Kereskedelmi Feltételek olyan előredefiniált üzleti feltételek,"
-" melyeket nemzetközi ügyleteknél használnak."
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__is_shipped
@@ -373,12 +331,7 @@ msgstr "Könyvelési tétel"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_account_move_line
 msgid "Journal Item"
-msgstr "Könyvelési tételsor"
-
-#. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report____last_update
-msgid "Last Modified on"
-msgstr "Legutóbb frissítve"
+msgstr "Napló tétel"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_product_supplierinfo__last_purchase_date
@@ -424,7 +377,7 @@ msgstr ""
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.exception_on_po
 msgid "Next transfer(s) impacted:"
-msgstr "Következő érintett transzferek:"
+msgstr "Következő átmozgatások érintettek:"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
@@ -484,8 +437,9 @@ msgstr "Rendelési pont"
 #: model:ir.model.fields,help:purchase_stock.field_res_partner__on_time_rate
 #: model:ir.model.fields,help:purchase_stock.field_res_users__on_time_rate
 msgid ""
-"Over the past 12 months; the number of products received on time divided by "
-"the number of ordered products."
+"Over the past x days; the number of products received on time divided by the"
+" number of ordered products.x is either the System Parameter "
+"purchase_stock.on_time_delivery_days or the default 365"
 msgstr ""
 
 #. module: purchase_stock
@@ -499,6 +453,13 @@ msgid "Partially Received"
 msgstr ""
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_category__property_account_creditor_price_difference_categ
+#: model:ir.model.fields,field_description:purchase_stock.field_product_product__property_account_creditor_price_difference
+#: model:ir.model.fields,field_description:purchase_stock.field_product_template__property_account_creditor_price_difference
+msgid "Price Difference Account"
+msgstr "Árkülönbözet számla"
+
+#. module: purchase_stock
 #. odoo-javascript
 #: code:addons/purchase_stock/static/src/js/tours/purchase_stock.js:0
 #, python-format
@@ -506,6 +467,7 @@ msgid "Process all the receipt quantities."
 msgstr ""
 
 #. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_procurement_group
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__group_id
 msgid "Procurement Group"
 msgstr "Beszerzési csoport"
@@ -517,9 +479,15 @@ msgid "Product"
 msgstr "Termék"
 
 #. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_product_category
 #: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report__category_id
 msgid "Product Category"
-msgstr "Termék kategória"
+msgstr "Termékkategória"
+
+#. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_product_replenish
+msgid "Product Replenish"
+msgstr "Termék feltöltés"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_replenishment_info__supplierinfo_id
@@ -645,7 +613,7 @@ msgstr "Foglalás"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_return_picking
 msgid "Return Picking"
-msgstr "Visszáru"
+msgstr "Visszáru kigyűjtés"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_product_product__route_ids
@@ -669,6 +637,12 @@ msgid "Show Set Supplier Button"
 msgstr ""
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_replenish__show_vendor
+#: model_terms:ir.ui.view,arch_db:purchase_stock.view_product_replenish_form_inherit_stock
+msgid "Show Vendor"
+msgstr ""
+
+#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__show_supplier
 msgid "Show supplier column"
 msgstr "Beszállító oszlop megjelenítése"
@@ -685,7 +659,7 @@ msgid "Stock Moves"
 msgstr "Készletmozgások"
 
 #. module: purchase_stock
-#: model:ir.model,name:purchase_stock.model_report_stock_report_product_product_replenishment
+#: model:ir.model,name:purchase_stock.model_stock_forecasted_product_product
 msgid "Stock Replenishment Report"
 msgstr "Készletfeltöltés kimutatás"
 
@@ -695,6 +669,11 @@ msgid "Stock Rule"
 msgstr "Készletszabály"
 
 #. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_stock_valuation_layer
+msgid "Stock Valuation Layer"
+msgstr ""
+
+#. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_report_stock_report_stock_rule
 msgid "Stock rule report"
 msgstr "Készletszabály riport"
@@ -702,6 +681,11 @@ msgstr "Készletszabály riport"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_replenishment_info
 msgid "Stock supplier replenishment information"
+msgstr ""
+
+#. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_stock_replenishment_option
+msgid "Stock warehouse replenishment option"
 msgstr ""
 
 #. module: purchase_stock
@@ -728,7 +712,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "The quantities on your purchase order indicate less than billed. You should "
@@ -744,6 +728,25 @@ msgid ""
 " %s (no vendor defined, minimum quantity not reached, dates not valid, ...)."
 " Go on the product form and complete the list of vendors."
 msgstr ""
+
+#. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_product_product__property_account_creditor_price_difference
+#: model:ir.model.fields,help:purchase_stock.field_product_template__property_account_creditor_price_difference
+msgid ""
+"This account is used in automated inventory valuation to record the price "
+"difference between a purchase order and its related vendor bill when "
+"validating this vendor bill."
+msgstr ""
+
+#. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_product_category__property_account_creditor_price_difference_categ
+msgid ""
+"This account will be used to value price difference between purchase price "
+"and accounting cost."
+msgstr ""
+"Ez a főkönyvi számla szolgál a tényleges bekerülési érték és a "
+"nyilvántartási ár /elszámoló ár/ közötti árkülönbözet értékének "
+"meghatározásához."
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_purchase
@@ -767,7 +770,7 @@ msgstr "Meghatározza a művelet típusát a bejövő szállítmányokhoz"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid ""
 "Those dates couldn’t be modified accordingly on the receipt %s which had "
@@ -776,7 +779,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid "Those dates have been updated accordingly on the receipt %s."
 msgstr ""
@@ -789,11 +792,11 @@ msgstr "Mennyiség összesen"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_picking
 msgid "Transfer"
-msgstr "Szállítás"
+msgstr "Átmozgatás"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid ""
 "Unable to cancel purchase order %s as some receptions have already been "
@@ -810,6 +813,7 @@ msgid "Validate the receipt of all ordered products."
 msgstr ""
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_replenish__supplier_id
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__vendor_id
 #: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report__partner_id
 #: model_terms:ir.ui.view,arch_db:purchase_stock.view_warehouse_orderpoint_tree_editable_inherited_mrp
@@ -827,6 +831,13 @@ msgstr "Beszállítói késés kimuatatás"
 #, python-format
 msgid "Vendor Lead Time"
 msgstr "Beszállítói átfutási idő"
+
+#. module: purchase_stock
+#. odoo-python
+#: code:addons/purchase_stock/wizard/product_replenish.py:0
+#, python-format
+msgid "Vendor Not Found in Product %s"
+msgstr ""
 
 #. module: purchase_stock
 #: model_terms:ir.actions.act_window,help:purchase_stock.action_purchase_vendor_delay_report
@@ -866,7 +877,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "You cannot decrease the ordered quantity below the received quantity.\n"
@@ -877,7 +888,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid "You must set a Vendor Location for this partner %s"
 msgstr "Hozzá kell rendelnie egy beszállítói telephelyet %s partnerhez."

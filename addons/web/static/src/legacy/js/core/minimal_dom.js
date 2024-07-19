@@ -53,7 +53,7 @@ export function makeAsyncHandler(fct, preventDefault, stopPropagation) {
 
         _lock();
         const result = fct.apply(this, arguments);
-        Promise.resolve(result).then(_unlock).catch(_unlock);
+        Promise.resolve(result).finally(_unlock);
         return result;
     };
 }
@@ -104,7 +104,7 @@ export function makeButtonHandler(fct) {
             .then(function () {
                 buttonEl.classList.remove('pe-none');
                 const restore = addButtonLoadingEffect(buttonEl);
-                return Promise.resolve(result).then(restore).catch(restore);
+                return Promise.resolve(result).finally(restore);
             });
 
         return result;

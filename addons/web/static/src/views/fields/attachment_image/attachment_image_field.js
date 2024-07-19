@@ -1,15 +1,18 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
 import { Component } from "@odoo/owl";
 
-export class AttachmentImageField extends Component {}
+export class AttachmentImageField extends Component {
+    static template = "web.AttachmentImageField";
+}
 
-AttachmentImageField.template = "web.AttachmentImageField";
+export const attachmentImageField = {
+    component: AttachmentImageField,
+    displayName: _t("Attachment Image"),
+    supportedTypes: ["many2one"],
+};
 
-AttachmentImageField.displayName = _lt("Attachment Image");
-AttachmentImageField.supportedTypes = ["many2one"];
-
-registry.category("fields").add("attachment_image", AttachmentImageField);
+registry.category("fields").add("attachment_image", attachmentImageField);

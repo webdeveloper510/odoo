@@ -3,22 +3,21 @@
 # 	* auth_totp
 # 
 # Translators:
-# A . <tiboreu@protonmail.com>, 2022
-# Zsolt Godó <zsolttokio@gmail.com>, 2022
-# Ákos Nagy <akos.nagy@oregional.hu>, 2022
-# gezza <geza.nagy@oregional.hu>, 2022
-# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2022
-# Martin Trigaux, 2022
-# Tamás Németh <ntomasz81@gmail.com>, 2022
-# krnkris, 2022
+# A . <tiboreu@protonmail.com>, 2023
+# Ákos Nagy <akos.nagy@oregional.hu>, 2023
+# gezza <geza.nagy@oregional.hu>, 2023
+# Zsolt Godó <zsolttokio@gmail.com>, 2023
+# Martin Trigaux, 2023
+# Tamás Németh <ntomasz81@gmail.com>, 2023
+# krnkris, 2023
 # Tamás Dombos, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:22+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Tamás Dombos, 2023\n"
 "Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -28,6 +27,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/controllers/home.py:0
 #, python-format
 msgid "%(browser)s on %(platform)s"
@@ -39,10 +39,11 @@ msgid "2-Factor Setup Wizard"
 msgstr "Kétlépcsős azonosítás varázsló"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format
 msgid "2-Factor authentication is now enabled."
-msgstr "Kétfaktoros alkalmazás bekapcsolva."
+msgstr "Kétlépcsős azonosítás bekapcsolva."
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
@@ -59,28 +60,12 @@ msgid ""
 msgstr ""
 
 #. module: auth_totp
-#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
-msgid ""
-"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
-"muted\">This account is protected!</span>"
-msgstr ""
-
-#. module: auth_totp
-#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
-msgid ""
-"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
-"muted\">Your account is protected!</span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
-"muted\">A fiókja most már védve van!</span>"
-
-#. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
 msgid ""
 "<span class=\"d-md-none d-block\">Or install an authenticator app</span>\n"
 "                                        <span class=\"d-none d-md-block\">Install an authenticator app on your mobile device</span>"
 msgstr ""
-"<span class=\"d-md-none d-block\">Vagy telepíts egy autentikátor alkalmazást</span>\n"
+"<span class=\"d-md-none d-block\">Vagy telepítsen egy autentikátor alkalmazást</span>\n"
 "                                        <span class=\"d-none d-md-block\">Autentikátor alkalmazás telepítése mobileszközre</span>"
 
 #. module: auth_totp
@@ -100,6 +85,20 @@ msgid ""
 msgstr ""
 "Népszerű alkalmazások az Authy, a Google Authenticator és a Microsoft "
 "Authenticator"
+
+#. module: auth_totp
+#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
+msgid ""
+"<span invisible=\"not totp_enabled\" class=\"text-muted\">This account is "
+"protected!</span>"
+msgstr ""
+
+#. module: auth_totp
+#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
+msgid ""
+"<span invisible=\"not totp_enabled\" class=\"text-muted\">Your account is "
+"protected!</span>"
+msgstr ""
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
@@ -134,7 +133,7 @@ msgstr ""
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.auth_totp_form
 msgid "Authentication Code"
-msgstr "Autentikációs kód"
+msgstr "Hitelesítő kód"
 
 #. module: auth_totp
 #: model:ir.model,name:auth_totp.model_auth_totp_device
@@ -150,7 +149,7 @@ msgstr "Autentikátor alkalmazás beállítása"
 #: model_terms:ir.ui.view,arch_db:auth_totp.auth_totp_form
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
 msgid "Cancel"
-msgstr "Mégse"
+msgstr "Töröl"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
@@ -175,7 +174,7 @@ msgstr "Létrehozva"
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device__create_date
 msgid "Creation Date"
-msgstr "Létrehozva"
+msgstr "Létrehozás dátuma"
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device__name
@@ -197,7 +196,7 @@ msgstr "Kétlépcsős azonosítás kikapcsolása"
 #. module: auth_totp
 #: model:ir.actions.server,name:auth_totp.action_disable_totp
 msgid "Disable two-factor authentication"
-msgstr "Kétfaktoros alkalmazás kikapcsolása"
+msgstr "Kétlépcsős azonosítás kikapcsolása"
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device__display_name
@@ -214,12 +213,12 @@ msgstr "Ne kérje többet ezen az eszközön"
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
 msgid "Enable 2FA"
-msgstr "Kétfaktoros hitelesítés bekapcsolása"
+msgstr "Kétlépcsős azonosítás bekapcsolása"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
 msgid "Enter your six-digit code below"
-msgstr "Adja meg a hatszámjegyű kódot"
+msgstr "Adja meg a hatjegyű kódot"
 
 #. module: auth_totp
 #: model:ir.model,name:auth_totp.model_ir_http
@@ -233,16 +232,11 @@ msgid "ID"
 msgstr "Azonosító"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/controllers/home.py:0
 #, python-format
 msgid "Invalid authentication code format."
 msgstr "Hitelesítő kód formátuma érvénytelen."
-
-#. module: auth_totp
-#: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device____last_update
-#: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard____last_update
-msgid "Last Modified on"
-msgstr "Legutóbb frissítve"
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__write_uid
@@ -252,7 +246,7 @@ msgstr "Frissítette"
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__write_date
 msgid "Last Updated on"
-msgstr "Frissítve ekkor"
+msgstr "Frissítve"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.auth_totp_form
@@ -269,7 +263,7 @@ msgstr "Bejelentkezés"
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
 msgid "Look for an \"Add an account\" button"
-msgstr "Keresse meg a \"Fiók hozzáadása\" gombot"
+msgstr "Keresse a \"Fiók hozzáadása\" gombot"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
@@ -309,6 +303,7 @@ msgid "Secret"
 msgstr "Titok"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format
 msgid "The verification code should only contain numbers"
@@ -320,7 +315,7 @@ msgid ""
 "To login, enter below the six-digit authentication code provided by your Authenticator app.\n"
 "                        <br/>"
 msgstr ""
-"A belépéshez adja meg az Autentikátor alkalmazás által adott 6-jegyű "
+"A belépéshez adja meg az Autentikátor alkalmazás által generált 6-jegyű "
 "belépési kódot."
 
 #. module: auth_totp
@@ -336,6 +331,7 @@ msgid "Trusted Devices"
 msgstr "Megbízható eszköz"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-Factor Authentication Activation"
@@ -383,18 +379,21 @@ msgid "Two-factor authentication Enabled"
 msgstr "Kétlépcsős azonosítás bekapcsolva"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication already enabled"
 msgstr "Kétlépcsős azonosítás már engedélyezve van"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication can only be enabled for yourself"
 msgstr "A kétlépcsős azonosítást csak saját magának kapcsolhatja be"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication disabled for the following user(s): %s"
@@ -419,6 +418,7 @@ msgid "Verification Code"
 msgstr "Ellenőrző kód"
 
 #. module: auth_totp
+#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format

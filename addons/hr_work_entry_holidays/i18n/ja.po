@@ -3,16 +3,15 @@
 # 	* hr_work_entry_holidays
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Ryoko Tsuda <ryoko@quartile.co>, 2023
+# Wil Odoo, 2023
 # Junko Augias, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
-"PO-Revision-Date: 2022-09-22 05:52+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Junko Augias, 2023\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -22,12 +21,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: hr_work_entry_holidays
-#: code:addons/hr_work_entry_holidays/models/hr_leave.py:0
-#, python-format
-msgid "%s: Time Off"
-msgstr "%s: 休暇"
-
-#. module: hr_work_entry_holidays
+#. odoo-python
 #: code:addons/hr_work_entry_holidays/models/hr_leave.py:0
 #, python-format
 msgid ""
@@ -52,6 +46,24 @@ msgstr ""
 "%s"
 
 #. module: hr_work_entry_holidays
+#: model:ir.model,name:hr_work_entry_holidays.model_hr_employee_base
+msgid "Basic Employee"
+msgstr "基本社員"
+
+#. module: hr_work_entry_holidays
+#. odoo-python
+#: code:addons/hr_work_entry_holidays/models/hr_contract.py:0
+#, python-format
+msgid ""
+"Changing the contract on this employee changes their working schedule in a "
+"period they already took leaves. Changing this working schedule changes the "
+"duration of these leaves in such a way the employee no longer has the "
+"required allocation for them. Please review these leaves and/or allocations "
+"before changing the contract."
+msgstr ""
+"この従業員の契約を変更すると、すでに休暇を取得している期間の勤務予定が変更されます。この勤務予定を変更することで、これらの休暇の期間が変更され、従業員が必要な休暇の割当を受けられなくなります。契約を変更する前に、これらの休暇および/または割当を確認して下さい。"
+
+#. module: hr_work_entry_holidays
 #: model:ir.model,name:hr_work_entry_holidays.model_hr_contract
 msgid "Employee Contract"
 msgstr "従業員契約"
@@ -69,12 +81,12 @@ msgstr "HR作業エントリタイプ"
 #. module: hr_work_entry_holidays
 #: model_terms:ir.ui.view,arch_db:hr_work_entry_holidays.work_entry_type_leave_form_inherit
 msgid "Payroll"
-msgstr "給与"
+msgstr "給与計算"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model.fields,field_description:hr_work_entry_holidays.field_hr_work_entry__leave_state
 msgid "Status"
-msgstr "ステータス"
+msgstr "状態"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model.fields,help:hr_work_entry_holidays.field_hr_work_entry__leave_state
@@ -87,6 +99,7 @@ msgstr ""
 "休暇申請が作成されると、ステータスは'送信予定'に設定されます。ユーザが休暇申請を確認すると、ステータスは'承認中'になります。マネージャーが休暇申請を否認した場合、ステータスは'否認'です。休暇申請がマネージャーによって承認されると、ステータスは'承認済み'になります。"
 
 #. module: hr_work_entry_holidays
+#. odoo-python
 #: code:addons/hr_work_entry_holidays/models/hr_leave.py:0
 #, python-format
 msgid ""

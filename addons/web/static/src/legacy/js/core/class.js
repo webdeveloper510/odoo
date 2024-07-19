@@ -1,5 +1,4 @@
-odoo.define('web.Class', function () {
-"use strict";
+/** @odoo-module **/
 /**
  * Improved John Resig's inheritance, based on:
  *
@@ -62,9 +61,13 @@ var fnTest = /xyz/.test(function(){xyz();}) ? /\b_super\b/ : /.*/;
 OdooClass.extend = function() {
     var _super = this.prototype;
     // Support mixins arguments
-    var args = _.toArray(arguments);
+    var args = [...arguments];
     args.unshift({});
-    var prop = _.extend.apply(_,args);
+
+    const prop = {};
+    args.forEach((arg) => {
+        Object.assign(prop, arg);
+    });
 
     // Instantiate a web class (but only create the instance,
     // don't run the init constructor)
@@ -74,7 +77,7 @@ OdooClass.extend = function() {
     initializing = false;
 
     // Copy the properties over onto the new prototype
-    _.each(prop, function(val, name) {
+    Object.keys(prop).forEach((name) => {
         // Check if we're overwriting an existing function
         prototype[name] = typeof prop[name] == "function" &&
                           fnTest.test(prop[name]) ?
@@ -111,7 +114,7 @@ OdooClass.extend = function() {
         return this;
     }
     Class.include = function (properties) {
-        _.each(properties, function(val, name) {
+        Object.keys(properties).forEach((name) => {
             if (typeof properties[name] !== 'function'
                     || !fnTest.test(properties[name])) {
                 prototype[name] = properties[name];
@@ -152,5 +155,4 @@ OdooClass.extend = function() {
     return Class;
 };
 
-return OdooClass;
-});
+export default OdooClass;

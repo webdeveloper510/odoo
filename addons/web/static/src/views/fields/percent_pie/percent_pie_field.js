@@ -1,41 +1,35 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
-import { formatPercentage } from "../formatters";
+import { _t } from "@web/core/l10n/translation";
+import { formatFloat } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 
 import { Component } from "@odoo/owl";
 
 export class PercentPieField extends Component {
-    get transform() {
-        const rotateDeg = (360 * this.props.value) / 100;
-        return {
-            left: rotateDeg < 180 ? 180 : rotateDeg,
-            right: rotateDeg < 180 ? rotateDeg : 0,
-            value: rotateDeg,
-        };
-    }
+    static template = "web.PercentPieField";
+    static props = {
+        ...standardFieldProps,
+        string: { type: String, optional: true },
+    };
+
+    /**
+     * Format to 2 decimals without trailing zeros.
+     */
     get formattedValue() {
-        const value = Math.round(this.props.value)
-        return formatPercentage(value / 100);
+        return formatFloat(this.props.record.data[this.props.name], {
+            trailingZeros: false,
+        });
     }
 }
 
-PercentPieField.template = "web.PercentPieField";
-PercentPieField.props = {
-    ...standardFieldProps,
-    string: { type: String, optional: true },
+export const percentPieField = {
+    component: PercentPieField,
+    displayName: _t("PercentPie"),
+    supportedTypes: ["float", "integer"],
+    additionalClasses: ["o_field_percent_pie"],
+    extractProps: ({ string }) => ({ string }),
 };
 
-PercentPieField.displayName = _lt("PercentPie");
-PercentPieField.supportedTypes = ["float", "integer"];
-
-PercentPieField.extractProps = ({ attrs }) => {
-    return {
-        string: attrs.string,
-    };
-};
-PercentPieField.additionalClasses = ["o_field_percent_pie"];
-
-registry.category("fields").add("percentpie", PercentPieField);
+registry.category("fields").add("percentpie", percentPieField);

@@ -171,17 +171,40 @@ class O2MSub(models.Model):
         if self.has_parent:
             self.value = self.parent_id.value
 
+class O2MRef(models.Model):
+    _name = 'test_testing_utilities.ref'
+    _description = 'Testing Utilities ref'
+
+    value = fields.Integer(default=1)
+    subs = fields.One2many('test_testing_utilities.ref.sub', 'parent_id')
+
+class O2MRefSub(models.Model):
+    _name = 'test_testing_utilities.ref.sub'
+    _description = 'Testing Utilities Subtraction'
+
+    a = fields.Integer()
+    b = fields.Integer()
+    c = fields.Integer()
+    parent_id = fields.Many2one('test_testing_utilities.ref')
+
 class O2MDefault(models.Model):
     _name = 'test_testing_utilities.default'
     _description = 'Testing Utilities Default'
+
+    value = fields.Integer(default=1)
+    v = fields.Integer()
+    subs = fields.One2many('test_testing_utilities.sub3', 'parent_id', default=lambda self: self._default_subs())
 
     def _default_subs(self):
         return [
             Command.create({'v': 5})
         ]
-    value = fields.Integer(default=1)
-    v = fields.Integer()
-    subs = fields.One2many('test_testing_utilities.sub3', 'parent_id', default=_default_subs)
+
+    @api.onchange('value')
+    def _onchange_value(self):
+        if self.value == 42:
+            self.subs = False
+
 
 class O2MSub3(models.Model):
     _name = 'test_testing_utilities.sub3'

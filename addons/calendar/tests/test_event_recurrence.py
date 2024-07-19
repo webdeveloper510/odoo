@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.exceptions import UserError
 import pytz
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from odoo.exceptions import UserError
 
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, Form
 from freezegun import freeze_time
 
 
@@ -353,6 +353,60 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
             (datetime(2023, 4, 27, 7, 00), datetime(2023, 4, 27, 8, 00)),
         ])
 
+    def test_all_day_date(self):
+        recurrence = self.env['calendar.event'].with_context(
+            default_start=datetime(2019, 10, 22),
+            default_stop=datetime(2019, 10, 22),
+            default_start_date=date(2019, 10, 22),
+            default_stop_date=date(2019, 10, 22),
+        ).create({
+            'name': 'Recurrent Event',
+            'start': datetime(2019, 10, 22, 8, 0),
+            'stop': datetime(2019, 10, 22, 18, 0),
+            'start_date': date(2019, 10, 22),
+            'stop_date': date(2019, 10, 22),
+            'recurrency': True,
+            'rrule_type': 'weekly',
+            'tue': True,
+            'interval': 1,
+            'count': 2,
+            'event_tz': 'UTC',
+            'allday': True,
+        }).recurrence_id
+        events = recurrence.calendar_event_ids
+        self.assertEqual(events[0].start_date, date(2019, 10, 22), "The first event has the initial start date")
+        self.assertEqual(events[1].start_date, date(2019, 10, 29), "The start date of the second event is one week later")
+
+    def test_recurrency_with_this_event(self):
+        """
+        1) Create an event with a recurrence set on it
+        2) Try updating the event with a different recurrence without specifying 'recurrence_update'
+        3) Update the recurrence of one of the events, this time using the 'recurrence_update' as future_events
+        4) Finally, check that the updated event correctly reflects the recurrence
+        """
+        event = self.env['calendar.event'].create({
+            'name': "Test Event",
+            'allday': False,
+            'rrule': u'FREQ=DAILY;INTERVAL=1;COUNT=10',
+            'recurrency': True,
+            'start': datetime(2023, 7, 28, 1, 0),
+            'stop': datetime(2023, 7, 29, 18, 0),
+            })
+        events = self.env['calendar.recurrence'].search([('base_event_id', '=', event.id)]).calendar_event_ids
+        self.assertEqual(len(events), 10, "It should have 10 events in the recurrence")
+
+        # Update the recurrence without without specifying 'recurrence_update'
+        with self.assertRaises(UserError):
+            event.write({'rrule': u'FREQ=DAILY;INTERVAL=2;COUNT=5'})
+        # Update the recurrence of the earlier event
+        events[5].write({
+            'recurrence_update': 'future_events',
+            'count': 2,
+        })
+        updated_events = self.env['calendar.recurrence'].search([('base_event_id', '=', events[5].id)]).calendar_event_ids
+        self.assertEqual(len(updated_events), 2, "It should have 2 events in the recurrence")
+        self.assertTrue(updated_events[1].recurrency, "It should have recurrency in the updated events")
+
 class TestUpdateRecurrentEvents(TestRecurrentEvents):
 
     @classmethod
@@ -443,7 +497,7 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
             'start': event.start + relativedelta(days=4),
             'stop': event.stop + relativedelta(days=5),
         })
-        recurrence = self.env['calendar.recurrence'].search([])
+        recurrence = self.env['calendar.recurrence'].search([], limit=1)
         self.assertEventDates(recurrence.calendar_event_ids, [
             (datetime(2019, 10, 26, 1, 0), datetime(2019, 10, 29, 18, 0)),
             (datetime(2019, 11, 2, 1, 0), datetime(2019, 11, 5, 18, 0)),
@@ -477,7 +531,7 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
             'start': event.start + relativedelta(days=4),
             'stop': event.stop + relativedelta(days=5),
         })
-        self.assertFalse(self.recurrence.calendar_event_ids, "Inactive event should not create recurrent events")
+        self.assertFalse(self.recurrence.exists(), "Inactive event should not create recurrent events")
 
     def test_shift_all_with_outlier(self):
         outlier = self.events[1]
@@ -559,7 +613,7 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
             'recurrence_update': 'all_events',
             'mon': True,  # recurrence is now Tuesday AND Monday
         })
-        recurrence = self.env['calendar.recurrence'].search([])
+        recurrence = self.env['calendar.recurrence'].search([], limit=1)
         self.assertEventDates(recurrence.calendar_event_ids, [
             (datetime(2019, 10, 22, 1, 0), datetime(2019, 10, 24, 18, 0)),
             (datetime(2019, 10, 28, 1, 0), datetime(2019, 10, 30, 18, 0)),
@@ -680,6 +734,26 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
         self.assertTrue(self.recurrence)
         self.assertEqual(self.events.exists(), self.events[0])
 
+    def test_unlink_recurrence_wizard_next(self):
+        event = self.events[1]
+        wizard = self.env['calendar.popover.delete.wizard'].create({'record': event.id})
+        form = Form(wizard)
+        form.delete = 'next'
+        form.save()
+        wizard.close()
+        self.assertTrue(self.recurrence)
+        self.assertEqual(self.events.exists(), self.events[0])
+
+    def test_unlink_recurrence_wizard_all(self):
+        event = self.events[1]
+        wizard = self.env['calendar.popover.delete.wizard'].create({'record': event.id})
+        form = Form(wizard)
+        form.delete = 'all'
+        form.save()
+        wizard.close()
+        self.assertFalse(self.recurrence.exists())
+        self.assertFalse(self.events.exists())
+
     def test_recurrence_update_all_first_archived(self):
         """Test to check the flow when a calendar event is
         created from a day that does not belong to the recurrence.
@@ -722,7 +796,6 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
             (datetime(2019, 11, 6, 1, 0), datetime(2019, 11, 6, 2, 0)),
         ])
 
-
 class TestUpdateMultiDayWeeklyRecurrentEvents(TestRecurrentEvents):
 
     @classmethod
@@ -757,7 +830,7 @@ class TestUpdateMultiDayWeeklyRecurrentEvents(TestRecurrentEvents):
             'start': event.start + relativedelta(days=2),
             'stop': event.stop + relativedelta(days=2),
         })
-        recurrence = self.env['calendar.recurrence'].search([])
+        recurrence = self.env['calendar.recurrence'].search([], limit=1)
         # We don't try to do magic tricks. First event is moved, other remain
         self.assertEventDates(recurrence.calendar_event_ids, [
             (datetime(2019, 10, 24, 1, 0), datetime(2019, 10, 26, 18, 0)),
@@ -775,7 +848,7 @@ class TestUpdateMultiDayWeeklyRecurrentEvents(TestRecurrentEvents):
             'start': event.start + relativedelta(days=2),
             'stop': event.stop + relativedelta(days=3),
         })
-        recurrence = self.env['calendar.recurrence'].search([])
+        recurrence = self.env['calendar.recurrence'].search([], limit=1)
         self.assertEventDates(recurrence.calendar_event_ids, [
             (datetime(2019, 10, 24, 1, 0), datetime(2019, 10, 27, 18, 0)),
             (datetime(2019, 10, 31, 1, 0), datetime(2019, 11, 3, 18, 0)),
@@ -828,7 +901,7 @@ class TestUpdateMonthlyByDay(TestRecurrentEvents):
             'start': event.start + relativedelta(hours=5),
             'stop': event.stop + relativedelta(hours=5),
         })
-        recurrence = self.env['calendar.recurrence'].search([])
+        recurrence = self.env['calendar.recurrence'].search([], limit=1)
         self.assertEventDates(recurrence.calendar_event_ids, [
             (datetime(2019, 10, 15, 6, 0), datetime(2019, 10, 16, 23, 0)),
             (datetime(2019, 11, 19, 6, 0), datetime(2019, 11, 20, 23, 0)),
@@ -886,3 +959,55 @@ class TestUpdateMonthlyByDate(TestRecurrentEvents):
             (datetime(2019, 11, 25, 1, 0), datetime(2019, 11, 27, 18, 0)),
             (datetime(2019, 12, 25, 1, 0), datetime(2019, 12, 27, 18, 0)),
         ])
+
+    def test_recurring_ui_options_daily(self):
+        with Form(self.env['calendar.event']) as calendar_form:
+            calendar_form.name = 'test recurrence daily'
+            calendar_form.recurrency = True
+            calendar_form.rrule_type_ui = 'daily'
+            calendar_form.count = 2
+            calendar_form.start = datetime(2019, 6, 23, 16)
+            calendar_form.stop = datetime(2019, 6, 23, 17)
+            event = calendar_form.save()
+            self.assertEventDates(event.recurrence_id.calendar_event_ids, [
+                (datetime(2019, 6, 23, 16), datetime(2019, 6, 23, 17)),
+                (datetime(2019, 6, 24, 16, 0), datetime(2019, 6, 24, 17)),
+            ])
+            self.assertEqual(event.rrule_type_ui, 'daily')
+            self.assertEqual(event.count, 2)
+
+    def test_recurring_ui_options_monthly(self):
+        with Form(self.env['calendar.event']) as calendar_form:
+            calendar_form.name = 'test recurrence monthly'
+            calendar_form.recurrency = True
+            calendar_form.rrule_type_ui = 'monthly'
+            calendar_form.count = 2
+            calendar_form.start = datetime(2019, 6, 11, 16)
+            calendar_form.stop = datetime(2019, 6, 11, 17)
+            calendar_form.day = 11
+            event = calendar_form.save()
+            self.assertEventDates(event.recurrence_id.calendar_event_ids, [
+                (datetime(2019, 6, 11, 16), datetime(2019, 6, 11, 17)),
+                (datetime(2019, 7, 11, 16), datetime(2019, 7, 11, 17)),
+            ])
+            self.assertEqual(event.rrule_type_ui, 'monthly')
+            self.assertEqual(event.count, 2)
+
+    def test_recurring_ui_options_yearly(self):
+        with Form(self.env['calendar.event']) as calendar_form:
+            calendar_form.name = 'test recurrence yearly'
+            calendar_form.recurrency = True
+            calendar_form.rrule_type_ui = 'yearly'
+            calendar_form.count = 2
+            calendar_form.start = datetime(2019, 6, 11, 16)
+            calendar_form.stop = datetime(2019, 6, 11, 17)
+            event = calendar_form.save()
+            self.assertEventDates(event.recurrence_id.calendar_event_ids, [
+                (datetime(2019, 6, 11, 16), datetime(2019, 6, 11, 17)),
+                (datetime(2020, 6, 11, 16), datetime(2020, 6, 11, 17)),
+            ])
+            # set to custom because a yearly recurrence, becomes a monthly recurrence every 12 months
+            self.assertEqual(event.rrule_type_ui, 'custom')
+            self.assertEqual(event.count, 2)
+            self.assertEqual(event.interval, 12)
+            self.assertEqual(event.rrule_type, 'monthly')

@@ -1,32 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* calendar
-# 
+# * calendar
+#
 # Translators:
-# Martin Trigaux, 2023
-# sackda chanthasombath, 2023
-# Phoxaysy Sengchanthanouvong <phoxaysy@gmail.com>, 2023
-# ສີສຸວັນ ສັງບົວບຸລົມ <sisouvan@gmail.com>, 2023
-# 
+# Martin Trigaux <mat@odoo.com>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:22+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: ສີສຸວັນ ສັງບົວບຸລົມ <sisouvan@gmail.com>, 2023\n"
-"Language-Team: Lao (https://app.transifex.com/odoo/teams/41243/lo/)\n"
+"POT-Creation-Date: 2023-05-16 13:48+0000\n"
+"PO-Revision-Date: 2017-11-30 13:12+0000\n"
+"Last-Translator: Martin Trigaux <mat@odoo.com>, 2017\n"
+"Language-Team: Lao (https://www.transifex.com/odoo/teams/41243/lo/)\n"
+"Language: lo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: lo\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_res_partner__meeting_count
 #: model:ir.model.fields,field_description:calendar.field_res_users__meeting_count
 msgid "# Meetings"
-msgstr "# ການປະຊຸມ"
+msgstr ""
 
 #. module: calendar
 #. odoo-python
@@ -192,22 +188,22 @@ msgid ""
 "            <tr>\n"
 "                <td width=\"130px;\" style=\"min-width: 130px;\">\n"
 "                    <div style=\"border-top-start-radius: 3px; border-top-end-radius: 3px; font-size: 12px; border-collapse: separate; text-align: center; font-weight: bold; color: #ffffff; min-height: 18px; background-color: #875A7B; border: 1px solid #875A7B;\">\n"
-"                        <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if not object.allday else None, dt_format='EEEE', lang_code=object.env.lang) \"></t>\n"
+"                        <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if not object.allday else None, dt_format='EEEE', lang_code=object.env.lang) \">Tuesday</t>\n"
 "                    </div>\n"
 "                    <div style=\"font-size: 48px; min-height: auto; font-weight: bold; text-align: center; color: #5F5F5F; background-color: #F8F8F8; border: 1px solid #875A7B;\">\n"
-"                        <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if not object.allday else None, dt_format='d', lang_code=object.env.lang)\"></t>\n"
+"                        <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if not object.allday else None, dt_format='d', lang_code=object.env.lang)\">4</t>\n"
 "                    </div>\n"
 "                    <div style=\"font-size: 12px; text-align: center; font-weight: bold; color: #ffffff; background-color: #875A7B;\">\n"
-"                        <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if not object.allday else None, dt_format='MMMM y', lang_code=object.env.lang)\"></t>\n"
+"                        <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if not object.allday else None, dt_format='MMMM y', lang_code=object.env.lang)\">May 2021</t>\n"
 "                    </div>\n"
 "                    <div style=\"border-collapse: separate; color: #5F5F5F; text-align: center; font-size: 12px; border-bottom-end-radius: 3px; font-weight: bold; border: 1px solid #875A7B; border-bottom-start-radius: 3px;\">\n"
 "                        <t t-if=\"not object.allday\">\n"
 "                            <div>\n"
-"                                <t t-out=\"format_time(time=object.start, tz=mail_tz, time_format='short', lang_code=object.env.lang)\"></t>\n"
+"                                <t t-out=\"format_time(time=object.start, tz=mail_tz, time_format='short', lang_code=object.env.lang)\">11:00 AM</t>\n"
 "                            </div>\n"
 "                            <t t-if=\"mail_tz\">\n"
 "                                <div style=\"font-size: 10px; font-weight: normal\">\n"
-"                                    (<t t-out=\"mail_tz\"></t>)\n"
+"                                    (<t t-out=\"mail_tz\"> Europe/Brussels</t>)\n"
 "                                </div>\n"
 "                            </t>\n"
 "                        </t>\n"
@@ -232,16 +228,16 @@ msgid ""
 "                            </li>\n"
 "                        </t>\n"
 "                        <t t-if=\"object.location\">\n"
-"                            <li>Location: <t t-out=\"object.location or ''\"></t>\n"
+"                            <li>Location: <t t-out=\"object.location or ''\">Bruxelles</t>\n"
 "                                (<a target=\"_blank\" t-attf-href=\"http://maps.google.com/maps?oi=map&amp;q={{object.location}}\">View Map</a>)\n"
 "                            </li>\n"
 "                        </t>\n"
 "                        <t t-if=\"recurrent\">\n"
-"                            <li>When: <t t-out=\"object.recurrence_id.name or ''\"></t></li>\n"
+"                            <li>When: <t t-out=\"object.recurrence_id.name or ''\">Every 1 Weeks, for 3 events</t></li>\n"
 "                        </t>\n"
 "                        <t t-if=\"not object.allday and object.duration\">\n"
 "                            <li>Duration:\n"
-"                                <t t-out=\"('%dH%02d' % (object.duration,round(object.duration*60)%60))\"></t>\n"
+"                                <t t-out=\"('%dH%02d' % (object.duration,round(object.duration*60)%60))\">0H30</t>\n"
 "                            </li>\n"
 "                        </t>\n"
 "                    </ul>\n"
@@ -254,6 +250,10 @@ msgid ""
 "        <p placeholder=\"Enter your message here\"><br></p>\n"
 "\n"
 "    </div>\n"
+"    <t t-if=\"object.user_id.signature\">\n"
+"        <br>\n"
+"        <t t-out=\"object.user_id.signature or ''\">--<br>Mitchell Admin</t>\n"
+"    </t>\n"
 "</div>\n"
 "            "
 msgstr ""
@@ -274,6 +274,9 @@ msgid ""
 "\n"
 "        <t t-if=\"is_online and target_customer\">\n"
 "            Your appointment <strong t-out=\"object.event_id.appointment_type_id.name or ''\">Schedule a Demo</strong> <t t-if=\"object.event_id.appointment_type_id.category != 'custom'\"> with <t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t></t> has been booked.\n"
+"            <t t-if=\"is_online and object.state != 'accepted' and object.event_id.appointment_type_id.resource_manual_confirmation\">\n"
+"                You will receive a mail of confirmation with more details when your appointment will be confirmed.\n"
+"            </t>\n"
 "        </t>\n"
 "        <t t-elif=\"is_online and target_responsible\">\n"
 "            <t t-if=\"customer\">\n"
@@ -354,6 +357,17 @@ msgid ""
 "                        </t>\n"
 "                    </li>\n"
 "                </ul></li>\n"
+"                <li t-if=\"is_online and object.event_id.appointment_type_id.resource_manage_capacity\">\n"
+"                    For: <t t-out=\"object.event_id.resource_total_capacity_reserved\"></t> people\n"
+"                </li>\n"
+"                <li t-if=\"is_online and object.event_id.appointment_type_id.assign_method != 'time_auto_assign'\">\n"
+"                    Resources\n"
+"                    <ul>\n"
+"                        <li t-foreach=\"object.event_id.appointment_resource_ids\" t-as=\"resource\">\n"
+"                            <span style=\"margin-left:5px\" t-out=\"resource.name or ''\">Table 1</span>\n"
+"                        </li>\n"
+"                    </ul>\n"
+"                </li>\n"
 "                <t t-if=\"object.event_id.videocall_location\">\n"
 "                    <li>\n"
 "                        How to Join:\n"
@@ -388,7 +402,7 @@ msgid ""
 "    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not ctx.get('calendar_template_ignore_recurrence')\"></t>\n"
 "    <p>\n"
 "        Hello <t t-out=\"object.common_name or ''\">Gemini Furniture</t>,<br><br>\n"
-"        This is a reminder for the below event :\n"
+"        This is a reminder for the below event:\n"
 "    </p>\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
 "        <a t-attf-href=\"/calendar/{{ 'recurrence' if recurrent else 'meeting' }}/accept?token={{ object.access_token }}&amp;id={{ object.event_id.id }}\" style=\"padding: 5px 10px; color: #FFFFFF; text-decoration: none; background-color: #875A7B; border: 1px solid #875A7B; border-radius: 3px\">\n"
@@ -476,18 +490,18 @@ msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.res_partner_kanban_view
-msgid ""
-"<i class=\"fa fa-fw fa-calendar\" aria-label=\"Meetings\" role=\"img\" "
-"title=\"Meetings\"/>"
+msgid "<i class=\"fa fa-fw fa-calendar\" aria-label=\"Meetings\" role=\"img\" title=\"Meetings\"/>"
 msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
 msgid "<span class=\"fa fa-plus\"/><span> Add Odoo meeting</span>"
 msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
 msgid "<span class=\"fa fa-times\"/><span> Clear meeting</span>"
 msgstr ""
 
@@ -503,14 +517,23 @@ msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
+msgid "<span class=\"oi oi-arrow-right\"/><span> Join video call</span>"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "<span> Attendees</span>"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "<span> hours</span>"
 msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
-msgid ""
-"<strong>The following attendees have invalid email addresses and won't "
-"receive any email notifications:</strong>"
+msgid "<strong>The following attendees have invalid email addresses and won't receive any email notifications:</strong>"
 msgstr ""
 
 #. module: calendar
@@ -533,9 +556,14 @@ msgid "Accepted"
 msgstr ""
 
 #. module: calendar
+#: model:ir.model.fields,field_description:calendar.field_calendar_event__accepted_count
+msgid "Accepted Count"
+msgstr ""
+
+#. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_mail_activity_type__category
 msgid "Action"
-msgstr "ການດຳເນີນການ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__message_needaction
@@ -544,26 +572,24 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_mail_activity_type__category
-msgid ""
-"Actions may trigger specific behavior like opening calendar view or "
-"automatically mark as done when a document is uploaded"
+msgid "Actions may trigger specific behavior like opening calendar view or automatically mark as done when a document is uploaded"
 msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__active
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__active
 msgid "Active"
-msgstr "ໃຊ້ຢູ່"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__activity_ids
 msgid "Activities"
-msgstr "ກິດຈຳກຳ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_mail_activity
 msgid "Activity"
-msgstr "ກິດຈະກຳ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_mail_activity_mixin
@@ -576,19 +602,23 @@ msgid "Activity Type"
 msgstr ""
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
+msgid "Add title"
+msgstr ""
+
+#. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm__body
 msgid "Additional Message"
 msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_alarm__body
-msgid ""
-"Additional message that would be sent with the notification for the reminder"
+msgid "Additional message that would be sent with the notification for the reminder"
 msgstr ""
 
 #. module: calendar
 #. odoo-javascript
-#: code:addons/calendar/static/src/components/activity_menu_view/activity_menu_view.xml:0
+#: code:addons/calendar/static/src/activity/activity_menu_patch.xml:0
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__allday
 #, python-format
 msgid "All Day"
@@ -613,13 +643,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "Archived"
-msgstr "ສຳເນົາໄວ້ແລ້ວ"
+msgstr ""
 
 #. module: calendar
 #. odoo-javascript
 #: code:addons/calendar/static/src/views/attendee_calendar/attendee_calendar_model.js:0
 #, python-format
-msgid "Are you sure you want to delete this record ?"
+msgid "Are you sure you want to delete this record?"
 msgstr ""
 
 #. module: calendar
@@ -644,6 +674,11 @@ msgid "Attendees"
 msgstr ""
 
 #. module: calendar
+#: model:ir.model.fields,field_description:calendar.field_calendar_event__attendees_count
+msgid "Attendees Count"
+msgstr ""
+
+#. module: calendar
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_attendee__availability__free
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_event__show_as__free
 msgid "Available"
@@ -655,13 +690,17 @@ msgid "Available/Busy"
 msgstr ""
 
 #. module: calendar
+#: model:ir.model.fields,field_description:calendar.field_calendar_event__awaiting_count
+msgid "Awaiting Count"
+msgstr ""
+
+#. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__base_event_id
 msgid "Base Event"
 msgstr ""
 
 #. module: calendar
 #. odoo-python
-#: code:addons/calendar/models/calendar_event.py:0
 #: code:addons/calendar/models/calendar_event.py:0
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_attendee__availability__busy
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_event__show_as__busy
@@ -698,6 +737,7 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_calendar_event
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__record
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__calendar_event_ids
 msgid "Calendar Event"
 msgstr ""
@@ -718,6 +758,11 @@ msgid "Calendar Meeting"
 msgstr ""
 
 #. module: calendar
+#: model:ir.model,name:calendar.model_calendar_popover_delete_wizard
+msgid "Calendar Popover Delete Wizard"
+msgstr ""
+
+#. module: calendar
 #: model:ir.model,name:calendar.model_calendar_provider_config
 msgid "Calendar Provider Configuration Wizard"
 msgstr ""
@@ -729,7 +774,6 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.actions.server,name:calendar.ir_cron_scheduler_alarm_ir_actions_server
-#: model:ir.cron,cron_name:calendar.ir_cron_scheduler_alarm
 msgid "Calendar: Event Reminder"
 msgstr ""
 
@@ -749,9 +793,10 @@ msgid "Calendar: Reminder"
 msgstr ""
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.calendar_popover_delete_view
 #: model_terms:ir.ui.view,arch_db:calendar.calendar_provider_config_view_form
 msgid "Cancel"
-msgstr "ຍົກເລີກ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__is_organizer_alone
@@ -772,9 +817,17 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__recurrence_update
-msgid ""
-"Choose what to do with other events in the recurrence. Updating All Events "
-"is not allowed when dates or time is modified"
+msgid "Choose what to do with other events in the recurrence. Updating All Events is not allowed when dates or time is modified"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.calendar_provider_config_view_form
+msgid "Client ID"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.calendar_provider_config_view_form
+msgid "Client Secret"
 msgstr ""
 
 #. module: calendar
@@ -790,17 +843,19 @@ msgstr ""
 #. module: calendar
 #: model:ir.ui.menu,name:calendar.calendar_menu_config
 msgid "Configuration"
-msgstr "ການຕັ້ງຄ່າລະບົບ"
+msgstr ""
 
 #. module: calendar
 #. odoo-javascript
 #: code:addons/calendar/static/src/views/ask_recurrence_update_policy_dialog.xml:0
 #, python-format
 msgid "Confirm"
-msgstr "ຢືນຢັນ"
+msgstr ""
 
 #. module: calendar
-#: model_terms:ir.ui.view,arch_db:calendar.calendar_provider_config_view_form
+#. odoo-javascript
+#: code:addons/calendar/static/src/components/calendar_provider_config/calendar_connect_provider.xml:0
+#, python-format
 msgid "Connect"
 msgstr ""
 
@@ -814,7 +869,7 @@ msgstr ""
 #. module: calendar
 #: model:ir.model,name:calendar.model_res_partner
 msgid "Contact"
-msgstr "ຂໍ້ມູນຕິດຕໍ່ພົວພັນ"
+msgstr ""
 
 #. module: calendar
 #. odoo-python
@@ -834,10 +889,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__create_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__create_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__create_uid
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__create_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_provider_config__create_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__create_uid
 msgid "Created by"
-msgstr "ສ້າງໂດຍ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm__create_date
@@ -845,10 +901,11 @@ msgstr "ສ້າງໂດຍ"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__create_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__create_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__create_date
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__create_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_provider_config__create_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__create_date
 msgid "Created on"
-msgstr "ສ້າງເມື່ອ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_event__videocall_source__custom
@@ -859,7 +916,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:calendar.invitation_page_anonymous
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "Date"
-msgstr "ວັນທີ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__day
@@ -871,7 +928,7 @@ msgstr ""
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__day
 msgid "Day"
-msgstr "ວັນ"
+msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -906,11 +963,37 @@ msgid "Declined"
 msgstr ""
 
 #. module: calendar
+#: model:ir.model.fields,field_description:calendar.field_calendar_event__declined_count
+msgid "Declined Count"
+msgstr ""
+
+#. module: calendar
 #. odoo-javascript
 #: code:addons/calendar/static/src/views/attendee_calendar/common/attendee_calendar_common_popover.xml:0
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__delete
 #, python-format
 msgid "Delete"
-msgstr "ລຶບ"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.calendar_popover_delete_view
+msgid "Delete Event"
+msgstr ""
+
+#. module: calendar
+#: model:ir.model.fields.selection,name:calendar.selection__calendar_popover_delete_wizard__delete__all
+msgid "Delete all the events"
+msgstr ""
+
+#. module: calendar
+#: model:ir.model.fields.selection,name:calendar.selection__calendar_popover_delete_wizard__delete__next
+msgid "Delete this and following events"
+msgstr ""
+
+#. module: calendar
+#: model:ir.model.fields.selection,name:calendar.selection__calendar_popover_delete_wizard__delete__one
+msgid "Delete this event"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__description
@@ -946,15 +1029,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__display_name
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__display_name
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__display_name
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__display_name
 #: model:ir.model.fields,field_description:calendar.field_calendar_provider_config__display_name
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__display_name
 msgid "Display Name"
-msgstr "ຊື່ເຕັມ"
+msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Document"
-msgstr "ເອກະສານ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__res_id
@@ -980,7 +1064,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__duration
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Duration"
-msgstr "ກຳນົດເວລາ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm__duration_minutes
@@ -1001,7 +1085,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_attendee__email
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_alarm__alarm_type__email
 msgid "Email"
-msgstr "ອີເມວລ໌"
+msgstr ""
 
 #. module: calendar
 #: model:calendar.alarm,name:calendar.alarm_mail_1
@@ -1021,13 +1105,13 @@ msgstr ""
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__partner_id
 msgid "Employee"
-msgstr "ພະນັກງານ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__stop_date
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_tree
 msgid "End Date"
-msgstr "ວັນທີສິ້ນສຸດ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__end_type
@@ -1038,16 +1122,6 @@ msgstr ""
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_event__end_type__end_date
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_recurrence__end_type__end_date
 msgid "End date"
-msgstr ""
-
-#. module: calendar
-#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
-msgid "Ending At"
-msgstr ""
-
-#. module: calendar
-#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
-msgid "Ending at"
 msgstr ""
 
 #. module: calendar
@@ -1147,6 +1221,11 @@ msgid "Friday"
 msgstr ""
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
+msgid "From"
+msgstr ""
+
+#. module: calendar
 #. odoo-javascript
 #: code:addons/calendar/static/src/views/attendee_calendar/attendee_calendar_controller.xml:0
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_provider_config__external_calendar_provider__google
@@ -1172,7 +1251,7 @@ msgstr ""
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "Group By"
-msgstr "ຈັດຂໍ້ມູນຕາມ"
+msgstr ""
 
 #. module: calendar
 #. odoo-python
@@ -1202,10 +1281,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__id
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__id
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__id
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__id
 #: model:ir.model.fields,field_description:calendar.field_calendar_provider_config__id
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__id
 msgid "ID"
-msgstr "ເລກລຳດັບ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__message_needaction
@@ -1219,9 +1299,7 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__active
-msgid ""
-"If the active field is set to false, it will allow you to hide the event "
-"alarm information without removing it."
+msgid "If the active field is set to false, it will allow you to hide the event alarm information without removing it."
 msgstr ""
 
 #. module: calendar
@@ -1229,6 +1307,11 @@ msgstr ""
 msgid ""
 "If the time is shown as 'busy', this event will be visible to other people with either the full         information or simply 'busy' written depending on its privacy. Use this option to let other people know         that you are unavailable during that period of time. \n"
 " If the event is shown as 'free', other users know         that you are available during that period of time."
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "Information"
 msgstr ""
 
 #. module: calendar
@@ -1295,6 +1378,7 @@ msgstr ""
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
 msgid "Join Video Call"
 msgstr ""
 
@@ -1305,26 +1389,16 @@ msgid "Last"
 msgstr ""
 
 #. module: calendar
-#: model:ir.model.fields,field_description:calendar.field_calendar_alarm____last_update
-#: model:ir.model.fields,field_description:calendar.field_calendar_attendee____last_update
-#: model:ir.model.fields,field_description:calendar.field_calendar_event____last_update
-#: model:ir.model.fields,field_description:calendar.field_calendar_event_type____last_update
-#: model:ir.model.fields,field_description:calendar.field_calendar_filters____last_update
-#: model:ir.model.fields,field_description:calendar.field_calendar_provider_config____last_update
-#: model:ir.model.fields,field_description:calendar.field_calendar_recurrence____last_update
-msgid "Last Modified on"
-msgstr "ແກ້ໄຂລ້າສຸດເມື່ອ"
-
-#. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm__write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_attendee__write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__write_uid
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_provider_config__write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__write_uid
 msgid "Last Updated by"
-msgstr "ປັບປຸງລ້າສຸດໂດຍ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm__write_date
@@ -1332,10 +1406,11 @@ msgstr "ປັບປຸງລ້າສຸດໂດຍ"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__write_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__write_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__write_date
+#: model:ir.model.fields,field_description:calendar.field_calendar_popover_delete_wizard__write_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_provider_config__write_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__write_date
 msgid "Last Updated on"
-msgstr "ປັບປຸງລ້າສຸດເມື່ອ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_res_partner__calendar_last_notif_ack
@@ -1365,11 +1440,6 @@ msgid "Mail Tz"
 msgstr ""
 
 #. module: calendar
-#: model:ir.model.fields,field_description:calendar.field_calendar_event__message_main_attachment_id
-msgid "Main Attachment"
-msgstr ""
-
-#. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_filters__user_id
 msgid "Me"
 msgstr ""
@@ -1383,15 +1453,8 @@ msgstr ""
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_event.py:0
-#: code:addons/calendar/models/calendar_event.py:0
 #, python-format
-msgid ""
-"Meeting '%(name)s' starts '%(start_datetime)s' and ends '%(end_datetime)s'"
-msgstr ""
-
-#. module: calendar
-#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
-msgid "Meeting Details"
+msgid "Meeting '%(name)s' starts '%(start_datetime)s' and ends '%(end_datetime)s'"
 msgstr ""
 
 #. module: calendar
@@ -1422,10 +1485,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_res_users__meeting_ids
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_tree
 #: model_terms:ir.ui.view,arch_db:calendar.view_partners_form
 msgid "Meetings"
-msgstr "ການປະຊຸມ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__message_has_error
@@ -1471,6 +1535,13 @@ msgid "Months"
 msgstr ""
 
 #. module: calendar
+#. odoo-javascript
+#: code:addons/calendar/static/src/views/calendar_form/calendar_quick_create.xml:0
+#, python-format
+msgid "More Options"
+msgstr ""
+
+#. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "My Meetings"
 msgstr ""
@@ -1480,7 +1551,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type__name
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__name
 msgid "Name"
-msgstr "ຊື່"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_attendee__state__needsaction
@@ -1493,7 +1564,7 @@ msgstr ""
 #: code:addons/calendar/static/src/views/attendee_calendar/attendee_calendar_controller.xml:0
 #, python-format
 msgid "New"
-msgstr "ສ້າງໃໝ່"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_mail_activity_mixin__activity_calendar_event_id
@@ -1564,7 +1635,7 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__message_needaction_counter
-msgid "Number of messages requiring action"
+msgid "Number of messages which requires an action"
 msgstr ""
 
 #. module: calendar
@@ -1603,12 +1674,12 @@ msgstr ""
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__month_by
 msgid "Option"
-msgstr "ທາງເລືອກ"
+msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Options"
-msgstr "ທາງເລືອກ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__user_id
@@ -1652,7 +1723,7 @@ msgstr ""
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_attendee__phone
 msgid "Phone"
-msgstr "ໂທລະສັຍ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__privacy
@@ -1753,7 +1824,7 @@ msgstr ""
 
 #. module: calendar
 #. odoo-javascript
-#: code:addons/calendar/static/src/components/activity/activity.xml:0
+#: code:addons/calendar/static/src/activity/activity_patch.xml:0
 #, python-format
 msgid "Reschedule"
 msgstr ""
@@ -1761,7 +1832,7 @@ msgstr ""
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "Responsible"
-msgstr "ຮັບຜິດຊອບ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_recurrence__rrule
@@ -1803,6 +1874,7 @@ msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
 msgid "Select attendees..."
 msgstr ""
 
@@ -1852,7 +1924,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__start_date
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_tree
 msgid "Start Date"
-msgstr "ວັນທີເລີ່ມ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event__start
@@ -1860,14 +1932,9 @@ msgid "Start date of an event, without time for full days events"
 msgstr ""
 
 #. module: calendar
-#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
-msgid "Starting at"
-msgstr ""
-
-#. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_attendee__state
 msgid "Status"
-msgstr "ສະຖານະພາບ"
+msgstr "ສະພາບ"
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -1887,6 +1954,11 @@ msgstr ""
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_tree
 msgid "Subject"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.calendar_popover_delete_view
+msgid "Submit"
 msgstr ""
 
 #. module: calendar
@@ -1920,13 +1992,13 @@ msgstr ""
 
 #. module: calendar
 #: model:ir.model.constraint,message:calendar.constraint_calendar_event_type_name_uniq
-msgid "Tag name already exists !"
-msgstr "ຊື່ເປົ້າໝາຍນີ້ມີແລ້ວ!"
+msgid "Tag name already exists!"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__categ_ids
 msgid "Tags"
-msgstr "ເປົ້າໝາຍ"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_alarm__mail_template_id
@@ -1939,17 +2011,13 @@ msgid "Tentative"
 msgstr ""
 
 #. module: calendar
-#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
-msgid "The"
+#: model:ir.model.fields,field_description:calendar.field_calendar_event__tentative_count
+msgid "Tentative Count"
 msgstr ""
 
 #. module: calendar
-#. odoo-javascript
-#: code:addons/calendar/static/src/models/activity_view.js:0
-#, python-format
-msgid ""
-"The activity is linked to a meeting. Deleting it will remove the meeting as "
-"well. Do you want to proceed?"
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "The"
 msgstr ""
 
 #. module: calendar
@@ -1969,8 +2037,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/calendar/models/calendar_event.py:0
 #, python-format
-msgid ""
-"The ending date and time cannot be earlier than the starting date and time."
+msgid "The ending date and time cannot be earlier than the starting date and time."
 msgstr ""
 
 #. module: calendar
@@ -2047,6 +2114,11 @@ msgid "Timezone used for displaying time in the mail template"
 msgstr ""
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
+msgid "To"
+msgstr ""
+
+#. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/res_users.py:0
 #, python-format
@@ -2068,7 +2140,7 @@ msgstr ""
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm__alarm_type
 msgid "Type"
-msgstr "ປະເພດ"
+msgstr ""
 
 #. module: calendar
 #. odoo-javascript
@@ -2099,7 +2171,12 @@ msgstr ""
 #. module: calendar
 #: model:ir.model,name:calendar.model_res_users
 msgid "User"
-msgstr "ຜູ້ໃຊ້"
+msgstr ""
+
+#. module: calendar
+#: model:ir.model.fields,field_description:calendar.field_calendar_event__user_can_edit
+msgid "User Can Edit"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event__videocall_source
@@ -2108,7 +2185,15 @@ msgstr ""
 
 #. module: calendar
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form_quick_create
 msgid "Videocall URL"
+msgstr ""
+
+#. module: calendar
+#. odoo-javascript
+#: code:addons/calendar/static/src/views/attendee_calendar/common/attendee_calendar_common_popover.xml:0
+#, python-format
+msgid "View"
 msgstr ""
 
 #. module: calendar
@@ -2168,10 +2253,36 @@ msgid "You have to choose at least one day in the week"
 msgstr ""
 
 #. module: calendar
+#. odoo-javascript
+#: code:addons/calendar/static/src/views/fields/many2many_attendee_expandable.xml:0
+#, python-format
+msgid "accepted"
+msgstr ""
+
+#. module: calendar
+#. odoo-javascript
+#: code:addons/calendar/static/src/views/fields/many2many_attendee_expandable.xml:0
+#, python-format
+msgid "attendees"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "awaiting"
+msgstr ""
+
+#. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "day %s"
+msgstr ""
+
+#. module: calendar
+#. odoo-javascript
+#: code:addons/calendar/static/src/views/fields/many2many_attendee_expandable.xml:0
+#, python-format
+msgid "declined"
 msgstr ""
 
 #. module: calendar
@@ -2184,6 +2295,21 @@ msgstr ""
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "for %s events"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "from"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "maybe,"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "no,"
 msgstr ""
 
 #. module: calendar
@@ -2201,10 +2327,27 @@ msgid "on the %(position)s %(weekday)s"
 msgstr ""
 
 #. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "to"
+msgstr ""
+
+#. module: calendar
+#. odoo-javascript
+#: code:addons/calendar/static/src/views/fields/many2many_attendee_expandable.xml:0
+#, python-format
+msgid "uncertain"
+msgstr ""
+
+#. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "until %s"
+msgstr ""
+
+#. module: calendar
+#: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_form
+msgid "yes,"
 msgstr ""
 
 #. module: calendar

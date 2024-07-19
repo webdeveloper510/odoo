@@ -2,8 +2,7 @@
 
 import { registry } from '@web/core/registry';
 import { useBus } from "@web/core/utils/hooks";
-
-const { Component, useState } = owl;
+import { Component, useState } from "@odoo/owl";
 
 class FieldIframePreview extends Component {
     setup() {
@@ -16,4 +15,8 @@ class FieldIframePreview extends Component {
 }
 FieldIframePreview.template = 'website.iframeWidget';
 
-registry.category('fields').add('iframe', FieldIframePreview);
+export const fieldIframePreview = {
+    component: FieldIframePreview,
+};
+
+registry.category("fields").add("iframe", fieldIframePreview);

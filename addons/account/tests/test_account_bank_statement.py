@@ -1441,7 +1441,6 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
 
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=move.ids).create({
             'date': fields.Date.from_string('2021-02-01'),
-            'refund_method': 'cancel',
             'journal_id': self.bank_journal_1.id,
         })
         reversal = move_reversal.reverse_moves()

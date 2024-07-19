@@ -1,10 +1,8 @@
-odoo.define('website_event_meet.website_event_meet_meeting_room', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const publicWidget = require('web.public.widget');
-const core = require('web.core');
-const Dialog = require('web.Dialog');
-const _t = core._t;
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { _t } from "@web/core/l10n/translation";
 
 publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     selector: '.o_wevent_meeting_room_card',
@@ -12,6 +10,11 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         'click .o_wevent_meeting_room_delete': '_onDeleteClick',
         'click .o_wevent_meeting_room_duplicate': '_onDuplicateClick',
         'click .o_wevent_meeting_room_is_pinned': '_onPinClick',
+    },
+
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
     },
 
     start: function () {
@@ -32,23 +35,20 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         event.preventDefault();
         event.stopPropagation();
 
-        Dialog.confirm(
-            this,
-            _t("Are you sure you want to close this room ?"),
-            {
-                confirm_callback: async () => {
-                    await this._rpc({
-                        model: 'event.meeting.room',
-                        method: 'write',
-                        args: [this.meetingRoomId, {is_published: false}],
-                        context: this.context,
-                    });
+        this.call("dialog", "add", ConfirmationDialog, {
+            body: _t("Are you sure you want to close this room?"),
+            confirm: async () => {
+                await this.orm.write(
+                    "event.meeting.room",
+                    [this.meetingRoomId],
+                    { is_published: false },
+                    { context: this.context }
+                );
 
-                    // remove the element so we do not need to refresh the page
-                    this.$el.remove();
-                }
+                // remove the element so we do not need to refresh the page
+                this.$el.remove();
             },
-        );
+        });
     },
 
     /**
@@ -59,22 +59,16 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     _onDuplicateClick: function (event) {
         event.preventDefault();
         event.stopPropagation();
-        Dialog.confirm(
-            this,
-            _t("Are you sure you want to duplicate this room ?"),
-            {
-                confirm_callback: async () => {
-                    await this._rpc({
-                        model: 'event.meeting.room',
-                        method: 'copy',
-                        args: [this.meetingRoomId],
-                        context: this.context,
-                    });
+        this.call("dialog", "add", ConfirmationDialog, {
+            body: _t("Are you sure you want to duplicate this room?"),
+            confirm: async () => {
+                await this.orm.call("event.meeting.room", "copy", [this.meetingRoomId], {
+                    context: this.context,
+                });
 
-                    window.location.reload();
-                }
+                window.location.reload();
             },
-        );
+        });
     },
 
     /**
@@ -89,12 +83,12 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
         const pinnedButtonClass = "o_wevent_meeting_room_pinned";
         const isPinned = event.currentTarget.classList.contains(pinnedButtonClass);
 
-        await this._rpc({
-            model: 'event.meeting.room',
-            method: 'write',
-            args: [this.meetingRoomId, {is_pinned: !isPinned}],
-            context: this.context,
-        });
+        await this.orm.write(
+            "event.meeting.room",
+            [this.meetingRoomId],
+            { is_pinned: !isPinned },
+            { context: this.context }
+        );
 
         // TDE FIXME: addclass ?
         if (isPinned) {
@@ -105,6 +99,4 @@ publicWidget.registry.websiteEventMeetingRoom = publicWidget.Widget.extend({
     }
 });
 
-return publicWidget.registry.websiteEventMeetingRoom;
-
-});
+export default publicWidget.registry.websiteEventMeetingRoom;

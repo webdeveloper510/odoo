@@ -1,13 +1,12 @@
-odoo.define('website.s_popup', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const config = require('web.config');
-const { _t } = require("@web/core/l10n/translation");
-const dom = require('web.dom');
-const publicWidget = require('web.public.widget');
-const { getCookie, setCookie, deleteCookie } = require("web.utils.cookies");
-const {setUtmsHtmlDataset} = require('@website/js/content/inject_dom');
-const { cloneContentEls, onceAllImagesLoaded } = require("website.utils");
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { cookie } from "@web/core/browser/cookie";
+import { _t } from "@web/core/l10n/translation";
+import {throttleForAnimation} from "@web/core/utils/timing";
+import { utils as uiUtils, SIZES } from "@web/core/ui/ui_service";
+import {setUtmsHtmlDataset} from '@website/js/content/inject_dom';
+import wUtils from "@website/js/utils";
 
 // TODO In master, export this class too or merge it with PopupWidget
 const SharedPopupWidget = publicWidget.Widget.extend({
@@ -35,29 +34,12 @@ const SharedPopupWidget = publicWidget.Widget.extend({
     destroy() {
         this._super(...arguments);
 
-        if (!this._isNormalCase()) {
-            return;
-        }
-
         // Popup are always closed when entering edit mode (see PopupWidget),
         // this allows to make sure the class is sync on the .s_popup parent
         // after that moment too.
         if (!this.editableMode) {
             this.el.classList.add('d-none');
         }
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * This whole widget was added as a stable fix, this function allows to
-     * be a bit more stable friendly. TODO remove in master.
-     */
-    _isNormalCase() {
-        return this.el.children.length === 1
-            && this.el.firstElementChild.classList.contains('modal');
     },
 
     //--------------------------------------------------------------------------
@@ -68,18 +50,12 @@ const SharedPopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _onModalShow() {
-        if (!this._isNormalCase()) {
-            return;
-        }
         this.el.classList.remove('d-none');
     },
     /**
      * @private
      */
     _onModalHidden() {
-        if (!this._isNormalCase()) {
-            return;
-        }
         if (this.el.querySelector('.s_popup_no_backdrop')) {
             // We trigger a scroll event here to call the
             // '_hideBottomFixedElements' method and re-display any bottom fixed
@@ -87,6 +63,7 @@ const SharedPopupWidget = publicWidget.Widget.extend({
             // hidden when the cookies bar is open).
             $().getScrollingTarget()[0].dispatchEvent(new Event('scroll'));
         }
+
         this.el.classList.add('d-none');
     },
 });
@@ -97,6 +74,7 @@ const PopupWidget = publicWidget.Widget.extend({
     selector: ".s_popup:not(#website_cookies_bar)",
     events: {
         'click .js_close_popup': '_onCloseClick',
+        'click .btn-primary': '_onBtnPrimaryClick',
         'hide.bs.modal': '_onHideModal',
         'show.bs.modal': '_onShowModal',
     },
@@ -106,9 +84,35 @@ const PopupWidget = publicWidget.Widget.extend({
      * @override
      */
     start: function () {
-        this._popupAlreadyShown = !!getCookie(this.$el.attr('id'));
-        if (!this._popupAlreadyShown) {
-            this._bindPopup();
+        this.modalShownOnClickEl = this.el.querySelector(".modal[data-display='onClick']");
+        if (this.modalShownOnClickEl) {
+            // We add a "hashchange" listener in case a button to open a popup
+            // is clicked.
+            this.__onHashChange = this._onHashChange.bind(this);
+            window.addEventListener('hashchange', this.__onHashChange);
+            // Check if a hash exists and if the modal needs to be opened when
+            // the page loads (e.g. The user has clicked a button on the
+            // "Contact us" page to open a popup on the homepage).
+            this._showPopupOnClick();
+        } else {
+            this._popupAlreadyShown = !!cookie.get(this.$el.attr('id'));
+            // Check if every child element of the popup is conditionally hidden,
+            // and if so, never show an empty popup.
+            // config.device.isMobile is true if the device is <= SM, but the device
+            // visibility option uses < LG to hide on mobile. So compute it here.
+            const isMobile = uiUtils.getSize() < SIZES.LG;
+            const emptyPopup = [
+                ...this.$el[0].querySelectorAll(".oe_structure > *:not(.s_popup_close)")
+            ].every((el) => {
+                const visibilitySelectors = el.dataset.visibilitySelectors;
+                const deviceInvisible = isMobile
+                    ? el.classList.contains("o_snippet_mobile_invisible")
+                    : el.classList.contains("o_snippet_desktop_invisible");
+                return (visibilitySelectors && el.matches(visibilitySelectors)) || deviceInvisible;
+            });
+            if (!this._popupAlreadyShown && !emptyPopup) {
+                this._bindPopup();
+            }
         }
         return this._super(...arguments);
     },
@@ -118,8 +122,11 @@ const PopupWidget = publicWidget.Widget.extend({
     destroy: function () {
         this._super.apply(this, arguments);
         $(document).off('mouseleave.open_popup');
-        this.$target.find('.modal').modal('hide');
+        this.$el.find('.modal').modal('hide');
         clearTimeout(this.timeout);
+        if (this.modalShownOnClickEl) {
+            window.removeEventListener('hashchange', this.__onHashChange);
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -130,12 +137,12 @@ const PopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _bindPopup: function () {
-        const $main = this.$target.find('.modal');
+        const $main = this.$el.find('.modal');
 
         let display = $main.data('display');
         let delay = $main.data('showAfter');
 
-        if (config.device.isMobile) {
+        if (uiUtils.isSmall()) {
             if (display === 'mouseExit') {
                 display = 'afterDelay';
                 delay = 5000;
@@ -144,7 +151,7 @@ const PopupWidget = publicWidget.Widget.extend({
 
         if (display === 'afterDelay') {
             this.timeout = setTimeout(() => this._showPopup(), delay);
-        } else {
+        } else if (display === "mouseExit") {
             $(document).on('mouseleave.open_popup', () => this._showPopup());
         }
     },
@@ -158,7 +165,7 @@ const PopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _hidePopup: function () {
-        this.$target.find('.modal').modal('hide');
+        this.$el.find('.modal').modal('hide');
     },
     /**
      * @private
@@ -167,7 +174,34 @@ const PopupWidget = publicWidget.Widget.extend({
         if (this._popupAlreadyShown || !this._canShowPopup()) {
             return;
         }
-        this.$target.find('.modal').modal('show');
+        this.$el.find('.modal').modal('show');
+    },
+    /**
+     * @private
+     */
+    _showPopupOnClick(hash = window.location.hash) {
+        // If a hash exists in the URL and it corresponds to the ID of the modal,
+        // then we open the modal.
+        if (hash && hash.substring(1) === this.modalShownOnClickEl.id) {
+            // We remove the hash from the URL because otherwise the popup
+            // cannot open again after being closed.
+            const urlWithoutHash = window.location.href.replace(hash, '');
+            window.history.replaceState(null, null, urlWithoutHash);
+            this._showPopup();
+        }
+    },
+    /**
+     * Checks if the given primary button should allow or not to close the
+     * modal.
+     *
+     * @private
+     * @param {HTMLElement} primaryBtnEl
+     */
+    _canBtnPrimaryClosePopup(primaryBtnEl) {
+        return !(
+            primaryBtnEl.classList.contains("s_website_form_send")
+            || primaryBtnEl.classList.contains("o_website_form_send")
+        );
     },
 
     //--------------------------------------------------------------------------
@@ -183,12 +217,20 @@ const PopupWidget = publicWidget.Widget.extend({
     /**
      * @private
      */
+    _onBtnPrimaryClick(ev) {
+        if (this._canBtnPrimaryClosePopup(ev.target)) {
+            this._hidePopup();
+        }
+    },
+    /**
+     * @private
+     */
     _onHideModal: function () {
         const nbDays = this.$el.find('.modal').data('consentsDuration');
-        setCookie(this.el.id, this.cookieValue, nbDays * 24 * 60 * 60, 'required');
-        this._popupAlreadyShown = true;
+        cookie.set(this.el.id, this.cookieValue, nbDays * 24 * 60 * 60, 'required');
+        this._popupAlreadyShown = true && !this.modalShownOnClickEl;
 
-        this.$target.find('.media_iframe_video iframe').each((i, iframe) => {
+        this.$el.find('.media_iframe_video iframe').each((i, iframe) => {
             iframe.src = '';
         });
     },
@@ -200,6 +242,20 @@ const PopupWidget = publicWidget.Widget.extend({
             const iframe = media.querySelector('iframe');
             iframe.src = media.dataset.oeExpression || media.dataset.src; // TODO still oeExpression to remove someday
         });
+    },
+    /**
+     * @private
+     */
+    _onHashChange(ev) {
+        if (ev && ev.newURL) {
+            // Keep the new hash from the event to avoid conflict with the eCommerce
+            // hash attributes managing.
+            // TODO : it should not have been a hash at all for ecommerce, but a
+            // query string parameter
+            this._showPopupOnClick(new URL(ev.newURL).hash);
+        } else {
+            this._showPopupOnClick();
+        }
     },
 });
 
@@ -217,7 +273,7 @@ const noBackdropPopupWidget = publicWidget.Widget.extend({
      * @override
      */
     start() {
-        this.throttledUpdateScrollbar = _.throttle(() => this._updateScrollbar(), 25);
+        this.throttledUpdateScrollbar = throttleForAnimation(() => this._updateScrollbar());
         if (this.editableMode && this.el.classList.contains('show')) {
             // Use case: When the "Backdrop" option is disabled in edit mode.
             // The page scrollbar must be adjusted and events must be added.
@@ -248,7 +304,7 @@ const noBackdropPopupWidget = publicWidget.Widget.extend({
         // When there is no backdrop the element with the scrollbar is
         // '.modal-content' (see comments in CSS).
         const modalContent = this.el.querySelector('.modal-content');
-        const isOverflowing = dom.hasScrollableContent(modalContent);
+        const isOverflowing = $(modalContent).hasScrollableContent();
         const modalInstance = window.Modal.getInstance(this.el);
         if (isOverflowing) {
             // If the "no-backdrop" modal has a scrollbar, the page's scrollbar
@@ -279,6 +335,7 @@ const noBackdropPopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _removeModalNoBackdropEvents() {
+        this.throttledUpdateScrollbar.cancel();
         window.removeEventListener('resize', this.throttledUpdateScrollbar);
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
@@ -338,8 +395,8 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
         this._super(...arguments);
         const policyLinkEl = this.el.querySelector(".o_cookies_bar_text_policy");
         if (policyLinkEl && window.location.pathname === new URL(policyLinkEl.href).pathname) {
-            this.toggleEl = cloneContentEls(`
-            <button class="o_cookies_bar_toggle btn btn-info btn-sm rounded-circle d-flex align-items-center position-fixed pe-auto">
+            this.toggleEl = wUtils.cloneContentEls(`
+            <button class="o_cookies_bar_toggle btn btn-info btn-sm rounded-circle d-flex gap-2 align-items-center position-fixed pe-auto">
                 <i class="fa fa-eye" alt="" aria-hidden="true"></i> <span class="o_cookies_bar_toggle_label"></span>
             </button>
             `).firstElementChild;
@@ -360,7 +417,7 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
         // As we're using Bootstrap's events, the PopupWidget prevents the modal
         // from being shown after hiding it: override that behavior.
         this._popupAlreadyShown = false;
-        deleteCookie(this.el.id);
+        cookie.delete(this.el.id);
 
         const hidden = !popupEl.classList.contains("show");
         this.toggleEl.querySelector(".fa").className = `fa ${hidden ? "fa-eye" : "fa-eye-slash"}`;
@@ -371,7 +428,7 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
             this.toggleEl.style.removeProperty("--cookies-bar-toggle-inset-block-end");
         } else {
             // Lazy-loaded images don't have a height yet. We need to await them
-            onceAllImagesLoaded($(popupEl)).then(() => {
+            wUtils.onceAllImagesLoaded($(popupEl)).then(() => {
                 const popupHeight = popupEl.querySelector(".modal-content").offsetHeight;
                 const toggleMargin = 8;
                 // Avoid having the toggleEl over another button, but if the
@@ -414,12 +471,11 @@ publicWidget.registry.cookies_bar = PopupWidget.extend({
         for (const [key, value] of params) {
             if (key in trackingFields) {
                 // Using same cookie expiration value as in python side
-                setCookie(trackingFields[key], value, 31 * 24 * 60 * 60, "optional");
+                cookie.set(trackingFields[key], value, 31 * 24 * 60 * 60, "optional");
             }
         }
         setUtmsHtmlDataset();
     }
 });
 
-return PopupWidget;
-});
+export default PopupWidget;

@@ -1,13 +1,12 @@
-odoo.define('test_website.image_upload_progress', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const wTourUtils = require('website.tour_utils');
+import wTourUtils from "@website/js/tours/tour_utils";
 
-const { FileSelectorControlPanel } = require('@web_editor/components/media_dialog/file_selector');
-const { patch, unpatch } = require('web.utils');
+import { FileSelectorControlPanel } from "@web_editor/components/media_dialog/file_selector";
+import { patch } from "@web/core/utils/patch";
 
 let patchWithError = false;
-const patchMediaDialog = () => patch(FileSelectorControlPanel.prototype, 'test_website.mock_image_widgets', {
+const patchMediaDialog = () => patch(FileSelectorControlPanel.prototype, {
     async onChangeFileInput() {
         const getFileFromB64 = (fileData) => {
             const binary = atob(fileData[2]);
@@ -18,7 +17,7 @@ const patchMediaDialog = () => patch(FileSelectorControlPanel.prototype, 'test_w
             }
             return new File([arr], fileData[1], {type: fileData[0]});
         };
-
+        
         let files = [
             getFileFromB64(['image/vnd.microsoft.icon', 'icon.ico', "AAABAAEAAQEAAAEAIAAwAAAAFgAAACgAAAABAAAAAgAAAAEAIAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA=="]),
             getFileFromB64(['image/webp', 'image.webp', "UklGRhwAAABXRUJQVlA4TBAAAAAvE8AEAAfQhuh//wMR0f8A"]),
@@ -37,34 +36,34 @@ const patchMediaDialog = () => patch(FileSelectorControlPanel.prototype, 'test_w
     }
 });
 
-const unpatchMediaDialog = () => unpatch(FileSelectorControlPanel.prototype, 'test_website.mock_image_widgets');
+let unpatchMediaDialog = null;
 
 const setupSteps = [{
     content: "reload to load patch",
     trigger: ".o_website_preview",
     run: () => {
-        patchMediaDialog();
+        unpatchMediaDialog = patchMediaDialog();
     },
 }, {
     content: "drop a snippet",
     trigger: "#oe_snippets .oe_snippet[name='Text - Image'] .oe_snippet_thumbnail:not(.o_we_already_dragging)",
     moveTrigger: "iframe .oe_drop_zone",
-    run: "drag_and_drop iframe #wrap",
+    run: "drag_and_drop_native iframe #wrap",
 }, {
     content: "drop a snippet",
     trigger: "#oe_snippets .oe_snippet[name='Image Gallery'] .oe_snippet_thumbnail:not(.o_we_already_dragging)",
     extra_trigger: "body.editor_has_snippets",
     moveTrigger: ".oe_drop_zone",
-    run: "drag_and_drop iframe #wrap",
+    run: "drag_and_drop_native iframe #wrap",
 }];
 
-const formatErrorMsg = "format is not supported. Try with: .gif, .jpe, .jpeg, .jpg, .png, .svg";
+const formatErrorMsg = "format is not supported. Try with: .gif, .jpe, .jpeg, .jpg, .png, .svg, .webp";
 
 wTourUtils.registerWebsitePreviewTour('test_image_upload_progress', {
     url: '/test_image_progress',
     test: true,
     edition: true,
-}, [
+}, () => [
     ...setupSteps,
     // 1. Check multi image upload
     {
@@ -88,7 +87,7 @@ wTourUtils.registerWebsitePreviewTour('test_image_upload_progress', {
         run: function () {}, // it's a check
     }, {
         content: "check upload progress bar is correctly shown (2)",
-        trigger: `.o_we_progressbar:contains('image.webp'):contains('${formatErrorMsg}')`,
+        trigger: ".o_we_progressbar:contains('image.webp'):contains('File has been uploaded')",
         in_modal: false,
         run: function () {}, // it's a check
     }, {
@@ -206,7 +205,7 @@ wTourUtils.registerWebsitePreviewTour('test_image_upload_progress_unsplash', {
     url: '/test_image_progress',
     test: true,
     edition: true,
-}, [
+}, () => [
     ...setupSteps,
     // 1. Check multi image upload
     {
@@ -241,5 +240,3 @@ wTourUtils.registerWebsitePreviewTour('test_image_upload_progress_unsplash', {
         },
     },
 ]);
-
-});

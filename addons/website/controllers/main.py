@@ -11,8 +11,9 @@ import werkzeug.urls
 import werkzeug.utils
 import werkzeug.wrappers
 
+from hashlib import md5
 from itertools import islice
-from lxml import etree
+from lxml import etree, html
 from textwrap import shorten
 from werkzeug.exceptions import NotFound
 from xml.etree import ElementTree as ET
@@ -24,6 +25,7 @@ from odoo.exceptions import AccessError
 from odoo.http import request, SessionExpiredException
 from odoo.osv import expression
 from odoo.tools import OrderedSet, escape_psql, html_escape as escape
+from odoo.addons.base.models.ir_qweb import QWebException
 from odoo.addons.http_routing.models.ir_http import slug, slugify, _guess_mimetype
 from odoo.addons.portal.controllers.portal import pager as portal_pager
 from odoo.addons.portal.controllers.web import Home
@@ -45,7 +47,8 @@ class QueryURL(object):
         self.path_args = OrderedSet(path_args or [])
 
     def __call__(self, path=None, path_args=None, **kw):
-        path = path or self.path
+        path_prefix = path or self.path
+        path = ''
         for key, value in self.args.items():
             kw.setdefault(key, value)
         path_args = OrderedSet(path_args or []) | self.path_args
@@ -67,12 +70,14 @@ class QueryURL(object):
                 path += '/' + key + '/' + value
         if fragments:
             path += '?' + '&'.join(fragments)
+        if not path.startswith(path_prefix):
+            path = path_prefix + path
         return path
 
 
 class Website(Home):
 
-    @http.route('/', type='http', auth="public", website=True, sitemap=True)
+    @http.route('/', auth="public", website=True, sitemap=True)
     def index(self, **kw):
         """ The goal of this controller is to make sure we don't serve a 404 as
         the website homepage. As this is the website entry point, serving a 404
@@ -204,7 +209,7 @@ class Website(Home):
         # default lang in case we switch from /fr -> /en with /en as default lang.
         request.update_context(lang=lang_code)
         redirect = request.redirect(r or ('/%s' % lang))
-        redirect.set_cookie('frontend_lang', lang_code, max_age=365 * 24 * 3600)
+        redirect.set_cookie('frontend_lang', lang_code)
         return redirect
 
     @http.route(['/website/country_infos/<model("res.country"):country>'], type='json', auth="public", methods=['POST'], website=True)
@@ -212,8 +217,11 @@ class Website(Home):
         fields = country.get_address_fields()
         return dict(fields=fields, states=[(st.id, st.name, st.code) for st in country.state_ids], phone_code=country.phone_code)
 
-    @http.route(['/robots.txt'], type='http', auth="public", website=True, sitemap=False)
+    @http.route(['/robots.txt'], type='http', auth="public", website=True, multilang=False, sitemap=False)
     def robots(self, **kwargs):
+        # Don't use `request.website.domain` here, the template is in charge of
+        # detecting if the current URL is the domain one and add a `Disallow: /`
+        # if it's not the case to prevent the crawler to continue.
         return request.render('website.robots', {'url_root': request.httprequest.url_root}, mimetype='text/plain')
 
     @http.route('/sitemap.xml', type='http', auth="public", website=True, multilang=False, sitemap=False)
@@ -223,6 +231,10 @@ class Website(Home):
         View = request.env['ir.ui.view'].sudo()
         mimetype = 'application/xml;charset=utf-8'
         content = None
+        url_root = request.httprequest.url_root
+        # For a same website, each domain has its own sitemap (cache)
+        hashed_url_root = md5(url_root.encode()).hexdigest()[:8]
+        sitemap_base_url = '/sitemap-%d-%s' % (current_website.id, hashed_url_root)
 
         def create_sitemap(url, content):
             return Attachment.create({
@@ -232,7 +244,7 @@ class Website(Home):
                 'name': url,
                 'url': url,
             })
-        dom = [('url', '=', '/sitemap-%d.xml' % current_website.id), ('type', '=', 'binary')]
+        dom = [('url', '=', '%s.xml' % sitemap_base_url), ('type', '=', 'binary')]
         sitemap = Attachment.search(dom, limit=1)
         if sitemap:
             # Check if stored version is still valid
@@ -243,8 +255,8 @@ class Website(Home):
 
         if not content:
             # Remove all sitemaps in ir.attachments as we're going to regenerated them
-            dom = [('type', '=', 'binary'), '|', ('url', '=like', '/sitemap-%d-%%.xml' % current_website.id),
-                   ('url', '=', '/sitemap-%d.xml' % current_website.id)]
+            dom = [('type', '=', 'binary'), '|', ('url', '=like', '%s-%%.xml' % sitemap_base_url),
+                   ('url', '=', '%s.xml' % sitemap_base_url)]
             sitemaps = Attachment.search(dom)
             sitemaps.unlink()
 
@@ -253,13 +265,13 @@ class Website(Home):
             while True:
                 values = {
                     'locs': islice(locs, 0, LOC_PER_SITEMAP),
-                    'url_root': request.httprequest.url_root[:-1],
+                    'url_root': url_root[:-1],
                 }
                 urls = View._render_template('website.sitemap_locs', values)
                 if urls.strip():
                     content = View._render_template('website.sitemap_xml', {'content': urls})
                     pages += 1
-                    last_sitemap = create_sitemap('/sitemap-%d-%d.xml' % (current_website.id, pages), content)
+                    last_sitemap = create_sitemap('%s-%d.xml' % (sitemap_base_url, pages), content)
                 else:
                     break
 
@@ -268,21 +280,32 @@ class Website(Home):
             elif pages == 1:
                 # rename the -id-page.xml => -id.xml
                 last_sitemap.write({
-                    'url': "/sitemap-%d.xml" % current_website.id,
-                    'name': "/sitemap-%d.xml" % current_website.id,
+                    'url': "%s.xml" % sitemap_base_url,
+                    'name': "%s.xml" % sitemap_base_url,
                 })
             else:
                 # TODO: in master/saas-15, move current_website_id in template directly
-                pages_with_website = ["%d-%d" % (current_website.id, p) for p in range(1, pages + 1)]
+                pages_with_website = ["%d-%s-%d" % (current_website.id, hashed_url_root, p) for p in range(1, pages + 1)]
 
                 # Sitemaps must be split in several smaller files with a sitemap index
                 content = View._render_template('website.sitemap_index_xml', {
                     'pages': pages_with_website,
-                    'url_root': request.httprequest.url_root,
+                    # URLs inside the sitemap index have to be on the same
+                    # domain as the sitemap index itself
+                    'url_root': url_root,
                 })
-                create_sitemap('/sitemap-%d.xml' % current_website.id, content)
+                create_sitemap('%s.xml' % sitemap_base_url, content)
 
         return request.make_response(content, [('Content-Type', mimetype)])
+
+    # if not icon provided in DOM, browser tries to access /favicon.ico, eg when
+    # opening an order pdf
+    @http.route(['/favicon.ico'], type='http', auth='public', website=True, multilang=False, sitemap=False)
+    def favicon(self, **kw):
+        website = request.website
+        response = request.redirect(website.image_url(website, 'favicon'), code=301)
+        response.headers['Cache-Control'] = 'public, max-age=%s' % http.STATIC_CACHE_LONG
+        return response
 
     def sitemap_website_info(env, rule, qs):
         website = env['website'].get_current_website()
@@ -353,10 +376,11 @@ class Website(Home):
         for name, url, mod in current_website.get_suggested_controllers():
             if needle.lower() in name.lower() or needle.lower() in url.lower():
                 module_sudo = mod and request.env.ref('base.module_%s' % mod, False).sudo()
-                icon = mod and "<img src='%s' width='24px' height='24px' class='mr-2 rounded' /> " % (module_sudo and module_sudo.icon or mod) or ''
+                icon = mod and '%s' % (module_sudo and module_sudo.icon or mod) or ''
                 suggested_controllers.append({
                     'value': url,
-                    'label': '%s%s (%s)' % (icon, url, name),
+                    'icon':  icon,
+                    'label': '%s (%s)' % (url, name),
                 })
 
         return {
@@ -366,6 +390,11 @@ class Website(Home):
                 dict(title=_('Apps url'), values=suggested_controllers),
             ]
         }
+
+    @http.route('/website/save_session_layout_mode', type='json', auth='public', website=True)
+    def save_session_layout_mode(self, layout_mode, view_id):
+        assert layout_mode in ('grid', 'list'), "Invalid layout mode"
+        request.session[f'website_{view_id}_layout_mode'] = layout_mode
 
     @http.route('/website/snippet/filters', type='json', auth='public', website=True)
     def get_dynamic_filter(self, filter_id, template_key, limit=None, search_domain=None, with_sample=False):
@@ -511,16 +540,19 @@ class Website(Home):
             'fuzzy_search': fuzzy_term,
         }
 
-    @http.route(['/pages', '/pages/page/<int:page>'], type='http', auth="public", website=True, sitemap=False)
-    def pages_list(self, page=1, search='', **kw):
-        options = {
+    def _get_page_search_options(self, **post):
+        return {
             'displayDescription': False,
             'displayDetail': False,
             'displayExtraDetail': False,
             'displayExtraLink': False,
             'displayImage': False,
-            'allowFuzzy': not kw.get('noFuzzy'),
+            'allowFuzzy': not post.get('noFuzzy'),
         }
+
+    @http.route(['/pages', '/pages/page/<int:page>'], type='http', auth="public", website=True, sitemap=False)
+    def pages_list(self, page=1, search='', **kw):
+        options = self._get_page_search_options(**kw)
         step = 50
         pages_count, details, fuzzy_search_term = request.website._search_with_fuzzy(
             "pages", search, limit=page * step, order='name asc, website_id desc, id',
@@ -546,6 +578,16 @@ class Website(Home):
         }
         return request.render("website.list_website_public_pages", values)
 
+    def _get_hybrid_search_options(self, **post):
+        return {
+            'displayDescription': True,
+            'displayDetail': True,
+            'displayExtraDetail': True,
+            'displayExtraLink': True,
+            'displayImage': True,
+            'allowFuzzy': not post.get('noFuzzy'),
+        }
+
     @http.route([
         '/website/search',
         '/website/search/page/<int:page>',
@@ -556,14 +598,7 @@ class Website(Home):
         if not search:
             return request.render("website.list_hybrid")
 
-        options = {
-            'displayDescription': True,
-            'displayDetail': True,
-            'displayExtraDetail': True,
-            'displayExtraLink': True,
-            'displayImage': True,
-            'allowFuzzy': not kw.get('noFuzzy'),
-        }
+        options = self._get_hybrid_search_options(**kw)
         data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=500, max_nb_chars=200, options=options)
 
         results = data.get('results', [])
@@ -611,7 +646,7 @@ class Website(Home):
         if website_id:
             website = request.env['website'].browse(int(website_id))
             website._force()
-        page = request.env['website'].new_page(path, add_menu=add_menu, **template)
+        page = request.env['website'].new_page(path, add_menu=add_menu, sections_arch=kwargs.get('sections_arch'), **template)
         url = page['url']
         # In case the page is created through the 404 "Create Page" button, the
         # URL may use special characters which are slugified on page creation.
@@ -631,14 +666,57 @@ class Website(Home):
             return json.dumps({'view_id': page.get('view_id')})
         return json.dumps({'url': url})
 
+    @http.route('/website/get_new_page_templates', type='json', auth='user', website=True)
+    def get_new_page_templates(self, **kw):
+        View = request.env['ir.ui.view']
+        result = []
+        groups_html = View._render_template("website.new_page_template_groups")
+        groups_el = etree.fromstring(f'<data>{groups_html}</data>')
+        for group_el in groups_el.getchildren():
+            group = {
+                'id': group_el.attrib['id'],
+                'title': group_el.text,
+                'templates': [],
+            }
+            for template in View.search([
+                ('mode', '=', 'primary'),
+                ('key', 'like', escape_psql(f'new_page_template_sections_{group["id"]}_')),
+            ], order='key'):
+                try:
+                    html_tree = html.fromstring(View.with_context(inherit_branding=False)._render_template(
+                        template.key,
+                    ))
+                    for section_el in html_tree.xpath("//section[@data-snippet]"):
+                        # data-snippet must be the short general name
+                        snippet = section_el.attrib['data-snippet']
+                        # Because the templates are generated from specific
+                        # t-snippet-calls such as:
+                        # "website.new_page_template_about_0_s_text_block",
+                        # the generated data-snippet looks like:
+                        # "new_page_template_about_0_s_text_block"
+                        # while it should be "s_text_block" only.
+                        if '_s_' in snippet:
+                            section_el.attrib['data-snippet'] = f's_{snippet.split("_s_")[-1]}'
+
+                    group['templates'].append({
+                        'key': template.key,
+                        'template': html.tostring(html_tree),
+                    })
+                except QWebException as qe:
+                    # Do not fail if theme is not compatible.
+                    logger.warning("Theme not compatible with template %r: %s", template.key, qe)
+            if group['templates']:
+                result.append(group)
+        return result
+
     @http.route("/website/get_switchable_related_views", type="json", auth="user", website=True)
     def get_switchable_related_views(self, key):
         views = request.env["ir.ui.view"].get_related_views(key, bundles=False).filtered(lambda v: v.customize_show)
         views = views.sorted(key=lambda v: (v.inherit_id.id, v.name))
         return views.with_context(display_website=False).read(['name', 'id', 'key', 'xml_id', 'active', 'inherit_id'])
 
-    @http.route('/website/reset_template', type='http', auth='user', methods=['POST'], website=True, csrf=False)
-    def reset_template(self, view_id, mode='soft', redirect='/', **kwargs):
+    @http.route('/website/reset_template', type='json', auth='user', methods=['POST'])
+    def reset_template(self, view_id, mode='soft', **kwargs):
         """ This method will try to reset a broken view.
         Given the mode, the view can either be:
         - Soft reset: restore to previous architeture.
@@ -648,7 +726,7 @@ class Website(Home):
         view = request.env['ir.ui.view'].browse(int(view_id))
         # Deactivate COW to not fix a generic view by creating a specific
         view.with_context(website_id=None).reset_arch(mode)
-        return request.redirect(redirect)
+        return True
 
     @http.route(['/website/publish'], type='json', auth="user", website=True)
     def publish(self, id, object):
@@ -685,13 +763,22 @@ class Website(Home):
         if res_model == 'website.page':
             fields.extend(['website_indexed', 'website_id'])
 
+        res = {'can_edit_seo': True}
         record = request.env[res_model].browse(res_id)
-        res = record.read(fields)[0]
+        try:
+            record.check_access_rights('write')
+            record.check_access_rule('write')
+        except AccessError:
+            record = record.sudo()
+            res['can_edit_seo'] = False
+
+        res.update(record.read(fields)[0])
         res['has_social_default_image'] = request.website.has_social_default_image
 
         if res_model not in ('website.page', 'ir.ui.view') and 'seo_name' in record:  # allow custom slugify
             res['seo_name_default'] = slugify(record.display_name)  # default slug, if seo_name become empty
             res['seo_name'] = record.seo_name and slugify(record.seo_name) or ''
+
         return res
 
     @http.route(['/google<string(length=16):key>.html'], type='http', auth="public", website=True, sitemap=False)
@@ -824,12 +911,3 @@ class WebsiteBinary(Binary):
             if unique:
                 kw['unique'] = unique
         return self.content_image(**kw)
-
-    # TODO in master: move this route outside the WebsiteBinary class
-    # if not icon provided in DOM, browser tries to access /favicon.ico, eg when opening an order pdf
-    @http.route(['/favicon.ico'], type='http', auth='public', website=True, multilang=False, sitemap=False)
-    def favicon(self, **kw):
-        website = request.website
-        response = request.redirect(website.image_url(website, 'favicon'), code=301)
-        response.headers['Cache-Control'] = 'public, max-age=%s' % http.STATIC_CACHE_LONG
-        return response

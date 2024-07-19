@@ -3,16 +3,15 @@
 # 	* onboarding
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Wichanon Jamwutthipreecha, 2022
+# Wil Odoo, 2023
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -22,9 +21,19 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "#{alt}"
+msgstr "#{alt}"
+
+#. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__progress_ids
 msgid "All Onboarding Progress Records (across companies)."
 msgstr "บันทึกความคืบหน้าการเริ่มต้นใช้งานทั้งหมด (ระหว่างบริษัท)"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "All done!"
+msgstr "เสร็จสิ้น"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__progress_ids
@@ -34,14 +43,25 @@ msgstr ""
 "(ระหว่างบริษัท)"
 
 #. module: onboarding
-#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
-msgid "Background color"
-msgstr "สีพื้นหลัง"
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_alt
+msgid "Alt Text for the Step Image"
+msgstr "ข้อความ Alt สำหรับรูปภาพขั้นตอน"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__blue
-msgid "Blue"
-msgstr "สีฟ้า"
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
+#, python-format
+msgid ""
+"An \"Opening Action\" is required for the following steps to be linked to an"
+" onboarding panel: %(step_titles)s"
+msgstr ""
+"จำเป็นต้องมี \"การดำเนินการเปิด\" "
+"สำหรับขั้นตอนต่อไปนี้เพื่อเชื่อมโยงกับแผงการเริ่มต้นใช้งาน: %(step_titles)s"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Are you sure you want to hide these configuration steps?"
+msgstr "คุณแน่ใจหรือไม่ว่าต้องการซ่อนขั้นตอนการกำหนดค่าเหล่านี้"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__button_text
@@ -49,19 +69,35 @@ msgid "Button text"
 msgstr "ข้อความของปุ่ม"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Cancel"
+msgstr "ยกเลิก"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close"
+msgstr "ปิด"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close Panel"
+msgstr "ปิดแผงควบคุม"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close the onboarding panel"
+msgstr "ปิดแผงการเริ่มต้นใช้งาน"
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_close_action_name
 msgid "Closing action"
 msgstr "ปิดการดำเนินการ"
 
 #. module: onboarding
-#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__panel_background_color
-msgid "Color gradient added to the panel's background."
-msgstr ""
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__company_id
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__company_id
 msgid "Company"
-msgstr "บริษัทเดียว"
+msgstr "บริษัท"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__current_onboarding_state
@@ -112,6 +148,16 @@ msgid "Font Awesome Icon when completed"
 msgstr "ไอคอนฟ้อนต์ที่ยอดเยี่ยมเมื่อสร้างเสร็จ"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Get them out of my sight!"
+msgstr "นำออกไปให้พ้นสายตา!"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Hide Onboarding Tips"
+msgstr "ซ่อนเคล็ดลับการเริ่มต้นใช้งาน"
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__id
@@ -120,20 +166,17 @@ msgid "ID"
 msgstr "ไอดี"
 
 #. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__is_per_company
+msgid "Is per company"
+msgstr "เป็นรายบริษัท"
+
+#. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding_step__current_step_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress__onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress_step__step_state__just_done
 msgid "Just done"
 msgstr "สําเร็จแล้ว"
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step____last_update
-msgid "Last Modified on"
-msgstr "แก้ไขครั้งล่าสุดเมื่อ"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__write_uid
@@ -152,10 +195,17 @@ msgid "Last Updated on"
 msgstr "อัปเดตครั้งล่าสุดเมื่อ"
 
 #. module: onboarding
-#: code:addons/onboarding/models/onboarding_step.py:0
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 #, python-format
 msgid "Let's do it"
 msgstr "ลุยกันเลย"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__text_completed
+msgid "Message at completion"
+msgstr "ข้อความเมื่อเสร็จสิ้น"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__name
@@ -165,7 +215,8 @@ msgstr "ชื่อของการเริ่มต้นใช้งาน
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__panel_close_action_name
 msgid "Name of the onboarding model action to execute when closing the panel."
-msgstr "ชื่อของการดำเนินการโมเดลการเริ่มต้นใช้งานที่จะดำเนินการเมื่อปิดแผง"
+msgstr ""
+"ชื่อของการดำเนินการโมเดลการเริ่มต้นใช้งานที่จะดำเนินการเมื่อปิดแผงควบคุม"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__panel_step_open_action_name
@@ -177,9 +228,11 @@ msgstr ""
 " เช่น action_open_onboarding_1_step_1"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__none
-msgid "None"
-msgstr "ไม่มี"
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding.py:0
+#, python-format
+msgid "Nice work! Your configuration is done."
+msgstr "ทำได้ดีมาก! การกำหนดค่าของคุณเสร็จสิ้นแล้ว"
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__not_done
@@ -191,8 +244,6 @@ msgstr "ยังไม่เสร็จ"
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__onboarding_id
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__onboarding_id
 msgid "Onboarding"
 msgstr "การเริ่มงาน"
 
@@ -265,7 +316,9 @@ msgstr "ขั้นตอนการเริ่มต้นใช้งาน
 
 #. module: onboarding
 #: model:ir.actions.act_window,name:onboarding.action_view_onboarding_onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__onboarding_ids
 #: model:ir.ui.menu,name:onboarding.menu_onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_step_view_form
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_tree
 msgid "Onboardings"
 msgstr "การเริ่มต้นใช้งาน"
@@ -283,22 +336,7 @@ msgstr "ชื่อคำเดียว"
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__panel_step_open_action_name
 msgid "Opening action"
-msgstr "การดำเนินการเปิด"
-
-#. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__orange
-msgid "Orange"
-msgstr "ส้ม"
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_background_color
-msgid "Panel's Background color"
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_background_image
-msgid "Panel's background image"
-msgstr ""
+msgstr "กำลังเปิดการดำเนินการ"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__progress_step_ids
@@ -306,7 +344,7 @@ msgid "Progress Steps Trackers"
 msgstr "ตัวติดตามขั้นตอนความคืบหน้า"
 
 #. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_id
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_ids
 msgid "Related Onboarding Progress Tracker"
 msgstr "ตัวติดตามความคืบหน้าการเริ่มต้นใช้งานที่เกี่ยวข้อง"
 
@@ -327,10 +365,26 @@ msgid "Should be done per company?"
 msgstr "ควรทำทีละบริษัทหรือไม่?"
 
 #. module: onboarding
-#: code:addons/onboarding/models/onboarding_step.py:0
+#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__step_image_alt
+msgid "Show when impossible to load the image"
+msgstr "แสดงเมื่อไม่สามารถโหลดภาพได้"
+
+#. module: onboarding
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 #, python-format
-msgid "Step Completed! - Click to review"
-msgstr ""
+msgid "Step Completed!"
+msgstr "ขั้นตอนเสร็จสมบูรณ์!"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image
+msgid "Step Image"
+msgstr "รูปภาพขั้นตอน"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_filename
+msgid "Step Image Filename"
+msgstr "ชื่อไฟล์รูปภาพขั้นตอน"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__current_progress_step_id
@@ -338,9 +392,19 @@ msgid "Step Progress"
 msgstr "ความคืบหน้าขั้นตอน"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
+msgid "Steps"
+msgstr "สถานะ"
+
+#. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__button_text
 msgid "Text on the panel's button to start this step"
 msgstr "ข้อความบนปุ่มของแผงเพื่อเริ่มขั้นตอนนี้"
+
+#. module: onboarding
+#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__text_completed
+msgid "Text shown on onboarding when completed"
+msgstr "ข้อความที่แสดงเมื่อเริ่มต้นใช้งานเมื่อเสร็จสิ้น"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__done_text
@@ -348,23 +412,9 @@ msgid "Text to show when step is completed"
 msgstr "ข้อความที่จะแสดงเมื่อขั้นตอนเสร็จสิ้น"
 
 #. module: onboarding
-#: model:ir.model.constraint,message:onboarding.constraint_onboarding_progress_onboarding_company_uniq
-msgid ""
-"There cannot be multiple records of the same onboarding completion for the "
-"same company."
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.constraint,message:onboarding.constraint_onboarding_progress_step_progress_step_uniq
-msgid ""
-"There cannot be multiple records of the same onboarding step completion for "
-"the same Progress record."
-msgstr ""
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__title
 msgid "Title"
-msgstr "ชื่อเรื่อง"
+msgstr "คำนำหน้าชื่อ"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
@@ -373,15 +423,15 @@ msgid "Toggle visibility"
 msgstr "สลับการมองเห็น"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__violet
-msgid "Violet"
-msgstr "สีไวโอเล็ต"
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_onboarding_closed
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__is_onboarding_closed
 msgid "Was panel closed?"
 msgstr "แผงถูกปิดใช่หรือไม่?"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "o_onboarding_confetti"
+msgstr "o_onboarding_confetti"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_panel

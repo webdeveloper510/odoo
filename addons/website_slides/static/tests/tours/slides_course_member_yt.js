@@ -1,23 +1,26 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
-import FullScreen from '@website_slides/js/slides_course_fullscreen_player';
+import { registry } from "@web/core/registry";
 
-/**
- * Alter this method for test purposes.
- * This will make the video start at 10 minutes.
- * As it lasts 10min24s, it will mark it as completed immediately.
- */
-FullScreen.include({
-    _renderSlide: function () {
+function patchFullScreen(){
+    /**
+     * Alter this method for test purposes.
+     * This will make the video start at 10 minutes.
+     * As it lasts 10min24s, it will mark it as completed immediately.
+    */
+    const FullScreen = odoo.loader.modules.get('@website_slides/js/slides_course_fullscreen_player')[Symbol.for("default")];
+    FullScreen.include({
+        _renderSlide: function () {
 
-        var slide = this.get('slide');
-        slide.embedUrl += '&start=260';
-        this.set('slide', slide);
+            var slide = this.get('slide');
+            slide.embedUrl += '&start=260';
+            this.set('slide', slide);
 
-        return this._super.call(this, arguments);
-    }
-});
+            return this._super.call(this, arguments);
+        }
+    });
+}
+
 
 /**
  * Global use case:
@@ -28,10 +31,17 @@ FullScreen.include({
  * they use fullscreen player to complete the course;
  * they rate the course;
  */
-tour.register('course_member_youtube', {
+registry.category("web_tour.tours").add('course_member_youtube', {
     url: '/slides',
-    test: true
-}, [
+    test: true,
+    steps: () => [
+{
+    content: "Patching FullScreen",
+    trigger: 'body',
+    run: function() {
+        patchFullScreen()
+    }
+},
 // eLearning: go on /all, find free course and join it
 {
     trigger: 'a.o_wslides_home_all_slides'
@@ -48,7 +58,7 @@ tour.register('course_member_youtube', {
     trigger: '.o_wslides_progress_percentage:contains("50")',
     run: function () {} // check progression
 }, {
-    trigger: 'a:contains("Wood Bending With Steam Box")',
+    trigger: '.o_wslides_fs_slide_name:contains("Wood Bending With Steam Box")',
 }, {
     trigger: '.player',
     run: function () {} // check player loading
@@ -56,9 +66,9 @@ tour.register('course_member_youtube', {
     trigger: '.o_wslides_fs_sidebar_section_slides li:contains("Wood Bending With Steam Box") .o_wslides_slide_completed',
     run: function () {} // check that video slide is marked as 'done'
 }, {
-    trigger: '.o_wslides_progress_percentage:contains("100")',
+    trigger: '.o_wslides_channel_completion_completed:contains(Completed)',
     run: function () {} // check progression
 }, {
     trigger: 'a:contains("Back to course")'
 }
-]);
+]});

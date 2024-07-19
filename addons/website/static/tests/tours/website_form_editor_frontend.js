@@ -1,10 +1,10 @@
 /** @odoo-module **/
-import tour from 'web_tour.tour';
-import rpc from 'web.rpc';
+import { jsonrpc } from "@web/core/network/rpc_service";
+import { registry } from "@web/core/registry";
 
-tour.register("website_form_editor_tour_submit", {
+registry.category("web_tour.tours").add("website_form_editor_tour_submit", {
     test: true,
-},[
+    steps: () => [
     {
         content:  "Try to send the form with some required fields not filled in",
         extra_trigger:  "form[data-model_name='mail.mail']" +
@@ -88,8 +88,13 @@ tour.register("website_form_editor_tour_submit", {
         trigger:  "input[name=Products][value='Wiko Stairway']"
     },
     {
+        content:  "Open datetime picker",
+        trigger:  ".s_website_form_datetime input",
+        run:      "click",
+    },
+    {
         content:  "Complete Date field",
-        trigger:  ".s_website_form_datetime [data-toggle='datetimepicker']",
+        trigger:  ".o_date_picker .o_today",
     },
     {
         content:  "Check another product",
@@ -149,45 +154,49 @@ tour.register("website_form_editor_tour_submit", {
     },
     {
         content:  "Check form is submitted without errors",
-        trigger:  "#wrap:has(h1:contains('Thank You!'))"
+        trigger:  "#wrap:has(h1:contains('Thank You!'))",
+        isCheck: true,
     }
-]);
+]});
 
-tour.register("website_form_editor_tour_results", {
+registry.category("web_tour.tours").add("website_form_editor_tour_results", {
     test: true,
-}, [
+    steps: () => [
     {
         content: "Check mail.mail records have been created",
         trigger: "body",
         run: function () {
-            var mailDef = rpc.query({
-                    model: 'mail.mail',
-                    method: 'search_count',
-                    args: [[
-                        ['email_to', '=', 'test@test.test'],
-                        ['body_html', 'like', 'A useless message'],
-                        ['body_html', 'like', 'Service : Development Service'],
-                        ['body_html', 'like', 'State : 44 - UK'],
-                        ['body_html', 'like', 'Products : Xperia,Wiko Stairway']
-                    ]],
-                });
+            var mailDef = jsonrpc(`/web/dataset/call_kw/mail.mail/search_count`, {
+                model: "mail.mail",
+                method: "search_count",
+                args: [[
+                    ['email_to', '=', 'test@test.test'],
+                    ['body_html', 'like', 'A useless message'],
+                    ['body_html', 'like', 'Service : Development Service'],
+                    ['body_html', 'like', 'State : 44 - UK'],
+                    ['body_html', 'like', 'Products : Xperia,Wiko Stairway']
+                ]],
+                kwargs: {},
+            });
             var success = function(model, count) {
                 if (count > 0) {
                     $('body').append('<div id="website_form_editor_success_test_tour_'+model+'"></div>');
                 }
             };
-            mailDef.then(_.bind(success, this, 'mail_mail'));
+            mailDef.then(success.bind(this, 'mail_mail'));
         }
     },
     {
         content:  "Check mail.mail records have been created",
-        trigger:  "#website_form_editor_success_test_tour_mail_mail"
+        trigger:  "#website_form_editor_success_test_tour_mail_mail",
+        allowInvisible: true,
+        isCheck: true,
     }
-]);
-tour.register('website_form_contactus_submit', {
+]});
+registry.category("web_tour.tours").add('website_form_contactus_submit', {
     test: true,
     url: '/contactus',
-}, [
+    steps: () => [
     // As the demo portal user, only two inputs needs to be filled to send
     // the email
     {
@@ -205,15 +214,16 @@ tour.register('website_form_contactus_submit', {
     {
         content: 'Check form is submitted without errors',
         trigger: '#wrap:has(h1:contains("Thank You!"))',
+        isCheck: true,
     },
-]);
-tour.register('website_form_contactus_check_changed_email', {
+]});
+registry.category("web_tour.tours").add('website_form_contactus_check_changed_email', {
     test: true,
     url: '/contactus',
-}, [
-    {
-        content: "Check that the recipient email is updated",
-        trigger: 'form:has(input[name="email_to"][value="after.change@mail.com"])',
-        run: () => null, // it's a check.
-    },
-]);
+    steps: () => [
+        {
+            content: "Check that the recipient email is updated",
+            trigger: 'form:has(input[name="email_to"][value="after.change@mail.com"])',
+            isCheck: true,
+        },
+]});

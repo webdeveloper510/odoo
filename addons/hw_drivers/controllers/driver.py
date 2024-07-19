@@ -2,14 +2,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from base64 import b64decode
+from datetime import datetime
 import json
 import logging
 import os
 import subprocess
+from socket import gethostname
 import time
+from werkzeug.exceptions import InternalServerError
+from zlib import adler32
 
 from odoo import http, tools
-from odoo.modules.module import get_resource_path
 
 from odoo.addons.hw_drivers.event_manager import event_manager
 from odoo.addons.hw_drivers.main import iot_devices, manager
@@ -79,7 +82,25 @@ class DriverController(http.Controller):
         """
         Downloads the log file
         """
-        if tools.config['logfile']:
-            res = http.send_file(tools.config['logfile'], mimetype="text/plain", as_attachment=True)
-            res.headers['Cache-Control'] = 'no-cache'
-            return res
+        log_path = tools.config['logfile']
+        if not log_path:
+            raise InternalServerError("Log file configuration is not set")
+        try:
+            stat = os.stat(log_path)
+        except FileNotFoundError:
+            raise InternalServerError("Log file has not been found")
+        check = adler32(log_path.encode())
+        log_file_name = f"iot-odoo-{gethostname()}-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+        # intentionally don't use Stream.from_path as the path used is not in the addons path
+        # for instance, for the iot-box it will be in /var/log/odoo
+        return http.Stream(
+                type='path',
+                path=log_path,
+                download_name=log_file_name,
+                etag=f'{int(stat.st_mtime)}-{stat.st_size}-{check}',
+                last_modified=stat.st_mtime,
+                size=stat.st_size,
+                mimetype='text/plain',
+            ).get_response(
+            mimetype='text/plain', as_attachment=True
+        )

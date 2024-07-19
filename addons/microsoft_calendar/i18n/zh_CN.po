@@ -3,18 +3,18 @@
 # 	* microsoft_calendar
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Jeffery CHEN <jeffery9@gmail.com>, 2022
-# Raymond Yu <cl_yu@hotmail.com>, 2022
+# Wil Odoo, 2023
+# 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2023
 # Chloe Wang, 2024
+# 湘子 南 <1360857908@qq.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Chloe Wang, 2024\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: 湘子 南 <1360857908@qq.com>, 2024\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,30 +23,35 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%(reminder_type)s - %(duration)s Days"
-msgstr "%(reminder_type)s-%(duration)s天。"
+msgstr "%(reminder_type)s - %(duration)s 天"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%(reminder_type)s - %(duration)s Hours"
 msgstr "%(reminder_type)s-%(duration)s小时"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%(reminder_type)s - %(duration)s Minutes"
 msgstr "%(reminder_type)s-%(duration)s分钟"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "%s - At time of event"
 msgstr "%s - 活动发生时"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "(No title)"
@@ -57,10 +62,10 @@ msgstr "‎（无标题）‎"
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_recurrence__active
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_sync__active
 msgid "Active"
-msgstr "启用"
+msgstr "已启用"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid ""
@@ -69,6 +74,7 @@ msgid ""
 msgstr "在您使用Outlook Synchronization之前，管理员需要对其进行配置!"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/res_users.py:0
 #, python-format
 msgid ""
@@ -110,11 +116,19 @@ msgid "Config Settings"
 msgstr "配置设置"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
+#: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid "Configuration"
+msgstr "配置"
+
+#. module: microsoft_calendar
+#. odoo-javascript
+#: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
+#, python-format
+msgid "Configure"
 msgstr "配置"
 
 #. module: microsoft_calendar
@@ -124,13 +138,15 @@ msgstr "确认"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__create_uid
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__create_uid
 msgid "Created by"
 msgstr "创建人"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__create_date
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__create_date
 msgid "Created on"
-msgstr "创建时间"
+msgstr "创建日期"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__delete_odoo
@@ -148,7 +164,15 @@ msgid "Delete from the current Microsoft Calendar account"
 msgstr "从当前的微软日历账户中删除"
 
 #. module: microsoft_calendar
+#. odoo-javascript
+#: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
+#, python-format
+msgid "Discard"
+msgstr "丢弃"
+
+#. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__display_name
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__display_name
 msgid "Display Name"
 msgstr "显示名称"
 
@@ -170,7 +194,7 @@ msgid ""
 "If this recurrence is not shown in Outlook Calendar, you must delete it in Odoo Calendar and recreate it in Outlook Calendar."
 msgstr ""
 "由于 Outlook 日历的限制，递归更新必须直接在 Outlook 日历中完成。\n"
-"如果在 Outlook 日历中未显示该递归，则必须在 Odoo 日历中删除该递归，然后在 Outlook 日历中重新创建。"
+"如果在 Outlook 日历中未显示该递归，则必须在 ERP 日历中删除该递归，然后在 Outlook 日历中重新创建."
 
 #. module: microsoft_calendar
 #. odoo-python
@@ -187,6 +211,7 @@ msgid "Event Recurrence Rule"
 msgstr "事件重复规则"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid ""
@@ -194,8 +219,8 @@ msgid ""
 "Either update the events/attendees or archive these events %s:\n"
 "%s"
 msgstr ""
-"为了在Odoo和Outlook日历之间实现正确的同步，所有与会者必须有一个电子邮件地址。然而，有些事件并不尊重这个条件。只要事件不正确，日历就不会被同步。\n"
-"要么更新事件/与会者，要么将这些事件存档%s。\n"
+"为了在 ERP 和 Outlook 日历之间实现正确的同步，所有与会者必须有一个电子邮件地址。然而，有些事件并不尊重这个条件。只要事件不正确，日历就不会被同步。\n"
+"要么更新事件/与会者，要么将这些事件归档%s:\n"
 "%s"
 
 #. module: microsoft_calendar
@@ -205,10 +230,11 @@ msgstr ""
 msgid ""
 "For having a different organizer in your event, it is necessary that the "
 "organizer have its Odoo Calendar synced with Outlook Calendar."
-msgstr "要在活动中使用不同的组织者，组织者必须将 Odoo 日历与 Outlook 日历同步。"
+msgstr "要在活动中使用不同的组织者，组织者必须将 ERP 日历与 Outlook 日历同步."
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__id
 msgid "ID"
 msgstr "ID"
 
@@ -220,6 +246,11 @@ msgid ""
 msgstr "如果启用字段设为false，它将允许您隐藏提醒信息而不需要删除它。"
 
 #. module: microsoft_calendar
+#: model:ir.model.fields,help:microsoft_calendar.field_res_config_settings__cal_microsoft_sync_paused
+msgid "Indicates if synchronization with Outlook Calendar is paused or not."
+msgstr "表示与 Outlook 日历的同步是否暂停。"
+
+#. module: microsoft_calendar
 #. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
@@ -229,24 +260,48 @@ msgid ""
 msgstr "在保存活动之前，必须将提议的组织者添加为参与者。"
 
 #. module: microsoft_calendar
-#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset____last_update
-msgid "Last Modified on"
-msgstr "最后修改时间"
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__last_sync_date
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_last_sync_date
+msgid "Last Sync Date"
+msgstr "上次同步日期"
+
+#. module: microsoft_calendar
+#: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
+msgid "Last Sync Time"
+msgstr "上次同步时间"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__write_uid
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__write_date
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__write_date
 msgid "Last Updated on"
-msgstr "最后更新时间"
+msgstr "上次更新日期"
+
+#. module: microsoft_calendar
+#: model:ir.model.fields,help:microsoft_calendar.field_microsoft_calendar_credentials__last_sync_date
+#: model:ir.model.fields,help:microsoft_calendar.field_res_users__microsoft_last_sync_date
+msgid "Last synchronization date with Outlook Calendar"
+msgstr "与 Outlook 日历的最后同步日期"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields.selection,name:microsoft_calendar.selection__microsoft_calendar_account_reset__delete_policy__dont_delete
 msgid "Leave them untouched"
 msgstr "‎保持原封不动‎"
+
+#. module: microsoft_calendar
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_calendar_account_id
+msgid "Microsoft Calendar Account"
+msgstr "微软日历账户"
+
+#. module: microsoft_calendar
+#: model:ir.model,name:microsoft_calendar.model_microsoft_calendar_credentials
+msgid "Microsoft Calendar Account Data"
+msgstr "Microsoft 日历账户数据"
 
 #. module: microsoft_calendar
 #: model:ir.actions.act_window,name:microsoft_calendar.microsoft_calendar_reset_account_action
@@ -280,6 +335,7 @@ msgid "Microsoft Client_key"
 msgstr "微软Client_key"
 
 #. module: microsoft_calendar
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__calendar_sync_token
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_calendar_sync_token
 msgid "Microsoft Next Sync Token"
 msgstr "微软下次同步令牌"
@@ -288,6 +344,11 @@ msgstr "微软下次同步令牌"
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__microsoft_recurrence_master_id
 msgid "Microsoft Recurrence Master Id"
 msgstr "微软的重复主标识"
+
+#. module: microsoft_calendar
+#: model:ir.model.fields,field_description:microsoft_calendar.field_res_config_settings__cal_microsoft_sync_paused
+msgid "Microsoft Synchronization Paused"
+msgstr "微软同步暂停"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,field_description:microsoft_calendar.field_calendar_event__need_sync_m
@@ -307,6 +368,7 @@ msgid "Next Synchronization"
 msgstr "下一个同步"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid "Notification"
@@ -320,7 +382,8 @@ msgid "Organizer event Id"
 msgstr "主办方活动ID"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
+#: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.xml:0
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.xml:0
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.xml:0
 #, python-format
@@ -333,11 +396,13 @@ msgid "Outlook Calendar"
 msgstr "Outlook日历"
 
 #. module: microsoft_calendar
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__synchronization_stopped
 #: model:ir.model.fields,field_description:microsoft_calendar.field_res_users__microsoft_synchronization_stopped
 msgid "Outlook Synchronization stopped"
 msgstr "Outlook同步停止"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/calendar.py:0
 #, python-format
 msgid ""
@@ -348,10 +413,13 @@ msgstr "Outlook限制：在重复发生中，活动不能移动到前一活动�
 
 #. module: microsoft_calendar
 #: model:ir.actions.server,name:microsoft_calendar.ir_cron_sync_all_cals_ir_actions_server
-#: model:ir.cron,cron_name:microsoft_calendar.ir_cron_sync_all_cals
-#: model:ir.cron,name:microsoft_calendar.ir_cron_sync_all_cals
 msgid "Outlook: synchronization"
 msgstr "Outlook：同步"
+
+#. module: microsoft_calendar
+#: model_terms:ir.ui.view,arch_db:microsoft_calendar.res_config_settings_view_form
+msgid "Pause Synchronization"
+msgstr "暂停同步"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.view_users_form
@@ -369,7 +437,14 @@ msgid "Reset Outlook Calendar Account"
 msgstr "重置Outlook日历账户"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
+#: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
+#, python-format
+msgid "Stop Synchronization"
+msgstr "停止同步"
+
+#. module: microsoft_calendar
+#. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid "Success"
@@ -391,7 +466,7 @@ msgid "Synchronize only new events"
 msgstr "‎仅同步新事件‎"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid ""
@@ -400,17 +475,23 @@ msgid ""
 msgstr "在使用Outlook同步功能之前，需要对其进行配置，您想现在就做吗？"
 
 #. module: microsoft_calendar
+#. odoo-python
 #: code:addons/microsoft_calendar/models/res_users.py:0
 #, python-format
 msgid "The account for the Outlook Calendar service is not configured."
 msgstr "Outlook日历服务的账户没有被配置。"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid "The synchronization with Outlook calendar was successfully stopped."
-msgstr "Outlook同步停止"
+msgstr "与 Outlook 日历的同步已成功停止。"
+
+#. module: microsoft_calendar
+#: model:ir.model.constraint,message:microsoft_calendar.constraint_res_users_microsoft_token_uniq
+msgid "The user has already a microsoft account"
+msgstr "该用户已拥有 Microsoft 帐户"
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_microsoft_calendar_account_reset__delete_policy
@@ -432,6 +513,7 @@ msgstr "通用活动ID"
 #. module: microsoft_calendar
 #: model:ir.model,name:microsoft_calendar.model_res_users
 #: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_account_reset__user_id
+#: model:ir.model.fields,field_description:microsoft_calendar.field_microsoft_calendar_credentials__user_ids
 msgid "User"
 msgstr "用户"
 
@@ -446,10 +528,17 @@ msgid "User's Existing Events"
 msgstr "‎用户的现有事件‎"
 
 #. module: microsoft_calendar
-#. openerp-web
+#. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 #, python-format
 msgid ""
 "You are about to stop the synchronization of your calendar with Outlook. Are"
 " you sure you want to continue?"
 msgstr "您即将停止您的日历与Outlook的同步。您确定您要继续吗？"
+
+#. module: microsoft_calendar
+#. odoo-javascript
+#: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
+#, python-format
+msgid "Your administrator paused the synchronization with Outlook Calendar."
+msgstr "您的管理员暂停了与 Outlook 日历的同步。"

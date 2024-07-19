@@ -1,14 +1,12 @@
-odoo.define('website_sale.tour_shop_deleted_archived_variants', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var tour = require('web_tour.tour');
+import { registry } from "@web/core/registry";
 
 // This tour relies on a data created from the python test.
-tour.register('tour_shop_deleted_archived_variants', {
+registry.category("web_tour.tours").add('tour_shop_deleted_archived_variants', {
     test: true,
     url: '/shop?search=Test Product 2',
-},
-[
+    steps: () => [
     {
         content: "check price on /shop (template price)",
         trigger: '.oe_product_cart .oe_currency_value:contains("1.00")',
@@ -50,5 +48,4 @@ tour.register('tour_shop_deleted_archived_variants', {
         trigger: '#add_to_cart.disabled',
         run: function () {},
     }
-]);
-});
+]});

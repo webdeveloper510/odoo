@@ -1,7 +1,7 @@
-odoo.define('website.s_tabs_options', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const options = require('web_editor.snippets.options');
+import { uniqueId } from "@web/core/utils/functions";
+import options from "@web_editor/js/editor/snippets.options";
 
 options.registry.NavTabs = options.registry.MultipleItems.extend({
     isTopOption: true,
@@ -67,7 +67,7 @@ options.registry.NavTabs = options.registry.MultipleItems.extend({
      */
     _generateUniqueIDs: function () {
         for (var i = 0; i < this.$navLinks.length; i++) {
-            var id = _.now() + '_' + _.uniqueId();
+            var id = uniqueId(new Date().getTime() + "_");
             var idLink = 'nav_tabs_link_' + id;
             var idContent = 'nav_tabs_content_' + id;
             this.$navLinks.eq(i).attr({
@@ -155,5 +155,4 @@ options.registry.NavTabsStyle = options.Class.extend({
         }
         return this._super(...arguments);
     },
-});
 });

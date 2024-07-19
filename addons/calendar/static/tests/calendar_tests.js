@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { getFixture } from "@web/../tests/helpers/utils";
+import { click, getFixture } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 
 let serverData;
@@ -91,19 +91,19 @@ QUnit.module(
             );
             assert.containsN(
                 target,
-                '.o_field_widget[name="partner_ids"] .badge',
+                '.o_field_widget[name="partner_ids"] .o_tag',
                 2,
                 "there should be 2 tags"
             );
-            const badges = target.querySelectorAll('.o_field_widget[name="partner_ids"] .badge');
+            const badges = target.querySelectorAll('.o_field_widget[name="partner_ids"] .o_tag');
             assert.strictEqual(
                 badges[0].textContent.trim(),
                 "Jesus",
                 "the tag should be correctly named"
             );
             assert.hasClass(
-                badges[0].querySelector("img"),
-                "o_attendee_border_accepted",
+                badges[0].querySelector(".attendee_tag_status"),
+                "o_attendee_status_accepted",
                 "Jesus should attend the meeting"
             );
             assert.strictEqual(
@@ -112,8 +112,8 @@ QUnit.module(
                 "the tag should be correctly named"
             );
             assert.hasClass(
-                badges[1].querySelector("img"),
-                "o_attendee_border_tentative",
+                badges[1].querySelector(".attendee_tag_status"),
+                "o_attendee_status_tentative",
                 "Mohamet should still confirm his attendance to the meeting"
             );
             assert.containsOnce(badges[0], "img", "should have img tag");
@@ -125,5 +125,45 @@ QUnit.module(
             );
             assert.verifySteps(["get_attendee_detail"]);
         });
-    }
+        QUnit.test("Many2ManyAttendee: remove own attendee", async function (assert) {
+            await makeView({
+                type: "form",
+                resModel: "event",
+                serverData,
+                resId: 14,
+                arch: `
+                    <form>
+                        <field name="partner_ids" widget="many2manyattendee"/>
+                    </form>`,
+                mockRPC(route, args) {
+                    if (args.method === "get_attendee_detail") {
+                        return Promise.resolve([
+                            { id: 1, name: "Jesus", status: "accepted", color: 0 },
+                            { id: 2, name: "Mahomet", status: "tentative", color: 0 },
+                        ]);
+                    }
+                },
+            });
+            assert.containsN(
+                target,
+                '.o_field_widget[name="partner_ids"] .o_tag',
+                2,
+                "there should be 2 tags"
+            );
+
+            // Attendee must be able to uninvite itself from the event.
+            const deleteButtons = target.querySelectorAll('.o_field_widget[name="partner_ids"] .o_delete');
+            await Promise.all([
+                click(deleteButtons[1]),
+                click(target.querySelector(".o_form_button_save")),
+            ])
+            // Ensure that there is only one attendee after removing it and saving the event.
+            assert.containsN(
+                target,
+                '.o_field_widget[name="partner_ids"] .o_tag',
+                1,
+                "there should be 1 tag after attendee removal"
+            );
+        });
+    },
 );

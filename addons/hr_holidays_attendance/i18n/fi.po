@@ -3,19 +3,19 @@
 # 	* hr_holidays_attendance
 # 
 # Translators:
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
+# Martin Trigaux, 2023
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2023
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
-# Martin Trigaux, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,9 +31,19 @@ msgid "%s hours available"
 msgstr "%s tuntia käytettävissä"
 
 #. module: hr_holidays_attendance
+#: model:ir.model,name:hr_holidays_attendance.model_hr_leave_accrual_level
+msgid "Accrual Plan Level"
+msgstr "Karttumajärjestelmän taso"
+
+#. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_hr_attendance
 msgid "Attendance"
 msgstr "Läsnäolo"
+
+#. module: hr_holidays_attendance
+#: model:ir.model.fields.selection,name:hr_holidays_attendance.selection__hr_leave_accrual_level__frequency_hourly_source__attendance
+msgid "Attendances"
+msgstr "Läsnäolot"
 
 #. module: hr_holidays_attendance
 #. odoo-javascript
@@ -41,6 +51,11 @@ msgstr "Läsnäolo"
 #, python-format
 msgid "Available"
 msgstr "Saatavilla"
+
+#. module: hr_holidays_attendance
+#: model:ir.model.fields.selection,name:hr_holidays_attendance.selection__hr_leave_accrual_level__frequency_hourly_source__calendar
+msgid "Calendar"
+msgstr "Kalenteri"
 
 #. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_res_company
@@ -86,6 +101,11 @@ msgid "Extra Hours Available"
 msgstr "Lisäaikoja saatavilla"
 
 #. module: hr_holidays_attendance
+#: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave_accrual_level__frequency_hourly_source
+msgid "Frequency Hourly Source"
+msgstr "Kunka usein Tunnit Lähde"
+
+#. module: hr_holidays_attendance
 #. odoo-javascript
 #: code:addons/hr_holidays_attendance/static/src/xml/time_off_calendar.xml:0
 #, python-format
@@ -96,6 +116,18 @@ msgstr "Tunnit"
 #: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave_type__hr_attendance_overtime
 msgid "Hr Attendance Overtime"
 msgstr "HR läsnäolo ylityö"
+
+#. module: hr_holidays_attendance
+#: model:ir.model.fields,help:hr_holidays_attendance.field_hr_leave_accrual_level__frequency_hourly_source
+msgid ""
+"If the source is set to Calendar, the amount of worked hours will be "
+"computed from employee calendar and time off (if the plan is based on worked"
+" time). Otherwise, the amount of worked hours will be based on Attendance "
+"records."
+msgstr ""
+"Jos lähteenä on Kalenteri, työtuntien määrä lasketaan työntekijän "
+"kalenterista ja vapaa-ajasta (jos järjestelmä perustuu työaikaan). Muussa "
+"tapauksessa työtuntien määrä perustuu läsnäolotietoihin."
 
 #. module: hr_holidays_attendance
 #: model:ir.actions.act_window,name:hr_holidays_attendance.hr_leave_allocation_overtime_action
@@ -127,6 +159,11 @@ msgid "Save"
 msgstr "Tallenna"
 
 #. module: hr_holidays_attendance
+#: model_terms:ir.ui.view,arch_db:hr_holidays_attendance.hr_leave_accrual_level_view_form
+msgid "Source"
+msgstr "Lähde"
+
+#. module: hr_holidays_attendance
 #. odoo-python
 #: code:addons/hr_holidays_attendance/models/hr_leave_allocation.py:0
 #, python-format
@@ -143,16 +180,6 @@ msgstr ""
 msgid "The employee does not have enough extra hours to extend this leave."
 msgstr ""
 "Työntekijällä ei ole riittävästi lisätunteja tämän loman pidentämiseksi."
-
-#. module: hr_holidays_attendance
-#. odoo-python
-#: code:addons/hr_holidays_attendance/models/hr_leave_allocation.py:0
-#, python-format
-msgid ""
-"The employee does not have enough extra hours to request this allocation."
-msgstr ""
-"Työntekijällä ei ole riittävästi lisätunteja, jotta hän voisi pyytää tätä "
-"kohdentamista."
 
 #. module: hr_holidays_attendance
 #. odoo-python
@@ -186,7 +213,7 @@ msgstr "Vapaa-ajan kohdentaminen"
 #. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_hr_leave_type
 msgid "Time Off Type"
-msgstr "Vapaa-aika Tyyppi"
+msgstr "Vapaa-aikatyyppi"
 
 #. module: hr_holidays_attendance
 #: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave__employee_overtime

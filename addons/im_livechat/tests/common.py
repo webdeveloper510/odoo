@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import HttpCase
 
 
-class TestImLivechatCommon(TransactionCase):
+class TestImLivechatCommon(HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.password = 'Pl1bhD@2!kXZ'
         cls.operators = cls.env['res.users'].create([{
             'name': 'Michel',
             'login': 'michel',
+            'password': cls.password,
             'livechat_username': "Michel Operator",
             'email': 'michel@example.com',
         }, {
@@ -42,7 +44,8 @@ class TestImLivechatCommon(TransactionCase):
     def setUp(self):
         super().setUp()
 
-        def get_available_users(_):
-            return self.operators
+        def _compute_available_operator_ids(channel_self):
+            for record in channel_self:
+                record.available_operator_ids = record.user_ids
 
-        self.patch(type(self.env['im_livechat.channel']), '_get_available_users', get_available_users)
+        self.patch(type(self.env['im_livechat.channel']), '_compute_available_operator_ids', _compute_available_operator_ids)

@@ -224,9 +224,6 @@ class AccountMove(models.Model):
         else:
             self.l10n_es_tbai_post_xml = b64_doc
 
-    def _is_l10n_es_tbai_simplified(self):
-        return self.commercial_partner_id == self.env.ref("l10n_es_edi_sii.partner_simplified")
-
     def _get_vendor_bill_tax_values(self):
         self.ensure_one()
         results = defaultdict(lambda: {'base_amount': 0.0, 'tax_amount': 0.0})
@@ -239,8 +236,7 @@ class AccountMove(models.Model):
             for tax in line.tax_ids.filtered(lambda t: t.l10n_es_type not in ('recargo', 'retencion')):
                 results[tax]['base_amount'] += line.balance
 
-            tax = line.tax_line_id
-            if (tax and tax.l10n_es_type not in ('recargo', 'retencion') and
+            if ((tax := line.tax_line_id) and tax.l10n_es_type not in ('recargo', 'retencion') and
                 line.tax_repartition_line_id.factor_percent != -100.0):
                 results[tax]['tax_amount'] += line.balance
         iva_values = []

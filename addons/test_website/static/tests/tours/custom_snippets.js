@@ -1,7 +1,6 @@
-odoo.define('test_website.custom_snippets', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const wTourUtils = require('website.tour_utils');
+import wTourUtils from "@website/js/tours/tour_utils";
 
 /**
  * The purpose of this tour is to check the custom snippets flow:
@@ -26,13 +25,11 @@ wTourUtils.registerWebsitePreviewTour('test_custom_snippet', {
     url: '/',
     edition: true,
     test: true,
-}, [
-    {
-        content: "drop a snippet",
-        trigger: ".oe_snippet[name='Banner'] .oe_snippet_thumbnail:not(.o_we_already_dragging)",
-        moveTrigger: ".oe_drop_zone",
-        run: "drag_and_drop iframe #wrap",
-    },
+}, () => [
+    wTourUtils.dragNDrop({
+        id: 's_banner',
+        name: 'Banner',
+    }),
     {
         content: "customize snippet",
         trigger: "iframe #wrapwrap .s_banner h1",
@@ -45,7 +42,7 @@ wTourUtils.registerWebsitePreviewTour('test_custom_snippet', {
     },
     {
         content: "confirm reload",
-        trigger: ".modal-dialog button span:contains('Save and Reload')",
+        trigger: ".modal-dialog button:contains('Save and Reload')",
     },
     {
         content: "ensure custom snippet appeared",
@@ -69,13 +66,7 @@ wTourUtils.registerWebsitePreviewTour('test_custom_snippet', {
         content: "confirm rename",
         trigger: ".oe_snippet[name='Custom Banner'] we-button.o_we_confirm_btn",
     },
-    {
-        content: "drop custom snippet",
-        trigger: ".oe_snippet[name='Bruce Banner'] .oe_snippet_thumbnail:not(.o_we_already_dragging)",
-        extra_trigger: "iframe body.editor_enable",
-        moveTrigger: ".oe_drop_zone",
-        run: "drag_and_drop iframe #wrap",
-    },
+    wTourUtils.dragNDrop({ name: "Bruce Banner" }),
     {
         content: "ensure banner section exists",
         trigger: "iframe #wrap section[data-name='Banner']",
@@ -96,7 +87,7 @@ wTourUtils.registerWebsitePreviewTour('test_custom_snippet', {
     },
     {
         content: "confirm delete",
-        trigger: ".modal-dialog button:has(span:contains('Yes'))",
+        trigger: ".modal-dialog button:contains('Yes')",
     },
     {
         content: "ensure custom snippet disappeared",
@@ -104,5 +95,3 @@ wTourUtils.registerWebsitePreviewTour('test_custom_snippet', {
         run: function () {}, // check
     },
 ]);
-
-});

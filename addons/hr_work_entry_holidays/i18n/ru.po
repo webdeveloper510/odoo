@@ -3,18 +3,15 @@
 # 	* hr_work_entry_holidays
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Сергей Шебанин <sergey@shebanin.ru>, 2022
-# Alena Vlasova, 2023
-# alenafairy, 2023
+# Martin Trigaux, 2023
 # Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
-"PO-Revision-Date: 2022-09-22 05:52+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -24,12 +21,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #. module: hr_work_entry_holidays
-#: code:addons/hr_work_entry_holidays/models/hr_leave.py:0
-#, python-format
-msgid "%s: Time Off"
-msgstr "%s: Отгул"
-
-#. module: hr_work_entry_holidays
+#. odoo-python
 #: code:addons/hr_work_entry_holidays/models/hr_leave.py:0
 #, python-format
 msgid ""
@@ -54,14 +46,36 @@ msgstr ""
 "%s"
 
 #. module: hr_work_entry_holidays
+#: model:ir.model,name:hr_work_entry_holidays.model_hr_employee_base
+msgid "Basic Employee"
+msgstr "Основной сотрудник"
+
+#. module: hr_work_entry_holidays
+#. odoo-python
+#: code:addons/hr_work_entry_holidays/models/hr_contract.py:0
+#, python-format
+msgid ""
+"Changing the contract on this employee changes their working schedule in a "
+"period they already took leaves. Changing this working schedule changes the "
+"duration of these leaves in such a way the employee no longer has the "
+"required allocation for them. Please review these leaves and/or allocations "
+"before changing the contract."
+msgstr ""
+"Изменение договора с этим сотрудником изменяет его график работы в период, "
+"когда он уже брал отпуск. Изменение графика работы изменяет "
+"продолжительность этих отпусков таким образом, что сотрудник больше не имеет"
+" необходимых ассигнований для них. Пожалуйста, проверьте эти отпуска и/или "
+"ассигнования, прежде чем изменять контракт."
+
+#. module: hr_work_entry_holidays
 #: model:ir.model,name:hr_work_entry_holidays.model_hr_contract
 msgid "Employee Contract"
-msgstr "Договор с сотрудником"
+msgstr "Договор с Сотрудником"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model,name:hr_work_entry_holidays.model_hr_work_entry
 msgid "HR Work Entry"
-msgstr "Рабочая запись HR"
+msgstr "HR Ввод данных о работе"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model,name:hr_work_entry_holidays.model_hr_work_entry_type
@@ -71,7 +85,7 @@ msgstr "HR Тип Ввода данных о работе"
 #. module: hr_work_entry_holidays
 #: model_terms:ir.ui.view,arch_db:hr_work_entry_holidays.work_entry_type_leave_form_inherit
 msgid "Payroll"
-msgstr "Платёжная ведомость"
+msgstr "Оплаты"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model.fields,field_description:hr_work_entry_holidays.field_hr_work_entry__leave_state
@@ -86,12 +100,13 @@ msgid ""
 "The status is 'Refused', when time off request is refused by manager.\n"
 "The status is 'Approved', when time off request is approved by manager."
 msgstr ""
-"Статус \"Отправить\" устанавливается, когда запрос на отгул создан.\n"
-" Статус \"Одобрить\", когда запрос на отгул подтвержден пользователем.\n"
-" Статус \"Отклонить\", когда запрос на отгул отклонен менеджером.\n"
-" Статус \"Одобрен\", когда запрос на отгул одобрен менеджером."
+"Статус установлен на ‘Отправить’, когда создается запрос на отпуск.\n"
+"Статус ‘Подтвердить’, когда запрос на отпуск подтверждается пользователем.\n"
+"Статус ‘Отказаться’, когда запрос на отпуск отклонен менеджером.\n"
+"Статус ‘Утвержден’, когда запрос на отпуск одобрен менеджером."
 
 #. module: hr_work_entry_holidays
+#. odoo-python
 #: code:addons/hr_work_entry_holidays/models/hr_leave.py:0
 #, python-format
 msgid ""
@@ -104,13 +119,13 @@ msgstr ""
 #: model:ir.model,name:hr_work_entry_holidays.model_hr_leave
 #: model:ir.model.fields,field_description:hr_work_entry_holidays.field_hr_work_entry__leave_id
 msgid "Time Off"
-msgstr "Отсутствие"
+msgstr "Отпуск"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model,name:hr_work_entry_holidays.model_hr_leave_type
 #: model:ir.model.fields,field_description:hr_work_entry_holidays.field_hr_work_entry_type__leave_type_ids
 msgid "Time Off Type"
-msgstr "Тип отгула"
+msgstr "Тип отсутсвия"
 
 #. module: hr_work_entry_holidays
 #: model:ir.model.fields,field_description:hr_work_entry_holidays.field_hr_leave_type__work_entry_type_id

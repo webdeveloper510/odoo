@@ -1,16 +1,14 @@
-odoo.define('web_editor.test_utils', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var ajax = require('web.ajax');
-var MockServer = require('web.MockServer');
-var testUtils = require('web.test_utils');
-var OdooEditorLib = require('@web_editor/js/editor/odoo-editor/src/OdooEditor');
-var Widget = require('web.Widget');
-var Wysiwyg = require('web_editor.wysiwyg');
-var options = require('web_editor.snippets.options');
-const { TABLE_ATTRIBUTES, TABLE_STYLES } = require('@web_editor/js/backend/convert_inline');
+import { MockServer } from "@web/../tests/helpers/mock_server";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
+import { patch } from "@web/core/utils/patch";
+import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor";
+import { Wysiwyg } from '@web_editor/js/wysiwyg/wysiwyg';
+import options from "@web_editor/js/editor/snippets.options";
+import { TABLE_ATTRIBUTES, TABLE_STYLES } from '@web_editor/js/backend/convert_inline';
 
-const COLOR_PICKER_TEMPLATE = `
+export const COLOR_PICKER_TEMPLATE = `
     <colorpicker>
         <div class="o_colorpicker_section" data-name="theme" data-display="Theme Colors" data-icon-class="fa fa-flask">
             <button data-color="o-color-1"/>
@@ -94,7 +92,7 @@ const SNIPPETS_TEMPLATE = `
         </div>
     </div>`;
 
-MockServer.include({
+patch(MockServer.prototype, {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -104,7 +102,7 @@ MockServer.include({
      * @private
      * @returns {Promise}
      */
-    async _performRpc(route, args) {
+    async _performRPC(route, args) {
         if (args.model === "ir.ui.view" && args.method === 'render_public_asset') {
             if (args.args[0] === "web_editor.colorpicker") {
                 return COLOR_PICKER_TEMPLATE;
@@ -113,7 +111,7 @@ MockServer.include({
                 return SNIPPETS_TEMPLATE;
             }
         }
-        return this._super(...arguments);
+        return super._performRPC(...arguments);
     },
 });
 
@@ -145,58 +143,12 @@ options.registry.option_test = options.Class.extend({
     },
 });
 
-
-/**
- * Constructor WysiwygTest why editable and unbreakable node used in test.
- */
-var WysiwygTest = Wysiwyg.extend({
-    _parentToDestroyForTest: null,
-    /**
-     * Override 'destroy' of discuss so that it calls 'destroy' on the parent.
-     *
-     * @override
-     */
-    destroy: function () {
-        unpatch();
-        this._super();
-        this.$target.remove();
-        this._parentToDestroyForTest.destroy();
-    },
-});
-
-
-function patch() {
-    testUtils.mock.patch(ajax, {
-        loadAsset: function (xmlId) {
-            if (xmlId === 'template.assets') {
-                return Promise.resolve({
-                    cssLibs: [],
-                    cssContents: ['body {background-color: red;}']
-                });
-            }
-            if (xmlId === 'template.assets_all_style') {
-                return Promise.resolve({
-                    cssLibs: $('link[href]:not([type="image/x-icon"])').map(function () {
-                        return $(this).attr('href');
-                    }).get(),
-                    cssContents: ['body {background-color: red;}']
-                });
-            }
-            throw 'Wrong template';
-        },
-    });
-}
-
-function unpatch() {
-    testUtils.mock.unpatch(ajax);
-}
-
 /**
  * @param {object} data
  * @returns {object}
  */
-function wysiwygData(data) {
-    return _.defaults({}, data, {
+export function wysiwygData(data) {
+    return Object.assign({
         'ir.ui.view': {
             fields: {
                 display_name: {
@@ -294,87 +246,8 @@ function wysiwygData(data) {
                 return;
             },
         },
-    });
+    }, data);
 }
-
-/**
- * Create the wysiwyg instance for test (contains patch, usefull ir.ui.view, snippets).
- *
- * @param {object} params
- */
-async function createWysiwyg(params) {
-    patch();
-    params.data = wysiwygData(params.data);
-
-    var parent = new Widget();
-    await testUtils.mock.addMockEnvironment(parent, params);
-
-    var wysiwygOptions = _.extend({}, params.wysiwygOptions, {
-        recordInfo: {
-            context: {},
-            res_model: 'module.test',
-            res_id: 1,
-        },
-        useOnlyTestUnbreakable: params.useOnlyTestUnbreakable,
-    });
-
-    var wysiwyg = new WysiwygTest(parent, wysiwygOptions);
-    wysiwyg._parentToDestroyForTest = parent;
-
-    var $textarea = $('<textarea/>');
-    if (wysiwygOptions.value) {
-        $textarea.val(wysiwygOptions.value);
-    }
-    var selector = params.debug ? 'body' : '#qunit-fixture';
-    $textarea.prependTo($(selector));
-    if (params.debug) {
-        $('body').addClass('debug');
-    }
-    return wysiwyg.attachTo($textarea).then(function () {
-        if (wysiwygOptions.snippets) {
-            var defSnippets = testUtils.makeTestPromise();
-            testUtils.mock.intercept(wysiwyg, "snippets_loaded", function () {
-                defSnippets.resolve(wysiwyg);
-            });
-            return defSnippets;
-        }
-        return wysiwyg;
-    });
-}
-
-
-/**
- * Char codes.
- */
-var keyboardMap = {
-    "8": "BACKSPACE",
-    "9": "TAB",
-    "13": "ENTER",
-    "16": "SHIFT",
-    "17": "CONTROL",
-    "18": "ALT",
-    "19": "PAUSE",
-    "20": "CAPS_LOCK",
-    "27": "ESCAPE",
-    "32": "SPACE",
-    "33": "PAGE_UP",
-    "34": "PAGE_DOWN",
-    "35": "END",
-    "36": "HOME",
-    "37": "LEFT",
-    "38": "UP",
-    "39": "RIGHT",
-    "40": "DOWN",
-    "45": "INSERT",
-    "46": "DELETE",
-    "91": "OS_KEY", // 'left command': Windows Key (Windows) or Command Key (Mac)
-    "93": "CONTEXT_MENU", // 'right command'
-};
-_.each(_.range(40, 127), function (keyCode) {
-    if (!keyboardMap[keyCode]) {
-        keyboardMap[keyCode] = String.fromCharCode(keyCode);
-    }
-});
 
 /**
  * Perform a series of tests (`keyboardTests`) for using keyboard inputs.
@@ -399,22 +272,16 @@ _.each(_.range(40, 127), function (keyCode) {
  * @param {Number} addTests
  */
 var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
-    var tests = _.compact(_.pluck(keyboardTests, 'test'));
-    var testNumber = _.compact(_.pluck(tests, 'start')).length +
-        _.compact(_.pluck(tests, 'content')).length +
-        _.compact(_.pluck(tests, 'check')).length +
+    var tests = keyboardTests.map((k) => k.test).map((x) => !!x);
+    var testNumber =
+        tests.map((test) => test.start).map((x) => !!x).length +
+        tests.map((test) => test.content).map((x) => !!x).length +
+        tests.map((test) => test.check.map((x) => !!x)).length +
         (addTests | 0);
     assert.expect(testNumber);
 
     function keydown(target, keypress) {
         var $target = $(target.tagName ? target : target.parentNode);
-        if (!keypress.keyCode) {
-            keypress.keyCode = +_.findKey(keyboardMap, function (key) {
-                return key === keypress.key;
-            });
-        } else {
-            keypress.key = keyboardMap[keypress.keyCode] || String.fromCharCode(keypress.keyCode);
-        }
         var event = $.Event("keydown", keypress);
         $target.trigger(event);
 
@@ -509,12 +376,11 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
                 }
             }
             setTimeout(function () {
-                if (step.keyCode || step.key) {
+                if (step.key) {
                     var target = Wysiwyg.getRange().ec;
                     if (window.location.search.indexOf('notrycatch') !== -1) {
                         keydown(target, {
                             key: step.key,
-                            keyCode: step.keyCode,
                             ctrlKey: !!step.ctrlKey,
                             shiftKey: !!step.shiftKey,
                             altKey: !!step.altKey,
@@ -524,7 +390,6 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
                         try {
                             keydown(target, {
                                 key: step.key,
-                                keyCode: step.keyCode,
                                 ctrlKey: !!step.ctrlKey,
                                 shiftKey: !!step.shiftKey,
                                 altKey: !!step.altKey,
@@ -536,11 +401,10 @@ var testKeyboard = function ($editable, assert, keyboardTests, addTests) {
                     }
                 }
                 setTimeout(function () {
-                    if (step.keyCode || step.key) {
+                    if (step.key) {
                         var $target = $(target.tagName ? target : target.parentNode);
                         $target.trigger($.Event('keyup', {
                             key: step.key,
-                            keyCode: step.keyCode,
                             ctrlKey: !!step.ctrlKey,
                             shiftKey: !!step.shiftKey,
                             altKey: !!step.altKey,
@@ -678,15 +542,7 @@ var select = (function () {
  */
 var keydown = function (key, $editable, options) {
     var keyPress = {};
-    if (typeof key === 'string') {
-        keyPress.key = key;
-        keyPress.keyCode = +_.findKey(keyboardMap, function (k) {
-            return k === key;
-        });
-    } else {
-        keyPress.key = keyboardMap[key] || String.fromCharCode(key);
-        keyPress.keyCode = key;
-    }
+    keyPress.key = key;
     var range = Wysiwyg.getRange();
     if (!range) {
         console.error("Editor have not any range");
@@ -760,7 +616,7 @@ const tableStylesString = Object.keys(TABLE_STYLES).map(key => `${key}: ${TABLE_
  * @param {Array<Array<Number|null>>} matrix
  * @returns {string}
  */
-function getGridHtml(matrix) {
+export function getGridHtml(matrix) {
     return (
         `<div class="container">` +
         matrix.map((row, iRow) => (
@@ -773,7 +629,7 @@ function getGridHtml(matrix) {
         `</div>`
     );
 }
-function getTdHtml(colspan, text, containerWidth) {
+export function getTdHtml(colspan, text, containerWidth) {
     return (
         `<td colspan="${colspan}"${
             containerWidth ? ' ' + `style="max-width: ${Math.round(containerWidth*colspan/12*100)/100}px;"`
@@ -805,7 +661,7 @@ function getTdHtml(colspan, text, containerWidth) {
  * @param {Number} [containerWidth]
  * @returns {string}
  */
-function getTableHtml(matrix, containerWidth) {
+export function getTableHtml(matrix, containerWidth) {
     return (
         `<table ${tableAttributesString} style="width: 100% !important; ${tableStylesString}">` +
         matrix.map((row, iRow) => (
@@ -830,7 +686,7 @@ function getTableHtml(matrix, containerWidth) {
  * @param {Number|Number[]} nCols
  * @returns {string}
  */
-function getRegularGridHtml(nRows, nCols) {
+export function getRegularGridHtml(nRows, nCols) {
     const matrix = new Array(nRows).fill().map((_, iRow) => (
         new Array(Array.isArray(nCols) ? nCols[iRow] : nCols).fill()
     ));
@@ -852,7 +708,7 @@ function getRegularGridHtml(nRows, nCols) {
  * @param {Number} containerWidth
  * @returns {string}
  */
-function getRegularTableHtml(nRows, nCols, colspan, width, containerWidth) {
+export function getRegularTableHtml(nRows, nCols, colspan, width, containerWidth) {
     const matrix = new Array(nRows).fill().map((_, iRow) => (
         new Array(Array.isArray(nCols) ? nCols[iRow] : nCols).fill().map(() => ([
             Array.isArray(colspan) ? colspan[iRow] : colspan,
@@ -870,7 +726,7 @@ function getRegularTableHtml(nRows, nCols, colspan, width, containerWidth) {
  * @param {boolean} [removeMsoHide=true]
  * @returns {string}
  */
-function removeComments(html, removeMsoHide=true) {
+export function removeComments(html, removeMsoHide=true) {
     const cleanHtml = html.replace(/<!--(.*?)-->/g, '');
     if (removeMsoHide) {
         return cleanHtml.replaceAll(' class="mso-hide"', '').replace(/\s*mso-hide/g, '').replace(/mso-hide\s*/g, '');
@@ -879,14 +735,11 @@ function removeComments(html, removeMsoHide=true) {
     }
 }
 
-return {
+export default {
     wysiwygData: wysiwygData,
-    createWysiwyg: createWysiwyg,
     testKeyboard: testKeyboard,
     select: select,
     keydown: keydown,
-    patch: patch,
-    unpatch: unpatch,
     getGridHtml: getGridHtml,
     getTableHtml: getTableHtml,
     getRegularGridHtml: getRegularGridHtml,
@@ -894,6 +747,3 @@ return {
     getTdHtml: getTdHtml,
     removeComments: removeComments,
 };
-
-
-});

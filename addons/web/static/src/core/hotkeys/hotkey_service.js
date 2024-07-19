@@ -18,7 +18,7 @@ import { getVisibleElements } from "../utils/ui";
  *  allow registration to perform no matter the UI active element
  * @property {() => HTMLElement} [area]
  *  adds a restricted operating area for this hotkey
- * @property {(target: EventTarget) => boolean} [validate]
+ * @property {() => boolean} [isAvailable]
  *  adds a validation before calling the hotkey registration's callback
  *
  * @typedef {HotkeyOptions & {
@@ -80,6 +80,12 @@ export function getActiveHotkey(ev) {
 
     // ------- Key -------
     let key = ev.key.toLowerCase();
+
+    // The browser space is natively " ", we want "space" for esthetic reasons
+    if (key === " ") {
+        key = "space";
+    }
+
     // Identify if the user has tapped on the number keys above the text keys.
     if (ev.code && ev.code.indexOf("Digit") === 0) {
         key = ev.code.slice(-1);
@@ -92,6 +98,7 @@ export function getActiveHotkey(ev) {
     if (!MODIFIERS.includes(key)) {
         hotkey.push(key);
     }
+
     return hotkey.join("+");
 }
 
@@ -171,7 +178,8 @@ export const hotkeyService = {
             // NB: except for ESC, which is always allowed as hotkey in editables.
             const targetIsEditable =
                 event.target instanceof HTMLElement &&
-                (/input|textarea/i.test(event.target.tagName) || event.target.isContentEditable);
+                (/input|textarea/i.test(event.target.tagName) || event.target.isContentEditable) &&
+                !event.target.matches("input[type=checkbox], input[type=radio]");
             const shouldProtectEditable =
                 targetIsEditable && !event.target.dataset.allowHotkeys && singleKey !== "escape";
 
@@ -230,7 +238,7 @@ export const hotkeyService = {
                     (reg.allowRepeat || !isRepeated) &&
                     (reg.bypassEditableProtection || !shouldProtectEditable) &&
                     (reg.global || reg.activeElement === activeElement) &&
-                    (!reg.validate || reg.validate(target)) &&
+                    (!reg.isAvailable || reg.isAvailable()) &&
                     (!reg.area ||
                         (target instanceof Node && reg.area() && reg.area().contains(target)))
             );
@@ -397,7 +405,7 @@ export const hotkeyService = {
                 bypassEditableProtection: options && options.bypassEditableProtection,
                 global: options && options.global,
                 area: options && options.area,
-                validate: options && options.validate,
+                isAvailable: options && options.isAvailable,
             };
 
             // Due to the way elements are mounted in the DOM by Owl (bottom-to-top),

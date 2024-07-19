@@ -41,7 +41,8 @@ class TestWebsitePriceList(TransactionCase):
         self.website = self.env.ref('website.default_website')
         self.website.user_id = self.env.user
 
-        (self.env['product.pricelist'].search([]) - self.env.ref('product.list0')).write({'website_id': False, 'active': False})
+        self.env['product.pricelist'].search([]).action_archive()
+        self.env['product.pricelist'].create({'name': 'Public Pricelist'})
         self.benelux = self.env['res.country.group'].create({
             'name': 'BeNeLux',
             'country_ids': [(6, 0, (self.env.ref('base.be') + self.env.ref('base.lu') + self.env.ref('base.nl')).ids)]
@@ -89,8 +90,6 @@ class TestWebsitePriceList(TransactionCase):
             'compute_price': 'formula',
             'base': 'list_price',
         })
-        self.env.ref('product.list0').website_id = self.website.id
-        self.website.pricelist_id = self.ref('product.list0')
 
         ca_group = self.env['res.country.group'].create({
             'name': 'Canada',
@@ -201,7 +200,7 @@ class TestWebsitePriceList(TransactionCase):
             'taxes_id': False,
         })
         current_website = self.env['website'].get_current_website()
-        website_pricelist = current_website.get_current_pricelist()
+        website_pricelist = current_website.pricelist_id
         website_pricelist.write({
             'discount_policy': 'with_discount',
             'item_ids': [(5, 0, 0), (0, 0, {
@@ -233,15 +232,16 @@ class TestWebsitePriceList(TransactionCase):
                 'product_uom': product.uom_id.id,
                 'price_unit': product.list_price,
                 'tax_id': False,
-            })]
+            })],
+            'website_id': current_website.id,
         })
         sol = so.order_line
         self.assertEqual(sol.price_total, 100.0)
         so.pricelist_id = promo_pricelist
         with MockRequest(self.env, website=current_website, sale_order_id=so.id):
             so._cart_update(product_id=product.id, line_id=sol.id, set_qty=500)
-        self.assertEqual(sol.price_unit, 37.0, 'Both reductions should be applied')
-        self.assertEqual(sol.price_reduce, 27.75, 'Both reductions should be applied')
+        self.assertEqual(sol.price_unit, 100.0, 'Both reductions should be applied')
+        self.assertEqual(sol.discount, 72.25, 'Both reductions should be applied')
         self.assertEqual(sol.price_total, 13875)
 
     def test_pricelist_with_no_list_price(self):
@@ -251,7 +251,7 @@ class TestWebsitePriceList(TransactionCase):
             'taxes_id': False,
         })
         current_website = self.env['website'].get_current_website()
-        website_pricelist = current_website.get_current_pricelist()
+        website_pricelist = current_website.pricelist_id
         website_pricelist.write({
             'discount_policy': 'without_discount',
             'item_ids': [(5, 0, 0), (0, 0, {
@@ -279,7 +279,7 @@ class TestWebsitePriceList(TransactionCase):
         with MockRequest(self.env, website=current_website, sale_order_id=so.id):
             so._cart_update(product_id=product.id, line_id=sol.id, set_qty=6)
         self.assertEqual(sol.price_unit, 10.0, 'Pricelist price should be applied')
-        self.assertEqual(sol.price_reduce, 10.0, 'Pricelist price should be applied')
+        self.assertEqual(sol.discount, 0, 'Pricelist price should be applied')
         self.assertEqual(sol.price_total, 60.0)
 
     def test_get_right_discount(self):
@@ -299,7 +299,7 @@ class TestWebsitePriceList(TransactionCase):
             'taxes_id': tax,
         })
 
-        prices = product._get_sales_prices(self.list_christmas)
+        prices = product._get_sales_prices(self.list_christmas, self.env['account.fiscal.position'])
         self.assertFalse('base_price' in prices[product.id])
 
     def test_pricelist_item_based_on_cost_for_templates(self):
@@ -323,7 +323,8 @@ class TestWebsitePriceList(TransactionCase):
             'name': 'Product Template', 'list_price': 10.0, 'standard_price': 5.0
         })
         self.assertEqual(product_template.standard_price, 5)
-        price = product_template._get_sales_prices(pricelist)[product_template.id]['price_reduce']
+        price = product_template._get_sales_prices(
+            pricelist, self.env['account.fiscal.position'])[product_template.id]['price_reduce']
         msg = "Template has no variants, the price should be computed based on the template's cost."
         self.assertEqual(price, 4.5, msg)
 
@@ -334,12 +335,14 @@ class TestWebsitePriceList(TransactionCase):
         self.assertEqual(product_template.standard_price, 0, msg)
         self.assertEqual(product_template.product_variant_ids[0].standard_price, 0)
 
-        price = product_template._get_sales_prices(pricelist)[product_template.id]['price_reduce']
+        price = product_template._get_sales_prices(
+            pricelist, self.env['account.fiscal.position'])[product_template.id]['price_reduce']
         msg = "Template has variants, the price should be computed based on the 1st variant's cost."
         self.assertEqual(price, 0, msg)
 
         product_template.product_variant_ids[0].standard_price = 20
-        price = product_template._get_sales_prices(pricelist)[product_template.id]['price_reduce']
+        price = product_template._get_sales_prices(
+            pricelist, self.env['account.fiscal.position'])[product_template.id]['price_reduce']
         self.assertEqual(price, 18, msg)
 
 def simulate_frontend_context(self, website_id=1):
@@ -560,9 +563,6 @@ class TestWebsitePriceListMultiCompany(TransactionCaseWithUserDemo):
         Website = self.env['website']
         self.website = self.env.ref('website.default_website')
         self.website.company_id = self.company2
-        # Delete unused website, it will make PL manipulation easier, avoiding
-        # UserError being thrown when a website wouldn't have any PL left.
-        Website.search([('id', '!=', self.website.id)]).unlink()
         self.website2 = Website.create({
             'name': 'Website 2',
             'company_id': self.company1.id,
@@ -665,10 +665,21 @@ class TestWebsiteSaleSession(HttpCaseWithUserPortal):
             'login': 'toto',
             'password': 'long_enough_password',
         })
-        user_pricelist = self.env['product.pricelist'].create({
-            'name': 'User Pricelist',
-            'website_id': website.id,
-            'code': 'User_pricelist',
-        })
+        user_pricelist, _ = self.env['product.pricelist'].create([
+            {
+                'name': 'User Pricelist',
+                'website_id': website.id,
+                'code': 'User_pricelist',
+                'selectable': True,
+                'sequence': 40, # Be sure not to use it by default
+            },
+            {
+                'name': 'Other Pricelist',
+                'website_id': website.id,
+                'code': 'Other_pricelist',
+                'selectable': True,
+                'sequence': 30,
+            }
+        ])
         test_user.partner_id.property_product_pricelist = user_pricelist
-        self.start_tour("/shop", 'website_sale_shop_pricelist_tour', login="")
+        self.start_tour("/shop", 'website_sale.website_sale_shop_pricelist_tour', login="")

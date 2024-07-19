@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+from lxml import etree
 from freezegun import freeze_time
 from odoo import tools
 from odoo.tests import tagged, Form
@@ -133,16 +134,16 @@ class TestItEdiDDT(TestItEdi):
             deferred_invoice.action_post()
 
         # Check the XML output of the invoice
-        invoice_xml = self.edi_format._l10n_it_edi_export_invoice_as_xml(deferred_invoice)
+        invoice_xml = deferred_invoice._l10n_it_edi_render_xml()
         expected_xml = self._get_stock_ddt_test_file_content("deferred_invoice.xml")
-        result = self._cleanup_etree(invoice_xml, {"//DatiGeneraliDocumento/Numero": "<Numero/>",})
-        expected = self._cleanup_etree(expected_xml, {"//DatiGeneraliDocumento/Numero": "<Numero/>",})
+        result = etree.fromstring(invoice_xml)
+        expected = etree.fromstring(expected_xml)
         self.assertXmlTreeEqual(result, expected)
 
     def _create_delivery(self, sale_order, qty=1):
         """ Create a picking of a limited quantity and create a backorder """
         pickings = sale_order.picking_ids.filtered(lambda picking: picking.state != 'done')
-        pickings.move_ids.write({'quantity_done': qty})
+        pickings.move_ids.write({'quantity': qty})
         wizard_action = pickings.button_validate()
         context = wizard_action['context']
         wizard = Form(self.env['stock.backorder.confirmation'].with_context(context))

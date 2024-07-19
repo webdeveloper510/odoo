@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import core from 'web.core';
-import publicWidget from 'web.public.widget';
+import publicWidget from '@web/legacy/js/public/public_widget';
+import { Component } from '@odoo/owl';
 
 publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
     selector: 'form[name="o_payment_express_checkout_form"]',
@@ -11,15 +11,15 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
      */
     start: async function () {
         await this._super(...arguments);
-        this.txContext = {};
-        Object.assign(this.txContext, this.$el.data());
-        this.txContext.shippingInfoRequired = !!this.txContext.shippingInfoRequired;
+        this.paymentContext = {};
+        Object.assign(this.paymentContext, this.el.dataset);
+        this.paymentContext.shippingInfoRequired = !!this.paymentContext['shippingInfoRequired'];
         const expressCheckoutForms = this._getExpressCheckoutForms();
         for (const expressCheckoutForm of expressCheckoutForms) {
             await this._prepareExpressCheckoutForm(expressCheckoutForm.dataset);
         }
         // Monitor updates of the amount on eCommerce's cart pages.
-        core.bus.on('cart_amount_changed', this, this._updateAmount.bind(this));
+        Component.env.bus.addEventListener('cart_amount_changed', (ev) => this._updateAmount(...ev.detail));
     },
 
     //--------------------------------------------------------------------------
@@ -45,35 +45,27 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
      *
      * @private
      * @param {Object} providerData - The provider-specific data.
-     * @return {Promise}
+     * @return {void}
      */
-    async _prepareExpressCheckoutForm(providerData) {
-        return Promise.resolve();
-    },
+    async _prepareExpressCheckoutForm(providerData) {},
 
     /**
-     * Prepare the params to send to the transaction route.
-     *
-     * For a provider to overwrite generic params or to add provider-specific ones, it must override
-     * this method and return the extended transaction route params.
+     * Prepare the params for the RPC to the transaction route.
      *
      * @private
      * @param {number} providerId - The id of the provider handling the transaction.
-     * @returns {object} - The transaction route params
+     * @returns {object} - The transaction route params.
      */
     _prepareTransactionRouteParams(providerId) {
         return {
-            'payment_option_id': parseInt(providerId),
-            'reference_prefix': this.txContext.referencePrefix &&
-                                this.txContent.referencePrefix.toString(),
-            'currency_id': this.txContext.currencyId &&
-                           parseInt(this.txContext.currencyId),
-            'partner_id': parseInt(this.txContext.partnerId),
+            'provider_id': parseInt(providerId),
+            'payment_method_id': parseInt(this.paymentContext['paymentMethodUnknownId']),
+            'token_id': null,
             'flow': 'direct',
             'tokenization_requested': false,
-            'landing_route': this.txContext.landingRoute,
-            'access_token': this.txContext.accessToken,
-            'csrf_token': core.csrf_token,
+            'landing_route': this.paymentContext['landingRoute'],
+            'access_token': this.paymentContext['accessToken'],
+            'csrf_token': odoo.csrf_token,
         };
     },
 
@@ -85,11 +77,11 @@ publicWidget.registry.PaymentExpressCheckoutForm = publicWidget.Widget.extend({
      * @private
      * @param {number} newAmount - The new amount.
      * @param {number} newMinorAmount - The new minor amount.
-     * @return {undefined}
+     * @return {void}
      */
     _updateAmount(newAmount, newMinorAmount) {
-        this.txContext.amount = parseFloat(newAmount);
-        this.txContext.minorAmount = parseInt(newMinorAmount);
+        this.paymentContext.amount = parseFloat(newAmount);
+        this.paymentContext.minorAmount = parseInt(newMinorAmount);
         this._getExpressCheckoutForms().forEach(form => {
             if (newAmount == 0) {
                 form.classList.add('d-none')}

@@ -1,29 +1,47 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from markupsafe import Markup
 
-from unittest.mock import patch
-import email.policy
-import email.message
 import re
-import threading
 
 from odoo.addons.base.models.ir_mail_server import extract_rfc2822_addresses
-from odoo.tests.common import BaseCase, TransactionCase
+from odoo.addons.base.models.ir_qweb_fields import nl2br_enclose
 from odoo.tests import tagged
+from odoo.tests.common import BaseCase
 from odoo.tools import (
     is_html_empty, html_to_inner_content, html_sanitize, append_content_to_html, plaintext2html,
-    email_domain_normalize, email_normalize, email_split, email_split_and_format, html2plaintext,
+    email_domain_normalize, email_normalize, email_re,
+    email_split, email_split_and_format, email_split_tuples,
+    single_email_re,
     misc, formataddr,
     prepend_html_content,
-    config,
 )
 
 from . import test_mail_examples
 
 
+@tagged('mail_sanitize')
 class TestSanitizer(BaseCase):
     """ Test the html sanitizer that filters html to remove unwanted attributes """
+
+    def test_abrupt_close(self):
+        payload = """<!--> <script> alert(1) </script> -->"""
+        html_result = html_sanitize(payload)
+        self.assertNotIn('alert(1)', html_result)
+
+        payload = """<!---> <script> alert(1) </script> -->"""
+        html_result = html_sanitize(payload)
+        self.assertNotIn('alert(1)', html_result)
+
+    def test_abrut_malformed(self):
+        payload = """<!--!> <script> alert(1) </script> -->"""
+        html_result = html_sanitize(payload)
+        self.assertNotIn('alert(1)', html_result)
+
+        payload = """<!---!> <script> alert(1) </script> -->"""
+        html_result = html_sanitize(payload)
+        self.assertNotIn('alert(1)', html_result)
 
     def test_basic_sanitizer(self):
         cases = [
@@ -35,6 +53,20 @@ class TestSanitizer(BaseCase):
         for content, expected in cases:
             html = html_sanitize(content)
             self.assertEqual(html, expected, 'html_sanitize is broken')
+
+    def test_comment_malformed(self):
+        html = '''<!-- malformed-close --!> <img src='x' onerror='alert(1)'></img> --> comment <!-- normal comment --> --> out of context balise --!>'''
+        html_result = html_sanitize(html)
+        self.assertNotIn('alert(1)', html_result)
+
+    def test_comment_multiline(self):
+        payload = """
+            <div> <!--
+                multi line comment
+                --!> </div> <script> alert(1) </script> -->
+        """
+        html_result = html_sanitize(payload)
+        self.assertNotIn('alert(1)', html_result)
 
     def test_evil_malicious_code(self):
         # taken from https://www.owasp.org/index.php/XSS_Filter_Evasion_Cheat_Sheet#Tests
@@ -334,6 +366,7 @@ class TestSanitizer(BaseCase):
     #         self.assertNotIn(ext, new_html)
 
 
+@tagged('mail_sanitize')
 class TestHtmlTools(BaseCase):
     """ Test some of our generic utility functions about html """
 
@@ -399,6 +432,30 @@ class TestHtmlTools(BaseCase):
         for content in valid_html_samples:
             self.assertFalse(is_html_empty(content))
 
+    def test_nl2br_enclose(self):
+        """ Test formatting of nl2br when using Markup: consider new <br> tags
+        as trusted without validating the whole input content. """
+        source_all = [
+            'coucou',
+            '<p>coucou</p>',
+            'coucou\ncoucou',
+            'coucou\n\ncoucou',
+            '<p>coucou\ncoucou\n\nzbouip</p>\n',
+        ]
+        expected_all = [
+            Markup('<div>coucou</div>'),
+            Markup('<div>&lt;p&gt;coucou&lt;/p&gt;</div>'),
+            Markup('<div>coucou<br>\ncoucou</div>'),
+            Markup('<div>coucou<br>\n<br>\ncoucou</div>'),
+            Markup('<div>&lt;p&gt;coucou<br>\ncoucou<br>\n<br>\nzbouip&lt;/p&gt;<br>\n</div>'),
+        ]
+        for source, expected in zip(source_all, expected_all):
+            with self.subTest(source=source, expected=expected):
+                self.assertEqual(
+                    nl2br_enclose(source, "div"),
+                    expected,
+                )
+
     def test_prepend_html_content(self):
         body = """
             <html>
@@ -454,6 +511,34 @@ class TestHtmlTools(BaseCase):
 @tagged('mail_tools')
 class TestEmailTools(BaseCase):
     """ Test some of our generic utility functions for emails """
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestEmailTools, cls).setUpClass()
+
+        cls.sources = [
+            # single email
+            'alfred.astaire@test.example.com',
+            ' alfred.astaire@test.example.com ',
+            'Fredo The Great <alfred.astaire@test.example.com>',
+            '"Fredo The Great" <alfred.astaire@test.example.com>',
+            'Fredo "The Great" <alfred.astaire@test.example.com>',
+            # multiple emails
+            'alfred.astaire@test.example.com, evelyne.gargouillis@test.example.com',
+            'Fredo The Great <alfred.astaire@test.example.com>, Evelyne The Goat <evelyne.gargouillis@test.example.com>',
+            '"Fredo The Great" <alfred.astaire@test.example.com>, evelyne.gargouillis@test.example.com',
+            '"Fredo The Great" <alfred.astaire@test.example.com>, <evelyne.gargouillis@test.example.com>',
+            # text containing email
+            'Hello alfred.astaire@test.example.com how are you ?',
+            '<p>Hello alfred.astaire@test.example.com</p>',
+            # text containing emails
+            'Hello "Fredo" <alfred.astaire@test.example.com>, evelyne.gargouillis@test.example.com',
+            'Hello "Fredo" <alfred.astaire@test.example.com> and evelyne.gargouillis@test.example.com',
+            # falsy
+            '<p>Hello Fredo</p>',
+            'j\'adore écrire des @gmail.com ou "@gmail.com" a bit randomly',
+            '',
+        ]
 
     def test_email_domain_normalize(self):
         cases = [
@@ -518,6 +603,37 @@ class TestEmailTools(BaseCase):
                 # check using INDA at format time, using ascii charset as done when
                 # sending emails (see extract_rfc2822_addresses)
                 self.assertEqual(formataddr((format_name, (expected or '')), charset='ascii'), expected_ascii_fmt)
+
+    def test_email_re(self):
+        """ Test 'email_re', finding emails in a given text """
+        expected = [
+            # single email
+            ['alfred.astaire@test.example.com'],
+            ['alfred.astaire@test.example.com'],
+            ['alfred.astaire@test.example.com'],
+            ['alfred.astaire@test.example.com'],
+            ['alfred.astaire@test.example.com'],
+            # multiple emails
+            ['alfred.astaire@test.example.com', 'evelyne.gargouillis@test.example.com'],
+            ['alfred.astaire@test.example.com', 'evelyne.gargouillis@test.example.com'],
+            ['alfred.astaire@test.example.com', 'evelyne.gargouillis@test.example.com'],
+            ['alfred.astaire@test.example.com', 'evelyne.gargouillis@test.example.com'],
+            # text containing email
+            ['alfred.astaire@test.example.com'],
+            ['alfred.astaire@test.example.com'],
+            # text containing emails
+            ['alfred.astaire@test.example.com', 'evelyne.gargouillis@test.example.com'],
+            ['alfred.astaire@test.example.com', 'evelyne.gargouillis@test.example.com'],
+            # falsy
+            [], [], [],
+        ]
+
+        for src, exp in zip(self.sources, expected):
+            res = email_re.findall(src)
+            self.assertEqual(
+                res, exp,
+                'Seems email_re is broken with %s (expected %r, received %r)' % (src, exp, res)
+            )
 
     def test_email_split(self):
         """ Test 'email_split' """
@@ -624,7 +740,40 @@ class TestEmailTools(BaseCase):
             with self.subTest(source=source):
                 self.assertEqual(email_split_and_format(source), expected)
 
+    def test_email_split_tuples(self):
+        """ Test 'email_split_and_format' that returns (name, email) pairs
+        found in text input """
+        expected = [
+            # single email
+            [('', 'alfred.astaire@test.example.com')],
+            [('', 'alfred.astaire@test.example.com')],
+            [('Fredo The Great', 'alfred.astaire@test.example.com')],
+            [('Fredo The Great', 'alfred.astaire@test.example.com')],
+            [('Fredo The Great', 'alfred.astaire@test.example.com')],
+            # multiple emails
+            [('', 'alfred.astaire@test.example.com'), ('', 'evelyne.gargouillis@test.example.com')],
+            [('Fredo The Great', 'alfred.astaire@test.example.com'), ('Evelyne The Goat', 'evelyne.gargouillis@test.example.com')],
+            [('Fredo The Great', 'alfred.astaire@test.example.com'), ('', 'evelyne.gargouillis@test.example.com')],
+            [('Fredo The Great', 'alfred.astaire@test.example.com'), ('', 'evelyne.gargouillis@test.example.com')],
+            # text containing email -> fallback on parsing to extract text from email
+            [('Hello', 'alfred.astaire@test.example.comhowareyou?')],
+            [('Hello', 'alfred.astaire@test.example.com')],
+            [('Hello Fredo', 'alfred.astaire@test.example.com'), ('', 'evelyne.gargouillis@test.example.com')],
+            [('Hello Fredo', 'alfred.astaire@test.example.com'), ('and', 'evelyne.gargouillis@test.example.com')],
+            # falsy -> probably not designed for that
+            [],
+            [('j\'adore écrire', "des@gmail.comou"), ('', '@gmail.com')], [],
+        ]
+
+        for src, exp in zip(self.sources, expected):
+            res = email_split_tuples(src)
+            self.assertEqual(
+                res, exp,
+                'Seems email_split_tuples is broken with %s (expected %r, received %r)' % (src, exp, res)
+            )
+
     def test_email_formataddr(self):
+        """ Test custom 'formataddr', notably with IDNA support """
         email_base = 'joe@example.com'
         email_idna = 'joe@examplé.com'
         cases = [
@@ -666,164 +815,25 @@ class TestEmailTools(BaseCase):
             with self.subTest(source=source):
                 self.assertEqual(extract_rfc2822_addresses(source), expected)
 
+    def test_single_email_re(self):
+        """ Test 'single_email_re', matching text input containing only one email """
+        expected = [
+            # single email
+            ['alfred.astaire@test.example.com'],
+            [], [], [], [], # formatting issue for single email re
+            # multiple emails -> couic
+            [], [], [], [],
+            # text containing email -> couic
+            [], [],
+            # text containing emails -> couic
+            [], [],
+            # falsy
+            [], [], [],
+        ]
 
-class EmailConfigCase(TransactionCase):
-    @patch.dict(config.options, {"email_from": "settings@example.com"})
-    def test_default_email_from(self, *args):
-        """Email from setting is respected."""
-        # ICP setting is more important
-        ICP = self.env["ir.config_parameter"].sudo()
-        ICP.set_param("mail.catchall.domain", "example.org")
-        ICP.set_param("mail.default.from", "icp")
-        message = self.env["ir.mail_server"].build_email(
-            False, "recipient@example.com", "Subject",
-            "The body of an email",
-        )
-        self.assertEqual(message["From"], "icp@example.org")
-        # Without ICP, the config file/CLI setting is used
-        ICP.set_param("mail.default.from", False)
-        message = self.env["ir.mail_server"].build_email(
-            False, "recipient@example.com", "Subject",
-            "The body of an email",
-        )
-        self.assertEqual(message["From"], "settings@example.com")
-
-
-class _FakeSMTP:
-    """SMTP stub"""
-    def __init__(self):
-        self.messages = []
-        self.from_filter = 'example.com'
-
-    # Python 3 before 3.7.4
-    def sendmail(self, smtp_from, smtp_to_list, message_str,
-                 mail_options=(), rcpt_options=()):
-        self.messages.append(message_str)
-
-    # Python 3.7.4+
-    def send_message(self, message, smtp_from, smtp_to_list,
-                     mail_options=(), rcpt_options=()):
-        self.messages.append(message.as_string())
-
-
-class TestEmailMessage(TransactionCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls._fake_smtp = _FakeSMTP()
-
-    def build_email(self, **kwargs):
-        kwargs.setdefault('email_from', 'from@example.com')
-        kwargs.setdefault('email_to', 'to@example.com')
-        kwargs.setdefault('subject', 'subject')
-        return self.env['ir.mail_server'].build_email(**kwargs)
-
-    def send_email(self, msg):
-        with patch.object(threading.current_thread(), 'testing', False):
-            self.env['ir.mail_server'].send_email(msg, smtp_session=self._fake_smtp)
-        return self._fake_smtp.messages.pop()
-
-    def test_bpo_34424_35805(self):
-        """Ensure all email sent are bpo-34424 and bpo-35805 free"""
-        msg = email.message.EmailMessage(policy=email.policy.SMTP)
-        msg['From'] = '"Joé Doe" <joe@example.com>'
-        msg['To'] = '"Joé Doe" <joe@example.com>'
-
-        # Message-Id & References fields longer than 77 chars (bpo-35805)
-        msg['Message-Id'] = '<929227342217024.1596730490.324691772460938-example-30661-some.reference@test-123.example.com>'
-        msg['References'] = '<345227342212345.1596730777.324691772483620-example-30453-other.reference@test-123.example.com>'
-
-        msg_on_the_wire = self.send_email(msg)
-        self.assertEqual(msg_on_the_wire,
-            'From: =?utf-8?q?Jo=C3=A9?= Doe <joe@example.com>\r\n'
-            'To: =?utf-8?q?Jo=C3=A9?= Doe <joe@example.com>\r\n'
-            'Message-Id: <929227342217024.1596730490.324691772460938-example-30661-some.reference@test-123.example.com>\r\n'
-            'References: <345227342212345.1596730777.324691772483620-example-30453-other.reference@test-123.example.com>\r\n'
-            '\r\n'
-        )
-
-    def test_alternative_correct_order(self):
-        """
-        RFC-1521 7.2.3. The Multipart/alternative subtype
-        > the alternatives appear in an order of increasing faithfulness
-        > to the original content. In general, the best choice is the
-        > LAST part of a type supported by the recipient system's local
-        > environment.
-
-        Also, the MIME-Version header should be present in BOTH the
-        enveloppe AND the parts
-        """
-        msg = self.build_email(body='<p>Hello world</p>', subtype='html')
-        msg_on_the_wire = self.send_email(msg)
-
-        self.assertGreater(msg_on_the_wire.index('text/html'), msg_on_the_wire.index('text/plain'),
-            "The html part should be preferred (=appear after) to the text part")
-        self.assertEqual(msg_on_the_wire.count('==============='), 2 + 2, # +2 for the header and the footer
-            "There should be 2 parts: one text and one html")
-        self.assertEqual(msg_on_the_wire.count('MIME-Version: 1.0'), 3,
-            "There should be 3 headers MIME-Version: one on the enveloppe, "
-            "one on the html part, one on the text part")
-
-    def test_comment_malformed(self):
-        html = '''<!-- malformed-close --!> <img src='x' onerror='alert(1)'></img> --> comment <!-- normal comment --> --> out of context balise --!>'''
-        html_result = html_sanitize(html)
-        self.assertNotIn('alert(1)', html_result)
-
-    def test_multiline(self):
-        payload = """
-            <div> <!--
-                multi line comment
-                --!> </div> <script> alert(1) </script> -->
-        """
-        html_result = html_sanitize(payload)
-        self.assertNotIn('alert(1)', html_result)
-
-    def test_abrupt_close(self):
-        payload = """<!--> <script> alert(1) </script> -->"""
-        html_result = html_sanitize(payload)
-        self.assertNotIn('alert(1)', html_result)
-
-        payload = """<!---> <script> alert(1) </script> -->"""
-        html_result = html_sanitize(payload)
-        self.assertNotIn('alert(1)', html_result)
-
-    def test_abrut_malformed(self):
-        payload = """<!--!> <script> alert(1) </script> -->"""
-        html_result = html_sanitize(payload)
-        self.assertNotIn('alert(1)', html_result)
-
-        payload = """<!---!> <script> alert(1) </script> -->"""
-        html_result = html_sanitize(payload)
-        self.assertNotIn('alert(1)', html_result)
-
-
-class TestMailTools(BaseCase):
-    """ Test mail utility methods. """
-
-    def test_html2plaintext(self):
-        self.assertEqual(html2plaintext(False), 'False')
-        self.assertEqual(html2plaintext('\t'), '')
-        self.assertEqual(html2plaintext('  '), '')
-        self.assertEqual(html2plaintext("""<h1>Title</h1>
-<h2>Sub title</h2>
-<br/>
-<h3>Sub sub title</h3>
-<h4>Sub sub sub title</h4>
-<p>Paragraph <em>with</em> <b>bold</b></p>
-<table><tr><td>table element 1</td></tr><tr><td>table element 2</td></tr></table>
-<p><special-chars>0 &lt; 10 &amp;  &nbsp; 10 &gt; 0</special-chars></p>"""),
-                         """**Title**
-**Sub title**
-
-*Sub sub title*
-Sub sub sub title
-Paragraph /with/ *bold*
-
-table element 1
-table element 2
-0 < 10 & \N{NO-BREAK SPACE} 10 > 0""")
-        self.assertEqual(html2plaintext('<p><img src="/web/image/428-c064ab1b/test-image.jpg?access_token=f72b5ec5-a363-45fb-b9ad-81fc794d6d7b" class="img img-fluid o_we_custom_image"><br></p>'),
-                         """test-image [1]
-
-
-[1] /web/image/428-c064ab1b/test-image.jpg?access_token=f72b5ec5-a363-45fb-b9ad-81fc794d6d7b""")
+        for src, exp in zip(self.sources, expected):
+            res = single_email_re.findall(src)
+            self.assertEqual(
+                res, exp,
+                'Seems single_email_re is broken with %s (expected %r, received %r)' % (src, exp, res)
+            )

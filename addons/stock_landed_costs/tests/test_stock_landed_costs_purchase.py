@@ -20,6 +20,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
             'partner_id': cls.supplier_id,
             'picking_type_id': cls.warehouse.in_type_id.id,
             'location_id': cls.supplier_location_id,
+            'state': 'draft',
             'location_dest_id': cls.warehouse.lot_stock_id.id})
         cls.Move.create({
             'name': cls.product_refrigerator.name,
@@ -42,6 +43,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
             'partner_id': cls.customer_id,
             'picking_type_id': cls.warehouse.out_type_id.id,
             'location_id': cls.warehouse.lot_stock_id.id,
+            'state': 'draft',
             'location_dest_id': cls.customer_location_id})
         cls.Move.create({
             'name': cls.product_refrigerator.name,
@@ -118,10 +120,8 @@ class TestLandedCosts(TestStockLandedCostsCommon):
         ])
 
     def test_00_landed_costs_on_incoming_shipment_without_real_time(self):
-        chart_of_accounts = self.env.company.chart_template_id
-        generic_coa = self.env.ref('l10n_generic_coa.configurable_chart_template')
-        if chart_of_accounts != generic_coa:
-            raise unittest.SkipTest('Skip this test as it works only with %s (%s loaded)' % (generic_coa.name, chart_of_accounts.name))
+        if self.env.company.chart_template != 'generic_coa':
+            raise unittest.SkipTest('Skip this test as it works only with `generic_coa`')
         # Test landed cost on incoming shipment
         #
         # (A) Purchase product
@@ -248,9 +248,9 @@ class TestLandedCosts(TestStockLandedCostsCommon):
         stock_negative_landed_cost.button_validate()
         self.assertEqual(stock_negative_landed_cost.state, 'done', 'Negative landed costs should be in done state')
         self.assertTrue(stock_negative_landed_cost.account_move_id, 'Landed costs should be available account move lines')
-        account_entry = self.env['account.move.line'].read_group(
-            [('move_id', '=', stock_negative_landed_cost.account_move_id.id)], ['balance', 'move_id'], ['move_id'])[0]
-        self.assertEqual(account_entry['balance'], 0, 'Move is not balanced')
+        [balance] = self.env['account.move.line']._read_group(
+            [('move_id', '=', stock_negative_landed_cost.account_move_id.id)], aggregates=['balance:sum'])[0]
+        self.assertEqual(balance, 0, 'Move is not balanced')
         move_lines = [
             {'name': 'split by volume - Microwave Oven',                    'debit': 3.75,  'credit': 0.0},
             {'name': 'split by volume - Microwave Oven',                    'debit': 0.0,   'credit': 3.75},
@@ -298,9 +298,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
         # Confirm incoming shipment.
         self.picking_in.action_confirm()
         # Transfer incoming shipment
-        res_dict = self.picking_in.button_validate()
-        wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict.get('context'))).save()
-        wizard.process()
+        self.picking_in.button_validate()
         return self.picking_in
 
     def _process_outgoing_shipment(self):
@@ -311,9 +309,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
         self.picking_out.action_assign()
         # Transfer picking.
 
-        res_dict = self.picking_out.button_validate()
-        wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict['context'])).save()
-        wizard.process()
+        self.picking_out.button_validate()
 
     def _create_landed_costs(self, value, picking_in):
         return self.LandedCost.create(dict(
@@ -387,7 +383,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_ids.quantity_done = 1
+        receipt.move_ids.quantity = 1
         receipt.button_validate()
 
         # Check SVL and AML
@@ -461,7 +457,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_ids.quantity_done = 1
+        receipt.move_ids.quantity = 1
         receipt.button_validate()
         po.order_line[1].qty_received = 1
 

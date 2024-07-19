@@ -1,13 +1,9 @@
-odoo.define('website_event_track_quiz.event.quiz', function (require) {
+/** @odoo-module **/
 
-'use strict';
-
-var publicWidget = require('web.public.widget');
-var core = require('web.core');
-var session = require('web.session');
-
-var QWeb = core.qweb;
-var _t = core._t;
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { session } from "@web/session";
+import { _t } from "@web/core/l10n/translation";
+import { renderToElement } from "@web/core/utils/render";
 
 /**
  * This widget is responsible of displaying quiz questions and propositions. Submitting the quiz will fetch the
@@ -32,7 +28,7 @@ var Quiz = publicWidget.Widget.extend({
     */
     init: function (parent, data, quizData) {
         this._super.apply(this, arguments);
-        this.track = _.defaults(data, {
+        this.track = Object.assign({
             id: 0,
             name: '',
             eventId: '',
@@ -41,7 +37,7 @@ var Quiz = publicWidget.Widget.extend({
             progressBar: false,
             isEventUser: false,
             repeatable: false
-        });
+        }, data);
         this.quiz = quizData || false;
         if (this.quiz) {
             this.quiz.questionsCount = quizData.questions.length;
@@ -49,6 +45,9 @@ var Quiz = publicWidget.Widget.extend({
         this.isMember = data.isMember || false;
         this.userId = session.user_id;
         this.redirectURL = encodeURIComponent(document.URL);
+
+        this.rpc = this.bindService("rpc");
+        this.notification = this.bindService("notification");
     },
 
     /**
@@ -84,15 +83,14 @@ var Quiz = publicWidget.Widget.extend({
     _alertShow: function (alertCode) {
         var message = _t('There was an error validating this quiz.');
         if (alertCode === 'quiz_incomplete') {
-            message = _t('All questions must be answered !');
+            message = _t('All questions must be answered!');
         } else if (alertCode === 'quiz_done') {
             message = _t('This quiz is already done. Retaking it is not possible.');
         }
 
-        this.displayNotification({
+        this.notification.add(message, {
             type: 'warning',
             title: _t('Quiz validation error'),
-            message: message,
             sticky: true
         });
     },
@@ -160,16 +158,14 @@ var Quiz = publicWidget.Widget.extend({
                         $answer.find('i.fa-times-circle').removeClass('d-none');
                     }
                     if (answer.awarded_points > 0) {
-                        var $badge = QWeb.render('quiz.badge', {'answer': answer});
-                        $answer.append($badge);
+                        $answer.append(renderToElement('quiz.badge', {'answer': answer}));
                     }
                 } else {
                     $answer.find('i.fa-circle').removeClass('d-none');
                 }
             });
             var $list = $question.find('.list-group');
-            var $comment = QWeb.render('quiz.comment', {'answer': answer});
-            $list.append($comment);
+            $list.append(renderToElement('quiz.comment', {'answer': answer}));
         });
     },
 
@@ -179,8 +175,8 @@ var Quiz = publicWidget.Widget.extend({
         */
     _renderValidationInfo: function () {
         var $validationElem = this.$('.o_quiz_js_quiz_validation');
-        $validationElem.html(
-            QWeb.render('quiz.validation', {'widget': this})
+        $validationElem.empty().append(
+            renderToElement('quiz.validation', {'widget': this})
         );
     },
 
@@ -214,18 +210,15 @@ var Quiz = publicWidget.Widget.extend({
     _submitQuiz: function () {
         var self = this;
 
-        return this._rpc({
-            route: '/event_track/quiz/submit',
-            params: {
-                event_id: self.track.eventId,
-                track_id: self.track.id,
-                answer_ids: this._getQuizAnswers(),
-            }
+        return this.rpc('/event_track/quiz/submit', {
+            event_id: self.track.eventId,
+            track_id: self.track.id,
+            answer_ids: this._getQuizAnswers(),
         }).then(function (data) {
             if (data.error) {
                 self._alertShow(data.error);
             } else {
-                self.quiz = _.extend(self.quiz, data);
+                self.quiz = Object.assign(self.quiz, data);
                 self.quiz.quizPointsGained = data.quiz_points;
                 if (data.quiz_completed) {
                     self._disableAnswers();
@@ -263,12 +256,9 @@ var Quiz = publicWidget.Widget.extend({
      * @private
      */
     _onClickReset: function () {
-        this._rpc({
-            route: '/event_track/quiz/reset',
-            params: {
-                event_id: this.track.eventId,
-                track_id: this.track.id
-            }
+        this.rpc('/event_track/quiz/reset', {
+            event_id: this.track.eventId,
+            track_id: this.track.id
         }).then(this._resetQuiz.bind(this));
     },
 
@@ -338,6 +328,4 @@ publicWidget.registry.Quiz = publicWidget.Widget.extend({
     },
 });
 
-return Quiz;
-
-});
+export default Quiz;

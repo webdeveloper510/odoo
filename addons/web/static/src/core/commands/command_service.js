@@ -7,6 +7,7 @@ import { Component, EventBus } from "@odoo/owl";
 
 /**
  * @typedef {import("./command_palette").CommandPaletteConfig} CommandPaletteConfig
+ * @typedef {import("../hotkeys/hotkey_service").HotkeyOptions} HotkeyOptions
  */
 
 /**
@@ -19,9 +20,12 @@ import { Component, EventBus } from "@odoo/owl";
  */
 
 /**
- * @typedef {import("../hotkeys/hotkey_service").HotkeyOptions & {
+ * @typedef {{
  *  category?: string;
- *  isAvailable: ()=>(boolean);
+ *  isAvailable?: ()=>(boolean);
+ *  global?: boolean;
+ *  hotkey?: string;
+ *  hotkeyOptions?: HotkeyOptions
  * }} CommandOptions
  */
 
@@ -75,14 +79,17 @@ export const commandService = {
                 if (!configByNamespace[namespace]) {
                     configByNamespace[namespace] = {
                         categories: [],
+                        categoryNames: {},
                     };
                 }
             }
 
             for (const [category, el] of commandCategoryRegistry.getEntries()) {
                 const namespace = el.namespace || "default";
+                const name = el.name;
                 if (namespace in configByNamespace) {
                     configByNamespace[namespace].categories.push(category);
+                    configByNamespace[namespace].categoryNames[category] = name;
                 }
             }
 
@@ -152,8 +159,24 @@ export const commandService = {
             if (!command.name || !command.action || typeof command.action !== "function") {
                 throw new Error("A Command must have a name and an action function.");
             }
-
             const registration = Object.assign({}, command, options);
+            if (registration.identifier) {
+                const commandsArray = Array.from(registeredCommands.values());
+                const sameName = commandsArray.find((com) => com.name === registration.name);
+                if (sameName) {
+                    if (registration.identifier !== sameName.identifier) {
+                        registration.name += ` (${registration.identifier})`;
+                        sameName.name += ` (${sameName.identifier})`;
+                    }
+                } else {
+                    const sameFullName = commandsArray.find(
+                        (com) => com.name === registration.name + `(${registration.identifier})`
+                    );
+                    if (sameFullName) {
+                        registration.name += ` (${registration.identifier})`;
+                    }
+                }
+            }
             if (registration.hotkey) {
                 const action = async () => {
                     const commandService = env.services.command;
@@ -163,9 +186,18 @@ export const commandService = {
                     }
                 };
                 registration.removeHotkey = hotkeyService.add(registration.hotkey, action, {
-                    activeElement: registration.activeElement,
+                    ...options.hotkeyOptions,
                     global: registration.global,
-                    validate: registration.isAvailable,
+                    isAvailable: (...args) => {
+                        let available = true;
+                        if (registration.isAvailable) {
+                            available = registration.isAvailable(...args);
+                        }
+                        if (available && options.hotkeyOptions?.isAvailable) {
+                            available = options.hotkeyOptions?.isAvailable(...args);
+                        }
+                        return available;
+                    },
                 });
             }
 

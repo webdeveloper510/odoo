@@ -19,11 +19,7 @@ echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
 locale-gen
 source ~/.bashrc
 
-# upgrade firmware-brcm80211 broke access point on rpi4
-apt-mark hold firmware-brcm80211
-apt-get update && apt-get -y upgrade
-# Do not be too fast to upgrade to more recent firmware and kernel than 4.38
-# Firmware 4.44 seems to prevent the LED mechanism from working
+apt-get update
 
 # At the first start it is necessary to configure a password
 # This will be modified by a unique password on the first start of Odoo
@@ -72,15 +68,11 @@ PKGS_TO_INSTALL="
     python3-psutil \
     python3-psycopg2 \
     python3-pydot \
-    python3-pypdf2 \
     python3-qrcode \
     python3-reportlab \
     python3-requests \
     python3-serial \
     python3-tz \
-    python3-urllib3 \
-    python3-werkzeug \
-    python3-venv \
     rsync \
     screen \
     swig \
@@ -119,12 +111,15 @@ PIP_TO_INSTALL="
     PyKCS11 \
     vcgencmd \
     RPi.GPIO \
-    rjsmin==1.1.0"
+    rjsmin==1.1.0 \
+    websocket-client==1.6.3 \
+    PyPDF2==1.26.0 \
+    Werkzeug==2.0.2 \
+    urllib3==1.26.5 \
+    pyOpenssl==22.0.0 \
+    cryptography==36.0.2"
 
-mkdir venv
-python3 -m venv venv
-venv/bin/pip3 install ${PIP_TO_INSTALL}
-rsync -avrhp venv/lib/python3.11/site-packages/* /usr/lib/python3/dist-packages/
+pip3 install ${PIP_TO_INSTALL} --break-system-package
 
 # Dowload MPD server and library for Six terminals
 wget 'https://nightly.odoo.com/master/iotbox/eftdvs' -P /usr/local/bin/

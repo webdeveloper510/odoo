@@ -1,9 +1,8 @@
-odoo.define('website.s_dynamic_snippet_carousel', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const publicWidget = require('web.public.widget');
-const DynamicSnippet = require('website.s_dynamic_snippet');
-const config = require('web.config');
+import publicWidget from "@web/legacy/js/public/public_widget";
+import DynamicSnippet from "@website/snippets/s_dynamic_snippet/000";
+import { utils as uiUtils } from "@web/core/ui/ui_service";
 
 const DynamicSnippetCarousel = DynamicSnippet.extend({
     selector: '.s_dynamic_snippet_carousel',
@@ -26,14 +25,13 @@ const DynamicSnippetCarousel = DynamicSnippet.extend({
         return Object.assign(
             this._super.apply(this, arguments),
             {
-                interval: parseInt(this.$target[0].dataset.carouselInterval),
-                rowPerSlide: parseInt(config.device.isMobile ? 1 : this.$target[0].dataset.rowPerSlide || 1),
-                arrowPosition: this.$target[0].dataset.arrowPosition || '',
+                interval: parseInt(this.el.dataset.carouselInterval),
+                rowPerSlide: parseInt(uiUtils.isSmall() ? 1 : this.el.dataset.rowPerSlide || 1),
+                arrowPosition: this.el.dataset.arrowPosition || '',
             },
         );
     },
 });
 publicWidget.registry.dynamic_snippet_carousel = DynamicSnippetCarousel;
 
-return DynamicSnippetCarousel;
-});
+export default DynamicSnippetCarousel;

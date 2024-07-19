@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
+import { registry } from '@web/core/registry';
 
 /**
  * This tour test that a log note isn't considered
  * as a course review. And also that a member can
  * add only one review.
  */
-tour.register('course_reviews', {
+registry.category('web_tour.tours').add('course_reviews', {
     url: '/slides',
-    test: true
-}, [
+    test: true,
+    steps: () => [
 {
     trigger: 'a:contains("Basics of Gardening - Test")',
 }, {
@@ -32,7 +32,7 @@ tour.register('course_reviews', {
 }, {
     trigger: 'a[id="review-tab"]',
 }, {
-    trigger: 'button:contains("Visible")',
+    trigger: 'label:contains("Public")',
 }, {
     trigger: 'span:contains("Edit Review")',
     // If it fails here, it means the system is allowing you to add another review.
@@ -40,4 +40,4 @@ tour.register('course_reviews', {
     trigger: 'div.o_portal_chatter_composer_body textarea:contains("Great course!")',
     run: function() {},
 }
-]);
+]});

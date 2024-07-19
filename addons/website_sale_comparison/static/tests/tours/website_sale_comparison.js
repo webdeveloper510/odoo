@@ -1,13 +1,12 @@
-odoo.define('website_sale_comparison.tour_comparison', function (require) {
-    'use strict';
+/** @odoo-module **/
 
-    var tour = require('web_tour.tour');
-    const tourUtils = require('website_sale.tour_utils');
+    import { registry } from "@web/core/registry";
+    import tourUtils from "@website_sale/js/tours/tour_utils";
 
-    tour.register('product_comparison', {
+    registry.category("web_tour.tours").add('product_comparison', {
         test: true,
         url: "/shop",
-    }, [
+        steps: () => [
     // test from shop page
     {
         content: "add first product 'Warranty' in a comparison list",
@@ -165,5 +164,4 @@ odoo.define('website_sale_comparison.tour_comparison', function (require) {
         trigger: '#cart_products:contains("Conference Chair") .js_quantity[value="1"]',
         run: function () {},
     },
-    ]);
-});
+    ]});

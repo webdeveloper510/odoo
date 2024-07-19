@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 
-from odoo import fields, models
+from odoo import models, api
 from odoo.tools import float_is_zero, float_compare
 from odoo.tools.misc import formatLang
 
@@ -62,11 +62,11 @@ class AccountMove(models.Model):
         previous_qties_delivered = defaultdict(float)
         stock_move_lines = current_invoice_amls.sale_line_ids.move_ids.move_line_ids.filtered(lambda sml: sml.state == 'done' and sml.lot_id).sorted(lambda sml: (sml.date, sml.id))
         for sml in stock_move_lines:
-            if sml.product_id not in invoiced_products or 'customer' not in {sml.location_id.usage, sml.location_dest_id.usage}:
+            if sml.product_id not in invoiced_products or not sml._should_show_lot_in_invoice():
                 continue
             product = sml.product_id
             product_uom = product.uom_id
-            qty_done = sml.product_uom_id._compute_quantity(sml.qty_done, product_uom)
+            quantity = sml.product_uom_id._compute_quantity(sml.quantity, product_uom)
 
             # is it a stock return considering the document type (should it be it thought of as positively or negatively?)
             is_stock_return = (
@@ -75,22 +75,22 @@ class AccountMove(models.Model):
                     self.move_type == 'out_refund' and (sml.location_id.usage, sml.location_dest_id.usage) == ('internal', 'customer')
             )
             if is_stock_return:
-                returned_qty = min(qties_per_lot[sml.lot_id], qty_done)
+                returned_qty = min(qties_per_lot[sml.lot_id], quantity)
                 qties_per_lot[sml.lot_id] -= returned_qty
-                qty_done = returned_qty - qty_done
+                quantity = returned_qty - quantity
 
             previous_qty_invoiced = previous_qties_invoiced[product]
             previous_qty_delivered = previous_qties_delivered[product]
-            # If we return more than currently delivered (i.e., qty_done < 0), we remove the surplus
-            # from the previously delivered (and qty_done becomes zero). If it's a delivery, we first
+            # If we return more than currently delivered (i.e., quantity < 0), we remove the surplus
+            # from the previously delivered (and quantity becomes zero). If it's a delivery, we first
             # try to reach the previous_qty_invoiced
-            if float_compare(qty_done, 0, precision_rounding=product_uom.rounding) < 0 or \
+            if float_compare(quantity, 0, precision_rounding=product_uom.rounding) < 0 or \
                     float_compare(previous_qty_delivered, previous_qty_invoiced, precision_rounding=product_uom.rounding) < 0:
-                previously_done = qty_done if is_stock_return else min(previous_qty_invoiced - previous_qty_delivered, qty_done)
+                previously_done = quantity if is_stock_return else min(previous_qty_invoiced - previous_qty_delivered, quantity)
                 previous_qties_delivered[product] += previously_done
-                qty_done -= previously_done
+                quantity -= previously_done
 
-            qties_per_lot[sml.lot_id] += qty_done
+            qties_per_lot[sml.lot_id] += quantity
 
         for lot, qty in qties_per_lot.items():
             # access the lot as a superuser in order to avoid an error
@@ -112,6 +112,26 @@ class AccountMove(models.Model):
 
         return res
 
+    @api.depends('line_ids.sale_line_ids.order_id')
+    def _compute_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_delivery_date()
+        for move in self:
+            sale_order_effective_date = list(filter(None, move.line_ids.sale_line_ids.order_id.mapped('effective_date')))
+            effective_date_res = max(sale_order_effective_date) if sale_order_effective_date else False
+            # if multiple sale order we take the bigger effective_date
+            if effective_date_res:
+                move.delivery_date = effective_date_res
+
+    @api.depends('line_ids.sale_line_ids.order_id')
+    def _compute_incoterm_location(self):
+        super()._compute_incoterm_location()
+        for move in self:
+            sale_locations = move.line_ids.sale_line_ids.order_id.mapped('incoterm_location')
+            incoterm_res = next((incoterm for incoterm in sale_locations if incoterm), False)
+            # if multiple purchase order we take an incoterm that is not false
+            if incoterm_res:
+                move.incoterm_location = incoterm_res
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"

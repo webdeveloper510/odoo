@@ -5,34 +5,16 @@ import contextlib
 import logging
 import json
 import requests
+import threading
 import uuid
-from unittest.mock import patch
 
 from odoo import exceptions, _
-from odoo.tests.common import BaseCase
 from odoo.tools import email_normalize, pycompat
 
 _logger = logging.getLogger(__name__)
 
 DEFAULT_ENDPOINT = 'https://iap.odoo.com'
 
-
-# We need to mock iap_jsonrpc during tests as we don't want to perform real calls to RPC endpoints
-def iap_jsonrpc_mocked(*args, **kwargs):
-    raise exceptions.AccessError("Unavailable during tests.")
-
-
-iap_patch = patch('odoo.addons.iap.tools.iap_tools.iap_jsonrpc', iap_jsonrpc_mocked)
-
-
-def setUp(self):
-    old_setup_func(self)
-    iap_patch.start()
-    self.addCleanup(iap_patch.stop)
-
-
-old_setup_func = BaseCase.setUp
-BaseCase.setUp = setUp
 
 #----------------------------------------------------------
 # Tools globals
@@ -127,6 +109,9 @@ def iap_jsonrpc(url, method='call', params=None, timeout=15):
     Calls the provided JSON-RPC endpoint, unwraps the result and
     returns JSON-RPC errors as exceptions.
     """
+    if hasattr(threading.current_thread(), 'testing') and threading.current_thread().testing:
+        raise exceptions.AccessError("Unavailable during tests.")
+
     payload = {
         'jsonrpc': '2.0',
         'method': method,
@@ -139,6 +124,7 @@ def iap_jsonrpc(url, method='call', params=None, timeout=15):
         req = requests.post(url, json=payload, timeout=timeout)
         req.raise_for_status()
         response = req.json()
+        _logger.info("iap jsonrpc %s answered in %s seconds", url, req.elapsed.total_seconds())
         if 'error' in response:
             name = response['error']['data'].get('name').rpartition('.')[-1]
             message = response['error']['data'].get('message')

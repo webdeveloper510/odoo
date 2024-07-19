@@ -4,8 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { BomOverviewControlPanel } from "../bom_overview_control_panel/mrp_bom_overview_control_panel";
 import { BomOverviewTable } from "../bom_overview_table/mrp_bom_overview_table";
-
-const { Component, EventBus, onWillStart, useSubEnv, useState } = owl;
+import { Component, EventBus, onWillStart, useSubEnv, useState } from "@odoo/owl";
 
 export class BomOverviewComponent extends Component {
     setup() {
@@ -22,7 +21,7 @@ export class BomOverviewComponent extends Component {
         this.state = useState({
             showOptions: {
                 uom: false,
-                availabilities: true,
+                availabilities: false || Boolean(this.props.action.context.activate_availabilities),
                 costs: true,
                 operations: true,
                 leadTimes: true,
@@ -48,6 +47,13 @@ export class BomOverviewComponent extends Component {
     //---- Data ----
 
     async initBomData() {
+        const variantId = this.props.action.context.active_product_id;
+        const resModel = this.props.action.context.active_model;
+        this.state.currentVariantId = false;
+        if (resModel === 'product.product' && variantId !== undefined) {
+            this.state.currentVariantId = variantId;
+        }
+
         const bomData = await this.getBomData();
         this.state.bomQuantity = bomData["bom_qty"];
         this.state.showOptions.uom = bomData["is_uom_applied"];
@@ -55,7 +61,7 @@ export class BomOverviewComponent extends Component {
         this.variants = bomData["variants"];
         this.showVariants = bomData["is_variant_applied"];
         if (this.showVariants) {
-            this.state.currentVariantId = Object.keys(this.variants)[0];
+            this.state.currentVariantId ||= Object.keys(this.variants)[0];
         }
         this.state.precision = bomData["precision"];
     }
@@ -105,7 +111,7 @@ export class BomOverviewComponent extends Component {
             await this.getBomData();
         }
     }
-    
+
     async onChangeVariant(variantId) {
         if (this.state.currentVariantId != variantId) {
             this.state.currentVariantId = variantId;

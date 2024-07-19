@@ -19,6 +19,8 @@ class SaleCommon(
         super().setUpClass()
 
         cls.env.company.country_id = cls.env.ref('base.us')
+        cls.env.ref('base.main_company').currency_id = cls.env.ref('base.USD')
+        cls.currency = cls.env.ref('base.USD')
 
         # Not defined in product common because only used in sale
         cls.group_discount_per_so_line = cls.env.ref('product.group_discount_per_so_line')
@@ -91,6 +93,7 @@ class TestSaleCommonBase(TransactionCase):
             'default_pricelist': cls.env['product.pricelist'].with_company(company).create({
                 'name': 'default_pricelist',
                 'currency_id': company.currency_id.id,
+                'company_id': False,
             }),
 
             # Product category

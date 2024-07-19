@@ -18,12 +18,17 @@ The entire API reference and the integration guide can be found on the
 ## Not implemented features
 
 - Manual capture
-- Full and partial refunds
+- Refunds
 - Express checkout
 - Multi-currency processing
 
 ## Module history
 
+- `16.2`
+  - The field "AsiaPay Brand" is added to select the API to use. odoo/odoo#110357
+- `16.1`
+  - The "AsiaPay Currency" field is replaced by the generic "Currencies" field of `payment`.
+    odoo/odoo#101018
 - `16.0`
   - The first version of the module is merged. odoo/odoo#98441
 

@@ -1,28 +1,18 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
-import tourUtils from 'website_sale.tour_utils';
+import { registry } from "@web/core/registry";
+import tourUtils from '@website_sale/js/tours/tour_utils';
 
-tour.register('compare_list_price_price_list_display', {
+registry.category("web_tour.tours").add('compare_list_price_price_list_display', {
         test: true,
-        url: '/shop?search=test_product'
-    },
-    [
+        url: '/shop?search=test_product',
+        steps: () => [
         tourUtils.assertProductPrice("price_reduce", "1,000", "test_product_default"),
         tourUtils.assertProductPrice("price_reduce", "2,000", "test_product_with_compare_list_price"),
         tourUtils.assertProductPrice("base_price",   "2,500", "test_product_with_compare_list_price"),
         tourUtils.assertProductPrice("price_reduce", "2,000", "test_product_with_pricelist"),
         tourUtils.assertProductPrice("price_reduce", "4,000", "test_product_with_pricelist_and_compare_list_price"),
         tourUtils.assertProductPrice("base_price",   "4,500", "test_product_with_pricelist_and_compare_list_price"),
-
-        ...tourUtils.selectPriceList('pricelist_other_currency'),
-
-        tourUtils.assertProductPrice("price_reduce", "2,000", "test_product_default"),
-        tourUtils.assertProductPrice("price_reduce", "4,000", "test_product_with_compare_list_price"),
-        tourUtils.assertProductPrice("base_price",   "5,000", "test_product_with_compare_list_price"),
-        tourUtils.assertProductPrice("price_reduce", "4,000", "test_product_with_pricelist"),
-        tourUtils.assertProductPrice("price_reduce", "8,000", "test_product_with_pricelist_and_compare_list_price"),
-        tourUtils.assertProductPrice("base_price",   "9,000", "test_product_with_pricelist_and_compare_list_price"),
 
         ...tourUtils.selectPriceList('pricelist_with_discount'),
 
@@ -44,4 +34,4 @@ tour.register('compare_list_price_price_list_display', {
         tourUtils.assertProductPrice("base_price",   "4,500", "test_product_with_pricelist_and_compare_list_price"),
 
     ]
-);
+});

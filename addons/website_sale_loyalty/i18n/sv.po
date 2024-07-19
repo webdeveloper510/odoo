@@ -3,23 +3,23 @@
 # 	* website_sale_loyalty
 # 
 # Translators:
-# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2022
-# Robert Frykelius <robert.frykelius@linserv.se>, 2022
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
-# Simon S, 2022
-# Martin Trigaux, 2022
-# Kristoffer Grundström <lovaren@gmail.com>, 2022
-# Kim Asplund <kim.asplund@gmail.com>, 2022
+# Robin Calvin, 2023
 # Lasse L, 2023
+# Robert Frykelius <robert.frykelius@linserv.se>, 2023
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2023
+# Simon S, 2023
+# Martin Trigaux, 2023
+# Kim Asplund <kim.asplund@gmail.com>, 2023
+# Kristoffer Grundström <lovaren@gmail.com>, 2023
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:24+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -29,12 +29,24 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "<strong> - </strong>"
+msgstr "<strong> - </strong>"
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "<strong>Coupons - </strong>"
+msgstr "<strong>Kuponger - </strong>"
+
+#. module: website_sale_loyalty
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "A coupon is needed for coupon programs."
 msgstr "En kupong behövs för kupongprogram."
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "A coupon with the same code was found."
@@ -54,6 +66,11 @@ msgstr "Tillgänglig på webbplatsen"
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Claim"
 msgstr "Anspråk"
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Code:"
+msgstr "Kod:"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
@@ -84,7 +101,7 @@ msgstr "Skapad av"
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__create_date
 msgid "Created on"
-msgstr "Skapad"
+msgstr "Skapad den"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_sale_order__disabled_auto_rewards
@@ -95,11 +112,6 @@ msgstr "Belöningar för bilar för funktionshindrade"
 #: model:ir.ui.menu,name:website_sale_loyalty.menu_discount_loyalty_type_config
 msgid "Discount & Loyalty"
 msgstr "Rabatt & Lojalitet"
-
-#. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.reduction_coupon_code
-msgid "Discount code or gift card"
-msgstr ""
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.cart_discount
@@ -120,6 +132,18 @@ msgstr "Visningsnamn"
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
 msgid "Done"
 msgstr "Klar"
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Expired Date:"
+msgstr "Förfallo Datum:"
+
+#. module: website_sale_loyalty
+#. odoo-javascript
+#: code:addons/website_sale_loyalty/static/src/js/website_sale_loyalty_delivery.js:0
+#, python-format
+msgid "Free"
+msgstr "Gratis"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
@@ -147,11 +171,6 @@ msgid "Invalid or expired promo code."
 msgstr "Fel eller utgången kod."
 
 #. module: website_sale_loyalty
-#: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share____last_update
-msgid "Last Modified on"
-msgstr "Senast redigerad den"
-
-#. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__write_uid
 msgid "Last Updated by"
 msgstr "Senast uppdaterad av"
@@ -159,7 +178,7 @@ msgstr "Senast uppdaterad av"
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__write_date
 msgid "Last Updated on"
-msgstr "Senast uppdaterad på"
+msgstr "Senast uppdaterad den"
 
 #. module: website_sale_loyalty
 #: model:ir.ui.menu,name:website_sale_loyalty.menu_loyalty
@@ -179,7 +198,7 @@ msgstr "Lojalitetsprogram"
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.res_config_settings_view_form_inherit_website_sale_loyalty
 msgid "Loyalty Programs"
-msgstr "lojalitetsprogram"
+msgstr "Lojalitetsprogram"
 
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_loyalty_rule
@@ -207,7 +226,8 @@ msgid "Promo Code"
 msgstr "Kampanj Kod"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "Provide either a coupon or a program."
 msgstr "Ge antingen en kupong eller ett program."
@@ -235,8 +255,9 @@ msgid "Sales Order Line"
 msgstr "Orderrad"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_card_view_tree_inherit_website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_program_view_tree_inherit_website_sale_loyalty
 #, python-format
@@ -259,6 +280,7 @@ msgid "Show Discount in Subtotal"
 msgstr "Visa rabatt i delsumma"
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/controllers/main.py:0
 #, python-format
 msgid ""
@@ -273,16 +295,23 @@ msgid "The following promo code was applied on your order:"
 msgstr "Följande kampanjkod tillämpades på din beställning:"
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "The promo code must be unique."
 msgstr "Kampanjkoden måste vara unik."
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "The shared website should correspond to the website of the program."
 msgstr "Den delade webbplatsen ska motsvara programmets webbplats."
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Use"
+msgstr "Användning"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__website_id

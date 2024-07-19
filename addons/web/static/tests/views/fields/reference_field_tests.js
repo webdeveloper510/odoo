@@ -12,9 +12,9 @@ import {
     clickSave,
     triggerHotkey,
     nextTick,
+    makeDeferred,
 } from "@web/../tests/helpers/utils";
-import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
+import { makeView, makeViewInDialog, setupViewRegistries } from "@web/../tests/views/helpers";
 
 let target;
 let serverData;
@@ -252,9 +252,7 @@ QUnit.module("Fields", (hooks) => {
                 "name_search", // for the select
                 "name_search", // for the spawned many2one
                 "name_create",
-                "create",
-                "read",
-                "name_get",
+                "web_save",
             ],
             "The name_create method should have been called"
         );
@@ -408,7 +406,7 @@ QUnit.module("Fields", (hooks) => {
 
         patchWithCleanup(actionService, {
             start() {
-                const service = this._super(...arguments);
+                const service = super.start(...arguments);
                 return {
                     ...service,
                     doAction(action) {
@@ -422,7 +420,7 @@ QUnit.module("Fields", (hooks) => {
             },
         });
 
-        await makeView({
+        await makeViewInDialog({
             type: "form",
             resModel: "partner",
             resId: 1,
@@ -431,7 +429,7 @@ QUnit.module("Fields", (hooks) => {
                 <form>
                     <sheet>
                         <group>
-                            <field name="reference" string="custom label" open_target="new" />
+                            <field name="reference" string="custom label"/>
                         </group>
                     </sheet>
                 </form>`,
@@ -460,7 +458,7 @@ QUnit.module("Fields", (hooks) => {
                         "the name_search should be done on the newly set model"
                     );
                 }
-                if (method === "write") {
+                if (method === "web_save") {
                     assert.strictEqual(model, "partner", "should write on the current model");
                     assert.deepEqual(
                         args,
@@ -502,11 +500,13 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".o_external_button");
 
         assert.strictEqual(
-            target.querySelector(".modal .modal-title").textContent.trim(),
+            target
+                .querySelector(".o_dialog:not(.o_inactive_modal) .modal-title")
+                .textContent.trim(),
             "Open: custom label",
             "dialog title should display the custom string label"
         );
-        await click(target, ".modal .o_form_button_cancel");
+        await click(target, ".o_dialog:not(.o_inactive_modal) .o_form_button_cancel");
 
         await editSelect(target, ".o_field_widget select", "partner_type");
         assert.strictEqual(
@@ -526,12 +526,7 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("Many2One 'Search More...' updates on resModel change", async function (assert) {
-
-        // Patch the Many2XAutocomplete default search limit options
-        patchWithCleanup(Many2XAutocomplete.defaultProps, {
-            searchLimit: -1,
-        });
+    QUnit.test("Many2One 'Search more...' updates on resModel change", async function (assert) {
 
         serverData.views = {
             "product,false,list": '<tree><field name="display_name"/></tree>',
@@ -562,82 +557,44 @@ QUnit.module("Fields", (hooks) => {
         );
     });
 
-    QUnit.test("computed reference field changed by onchange to 'False,0' value", async function (assert) {
-        assert.expect(1);
+    QUnit.test(
+        "computed reference field changed by onchange to 'False,0' value",
+        async function (assert) {
+            assert.expect(1);
 
-        serverData.models.partner.onchanges = {
-            bar(obj) {
-                if (!obj.bar) {
-                    obj.reference_char = "False,0";
-                }
-            },
-        };
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            serverData,
-            arch: `
+            serverData.models.partner.onchanges = {
+                bar(obj) {
+                    if (!obj.bar) {
+                        obj.reference_char = "False,0";
+                    }
+                },
+            };
+            await makeView({
+                type: "form",
+                resModel: "partner",
+                serverData,
+                arch: `
                 <form>
                     <field name="bar"/>
                     <field name="reference_char" widget="reference"/>
                 </form>`,
-            mockRPC(route, { args, method }) {
-                if (method === "create") {
-                    assert.deepEqual(args[0], {
-                        bar: false,
-                        reference_char: "False,0",
-                    });
-                }
-            },
-        });
+                mockRPC(route, { args, method }) {
+                    if (method === "web_save") {
+                        assert.deepEqual(args[1], {
+                            bar: false,
+                            reference_char: "False,0",
+                        });
+                    }
+                },
+            });
 
-        // trigger the onchange to set a value for the reference field
-        await click(target, ".o_field_boolean input");
+            // trigger the onchange to set a value for the reference field
+            await click(target, ".o_field_boolean input");
 
-        // save
-        await clickSave(target);
-    });
-
-    QUnit.test("ReferenceField with model field", async function (assert) {
-        serverData.models.partner.onchanges = {
-            color(obj) {
-                if (obj.color === "black") {
-                    obj.model_id = 20;
-                    obj.reference = "product,37";
-                } else {
-                    obj.model_id = 17;
-                    obj.reference = "partner,1";
-                }
-            },
-        };
-
-        await makeView({
-            type: "form",
-            resModel: "partner",
-            resId: 1,
-            serverData,
-            arch: `
-                <form>
-                    <field name="color" />
-                    <field name="model_id" invisible="1"/>
-                    <field name="reference" options="{'model_field': 'model_id'}" />
-                </form>`,
-            mockRPC(route, { args, method }) {
-                if (method === "write") {
-                    assert.step("write");
-                    assert.strictEqual(args[1].reference, "partner,4");
-                }
-            },
-        });
-        await editSelect(target, "select", '"black"');
-        await editSelect(target, "select", '"red"');
-
-        await editInput(target, ".o_field_widget[name=reference] input", "aaa");
-
-        await click(target, ".ui-autocomplete .ui-menu-item:first-child");
-        await clickSave(target);
-        assert.verifySteps(["write"]);
-    });
+            // save
+            await clickSave(target);
+        }
+    );
 
     QUnit.test("interact with reference field changed by onchange", async function (assert) {
         assert.expect(2);
@@ -659,8 +616,8 @@ QUnit.module("Fields", (hooks) => {
                     <field name="reference"/>
                 </form>`,
             mockRPC(route, { args, method }) {
-                if (method === "create") {
-                    assert.deepEqual(args[0], {
+                if (method === "web_save") {
+                    assert.deepEqual(args[1], {
                         bar: false,
                         reference: "partner,4",
                     });
@@ -707,14 +664,8 @@ QUnit.module("Fields", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { method, model }) {
-                if (method === "name_get") {
-                    assert.step(model);
-                }
-            },
         });
 
-        assert.verifySteps(["product"], "the first name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] select").value,
             "product",
@@ -729,7 +680,6 @@ QUnit.module("Fields", (hooks) => {
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 12);
 
-        assert.verifySteps(["partner_type"], "the second name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] select").value,
             "partner_type",
@@ -784,7 +734,6 @@ QUnit.module("Fields", (hooks) => {
                 obj.foo = "product," + obj.int_field;
             },
         };
-
         let nbNameGet = 0;
         await makeView({
             type: "form",
@@ -800,23 +749,26 @@ QUnit.module("Fields", (hooks) => {
                         </group>
                     </sheet>
                 </form>`,
-            mockRPC(route, { model, method }) {
-                if (model === "product" && method === "name_get") {
+            mockRPC(route, { model, method, args }) {
+                if (
+                    model === "product" &&
+                    method === "read" &&
+                    args[1].length === 1 &&
+                    args[1][0] === "display_name"
+                ) {
                     nbNameGet++;
                 }
             },
         });
-
         assert.strictEqual(nbNameGet, 1, "the first name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
             "xphone",
             "foo field should be correctly set"
         );
-
         // trigger onchange
         await editInput(target, ".o_field_widget[name=int_field] input", 41);
-
+        await nextTick();
         assert.strictEqual(nbNameGet, 2, "the second name_get should have been done");
         assert.strictEqual(
             target.querySelector(".o_field_widget[name=foo]").textContent,
@@ -869,7 +821,6 @@ QUnit.module("Fields", (hooks) => {
                     <field name="reference" options="{'model_field': 'model_id'}" />
                 </form>`,
         });
-
         assert.containsNone(
             target,
             "select",
@@ -891,6 +842,7 @@ QUnit.module("Fields", (hooks) => {
 
         await editInput(target, ".o_field_widget[name='model_id'] input", "Partner");
         await click(target, ".ui-autocomplete .ui-menu-item:first-child");
+        await nextTick();
         assert.strictEqual(
             target.querySelector(".o_field_widget[name='reference'] input").value,
             "",
@@ -946,7 +898,7 @@ QUnit.module("Fields", (hooks) => {
     );
 
     QUnit.test("Reference field with default value in list view", async function (assert) {
-        assert.expect(2);
+        assert.expect(1);
 
         await makeView({
             type: "list",
@@ -960,19 +912,29 @@ QUnit.module("Fields", (hooks) => {
             mockRPC: (route, { method, args }) => {
                 if (method === "onchange") {
                     return {
-                        value: {reference: "partner,2"},
+                        value: {
+                            reference: {
+                                id: { id: 2, model: "partner" },
+                                display_name: "second record",
+                            },
+                        },
                     };
-                } else if (method === "create") {
-                    assert.strictEqual(args.length, 1);
-                    assert.strictEqual(args[0].reference, "partner,2");
+                } else if (method === "web_save") {
+                    assert.strictEqual(args[1].reference, "partner,2");
                 }
             },
         });
 
-        await click(target, '.o_list_button_add');
+        await click(
+            target,
+            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_list_button_add"
+        );
         await click(target, '.o_list_char[name="display_name"] input');
         await editInput(target, '.o_list_char[name="display_name"] input', "Blabla");
-        await click(target, '.o_list_button_save');
+        await click(
+            target,
+            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_list_button_save"
+        );
     });
 
     QUnit.test(
@@ -1003,6 +965,8 @@ QUnit.module("Fields", (hooks) => {
 
             // Select the second product without changing the model
             await click(target, ".o_list_table .reference_field");
+            await nextTick();
+
             await click(target, ".o_list_table .reference_field input");
 
             // Enter to select it
@@ -1051,6 +1015,7 @@ QUnit.module("Fields", (hooks) => {
             );
 
             await click(target.querySelector(".o_list_table .o_data_cell"));
+            await nextTick();
             await editInput(target, ".o_list_table [name='name'] input", "plop");
             await click(target, ".o_form_view");
             assert.strictEqual(
@@ -1095,6 +1060,7 @@ QUnit.module("Fields", (hooks) => {
             //Select the "Partner" option, different from original "Product"
             const dropdownItems = [...target.querySelectorAll(".o_list_table .o_list_many2one .o_input_dropdown .dropdown-item")];
             await click(dropdownItems.filter(item => item.text === "Partner")[0]);
+            await nextTick();
             assert.strictEqual(target.querySelector(".reference_field input").value, "");
             assert.strictEqual(target.querySelector(".o_list_many2one input").value, "Partner");
             //Void the associated, required, "reference" field and make sure the form marks the field as required
@@ -1157,5 +1123,34 @@ QUnit.module("Fields", (hooks) => {
             "select",
             "the selection list of the reference field should exist when hide_model=False and no model_field specified."
         );
+    });
+
+    QUnit.test("reference field should await fetch model before render", async function (assert) {
+        serverData.models.partner.records[0].model_id = 20;
+
+        const def = makeDeferred();
+        makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="model_id" invisible="1"/>
+                    <field name="reference" options="{'model_field': 'model_id'}" />
+                </form>`,
+            async mockRPC(route, args) {
+                if (args.method === "read" && args.model === "ir.model") {
+                    await def;
+                }
+            },
+        });
+        await nextTick();
+        await nextTick();
+        assert.containsNone(target, ".o_form_view");
+        def.resolve();
+
+        await nextTick();
+        assert.containsOnce(target, ".o_form_view");
     });
 });

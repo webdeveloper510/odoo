@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.fields import Command
 from odoo.tests import tagged
 
 
@@ -8,7 +9,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
 
 
     @classmethod
-    def setUpClass(cls, chart_template_ref="l10n_in.indian_chart_template_standard"):
+    def setUpClass(cls, chart_template_ref="in"):
         super().setUpClass(chart_template_ref=chart_template_ref)
         cls.env['ir.config_parameter'].set_param('l10n_in_edi.manage_invoice_negative_lines', True)
         cls.maxDiff = None
@@ -31,7 +32,13 @@ class TestEdiJson(AccountTestInvoicingCommon):
             "country_id": cls.env.ref("base.in").id,
             "l10n_in_gst_treatment": "regular",
         })
-        cls.product_a.write({"l10n_in_hsn_code": "01111"})
+        sgst_sale_5 = cls.env["account.chart.template"].ref("sgst_sale_5")
+        sgst_purchase_5 = cls.env["account.chart.template"].ref("sgst_purchase_5")
+        cls.product_a.write({
+            "l10n_in_hsn_code": "01111",
+            'taxes_id': sgst_sale_5,
+            'supplier_taxes_id': sgst_purchase_5,
+        })
         cls.product_a2 = cls.env['product.product'].create({
             'name': 'product_a2',
             'uom_id': cls.env.ref('uom.product_uom_unit').id,
@@ -39,8 +46,8 @@ class TestEdiJson(AccountTestInvoicingCommon):
             'standard_price': 1000.0,
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
             'property_account_expense_id': cls.company_data['default_account_expense'].id,
-            'taxes_id': [(6, 0, cls.tax_sale_a.ids)],
-            'supplier_taxes_id': [(6, 0, cls.tax_purchase_a.ids)],
+            'taxes_id': [Command.set(sgst_sale_5.ids)],
+            'supplier_taxes_id': [Command.set(sgst_purchase_5.ids)],
             "l10n_in_hsn_code": "01111",
         })
         cls.product_a_discount = cls.env['product.product'].create({
@@ -50,12 +57,12 @@ class TestEdiJson(AccountTestInvoicingCommon):
             'standard_price': 400.0,
             'property_account_income_id': cls.company_data['default_account_revenue'].id,
             'property_account_expense_id': cls.company_data['default_account_expense'].id,
-            'taxes_id': [(6, 0, cls.tax_sale_a.ids)],
-            'supplier_taxes_id': [(6, 0, cls.tax_purchase_a.ids)],
+            'taxes_id': [Command.set(sgst_sale_5.ids)],
+            'supplier_taxes_id': [Command.set(sgst_purchase_5.ids)],
             "l10n_in_hsn_code": "01111",
         })
-        gst_with_cess = cls.env.ref("l10n_in.%s_sgst_sale_12" % (cls.company_data["company"].id)
-            ) + cls.env.ref("l10n_in.%s_cess_5_plus_1591_sale" % (cls.company_data["company"].id))
+        gst_with_cess = cls.env.ref("account.%s_sgst_sale_12" % (cls.company_data["company"].id)
+            ) + cls.env.ref("account.%s_cess_5_plus_1591_sale" % (cls.company_data["company"].id))
         product_with_cess = cls.env["product.product"].create({
             "name": "product_with_cess",
             "uom_id": cls.env.ref("uom.product_uom_unit").id,
@@ -63,8 +70,8 @@ class TestEdiJson(AccountTestInvoicingCommon):
             "standard_price": 800.0,
             "property_account_income_id": cls.company_data["default_account_revenue"].id,
             "property_account_expense_id": cls.company_data["default_account_expense"].id,
-            "taxes_id": [(6, 0, gst_with_cess.ids)],
-            "supplier_taxes_id": [(6, 0, cls.tax_purchase_a.ids)],
+            "taxes_id": [Command.set(gst_with_cess.ids)],
+            "supplier_taxes_id": [Command.set(sgst_purchase_5.ids)],
             "l10n_in_hsn_code": "02222",
         })
         rounding = cls.env["account.cash.rounding"].create({
@@ -137,21 +144,21 @@ class TestEdiJson(AccountTestInvoicingCommon):
             "TranDtls": {"TaxSch": "GST", "SupTyp": "B2B", "RegRev": "N", "IgstOnIntra": "N"},
             "DocDtls": {"Typ": "INV", "No": "INV/2019/00001", "Dt": "01/01/2019"},
             "SellerDtls": {
-                "LglNm": "company_1_data",
                 "Addr1": "Block no. 401",
-                "Addr2": "Street 2",
                 "Loc": "City 1",
                 "Pin": 500001,
                 "Stcd": "36",
+                "Addr2": "Street 2",
+                "LglNm": "company_1_data",
                 "GSTIN": "36AABCT1332L011"},
             "BuyerDtls": {
-                "LglNm": "partner_a",
                 "Addr1": "Block no. 401",
-                "Addr2": "Street 2",
                 "Loc": "City 2",
                 "Pin": 500001,
                 "Stcd": "36",
+                "Addr2": "Street 2",
                 "POS": "36",
+                "LglNm": "partner_a",
                 "GSTIN": "36BBBFF5679L8ZR"},
             "ItemList": [
                 {
@@ -171,7 +178,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             ],
             "ValDtls": {
                 "AssVal": 1800.0, "CgstVal": 76.5, "SgstVal": 76.5, "IgstVal": 0.0, "CesVal": 46.59,
-                "StCesVal": 0.0, "RndOffAmt": 0.0, "TotInvVal": 1999.59
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.0, "TotInvVal": 1999.59
             }
         }
         self.assertDictEqual(json_value, expected, "Indian EDI send json value is not matched")
@@ -187,7 +194,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
                 "CesNonAdvlAmt": 0.0, "StateCesRt": 0.0, "StateCesAmt": 0.0, "StateCesNonAdvlAmt": 0.0,
                 "OthChrg": 0.0, "TotItemVal": 0.0}],
             "ValDtls": {"AssVal": 0.0, "CgstVal": 0.0, "SgstVal": 0.0, "IgstVal": 0.0, "CesVal": 0.0,
-                "StCesVal": 0.0, "RndOffAmt": 0.0, "TotInvVal": 0.0}
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.0, "TotInvVal": 0.0}
         })
         self.assertDictEqual(json_value, expected, "Indian EDI with 100% discount sent json value is not matched")
 
@@ -226,7 +233,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             ],
             "ValDtls": {
                 "AssVal": 1600.0, "CgstVal": 75.0, "SgstVal": 75.0, "IgstVal": 0.0, "CesVal": 51.59,
-                "StCesVal": 0.0, "RndOffAmt": 0.0, "TotInvVal": 1801.59
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.0, "TotInvVal": 1801.59
             },
         })
         self.assertDictEqual(json_value, expected, "Indian EDI with negative unit price sent json value is not matched")
@@ -250,7 +257,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             }],
             "ValDtls": {
                 "AssVal": 600.0, "CgstVal": 15.0, "SgstVal": 15.0, "IgstVal": 0.0, "CesVal": 0.0,
-                "StCesVal": 0.0, "RndOffAmt": 0.0, "TotInvVal": 630.0
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.0, "TotInvVal": 630.0
             },
         })
         json_value = self.env["account.edi.format"]._l10n_in_edi_generate_invoice_json(self.invoice_negative_with_discount)
@@ -274,7 +281,7 @@ class TestEdiJson(AccountTestInvoicingCommon):
             }],
             "ValDtls": {
                 "AssVal": 900.0, "CgstVal": 22.5, "SgstVal": 22.5, "IgstVal": 0.0, "CesVal": 0.0,
-                "StCesVal": 0.0, "RndOffAmt": 0.0, "TotInvVal": 945.0
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.0, "TotInvVal": 945.0
             },
         })
         json_value = self.env['account.edi.format']._l10n_in_edi_generate_invoice_json(self.invoice_negative_more_than_max_line)
@@ -285,6 +292,6 @@ class TestEdiJson(AccountTestInvoicingCommon):
             "DocDtls": {"Typ": "INV", "No": "INV/2019/00009", "Dt": "01/01/2019"},
             "ValDtls": {
                 "AssVal": 1800.0, "CgstVal": 76.5, "SgstVal": 76.5, "IgstVal": 0.0, "CesVal": 46.59,
-                "StCesVal": 0.0, "RndOffAmt": 0.41, "TotInvVal": 2000.00
+                "StCesVal": 0.0, "Discount": 0.0, "RndOffAmt": 0.41, "TotInvVal": 2000.00
             }})
         self.assertDictEqual(json_value, expected_copy_rounding, "Indian EDI with cash rounding sent json value is not matched")

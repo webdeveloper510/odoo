@@ -17,7 +17,7 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon):
         # By default, tests are run with the current user set on the first company.
         cls.env.user.company_id = cls.company_data['company']
 
-        cls.default_plan = cls.env['account.analytic.plan'].create({'name': 'Default', 'company_id': False})
+        cls.default_plan = cls.env['account.analytic.plan'].create({'name': 'Default'})
         cls.analytic_account_a = cls.env['account.analytic.account'].create({
             'name': 'analytic_account_a',
             'plan_id': cls.default_plan.id,
@@ -29,9 +29,16 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon):
             'company_id': False,
         })
 
-    def create_invoice(self, partner, product, move_type='out_invoice'):
+        cls.cross_plan = cls.env['account.analytic.plan'].create({'name': 'Cross'})
+        cls.analytic_account_c = cls.env['account.analytic.account'].create({
+            'name': 'analytic_account_c',
+            'plan_id': cls.cross_plan.id,
+            'company_id': False,
+        })
+
+    def create_invoice(self, partner, product):
         return self.env['account.move'].create([{
-            'move_type': move_type,
+            'move_type': 'out_invoice',
             'partner_id': partner.id,
             'date': '2017-01-01',
             'invoice_date': '2017-01-01',
@@ -84,12 +91,12 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon):
         # Analytic lines are created when posting the invoice
         self.assertRecordValues(get_analytic_lines(), [{
             'amount': 100,
-            'account_id': self.analytic_account_b.id,
+            self.default_plan._column_name(): self.analytic_account_b.id,
             'partner_id': self.partner_a.id,
             'product_id': self.product_a.id,
         }, {
             'amount': 200,
-            'account_id': self.analytic_account_a.id,
+            self.default_plan._column_name(): self.analytic_account_a.id,
             'partner_id': self.partner_a.id,
             'product_id': self.product_a.id,
         }])
@@ -101,10 +108,10 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon):
         }
         self.assertRecordValues(get_analytic_lines(), [{
             'amount': 50,
-            'account_id': self.analytic_account_b.id,
+            self.default_plan._column_name(): self.analytic_account_b.id,
         }, {
             'amount': 200,
-            'account_id': self.analytic_account_a.id,
+            self.default_plan._column_name(): self.analytic_account_a.id,
         }])
 
         # Analytic lines are deleted when resetting to draft
@@ -211,54 +218,77 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon):
         invoice.action_post()
         self.assertEqual(invoice.state, 'posted')
 
-    def test_set_anaylytic_distribution_posted_line(self):
-        """
-        Test that we can set the analytic distribution on the product line of a move, when the line has tax with
-        repartition lines used in tax closing. Although the change can not be applied on the tax line, we should
-        not raise any error.
-        """
-        tax = self.tax_purchase_a.copy({
-            'name': 'taXXX',
-            'invoice_repartition_line_ids': [
-                Command.create({
-                    'repartition_type': 'base',
-                    'use_in_tax_closing': False,
-                }),
-                Command.create({
-                    'repartition_type': 'tax',
-                    'factor_percent': 50,
-                    'use_in_tax_closing': False,
-                }),
-                Command.create({
-                    'repartition_type': 'tax',
-                    'factor_percent': 50,
-                    'account_id': self.company_data['default_account_tax_purchase'].id,
-                    'use_in_tax_closing': True,
-                }),
-            ],
-            'refund_repartition_line_ids': [
-                Command.create({
-                    'repartition_type': 'base',
-                    'use_in_tax_closing': False,
-                }),
-                Command.create({
-                    'repartition_type': 'tax',
-                    'factor_percent': 50,
-                    'use_in_tax_closing': False,
-                }),
-                Command.create({
-                    'repartition_type': 'tax',
-                    'factor_percent': 50,
-                    'account_id': self.company_data['default_account_tax_purchase'].id,
-                    'use_in_tax_closing': True,
-                }),
-            ],
-        })
+    def test_cross_analytics_computing(self):
 
-        bill = self.create_invoice(self.partner_a, self.product_a, move_type='in_invoice')
-        bill.invoice_line_ids.tax_ids = [Command.set(tax.ids)]
-        bill.action_post()
+        out_invoice = self.env['account.move'].create([{
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'date': '2017-01-01',
+            'invoice_date': '2017-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_b.id,
+                'price_unit': 200.0,
+                'analytic_distribution': {
+                    f'{self.analytic_account_a.id},{self.analytic_account_c.id}': 20,
+                    f'{self.analytic_account_a.id},{self.analytic_account_b.id}': 80,
+                },
+            })]
+        }])
+        out_invoice.action_post()
+        in_invoice = self.env['account.move'].create([{
+            'move_type': 'in_invoice',
+            'partner_id': self.partner_b.id,
+            'date': '2017-01-01',
+            'invoice_date': '2017-01-01',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 200.0,
+                    'analytic_distribution': {
+                        f'{self.analytic_account_a.id},{self.analytic_account_b.id}': 100,
+                    },
+                }),
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'price_unit': 200.0,
+                    'analytic_distribution': {
+                        f'{self.analytic_account_a.id},{self.analytic_account_c.id}': 50,
+                        self.analytic_account_b.id: 50,
+                    },
+                })
+            ]
+        }])
+        in_invoice.action_post()
 
-        line = bill.line_ids.filtered(lambda l: l.display_type == 'product')
-        line.write({'analytic_distribution': {self.analytic_account_a.id: 100}})
-        self.assertEqual(line.analytic_distribution, {str(self.analytic_account_a.id): 100})
+        self.analytic_account_a._compute_invoice_count()
+        self.assertEqual(self.analytic_account_a.invoice_count, 1)
+        self.analytic_account_a._compute_vendor_bill_count()
+        self.assertEqual(self.analytic_account_a.vendor_bill_count, 1)
+
+    def test_applicability_score(self):
+        """ Tests which applicability is chosen if several ones are valid """
+        applicability_without_company, applicability_with_company = self.env['account.analytic.applicability'].create([
+            {
+                'business_domain': 'invoice',
+                'product_categ_id': self.product_a.categ_id.id,
+                'applicability': 'mandatory',
+                'analytic_plan_id': self.default_plan.id,
+                'company_id': False,
+            },
+            {
+                'business_domain': 'invoice',
+                'applicability': 'unavailable',
+                'analytic_plan_id': self.default_plan.id,
+                'company_id': self.env.company.id,
+            },
+        ])
+
+        applicability = self.default_plan._get_applicability(business_domain='invoice', company_id=self.env.company.id, product=self.product_a.id)
+        self.assertEqual(applicability, 'mandatory', "product takes precedence over company")
+
+        # If the model that asks for a validation does not have a company_id,
+        # the score shouldn't take into account the company of the applicability
+        score = applicability_without_company._get_score(business_domain='invoice', product=self.product_a.id)
+        self.assertEqual(score, 2)
+        score = applicability_with_company._get_score(business_domain='invoice', product=self.product_a.id)
+        self.assertEqual(score, 1)

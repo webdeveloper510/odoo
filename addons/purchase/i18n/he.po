@@ -3,38 +3,38 @@
 # 	* purchase
 # 
 # Translators:
-# Leandro Noijovich <eliel.sorcerer@gmail.com>, 2022
-# Fishfur A Banter <fishfurbanter@gmail.com>, 2022
-# Lilach Gilliam <lilach@apprcase.com>, 2022
-# Jonathan Spier, 2022
-# Netta Waizer, 2022
-# uriel ehrman <uriel@laylinetech.com>, 2022
-# Ofir Blum <ofir.blum@gmail.com>, 2022
-# Moshe Flam <pashute@gmail.com>, 2022
-# שהאב חוסיין <shhab89@gmail.com>, 2022
-# david danilov, 2022
-# Adi Sharashov <Adi@laylinetech.com>, 2022
-# Amit Spilman <amit@laylinetech.com>, 2022
-# דודי מלכה <Dudimalka6@gmail.com>, 2022
-# Sagi Ahiel, 2022
-# ExcaliberX <excaliberx@gmail.com>, 2022
-# Yihya Hugirat <hugirat@gmail.com>, 2022
-# Martin Trigaux, 2022
-# NoaFarkash, 2022
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
-# Ha Ketem <haketem@gmail.com>, 2022
+# Netta Waizer, 2023
+# Fishfur A Banter <fishfurbanter@gmail.com>, 2023
+# Jonathan Spier, 2023
+# Leandro Noijovich <eliel.sorcerer@gmail.com>, 2023
+# Lilach Gilliam <lilach@apprcase.com>, 2023
+# uriel ehrman <uriel@laylinetech.com>, 2023
+# Ofir Blum <ofir.blum@gmail.com>, 2023
+# Moshe Flam <pashute@gmail.com>, 2023
+# Sagi Ahiel, 2023
+# ExcaliberX <excaliberx@gmail.com>, 2023
+# Yihya Hugirat <hugirat@gmail.com>, 2023
+# david danilov, 2023
+# דודי מלכה <Dudimalka6@gmail.com>, 2023
+# Amit Spilman <amit@laylinetech.com>, 2023
+# Adi Sharashov <Adi@laylinetech.com>, 2023
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2023
+# Martin Trigaux, 2023
+# Ha Ketem <haketem@gmail.com>, 2023
+# NoaFarkash, 2023
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023
-# hed shefer <hed@laylinetech.com>, 2023
 # yael terner, 2023
+# hed shefer <hed@laylinetech.com>, 2023
 # Roy Sayag, 2024
+# שהאב חוסיין <shhab89@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Roy Sayag, 2024\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: שהאב חוסיין <shhab89@gmail.com>, 2024\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -66,29 +66,29 @@ msgstr "מס' שורות"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "%(amount)s due %(date)s"
 msgstr "%(amount)sלתשלום  עד %(date)s"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "%(product)s from %(original_receipt_date)s to %(new_receipt_date)s"
 msgstr "%(product)s מאת %(original_receipt_date)s אל %(new_receipt_date)s"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "%s confirmed the receipt will take place on %s."
-msgstr "%s אישר שיתקבל ב- %s."
+msgstr "%s אישר/ה שיתקבל ב- %s."
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "%s modified receipt dates for the following products:"
 msgstr "%s שינו את מועד קבלת המוצרים הבאים:"
@@ -136,7 +136,7 @@ msgid ""
 "        </t>\n"
 "        is expected for \n"
 "        <t t-if=\"object.date_planned\">\n"
-"            <span style=\"font-weight:bold;\" t-out=\"format_date(object.get_localized_date_planned()) or ''\">05/05/2021</span>.\n"
+"            <span style=\"font-weight:bold;\" t-out=\"format_date(object.date_planned) or ''\">05/05/2021</span>.\n"
 "        </t>\n"
 "         <t t-else=\"\">\n"
 "            <span style=\"font-weight:bold;\">undefined</span>.\n"
@@ -169,7 +169,7 @@ msgid ""
 "        from <t t-out=\"object.company_id.name or ''\">YourCompany</t>. \n"
 "        <br><br>\n"
 "        <t t-if=\"object.date_planned\">\n"
-"            The receipt is expected for <span style=\"font-weight:bold;\" t-out=\"format_date(object.get_localized_date_planned()) or ''\">05/05/2021</span>.\n"
+"            The receipt is expected for <span style=\"font-weight:bold;\" t-out=\"format_date(object.date_planned) or ''\">05/05/2021</span>.\n"
 "            <br><br>\n"
 "            Could you please acknowledge the receipt of this order?\n"
 "        </t>\n"
@@ -210,16 +210,6 @@ msgid ""
 msgstr ""
 
 #. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "<i class=\"fa fa-comment\"/> Send message"
-msgstr "<i class=\"fa fa-comment\"/> שלח הודעה"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "<i class=\"fa fa-download\"/> Download"
-msgstr "<i class=\"fa fa-download\"/> הורד"
-
-#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
 msgid ""
 "<i class=\"fa fa-fw fa-check\" role=\"img\" aria-label=\"Done\" "
@@ -230,18 +220,18 @@ msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> <b>Paid</b>"
-msgstr "<i class=\"fa fa-fw fa-check\"/> <b>שולם</b>"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> <b>Reversed</b>"
+msgid "<i class=\"fa fa-fw fa-check\"/>Paid"
 msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> <b>Waiting Payment</b>"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/> <b>תשלום ממתין</b>"
+msgid "<i class=\"fa fa-fw fa-check\"/>Reversed"
+msgstr ""
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
+msgid "<i class=\"fa fa-fw fa-clock-o\"/>Waiting Payment"
+msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_partner_kanban_view
@@ -274,8 +264,13 @@ msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "<i class=\"fa fa-print\"/> Print"
-msgstr "<i class=\"fa fa-print\"/> הדפס"
+msgid "<i class=\"fa fa-print\"/> View Details"
+msgstr ""
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
+msgid "<small class=\"text-muted\">Purchase Representative</small>"
+msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
@@ -292,7 +287,7 @@ msgid ""
 "<span class=\"d-none d-md-inline\">Purchase Order #</span>\n"
 "                          <span class=\"d-block d-md-none\">Ref.</span>"
 msgstr ""
-"<span class=\"d-none d-md-inline\">הזמנת רכש מס'</span>\n"
+"<span class=\"d-none d-md-inline\">הזמנת רכש מס' </span>\n"
 "                          <span class=\"d-block d-md-none\">מספר אסמכתא</span>"
 
 #. module: purchase
@@ -305,24 +300,11 @@ msgstr ""
 "                        <span class=\"d-block d-md-none\">מזהה</span>"
 
 #. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
-
-#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid ""
-"<span class=\"o_form_label\" attrs=\"{'invisible': [('state','not in',('draft','sent'))]}\">Request for Quotation </span>\n"
-"                        <span class=\"o_form_label\" attrs=\"{'invisible': [('state','in',('draft','sent'))]}\">Purchase Order </span>"
+"<span class=\"o_form_label\" invisible=\"state not in ('draft', 'sent')\">Request for Quotation </span>\n"
+"                        <span class=\"o_form_label\" invisible=\"state in ('draft', 'sent')\">Purchase Order </span>"
 msgstr ""
-"<span class=\"o_form_label\" attrs=\"{'invisible': [('state','not in',('draft','sent'))]}\">בקשה להצעת מחיר </span>\n"
-"                        <span class=\"o_form_label\" attrs=\"{'invisible': [('state','in',('draft','sent'))]}\">הזמנת רכש </span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.product_normal_form_view_inherit_purchase
@@ -333,30 +315,26 @@ msgstr "<span class=\"o_stat_text\">נרכש</span>"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid ""
-"<span class=\"text-muted\" attrs=\"{'invisible': "
-"[('mail_reception_confirmed','=', False)]}\">(confirmed by vendor)</span>"
-msgstr "התקבלו"
+"<span class=\"text-muted\" invisible=\"not "
+"mail_reception_confirmed\">(confirmed by vendor)</span>"
+msgstr ""
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid ""
-"<span class=\"text-muted\" attrs=\"{'invisible': "
-"[('mail_reminder_confirmed', '=', False)]}\">(confirmed by vendor)</span>"
-msgstr "תזכורת אושרה"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
-msgid ""
-"<span groups=\"account.group_show_line_subtotals_tax_excluded\">Amount</span>\n"
-"                                <span groups=\"account.group_show_line_subtotals_tax_included\">Total Price</span>"
+"<span class=\"text-muted\" invisible=\"not "
+"mail_reminder_confirmed\">(confirmed by vendor)</span>"
 msgstr ""
-"<span groups=\"account.group_show_line_subtotals_tax_excluded\">סכום</span>\n"
-"                                <span groups=\"account.group_show_line_subtotals_tax_included\">מחיר כולל</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.view_partner_property_form
 msgid "<span> day(s) before</span>"
 msgstr "<span> ימים לפני</span>"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
+msgid "<span>Amount</span>"
+msgstr "<span>סכום כולל</span>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -383,11 +361,6 @@ msgstr "<strong class=\"d-block mb-1\">חשבוניות</strong>"
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
 msgid "<strong class=\"mr16\">Subtotal</strong>"
 msgstr "<strong class=\"mr16\">סכום ביניים</strong>"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "<strong class=\"text-muted\">Purchase Representative</strong>"
-msgstr "<strong class=\"text-muted\">נציג מכירות</strong>"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
@@ -479,18 +452,13 @@ msgid "<strong>Unit Price</strong>"
 msgstr "<strong>מחיר יחידה</strong>"
 
 #. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
-msgid "<strong>Update Here</strong>"
-msgstr "<strong>לעדכן כאן</strong>"
-
-#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
 msgid "<strong>Your Order Reference:</strong>"
 msgstr "<strong>מזהה הזמנה שלך:</strong>"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "A sample email has been sent to %s."
 msgstr "אימייל לדוגמא נשלח ל- %s."
@@ -522,7 +490,7 @@ msgstr ""
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "Accept"
 msgstr "אשר"
@@ -535,12 +503,10 @@ msgstr "אזהרת גישה"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order_line__qty_received_method
 msgid ""
-"According to product configuration, the received quantity can be automatically computed by mechanism :\n"
+"According to product configuration, the received quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
-"על-פי הגדרות המוצר, אפשר לחשב את הכמות שהתקבלה עם מנגנון אוטומטי ידני: הכמות נקבעת ידנית בשורה\n"
-"תנועות מלאי: הכמות נקבעת לפי בחירות שאושרו\n"
 
 #. module: purchase
 #: model:ir.actions.act_window,name:purchase.action_accrued_expense_entry
@@ -662,28 +628,19 @@ msgid ""
 msgstr ""
 
 #. module: purchase
-#: model:ir.model.fields,help:purchase.field_purchase_report__avg_days_to_purchase
-msgid ""
-"Amount of time between purchase approval and document creation date. Due to "
-"a hack needed to calculate this,               every record will show the "
-"same average value, therefore only use this as an aggregated value with "
-"group_operator=avg"
-msgstr ""
-
-#. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_report__delay
 msgid "Amount of time between purchase approval and order by date."
 msgstr ""
 
 #. module: purchase
-#: model:ir.model.fields,field_description:purchase.field_purchase_order_line__analytic_distribution
-msgid "Analytic"
-msgstr "אנליטי"
-
-#. module: purchase
 #: model:ir.model,name:purchase.model_account_analytic_account
 msgid "Analytic Account"
 msgstr "חשבון אנליטי"
+
+#. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_purchase_order_line__analytic_distribution
+msgid "Analytic Distribution"
+msgstr "חלוקה לחשבונות אנליטיים"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__analytic_distribution_search
@@ -766,11 +723,6 @@ msgid "Average Cost"
 msgstr "עלות ממוצעת"
 
 #. module: purchase
-#: model:ir.model.fields,field_description:purchase.field_purchase_report__avg_days_to_purchase
-msgid "Average Days to Purchase"
-msgstr "ימים ממוצעים לרכישה"
-
-#. module: purchase
 #. odoo-javascript
 #: code:addons/purchase/static/src/views/purchase_dashboard.xml:0
 #, python-format
@@ -835,6 +787,8 @@ msgstr "הודעת חסימה"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__user_id
+#: model:ir.model.fields,field_description:purchase.field_res_partner__buyer_id
+#: model:ir.model.fields,field_description:purchase.field_res_users__buyer_id
 msgid "Buyer"
 msgstr "קונה"
 
@@ -871,10 +825,15 @@ msgstr "מספר הזמנת רכש מבוטלת "
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #, python-format
-msgid "Cannot delete a purchase order line which is in state '%s'."
-msgstr "לא ניתן למחוק שורת הזמנת רכש שנמצאת במצב  '%s'."
+msgid "Cannot delete a purchase order line which is in state %r."
+msgstr ""
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Catalog"
+msgstr "קטלוג"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__product_uom_category_id
@@ -885,6 +844,11 @@ msgstr "קטגוריה"
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__commercial_partner_id
 msgid "Commercial Entity"
 msgstr "יישות מסחרית"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
+msgid "Communication history"
+msgstr ""
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_res_company
@@ -907,8 +871,8 @@ msgstr "מטבע החברה"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "Compose Email"
 msgstr "כתוב דוא\"ל"
@@ -925,7 +889,7 @@ msgstr "תצורה"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "Confirm"
 msgstr "אשר"
@@ -1059,8 +1023,8 @@ msgstr "תאריך התחלה"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "Date Updated"
 msgstr "תאריך עודכן"
@@ -1128,6 +1092,21 @@ msgid "Description"
 msgstr "תיאור"
 
 #. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Disc.%"
+msgstr "הנחה %"
+
+#. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_purchase_order_line__discount
+msgid "Discount (%)"
+msgstr "הנחה (%)"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Discount:"
+msgstr "הנחה"
+
+#. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union__display_name
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__display_name
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__display_name
@@ -1139,11 +1118,6 @@ msgstr "שם לתצוגה"
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__display_type
 msgid "Display Type"
 msgstr "סוג תצוגה"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
-msgid "Documentation"
-msgstr "תיעוד"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_account_analytic_applicability__business_domain
@@ -1161,11 +1135,6 @@ msgid "Double validation amount"
 msgstr "סכום אימות כפול"
 
 #. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "Download"
-msgstr "הורד"
-
-#. module: purchase
 #: model:ir.model.fields.selection,name:purchase.selection__purchase_report__state__draft
 msgid "Draft RFQ"
 msgstr "טיוטת בקשה להצעת מחיר"
@@ -1181,11 +1150,6 @@ msgid "Dropship Address"
 msgstr "כתובת דרופשיפינג (drop shipping)"
 
 #. module: purchase
-#: model:ir.model,name:purchase.model_mail_compose_message
-msgid "Email composition wizard"
-msgstr "אשף יצירת דוא\"ל"
-
-#. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__date_planned
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__date_planned
 msgid "Expected Arrival"
@@ -1198,7 +1162,7 @@ msgstr "מסננים מורחבים"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #, python-format
 msgid "Extra line with %s "
 msgstr "שורת נוספת עם %s "
@@ -1207,7 +1171,17 @@ msgstr "שורת נוספת עם %s "
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__fiscal_position_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__fiscal_position_id
 msgid "Fiscal Position"
-msgstr "מעמד פיסקלי"
+msgstr "סוגי תנועה"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_home_purchase
+msgid "Follow orders you have to fulfill"
+msgstr ""
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_home_purchase
+msgid "Follow your Requests for Quotation"
+msgstr ""
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__message_follower_ids
@@ -1233,7 +1207,14 @@ msgstr "ערכים אסורים בשורת הזמנת רכש שאינה מובא
 #. odoo-python
 #: code:addons/purchase/models/account_invoice.py:0
 #, python-format
-msgid "From %s document"
+msgid "From %s"
+msgstr ""
+
+#. module: purchase
+#. odoo-python
+#: code:addons/purchase/models/account_invoice.py:0
+#, python-format
+msgid "From Electronic Document"
 msgstr ""
 
 #. module: purchase
@@ -1279,11 +1260,6 @@ msgstr "יש הודעה"
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_search
 msgid "Hide cancelled lines"
 msgstr "הסתר שורות מבוטלות"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "History"
-msgstr "היסטוריה"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union__id
@@ -1344,7 +1320,7 @@ msgstr "ייבא תבנית למוצרים"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "In order to delete a purchase order, you must cancel it first."
 msgstr "כדי למחוק הזמנת רכש, עליך לבטל אותה תחילה."
@@ -1394,14 +1370,6 @@ msgstr "פקודת יומן"
 #: model:ir.model,name:purchase.model_account_move_line
 msgid "Journal Item"
 msgstr "תנועת יומן"
-
-#. module: purchase
-#: model:ir.model.fields,field_description:purchase.field_purchase_bill_union____last_update
-#: model:ir.model.fields,field_description:purchase.field_purchase_order____last_update
-#: model:ir.model.fields,field_description:purchase.field_purchase_order_line____last_update
-#: model:ir.model.fields,field_description:purchase.field_purchase_report____last_update
-msgid "Last Modified on"
-msgstr "שינוי אחרון ב"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__write_uid
@@ -1484,11 +1452,6 @@ msgstr "נעל הזמנות מאושרות"
 #, python-format
 msgid "Locked"
 msgstr "נעולה"
-
-#. module: purchase
-#: model:ir.model.fields,field_description:purchase.field_purchase_order__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "קובץ ראשי מצורף "
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
@@ -1834,10 +1797,9 @@ msgid "Other Information"
 msgstr "מידע נוסף"
 
 #. module: purchase
-#: model:mail.template,report_name:purchase.email_template_edi_purchase_done
-#: model:mail.template,report_name:purchase.email_template_edi_purchase_reminder
-msgid "PO_{{ (object.name or '').replace('/','_') }}"
-msgstr "PO_{{ (object.name or '').replace('/','_') }}"
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_home_purchase
+msgid "Our Orders"
+msgstr ""
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__product_packaging_id
@@ -1880,14 +1842,16 @@ msgid "Preview the reminder email by sending it to yourself."
 msgstr "תצוגה מקדימה של המייל באמצעות שליחה לכתובת של עצמך"
 
 #. module: purchase
+#. odoo-javascript
+#: code:addons/purchase/static/src/product_catalog/purchase_order_line/purchase_order_line.xml:0
+#, python-format
+msgid "Price:"
+msgstr "מחיר:"
+
+#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
 msgid "Pricing"
 msgstr "תמחור"
-
-#. module: purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
-msgid "Print"
-msgstr "הדפס"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -2009,7 +1973,7 @@ msgstr "היסטוריית רכש"
 #. odoo-python
 #: code:addons/purchase/models/product.py:0
 #: code:addons/purchase/models/product.py:0
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #, python-format
 msgid "Purchase History for %s"
 msgstr ""
@@ -2023,8 +1987,8 @@ msgstr "זמן אספקת רכש"
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/controllers/portal.py:0
-#: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #: model:ir.actions.report,name:purchase.action_report_purchase_order
 #: model:ir.model,name:purchase.model_purchase_order
 #: model:ir.model.fields,field_description:purchase.field_account_bank_statement_line__purchase_id
@@ -2052,7 +2016,7 @@ msgstr "הזמנת רכש"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchaseorder_document
 msgid "Purchase Order #"
-msgstr "הזמנת רכש מס'"
+msgstr "הזמנת רכש מס' "
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_config_settings__po_order_approval
@@ -2115,7 +2079,6 @@ msgstr "שינוי הזמנת רכש משמש כאשר ברצונך לערוך �
 #: model:ir.ui.menu,name:purchase.menu_purchase_form_action
 #: model_terms:ir.ui.view,arch_db:purchase.account_analytic_account_view_form_purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_home_menu_purchase
-#: model_terms:ir.ui.view,arch_db:purchase.portal_my_home_purchase
 #: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_orders
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_bill_union_filter
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_order_filter
@@ -2159,7 +2122,6 @@ msgstr "קנה מוצרים לפי מספר יחידה בכל חבילה"
 
 #. module: purchase
 #: model:ir.actions.server,name:purchase.purchase_send_reminder_mail_ir_actions_server
-#: model:ir.cron,cron_name:purchase.purchase_send_reminder_mail
 msgid "Purchase reminder"
 msgstr "תזכורת רכש"
 
@@ -2286,11 +2248,6 @@ msgid "RFQ Sent"
 msgstr "בקשה להצעת מחיר נשלחה"
 
 #. module: purchase
-#: model:mail.template,report_name:purchase.email_template_edi_purchase
-msgid "RFQ_{{ (object.name or '').replace('/','_') }}"
-msgstr "RFQ_{{ (object.name or '').replace('/','_') }}"
-
-#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "RFQs"
 msgstr "בקשות להצעת מחיר"
@@ -2306,6 +2263,11 @@ msgstr "בקשות להצעות מחיר שנשלחו ב-7 הימים האחרו
 #: model:ir.actions.act_window,name:purchase.act_res_partner_2_purchase_order
 msgid "RFQs and Purchases"
 msgstr "בקשות להצעת מחיר ורכישות"
+
+#. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_purchase_order__rating_ids
+msgid "Ratings"
+msgstr "דירוגים"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__currency_rate
@@ -2419,7 +2381,7 @@ msgstr "דו\"חות"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #: model:ir.actions.report,name:purchase.report_purchase_quotation
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
 #: model_terms:ir.ui.view,arch_db:purchase.report_purchasequotation_document
@@ -2544,6 +2506,11 @@ msgstr ""
 "הבא."
 
 #. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
+msgid "Sell and purchase products in different units of measure"
+msgstr "מכור ורכוש מוצרים ביחידות מידה שונות"
+
+#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Send PO by Email"
 msgstr "שלח הזמנת רכש בדוא\"ל"
@@ -2562,6 +2529,11 @@ msgstr "שלח אימייל תזכורת אוטומטית לאישור משלו�
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Send by Email"
 msgstr "שלח בדוא\"ל"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
+msgid "Send message"
+msgstr "שלח הודעה"
 
 #. module: purchase
 #. odoo-javascript
@@ -2665,7 +2637,7 @@ msgstr ""
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_report_view_tree
 msgid "Sum of Qty Ordered"
-msgstr "סיכום הכמות שהוזמנה"
+msgstr "סך הכמות שהוזמנה"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_report_view_tree
@@ -2694,6 +2666,7 @@ msgid "Supplier Pricelist"
 msgstr "מחירון ספק"
 
 #. module: purchase
+#: model:ir.model,name:purchase.model_account_tax
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__price_tax
 msgid "Tax"
 msgstr "מס"
@@ -2707,6 +2680,32 @@ msgstr "מס לפי ארץ"
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__tax_totals
 msgid "Tax Totals"
 msgstr "סיכומי מס"
+
+#. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_purchase_order__tax_calculation_rounding_method
+#: model:ir.model.fields,field_description:purchase.field_purchase_order_line__tax_calculation_rounding_method
+msgid "Tax calculation rounding method"
+msgstr "שיטת עיגול חישוב מס"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Tax excl."
+msgstr "ללא מיסים"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Tax excl.:"
+msgstr "ללא מיסים"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Tax incl."
+msgstr "מיסים"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
+msgid "Tax incl.:"
+msgstr "מיסים"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__amount_tax
@@ -2724,7 +2723,7 @@ msgstr "שדה טכני למטרת חווית משתמש."
 msgid ""
 "Technical field to filter the available taxes depending on the fiscal "
 "country and fiscal position."
-msgstr "שדה טכני לסינון המסים הקיימים לפי מדינה פיסקלית ומצב פיסקלי."
+msgstr "שדה טכני לסינון המסים הקיימים לפי מדינה פיסקלית וסוג תנועה."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_portal_content
@@ -2747,7 +2746,7 @@ msgstr ""
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "The order receipt has been acknowledged by %s."
 msgstr "אישור על קבלת ההזמנה עודכן על-ידי %s."
@@ -2775,14 +2774,14 @@ msgstr "אין כרגע הצעות מחיר בחשבונך."
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid ""
 "There is no invoiceable line. If a product has a control policy based on "
 "received quantity, please make sure that a quantity has been received."
 msgstr ""
 "לא ניתן לייצר חשבונית. אם למוצר יש מדיניות בקרה המבוססת על כמות שהתקבלה, נא "
-"לוודא שתועד שהכמות התקבלה."
+"לוודא שהכמות שהתקבלה תועדה."
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.action_purchase_order_report_all
@@ -2815,7 +2814,7 @@ msgstr "הערה זו מתווספת להזמנות רכש."
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "This product is packaged by %(pack_size).2f %(pack_name)s. You should "
@@ -2828,15 +2827,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/purchase/models/account_invoice.py:0
 #, python-format
-msgid "This vendor bill has been created from: %s"
-msgstr "חשבונית ספק זו נוצרה מ: %s"
+msgid "This vendor bill has been created from: "
+msgstr ""
 
 #. module: purchase
 #. odoo-python
 #: code:addons/purchase/models/account_invoice.py:0
 #, python-format
-msgid "This vendor bill has been modified from: %s"
-msgstr "חשבונית ספק זו השתנתה מ: %s"
+msgid "This vendor bill has been modified from: "
+msgstr ""
 
 #. module: purchase
 #: model_terms:ir.actions.act_window,help:purchase.act_res_partner_2_purchase_order
@@ -2934,7 +2933,7 @@ msgstr "סוג הפעילות החריגה ברשומה."
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid ""
 "Unable to cancel this purchase order. You must first cancel the related "
@@ -2948,6 +2947,11 @@ msgid "Unit Price"
 msgstr "מחיר יחידה"
 
 #. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_purchase_order_line__price_unit_discounted
+msgid "Unit Price (Discounted)"
+msgstr ""
+
+#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Unit Price:"
 msgstr "מחיר יחידה:"
@@ -2956,6 +2960,11 @@ msgstr "מחיר יחידה:"
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line__product_uom
 msgid "Unit of Measure"
 msgstr "יחידת מידה"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
+msgid "Units Of Measure"
+msgstr "יחידות מידה"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_purchase_uom_form_action
@@ -3001,7 +3010,7 @@ msgstr "יחידת מידה"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "Update Dates"
 msgstr ""
@@ -3017,15 +3026,6 @@ msgid "User"
 msgstr "משתמש"
 
 #. module: purchase
-#. odoo-python
-#: code:addons/purchase/report/purchase_report.py:0
-#, python-format
-msgid ""
-"Value: 'avg_days_to_purchase' should only be used to show an average. If you"
-" are seeing this message then it is being accessed incorrectly."
-msgstr ""
-
-#. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
 msgid "Variant Grid Entry"
 msgstr "וריאנט מתצוגת רשת"
@@ -3034,6 +3034,8 @@ msgstr "וריאנט מתצוגת רשת"
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union__partner_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__partner_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__partner_id
+#: model_terms:ir.ui.view,arch_db:purchase.product_template_search_view_purchase
+#: model_terms:ir.ui.view,arch_db:purchase.product_view_search_catalog
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_search
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_line_tree
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_view_search
@@ -3068,7 +3070,7 @@ msgstr "מחירוני ספקים"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__partner_ref
 msgid "Vendor Reference"
-msgstr "מספר הזמנת ספק"
+msgstr "מספר חשבונית ספק"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_procurement_management_supplier_name
@@ -3090,10 +3092,15 @@ msgstr ""
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid "View"
 msgstr "תצוגה"
+
+#. module: purchase
+#: model_terms:ir.ui.view,arch_db:purchase.portal_my_purchase_order
+msgid "View Details"
+msgstr ""
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__volume
@@ -3120,7 +3127,7 @@ msgstr "בקשות להצעת מחיר בהמתנה"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #: model:ir.model.fields.selection,name:purchase.selection__product_template__purchase_line_warn__warning
 #: model:ir.model.fields.selection,name:purchase.selection__res_partner__purchase_warn__warning
 #, python-format
@@ -3129,8 +3136,8 @@ msgstr "אזהרה"
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #, python-format
 msgid "Warning for %s"
 msgstr "אזהרה עבור %s"
@@ -3190,7 +3197,7 @@ msgstr "אתה יכול למצוא ספק לפי שם, דוא\"ל או מזהה 
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "You cannot change the type of a purchase order line. Instead you should "
@@ -3217,7 +3224,7 @@ msgstr ""
 
 #. module: purchase
 #. odoo-python
-#: code:addons/purchase/models/purchase.py:0
+#: code:addons/purchase/models/purchase_order.py:0
 #, python-format
 msgid ""
 "Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n"

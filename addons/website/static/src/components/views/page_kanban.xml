@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <!-- TODO master: remove this template -->
-<t t-name="website.PageKanbanRenderer" t-inherit="web.KanbanRenderer" owl="1">
+<t t-name="website.PageKanbanRenderer" t-inherit="web.KanbanRenderer">
     <xpath expr="//t[@t-if='groupOrRecord.group']//KanbanRecord" position="attributes">
         <attribute name="t-if">recordFilter(record, props.list.records)</attribute>
         <attribute name="t-if"/><!-- stable way to cancel the above `t-if` -->
@@ -13,13 +13,13 @@
     </xpath>
 </t>
 
-<t t-name="website.PageKanbanView" t-inherit="web.KanbanView" owl="1">
-    <!-- TODO master: remove this xpath -->
+<!-- TODO master: remove this xpath -->
+<t t-name="website.PageKanbanView" t-inherit="web.KanbanView">
     <xpath expr="//t[@t-component='props.Renderer']" position="attributes">
         <attribute name="activeWebsite">state.activeWebsite</attribute>
     </xpath>
-    <xpath expr="//Layout" position="inside">
-        <t t-set-slot="control-panel-website-extra-actions">
+    <xpath expr="//SearchBar" position="inside">
+        <t t-set-slot="search-bar-additional-menu">
             <t t-call="website.RecordFilter"/>
         </t>
     </xpath>

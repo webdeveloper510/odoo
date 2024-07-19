@@ -1,8 +1,6 @@
-odoo.define('web.mixins', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var Class = require('web.Class');
-var utils = require('web.utils');
+import { floatIsZero } from "@web/core/utils/numbers";
 
 /**
  * Mixin to structure objects' life-cycles folowing a parent-children
@@ -31,8 +29,10 @@ var ParentedMixin = {
     setParent : function (parent) {
         if (this.getParent()) {
             if (this.getParent().__parentedMixin) {
-                this.getParent().__parentedChildren = _.without(this
-                        .getParent().getChildren(), this);
+                const children = this.getParent().getChildren();
+                this.getParent().__parentedChildren = children.filter(
+                    (child) => child.$el !== this.$el
+                );
             }
         }
         this.__parentedParent = parent;
@@ -50,7 +50,7 @@ var ParentedMixin = {
      * Return a list of the children of the current object.
      */
     getChildren : function () {
-        return _.clone(this.__parentedChildren);
+        return [...this.__parentedChildren];
     },
     /**
      * Returns true if destroy() was called on the current object.
@@ -84,7 +84,7 @@ var ParentedMixin = {
                 } else if (shouldReject) {
                     reject();
                 }
-            }).guardedCatch(function (reason) {
+            }).catch(function (reason) {
                 if (!self.isDestroyed()) {
                     reject(reason);
                 } else if (shouldReject) {
@@ -120,7 +120,7 @@ function OdooEvent(target, name, data) {
     this.target = target;
     this.name = name;
     this.data = Object.create(null);
-    _.extend(this.data, data);
+    Object.assign(this.data, data);
     this.stopped = false;
 }
 
@@ -147,8 +147,8 @@ OdooEvent.prototype.is_stopped = function () {
  * http://backbonejs.org
  *
  */
-var Events = Class.extend({
-    on : function (events, callback, context) {
+class Events {
+    on(events, callback, context) {
         var ev;
         events = events.split(/\s+/);
         var calls = this._callbacks || (this._callbacks = {});
@@ -160,9 +160,9 @@ var Events = Class.extend({
             list.tail = tail.next = {};
         }
         return this;
-    },
+    }
 
-    off : function (events, callback, context) {
+    off(events, callback, context) {
         var ev, calls, node;
         if (!events) {
             delete this._callbacks;
@@ -182,20 +182,20 @@ var Events = Class.extend({
             }
         }
         return this;
-    },
+    }
 
-    callbackList: function () {
+    callbackList() {
         var lst = [];
-        _.each(this._callbacks || {}, function (el, eventName) {
+        for (const [eventName, el] of Object.entries(this._callbacks || {})) {
             var node = el;
             while ((node = node.next) && node.next) {
                 lst.push([eventName, node.callback, node.context]);
             }
-        });
+        }
         return lst;
-    },
+    }
 
-    trigger : function (events) {
+    trigger(events) {
         var event, node, calls, tail, args, all, rest;
         if (!(calls = this._callbacks))
             return this;
@@ -226,7 +226,7 @@ var Events = Class.extend({
         }
         return this;
     }
-});
+}
 
 /**
  * Mixin containing an event system. Events are also registered by specifying the target object
@@ -239,7 +239,7 @@ var Events = Class.extend({
  * @name EventDispatcherMixin
  * @mixin
  */
-var EventDispatcherMixin = _.extend({}, ParentedMixin, {
+var EventDispatcherMixin = Object.assign({}, ParentedMixin, {
     __eventDispatcherMixin: true,
     custom_events: {},
     init: function () {
@@ -252,7 +252,7 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
      * Proxies a method of the object, in order to keep the right ``this`` on
      * method invocations.
      *
-     * This method is similar to ``Function.prototype.bind`` or ``_.bind``, and
+     * This method is similar to ``Function.prototype.bind``, and
      * even more so to ``jQuery.proxy`` with a fundamental difference: its
      * resolution of the method being called is lazy, meaning it will use the
      * method as it is when the proxy is called, not when the proxy is created.
@@ -278,7 +278,7 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
         };
     },
     _delegateCustomEvents: function () {
-        if (_.isEmpty(this.custom_events)) { return; }
+        if (Object.keys(this.custom_events || {}).length === 0) { return; }
         for (var key in this.custom_events) {
             if (!this.custom_events.hasOwnProperty(key)) { continue; }
 
@@ -292,7 +292,7 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
             throw new Error("Event handler must be a function.");
         }
         events = events.split(/\s+/);
-        _.each(events, function (eventName) {
+        events.forEach((eventName) => {
             self.__edispatcherEvents.on(eventName, func, dest);
             if (dest && dest.__eventDispatcherMixin) {
                 dest.__edispatcherRegisteredEvents.push({name: eventName, func: func, source: self});
@@ -303,10 +303,10 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
     off: function (events, dest, func) {
         var self = this;
         events = events.split(/\s+/);
-        _.each(events, function (eventName) {
+        events.forEach((eventName) => {
             self.__edispatcherEvents.off(eventName, func, dest);
             if (dest && dest.__eventDispatcherMixin) {
-                dest.__edispatcherRegisteredEvents = _.filter(dest.__edispatcherRegisteredEvents, function (el) {
+                dest.__edispatcherRegisteredEvents = dest.__edispatcherRegisteredEvents.filter(el => {
                     return !(el.name === eventName && el.func === func && el.source === self);
                 });
             }
@@ -343,23 +343,25 @@ var EventDispatcherMixin = _.extend({}, ParentedMixin, {
     },
     destroy: function () {
         var self = this;
-        _.each(this.__edispatcherRegisteredEvents, function (event) {
+        this.__edispatcherRegisteredEvents.forEach((event) => {
             event.source.__edispatcherEvents.off(event.name, event.func, self);
         });
         this.__edispatcherRegisteredEvents = [];
-        _.each(this.__edispatcherEvents.callbackList(), function (cal) {
-            this.off(cal[0], cal[2], cal[1]);
-        }, this);
+        this.__edispatcherEvents.callbackList().forEach(
+            ((cal) => {
+                this.off(cal[0], cal[2], cal[1]);
+            }).bind(this)
+        );
         this.__edispatcherEvents.off();
         ParentedMixin.destroy.call(this);
-    }
+    },
 });
 
 /**
  * @name PropertiesMixin
  * @mixin
  */
-var PropertiesMixin = _.extend({}, EventDispatcherMixin, {
+var PropertiesMixin = Object.assign({}, EventDispatcherMixin, {
     init: function () {
         EventDispatcherMixin.init.call(this);
         this.__getterSetterInternalMap = {};
@@ -377,7 +379,7 @@ var PropertiesMixin = _.extend({}, EventDispatcherMixin, {
         }
         var self = this;
         var changed = false;
-        _.each(map, function (val, key) {
+        for (const [key, val] of Object.entries(map)) {
             var tmp = self.__getterSetterInternalMap[key];
             if (tmp === val)
                 return;
@@ -387,8 +389,8 @@ var PropertiesMixin = _.extend({}, EventDispatcherMixin, {
             // remove this, or move it elsewhere.  Also, learn OO programming.
             if (key === 'value' && self.field && self.field.type === 'float' && tmp && val){
                 var digits = self.field.digits;
-                if (_.isArray(digits)) {
-                    if (utils.float_is_zero(tmp - val, digits[1])) {
+                if (Array.isArray(digits)) {
+                    if (floatIsZero(tmp - val, digits[1])) {
                         return;
                     }
                 }
@@ -400,7 +402,7 @@ var PropertiesMixin = _.extend({}, EventDispatcherMixin, {
                     oldValue: tmp,
                     newValue: val
                 });
-        });
+        }
         if (changed)
             self.trigger("change", self);
     },
@@ -409,10 +411,8 @@ var PropertiesMixin = _.extend({}, EventDispatcherMixin, {
     }
 });
 
-return {
+export default {
     ParentedMixin: ParentedMixin,
     EventDispatcherMixin: EventDispatcherMixin,
     PropertiesMixin: PropertiesMixin,
 };
-
-});

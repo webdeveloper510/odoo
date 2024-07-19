@@ -3,15 +3,15 @@
 # 	* google_calendar
 # 
 # Translators:
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
 # Thi Huong Nguyen, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2024\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -95,7 +95,7 @@ msgstr "Thông tin người tham dự"
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_event
 msgid "Calendar Event"
-msgstr "Lịch sự kiện"
+msgstr "Sự kiện theo Lịch"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_credentials__calendar_cal_id
@@ -116,7 +116,7 @@ msgstr "Client ID"
 #. module: google_calendar
 #: model_terms:ir.ui.view,arch_db:google_calendar.res_config_settings_view_form
 msgid "Client Secret"
-msgstr "Client Secret"
+msgstr "Mật khẩu khách"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_config_settings__cal_client_id
@@ -131,14 +131,22 @@ msgstr "Client_key"
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_res_config_settings
 msgid "Config Settings"
-msgstr "Cấu hình"
+msgstr "Cài đặt cấu hình"
 
 #. module: google_calendar
 #. odoo-javascript
 #: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
 #: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
+#: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
 #, python-format
 msgid "Configuration"
+msgstr "Cấu hình"
+
+#. module: google_calendar
+#. odoo-javascript
+#: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
+#, python-format
+msgid "Configure"
 msgstr "Cấu hình"
 
 #. module: google_calendar
@@ -174,6 +182,13 @@ msgid "Delete from the current Google Calendar account"
 msgstr "Delete from the current Google Calendar account"
 
 #. module: google_calendar
+#. odoo-javascript
+#: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
+#, python-format
+msgid "Discard"
+msgstr "Huỷ bỏ"
+
+#. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__display_name
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_credentials__display_name
 msgid "Display Name"
@@ -195,6 +210,7 @@ msgstr "Quy tắc lặp lại sự kiện"
 #. odoo-javascript
 #: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.xml:0
 #: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.xml:0
+#: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.xml:0
 #, python-format
 msgid "Google"
 msgstr "Google"
@@ -202,7 +218,7 @@ msgstr "Google"
 #. module: google_calendar
 #: model_terms:ir.ui.view,arch_db:google_calendar.view_users_form
 msgid "Google Calendar"
-msgstr "Lịch Google"
+msgstr "Google Calendar"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_res_users__google_calendar_account_id
@@ -233,9 +249,18 @@ msgstr "Google Calendar Id"
 
 #. module: google_calendar
 #: model:ir.actions.server,name:google_calendar.ir_cron_sync_all_cals_ir_actions_server
-#: model:ir.cron,cron_name:google_calendar.ir_cron_sync_all_cals
 msgid "Google Calendar: synchronization"
 msgstr "Google Calendar: synchronization"
+
+#. module: google_calendar
+#: model:ir.model.fields.selection,name:google_calendar.selection__calendar_event__videocall_source__google_meet
+msgid "Google Meet"
+msgstr "Google Meet"
+
+#. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_res_config_settings__cal_sync_paused
+msgid "Google Synchronization Paused"
+msgstr "Đồng bộ hóa Google đã tạm dừng"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_credentials__synchronization_stopped
@@ -249,6 +274,11 @@ msgstr "Đồng bộ hóa Google đã dừng"
 #, python-format
 msgid "Google gave the following explanation: %s"
 msgstr "Google đã đưa ra những giải thích sau: %s"
+
+#. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_event__guests_readonly
+msgid "Guests Event Modification Permission"
+msgstr "Quyền sửa đổi sự kiện của khách"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__id
@@ -266,26 +296,32 @@ msgstr ""
 "thể được ẩn đi mà không cần xoá nó."
 
 #. module: google_calendar
+#: model:ir.model.fields,help:google_calendar.field_res_config_settings__cal_sync_paused
+msgid "Indicates if synchronization with Google Calendar is paused or not."
+msgstr "Cho biết liệu đồng bộ hóa với Google Lịch có bị tạm dừng hay không."
+
+#. module: google_calendar
+#. odoo-python
+#: code:addons/google_calendar/models/google_sync.py:0
+#, python-format
+msgid "It will not be synced as long at it is not updated."
+msgstr "Nó sẽ không được đồng bộ hóa nếu không được cập nhật."
+
+#. module: google_calendar
 #: model:ir.model.fields,help:google_calendar.field_google_calendar_credentials__calendar_cal_id
 #: model:ir.model.fields,help:google_calendar.field_res_users__google_calendar_cal_id
 msgid ""
 "Last Calendar ID who has been synchronized. If it is changed, we remove all "
 "links between GoogleID and Odoo Google Internal ID"
 msgstr ""
-"Last Calendar ID who has been synchronized. If it is changed, we remove all "
-"links between GoogleID and Odoo Google Internal ID"
-
-#. module: google_calendar
-#: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset____last_update
-#: model:ir.model.fields,field_description:google_calendar.field_google_calendar_credentials____last_update
-msgid "Last Modified on"
-msgstr "Sửa lần cuối vào"
+"ID Lịch cuối cùng được đồng bộ hóa. Nếu bị thay đổi, chúng tôi sẽ xóa bỏ tất"
+" cả liên kết giữa Google ID và Google ID nội bộ trong Odoo"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__write_uid
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_credentials__write_uid
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Cập nhật lần cuối bởi"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__write_date
@@ -324,6 +360,11 @@ msgid "Notification"
 msgstr "Thông báo"
 
 #. module: google_calendar
+#: model_terms:ir.ui.view,arch_db:google_calendar.res_config_settings_view_form
+msgid "Pause Synchronization"
+msgstr "Tạm ngừng đồng bộ hoá"
+
+#. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_credentials__calendar_rtoken
 #: model:ir.model.fields,field_description:google_calendar.field_res_users__google_calendar_rtoken
 msgid "Refresh Token"
@@ -338,6 +379,13 @@ msgstr "Reset Account"
 #: model_terms:ir.ui.view,arch_db:google_calendar.google_calendar_reset_account_view_form
 msgid "Reset Google Calendar Account"
 msgstr "Reset Google Calendar Account"
+
+#. module: google_calendar
+#. odoo-javascript
+#: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
+#, python-format
+msgid "Stop Synchronization"
+msgstr "Tắt đồng bộ hoá"
 
 #. module: google_calendar
 #. odoo-javascript
@@ -381,14 +429,21 @@ msgstr "The account for the Google Calendar service is not configured."
 
 #. module: google_calendar
 #. odoo-python
-#: code:addons/google_calendar/models/google_sync.py:0
+#: code:addons/google_calendar/models/calendar.py:0
 #, python-format
 msgid ""
-"The following event could not be synced with Google Calendar. </br>It will "
-"not be synced as long at it is not updated.</br>%(reason)s"
+"The following event can only be updated by the organizer according to the "
+"event permissions set on Google Calendar."
 msgstr ""
-"Sự kiện sau không thể đồng bộ với Google Calendar. </br>Sự kiện sẽ không "
-"được đồng bộ chừng nào sự kiện không được cập nhật.</br>%(reason)s"
+"Sự kiện sau chỉ có thể được người tổ chức cập nhật theo quyền sự kiện được "
+"cài đặt trên Google Lịch."
+
+#. module: google_calendar
+#. odoo-python
+#: code:addons/google_calendar/models/google_sync.py:0
+#, python-format
+msgid "The following event could not be synced with Google Calendar."
+msgstr "Không thể đồng bộ hóa sự kiện sau với Google Lịch."
 
 #. module: google_calendar
 #. odoo-javascript
@@ -432,6 +487,11 @@ msgid "User's Existing Events"
 msgstr "User's Existing Events"
 
 #. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_event__videocall_source
+msgid "Videocall Source"
+msgstr "Nguồn cuộc gọi video"
+
+#. module: google_calendar
 #. odoo-javascript
 #: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
 #, python-format
@@ -441,6 +501,13 @@ msgid ""
 msgstr ""
 "Bạn sắp dừng đồng bộ hóa lịch của bạn với Google. Bạn có chắc chắn muốn tiếp"
 " tục không? "
+
+#. module: google_calendar
+#. odoo-javascript
+#: code:addons/google_calendar/static/src/views/google_calendar/google_calendar_controller.js:0
+#, python-format
+msgid "Your administrator paused the synchronization with Google Calendar."
+msgstr "Quản trị viên đã tạm dừng việc đồng bộ hóa với Google Lịch."
 
 #. module: google_calendar
 #. odoo-python

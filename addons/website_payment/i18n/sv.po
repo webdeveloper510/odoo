@@ -3,23 +3,22 @@
 # 	* website_payment
 # 
 # Translators:
-# Kristoffer Grundström <lovaren@gmail.com>, 2022
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
-# Martin Wilderoth <martin.wilderoth@linserv.se>, 2022
-# Patrik Lermon <patrik.lermon@gmail.com>, 2022
-# Kim Asplund <kim.asplund@gmail.com>, 2022
-# Simon S, 2022
-# Martin Trigaux, 2022
+# Kristoffer Grundström <lovaren@gmail.com>, 2023
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2023
+# Martin Wilderoth <martin.wilderoth@linserv.se>, 2023
+# Patrik Lermon <patrik.lermon@gmail.com>, 2023
 # Lasse L, 2023
+# Kim Asplund <kim.asplund@gmail.com>, 2023
+# Martin Trigaux, 2023
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:24+0000\n"
-"PO-Revision-Date: 2022-09-22 05:56+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -74,7 +73,7 @@ msgid "<b>Payment Method:</b>"
 msgstr "<b>Betalningsmetod:</b>"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "<option value=\"\">Country...</option>"
 msgstr "<option value=\"\">Land...</option>"
 
@@ -110,6 +109,7 @@ msgid "Activate Payments"
 msgstr "Aktivera betalningar"
 
 #. module: website_payment
+#: model:ir.actions.server,name:website_payment.action_activate_stripe
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Activate Stripe"
 msgstr "Aktivera Stripe"
@@ -137,7 +137,7 @@ msgid "Amount"
 msgstr "Belopp"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Amount ("
 msgstr "Summa ("
 
@@ -171,24 +171,21 @@ msgid "Configure %s"
 msgstr "Konfigurera %s"
 
 #. module: website_payment
-#: model:ir.actions.server,name:website_payment.action_stripe_connect_account
-msgid "Connect to Stripe"
-msgstr ""
-
-#. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #: model:ir.model,name:website_payment.model_res_country
 #, python-format
 msgid "Country"
 msgstr "Land"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid ""
 "Country\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"Land\n"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-python
@@ -228,14 +225,20 @@ msgid "Display Options"
 msgstr "Alternativ för visning"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#. odoo-python
+#: code:addons/website_payment/controllers/portal.py:0
+#, python-format
+msgid "Donate"
+msgstr "Donera"
+
+#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "Donate Now"
 msgstr "Donera nu"
 
 #. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 #: model_terms:ir.ui.view,arch_db:website_payment.snippets
 msgid "Donation"
 msgstr "Donationer"
@@ -266,21 +269,23 @@ msgstr "Meddelande om donation"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Email"
 msgstr "E-post"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid ""
 "Email\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"E-post\n"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Email is invalid"
 msgstr "E-postadressen är ogiltig"
@@ -294,7 +299,7 @@ msgstr "E-post är obligatoriskt."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Field '%s' is mandatory"
 msgstr "Fältet '%s' är obligatoriskt"
@@ -333,7 +338,7 @@ msgstr "Gör en donation"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
 msgid "Maximum"
-msgstr "Maximum"
+msgstr "Max"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
@@ -342,17 +347,19 @@ msgstr "Minimum"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Name"
 msgstr "Namn"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid ""
 "Name\n"
-"                            <span class=\"s_website_form_mark\"> *</span>"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"Namn\n"
+"                    <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-python
@@ -383,7 +390,7 @@ msgid "Other than Paypal"
 msgstr "Annat än Paypal"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Payment Details"
 msgstr "Betalningsinformation"
 
@@ -398,6 +405,13 @@ msgid "Payment Transaction"
 msgstr "Betalningstransaktion"
 
 #. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/js/payment_form.js:0
+#, python-format
+msgid "Payment processing failed"
+msgstr "Betalningshanteringen misslyckades"
+
+#. module: website_payment
 #. odoo-python
 #: code:addons/website_payment/models/payment_transaction.py:0
 #, python-format
@@ -408,11 +422,6 @@ msgstr "Betalning mottagen från donation med följande detaljer:"
 #: model:ir.model,name:website_payment.model_account_payment
 msgid "Payments"
 msgstr "Betalningar"
-
-#. module: website_payment
-#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__module_payment_paypal
-msgid "Paypal - Express Checkout"
-msgstr ""
 
 #. module: website_payment
 #: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__paypal_only
@@ -442,13 +451,6 @@ msgid "Recipient Email"
 msgstr "Mottagarens E-post"
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
-#, python-format
-msgid "Server Error"
-msgstr "Server Fel"
-
-#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Shop - Payment"
 msgstr "Butik - Betalning"
@@ -465,7 +467,7 @@ msgstr "Oavsett om det är litet eller stort är ditt bidrag avgörande."
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#: code:addons/website_payment/static/src/js/payment_form.js:0
 #, python-format
 msgid "Some information is missing to process your payment."
 msgstr "Viss information saknas för att vi ska kunna behandla din betalning."
@@ -511,13 +513,6 @@ msgid "There is nothing to pay."
 msgstr "Det finns inget att betala."
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
-#, python-format
-msgid "Validation Error"
-msgstr "Verifieringsfel"
-
-#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "View Alternatives"
 msgstr "Visa alternativ"
@@ -526,13 +521,6 @@ msgstr "Visa alternativ"
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "View other providers"
 msgstr "Se andra leverantörer"
-
-#. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/website_payment_form.js:0
-#, python-format
-msgid "We could not obtain payment fees."
-msgstr ""
 
 #. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_payment_provider__website_id
@@ -545,12 +533,12 @@ msgid "Website: Donation"
 msgstr "Webbplats Donation"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Write us a comment"
 msgstr "Skriv en kommentar till oss"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
+#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 msgid "Your comment"
 msgstr "Din kommentar"
 

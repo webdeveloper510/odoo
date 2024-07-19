@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { ancestors } from '@web_editor/js/common/wysiwyg_utils';
+import { closestElement } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 
 export class QWebPlugin {
     constructor(options = {}) {
@@ -8,10 +9,12 @@ export class QWebPlugin {
         if (this._options.editor) {
             this._editable = this._options.editor.editable;
             this._document = this._options.editor.document;
+            this._selectQwebNode(this._options.editor);
         } else {
             this._editable = this._options.editable;
             this._document = this._options.document || window.document;
         }
+        this._getContextFromParentRect = this._options.editor?.options?.getContextFromParentRect || (() => ({ top: 0, left: 0 }));
         this._editable = this._options.editable || (this._options.editor && this._options.editor.editable);
         this._document = this._options.document || (this._options.editor && this._options.editor.document) || window.document;
         this._tGroupCount = 0;
@@ -43,7 +46,7 @@ export class QWebPlugin {
 
         this._fixInlines(subRoot);
 
-        const demoElements = subRoot.querySelectorAll('[t-esc], [t-raw], [t-out]');
+        const demoElements = subRoot.querySelectorAll('[t-esc], [t-raw], [t-out], [t-field]');
         for (const element of demoElements) {
             element.setAttribute('contenteditable', 'false');
         }
@@ -130,6 +133,18 @@ export class QWebPlugin {
             }
         });
     }
+    _selectQwebNode(editor) {
+        editor.addDomListener(editor.document, 'selectionchange', e => {
+            const selection = editor.document.getSelection();
+            const qwebNode = selection.anchorNode && closestElement(selection.anchorNode, '[t-field],[t-esc],[t-out]');
+            if (qwebNode){
+                const range = new Range();
+                range.selectNode(qwebNode);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        });
+    }
     _makeBranchingSelection() {
         const document = this._options.document || window.document;
         this._selectElWrapper = document.createElement('div');
@@ -179,15 +194,18 @@ export class QWebPlugin {
         );
     }
     _updateBranchingSelectionPosition(target) {
-        window.addEventListener('mousewheel', this._hideBranchingSelection);
-
         const box = target.getBoundingClientRect();
         const selBox = this._selectElWrapper.getBoundingClientRect();
+        const parentBox = this._getContextFromParentRect();
 
-        this._selectElWrapper.style.left = `${window.scrollX + box.left}px`;
-        this._selectElWrapper.style.top = `${window.scrollY + box.top - selBox.height}px`;
+        const left = parentBox.left + window.scrollX + box.left;
+        const top = parentBox.top + window.scrollY + box.top - selBox.height;
+
+        this._selectElWrapper.style.left = `${left}px`;
+        this._selectElWrapper.style.top = `${top}px`;
     }
     _renderBranchingSelection(target) {
+        this._document.addEventListener('scroll', this._hideBranchingSelection);
         const selectEl = document.createElement('select');
         const groupId = parseInt(target.getAttribute('data-oe-t-group'));
         const groupElements = target.parentElement.querySelectorAll(
@@ -196,9 +214,9 @@ export class QWebPlugin {
         for (const element of groupElements) {
             const optionElement = document.createElement('option');
             if (element.hasAttribute('t-if')) {
-                optionElement.innerText = 'if';
+                optionElement.innerText = `if: "${element.getAttribute("t-if")}"`;
             } else if (element.hasAttribute('t-elif')) {
-                optionElement.innerText = 'elif';
+                optionElement.innerText = `elif: "${element.getAttribute("t-elif")}"`;
             } else if (element.hasAttribute('t-else')) {
                 optionElement.innerText = 'else';
             }
@@ -225,6 +243,6 @@ export class QWebPlugin {
     _hideBranchingSelection() {
         this._selectElWrapper.style.display = 'none';
         this._selectElWrapper.innerHTML = ``;
-        window.removeEventListener('mousewheel', this._hideBranchingSelection);
+        this._document.removeEventListener('scroll', this._hideBranchingSelection);
     }
 }

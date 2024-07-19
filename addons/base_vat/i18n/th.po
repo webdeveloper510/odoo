@@ -3,16 +3,15 @@
 # 	* base_vat
 # 
 # Translators:
-# Wichanon Jamwutthipreecha, 2022
-# Martin Trigaux, 2023
+# Wil Odoo, 2023
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-21 21:59+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -53,17 +52,6 @@ msgid "49-098-576 or 49098576"
 msgstr "49-098-576 หรือ 49098576"
 
 #. module: base_vat
-#: model_terms:ir.ui.view,arch_db:base_vat.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"ค่าที่ตั้งไว้นี้เป็นค่าเฉพาะบริษัท\" "
-"groups=\"base.group_multi_company\" role=\"img\"/>"
-
-#. module: base_vat
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
@@ -88,12 +76,22 @@ msgstr "CO213123432-1 หรือ CO213.123.432-1"
 #. module: base_vat
 #: model:ir.model,name:base_vat.model_res_company
 msgid "Companies"
-msgstr "หลายบริษัท"
+msgstr "บริษัท"
 
 #. module: base_vat
 #: model:ir.model,name:base_vat.model_res_config_settings
 msgid "Config Settings"
 msgstr "ตั้งค่าการกำหนดค่า"
+
+#. module: base_vat
+#. odoo-python
+#: code:addons/base_vat/models/res_partner.py:0
+#, python-format
+msgid ""
+"Connection with the VIES server failed. The VAT number %s could not be "
+"validated."
+msgstr ""
+"การเชื่อมต่อกับเซิร์ฟเวอร์ VIES ล้มเหลว ไม่สามารถตรวจสอบหมายเลข VAT %s ได้"
 
 #. module: base_vat
 #: model:ir.model,name:base_vat.model_res_partner
@@ -113,6 +111,12 @@ msgstr "DE123456788 หรือ 12/345/67890"
 #, python-format
 msgid "DO1-01-85004-3 or 101850043"
 msgstr "DO1-01-85004-3 หรือ 101850043"
+
+#. module: base_vat
+#: model:ir.model.fields,help:base_vat.field_res_partner__vies_valid
+#: model:ir.model.fields,help:base_vat.field_res_users__vies_valid
+msgid "European VAT numbers are automatically checked on the VIES database."
+msgstr "หมายเลข VAT ของยุโรปจะถูกตรวจสอบโดยอัตโนมัติในฐานข้อมูล VIES"
 
 #. module: base_vat
 #: model:ir.model,name:base_vat.model_account_fiscal_position
@@ -136,11 +140,18 @@ msgstr "HU12345676 หรือ 12345678-1-11 หรือ 8071592153"
 #. module: base_vat
 #: model_terms:ir.ui.view,arch_db:base_vat.res_config_settings_view_form
 msgid ""
-"If this checkbox is ticked, you will not be able to save a contact if its "
-"VAT number cannot be verified by the European VIES service."
+"If this checkbox is ticked, the default fiscal position that applies will "
+"depend upon the output of the verification by the European VIES Service."
 msgstr ""
-"หากทำเครื่องหมายในช่องนี้คุณจะไม่สามารถบันทึกรายชื่อติดต่อได้หากบริการ "
-"European VIES ไม่สามารถตรวจสอบหมายเลข VAT ได้"
+"หากทำเครื่องหมายในช่องนี้ "
+"ฐานะทางการเงินเริ่มต้นที่ใช้จะขึ้นอยู่กับผลลัพธ์ของการตรวจสอบโดยบริการ VIES "
+"ของยุโรป"
+
+#. module: base_vat
+#: model:ir.model.fields,field_description:base_vat.field_res_partner__vies_valid
+#: model:ir.model.fields,field_description:base_vat.field_res_users__vies_valid
+msgid "Intra-Community Valid"
+msgstr "ภายในคอมมูนิตี้ถูกต้อง"
 
 #. module: base_vat
 #. odoo-python
@@ -150,6 +161,12 @@ msgid "MXGODE561231GR8 or GODE561231GR8"
 msgstr "MXGODE561231GR8 หรือ GODE561231GR8"
 
 #. module: base_vat
+#: model:ir.model.fields,field_description:base_vat.field_res_partner__perform_vies_validation
+#: model:ir.model.fields,field_description:base_vat.field_res_users__perform_vies_validation
+msgid "Perform Vies Validation"
+msgstr "ดำเนินการตรวจสอบ Vies"
+
+#. module: base_vat
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
@@ -157,10 +174,9 @@ msgid "TR1234567890 (VERGINO) or TR17291716060 (TCKIMLIKNO)"
 msgstr "TR1234567890 (VERGINO) หรือ TR17291716060 (TCKIMLIKNO)"
 
 #. module: base_vat
-#: model:ir.model.fields,field_description:base_vat.field_res_partner__vies_failed_message
-#: model:ir.model.fields,field_description:base_vat.field_res_users__vies_failed_message
-msgid "Technical field display a message to the user if the VIES check fails."
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:base_vat.view_partner_base_vat_form
+msgid "Tax ID"
+msgstr "เลขประจำตัวผู้เสียภาษี"
 
 #. module: base_vat
 #. odoo-python
@@ -188,8 +204,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
-msgid "The VAT number %s failed the VIES VAT validation check."
-msgstr ""
+msgid "The VAT number %s could not be interpreted by the VIES server."
+msgstr "หมายเลข VAT %s ไม่สามารถตีความได้โดยเซิร์ฟเวอร์ VIES"
 
 #. module: base_vat
 #. odoo-python
@@ -201,6 +217,17 @@ msgid ""
 msgstr ""
 "ประเทศที่ตรวจพบสำหรับหมายเลข VAT "
 "ต่างประเทศนี้ไม่ตรงกับประเทศที่ตั้งไว้ในสถานะทางบัญชีนี้"
+
+#. module: base_vat
+#. odoo-python
+#: code:addons/base_vat/models/res_partner.py:0
+#, python-format
+msgid ""
+"The request for VAT validation was not processed. VIES service has responded"
+" with the following error: %s"
+msgstr ""
+"คำขอสำหรับการตรวจสอบ VAT ไม่ได้รับการดำเนินการ บริการ VIES "
+"ตอบกลับโดยมีข้อผิดพลาดดังต่อไปนี้: %s"
 
 #. module: base_vat
 #. odoo-python
@@ -219,6 +246,12 @@ msgstr "ตรวจสอบหมายเลข VAT"
 #: model_terms:ir.ui.view,arch_db:base_vat.res_config_settings_view_form
 msgid "Verify VAT numbers using the European VIES service"
 msgstr "ตรวจสอบหมายเลข VAT โดยใช้บริการ European VIES"
+
+#. module: base_vat
+#: model:ir.model.fields,field_description:base_vat.field_res_partner__vies_vat_to_check
+#: model:ir.model.fields,field_description:base_vat.field_res_users__vies_vat_to_check
+msgid "Vies Vat To Check"
+msgstr "Vies Vat เพื่อตรวจสอบ"
 
 #. module: base_vat
 #. odoo-python

@@ -3,16 +3,16 @@
 # 	* base_import
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
+# Wil Odoo, 2023
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,47 +22,53 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
-msgid "%d records successfully imported"
-msgstr "%d записи успішно імпортовано"
+msgid "%s at multiple rows"
+msgstr "%s на кількох рядках"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_action/import_action.js:0
+#, python-format
+msgid "%s records successfully imported"
+msgstr "%s записи успішно імпортовано"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid ""
 "A single column was found in the file, this often means the file separator "
-"is incorrect"
+"is incorrect."
 msgstr ""
-"У файлі знайдено одинарну колонку; зазвичай це означає, що роздільник файлів"
-" налаштований невірно"
+"У файлі знайдено один стовпець, це часто означає, що роздільник файлу "
+"неправильний."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.js:0
 #, python-format
 msgid "Additional Fields"
 msgstr "Додаткові поля"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Advanced"
 msgstr "Розширено"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Allow matching with subfields"
 msgstr "Дозволити узгодження з підполями"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid ""
 "An unknown issue occurred during import (possibly lost connection, data "
@@ -92,32 +98,38 @@ msgstr "Зіставлення імпорту бази"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
+#, python-format
+msgid "Batch"
+msgstr "Група"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Batch Import"
 msgstr "Груповий імпорт"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Batch limit"
 msgstr "Груповий ліміт"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Cancel"
 msgstr "Скасувати"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
-msgid "Click 'Resume' to proceed with the import, resuming at line"
-msgstr ""
-"Натисніть 'Продовжити', щоби продовжити імпорт, відновлюючись у рядках"
+msgid "Click 'Resume' to proceed with the import, resuming at line %s."
+msgstr "Натисніть 'Продовжити' щоб продовжити імпорт, з рядка %s."
 
 #. module: base_import
 #. odoo-python
@@ -140,15 +152,16 @@ msgstr "Назва колонки"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
+#: code:addons/base_import/static/src/import_model.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Comma"
 msgstr "Кома"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "Comments"
 msgstr "Коментарі"
@@ -166,7 +179,7 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
 msgid "Create new values"
 msgstr "Створити нові значення"
@@ -174,50 +187,14 @@ msgstr "Створити нові значення"
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__create_uid
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__create_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__create_uid
 msgid "Created by"
 msgstr "Створив"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__create_date
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__create_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__create_date
 msgid "Created on"
 msgstr "Створено"
-
-#. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__currency_id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__currency_id
-msgid "Currency"
-msgstr "Валюта"
 
 #. module: base_import
 #. odoo-python
@@ -229,78 +206,50 @@ msgstr "ID бази даних"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Date Format:"
 msgstr "Формат дати:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Datetime Format:"
 msgstr "Формат дати та часу:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
-msgid "Decimal Separator:"
-msgstr "Десятковий розділювач:"
+msgid "Decimals Separator:"
+msgstr "Десятковий роздільник:"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__display_name
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__display_name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__display_name
 msgid "Display Name"
 msgstr "Назва для відображення"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Dot"
 msgstr "Крапка"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Download"
 msgstr "Завантажити"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#, python-format
-msgid "Download Template"
-msgstr "Завантажити шаблон"
-
-#. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__dt
-msgid "Dt"
-msgstr "Dt"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Encoding:"
 msgstr "Кодування:"
@@ -311,6 +260,13 @@ msgstr "Кодування:"
 #, python-format
 msgid "Error Parsing Date [%s:L%d]: %s"
 msgstr "Помилка аналізу дати [%s:L%d]: %s"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_model.js:0
+#, python-format
+msgid "Error at row %s: \"%s\""
+msgstr "Помилка на рядку %s: \"%s\""
 
 #. module: base_import
 #. odoo-python
@@ -337,21 +293,21 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 #, python-format
 msgid "Estimated time left:"
 msgstr "Витрачений оцінений час:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Everything seems valid."
 msgstr "Все здається вірним."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Excel files are recommended as formatting is automatic."
 msgstr ""
@@ -377,10 +333,7 @@ msgstr "Файл"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "File Column"
 msgstr "Колонка файлу"
@@ -410,21 +363,21 @@ msgstr "Файл для перевірки та/або імпорту, біна�
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 #, python-format
 msgid "Finalizing current batch before interrupting..."
 msgstr "Завершення поточної групи перед перериванням..."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "For CSV files, you may need to select the correct separator."
 msgstr "Для файлів CSV вам потрібно буде вибрати правильний роздільник."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Formatting"
 msgstr "Форматування"
@@ -442,21 +395,21 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Go to Import FAQ"
 msgstr "Перейдіть в імпорт FAQ"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Help"
 msgstr "Допомога"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "Here is the start of the file we could not import:"
 msgstr "Ось початок файла, який не вдалося імпортувати:"
@@ -464,27 +417,12 @@ msgstr "Ось початок файла, який не вдалося імпо�
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__id
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__id
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__id
 msgid "ID"
 msgstr "ID"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid ""
 "If the file contains\n"
@@ -498,18 +436,6 @@ msgstr ""
 "                    простішим, особливо коли у файлі багато колонок."
 
 #. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#, python-format
-msgid ""
-"If the model uses openchatter, history tracking will set up subscriptions "
-"and send notifications during the import, but lead to a slower import."
-msgstr ""
-"Якщо модель використовує openchatter, відстеження історії налаштовує "
-"підписки та надсилає сповіщення під час імпорту, але призводить до "
-"повільнішого імпорту."
-
-#. module: base_import
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
@@ -521,21 +447,21 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Import"
 msgstr "Імпорт"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Import FAQ"
 msgstr "Імпортувати FAQ"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_action/import_action.js:0
 #, python-format
 msgid "Import a File"
 msgstr "Імпорт файлу"
@@ -549,10 +475,10 @@ msgstr "Імпортований файл не має вмісту або пош
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
-msgid "Import preview failed due to:"
-msgstr "Помилка попереднього перегляду імпорту через:"
+msgid "Import preview failed due to: \""
+msgstr "Помилка попереднього перегляду імпорту через: \""
 
 #. module: base_import
 #. odoo-javascript
@@ -563,14 +489,14 @@ msgstr "Імпортувати записи"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Imported file"
 msgstr "Імпортований файл"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_action/import_action.js:0
 #, python-format
 msgid "Importing"
 msgstr "Імпортування"
@@ -584,175 +510,109 @@ msgstr ""
 "Недійсне значення клітинки в рядку %(row)s, колонки %(col)s: %(cell_value)s"
 
 #. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#, python-format
-msgid "Label"
-msgstr "Мітка"
-
-#. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_import____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_mapping____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child____last_update
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview____last_update
-msgid "Last Modified on"
-msgstr "Остання модифікація"
-
-#. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__write_uid
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__write_uid
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__write_uid
 msgid "Last Updated by"
 msgstr "Востаннє оновив"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__write_date
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_complex__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__write_date
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__write_date
 msgid "Last Updated on"
 msgstr "Останнє оновлення"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Load File"
 msgstr "Завантажити файл"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_action/import_action.js:0
 #, python-format
 msgid "Loading file..."
 msgstr "Завантаження файлу..."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model
+#: code:addons/base_import/static/src/import_block_ui.xml:0
 #, python-format
+msgid "Loading..."
+msgstr "Завантаження..."
+
+#. module: base_import
+#: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model
 msgid "Model"
 msgstr "Модель"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
 msgid "Multiple errors occurred"
 msgstr "Виникло кілька помилок"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__name
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__name
-#, python-format
-msgid "Name"
-msgstr "Назва"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Need Help?"
 msgstr "Потрібна допомога?"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "No Separator"
 msgstr "Немає роздільника"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
-msgid "No matching records found for"
-msgstr "Не знайдено співставлених записів для"
+msgid "No matching records found for the following name"
+msgstr "Для наступного імені не знайдено відповідних записів"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#, python-format
-msgid "No matching records found for the following"
-msgstr "Не знайдено співставлених записів для наступного"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "Odoo Field"
 msgstr "Поле Odoo"
 
 #. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__othervalue
-msgid "Other Variable"
-msgstr "Інша змінна"
-
-#. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__parent_id
-msgid "Parent"
-msgstr "Батьківський"
-
-#. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
 msgid "Prevent import"
 msgstr "Заборонити імпорт"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "Preview"
 msgstr "Попередній перегляд"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
+#, python-format
+msgid "Progress bar"
+msgstr "Гістограма прогресу"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
+#, python-format
+msgid "Reimport"
+msgstr "Повторний імпорт"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_data_content/import_data_content.js:0
 #, python-format
 msgid "Relation Fields"
 msgstr "Пов’язані поля"
@@ -764,301 +624,201 @@ msgstr "Модель резервування"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Resume"
 msgstr "Продовжити"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.js:0
 #, python-format
-msgid "Search for a field..."
+msgid "Search a field..."
 msgstr "Пошук поля..."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
 msgid "See possible values"
 msgstr "Переглянути можливі значення"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Selected Sheet:"
 msgstr "Обраний баланс:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Semicolon"
 msgstr "Крапка з комою"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Separator:"
 msgstr "Роздільник:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
-msgid "Set to:"
-msgstr "Встановити на:"
+msgid "Set to: %s"
+msgstr "Встановити на: %s"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
 msgid "Set to: False"
 msgstr "Встановити на: False"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
 msgid "Set to: True"
 msgstr "Встановити на: True"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
 msgid "Set value as empty"
 msgstr "Встановити значення як пусте"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Sheet:"
 msgstr "Таблиця:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.js:0
 #, python-format
 msgid "Skip record"
 msgstr "Пропустити запис"
 
 #. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_preview__somevalue
-msgid "Some Value"
-msgstr "Деяке значення"
-
-#. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Space"
 msgstr "Пробіл"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.js:0
 #, python-format
 msgid "Standard Fields"
 msgstr "Стандартні поля"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Start at line"
 msgstr "Почніть в рядку"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 #, python-format
 msgid "Stop Import"
 msgstr "Зупинити імпорт"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.js:0
 #, python-format
 msgid "Suggested Fields"
 msgstr "Рекомендовані поля"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Tab"
 msgstr "Tab"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Test"
 msgstr "Тест"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_action/import_action.js:0
 #, python-format
 msgid "Testing"
 msgstr "Тестування"
 
 #. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_preview
-msgid "Tests : Base Import Model Preview"
-msgstr "Тести : Попередній перегляд моделі імпорту бази"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_char
-msgid "Tests : Base Import Model, Character"
-msgstr "Тести : Модель імпорту бази, Символ"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_char_noreadonly
-msgid "Tests : Base Import Model, Character No readonly"
-msgstr "Тести : Модель імпорту бази, Символ Немає лише для читання"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_char_readonly
-msgid "Tests : Base Import Model, Character readonly"
-msgstr "Тести : Модель імпорту бази, Символ тільки для читання"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_char_required
-msgid "Tests : Base Import Model, Character required"
-msgstr "Тести : Модель імпорту бази, Необхідний символ"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_char_states
-msgid "Tests : Base Import Model, Character states"
-msgstr "Тести : Модель імпорту бази, Стани символів"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_char_stillreadonly
-msgid "Tests : Base Import Model, Character still readonly"
-msgstr "Тести : Модель імпорту бази, Символ досі тільки для читання"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_m2o
-msgid "Tests : Base Import Model, Many to One"
-msgstr "Тести : Модель імпорту бази, Many to One"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_m2o_related
-msgid "Tests : Base Import Model, Many to One related"
-msgstr "Тести : Модель імпорту бази, Many to One пов'язано"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_m2o_required
-msgid "Tests : Base Import Model, Many to One required"
-msgstr "Тести : Модель імпорту бази, Many to One необхідно"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_m2o_required_related
-msgid "Tests : Base Import Model, Many to One required related"
-msgstr "Тести : Модель імпорту бази, Many to One пов'язано необхідний"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_o2m
-msgid "Tests : Base Import Model, One to Many"
-msgstr "Тести : Модель імпорту бази, One to Many"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_o2m_child
-msgid "Tests : Base Import Model, One to Many child"
-msgstr "Тести : Модель імпорту бази, дочірній One to Many"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_complex
-msgid "Tests: Base Import Model Complex"
-msgstr "Тести : Комплекс моделі імпорту бази"
-
-#. module: base_import
-#: model:ir.model,name:base_import.model_base_import_tests_models_float
-msgid "Tests: Base Import Model Float"
-msgstr "Тести : Гнучка модель імпорту бази"
-
-#. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Text Delimiter:"
 msgstr "Роздільник тексту:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "The file contains blocking errors (see below)"
 msgstr "Файл містить помилки блокування (перегляньте нижче)"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#, python-format
-msgid "The file contains non-blocking warnings (see below)"
-msgstr "Файл містить попередження про неблокування (перегляньте нижче)"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "The file will be imported by batches"
 msgstr "Файл буде імпортовано групами"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "This column will be concatenated in field"
 msgstr "Цей стовпець буде об’єднано в поле"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#, python-format
-msgid "This file has been successfully imported up to line %d."
-msgstr "Цей файл успішно імпортовано в рядок %d."
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "Thousands Separator:"
 msgstr "Тисячний роздільник:"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
-msgid "To import multiple values, separate them by a comma"
-msgstr "Щоб імпортувати кілька значень, розділіть їх комами"
+msgid "To import multiple values, separate them by a comma."
+msgstr "Щоб імпортувати кілька значень, розділіть їх комою."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "To import, select a field..."
 msgstr "Щоб імпортувати, оберіть поле..."
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Track history during import"
 msgstr "Історія переміщень під час імпорту"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/js/import_action.js:0
-#, python-format
-msgid "Type"
-msgstr "Тип"
 
 #. module: base_import
 #. odoo-python
@@ -1081,28 +841,57 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_content/import_data_content.xml:0
 #, python-format
 msgid "Untitled"
 msgstr "Без назви"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Upload File"
 msgstr "Завантажити файл"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_action/import_action.xml:0
 #, python-format
 msgid "Upload an Excel or CSV file to import"
 msgstr "Завантажте файл Excel або CSV для імпорту"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_model.js:0
+#, python-format
+msgid ""
+"Use HH for hours in a 24h system, use II in conjonction with 'p' for a 12h "
+"system. You can use a custom format in addition to the suggestions provided."
+" Leave empty to let Odoo guess the format (recommended)"
+msgstr ""
+"Використовуйте HH для годин у 24-годинній системі, використовуйте II у "
+"поєднанні з «p» для 12-годинної системи. Ви можете використовувати власний "
+"формат на додаток до наданих пропозицій. Залиште порожнім, щоб Odoo "
+"зрозуміла формат (рекомендовано)"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_model.js:0
+#, python-format
+msgid ""
+"Use YYYY to represent the year, MM for the month and DD for the day. Include"
+" separators such as a dot, forward slash or dash. You can use a custom "
+"format in addition to the suggestions provided. Leave empty to let Odoo "
+"guess the format (recommended)"
+msgstr ""
+"Використовуйте YYYY для позначення року, ММ для місяця та DD для дня. "
+"Додайте роздільники, наприклад крапку, скісну риску або тире. Ви можете "
+"використовувати власний формат на додаток до наданих пропозицій. Залиште "
+"порожнім, щоб Odoo зрозуміла формат (рекомендовано)"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 #, python-format
 msgid "Use first row as header"
 msgstr "Використовувати перший рядок як заголовок"
@@ -1113,41 +902,8 @@ msgid "User"
 msgstr "Користувач"
 
 #. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_noreadonly__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_readonly__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_required__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_states__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_char_stillreadonly__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_related__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_m2o_required_related__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m__value
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_o2m_child__value
-msgid "Value"
-msgstr "Значення"
-
-#. module: base_import
-#: model:ir.model.fields,field_description:base_import.field_base_import_tests_models_float__value2
-msgid "Value2"
-msgstr "Значення2"
-
-#. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#, python-format
-msgid ""
-"Warning: ignores the labels line, empty lines and lines composed only of "
-"empty cells"
-msgstr ""
-"Попередження: ігнорує рядок мітки, порожні рядки та рядки, що складаються "
-"лише з порожніх клітинок"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_options/import_data_options.xml:0
 #, python-format
 msgid "When a value cannot be matched:"
 msgstr "Коли значення не може бути співставлене:"
@@ -1165,7 +921,7 @@ msgstr ""
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_model.js:0
 #, python-format
 msgid "You can test or reload your file before resuming the import."
 msgstr ""
@@ -1181,53 +937,52 @@ msgstr "Щоб імпортувати, потрібно налаштувати �
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
 msgid "at multiple rows"
 msgstr "на кілька рядків"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
 msgid "at row"
 msgstr "на рядку"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#, python-format
-msgid "batch"
-msgstr "співставити"
-
-#. module: base_import
-#. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
 msgid "in field"
 msgstr "у полі"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 #, python-format
 msgid "minutes"
 msgstr "хвилин"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_column_error/import_data_column_error.xml:0
 #, python-format
-msgid "more)"
-msgstr "більше)"
+msgid "more"
+msgstr "більше"
 
 #. module: base_import
 #. odoo-javascript
-#: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
 #, python-format
 msgid "out of"
 msgstr "з"
+
+#. module: base_import
+#. odoo-javascript
+#: code:addons/base_import/static/src/import_data_progress/import_data_progress.xml:0
+#, python-format
+msgid "seconds"
+msgstr "секунди"
 
 #. module: base_import
 #. odoo-python

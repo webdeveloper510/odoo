@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import models
+from odoo import api, models
 
 
 class AccountEdiXmlUBL21(models.AbstractModel):
@@ -25,8 +25,12 @@ class AccountEdiXmlUBL21(models.AbstractModel):
         vals = super()._export_invoice_vals(invoice)
 
         vals.update({
+            'PaymentTermsType_template': 'account_edi_ubl_cii.ubl_21_PaymentTermsType',
+            'CreditNoteLineType_template': 'account_edi_ubl_cii.ubl_21_CreditNoteLineType',
+            'DebitNoteLineType_template': 'account_edi_ubl_cii.ubl_21_DebitNoteLineType',
             'InvoiceType_template': 'account_edi_ubl_cii.ubl_21_InvoiceType',
-            'InvoiceLineType_template': 'account_edi_ubl_cii.ubl_21_InvoiceLineType',
+            'CreditNoteType_template': 'account_edi_ubl_cii.ubl_21_CreditNoteType',
+            'DebitNoteType_template': 'account_edi_ubl_cii.ubl_21_DebitNoteType',
         })
 
         vals['vals'].update({
@@ -35,3 +39,13 @@ class AccountEdiXmlUBL21(models.AbstractModel):
         })
 
         return vals
+
+    @api.model
+    def _get_customization_ids(self):
+        return {
+            'ubl_bis3': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0',
+            'nlcius': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0',
+            'ubl_sg': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0',
+            'xrechnung': 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0',
+            'ubl_a_nz': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0',
+        }

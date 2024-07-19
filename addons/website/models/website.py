@@ -1,23 +1,20 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+import fnmatch
 import hashlib
 import inspect
 import json
 import logging
-import operator
 import re
 import requests
 import threading
 
-from collections import defaultdict
-from functools import reduce
 from lxml import etree, html
 from psycopg2 import sql
 from werkzeug import urls
 from werkzeug.datastructures import OrderedMultiDict
 from werkzeug.exceptions import NotFound
-from markupsafe import Markup
 
 from odoo import api, fields, models, tools, http, release, registry
 from odoo.addons.http_routing.models.ir_http import RequestUID, slugify, url_for
@@ -27,10 +24,10 @@ from odoo.addons.portal.controllers.portal import pager
 from odoo.addons.iap.tools import iap_tools
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.http import request
-from odoo.modules.module import get_resource_path, get_manifest
+from odoo.modules.module import get_manifest
 from odoo.osv.expression import AND, OR, FALSE_DOMAIN, get_unaccent_wrapper
-from odoo.tools.translate import _
-from odoo.tools import escape_psql, OrderedSet, pycompat
+from odoo.tools.translate import _, xml_translate
+from odoo.tools import escape_psql, pycompat
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +42,8 @@ DEFAULT_CDN_FILTERS = [
     "^/website/image/",
 ]
 
-DEFAULT_ENDPOINT = 'https://website.api.odoo.com'
-
-# TODO: Remove in master.
-SEARCH_TYPE_MODELS = defaultdict(OrderedSet)
-#: DO NOT USE: this breaks multitenancy, extend '_search_get_details' instead
+DEFAULT_WEBSITE_ENDPOINT = 'https://website.api.odoo.com'
+DEFAULT_OLG_ENDPOINT = 'https://olg.api.odoo.com'
 
 
 class Website(models.Model):
@@ -66,7 +60,7 @@ class Website(models.Model):
         return self.env['res.lang'].search([]).ids
 
     def _default_language(self):
-        lang_code = self.env['ir.default'].get('res.partner', 'lang')
+        lang_code = self.env['ir.default']._get('res.partner', 'lang')
         def_lang_id = self.env['res.lang']._lang_get_id(lang_code)
         return def_lang_id or self._active_languages()[0]
 
@@ -101,9 +95,11 @@ class Website(models.Model):
     def _default_social_twitter(self):
         return self.env.ref('base.main_company').social_twitter
 
+    def _default_social_tiktok(self):
+        return self.env.ref('base.main_company').social_tiktok
+
     def _default_logo(self):
-        image_path = get_resource_path('website', 'static/src/img', 'website_logo.svg')
-        with tools.file_open(image_path, 'rb') as f:
+        with tools.file_open('website/static/src/img/website_logo.svg', 'rb') as f:
             return base64.b64encode(f.read())
 
     logo = fields.Binary('Website Logo', default=_default_logo, help="Display this logo on the website.")
@@ -113,6 +109,7 @@ class Website(models.Model):
     social_linkedin = fields.Char('LinkedIn Account', default=_default_social_linkedin)
     social_youtube = fields.Char('Youtube Account', default=_default_social_youtube)
     social_instagram = fields.Char('Instagram Account', default=_default_social_instagram)
+    social_tiktok = fields.Char('TikTok Account', default=_default_social_tiktok)
     social_default_image = fields.Binary(string="Default Social Share Image", help="If set, replaces the website logo as the default social share image.")
     has_social_default_image = fields.Boolean(compute='_compute_has_social_default_image', store=True)
 
@@ -137,8 +134,7 @@ class Website(models.Model):
     robots_txt = fields.Html('Robots.txt', translate=False, groups='website.group_website_designer', sanitize=False)
 
     def _default_favicon(self):
-        img_path = get_resource_path('web', 'static/img/favicon.ico')
-        with tools.file_open(img_path, 'rb') as f:
+        with tools.file_open('web/static/img/favicon.ico', 'rb') as f:
             return base64.b64encode(f.read())
 
     favicon = fields.Binary(string="Website Favicon", help="This field holds the image used to display a favicon on the website.", default=_default_favicon)
@@ -189,11 +185,11 @@ class Website(models.Model):
             website.menu_id = top_menus and top_menus[0].id or False
 
     # self.env.uid for ir.rule groups on menu
-    @tools.ormcache('self.env.uid', 'self.id')
+    @tools.ormcache('self.env.uid', 'self.id', cache='templates')
     def _get_menu_ids(self):
         return self.env['website.menu'].search([('website_id', '=', self.id)]).ids
 
-    @tools.ormcache('self.env.uid', 'self.id')
+    @tools.ormcache('self.env.uid', 'self.id', cache='templates')
     def is_menu_cache_disabled(self):
         """
         Checks if the website menu contains a record like url.
@@ -229,7 +225,7 @@ class Website(models.Model):
         original_company = self.company_id
         self._handle_create_write(values)
 
-        self.clear_caches()
+        self.env.registry.clear_cache()
 
         if 'company_id' in values and 'user_id' not in values:
             public_user_to_change_websites = self.filtered(lambda w: w.sudo().user_id.company_id.id != values['company_id'])
@@ -241,7 +237,7 @@ class Website(models.Model):
 
         if 'cdn_activated' in values or 'cdn_url' in values or 'cdn_filters' in values:
             # invalidate the caches from static node at compile time
-            self.env['ir.qweb'].clear_caches()
+            self.env.registry.clear_cache()
 
         # invalidate cache for `company.website_id` to be recomputed
         if 'sequence' in values or 'company_id' in values:
@@ -299,12 +295,8 @@ class Website(models.Model):
             if not website.homepage_url.startswith('/'):
                 raise ValidationError(_("The homepage URL should be relative and start with '/'."))
 
-    # TODO: rename in master
     @api.ondelete(at_uninstall=False)
-    def _unlink_except_last_remaining_website(self):
-        website = self.search([('id', 'not in', self.ids)], limit=1)
-        if not website:
-            raise UserError(_('You must keep at least one website.'))
+    def _unlink_except_default_website(self):
         default_website = self.env.ref('website.default_website', raise_if_not_found=False)
         if default_website and default_website in self:
             raise UserError(_("You cannot delete default website %s. Try to change its settings instead", default_website.name))
@@ -323,7 +315,7 @@ class Website(models.Model):
             ('website_id', 'in', self.ids),
             '|', '|',
             ('key', '!=', False),  # theme attachment
-            ('url', 'ilike', '.custom.'),  # customized theme attachment
+            ('url', '=like', '/_custom/%'),  # customized theme attachment
             ('url', 'ilike', '.assets\\_'),
         ])
         attachments_to_unlink.unlink()
@@ -350,21 +342,29 @@ class Website(models.Model):
     # ----------------------------------------------------------
     # Configurator
     # ----------------------------------------------------------
-    def _website_api_rpc(self, route, params):
+
+    def _api_rpc(self, route, params, endpoint_param_name, default_endpoint, **kwargs):
         params['version'] = release.version
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
-        website_api_endpoint = IrConfigParameter.get_param('website.website_api_endpoint', DEFAULT_ENDPOINT)
-        endpoint = website_api_endpoint + route
-        return iap_tools.iap_jsonrpc(endpoint, params=params)
+        api_endpoint = IrConfigParameter.get_param(endpoint_param_name, default_endpoint)
+        return iap_tools.iap_jsonrpc(api_endpoint + route, params=params, **kwargs)
+
+    def _website_api_rpc(self, route, params):
+        # For industries, theme suggestions, ...
+        return self._api_rpc(route, params, 'website.website_api_endpoint', DEFAULT_WEBSITE_ENDPOINT)
+
+    def _OLG_api_rpc(self, route, params):
+        # For text content generation
+        return self._api_rpc(route, params, 'website.olg_api_endpoint', DEFAULT_OLG_ENDPOINT, timeout=20)
 
     def get_cta_data(self, website_purpose, website_type):
         return {'cta_btn_text': False, 'cta_btn_href': '/contactus'}
 
     @api.model
-    def get_theme_snippet_lists(self, theme_name):
+    def get_theme_configurator_snippets(self, theme_name):
         return {
-            **get_manifest('theme_default')['snippet_lists'],
-            **get_manifest(theme_name).get('snippet_lists', {}),
+            **get_manifest('theme_default')['configurator_snippets'],
+            **get_manifest(theme_name).get('configurator_snippets', {}),
         }
 
     def configurator_set_menu_links(self, menu_company, module_data):
@@ -392,13 +392,14 @@ class Website(models.Model):
             'module_state': feature.module_id.state,
         } for feature in configurator_features]
         r['logo'] = False
-        if company.logo and company.logo != company._get_logo():
+        if not company.uses_default_logo:
             r['logo'] = company.logo.decode('utf-8')
         try:
             result = self._website_api_rpc('/api/website/1/configurator/industries', {'lang': self.env.context.get('lang')})
             r['industries'] = result['industries']
         except AccessError as e:
             logger.warning(e.args[0])
+            r['industries'] = []
         return r
 
     @api.model
@@ -409,7 +410,7 @@ class Website(models.Model):
         client_themes = Module.search(domain).mapped('name')
         client_themes_img = {t: get_manifest(t).get('images_preview_theme', {}) for t in client_themes if get_manifest(t)}
         themes_suggested = self._website_api_rpc(
-            '/api/website/2/configurator/recommended_themes/%s' % industry_id,
+            '/api/website/2/configurator/recommended_themes/%s' % (industry_id if industry_id > 0 else ''),
             {'client_themes': client_themes_img}
         )
         process_svg = self.env['website.configurator.feature']._process_svg
@@ -423,140 +424,22 @@ class Website(models.Model):
         website.configurator_done = True
 
     @api.model
+    def configurator_missing_industry(self, unknown_industry):
+        self._website_api_rpc(
+            '/api/website/unknown_industry',
+            {
+                'unknown_industry': unknown_industry,
+                'lang': self.env.context.get('lang'),
+            }
+        )
+
+    @api.model
     def configurator_apply(self, **kwargs):
-        def set_colors(selected_palette):
-            url = '/website/static/src/scss/options/user_values.scss'
-            selected_palette_name = selected_palette if isinstance(selected_palette, str) else 'base-1'
-            values = {'color-palettes-name': "'%s'" % selected_palette_name}
-            self.env['web_editor.assets'].make_scss_customization(url, values)
-
-            if isinstance(selected_palette, list):
-                url = '/website/static/src/scss/options/colors/user_color_palette.scss'
-                values = {f'o-color-{i}': color for i, color in enumerate(selected_palette, 1)}
-                self.env['web_editor.assets'].make_scss_customization(url, values)
-
-        def set_features(selected_features):
-            features = self.env['website.configurator.feature'].browse(selected_features)
-
-            menu_company = self.env['website.menu']
-            if len(features.filtered('menu_sequence')) > 5 and len(features.filtered('menu_company')) > 1:
-                menu_company = self.env['website.menu'].create({
-                    'name': _('Company'),
-                    'parent_id': website.menu_id.id,
-                    'website_id': website.id,
-                    'sequence': 40,
-                })
-
-            pages_views = {}
-            modules = self.env['ir.module.module']
-            module_data = {}
-            for feature in features:
-                add_menu = bool(feature.menu_sequence)
-                if feature.module_id:
-                    if feature.module_id.state != 'installed':
-                        modules += feature.module_id
-                    if add_menu:
-                        if feature.module_id.name != 'website_blog':
-                            module_data[feature.feature_url] = {'sequence': feature.menu_sequence}
-                        else:
-                            blogs = module_data.setdefault('#blog', [])
-                            blogs.append({'name': feature.name, 'sequence': feature.menu_sequence})
-                elif feature.page_view_id:
-                    result = self.env['website'].new_page(
-                        name=feature.name,
-                        add_menu=add_menu,
-                        page_values=dict(url=feature.feature_url, is_published=True),
-                        menu_values=add_menu and {
-                            'url': feature.feature_url,
-                            'sequence': feature.menu_sequence,
-                            'parent_id': feature.menu_company and menu_company.id or website.menu_id.id,
-                        },
-                        template=feature.page_view_id.key
-                    )
-                    pages_views[feature.iap_page_code] = result['view_id']
-
-            if modules:
-                modules.button_immediate_install()
-                assert self.env.registry is registry()
-
-            self.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
-
-            return pages_views
-
-        def configure_page(page_code, snippet_list, pages_views, cta_data):
-            if page_code == 'homepage':
-                page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
-            else:
-                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
-            rendered_snippets = []
-            nb_snippets = len(snippet_list)
-            for i, snippet in enumerate(snippet_list, start=1):
-                try:
-                    IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
-                    render = IrQweb._render('website.' + snippet, cta_data)
-                    if render:
-                        el = html.fromstring(render)
-
-                        # Add the data-snippet attribute to identify the snippet
-                        # for compatibility code
-                        el.attrib['data-snippet'] = snippet
-
-                        # Tweak the shape of the first snippet to connect it
-                        # properly with the header color in some themes
-                        if i == 1:
-                            shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                            if shape_el:
-                                shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
-
-                        # Tweak the shape of the last snippet to connect it
-                        # properly with the footer color in some themes
-                        if i == nb_snippets:
-                            shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                            if shape_el:
-                                shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
-                        rendered_snippet = pycompat.to_text(etree.tostring(el))
-                        rendered_snippets.append(rendered_snippet)
-                except ValueError as e:
-                    logger.warning(e)
-            page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
-                              xpath="(//div[hasclass('oe_structure')])[last()]")
-
-        def set_images(images):
-            names = self.env['ir.model.data'].search([
-                ('name', '=ilike', f'configurator\\_{website.id}\\_%'),
-                ('module', '=', 'website'),
-                ('model', '=', 'ir.attachment')
-            ]).mapped('name')
-            for name, url in images.items():
-                extn_identifier = 'configurator_%s_%s' % (website.id, name.split('.')[1])
-                if extn_identifier in names:
-                    continue
-                try:
-                    response = requests.get(url, timeout=3)
-                    response.raise_for_status()
-                except Exception as e:
-                    logger.warning("Failed to download image: %s.\n%s", url, e)
-                else:
-                    attachment = self.env['ir.attachment'].create({
-                        'name': name,
-                        'website_id': website.id,
-                        'key': name,
-                        'type': 'binary',
-                        'raw': response.content,
-                        'public': True,
-                    })
-                    self.env['ir.model.data'].create({
-                        'name': extn_identifier,
-                        'module': 'website',
-                        'model': 'ir.attachment',
-                        'res_id': attachment.id,
-                        'noupdate': True,
-                    })
-
         website = self.get_current_website()
         theme_name = kwargs['theme_name']
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
-        url = theme.button_choose_theme()
+        theme._generate_primary_snippet_templates()
+        redirect_url = theme.button_choose_theme()
 
         # Force to refresh env after install of module
         assert self.env.registry is registry()
@@ -577,13 +460,23 @@ class Website(models.Model):
                 'res_field': 'logo',
                 'res_id': website.id,
             })
-        elif not logo_attachment_id and company.logo and company.logo != company._get_logo():
+        elif not logo_attachment_id and not company.uses_default_logo:
             website.logo = company.logo.decode('utf-8')
 
-        # palette
-        palette = kwargs.get('selected_palette')
-        if palette:
-            set_colors(palette)
+        # Configure the color palette
+        selected_palette = kwargs.get('selected_palette')
+        if selected_palette:
+            Assets = self.env['web_editor.assets']
+            selected_palette_name = selected_palette if isinstance(selected_palette, str) else 'base-1'
+            Assets.make_scss_customization(
+                '/website/static/src/scss/options/user_values.scss',
+                {'color-palettes-name': "'%s'" % selected_palette_name}
+            )
+            if isinstance(selected_palette, list):
+                Assets.make_scss_customization(
+                    '/website/static/src/scss/options/colors/user_color_palette.scss',
+                    {f'o-color-{i}': color for i, color in enumerate(selected_palette, 1)}
+                )
 
         # Update CTA
         cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
@@ -620,14 +513,59 @@ class Website(models.Model):
             except ValueError as e:
                 logger.warning(e)
 
-        # modules
-        pages_views = set_features(kwargs.get('selected_features'))
-        # We need to refresh the environment of website because set_features installed some new module
-        # and we need the overrides of these new menus e.g. for .get_cta_data()
+        # Configure the features
+        features = self.env['website.configurator.feature'].browse(kwargs.get('selected_features'))
+
+        menu_company = self.env['website.menu']
+        if len(features.filtered('menu_sequence')) > 5 and len(features.filtered('menu_company')) > 1:
+            menu_company = self.env['website.menu'].create({
+                'name': _('Company'),
+                'parent_id': website.menu_id.id,
+                'website_id': website.id,
+                'sequence': 40,
+            })
+
+        pages_views = {}
+        modules = self.env['ir.module.module']
+        module_data = {}
+        for feature in features:
+            add_menu = bool(feature.menu_sequence)
+            if feature.module_id:
+                if feature.module_id.state != 'installed':
+                    modules += feature.module_id
+                if add_menu:
+                    if feature.module_id.name != 'website_blog':
+                        module_data[feature.feature_url] = {'sequence': feature.menu_sequence}
+                    else:
+                        blogs = module_data.setdefault('#blog', [])
+                        blogs.append({'name': feature.name, 'sequence': feature.menu_sequence})
+            elif feature.page_view_id:
+                result = self.env['website'].new_page(
+                    name=feature.name,
+                    add_menu=add_menu,
+                    page_values=dict(url=feature.feature_url, is_published=True),
+                    menu_values=add_menu and {
+                        'url': feature.feature_url,
+                        'sequence': feature.menu_sequence,
+                        'parent_id': feature.menu_company and menu_company.id or website.menu_id.id,
+                    },
+                    template=feature.page_view_id.key
+                )
+                pages_views[feature.iap_page_code] = result['view_id']
+
+        if modules:
+            modules.button_immediate_install()
+            assert self.env.registry is registry()
+
+        self.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
+
+        # We need to refresh the environment of the website because we installed
+        # some new module and we need the overrides of these new menus e.g. for
+        # the call to `get_cta_data`.
         website = self.env['website'].browse(website.id)
 
-        # Update footers links, needs to be done after `set_features` to go
-        # through module overide of `configurator_get_footer_links`
+        # Update footers links, needs to be done after "Features" addition to go
+        # through module overrides of `configurator_get_footer_links`.
         footer_links = website.configurator_get_footer_links()
         footer_ids = [
             'website.template_footer_contact', 'website.template_footer_headline',
@@ -651,20 +589,204 @@ class Website(models.Model):
                 logger.warning(e)
 
         # Load suggestion from iap for selected pages
+        industry_id = kwargs['industry_id']
         custom_resources = self._website_api_rpc(
-            '/api/website/2/configurator/custom_resources/%s' % kwargs['industry_id'],
-            {'theme': theme_name, }
+            '/api/website/2/configurator/custom_resources/%s' % (industry_id if industry_id > 0 else ''),
+            {'theme': theme_name}
         )
 
-        # Update pages
-        requested_pages = list(pages_views.keys()) + ['homepage']
-        snippet_lists = website.get_theme_snippet_lists(theme_name)
-        for page_code in requested_pages:
-            configure_page(page_code, snippet_lists.get(page_code, []), pages_views, cta_data)
+        # Generate text for the pages
+        requested_pages = set(pages_views.keys()).union({'homepage'})
+        configurator_snippets = website.get_theme_configurator_snippets(theme_name)
+        industry = kwargs['industry_name']
 
+        IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
+        snippets_cache = {}
+        translated_content = {}
+
+        def _compute_placeholder(term):
+            return xml_translate.get_text_content(term).strip()
+
+        def _render_snippet(key):
+            # Using this avoids rendering the same snippet multiple times
+            data = snippets_cache.get(key)
+            if data:
+                return data
+
+            render = IrQweb._render(key, cta_data)
+
+            terms = []
+            xml_translate(terms.append, render)
+            placeholders = [_compute_placeholder(term) for term in terms]
+
+            if text_must_be_translated_for_openai:
+                # Check if terms are translated.
+                translation_dictionary = self.env['website.page']._fields['arch_db'].get_translation_dictionary(
+                    str(IrQweb._render(key, cta_data, lang="en_US")),
+                    {text_generation_target_lang: str(render)},
+                )
+                # Remove all numeric keys.
+                translation_dictionary = {k: v for k, v in translation_dictionary.items() if not _compute_placeholder(k).isnumeric()}
+                for from_lang_term, to_lang_terms in translation_dictionary.items():
+                    translated_content[from_lang_term] = to_lang_terms[text_generation_target_lang]
+
+            data = (render, placeholders)
+            snippets_cache[key] = data
+            return data
+
+        text_generation_target_lang = self.get_current_website().default_lang_id.code
+        # If the target language is not English, we need a good translation
+        # coverage. But if the target lang is en_XX it's ok to have en_US text.
+        text_must_be_translated_for_openai = not text_generation_target_lang.startswith('en_')
+        generated_content = {}
+        for page_code in requested_pages - {'privacy_policy'}:
+            snippet_list = configurator_snippets.get(page_code, [])
+            for snippet in snippet_list:
+                render, placeholders = _render_snippet(f'website.configurator_{page_code}_{snippet}')
+                for placeholder in placeholders:
+                    generated_content[placeholder] = ''
+        if text_must_be_translated_for_openai:
+            nb_terms_translated = len([k for k, v in translated_content.items() if k != v])
+            nb_terms_total = len(translated_content)
+        else:
+            nb_terms_translated = len(generated_content)
+            nb_terms_total = len(generated_content)
+        translated_ratio = nb_terms_translated / nb_terms_total
+        logger.debug("Ratio of translated content: %s%% (%s/%s)", translated_ratio * 100, nb_terms_translated, nb_terms_total)
+
+        if translated_ratio > 0.8:
+            try:
+                database_id = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
+                response = self._OLG_api_rpc('/api/olg/1/generate_placeholder', {
+                    'placeholders': list(generated_content.keys()),
+                    'lang': website.default_lang_id.name,
+                    'industry': industry,
+                    'database_id': database_id,
+                })
+                name_replace_parser = re.compile(r"XXXX", re.MULTILINE)
+                for key in generated_content:
+                    if response.get(key):
+                        generated_content[key] = (name_replace_parser.sub(website.name, response[key], 0))
+            except AccessError:
+                # If IAP is broken continue normally (without generating text)
+                pass
+        else:
+            logger.info("Skip AI text generation because translation coverage is too low (%s%%)", translated_ratio * 100)
+
+        # Configure the pages
+        for page_code in requested_pages:
+            snippet_list = configurator_snippets.get(page_code, [])
+            if page_code == 'homepage':
+                page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
+            else:
+                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
+            rendered_snippets = []
+            nb_snippets = len(snippet_list)
+            for i, snippet in enumerate(snippet_list, start=1):
+                try:
+                    render, placeholders = _render_snippet(f'website.configurator_{page_code}_{snippet}')
+
+                    # Fill rendered block with AI text
+                    render = xml_translate(
+                        lambda x: generated_content.get(_compute_placeholder(x), x),
+                        render
+                    )
+
+                    el = html.fromstring(render)
+
+                    # Add the data-snippet attribute to identify the snippet
+                    # for compatibility code
+                    el.attrib['data-snippet'] = snippet
+
+                    # Tweak the shape of the first snippet to connect it
+                    # properly with the header color in some themes
+                    if i == 1:
+                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                        if shape_el:
+                            shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+
+                    # Tweak the shape of the last snippet to connect it
+                    # properly with the footer color in some themes
+                    if i == nb_snippets:
+                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                        if shape_el:
+                            shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
+                    rendered_snippet = pycompat.to_text(etree.tostring(el))
+                    rendered_snippets.append(rendered_snippet)
+                except ValueError as e:
+                    logger.warning(e)
+            page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
+                              xpath="(//div[hasclass('oe_structure')])[last()]")
+
+        # Configure the images
         images = custom_resources.get('images', {})
-        set_images(images)
-        return {'url': url, 'website_id': website.id}
+        names = self.env['ir.model.data'].search([
+            ('name', '=ilike', f'configurator\\_{website.id}\\_%'),
+            ('module', '=', 'website'),
+            ('model', '=', 'ir.attachment')
+        ]).mapped('name')
+        for name, image_src in images.items():
+            extn_identifier = 'configurator_%s_%s' % (website.id, name.split('.')[1])
+            if extn_identifier in names:
+                continue
+            try:
+                response = requests.get(image_src, timeout=3)
+                response.raise_for_status()
+            except Exception as e:
+                logger.warning("Failed to download image: %s.\n%s", image_src, e)
+            else:
+                attachment = self.env['ir.attachment'].create({
+                    'name': name,
+                    'website_id': website.id,
+                    'key': name,
+                    'type': 'binary',
+                    'raw': response.content,
+                    'public': True,
+                })
+                self.env['ir.model.data'].create({
+                    'name': extn_identifier,
+                    'module': 'website',
+                    'model': 'ir.attachment',
+                    'res_id': attachment.id,
+                    'noupdate': True,
+                })
+
+        def fallback_create_missing_industry_image(image_name, fallback_img_name):
+            """ If an industry did not specify an image, this method allows that
+            specific image to be using the same image as another fallback one.
+            """
+            image_name = f'website.{image_name}'
+            if (
+                image_name not in images.keys()
+                and f'website.{fallback_img_name}' in images.keys()
+            ):
+                extn_identifier = 'configurator_%s_%s' % (website.id, image_name.split('.')[1])
+                if extn_identifier not in names:
+                    attachment = self.env['ir.attachment'].create({
+                        'name': image_name,
+                        'website_id': website.id,
+                        'key': image_name,
+                        'type': 'binary',
+                        'raw': self.env.ref(f'website.configurator_{website.id}_{fallback_img_name}').raw,
+                        'public': True,
+                    })
+                    self.env['ir.model.data'].create({
+                        'name': extn_identifier,
+                        'module': 'website',
+                        'model': 'ir.attachment',
+                        'res_id': attachment.id,
+                        'noupdate': True,
+                    })
+
+        try:
+            # TODO: Remove this try/except, safety net because it was merged
+            #       to close to OXP.
+            fallback_create_missing_industry_image('s_banner_default_image_2', 's_image_text_default_image')
+            fallback_create_missing_industry_image('s_banner_default_image_3', 's_product_list_default_image_1')
+        except Exception:
+            pass
+
+        return {'url': redirect_url, 'website_id': website.id}
 
     # ----------------------------------------------------------
     # Page Management
@@ -720,14 +842,15 @@ class Website(models.Model):
                 copy_menu(submenu, new_top_menu)
 
     @api.model
-    def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None, page_values=None, menu_values=None):
+    def new_page(self, name=False, add_menu=False, template='website.default_page', ispage=True, namespace=None, page_values=None, menu_values=None, sections_arch=None):
         """ Create a new website page, and assign it a xmlid based on the given one
-            :param name : the name of the page
-            :param add_menu : if True, add a menu for that page
-            :param template : potential xml_id of the page to create
-            :param namespace : module part of the xml_id if none, the template module name is used
-            :param page_values : default values for the page to be created
-            :param menu_values : default values for the menu to be created
+            :param name: the name of the page
+            :param add_menu: if True, add a menu for that page
+            :param template: potential xml_id of the page to create
+            :param namespace: module part of the xml_id if none, the template module name is used
+            :param page_values: default values for the page to be created
+            :param menu_values: default values for the menu to be created
+            :param sections_arch: HTML content of sections
         """
         if namespace:
             template_module = namespace
@@ -743,12 +866,19 @@ class Website(models.Model):
             page_key = 'home'
 
         template_record = self.env.ref(template)
+        arch = template_record.arch
+        if sections_arch:
+            tree = html.fromstring(arch)
+            wrap = tree.xpath('//div[@id="wrap"]')[0]
+            for section in html.fromstring(f'<wrap>{sections_arch}</wrap>'):
+                wrap.append(section)
+            arch = etree.tostring(tree, encoding="unicode")
         website_id = self._context.get('website_id')
         key = self.get_unique_key(page_key, template_module)
         view = template_record.copy({'website_id': website_id, 'key': key})
 
         view.with_context(lang=None).write({
-            'arch': template_record.arch.replace(template, key),
+            'arch': arch.replace(template, key),
             'name': name,
         })
         result['view_id'] = view.id
@@ -923,6 +1053,7 @@ class Website(models.Model):
         langs = []
         shorts = []
 
+        self_prefetch_langs = self.with_context(prefetch_langs=True)
         for lg in languages:
             lg_codes = lg.code.split('_')
             short = lg_codes[0]
@@ -930,7 +1061,7 @@ class Website(models.Model):
             langs.append({
                 'hreflang': ('-'.join(lg_codes)).lower(),
                 'short': short,
-                'href': self._get_canonical_url_localized(lang=lg, canonical_params=canonical_params),
+                'href': self_prefetch_langs._get_canonical_url_localized(lang=lg, canonical_params=canonical_params),
             })
 
         # if there is only one region for a language, use only the language code
@@ -991,8 +1122,7 @@ class Website(models.Model):
         domain_name = (
             request and request.httprequest.host
             or hasattr(threading.current_thread(), 'url') and threading.current_thread().url
-            or ''
-        )
+            or '')
         website_id = self.sudo()._get_current_website_id(domain_name, fallback=fallback)
         return self.browse(website_id)
 
@@ -1106,7 +1236,7 @@ class Website(models.Model):
         return view
 
     @api.model
-    @tools.ormcache_context('key', keys=('website_id',))
+    @tools.ormcache('key', 'self._context.get("website_id")', cache='templates')
     def is_view_active(self, key):
         """
             Return True if active, False if not active, None if not found
@@ -1166,6 +1296,31 @@ class Website(models.Model):
                       of the same.
             :rtype: list({name: str, url: str})
         """
+        # ==== WEBSITE.PAGES ====
+        # '/' already has a http.route & is in the routing_map so it will already have an entry in the xml
+        domain = [('url', '!=', '/')]
+        if not force:
+            domain += [('website_indexed', '=', True), ('visibility', '=', False)]
+            # is_visible
+            domain += [
+                ('website_published', '=', True), ('visibility', '=', False),
+                '|', ('date_publish', '=', False), ('date_publish', '<=', fields.Datetime.now())
+            ]
+
+        if query_string:
+            domain += [('url', 'like', query_string)]
+
+        pages = self._get_website_pages(domain)
+
+        for page in pages:
+            record = {'loc': page['url'], 'id': page['id'], 'name': page['name']}
+            if page.view_id and page.view_id.priority != 16:
+                record['priority'] = min(round(page.view_id.priority / 32.0, 1), 1)
+            if page['write_date']:
+                record['lastmod'] = page['write_date'].date()
+            yield record
+
+        # ==== CONTROLLERS ====
         router = self.env['ir.http'].routing_map()
         url_set = set()
 
@@ -1221,36 +1376,14 @@ class Website(models.Model):
 
             for value in values:
                 domain_part, url = rule.build(value, append_unknown=False)
-                if not query_string or query_string.lower() in url.lower():
+                pattern = query_string and '*%s*' % "*".join(query_string.split('/'))
+                if not query_string or fnmatch.fnmatch(url.lower(), pattern):
                     page = {'loc': url}
                     if url in url_set:
                         continue
                     url_set.add(url)
 
                     yield page
-
-        # '/' already has a http.route & is in the routing_map so it will already have an entry in the xml
-        domain = [('url', '!=', '/')]
-        if not force:
-            domain += [('website_indexed', '=', True), ('visibility', '=', False)]
-            # is_visible
-            domain += [
-                ('website_published', '=', True), ('visibility', '=', False),
-                '|', ('date_publish', '=', False), ('date_publish', '<=', fields.Datetime.now())
-            ]
-
-        if query_string:
-            domain += [('url', 'like', query_string)]
-
-        pages = self._get_website_pages(domain)
-
-        for page in pages:
-            record = {'loc': page['url'], 'id': page['id'], 'name': page['name']}
-            if page.view_id and page.view_id.priority != 16:
-                record['priority'] = min(round(page.view_id.priority / 32.0, 1), 1)
-            if page['write_date']:
-                record['lastmod'] = page['write_date'].date()
-            yield record
 
     def get_website_page_ids(self):
         if not self.env.user.has_group('website.group_website_restricted_editor'):
@@ -1268,16 +1401,16 @@ class Website(models.Model):
             domain = AND([domain, self.website_domain()])
         pages = self.env['website.page'].sudo().search(domain)
         if self:
-            pages = pages._get_most_specific_pages()
+            pages = pages.with_context(website_id=self.id)._get_most_specific_pages()
         return pages.ids
 
     def _get_website_pages(self, domain=None, order='name', limit=None):
+        website = self.get_current_website()
         if domain is None:
             domain = []
-        domain += self.get_current_website().website_domain()
-        domain = AND([domain, [('url', '!=', False)]])
+        domain += website.website_domain()
         pages = self.env['website.page'].sudo().search(domain, order=order, limit=limit)
-        pages = pages._get_most_specific_pages()
+        pages = pages.with_context(website_id=website.id)._get_most_specific_pages()
         return pages
 
     def search_pages(self, needle=None, limit=None):
@@ -1304,7 +1437,7 @@ class Website(models.Model):
     def image_url(self, record, field, size=None):
         """ Returns a local url that points to the image field of a given browse record. """
         sudo_record = record.sudo()
-        sha = hashlib.sha512(str(getattr(sudo_record, '__last_update')).encode('utf-8')).hexdigest()[:7]
+        sha = hashlib.sha512(str(sudo_record.write_date).encode('utf-8')).hexdigest()[:7]
         size = '' if size is None else '/%s' % size
         return '/web/image/%s/%s/%s%s?unique=%s' % (record._name, record.id, field, size, sha)
 
@@ -1371,6 +1504,8 @@ class Website(models.Model):
                         args[key] = val = val.with_user(request.uid)
                     if val.env.context.get('lang') != lang.code:
                         args[key] = val = val.with_context(lang=lang.code)
+                    if self.env.context.get('prefetch_langs'):
+                        args[key] = val = val.with_context(prefetch_langs=True)
 
             router = http.root.get_db_router(request.db).bind('')
             path = router.build(rule.endpoint, args)
@@ -1448,34 +1583,6 @@ class Website(models.Model):
                 html_fields.append((model, table, name, translate))
         return html_fields
 
-    def _get_snippets_assets(self):
-        """Returns every parent snippet asset from the database, filtering out
-        their potential overrides defined in other modules. As they share the same
-        snippet_id, asset_version and asset_type, it is possible to do that using
-        Postgres' DISTINCT ON and ordering by asset_id, as overriden assets will be
-        created later than their parents.
-        The assets are returned in the form of a list of tuples :
-        [(snippet_module, snippet_id, asset_version, asset_type, asset_id)]
-        """
-        self.env.cr.execute(r"""
-            SELECT DISTINCT ON (snippet_id, asset_version, asset_type)
-                   regexp_matches[1] AS snippet_module,
-                   regexp_matches[2] AS snippet_id,
-                   regexp_matches[3] AS asset_version,
-                   CASE
-                       WHEN regexp_matches[4]='scss' THEN 'css'
-                       ELSE regexp_matches[4]
-                   END AS asset_type,
-                   id AS asset_id
-            FROM (
-                SELECT REGEXP_MATCHES(PATH, '(\w*)\/.*\/snippets\/(\w*)\/(\d{3})\.(js|scss)'),
-                       id
-                FROM ir_asset
-            ) AS regexp
-            ORDER BY snippet_id, asset_version, asset_type, asset_id;
-        """)
-        return self.env.cr.fetchall()
-
     def _is_snippet_used(self, snippet_module, snippet_id, asset_version, asset_type, html_fields_attributes):
         snippet_occurences = []
         # Check snippet template definition to avoid disabling its related assets.
@@ -1513,22 +1620,28 @@ class Website(models.Model):
         return False
 
     def _disable_unused_snippets_assets(self):
-        snippets_assets = self._get_snippets_assets()
+        snippet_assets = self.env['ir.asset'].with_context(active_test=False).search_fetch(
+            [('path', 'like', '/static%/snippets/')],
+            ['active', 'path'], order='id')
+        snippet_re = re.compile(r'(\w*)\/.*\/snippets\/(\w*)\/(\d{3})(?:_\w*)?\.(js|scss)')
+        # regex will match /module/static/[.../]/snippets/snippet_id/XXX[_variable].asset_type
+        # _variable is not kept since only module, snippet_id, asset_version (XXX), asset_type are relevant
         html_fields_attributes = self._get_html_fields_attributes()
-
-        for snippet_module, snippet_id, asset_version, asset_type, _asset_id in snippets_assets:
-            is_snippet_used = self._is_snippet_used(snippet_module, snippet_id, asset_version, asset_type, html_fields_attributes)
-
-            # The regex catches XXX.scss, XXX.js and XXX_variables.scss
-            assets_regex = f'{snippet_id}/{asset_version}.+{asset_type}'
-
-            # The query will also set to active or inactive assets overrides, as they
-            # share the same snippet_id, asset_version and filename_type as their parents
-            self.env.cr.execute("""
-                UPDATE ir_asset
-                SET active = %(active)s
-                WHERE path ~ %(assets_regex)s
-            """, {"active": is_snippet_used, "assets_regex": assets_regex})
+        snippet_used = {}
+        for snippet_asset in snippet_assets:
+            match = snippet_re.match(snippet_asset.path)
+            if not match:
+                continue
+            (snippet_module, snippet_id, asset_version, asset_type) = match.groups()
+            if asset_type == 'scss':
+                asset_type = 'css'
+            key = (snippet_id, asset_version, asset_type)  # module is not relevant, we want the first one in the asset id order to filter module extension
+            if key not in snippet_used:
+                snippet_used[key] = self._is_snippet_used(snippet_module, snippet_id, asset_version, asset_type, html_fields_attributes)
+            is_snippet_used = snippet_used[key]
+            if is_snippet_used != snippet_asset.active:
+                snippet_asset.active = is_snippet_used
+        self.env['ir.asset'].flush_model()
 
     def _search_build_domain(self, domain, search, fields, extra=None):
         """
@@ -1575,21 +1688,7 @@ class Website(models.Model):
 
         :return: list of search details obtained from the `website.searchable.mixin`'s `_search_get_detail()`
         """
-        if SEARCH_TYPE_MODELS:
-            # TODO: Remove in master.
-            if search_type == 'all':
-                model_names = reduce(operator.ior, SEARCH_TYPE_MODELS.values())
-            else:
-                model_names = SEARCH_TYPE_MODELS[search_type]
-
-            result = list(
-                self.env[model_name]._search_get_detail(self, order, options)
-                for model_name in model_names
-                if model_name in self.env
-            )
-        else:
-            result = []
-
+        result = []
         if search_type in ['pages', 'all']:
             result.append(self.env['website.page']._search_get_detail(self, order, options))
         return result

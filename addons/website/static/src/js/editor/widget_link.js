@@ -1,43 +1,48 @@
-odoo.define('website.editor.link', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var weWidgets = require('wysiwyg.widgets');
-var wUtils = require('website.utils');
+import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
+import { patch } from "@web/core/utils/patch";
 
-weWidgets.LinkTools.include({
-    custom_events: _.extend({}, weWidgets.LinkTools.prototype.custom_events || {}, {
-        website_url_chosen: '_onAutocompleteClose',
-    }),
-    LINK_DEBOUNCE: 1000,
+import { onWillStart, status, useEffect } from '@odoo/owl';
+import wUtils from "@website/js/utils";
+import { debounce } from "@web/core/utils/timing";
 
-    /**
-     * @constructor
-     */
-    init: function () {
-        this._super.apply(this, arguments);
-        this._adaptPageAnchor = _.debounce(this._adaptPageAnchor, this.LINK_DEBOUNCE);
-    },
+const LINK_DEBOUNCE = 1000;
+
+patch(LinkTools.prototype, {
     /**
      * Allows the URL input to propose existing website pages.
      *
      * @override
      */
-    start: async function () {
-        var def = await this._super.apply(this, arguments);
-        const options = {
-            position: {
-                collision: 'flip flipfit',
-            },
-            classes: {
-                "ui-autocomplete": 'o_website_ui_autocomplete'
-            },
-            body: this.$editable[0].ownerDocument.body,
-        };
-        wUtils.autocompleteWithPages(this, this.$('input[name="url"]'), options);
+    async start() {
+        var def = await super.start(...arguments);
         this._adaptPageAnchor();
         return def;
     },
 
+    setup() {
+        super.setup();
+        onWillStart(() => {
+            this._adaptPageAnchor = debounce(this._adaptPageAnchor, LINK_DEBOUNCE);
+        });
+        useEffect((container) => {
+            const input = container?.querySelector(`input[name="url"]`);
+            if (!input) {
+                return;
+            }
+            const options = {
+                classes: {
+                    "ui-autocomplete": 'o_website_ui_autocomplete'
+                },
+                body: this.$editable[0].ownerDocument.body,
+                urlChosen: this._onAutocompleteClose.bind(this),
+                isDestroyed: () => status(this) === 'destroyed',
+            };
+            const unmountAutocompleteWithPages = wUtils.autocompleteWithPages(input, options);
+            return () => unmountAutocompleteWithPages();
+            }, () => [this.linkComponentWrapperRef.el]);
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -45,11 +50,11 @@ weWidgets.LinkTools.include({
     /**
      * @private
      */
-    _adaptPageAnchor: function () {
-        const urlInputValue = this.$('input[name="url"]').val();
-        const $pageAnchor = this.$('.o_link_dialog_page_anchor');
+    _adaptPageAnchor() {
+        const urlInputValue = this.$el.find('input[name="url"]').val();
+        const $pageAnchor = this.$el.find('.o_link_dialog_page_anchor');
         const showAnchorSelector = urlInputValue[0] === '/';
-        const $selectMenu = this.$('we-selection-items[name="link_anchor"]');
+        const $selectMenu = this.$el.find('we-selection-items[name="link_anchor"]');
 
         if ($selectMenu.data("anchor-for") !== urlInputValue) { // avoid useless query
             $pageAnchor.toggleClass('d-none', !showAnchorSelector);
@@ -74,8 +79,7 @@ weWidgets.LinkTools.include({
                         $option.data('value', anchor);
                         $selectMenu.append($option);
                     }
-                    always();
-                }).guardedCatch(always);
+                }).finally(always);
             }
         }
         $selectMenu.data("anchor-for", urlInputValue);
@@ -88,28 +92,14 @@ weWidgets.LinkTools.include({
     /**
      * @private
      */
-    _onAutocompleteClose: function () {
-        this._onURLInput();
-    },
-    /**
-     * @todo this should not be an event handler anymore in master
-     * @private
-     * @param {Event} ev
-     */
-    _onAnchorChange: function (ev) {
-        const anchorValue = $(ev.currentTarget).data('value');
-        const $urlInput = this.$('[name="url"]');
-        let urlInputValue = $urlInput.val();
-        if (urlInputValue.indexOf('#') > -1) {
-            urlInputValue = urlInputValue.substr(0, urlInputValue.indexOf('#'));
-        }
-        $urlInput.val(urlInputValue + anchorValue);
+    _onAutocompleteClose() {
+        this.__onURLInput();
     },
     /**
      * @override
      */
-    _onURLInput: function () {
-        this._super.apply(this, arguments);
+    _onURLInput() {
+        super._onURLInput(...arguments);
         this._adaptPageAnchor();
     },
     /**
@@ -118,9 +108,16 @@ weWidgets.LinkTools.include({
      */
     _onPickSelectOption(ev) {
         if (ev.currentTarget.closest('[name="link_anchor"]')) {
-            this._onAnchorChange(ev);
+            const anchorValue = $(ev.currentTarget).data('value');
+            const $urlInput = this.$el.find('[name="url"]');
+            let urlInputValue = $urlInput.val();
+            if (urlInputValue.indexOf('#') > -1) {
+                urlInputValue = urlInputValue.substr(0, urlInputValue.indexOf('#'));
+            }
+            $urlInput.val(urlInputValue + anchorValue);
+            // Updates the link in the DOM with the chosen anchor.
+            this.__onURLInput();
         }
-        this._super(...arguments);
+        super._onPickSelectOption(...arguments);
     },
-});
 });

@@ -20,7 +20,6 @@ class TestEventInternalsCommon(EventCase):
 
         cls.event_type_complex = cls.env['event.type'].create({
             'name': 'Update Type',
-            'auto_confirm': True,
             'has_seats_limitation': True,
             'seats_max': 30,
             'default_timezone': 'Europe/Paris',
@@ -47,7 +46,6 @@ class TestEventInternalsCommon(EventCase):
         cls.reference_end = datetime(2020, 2, 4, 18, 45, 0)
 
         cls.event_0 = cls.env['event.event'].create({
-            'auto_confirm': True,
             'date_begin': cls.reference_beg,
             'date_end': cls.reference_end,
             'date_tz': 'Europe/Brussels',
@@ -123,12 +121,10 @@ class TestEventData(TestEventInternalsCommon):
         })
         self.assertEqual(event.date_tz, self.env.user.tz)
         self.assertFalse(event.seats_limited)
-        self.assertFalse(event.auto_confirm)
         self.assertEqual(event.event_mail_ids, self.env['event.mail'])
         self.assertEqual(event.event_ticket_ids, self.env['event.event.ticket'])
 
         registration = self._create_registrations(event, 1)
-        self.assertEqual(registration.state, 'draft')  # event is not auto confirm
 
         # ------------------------------------------------------------
         # FILL SYNC TEST
@@ -146,7 +142,6 @@ class TestEventData(TestEventInternalsCommon):
         self.assertEqual(event.date_tz, 'Europe/Paris')
         self.assertTrue(event.seats_limited)
         self.assertEqual(event.seats_max, event_type.seats_max)
-        self.assertTrue(event.auto_confirm)
         # check 2many fields being populated
         self.assertEqual(len(event.event_mail_ids), 1)
         self.assertEqual(event.event_mail_ids.interval_nbr, 1)
@@ -182,12 +177,10 @@ class TestEventData(TestEventInternalsCommon):
         # setup test records
         event_type_default = self.env['event.type'].create({
             'name': 'Type Default',
-            'auto_confirm': True,
             'event_type_mail_ids': False,
         })
         event_type_mails = self.env['event.type'].create({
             'name': 'Type Mails',
-            'auto_confirm': False,
             'event_type_mail_ids': [
                 Command.clear(),
                 Command.create({
@@ -218,7 +211,7 @@ class TestEventData(TestEventInternalsCommon):
         })
         mail = event.event_mail_ids[0]
         registration = self._create_registrations(event, 1)
-        self.assertEqual(registration.state, 'open')  # event auto confirms
+        self.assertEqual(registration.state, 'open')
         # verify that mail is linked to the registration
         self.assertEqual(
             set(mail.mapped('mail_registration_ids.registration_id.id')),
@@ -284,11 +277,9 @@ class TestEventData(TestEventInternalsCommon):
         # setup test records
         event_type_default = self.env['event.type'].create({
             'name': 'Type Default',
-            'auto_confirm': True
         })
         event_type_tickets = self.env['event.type'].create({
             'name': 'Type Tickets',
-            'auto_confirm': False
         })
         event_type_tickets.write({
             'event_type_ticket_ids': [
@@ -349,7 +340,6 @@ class TestEventData(TestEventInternalsCommon):
         })
         self.assertEqual(event.date_tz, self.env.user.tz)
         self.assertFalse(event.seats_limited)
-        self.assertFalse(event.auto_confirm)
 
         #Event Communications: when no event type, default configuration
         self.assertEqual(len(event.event_mail_ids), 3)
@@ -416,7 +406,6 @@ class TestEventData(TestEventInternalsCommon):
             'name': 'Albert Test',
             'event_id': event.id,
         })
-        registration.action_confirm()
         event.write({
             'date_end': datetime(2020, 2, 1, 15, 0, 0),
             'seats_max': 1,
@@ -444,13 +433,13 @@ class TestEventData(TestEventInternalsCommon):
             'date_end': datetime(2020, 2, 1, 18, 0, 0),
         })
         self.assertTrue(event_1.is_ongoing)
-        ongoing_event_ids = self.env['event.event']._search([('is_ongoing', '=', True)])
-        self.assertIn(event_1.id, ongoing_event_ids)
+        ongoing_events = self.env['event.event'].search([('is_ongoing', '=', True)])
+        self.assertIn(event_1, ongoing_events)
 
         event_1.update({'date_begin': datetime(2020, 2, 1, 9, 0, 0)})
         self.assertFalse(event_1.is_ongoing)
-        ongoing_event_ids = self.env['event.event']._search([('is_ongoing', '=', True)])
-        self.assertNotIn(event_1.id, ongoing_event_ids)
+        ongoing_events = self.env['event.event'].search([('is_ongoing', '=', True)])
+        self.assertNotIn(event_1, ongoing_events)
 
         event_2 = self.env['event.event'].create({
             'name': 'Test Event 2',
@@ -458,13 +447,13 @@ class TestEventData(TestEventInternalsCommon):
             'date_end': datetime(2020, 1, 28, 8, 0, 0),
         })
         self.assertFalse(event_2.is_ongoing)
-        finished_or_upcoming_event_ids = self.env['event.event']._search([('is_ongoing', '=', False)])
-        self.assertIn(event_2.id, finished_or_upcoming_event_ids)
+        finished_or_upcoming_events = self.env['event.event'].search([('is_ongoing', '=', False)])
+        self.assertIn(event_2, finished_or_upcoming_events)
 
         event_2.update({'date_end': datetime(2020, 2, 2, 8, 0, 1)})
         self.assertTrue(event_2.is_ongoing)
-        finished_or_upcoming_event_ids = self.env['event.event']._search([('is_ongoing', '=', False)])
-        self.assertNotIn(event_2.id, finished_or_upcoming_event_ids)
+        finished_or_upcoming_events = self.env['event.event'].search([('is_ongoing', '=', False)])
+        self.assertNotIn(event_2, finished_or_upcoming_events)
 
     @users('user_eventmanager')
     def test_event_seats(self):
@@ -480,13 +469,11 @@ class TestEventData(TestEventInternalsCommon):
         # seats: coming from event type configuration
         self.assertTrue(event.seats_limited)
         self.assertEqual(event.seats_available, event.event_type_id.seats_max)
-        self.assertEqual(event.seats_unconfirmed, 0)
         self.assertEqual(event.seats_reserved, 0)
         self.assertEqual(event.seats_used, 0)
-        self.assertEqual(event.seats_expected, 0)
+        self.assertEqual(event.seats_taken, 0)
 
         # create registration in order to check the seats computation
-        self.assertTrue(event.auto_confirm)
         reg_open_multiple = self.env['event.registration'].create([{
             'event_id': event.id,
             'name': 'reg_open',
@@ -505,10 +492,9 @@ class TestEventData(TestEventInternalsCommon):
         })
         reg_done.write({'state': 'done'})
         self.assertEqual(event.seats_available, event.event_type_id.seats_max - 6)
-        self.assertEqual(event.seats_unconfirmed, 1)
         self.assertEqual(event.seats_reserved, 5)
         self.assertEqual(event.seats_used, 1)
-        self.assertEqual(event.seats_expected, 7)
+        self.assertEqual(event.seats_taken, 6)
 
         # ------------------------------------------------------------
         # SEATS AVAILABILITY AND (UN-)ARCHIVING REGISTRATIONS
@@ -518,23 +504,21 @@ class TestEventData(TestEventInternalsCommon):
         reg_open.action_archive()
         self.assertEqual(event.seats_reserved, 4)
         self.assertEqual(event.seats_available, event.event_type_id.seats_max - 5)
-        self.assertEqual(event.seats_expected, 6)
+        self.assertEqual(event.seats_taken, 5)
 
         reg_draft.action_archive()
-        self.assertEqual(event.seats_unconfirmed, 0)
         self.assertEqual(event.seats_available, event.event_type_id.seats_max - 5)
-        self.assertEqual(event.seats_expected, 5)
+        self.assertEqual(event.seats_taken, 5)
 
         # Un-archiving confirmed seats requires available seat(s)
         reg_open.action_unarchive()
         self.assertEqual(event.seats_reserved, 5)
         self.assertEqual(event.seats_available, event.event_type_id.seats_max - 6)
-        self.assertEqual(event.seats_expected, 6)
+        self.assertEqual(event.seats_taken, 6)
 
         reg_draft.action_unarchive()
-        self.assertEqual(event.seats_unconfirmed, 1)
         self.assertEqual(event.seats_available, event.event_type_id.seats_max - 6)
-        self.assertEqual(event.seats_expected, 7)
+        self.assertEqual(event.seats_taken, 6)
 
         reg_open.action_archive()
         self.assertEqual(event.seats_reserved, 4)
@@ -560,18 +544,19 @@ class TestEventData(TestEventInternalsCommon):
         with self.assertRaises(exceptions.ValidationError):
             reg_draft.write({'state': 'open'})
 
-        # With auto-confirm, it is also impossible to create a draft
-        # registration when the event is full
-        new_draft_to_autoconfirm = {
+        # It is not possible to create an open registration (default value)
+        # when the event is full
+        new_open_registration = {
             'event_id': event.id,
-            'name': 'New registration with auto confirm'
+            'name': 'reg_open',
         }
         with self.assertRaises(exceptions.ValidationError):
-            self.env['event.registration'].create(new_draft_to_autoconfirm)
+            self.env['event.registration'].create(new_open_registration)
 
         # If the seats limitation is removed, it becomes possible of course
         event.write({'seats_limited': 0})
-        self.env['event.registration'].create(new_draft_to_autoconfirm)
+        self.env['event.registration'].create(new_open_registration)
+        reg_draft.write({'state': 'open'})
 
 
 @tagged('event_registration')
@@ -710,79 +695,75 @@ class TestEventRegistrationPhone(EventCase):
         """ Test onchange on phone / mobile, should try to format number """
         event = self.test_event.with_user(self.env.user)
 
-        lead_form = Form(self.env['event.registration'])
-        lead_form.event_id = event
-        lead_form.mobile = '7200000011'
-        lead_form.phone = '7200000000'
-        self.assertEqual(lead_form.mobile, '+917200000011')
-        self.assertEqual(lead_form.phone, '+917200000000')
+        reg_form = Form(self.env['event.registration'])
+        reg_form.event_id = event
+        reg_form.phone = '7200000000'
+        self.assertEqual(reg_form.phone, '+917200000000')
 
     @users('user_eventregistrationdesk')
     def test_registration_phone_format(self):
         """ Test phone formatting: based on partner (BE numbers) or event
         (IN numbers) or company (BE numbers). """
+        partner_mobileonly = self.env['res.partner'].sudo().create({
+            'name': 'Constantin Customer 3 Mobile',
+            'email': 'constantin3test.example.com',
+            'country_id': self.env.ref('base.be').id,
+            'phone': False,
+            'mobile': '0456987654',
+            })
         event = self.test_event.with_user(self.env.user)
 
-        # customer_id, mobile, phone -> based on partner or event country
+        # customer_id, phone -> based on partner or event country
         sources = [
-            (self.event_customer.id, None, None),  # BE local on partner
-            (self.event_customer2.id, None, None),  # BE local on partner
-            (self.event_customer2.id, '0456001122', None),  # BE local + on partner
-            (False, '0456778899', '+32456778899'),  # BE local + BE global
-            (False, '7200000000', False),  # IN local
-            (False, False, '7200000011'),  # IN local
-            (False, '7200000000', '7200000011'),  # IN local
-            (False, '+917200000088', '+917200000099'),  # IN global
+            (self.event_customer.id, None),  # BE local on partner
+            (self.event_customer2.id, None),  # BE local on partner
+            (partner_mobileonly.id, None),  # BE local on partner
+            (self.event_customer2.id, '0456001122'),  # BE local + on partner
+            (False, '0456778899'),  # BE local
+            (False, '7200000000'),  # IN local
+            (False, '+917200000088'),  # IN global
         ]
-        # mobile, phone
+        # expected phone
         expected = [
-            (False, '0485112233'),  # partner values, no format
-            ('0456654321', '0456987654'),  # partner values, no format
-            ('+32456001122', '0456987654'),  # BE on partner / partner value, no format
-            ('0456778899', '+32456778899'),  # IN on event -> cannot format BE
-            ('+917200000000', False),  # IN on event
-            (False, '+917200000011'),  # IN on event
-            ('+917200000000', '+917200000011'),  # IN on event
-            ('+917200000088', '+917200000099'),  # already formatted
+            '0485112233',  # partner values, no format (phone only)
+            '0456987654',  # partner values, no format (both: phone wins)
+            '0456987654',  # partner values, no format (mobile only)
+            '+32456001122',  # BE on partner
+            '0456778899',  # IN on event -> cannot format BE
+            '+917200000000',  # IN on event
+            '+917200000088',  # already formatted
         ]
-        for (partner_id, mobile, phone), (exp_mobile, exp_phone) in zip(sources, expected):
-            with self.subTest(partner_id=partner_id, mobile=mobile, phone=phone):
+        for (partner_id, phone), exp_phone in zip(sources, expected):
+            with self.subTest(partner_id=partner_id, phone=phone):
                 create_vals = {
                     'event_id': event.id,
                     'partner_id': partner_id,
                 }
-                if mobile is not None:
-                    create_vals['mobile'] = mobile
                 if phone is not None:
                     create_vals['phone'] = phone
                 reg = self.env['event.registration'].create(create_vals)
-                self.assertEqual(reg.mobile, exp_mobile)
                 self.assertEqual(reg.phone, exp_phone)
 
         # no country on event -> based on partner or event company country
         self.test_event.write({'address_id': False})
         expected = [
-            (False, '0485112233'),  # partner values, no format
-            ('0456654321', '0456987654'),  # partner values, no format
-            ('+32456001122', '0456987654'),  # BE on partner / partner value, no format
-            ('+32456778899', '+32456778899'),  # BE on company
-            ('7200000000', False),  # BE on company -> cannot format IN
-            (False, '7200000011'),  # BE on company -> cannot format IN
-            ('7200000000', '7200000011'),  # BE on company -> cannot format IN
-            ('+917200000088', '+917200000099'),  # already formatted
+            '0485112233',  # partner values, no format (phone only)
+            '0456987654',  # partner values, no format (both: phone wins)
+            '0456987654',  # partner values, no format (mobile only)
+            '+32456001122',  # BE on company
+            '+32456778899',  # BE on company
+            '7200000000',  # BE on company -> cannot format IN
+            '+917200000088',  # already formatted
         ]
-        for (partner_id, mobile, phone), (exp_mobile, exp_phone) in zip(sources, expected):
-            with self.subTest(partner_id=partner_id, mobile=mobile, phone=phone):
+        for (partner_id, phone), exp_phone in zip(sources, expected):
+            with self.subTest(partner_id=partner_id, phone=phone):
                 create_vals = {
                     'event_id': event.id,
                     'partner_id': partner_id,
                 }
-                if mobile is not None:
-                    create_vals['mobile'] = mobile
                 if phone is not None:
                     create_vals['phone'] = phone
                 reg = self.env['event.registration'].create(create_vals)
-                self.assertEqual(reg.mobile, exp_mobile)
                 self.assertEqual(reg.phone, exp_phone)
 
 
@@ -807,7 +788,6 @@ class TestEventTicketData(TestEventInternalsCommon):
                     'end_sale_datetime': datetime(2020, 2, 10, 23, 59, 59),
                 })
             ],
-            'auto_confirm': False  # to interact with registrations states
         })
         first_ticket = event.event_ticket_ids.filtered(lambda t: t.name == 'First Ticket')
         second_ticket = event.event_ticket_ids.filtered(lambda t: t.name == 'Second Ticket')
@@ -873,23 +853,23 @@ class TestEventTicketData(TestEventInternalsCommon):
             'name': f'reg_draft #{idx}',
             'event_ticket_id': first_ticket.id,
         } for idx in range(3)])
+        # Draft registrations should not impact seats
+        reg_draft_multiple.state = 'draft'
         reg_draft = reg_draft_multiple[0]
 
         reg_open = self.env['event.registration'].create({
             'event_id': event.id,
             'name': 'reg_open',
             'event_ticket_id': first_ticket.id,
-            'state': 'open'
         })
 
         reg_done = self.env['event.registration'].create({
             'event_id': event.id,
             'name': 'reg_done',
             'event_ticket_id': first_ticket.id,
-            'state': 'done'
         })
+        reg_done.action_set_done()
 
-        self.assertEqual(first_ticket.seats_unconfirmed, 3)
         self.assertEqual(first_ticket.seats_reserved, 1)
         self.assertEqual(first_ticket.seats_used, 1)
         self.assertEqual(first_ticket.seats_available, INITIAL_TICKET_SEATS_MAX - 2)
@@ -902,9 +882,6 @@ class TestEventTicketData(TestEventInternalsCommon):
         self.assertEqual(first_ticket.seats_reserved, 0)
         self.assertEqual(first_ticket.seats_available, INITIAL_TICKET_SEATS_MAX)
 
-        reg_draft.action_archive()
-        self.assertEqual(first_ticket.seats_unconfirmed, 2)
-
         # Un-archiving confirmed/done seats requires available seat(s)
         reg_open.action_unarchive()
         self.assertEqual(first_ticket.seats_reserved, 1)
@@ -912,10 +889,6 @@ class TestEventTicketData(TestEventInternalsCommon):
 
         reg_done.action_unarchive()
         self.assertEqual(first_ticket.seats_used, 1)
-        self.assertEqual(first_ticket.seats_available, INITIAL_TICKET_SEATS_MAX - 2)
-
-        reg_draft.action_unarchive()
-        self.assertEqual(first_ticket.seats_unconfirmed, 3)
         self.assertEqual(first_ticket.seats_available, INITIAL_TICKET_SEATS_MAX - 2)
 
         # It is not possible to set a seats_max value below the current number of confirmed
@@ -932,10 +905,9 @@ class TestEventTicketData(TestEventInternalsCommon):
 
         # SEATS AVAILABILITY
 
-        # With auto-confirm, it is impossible to create a draft
-        # registration when the ticket is fully booked (1 used + 1 reserved)
+        # It is impossible to create an open registration when the
+        # ticket is fully booked (1 used + 1 reserved)
         self.assertEqual(event.seats_available, 0)
-        first_ticket.event_id.auto_confirm = True
         with self.assertRaises(exceptions.ValidationError):
             self.env['event.registration'].create({
                 'event_id': event.id,

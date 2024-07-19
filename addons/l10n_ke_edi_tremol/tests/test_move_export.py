@@ -9,7 +9,7 @@ from freezegun import freeze_time
 class TestKeMoveExport(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref='l10n_ke.l10nke_chart_template'):
+    def setUpClass(cls, chart_template_ref='ke'):
         super().setUpClass(chart_template_ref=chart_template_ref)
 
         cls.partner_a.write({
@@ -24,14 +24,13 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
 
         cls.product_a.write({
             'name': 'Infinite Improbability Drive',
-            'l10n_ke_hsn_code': '0039.11.53',
-            'l10n_ke_hsn_name': 'Spacecraft including satellites and suborbital and spacecraft launch vehicles'
         })
 
-        cls.standard_rate_tax = cls.env['account.tax'].create({
-            'name': '16% tax',
-            'amount': 16.0,
+        cls.spaceship_tax = cls.env['account.tax'].create({
+            'name': 'Exempt Spaceship tax',
+            'amount': 0,
             'amount_type': 'percent',
+            'l10n_ke_item_code_id': cls.env.ref('l10n_ke.item_code_2023_00391153').id,
         })
 
     @classmethod
@@ -66,7 +65,7 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
                     'product_id': self.product_a.id,
                     'quantity': 10,
                     'price_unit': 1234.56,
-                    'tax_ids': [(6, 0, [self.company_data['company'].account_sale_tax_id.id])],
+                    'tax_ids': [(6, 0, [self.spaceship_tax.id])],
                     'discount': 25,
                 }),
             ],
@@ -75,9 +74,13 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
         generated_messages = simple_invoice._l10n_ke_get_cu_messages()
         expected_sale_line = self.line_dict_to_bytes({
             'name': b'Infinite Improbability Drive        ',
-            'price': b'1432.09', # This is the unit price, tax included
+            'price': b'1234.56', # This is the unit price, (though this is tax exempt)
+            'item_code': b'0039.11.53',
+            'item_desc': b'Spacecraft including',
             'quantity': b'10.0',
             'discount': b'-25.0%',
+            'vat_rate': b'0.0',
+            'vat_class': b'E',
         })
         expected_messages = [
             # open invoice

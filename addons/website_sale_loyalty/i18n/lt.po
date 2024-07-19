@@ -3,25 +3,26 @@
 # 	* website_sale_loyalty
 # 
 # Translators:
-# Arunas V. <arunas@devoro.com>, 2022
-# Edgaras Kriukonis <edgaras@focusate.eu>, 2022
-# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2022
-# Naglis Jonaitis, 2022
-# Aleksandr Jadov <a.jadov@tata.lt>, 2022
-# Martin Trigaux, 2022
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
-# Linas Versada <linaskrisiukenas@gmail.com>, 2022
-# Antanas Muliuolis <an.muliuolis@gmail.com>, 2022
+# Arunas V. <arunas@devoro.com>, 2023
+# Edgaras Kriukonis <edgaras@focusate.eu>, 2023
+# UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2023
+# Naglis Jonaitis, 2023
 # Jonas Zinkevicius <jozi@odoo.com>, 2023
+# Aleksandr Jadov <a.jadov@tata.lt>, 2023
+# Martin Trigaux, 2023
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2023
+# Linas Versada <linaskrisiukenas@gmail.com>, 2023
+# Antanas Muliuolis <an.muliuolis@gmail.com>, 2023
+# Tautvydas M, 2024
 # Gailius Kazlauskas <gailius@vialaurea.lt>, 2024
 # Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:24+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024\n"
 "Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
@@ -31,12 +32,24 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < 11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 : n % 1 != 0 ? 2: 3);\n"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "<strong> - </strong>"
+msgstr ""
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "<strong>Coupons - </strong>"
+msgstr ""
+
+#. module: website_sale_loyalty
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "A coupon is needed for coupon programs."
 msgstr ""
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "A coupon with the same code was found."
@@ -56,6 +69,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Claim"
 msgstr ""
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Code:"
+msgstr "Kodas:"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
@@ -98,11 +116,6 @@ msgid "Discount & Loyalty"
 msgstr "Nuolaidos ir Lojalumo programos"
 
 #. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.reduction_coupon_code
-msgid "Discount code or gift card"
-msgstr ""
-
-#. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.cart_discount
 msgid "Discount:"
 msgstr "Nuolaida:"
@@ -121,6 +134,18 @@ msgstr "Rodomas pavadinimas"
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
 msgid "Done"
 msgstr "Atlikta"
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Expired Date:"
+msgstr "Galiojimo data:"
+
+#. module: website_sale_loyalty
+#. odoo-javascript
+#: code:addons/website_sale_loyalty/static/src/js/website_sale_loyalty_delivery.js:0
+#, python-format
+msgid "Free"
+msgstr "Nemokamas"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
@@ -146,11 +171,6 @@ msgstr "ID"
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Invalid or expired promo code."
 msgstr "Klaidingas arba pasibaigusio galiojimo nuolaidos kodas"
-
-#. module: website_sale_loyalty
-#: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share____last_update
-msgid "Last Modified on"
-msgstr "Paskutinį kartą keista"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__write_uid
@@ -208,7 +228,8 @@ msgid "Promo Code"
 msgstr ""
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "Provide either a coupon or a program."
 msgstr ""
@@ -236,8 +257,9 @@ msgid "Sales Order Line"
 msgstr "Pardavimo užsakymo eilutė"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_card_view_tree_inherit_website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_program_view_tree_inherit_website_sale_loyalty
 #, python-format
@@ -260,6 +282,7 @@ msgid "Show Discount in Subtotal"
 msgstr ""
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/controllers/main.py:0
 #, python-format
 msgid ""
@@ -273,15 +296,22 @@ msgid "The following promo code was applied on your order:"
 msgstr ""
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "The promo code must be unique."
 msgstr ""
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "The shared website should correspond to the website of the program."
+msgstr ""
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Use"
 msgstr ""
 
 #. module: website_sale_loyalty

@@ -45,6 +45,9 @@ class ReportProductLabel(models.AbstractModel):
                     }
                     )
         data['quantity'] = quantity_by_product
+        layout_wizard = self.env['product.label.layout'].browse(data.get('layout_wizard'))
+        data['pricelist'] = layout_wizard.pricelist_id
+
         return data
 
 

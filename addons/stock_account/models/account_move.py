@@ -147,6 +147,7 @@ class AccountMove(models.Model):
                     'account_id': debit_interim_account.id,
                     'display_type': 'cogs',
                     'tax_ids': [],
+                    'cogs_origin_id': line.id,
                 })
 
                 # Add expense account line.
@@ -163,6 +164,7 @@ class AccountMove(models.Model):
                     'analytic_distribution': line.analytic_distribution,
                     'display_type': 'cogs',
                     'tax_ids': [],
+                    'cogs_origin_id': line.id,
                 })
         return lines_vals_list
 
@@ -176,6 +178,8 @@ class AccountMove(models.Model):
         """ Reconciles the entries made in the interim accounts in anglosaxon accounting,
         reconciling stock valuation move lines with the invoice's.
         """
+        reconcile_plan = []
+        no_exchange_reconcile_plan = []
         for move in self:
             if not move.is_invoice():
                 continue
@@ -219,13 +223,17 @@ class AccountMove(models.Model):
                     stock_aml = product_account_moves - correction_amls - invoice_aml
                     # Reconcile.
                     if correction_amls:
-                        if sum(correction_amls.mapped('balance')) > 0:
-                            product_account_moves.with_context(no_exchange_difference=True).reconcile()
+                        if sum(correction_amls.mapped('balance')) > 0 or all(aml.is_same_currency for aml in correction_amls):
+                            no_exchange_reconcile_plan += [product_account_moves]
                         else:
-                            (invoice_aml | correction_amls).with_context(no_exchange_difference=True).reconcile()
-                            (invoice_aml.filtered(lambda aml: not aml.reconciled) | stock_aml).with_context(no_exchange_difference=True).reconcile()
+                            no_exchange_reconcile_plan += [invoice_aml | correction_amls]
+                            moves_to_reconcile = (invoice_aml.filtered(lambda aml: not aml.reconciled) | stock_aml)
+                            if moves_to_reconcile:
+                                no_exchange_reconcile_plan += [moves_to_reconcile]
                     else:
-                        product_account_moves.reconcile()
+                        reconcile_plan += [product_account_moves]
+        self.env['account.move.line']._reconcile_plan(reconcile_plan)
+        self.env['account.move.line'].with_context(no_exchange_difference=True)._reconcile_plan(no_exchange_reconcile_plan)
 
     def _get_invoiced_lot_values(self):
         return []
@@ -235,6 +243,11 @@ class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
     stock_valuation_layer_ids = fields.One2many('stock.valuation.layer', 'account_move_line_id', string='Stock Valuation Layer')
+    cogs_origin_id = fields.Many2one(  # technical field used to keep track in the originating line of the anglo-saxon lines
+        comodel_name="account.move.line",
+        copy=False,
+        index="btree_not_null",
+    )
 
     def _compute_account_id(self):
         super()._compute_account_id()

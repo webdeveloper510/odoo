@@ -3,22 +3,16 @@
 # 	* hr_recruitment
 # 
 # Translators:
-# SAKodoo <sak@odoo.com>, 2022
-# Jan Prokop, 2022
-# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2022
-# Damian Brencic <brencicdamian12313@gmail.com>, 2022
-# karolína schusterová <karolina.schusterova@vdp.sk>, 2022
-# Rastislav Brencic <rastislav.brencic@azet.sk>, 2023
-# Martin Trigaux, 2023
-# Wil Odoo, 2023
+# Dávid Kováč, 2023
+# Wil Odoo, 2024
 # Tomáš Píšek, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:22+0000\n"
-"PO-Revision-Date: 2022-09-22 05:52+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Tomáš Píšek, 2024\n"
 "Language-Team: Slovak (https://app.transifex.com/odoo/teams/41243/sk/)\n"
 "MIME-Version: 1.0\n"
@@ -29,7 +23,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "1 Meeting"
 msgstr ""
@@ -86,11 +80,6 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
-msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
 msgid "<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" title=\"Alias\"/>"
 msgstr "<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" title=\"Alias\"/>"
 
@@ -105,59 +94,16 @@ msgid "<i class=\"fa fa-paperclip\" role=\"img\" aria-label=\"Documents\"/>"
 msgstr "<i class=\"fa fa-paperclip\" role=\"img\" aria-label=\"Documents\"/>"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
 msgid ""
-"<span attrs=\"{'invisible': [('address_id', '!=', False)]}\" "
-"class=\"oe_read_only\">Remote</span>"
-msgstr ""
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
-msgid ""
-"<span attrs=\"{'invisible': [('is_warning_visible', '=', False)]}\">\n"
-"                            <span class=\"fa fa-exclamation-triangle text-danger ps-3\">\n"
-"                            </span>\n"
-"                            <span class=\"text-danger\">\n"
-"                                All applications will lose their hired date and hired status.\n"
-"                            </span>\n"
-"                        </span>"
+"<span class=\"badge rounded-pill text-bg-danger float-end me-4\" invisible=\"application_status != 'refused'\">Refused</span>\n"
+"                            <span class=\"badge rounded-pill text-bg-secondary float-end me-4\" invisible=\"application_status != 'archived'\">Archived</span>"
 msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-msgid ""
-"<span attrs=\"{'invisible':[('salary_expected_extra','=',False)]}\"> + "
-"</span>"
+msgid "<span class=\"o_stat_text\">Employee</span>"
 msgstr ""
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-msgid ""
-"<span attrs=\"{'invisible':[('salary_proposed_extra','=',False)]}\"> + "
-"</span>"
-msgstr ""
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
-msgid ""
-"<span class=\"badge rounded-pill text-bg-danger float-end me-4\" "
-"attrs=\"{'invisible': ['|', ('active', '=', True), ('refuse_reason_id', '=',"
-" False)]}\">Refused</span>"
-msgstr ""
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
-msgid "<span class=\"bg-success\">Hired</span>"
-msgstr ""
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\"/>"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
@@ -165,8 +111,35 @@ msgid "<span class=\"o_stat_text\">Trackers</span>"
 msgstr "<span class=\"o_stat_text\">Sledovače</span>"
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
+msgid "<span class=\"text-bg-success\">Hired</span>"
+msgstr ""
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
+msgid "<span invisible=\"address_id\" class=\"oe_read_only\">Remote</span>"
+msgstr ""
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
+msgid ""
+"<span invisible=\"not is_warning_visible\">\n"
+"                                <span class=\"fa fa-exclamation-triangle text-danger ps-3\">\n"
+"                                </span>\n"
+"                                <span class=\"text-danger\">\n"
+"                                    All applications will lose their hired date and hired status.\n"
+"                                </span>\n"
+"                            </span>"
+msgstr ""
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-msgid "<span class=\"o_stat_value\">Employee</span>"
+msgid "<span invisible=\"not salary_expected_extra\"> + </span>"
+msgstr ""
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+msgid "<span invisible=\"not salary_proposed_extra\"> + </span>"
 msgstr ""
 
 #. module: hr_recruitment
@@ -476,7 +449,7 @@ msgstr "Stav aktivity"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Ikona typ aktivity"
+msgstr "Ikona typu aktivity"
 
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.mail_activity_type_action_config_hr_applicant
@@ -496,11 +469,6 @@ msgid "Add a new tag"
 msgstr "Pridaj nový tag"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_job__address_id
-msgid "Address where employees are working"
-msgstr "Adresa kde pracujú zamestnanci"
-
-#. module: hr_recruitment
 #: model:res.groups,name:hr_recruitment.group_hr_recruitment_manager
 msgid "Administrator"
 msgstr "Správca"
@@ -516,6 +484,21 @@ msgid "Alias Contact Security"
 msgstr "Alias ​​kontakt bezpečnosť"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_domain_id
+msgid "Alias Domain"
+msgstr "Alias doména"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_domain
+msgid "Alias Domain Name"
+msgstr "Názov alias domény"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_full_name
+msgid "Alias Email"
+msgstr "Alias e-mailu"
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__alias_id
 msgid "Alias ID"
 msgstr "Alias ID"
@@ -526,9 +509,14 @@ msgid "Alias Name"
 msgstr "Alias názov"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_domain
-msgid "Alias domain"
-msgstr "Doména aliasu"
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_status
+msgid "Alias Status"
+msgstr "Stav aliasu"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_status
+msgid "Alias status assessed on the last message received."
+msgstr "Stav aliasu posúdený pri poslednej doručenej správe."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_model_id
@@ -567,10 +555,20 @@ msgid "Applicant Degree"
 msgstr "Vzdelanie uchádzača"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__applicant_emails
+msgid "Applicant Emails"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:mail.message.subtype,name:hr_recruitment.mt_applicant_hired
 #: model:mail.message.subtype,name:hr_recruitment.mt_job_applicant_hired
 msgid "Applicant Hired"
 msgstr "Uchádzač prijatý"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__applicant_properties_definition
+msgid "Applicant Properties"
+msgstr ""
 
 #. module: hr_recruitment
 #: model:mail.message.subtype,name:hr_recruitment.mt_job_applicant_stage_changed
@@ -581,16 +579,6 @@ msgstr "Fáza kandidáta zmenená"
 #: model:mail.message.subtype,description:hr_recruitment.mt_applicant_new
 msgid "Applicant created"
 msgstr "Kandidát vytvorený"
-
-#. module: hr_recruitment
-#: model:mail.message.subtype,description:hr_recruitment.mt_applicant_hired
-msgid "Applicant hired"
-msgstr "Kandidát prijatý"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_hired_template
-msgid "Applicant hired<br/>"
-msgstr "Kandidát prijatý<br/>"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_name
@@ -616,6 +604,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_applications
+#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
 msgid ""
 "Applicants and their attached CV are created automatically when an email is sent.\n"
 "                If you install the document management modules, all resumes are indexed automatically,\n"
@@ -624,17 +613,6 @@ msgstr ""
 "Kandidáti a ich priložené CV-čka sú automaticky vytvorené keď sa pošle email.\n"
 "Ak nainštalujete moduly pre správu dokumentov, všetky životopisy sú indexované automaticky,\n"
 "takže môžete ľahko prehľadávať ich obsah."
-
-#. module: hr_recruitment
-#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
-msgid ""
-"Applicants and their attached CV are created automatically when an email is sent.\n"
-"            If you install the document management modules, all resumes are indexed automatically,\n"
-"            so that you can easily search through their content."
-msgstr ""
-"Žiadatelia a ich priložený životopis sa vytvárajú automaticky pri odoslaní e-mailu.\n"
-"Ak inštalujete moduly správy dokumentov, všetky životopisy sa automaticky indexujú\n"
-" tak, aby ste mohli jednoducho prehľadávať ich obsah."
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
@@ -693,12 +671,19 @@ msgid "Applied Job"
 msgstr "Žiadaná práca"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__create_date
+msgid "Applied on"
+msgstr ""
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
 msgid "Archive"
 msgstr "Archivovať"
 
 #. module: hr_recruitment
+#: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__application_status__archived
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Archived"
@@ -716,7 +701,6 @@ msgstr "Počet príloh"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__attachment_ids
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Attachments"
 msgstr "Prílohy"
 
@@ -736,8 +720,24 @@ msgid "Bachelor Degree"
 msgstr "Bakalársky titul"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__is_blacklisted
+msgid "Blacklist"
+msgstr "Čierna listina"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__mobile_blacklisted
+msgid "Blacklisted Phone Is Mobile"
+msgstr "Telefón na čiernej listine je mobil"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_blacklisted
+msgid "Blacklisted Phone is Phone"
+msgstr "Telefón na čiernej listine je mobil"
+
+#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment_stage.py:0
+#: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job0
 #: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job1
 #: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job2
 #: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job3
@@ -747,6 +747,16 @@ msgstr "Bakalársky titul"
 #, python-format
 msgid "Blocked"
 msgstr "Blokované"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__body_has_template_value
+msgid "Body content is the same as the template"
+msgstr ""
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_bounce
+msgid "Bounce"
+msgstr "Odskočiť"
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_job_position
@@ -821,6 +831,7 @@ msgstr "Index farieb"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__company_id
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Company"
 msgstr "Spoločnosť"
 
@@ -842,7 +853,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_id
 #, python-format
 msgid "Contact"
@@ -850,7 +861,7 @@ msgstr "Kontakt"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "Contact Email"
 msgstr "Kontaktný email"
@@ -889,6 +900,11 @@ msgstr ""
 "Skopírujte túto e-mailovú adresu a vložte ju do svojho e-mailového editora."
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__message_bounce
+msgid "Counter of the number of bounced emails for this contact"
+msgstr "Počítadlo počtu odmietnutých emailov pre tento kontakt"
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "Create"
 msgstr "Vytvoriť"
@@ -903,6 +919,13 @@ msgstr "Vytvoriť zamestnanca"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "Create a Job Position"
 msgstr "Vytvorte pracovnú pozíciu."
+
+#. module: hr_recruitment
+#. odoo-python
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#, python-format
+msgid "Create new applications by sending an email to"
+msgstr ""
 
 #. module: hr_recruitment
 #. odoo-javascript
@@ -935,7 +958,6 @@ msgid "Created on"
 msgstr "Vytvorené"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__create_date
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Creation Date"
@@ -977,18 +999,14 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_job_stage_act
 msgid ""
 "Define here your stages of the recruitment process, for example:\n"
-"            qualification call, first interview, second interview, refused,\n"
-"            hired."
+"                    qualification call, first interview, second interview, refused,\n"
+"                    hired."
 msgstr ""
-"Tu zadefinujte vaše fázy náborového proces, napríklad:\n"
-"kvalifikačný telefonát, prvý pohovor, druhý pohovor, zamietnutie,\n"
-"prijatie."
 
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.hr_recruitment_degree_action
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__type_id
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_degree_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_degree_tree
 msgid "Degree"
@@ -1049,6 +1067,12 @@ msgid "Digitize your CV to extract name and email automatically."
 msgstr ""
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
+msgid "Directly Available"
+msgstr ""
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "Discard"
 msgstr "Zrušiť"
@@ -1089,14 +1113,9 @@ msgid "Document Count"
 msgstr "Počet dokumentov"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
-msgid "Documentation"
-msgstr "Dokumentácia"
-
-#. module: hr_recruitment
 #. odoo-python
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: code:addons/hr_recruitment/models/hr_job.py:0
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__document_ids
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
@@ -1113,15 +1132,8 @@ msgstr "Nezodpovedá pracovným požiadavkám"
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_recruitment_stage_act
 msgid ""
 "Don't forget to specify the department if your recruitment process\n"
-"            is different according to the job position."
+"                is different according to the job position."
 msgstr ""
-"Nezabudnite upresniť oddelenie ak sa váš náborový proces  \n"
-"líši v závislosti na pracovnej pozícii."
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
-msgid "Dropdown menu"
-msgstr "Rozbaľovacie menu"
 
 #. module: hr_recruitment
 #: model:hr.applicant.refuse.reason,name:hr_recruitment.refuse_reason_6
@@ -1136,6 +1148,7 @@ msgid "Email"
 msgstr "Email"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_email
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
 msgid "Email Alias"
@@ -1183,7 +1196,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: model:ir.model,name:hr_recruitment.model_hr_employee
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__emp_id
 #, python-format
@@ -1191,19 +1204,24 @@ msgid "Employee"
 msgstr "Zamestnanec"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__emp_is_active
+msgid "Employee Active"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__employee_name
 msgid "Employee Name"
 msgstr "Meno zamestnanca"
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_hired_template
+msgid "Employee created:"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__emp_id
 msgid "Employee linked to the applicant."
 msgstr "Zamestnanec spojený s kandidátom."
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_hired_template
-msgid "Employee:"
-msgstr "Zamestnanec:"
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_recruitment_config_employees
@@ -1259,6 +1277,15 @@ msgstr "Extra výhody..."
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__favorite_user_ids
 msgid "Favorite User"
 msgstr "Obľúbený užívateľ"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_sanitized
+msgid ""
+"Field used to store sanitized phone number. Helps speeding up searches and "
+"comparisons."
+msgstr ""
+"Pole použité na uloženie dezinfikovaného telefónneho čísla. Pomáha urýchliť "
+"vyhľadávanie a porovnanie."
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.ir_attachment_hr_recruitment_list_view
@@ -1348,11 +1375,6 @@ msgid "Group By"
 msgstr "Zoskupiť podľa"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__hr_responsible_id
-msgid "HR Responsible"
-msgstr "Zodpovedný za HR"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__has_domain
 msgid "Has Domain"
 msgstr ""
@@ -1370,12 +1392,18 @@ msgstr ""
 #. module: hr_recruitment
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__application_status__hired
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Hired"
 msgstr "Prijatý"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_stage__hired_stage
 msgid "Hired Stage"
+msgstr ""
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
+msgid "Hiring Date"
 msgstr ""
 
 #. module: hr_recruitment
@@ -1445,6 +1473,15 @@ msgstr ""
 "odošle neoprávneným užívateľom."
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__emp_is_active
+msgid ""
+"If the active field is set to False, it will allow you to hide the resource "
+"record without removing it."
+msgstr ""
+"Ak je aktívne pole nastavené na hodnotu False, umožní vám to skryť záznam "
+"prostriedku bez jeho odstránenia."
+
+#. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__active
 msgid ""
 "If the active field is set to false, it will allow you to hide the case "
@@ -1454,16 +1491,58 @@ msgstr ""
 " odtránenia."
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__is_blacklisted
+msgid ""
+"If the email address is on the blacklist, the contact won't receive mass "
+"mailing anymore, from any list"
+msgstr ""
+"Ak je adresa na čiernej listine, kontakt neobdrží žiadny hromadný mail, zo "
+"žiadneho zoznamu"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_sanitized_blacklisted
+msgid ""
+"If the sanitized phone number is on the blacklist, the contact won't receive"
+" mass mailing sms anymore, from any list"
+msgstr ""
+"Ak je upravené číslo na čiernej listine, kontakt už nebude dostávať hromadné"
+" správy SMS zo žiadneho zoznamu"
+
+#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment_stage.py:0
+#: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job0
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job1
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job2
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job3
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job4
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job5
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 #, python-format
 msgid "In Progress"
 msgstr "Spracováva sa"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__mobile_blacklisted
+msgid ""
+"Indicates if a blacklisted sanitized phone number is a mobile number. Helps "
+"distinguish which number is blacklisted             when there is both a "
+"mobile and phone field in a model."
+msgstr ""
+"Označte, či je overené telefónne číslo na čiernej listine mobilné číslo. "
+"Pomáha rozlíšiť, ktoré číslo je na čiernej listine, keď je v modeli pole pre"
+" mobil aj telefón."
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_blacklisted
+msgid ""
+"Indicates if a blacklisted sanitized phone number is a phone number. Helps "
+"distinguish which number is blacklisted             when there is both a "
+"mobile and phone field in a model."
+msgstr ""
+"Označuje, či je dezinfikované telefónne číslo na čiernej listine telefónnym "
+"číslom. Pomáha rozlíšiť, ktoré číslo je na čiernej listine, keď je v modeli "
+"pole pre mobil aj telefón."
 
 #. module: hr_recruitment
 #: model:hr.recruitment.stage,name:hr_recruitment.stage_job1
@@ -1474,6 +1553,11 @@ msgstr "Počiatočná kvalifikácia"
 #: model:ir.model.fields,field_description:hr_recruitment.field_res_config_settings__module_hr_recruitment_survey
 msgid "Interview Forms"
 msgstr "Formuláre pohovoru"
+
+#. module: hr_recruitment
+#: model:res.groups,name:hr_recruitment.group_hr_recruitment_interviewer
+msgid "Interviewer"
+msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__interviewer_ids
@@ -1502,6 +1586,11 @@ msgid "Is Warning Visible"
 msgstr ""
 
 #. module: hr_recruitment
+#: model:res.groups,comment:hr_recruitment.group_hr_recruitment_interviewer
+msgid "It will also allow to send surveys and see the resume."
+msgstr ""
+
+#. module: hr_recruitment
 #. odoo-python
 #: code:addons/hr_recruitment/models/hr_job.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__job_id
@@ -1513,7 +1602,7 @@ msgstr "Práca"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__application_ids
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.crm_case_pivot_view_job
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
@@ -1616,22 +1705,10 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "Last Meeting"
 msgstr ""
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_category____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_degree____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source____last_update
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_stage____last_update
-msgid "Last Modified on"
-msgstr "Posledná úprava"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__last_stage_id
@@ -1728,6 +1805,11 @@ msgid "LinkedIn Profile"
 msgstr ""
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_incoming_local
+msgid "Local-part based incoming detection"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__template_id
 msgid "Mail Template"
 msgstr "Mailová šablóna"
@@ -1819,6 +1901,7 @@ msgid "Name"
 msgstr "Meno"
 
 #. module: hr_recruitment
+#: model:hr.recruitment.stage,name:hr_recruitment.stage_job0
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 msgid "New"
 msgstr "Nové"
@@ -1858,21 +1941,6 @@ msgid "New Hired Employee"
 msgstr "Nový prijatý zamestnanec "
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_employee_view_search
-msgid "Newly Hired"
-msgstr "Novoprijatý"
-
-#. module: hr_recruitment
-#: model:ir.actions.act_window,name:hr_recruitment.hr_employee_action_from_department
-msgid "Newly Hired Employees"
-msgstr "Noví prijatí zamestnanci"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_employee__newly_hired_employee
-msgid "Newly hired employee"
-msgstr "Novo prijatý zamestnanec"
-
-#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_tree_activity
 msgid "Next Activities"
 msgstr "Ďalšie aktivity"
@@ -1899,28 +1967,28 @@ msgstr "Typ ďalšej aktivity"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "Next Meeting"
 msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "No Meeting"
 msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "No Subject"
 msgstr "Bez predmetu"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "No application found. Let's create one !"
 msgstr ""
@@ -1947,6 +2015,11 @@ msgstr "Zatiaľ žiadne údaje!"
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__priority__0
 msgid "Normal"
 msgstr "Normálna"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__email_normalized
+msgid "Normalized Email"
+msgstr "Normalizovaný email"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_needaction_counter
@@ -1988,6 +2061,7 @@ msgstr "Počet doručených správ s chybou"
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_applications
+#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
 msgid ""
 "Odoo helps you track applicants in the recruitment\n"
 "                process and follow up all operations: meetings, interviews, etc."
@@ -1996,17 +2070,8 @@ msgstr ""
 "procese a spracovať alebo sledovať všetky aktivity: stretnutia, pohovory, atď."
 
 #. module: hr_recruitment
-#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
-msgid ""
-"Odoo helps you track applicants in the recruitment\n"
-"            process and follow up all operations: meetings, interviews, etc."
-msgstr ""
-"Odoo vám pomáha sledovať uchádzačov v náborovom\n"
-"procese a spracovať alebo sledovať všetky aktivity: stretnutia, pohovory, atď."
-
-#. module: hr_recruitment
 #: model:res.groups,name:hr_recruitment.group_hr_recruitment_user
-msgid "Officer : Manage all applicants"
+msgid "Officer: Manage all applicants"
 msgstr ""
 
 #. module: hr_recruitment
@@ -2060,11 +2125,6 @@ msgid "Other applications"
 msgstr ""
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_user_id
-msgid "Owner"
-msgstr "Majiteľ"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_parent_model_id
 msgid "Parent Model"
 msgstr "Nadradený model"
@@ -2087,20 +2147,32 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "People can also apply by email to save time."
 msgstr ""
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_job__hr_responsible_id
-msgid "Person responsible of validating the employee's contracts."
-msgstr "Osoba zodpovedná za potvrdenie pracovnej zmluvy"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_phone
 msgid "Phone"
 msgstr "Telefón"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_sanitized_blacklisted
+msgid "Phone Blacklisted"
+msgstr "Telefón na čiernej listine"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_mobile_search
+msgid "Phone/Mobile"
+msgstr "Telefón / mobil"
+
+#. module: hr_recruitment
+#. odoo-python
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#, python-format
+msgid "Please provide an applicant name."
+msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_contact
@@ -2122,6 +2194,11 @@ msgid "Probability"
 msgstr "Pravdepodobnosť"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__applicant_properties
+msgid "Properties"
+msgstr "Vlastnosti"
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__salary_proposed
 msgid "Proposed Salary"
 msgstr "Navrhnutá mzda"
@@ -2137,8 +2214,14 @@ msgid "Publish available jobs on your website"
 msgstr "Publikujte voľné miesta na webstránke"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__rating_ids
+msgid "Ratings"
+msgstr "Hodnotenia"
+
+#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment_stage.py:0
+#: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job0
 #: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job1
 #: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job2
 #: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job3
@@ -2190,11 +2273,6 @@ msgid "Recruitment Analysis"
 msgstr "Analýza náboru"
 
 #. module: hr_recruitment
-#: model:res.groups,name:hr_recruitment.group_hr_recruitment_interviewer
-msgid "Recruitment Interviewer"
-msgstr ""
-
-#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
 msgid "Recruitment Process"
 msgstr "Náborový proces"
@@ -2240,6 +2318,7 @@ msgid "Red Kanban Label"
 msgstr "Červená značka Kanban"
 
 #. module: hr_recruitment
+#: model:ir.actions.server,name:hr_recruitment.ir_actions_server_refuse_applicant
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_get_refuse_reason_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
@@ -2248,7 +2327,7 @@ msgstr "Odmietnuť"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: model:ir.actions.act_window,name:hr_recruitment.applicant_get_refuse_reason_action
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__refuse_reason_id
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__refuse_reason_id
@@ -2338,6 +2417,11 @@ msgid "Restore"
 msgstr "Obnoviť"
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
+msgid "Resume's content"
+msgstr ""
+
+#. module: hr_recruitment
 #: model:hr.applicant.refuse.reason,name:hr_recruitment.refuse_reason_5
 msgid "Role already fulfilled"
 msgstr ""
@@ -2373,11 +2457,26 @@ msgid "Salary Proposed by the Organisation, extra advantages"
 msgstr "Mzda navrhnutá organizáciou, extra benefity"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_mobile_sanitized
+msgid "Sanitized Mobile Number"
+msgstr ""
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_sanitized
+msgid "Sanitized Number"
+msgstr "dezinfikované číslo"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_phone_sanitized
+msgid "Sanitized Phone Number"
+msgstr ""
+
+#. module: hr_recruitment
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
 #, python-format
-msgid "Save it !"
-msgstr "Ulož to !"
+msgid "Save it!"
+msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
@@ -2400,6 +2499,13 @@ msgid "Second Interview"
 msgstr "Druhý pohovor"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_job__address_id
+msgid ""
+"Select the location where the applicant will work. Addresses listed here are"
+" defined on the company's contact information."
+msgstr ""
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_send_mail_view_form
 msgid "Send"
 msgstr "Poslať"
@@ -2411,7 +2517,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: model:ir.actions.server,name:hr_recruitment.action_applicant_send_mail
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__send_mail
 #, python-format
@@ -2424,6 +2530,7 @@ msgid "Send Interview Survey"
 msgstr ""
 
 #. module: hr_recruitment
+#: model:ir.actions.act_window,name:hr_recruitment.action_hr_applicant_mass_sms
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
 msgid "Send SMS"
 msgstr "Zaslať SMS"
@@ -2431,8 +2538,7 @@ msgstr "Zaslať SMS"
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
 msgid ""
-"Send an Interview Survey to the applicant during\n"
-"                                        the recruitment process"
+"Send an Interview Survey to the applicant during the recruitment process"
 msgstr ""
 
 #. module: hr_recruitment
@@ -2453,6 +2559,7 @@ msgid "Send your email. Followers will get a copy of the communication."
 msgstr "Pošlite svoj e-mail. Sledovatelia dostanú kópiu oznámenia."
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason__sequence
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_degree__sequence
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_stage__sequence
 msgid "Sequence"
@@ -2584,7 +2691,7 @@ msgstr "Názov tagu"
 
 #. module: hr_recruitment
 #: model:ir.model.constraint,message:hr_recruitment.constraint_hr_applicant_category_name_uniq
-msgid "Tag name already exists !"
+msgid "Tag name already exists!"
 msgstr "Názov značky už existuje!"
 
 #. module: hr_recruitment
@@ -2595,7 +2702,6 @@ msgstr "Názov značky už existuje!"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_category_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Tags"
 msgstr "Tagy"
 
@@ -2672,17 +2778,13 @@ msgstr ""
 "<praca@priklad.odoo.com>"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_user_id
+#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__email_normalized
 msgid ""
-"The owner of records created upon receiving emails on this alias. If this "
-"field is not set the system will attempt to find the right owner based on "
-"the sender (From) address, or will use the Administrator account if no "
-"system user is found for that address."
+"This field is used to search on email address as the primary email field can"
+" contain more than strictly an email address."
 msgstr ""
-"Majiteľ záznamov vytvorených pri prijímaní emailov na tento alias. Ak toto "
-"pole nie je nastavené, systém sa pokúsi nájsť správneho vlastníka na základe"
-" adresy odosielateľa (Od), alebo bude používať účet správcu, ak nie je "
-"užívateľ systému nájdený pre danú adresu."
+"Toto pole sa používa na vyhľadávanie emailovej adresy, pretože emailové pole"
+" môže obsahovať viac ako len striktne emailovú adresu."
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__campaign_id
@@ -2862,7 +2964,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "You are not allowed to perform this action."
 msgstr ""
@@ -2871,14 +2973,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
 msgid ""
 "You can define here the labels that will be displayed for the kanban state instead\n"
-"                        of the default labels."
+"                            of the default labels."
 msgstr ""
-"Tu môžete definovať štítky, ktoré sa namiesto toho zobrazia v stave kanban\n"
-"predvolených štítkov."
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid ""
 "You can search into attachment's content, like resumes, with the searchbar."
@@ -2895,8 +2995,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
-#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "You must define a Contact Name for this applicant."
 msgstr "Pre tohto kandidáta musíte definovať kontaktné meno."
@@ -2932,5 +3031,16 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
+msgid "e.g. domain.com"
+msgstr ""
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "e.g. sales-manager"
 msgstr "napr. manažér predaja"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_get_refuse_reason_view_form
+msgid "to"
+msgstr "na"

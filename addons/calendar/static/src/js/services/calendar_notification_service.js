@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { ConnectionLostError } from "@web/core/network/rpc_service";
 import { registry } from "@web/core/registry";
@@ -12,12 +13,8 @@ export const calendarNotificationService = {
         let nextCalendarNotifTimeout = null;
         const displayedNotifications = new Set();
 
-        bus_service.addEventListener('notification', ({ detail: notifications }) => {
-            for (const { payload, type } of notifications) {
-                if (type === "calendar.alarm") {
-                    displayCalendarNotification(payload);
-                }
-            }
+        bus_service.subscribe("calendar.alarm", (payload) => {
+            displayCalendarNotification(payload);
         });
         bus_service.start();
 
@@ -48,7 +45,7 @@ export const calendarNotificationService = {
                         },
                         buttons: [
                             {
-                                name: env._t("OK"),
+                                name: _t("OK"),
                                 primary: true,
                                 onClick: async () => {
                                     await rpc("/calendar/notify_ack");
@@ -56,7 +53,7 @@ export const calendarNotificationService = {
                                 },
                             },
                             {
-                                name: env._t("Details"),
+                                name: _t("Details"),
                                 onClick: async () => {
                                     await action.doAction({
                                         type: 'ir.actions.act_window',
@@ -69,7 +66,7 @@ export const calendarNotificationService = {
                                 },
                             },
                             {
-                                name: env._t("Snooze"),
+                                name: _t("Snooze"),
                                 onClick: () => {
                                     notificationRemove();
                                 },

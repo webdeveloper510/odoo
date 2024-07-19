@@ -3,27 +3,43 @@
 # 	* hr_expense
 # 
 # Translators:
-# Noma Yuki, 2022
-# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023
-# Andy Yiu, 2023
-# Martin Trigaux, 2023
-# Ryoko Tsuda <ryoko@quartile.co>, 2023
 # Wil Odoo, 2024
 # Junko Augias, 2024
+# Ryoko Tsuda <ryoko@quartile.co>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Junko Augias, 2024\n"
+"POT-Creation-Date: 2024-01-29 10:44+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Ryoko Tsuda <ryoko@quartile.co>, 2024\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: ja\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "$100.00"
+msgstr "$100.00"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "$120.00"
+msgstr "$120.00"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "$500.00"
+msgstr "$500.00"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "$600.00"
+msgstr "$600.00"
 
 #. module: hr_expense
 #. odoo-python
@@ -41,6 +57,27 @@ msgid ""
 msgstr "%(user)s がこの経費が類似の経費と重複していないことを確認"
 
 #. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "%s: It is not from your department"
+msgstr "%s: あなたの部署からではありません。"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "%s: It is your own expense"
+msgstr "%s: 自分の経費です"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "%s: Your are not a Manager or HR Officer"
+msgstr "%s: あなたは管理者または人事社員ではありません"
+
+#. module: hr_expense
 #: model:ir.actions.report,print_report_name:hr_expense.action_report_hr_expense_sheet
 msgid ""
 "'Expenses - %s - %s' % (object.employee_id.name, (object.name).replace('/', "
@@ -56,48 +93,31 @@ msgid "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 msgstr "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "2023-08-11"
+msgstr "2023-08-11"
+
+#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"<span class=\"d-inline-block\"><i class=\"text-muted\">Use this reference as"
-" a subject prefix when submitting by email.</i></span>"
+"<span class=\"d-inline-block\">\n"
+"                                        <i class=\"text-muted\">Use this reference as a subject prefix when submitting by email.</i>\n"
+"                                    </span>"
 msgstr ""
-"<span class=\"d-inline-block\"><i class=\"text-"
-"muted\">メールで提出する際は、この参照を件名の頭に使用します。</i></span>"
+"<span class=\"d-inline-block\">\n"
+"                                        <i class=\"text-muted\">メールで提出する際は、この参照を件名の頭に使用します。</i>\n"
+"                                    </span>"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\"/>"
-msgstr "<span class=\"fa fa-lg fa-building-o\" title=\"各企業固有の値\"/>"
+#: model_terms:ir.ui.view,arch_db:hr_expense.view_move_form_inherit_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.view_payment_form_inherit_expense
+msgid "<span class=\"o_stat_text\">Expense Report</span>"
+msgstr "<span class=\"o_stat_text\">経費レポート</span>"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Company Expense Journal</span>\n"
-"                                    <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" role=\"img\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"o_form_label\">会社経費仕訳帳</span>\n"
-"                                    <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" role=\"img\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\"/>"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid ""
-"<span class=\"o_form_label\">Employee Expense Journal</span>\n"
-"                                    <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" role=\"img\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"o_form_label\">従業員経費仕訳帳</span>\n"
-"                                    <span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-specific.\" role=\"img\" aria-label=\"Values set here are company-specific.\" groups=\"base.group_multi_company\"/>"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
-msgid "<span class=\"oe_inline o_form_label ms-1 me-1\"> ( </span>"
-msgstr ""
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
-msgid "<span class=\"oe_inline o_form_label ms-1 me-3\"> ) </span>"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
+msgid "<span class=\"o_stat_text\">Journal Entry</span>"
+msgstr "<span class=\"o_stat_text\">仕訳</span>"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
@@ -106,33 +126,23 @@ msgstr "<span>@</span>"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "<strong>Date:</strong>"
-msgstr "<strong>日付:</strong>"
+msgid "<span>Date:</span>"
+msgstr "<span>日付:</span>"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "<strong>Description:</strong>"
-msgstr "<strong>説明:</strong>"
+msgid "<span>Employee:</span>"
+msgstr "<span>従業員:</span>"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "<strong>Employee:</strong>"
-msgstr "<strong>従業員:</strong>"
+msgid "<span>Manager:</span>"
+msgstr "<span>マネジャー:</span>"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "<strong>Payment By:</strong>"
-msgstr "<strong>支払元:</strong>"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "<strong>Total</strong>"
-msgstr "<strong>合計</strong>"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "<strong>Validated By:</strong>"
-msgstr "<strong>検証者：</strong>"
+msgid "<span>Paid by:</span>"
+msgstr "<span>支払済:</span>"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__account_id
@@ -141,6 +151,7 @@ msgstr "勘定科目"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
 msgid "Accounting"
 msgstr "会計"
 
@@ -148,7 +159,7 @@ msgstr "会計"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__accounting_date
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__accounting_date
 msgid "Accounting Date"
-msgstr "会計日"
+msgstr "記帳日"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_needaction
@@ -166,7 +177,7 @@ msgstr "活動"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_exception_decoration
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "例外の活動を示す文字装飾"
+msgstr "例外活動文字装飾"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_state
@@ -212,7 +223,18 @@ msgid "All Reports"
 msgstr "全ての報告"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__amount_residual
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "All expenses in an expense report must have the same \"paid by\" criteria."
+msgstr "経費レポートに記載されるすべての経費は、同じ\"支払者\"基準でなければなりません。"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid "All payment methods allowed"
+msgstr "全ての許可済支払方法"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__amount_residual
 msgid "Amount Due"
 msgstr "未消込額"
@@ -238,21 +260,21 @@ msgstr "同じカテゴリ、金額、日付の経費がすでに存在します
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "An expense report must contain only lines from the same company."
 msgstr "経費報告書は、同じ会社の明細のみでなければなりません。"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__analytic_distribution
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__analytic_distribution
-msgid "Analytic"
-msgstr "分析"
-
-#. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_analytic_account
 msgid "Analytic Account"
 msgstr "分析勘定"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__analytic_distribution
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__analytic_distribution
+msgid "Analytic Distribution"
+msgstr "分析分配"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__analytic_distribution_search
@@ -282,6 +304,11 @@ msgid "Approval Date"
 msgstr "承認日"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__approval_state
+msgid "Approval State"
+msgstr "承認ステイタス"
+
+#. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_approve_duplicate_view_form
@@ -299,6 +326,7 @@ msgstr "報告を承認"
 
 #. module: hr_expense
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__approved
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__approval_state__approve
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__state__approve
 #: model:mail.message.subtype,name:hr_expense.mt_expense_approved
 msgid "Approved"
@@ -346,6 +374,11 @@ msgid "Attachment Count"
 msgstr "添付数"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet_img
+msgid "Attachment Name"
+msgstr "添付ファイル名"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__attachment_ids
 msgid "Attachments"
 msgstr "添付"
@@ -356,21 +389,16 @@ msgid "Attachments of expenses"
 msgstr "経費の添付"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__bank_journal_id
-msgid "Bank Journal"
-msgstr "銀行仕訳帳"
-
-#. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__reference
-msgid "Bill Reference"
-msgstr "請求参照"
-
-#. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__tax_ids
 msgid ""
 "Both price-included and price-excluded taxes will behave as price-included "
 "taxes for expenses."
 msgstr "価格に含まれる税金も価格に含まれない税金も、経費については価格に含まれる税金として扱われます。"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "Business Trip"
+msgstr "出張"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__can_approve
@@ -397,6 +425,11 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__cannot_approve_reason
+msgid "Cannot Approve Reason"
+msgstr "承認できない理由"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__product_ids
 msgid "Categories"
 msgstr "カテゴリ"
@@ -405,7 +438,7 @@ msgstr "カテゴリ"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_id
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "Category"
-msgstr "カテゴリ"
+msgstr "カテゴリー"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
@@ -416,11 +449,6 @@ msgstr "カテゴリ:"
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "Category: not found"
 msgstr "カテゴリ: 見つかりません"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "Certified honest and conform,<br/>(Date and signature).<br/><br/>"
-msgstr "誠実で正式な認定を受けました。<br/>(日付と署名)。<br/><br/>"
 
 #. module: hr_expense
 #: model:product.template,name:hr_expense.expense_product_communication_product_template
@@ -460,17 +488,14 @@ msgid ""
 msgstr "単位間の変換は同じカテゴリに属している場合のみ可能です。変換は比率に基づいて行われます。"
 
 #. module: hr_expense
-#. odoo-javascript
-#: code:addons/hr_expense/static/src/xml/documents_upload_views.xml:0
-#, python-format
-msgid "Create"
-msgstr "作成"
+#: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_kanban_view
+msgid "Cost:"
+msgstr "原価:"
 
 #. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 #: code:addons/hr_expense/static/src/views/list.xml:0
-#: code:addons/hr_expense/static/src/xml/documents_upload_views.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 #, python-format
 msgid "Create Report"
@@ -480,7 +505,7 @@ msgstr "報告を作成"
 #: model_terms:ir.actions.act_window,help:hr_expense.action_hr_expense_account
 #: model_terms:ir.actions.act_window,help:hr_expense.action_hr_expense_sheet_all_all
 msgid "Create a new expense report"
-msgstr "経費報告を新規作成"
+msgstr "経費報告を新規作成してください"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -498,13 +523,6 @@ msgstr "受信メールから経費を作成"
 #: model_terms:ir.actions.act_window,help:hr_expense.hr_expense_actions_all
 msgid "Create new expenses to get statistics."
 msgstr "統計データを得るためには新しい経費を作成しましょう。"
-
-#. module: hr_expense
-#. odoo-javascript
-#: code:addons/hr_expense/static/src/xml/documents_upload_views.xml:0
-#, python-format
-msgid "Create record"
-msgstr "レコードを作成"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__create_uid
@@ -525,6 +543,11 @@ msgstr "作成者"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__create_date
 msgid "Created on"
 msgstr "作成日"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "Credit Card"
+msgstr "クレジットカード"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__currency_id
@@ -551,15 +574,20 @@ msgid "Dear"
 msgstr "Dear"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__expense_alias_prefix
+#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_prefix
 msgid "Default Alias Name for Expenses"
 msgstr "経費のデフォルトエイリアス名"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_res_company__company_expense_journal_id
-#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__company_expense_journal_id
-msgid "Default Company Expense Journal"
-msgstr "デフォルト会社経費仕訳帳"
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid "Default Category"
+msgstr "デフォルトカテゴリ"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_res_company__expense_product_id
+#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__expense_product_id
+msgid "Default Expense Category"
+msgstr "デフォルト経費カテゴリ"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_company__expense_journal_id
@@ -569,18 +597,13 @@ msgstr "デフォルト経費仕訳帳"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "Default Journals"
-msgstr "デフォルト仕訳帳"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
 msgid "Default accounting journal for expenses paid by employees."
 msgstr "従業員から支払われる経費のデフォルト会計仕訳帳。"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "Default accounting journal for expenses paid by the company."
-msgstr "会社から支払われる経費のデフォルト会計仕訳帳。"
+msgid "Default expense categories for uploaded expenses"
+msgstr "アップロードされた経費用のデフォルト経費カテゴリ"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_department
@@ -643,7 +666,7 @@ msgid "Download our App"
 msgstr "アプリをダウンロード"
 
 #. module: hr_expense
-#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__state__draft
+#: model:mail.message.subtype,name:hr_expense.mt_expense_reset
 msgid "Draft"
 msgstr "ドラフト"
 
@@ -676,15 +699,22 @@ msgid "Employee (to reimburse)"
 msgstr "従業員 (要払戻)"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid "Employee Expense Journal"
+msgstr "従業員経費仕訳帳"
+
+#. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.action_hr_expense_account
 #: model:ir.ui.menu,name:hr_expense.menu_hr_expense_account_employee_expenses
 msgid "Employee Expenses"
 msgstr "経費精算"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__address_id
-msgid "Employee Home Address"
-msgstr "従業員住所"
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid ""
+"Enable users to choose default category for automatically generated "
+"expenses."
+msgstr "自動生成される経費のデフォルトカテゴリを選択できるようにします。"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -696,6 +726,7 @@ msgid ""
 msgstr "名前を入力し、カテゴリを選択し、経費の金額を設定します。"
 
 #. module: hr_expense
+#: model:account.journal,name:hr_expense.hr_expense_account_journal
 #: model:ir.model,name:hr_expense.model_hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_move_line__expense_id
 #: model:ir.model.fields,field_description:hr_expense.field_hr_employee__expense_manager_id
@@ -751,7 +782,7 @@ msgstr "経費仕訳"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__expense_line_ids
 msgid "Expense Lines"
-msgstr "経費の行"
+msgstr "費用明細"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__is_editable
@@ -773,10 +804,13 @@ msgstr "費用否認理由ウィザード"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__sheet_id
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_tree
-#: model_terms:ir.ui.view,arch_db:hr_expense.view_move_form_inherit_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.view_payment_form_inherit_expense
 msgid "Expense Report"
 msgstr "経費報告"
+
+#. module: hr_expense
+#: model:ir.actions.report,name:hr_expense.action_report_expense_sheet_img
+msgid "Expense Report Image"
+msgstr "経費報告画像"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__name
@@ -837,8 +871,8 @@ msgstr "経費カテゴリは顧客に再請求可能です。"
 #. odoo-python
 #: code:addons/hr_expense/models/account_move.py:0
 #, python-format
-msgid "Expense entry Created"
-msgstr ""
+msgid "Expense entry created from: %s"
+msgstr "以下から作成された経費エントリ: %s"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_refuse_wizard_view_form
@@ -861,6 +895,11 @@ msgid "Expense report refused"
 msgstr "経費報告否認"
 
 #. module: hr_expense
+#: model:mail.message.subtype,description:hr_expense.mt_expense_reset
+msgid "Expense report reset to Draft"
+msgstr "経費レポートがドラフトに再設定されました"
+
+#. module: hr_expense
 #: model_terms:ir.actions.act_window,help:hr_expense.action_hr_expense_sheet_all
 msgid ""
 "Expense reports regroup all the expenses incurred during a specific event."
@@ -875,7 +914,7 @@ msgstr "経費分割"
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #: model:ir.ui.menu,name:hr_expense.menu_hr_expense_root
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_department_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_activity
@@ -918,8 +957,10 @@ msgstr "日ごとの経費"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
-msgid "Expenses must have the same To Reimburse status."
-msgstr ""
+msgid ""
+"Expenses from which the report has been submitted to the approver and is "
+"waiting for approval."
+msgstr "報告書が承認者に提出され、承認待ちの経費。"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
@@ -928,14 +969,33 @@ msgid "Expenses of Your Team Member"
 msgstr "あなたのチームメンバーの経費"
 
 #. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
+msgid "Expenses paid by employee that are approved but not paid yet."
+msgstr "従業員が支払った費用で、承認済だがまだ支払われていないもの。"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
+msgid "Expenses that need to be submitted to the approver."
+msgstr "承認者に提出する必要のある経費"
+
+#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.account_journal_dashboard_kanban_view_inherit_hr_expense
 msgid "Expenses to Process"
 msgstr "未処理経費"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__is_refused
-msgid "Explicitly Refused by manager or accountant"
-msgstr ""
+#: model:ir.model.fields,field_description:hr_expense.field_hr_employee__filter_for_expense
+msgid "Filter For Expense"
+msgstr "経費用フィルタ"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "Flight Ticket"
+msgstr "フライトチケット"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_follower_ids
@@ -965,7 +1025,7 @@ msgstr "過去の従業員"
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "Future Activities"
-msgstr "将来の活動"
+msgstr "今後の活動"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
@@ -1017,16 +1077,6 @@ msgid "Hotel, plane ticket, taxi, etc."
 msgstr "ホテル、飛行機チケット、タクシーなど"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__hr_expense_ids
-msgid "Hr Expense"
-msgstr ""
-
-#. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__hr_expense_sheet_id
-msgid "Hr Expense Sheet"
-msgstr ""
-
-#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__id
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_approve_duplicate__id
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__id
@@ -1046,13 +1096,13 @@ msgstr "アイコン"
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__activity_exception_icon
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "例外的なアクティビティを示唆するアイコン"
+msgstr "例外活動を示すアイコン"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_needaction
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
+msgstr "チェックした場合は、新しいメッセージに注意が必要です。"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_has_error
@@ -1060,7 +1110,7 @@ msgstr "チェックされている場合は、新しいメッセージに注意
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_has_error
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "チェックした場合、一部のメッセージで配信エラーが発生しています。"
+msgstr "チェックした場合は、一部のメッセージに配信エラーが発生されました。"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
@@ -1079,14 +1129,13 @@ msgstr "受信Eメール"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_categories_tree_view
-#: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid "Internal Note"
 msgstr "内部注釈"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__description
 msgid "Internal Notes"
-msgstr "内部注記"
+msgstr "内部メモ"
 
 #. module: hr_expense
 #. odoo-python
@@ -1098,7 +1147,7 @@ msgstr "無効な添付ファイルです！"
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__is_editable
 msgid "Is Editable By Current User"
-msgstr "現在のユーザが編集可能か"
+msgstr "現在のユーザが編集可能"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_is_follower
@@ -1107,15 +1156,14 @@ msgid "Is Follower"
 msgstr "フォロー中　"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__same_currency
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__is_multiple_currency
 msgid "Is currency_id different from the company_currency_id"
 msgstr "currency_id がcompany_currency_idと異なるか"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_has_cost
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__product_has_cost
 msgid "Is product with non zero cost selected"
-msgstr "ゼロ原価のプロダクトが選択されているか"
+msgstr "選択されたゼロ原価のプロダクト"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1127,37 +1175,47 @@ msgstr "ここから全てが始まります。始めましょう！"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_journal
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__journal_displayed_id
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__employee_journal_id
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 msgid "Journal"
 msgstr "仕訳帳"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__account_move_ids
+msgid "Journal Entries"
+msgstr "仕訳"
+
+#. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_move
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__account_move_id
-#: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
 msgid "Journal Entry"
 msgstr "仕訳"
 
 #. module: hr_expense
+#: model:mail.message.subtype,name:hr_expense.mt_expense_entry_delete
+msgid "Journal Entry Deleted"
+msgstr "仕訳エントリが削除されました"
+
+#. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_move_line
 msgid "Journal Item"
-msgstr "仕訳明細"
+msgstr "仕訳項目"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__label_convert_rate
-msgid "Label Convert Rate"
-msgstr "ラベル変換レート"
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "Journal entries"
+msgstr "仕訳帳エントリ"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense____last_update
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_approve_duplicate____last_update
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard____last_update
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet____last_update
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split____last_update
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard____last_update
-msgid "Last Modified on"
-msgstr "最終更新日"
+#: model:mail.message.subtype,description:hr_expense.mt_expense_entry_delete
+msgid "Journal entry deleted"
+msgstr "仕訳帳エントリが削除されました"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__label_currency_rate
+msgid "Label Currency Rate"
+msgstr "ラベル通貨レート"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__write_uid
@@ -1186,7 +1244,7 @@ msgid "Late Activities"
 msgstr "遅れた活動"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__use_mailgateway
+#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_use_mailgateway
 msgid "Let your employees record expenses by email"
 msgstr "従業員がEメールで経費を記録できるようにする"
 
@@ -1205,10 +1263,17 @@ msgid "Let's go back to your expenses."
 msgstr "経費に戻りましょう。"
 
 #. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
+msgid "Lunch with customer $12.32"
+msgstr "顧客との昼食 $12.32"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_main_attachment_id
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__message_main_attachment_id
 msgid "Main Attachment"
-msgstr "主な添付"
+msgstr "主要添付"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__user_id
@@ -1222,7 +1287,7 @@ msgstr "マネジャー"
 msgid ""
 "Managers can approve the report here, then an accountant can post the "
 "accounting entries."
-msgstr "管理者はレポートをここで承認し、その後、会計担当が会計エントリを投稿することができます。"
+msgstr "マネジャーは報告をここで承認し、その後、会計担当が会計エントリを投稿することができます。"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1231,6 +1296,11 @@ msgstr "管理者はレポートをここで承認し、その後、会計担当
 #, python-format
 msgid "Managers can inspect all expenses from here."
 msgstr "マネジャーはここから全ての経費を調査することができます。"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "Marc Demo"
+msgstr "Marc Demo"
 
 #. module: hr_expense
 #: model:product.template,name:hr_expense.expense_product_meal_product_template
@@ -1255,10 +1325,15 @@ msgid "Mileage"
 msgstr "走行距離"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "Mitchell Admin"
+msgstr "Mitchell Admin"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__my_activity_date_deadline
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr "活動の締切"
+msgstr "活動期限"
 
 #. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.hr_expense_actions_my_all
@@ -1290,13 +1365,6 @@ msgstr "名称"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
-msgid "New Expense Report"
-msgstr ""
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
 msgid "New Expense Report, paid by %(paid_by)s"
 msgstr "新規経費レポート、支払者:%(paid_by)s"
 
@@ -1305,7 +1373,7 @@ msgstr "新規経費レポート、支払者:%(paid_by)s"
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
 msgid "New Expense Reports"
-msgstr "新規経費レポート"
+msgstr "新規経費報告"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_date_deadline
@@ -1317,20 +1385,13 @@ msgstr "次の活動期限"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_summary
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__activity_summary
 msgid "Next Activity Summary"
-msgstr "次の活動サマリ"
+msgstr "次の活動概要"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_type_id
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__activity_type_id
 msgid "Next Activity Type"
 msgstr "次の活動タイプ"
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid "No Home Address found for the employee %s, please configure one."
-msgstr "従業員 %s にホームアドレスがありません。設定してください。"
 
 #. module: hr_expense
 #. odoo-python
@@ -1361,6 +1422,18 @@ msgid "No expense reports found. Let's create one!"
 msgstr "経費報告がありません。経費報告を作成しましょう！"
 
 #. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "No work contact found for the employee %s, please configure one."
+msgstr "従業員%s用の雇用契約書が見つかりません。作成して下さい。"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
+msgid "Not Refused"
+msgstr "未却下"
+
+#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 msgid "Notes..."
 msgstr "注記..."
@@ -1369,18 +1442,22 @@ msgstr "注記..."
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_needaction_counter
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__message_needaction_counter
 msgid "Number of Actions"
-msgstr "アクションの数"
+msgstr "アクション数"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__attachment_number
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__attachment_number
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__nb_attachment
 msgid "Number of Attachments"
 msgstr "添付の数"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__expense_number
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__nb_expense
 msgid "Number of Expenses"
 msgstr "経費数"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__nb_account_move
+msgid "Number of Journal Entries"
+msgstr "仕訳エントリ数"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_has_error_counter
@@ -1398,7 +1475,7 @@ msgstr "アクションを必要とするメッセージの数"
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_has_error_counter
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "配信エラーのメッセージ数"
+msgstr "配信エラーが発生されたメッセージ数"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register_no_user
@@ -1425,23 +1502,22 @@ msgstr "<b>経費報告書</b>の準備ができたら、上司に提出して�
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "Only HR Officers or the concerned employee can reset to draft."
 msgstr "ドラフトをリセットできるのは、人事担当者または関連する従業員のみです。"
 
 #. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid "Only Managers and HR Officers can approve expenses"
-msgstr ""
-
-#. module: hr_expense
 #: model_terms:ir.actions.act_window,help:hr_expense.hr_expense_actions_my_all
 msgid "Or"
 msgstr "または"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
+msgid "Or send your receipts at"
+msgstr "または以下に領収書を送る:"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
@@ -1471,6 +1547,11 @@ msgid "Partial"
 msgstr "部分消込"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__payment_method_line_id
+msgid "Payment Method"
+msgstr "支払方法"
+
+#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__payment_state
 msgid "Payment Status"
 msgstr "支払状況"
@@ -1481,6 +1562,22 @@ msgstr "支払状況"
 #, python-format
 msgid "Payment created for: %s"
 msgstr "以下用に作成された支払: %s"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid "Payment method allowed for expenses paid by company."
+msgstr "会社が費用を支払う際に許可されている支払方法。"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid "Payment methods"
+msgstr "支払方法"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_res_company__company_expense_allowed_payment_method_line_ids
+#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__company_expense_allowed_payment_method_line_ids
+msgid "Payment methods available for expenses paid by company"
+msgstr "会社が費用を支払う際に利用可能な支払方法。"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_account_payment
@@ -1497,7 +1594,7 @@ msgstr "電話代、郵便料金など"
 #: code:addons/hr_expense/static/src/views/list.xml:0
 #, python-format
 msgid "Post Entries"
-msgstr "エントリを投稿"
+msgstr "仕訳を記帳"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
@@ -1515,16 +1612,6 @@ msgid "Powered by"
 msgstr "Powered by"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "Price"
-msgstr "価格"
-
-#. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "Price in Company Currency"
-msgstr "会社通貨での価格"
-
-#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "Price:"
 msgstr "価格:"
@@ -1539,6 +1626,11 @@ msgstr "プロダクト"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_description
 msgid "Product Description"
 msgstr "プロダクト説明"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_has_cost
+msgid "Product Has Cost"
+msgstr "プロダクトに原価あり"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
@@ -1561,12 +1653,8 @@ msgid "Public Employee"
 msgstr "公務員"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "Qty"
-msgstr "数量"
-
-#. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__quantity
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "Quantity"
 msgstr "数量"
 
@@ -1587,24 +1675,14 @@ msgid "Reason"
 msgstr "理由"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_refuse_reason
-msgid "Reason :"
-msgstr ""
-
-#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_refuse_wizard_view_form
 msgid "Reason to refuse Expense"
 msgstr "経費否認の理由"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
-msgid "Ref."
-msgstr "参照"
-
-#. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__is_ref_editable
-msgid "Reference Is Editable By Current User"
-msgstr "参照は現在のユーザが編集可能"
+#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_refuse_reason
+msgid "Reason:"
+msgstr "理由:"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_approve_duplicate_view_form
@@ -1620,11 +1698,12 @@ msgstr "承認不可"
 
 #. module: hr_expense
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__refused
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__approval_state__cancel
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__state__cancel
 #: model:mail.message.subtype,name:hr_expense.mt_expense_refused
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "Refused"
-msgstr "否認"
+msgstr "却下済"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
@@ -1632,13 +1711,13 @@ msgid "Refused Expenses"
 msgstr "否認経費"
 
 #. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#. odoo-javascript
+#: code:addons/hr_expense/static/src/views/list.xml:0
 #: model:ir.model,name:hr_expense.model_account_payment_register
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
 #, python-format
 msgid "Register Payment"
-msgstr "支払登録"
+msgstr "支払を登録"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__module_hr_payroll_expense
@@ -1656,12 +1735,13 @@ msgid "Reimburse in Payslip"
 msgstr "給与明細で払い戻す"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_refuse_reason
-msgid "Report"
-msgstr "レポート"
+#: model:ir.model,name:hr_expense.model_ir_actions_report
+msgid "Report Action"
+msgstr "レポートアクション"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__company_currency_id
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__company_currency_id
 msgid "Report Company Currency"
 msgstr "レポート会社通貨"
 
@@ -1673,13 +1753,13 @@ msgstr "レポーティング"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
 msgid "Reset to Draft"
-msgstr "ドラフトに再設定"
+msgstr "ドラフトにリセット"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_user_id
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__activity_user_id
 msgid "Responsible User"
-msgstr "担当者"
+msgstr "担当ユーザ"
 
 #. module: hr_expense
 #: model_terms:product.template,description:hr_expense.expense_product_meal_product_template
@@ -1698,16 +1778,9 @@ msgid "Sales Price"
 msgstr "販売価格"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__sample
-msgid "Sample"
-msgstr "サンプル"
-
-#. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/views/kanban.xml:0
 #: code:addons/hr_expense/static/src/views/list.xml:0
-#: code:addons/hr_expense/static/src/xml/documents_upload_views.xml:0
-#: code:addons/hr_expense/static/src/xml/documents_upload_views.xml:0
 #, python-format
 msgid "Scan"
 msgstr "スキャン"
@@ -1715,7 +1788,6 @@ msgstr "スキャン"
 #. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/components/qrcode_action.xml:0
-#: code:addons/hr_expense/static/src/xml/expense_qr_modal_template.xml:0
 #, python-format
 msgid "Scan this QR code to get the Odoo app:"
 msgstr "このQRコードをスキャンして、Odooアプリを入手してください。"
@@ -1731,13 +1803,9 @@ msgstr ""
 "空の場合、承認は管理者または承認者（設定/ユーザで決定）が行います。"
 
 #. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid ""
-"Selected Unit of Measure for expense %(expense)s does not belong to the same"
-" category as the Unit of Measure of product %(product)s."
-msgstr "選択された費用の測定単位%(expense)sは、プロダクト%(product)sの測定単位と同じカテゴリには属しません。"
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__selectable_payment_method_line_ids
+msgid "Selectable Payment Method Line"
+msgstr "選択可能な支払方法明細"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
@@ -1763,24 +1831,27 @@ msgstr "管理設定"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "Setup your domain alias"
-msgstr "ドメインエイリアスを設定"
+msgid "Setup your alias domain"
+msgstr "エイリアスドメインを設定"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_approve_duplicate__sheet_ids
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__sheet_ids
 msgid "Sheet"
 msgstr "表"
-
-#. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__sheet_is_editable
-msgid "Sheet Is Editable"
-msgstr "シートは編集可能です"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "Show all records which has next action date is before today"
-msgstr "次のアクションの日付が今日より前のすべてのレコードを表示する"
+msgstr "次のアクションの日付が今日より前のすべてのレコードを表示"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid "Show missing work email employees"
+msgstr "仕事用Eメールのない従業員を表示"
 
 #. module: hr_expense
 #: model_terms:ir.actions.act_window,help:hr_expense.hr_expense_actions_my_all
@@ -1791,7 +1862,7 @@ msgstr "領収書の写真を撮り、<br> Odooに自動で経費を精算して
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "Specify expense journal to generate accounting entries."
 msgstr "会計仕訳作成の経費仕訳帳を指定"
@@ -1831,7 +1902,7 @@ msgstr "標準価格更新の警告"
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "Status"
-msgstr "ステータス"
+msgstr "状態"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__activity_state
@@ -1842,17 +1913,17 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"活動に基づく状態\n"
-"延滞：期限は既に過ぎました\n"
-"当日：活動日は本日です\n"
-"予定：将来の活動。"
+"活動に基づいての状態\n"
+"延滞: 期限は既に過ぎました\n"
+"当日: 活動日は本日です\n"
+"予定: 将来の活動。"
 
 #. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/views/list.xml:0
 #, python-format
 msgid "Submit"
-msgstr "送信"
+msgstr "提出"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1863,12 +1934,30 @@ msgid "Submit to Manager"
 msgstr "マネジャーに申請"
 
 #. module: hr_expense
-#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__reported
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__submitted
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__approval_state__submit
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__state__submit
 msgid "Submitted"
 msgstr "申請済"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+#: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
+msgid "Subtotal"
+msgstr "小計"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
+msgid "Subtotal In Currency"
+msgstr "通貨での小計"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
+msgid "Subtotal in currency"
+msgstr "通貨での小計"
+
+#. module: hr_expense
+#: model:ir.model,name:hr_expense.model_account_tax
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__tax_ids
 msgid "Tax"
 msgstr "税"
@@ -1879,45 +1968,39 @@ msgid "Tax 15%"
 msgstr "税率 15%"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__amount_tax_company
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__tax_amount
 msgid "Tax amount"
 msgstr "税額"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__amount_tax
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__amount_tax
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__tax_amount_currency
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__tax_amount_currency
 msgid "Tax amount in Currency"
 msgstr "取引通貨税額"
 
 #. module: hr_expense
-#: model:ir.model.fields,help:hr_expense.field_hr_expense__amount_tax_company
+#: model:ir.model.fields,help:hr_expense.field_hr_expense__tax_amount
 msgid "Tax amount in company currency"
 msgstr "会社通貨税額"
 
 #. module: hr_expense
-#: model:ir.model.fields,help:hr_expense.field_hr_expense__amount_tax
+#: model:ir.model.fields,help:hr_expense.field_hr_expense__tax_amount_currency
 msgid "Tax amount in currency"
 msgstr "取引通貨税額"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__total_amount_taxes
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__total_amount_taxes
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__total_tax_amount
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__tax_amount_currency
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
 msgid "Taxes"
-msgstr "税"
+msgstr "税金"
 
 #. module: hr_expense
 #: model:res.groups,name:hr_expense.group_hr_expense_team_approver
 msgid "Team Approver"
 msgstr "チーム承認者"
-
-#. module: hr_expense
-#: model:ir.model.fields,help:hr_expense.field_res_company__company_expense_journal_id
-#: model:ir.model.fields,help:hr_expense.field_res_config_settings__company_expense_journal_id
-msgid "The company's default journal used when a company expense is created."
-msgstr "会社の経費が作成される時に使われる会社のデフォルト会計仕訳帳。"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
@@ -1932,13 +2015,6 @@ msgstr "従業員の経費が作成される時に使われる会社のデフォ
 #, python-format
 msgid "The current user has no related employee. Please, create one."
 msgstr "現ユーザには関連する従業員レコードがありません。従業員を作成してください。"
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid "The expense reports were successfully approved."
-msgstr ""
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
@@ -1961,23 +2037,14 @@ msgid "The journal must be set on posted expense"
 msgstr "仕訳は計上費用に設定する必要があります。"
 
 #. module: hr_expense
-#: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__journal_id
-msgid "The journal used when the expense is done."
-msgstr "経費が行われたときに使用された記録。"
+#: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__employee_journal_id
+msgid "The journal used when the expense is paid by employee."
+msgstr "従業員に経費を支払う時に使用される仕訳帳"
 
 #. module: hr_expense
-#: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__bank_journal_id
+#: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__payment_method_line_id
 msgid "The payment method used when the expense is paid by the company."
 msgstr "会社が費用を支払う際に使用される支払方法。"
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid ""
-"The private address of the employee is required to post the expense report. "
-"Please add it on the employee form."
-msgstr ""
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1993,10 +2060,12 @@ msgstr "分割後の合計は同じままである必要があります。"
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
-msgid "There are no expense reports to approve."
-msgstr ""
+msgid ""
+"The work email of some employees is missing. Please add it on the employee "
+"form"
+msgstr "一部の従業員の会社Eメールがありません。従業員フォームに追加して下さい。"
 
 #. module: hr_expense
 #. odoo-python
@@ -2029,12 +2098,14 @@ msgid "Tip: Snap pictures of your receipts with the remote app"
 msgstr "ヒント：リモートアプリで領収書の写真を撮りましょう"
 
 #. module: hr_expense
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__draft
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "To Report"
 msgstr "未申請"
 
 #. module: hr_expense
-#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__draft
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__reported
+#: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense_sheet__state__draft
 msgid "To Submit"
 msgstr "未申請"
 
@@ -2045,41 +2116,43 @@ msgid "Today Activities"
 msgstr "本日の活動"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__total_amount_company
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__total_amount
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__total_amount
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "Total"
 msgstr "合計"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__total_amount
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__total_amount
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__total_amount_currency
+#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_expenses_analysis_tree
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_tree
 msgid "Total Amount"
 msgstr "合計金額"
 
 #. module: hr_expense
-#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_expenses_analysis_tree
-msgid "Total Company Currency"
-msgstr ""
-
-#. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__total_amount
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__total_amount
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__total_amount_currency
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__total_amount_currency
 msgid "Total In Currency"
 msgstr "取引通貨合計"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__untaxed_amount
+#: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_expenses_analysis_tree
+msgid "Total Taxes"
+msgstr "税額合計"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__untaxed_amount_currency
 msgid "Total Untaxed Amount In Currency"
 msgstr "取引通貨税抜金額"
 
 #. module: hr_expense
-#: model:ir.model.fields,help:hr_expense.field_hr_expense_split_wizard__total_amount_original
+#: model:ir.model.fields,help:hr_expense.field_hr_expense_split_wizard__total_amount_currency_original
 msgid "Total amount of the original Expense that we are splitting"
 msgstr "分割する経費の合計額"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__total_amount_original
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__total_amount_currency_original
 msgid "Total amount original"
 msgstr "元の合計金額"
 
@@ -2092,19 +2165,14 @@ msgstr "旅費交通費"
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__activity_exception_decoration
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "記録上の例外アクティビティのタイプ。"
+msgstr "記録上の例外活動の種類。"
 
 #. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__unit_amount
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__price_unit
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_expenses_analysis_tree
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "Unit Price"
 msgstr "単価"
-
-#. module: hr_expense
-#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__unit_amount_display
-msgid "Unit Price Display"
-msgstr "単価ディスプレー"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_uom_id
@@ -2113,6 +2181,7 @@ msgstr "単位"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__untaxed_amount
+#: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "Untaxed Amount"
 msgstr "税抜金額"
 
@@ -2178,18 +2247,20 @@ msgstr "ウェブサイトメッセージ"
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__website_message_ids
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_sheet__website_message_ids
 msgid "Website communication history"
-msgstr "ウェブサイトコミュニケーション履歴"
+msgstr "ウェブサイト通信履歴"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the user using"
-" this product won't be able to change the amount of the expense, only the "
-"quantity. Use a cost different than 0 for expense categories funded by the "
-"company at fixed cost like allowances for mileage, per diem, accommodation "
-"or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                         using this product won't be able to"
+" change the amount of the expense,                                         "
+"only the quantity. Use a cost different than 0 for expense categories funded"
+" by                                         the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                         or meal."
 msgstr ""
-"経費プロダクトの原価が0より大きい場合、そのプロダクトを使用するユーザは経費の金額を変更することができず、数量のみを変更することができます。マイレージ、日当、宿泊費、食事手当のように、会社から固定費で支給される経費カテゴリには、0以外の原価を使用して下さい。"
+"経費プロダクトの原価が0より大きい場合、そのプロダクトを使用するユーザは経費の金額を変更することができず、数量のみを変更することができます。マイレージ、日当、宿泊費、　　　　　　　　　　　食事手当のように、会社から固定費で支給される経費カテゴリには、0以外の原価を　　　　使用して下さい。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_has_tax
@@ -2206,15 +2277,16 @@ msgstr "ウィザード"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
-msgid "You are not authorized to edit the reference of this expense report."
-msgstr "この経費報告の参照元を編集する権限がありません。"
+msgid "You are not authorized to edit this expense report."
+msgstr "この経費報告を編集する権限がありません。"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
-msgid "You are not authorized to edit this expense report."
-msgstr "この経費報告を編集する権限がありません。"
+msgid "You are not authorized to edit this expense."
+msgstr "この経費を編集する権利はありません"
 
 #. module: hr_expense
 #. odoo-python
@@ -2230,56 +2302,39 @@ msgstr "以下のリンクからマネジャーに提出することができま
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid "You can only approve your department expenses"
-msgstr ""
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "You can only generate accounting entry for approved expense(s)."
 msgstr "承認の経費のみ会計仕訳生成できます。"
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid "You can only refuse your department expenses"
-msgstr "部署経費のみ否認できます"
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
-#, python-format
-msgid "You can't mix sample expenses and regular ones"
-msgstr "サンプル経費と通常経費を混ぜることはできません"
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "You cannot add expenses of another employee."
 msgstr "他の従業員の経費を追加することはできません。"
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
-msgid "You cannot approve your own expenses"
+msgid ""
+"You cannot approve:\n"
+" %s"
 msgstr ""
+"以下を承認できません:\n"
+"%s"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
 msgid "You cannot delete a posted or approved expense."
-msgstr "投稿または承認された経費を削除することはできません。"
+msgstr "記帳または承認された経費を削除することはできません。"
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "You cannot delete a posted or paid expense."
 msgstr "記帳または支払済の経費を削除することはできません。"
@@ -2293,6 +2348,24 @@ msgstr "経費に使用されている分析勘定を削除することはでき
 
 #. module: hr_expense
 #. odoo-python
+#: code:addons/hr_expense/models/account_move.py:0
+#, python-format
+msgid ""
+"You cannot delete only some entries linked to an expense report. All entries"
+" must be deleted at the same time."
+msgstr "経費報告にリンクしている一部の項目だけを削除することはできません。全ての項目を同時に削除する必要があります。"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/account_payment.py:0
+#, python-format
+msgid ""
+"You cannot delete only some payments linked to an expense report. All "
+"payments must be deleted at the same time."
+msgstr "経費報告にリンクされている一部の支払だけを削除することはできません。全ての支払を同時に削除する必要があります。"
+
+#. module: hr_expense
+#. odoo-python
 #: code:addons/hr_expense/models/account_payment.py:0
 #, python-format
 msgid ""
@@ -2302,10 +2375,14 @@ msgstr "支払は経費報告書にリンクされているため、この修正
 
 #. module: hr_expense
 #. odoo-python
-#: code:addons/hr_expense/models/hr_expense.py:0
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
-msgid "You cannot refuse your own expenses"
-msgstr "自分自身の経費を否認できません"
+msgid ""
+"You cannot refuse:\n"
+" %s"
+msgstr ""
+"以下を拒否できません:\n"
+"%s"
 
 #. module: hr_expense
 #. odoo-python
@@ -2333,7 +2410,7 @@ msgstr "金額のない経費は計上できません！"
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
 msgid "You cannot report twice the same line!"
-msgstr "同じ項目を2回報告することはできません！"
+msgstr "同じ明細を2回報告することはできません！"
 
 #. module: hr_expense
 #. odoo-python
@@ -2360,8 +2437,8 @@ msgstr "次に進むには、データベースに費用計上可能なカテゴ
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_refuse_reason
-msgid "Your Expense"
-msgstr ""
+msgid "Your Expense Report"
+msgstr "あなたの経費報告"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
@@ -2384,6 +2461,11 @@ msgid "e.g. Trip to NY"
 msgstr "例. ニューヨークへの旅行"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
+msgid "e.g. domain.com"
+msgstr "例: domain.com"
+
+#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_refuse_reason
 msgid "has been refused"
 msgstr "が否認されました。"
@@ -2399,8 +2481,8 @@ msgstr "払戻待ち"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 #, python-format
-msgid "to report"
-msgstr "未申請"
+msgid "to submit"
+msgstr "申請対象"
 
 #. module: hr_expense
 #. odoo-python

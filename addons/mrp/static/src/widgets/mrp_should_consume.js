@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import { FloatField } from "@web/views/fields/float/float_field";
-import { registry } from "@web/core/registry";
+import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { formatFloat } from "@web/views/fields/formatters";
+import { registry } from "@web/core/registry";
+import { useRef, onPatched, onMounted, useState } from "@odoo/owl";
 
 /**
  * This widget is used to display alongside the total quantity to consume of a production order,
@@ -12,7 +13,6 @@ import { formatFloat } from "@web/views/fields/formatters";
  * The widget will be '3.000 / 5.000'.
  */
 
-const { useRef, onPatched, onMounted, useState } = owl;
 export class MrpShouldConsumeOwl extends FloatField {
     setup() {
         super.setup();
@@ -41,9 +41,14 @@ export class MrpShouldConsumeOwl extends FloatField {
             ...this.nodeOptions,
         });
     }
-} 
+}
 
 MrpShouldConsumeOwl.template = "mrp.ShouldConsume";
-MrpShouldConsumeOwl.displayName = "MRP Should Consume";
 
-registry.category("fields").add("mrp_should_consume", MrpShouldConsumeOwl);
+export const mrpShouldConsumeOwl = {
+    ...floatField,
+    component: MrpShouldConsumeOwl,
+    displayName: "MRP Should Consume",
+};
+
+registry.category("fields").add("mrp_should_consume", mrpShouldConsumeOwl);

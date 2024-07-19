@@ -1,12 +1,13 @@
 /** @odoo-module */
 
-import tour from 'web_tour.tour';
+import { registry } from "@web/core/registry";
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
-tour.register('create_crm_team_tour', {
+registry.category("web_tour.tours").add('create_crm_team_tour', {
     url: "/web",
     test: true,
-}, [
-    ...tour.stepUtils.goToAppSteps('crm.crm_menu_root'),
+    steps: () => [
+    ...stepUtils.goToAppSteps('crm.crm_menu_root'),
 {
     trigger: 'button[data-menu-xmlid="crm.crm_menu_config"]',
 }, {
@@ -14,7 +15,7 @@ tour.register('create_crm_team_tour', {
 }, {
     trigger: 'button.o_list_button_add',
 }, {
-    trigger: 'input[id="name"]',
+    trigger: 'input[id="name_0"]',
     run: 'text My CRM Team',
 }, {
     trigger: 'button.o-kanban-button-new',
@@ -28,7 +29,10 @@ tour.register('create_crm_team_tour', {
     trigger: 'div.modal-dialog tr:contains("Test Sales Manager") input.form-check-input:checked',
     run: () => {},
 }, {
+    trigger: '.o_list_selection_box:contains(2)',
+    run: () => {},
+}, {
     trigger: 'button.o_select_button',
 }, 
-    ...tour.stepUtils.saveForm()
-]);
+    ...stepUtils.saveForm()
+]});

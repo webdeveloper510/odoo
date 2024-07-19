@@ -3,18 +3,17 @@
 # 	* mail_group
 # 
 # Translators:
-# Uros Kalajdzic <ukalajdzic@gmail.com>, 2022
-# Martin Trigaux, 2022
-# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2022
+# Martin Trigaux, 2023
+# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
 # Milan Bojovic <mbojovic@outlook.com>, 2023
 # コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: コフスタジオ, 2024\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
@@ -25,9 +24,7 @@ msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_reject_form
-msgid ""
-") <span attrs=\"{'invisible': [('send_email', '=', False)]}\">and send them "
-"an email</span>."
+msgid ") <span invisible=\"not send_email\">and send them an email</span>."
 msgstr ""
 
 #. module: mail_group
@@ -93,51 +90,9 @@ msgid ""
 msgstr ""
 
 #. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.group_message
-msgid ""
-"<i class=\"fa fa-arrow-left\" role=\"img\" aria-label=\"Previous message\" "
-"title=\"Previous message\"/>"
-msgstr ""
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.group_message
-msgid ""
-"<i class=\"fa fa-arrow-right\" role=\"img\" aria-label=\"Next message\" "
-"title=\"Next message\"/>"
-msgstr ""
-
-#. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.message_footer
 msgid "<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
 msgstr "<i class=\"fa fa-calendar\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
-msgid ""
-"<i class=\"fa fa-chevron-down\" role=\"img\" aria-label=\"Show attachments\""
-" title=\"Show attachments\"/>"
-msgstr ""
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.messages_short
-msgid ""
-"<i class=\"fa fa-chevron-down\" role=\"img\" aria-label=\"Show replies\" "
-"title=\"Show replies\"/>"
-msgstr ""
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
-msgid ""
-"<i class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Hide "
-"attachments\" title=\"Hide attachments\"/>"
-msgstr ""
-
-#. module: mail_group
-#: model_terms:ir.ui.view,arch_db:mail_group.messages_short
-msgid ""
-"<i class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Hide replies\" "
-"title=\"Hide replies\"/>"
-msgstr ""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
@@ -161,6 +116,48 @@ msgstr ""
 "title=\"Recipients\"/>"
 
 #. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.group_message
+msgid ""
+"<i class=\"oi oi-arrow-left\" role=\"img\" aria-label=\"Previous message\" "
+"title=\"Previous message\"/>"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.group_message
+msgid ""
+"<i class=\"oi oi-arrow-right\" role=\"img\" aria-label=\"Next message\" "
+"title=\"Next message\"/>"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
+msgid ""
+"<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show attachments\""
+" title=\"Show attachments\"/>"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.messages_short
+msgid ""
+"<i class=\"oi oi-chevron-down\" role=\"img\" aria-label=\"Show replies\" "
+"title=\"Show replies\"/>"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.message_attachments
+msgid ""
+"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Hide "
+"attachments\" title=\"Hide attachments\"/>"
+msgstr ""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.messages_short
+msgid ""
+"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Hide replies\" "
+"title=\"Hide replies\"/>"
+msgstr ""
+
+#. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.messages_short
 msgid "<span class=\"bg-warning\">Pending</span>"
 msgstr "<span class=\"bg-warning\">Pending</span>"
@@ -168,8 +165,8 @@ msgstr "<span class=\"bg-warning\">Pending</span>"
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
 msgid ""
-"<span class=\"ms-2 badge text-bg-success\" attrs=\"{'invisible': [('author_moderation', '!=', 'allow')]}\">Whitelisted</span>\n"
-"                            <span class=\"ms-2 badge text-bg-danger\" attrs=\"{'invisible': [('author_moderation', '!=', 'ban')]}\">Banned</span>"
+"<span class=\"ms-2 badge text-bg-success\" invisible=\"author_moderation != 'allow'\">Whitelisted</span>\n"
+"                            <span class=\"ms-2 badge text-bg-danger\" invisible=\"author_moderation != 'ban'\">Banned</span>"
 msgstr ""
 
 #. module: mail_group
@@ -197,8 +194,8 @@ msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
 msgstr ""
-"Python rečnik koji će biti procenjen kako bi se pružila podrazumevana "
-"vrednost prilikom kreiranja novih zapisa za ovaj alias."
+"Python rečnik koji će biti proveren da obezbedi podrazumevane vrednosti "
+"prilikom kreiranja novih zapisa za ovaj alias."
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_form
@@ -244,9 +241,19 @@ msgid "Alias Contact Security"
 msgstr "Bezbednost alias kontakta"
 
 #. module: mail_group
-#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_fullname
-msgid "Alias Full Name"
-msgstr ""
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_domain_id
+msgid "Alias Domain"
+msgstr "Alias domen"
+
+#. module: mail_group
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_domain
+msgid "Alias Domain Name"
+msgstr "Naziv alias domena"
+
+#. module: mail_group
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_full_name
+msgid "Alias Email"
+msgstr "Alias e-mail-a"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_name
@@ -254,9 +261,14 @@ msgid "Alias Name"
 msgstr "Naziv aliasa"
 
 #. module: mail_group
-#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_domain
-msgid "Alias domain"
-msgstr "Domen aliasa"
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_status
+msgid "Alias Status"
+msgstr "Status Aliasa"
+
+#. module: mail_group
+#: model:ir.model.fields,help:mail_group.field_mail_group__alias_status
+msgid "Alias status assessed on the last message received."
+msgstr "Status aliasa procenjen na osnovu poslednje primljene poruke."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_model_id
@@ -389,8 +401,8 @@ msgstr "Podređeni"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
-msgid "Configure a custom domain"
-msgstr "Konfigurišite prilagođeni domen"
+msgid "Choose or configure a custom domain"
+msgstr ""
 
 #. module: mail_group
 #: model:mail.template,subject:mail_group.mail_template_list_subscribe
@@ -483,6 +495,7 @@ msgid "Email %s is invalid"
 msgstr "Email %s is invalid"
 
 #. module: mail_group
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_email
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 msgid "Email Alias"
 msgstr "Email Alias"
@@ -655,22 +668,13 @@ msgid "Join"
 msgstr "Pridruži se"
 
 #. module: mail_group
-#: model:ir.model.fields,field_description:mail_group.field_mail_group____last_update
-#: model:ir.model.fields,field_description:mail_group.field_mail_group_member____last_update
-#: model:ir.model.fields,field_description:mail_group.field_mail_group_message____last_update
-#: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject____last_update
-#: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation____last_update
-msgid "Last Modified on"
-msgstr "Poslednja izmena dana"
-
-#. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__write_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_member__write_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__write_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__write_uid
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__write_uid
 msgid "Last Updated by"
-msgstr "Poslednje izmenio/la"
+msgstr "Poslednji put ažurirao"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__write_date
@@ -679,7 +683,7 @@ msgstr "Poslednje izmenio/la"
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message_reject__write_date
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_moderation__write_date
 msgid "Last Updated on"
-msgstr "Poslednje ažuriranje dana"
+msgstr "Poslednji put ažurirano"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
@@ -691,6 +695,11 @@ msgstr "Napusti"
 #: model_terms:ir.actions.act_window,help:mail_group.mail_group_member_action
 msgid "Let people subscribe to your list online or manually add them here."
 msgstr "Let people subscribe to your list online or manually add them here."
+
+#. module: mail_group
+#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_incoming_local
+msgid "Local-part based incoming detection"
+msgstr ""
 
 #. module: mail_group
 #: model:ir.model,name:mail_group.model_mail_group
@@ -727,7 +736,6 @@ msgstr "Mail Groups"
 
 #. module: mail_group
 #: model:ir.actions.server,name:mail_group.ir_cron_mail_notify_group_moderators_ir_actions_server
-#: model:ir.cron,cron_name:mail_group.ir_cron_mail_notify_group_moderators
 msgid "Mail List: Notify group moderators"
 msgstr "Mail List: Notify group moderators"
 
@@ -782,7 +790,7 @@ msgstr "Član"
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_kanban
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_list
 msgid "Members"
-msgstr "Članovi"
+msgstr "Članovi​"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__member_count
@@ -926,12 +934,12 @@ msgstr "My Company News"
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__name
 msgid "Name"
-msgstr "Ime"
+msgstr "Naziv"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
 msgid ""
-"Need to unsubscribe? <br/>It's right here! <span class=\"fa fa-2x fa-arrow-"
+"Need to unsubscribe? <br/>It's right here! <span class=\"oi fa-2x oi-arrow-"
 "down float-end\" role=\"img\" aria-label=\"\" title=\"Read this !\"/>"
 msgstr ""
 
@@ -1003,11 +1011,6 @@ msgstr ""
 "Opcioni ID niza (zapisa) kom će biti dodate kao prilog sve dolazne mail "
 "poruke, čak i ako na njih nisu odgovorili. Ako je podešeno, ovo ć́e u "
 "potpunosti onemogućiti stvaranje novih zapisa."
-
-#. module: mail_group
-#: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_user_id
-msgid "Owner"
-msgstr "Vlasnik"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__group_message_parent_id
@@ -1262,7 +1265,7 @@ msgstr "Predmet"
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_groups
 #, python-format
 msgid "Subscribe"
-msgstr "Pretplati se"
+msgstr "Prijavi se"
 
 #. module: mail_group
 #: model:mail.template,description:mail_group.mail_template_list_subscribe
@@ -1343,7 +1346,7 @@ msgid ""
 "<jobs@example.odoo.com>"
 msgstr ""
 "Naziv email aliasa, npr. 'poslovi' ako želite da prikupljate email-ove za "
-"<poslovi@example.odoo.com>"
+"<jobs@example.odoo.com>"
 
 #. module: mail_group
 #. odoo-python
@@ -1351,19 +1354,6 @@ msgstr ""
 #, python-format
 msgid "The notification message is missing."
 msgstr "The notification message is missing."
-
-#. module: mail_group
-#: model:ir.model.fields,help:mail_group.field_mail_group__alias_user_id
-msgid ""
-"The owner of records created upon receiving emails on this alias. If this "
-"field is not set the system will attempt to find the right owner based on "
-"the sender (From) address, or will use the Administrator account if no "
-"system user is found for that address."
-msgstr ""
-"Vlasnik zapisa kreiranih primanjem e-maila sa ovim aliasom. Ako ovo polje "
-"nije podešeno, sistem će pokušati da pronađe pravog vlasnika na osnovu "
-"adrese (Od) pošiljaoca, ili cće koristiti administratorski nalog ako za tu "
-"adresu nije pronađen korisnik sistema."
 
 #. module: mail_group
 #. odoo-python
@@ -1490,6 +1480,11 @@ msgstr "od"
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 msgid "e.g. \"Newsletter\""
 msgstr "e.g. \"Newsletter\""
+
+#. module: mail_group
+#: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
+msgid "e.g. domain.com"
+msgstr "npr. domain.com"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_search

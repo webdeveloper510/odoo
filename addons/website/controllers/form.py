@@ -5,14 +5,14 @@ import base64
 import json
 import re
 
-from markupsafe import escape
+from markupsafe import Markup
 from psycopg2 import IntegrityError
 from werkzeug.exceptions import BadRequest
 
 from odoo import http, SUPERUSER_ID, _, _lt
+from odoo.addons.base.models.ir_qweb_fields import nl2br, nl2br_enclose
 from odoo.http import request
 from odoo.tools import plaintext2html
-from odoo.addons.base.models.ir_qweb_fields import nl2br
 from odoo.exceptions import AccessDenied, ValidationError, UserError
 from odoo.tools.misc import hmac, consteq
 
@@ -73,6 +73,7 @@ class WebsiteForm(http.Controller):
                 self.insert_attachment(model_record, id_record, data['attachments'])
                 # in case of an email, we want to send it immediately instead of waiting
                 # for the email queue to process
+
                 if model_name == 'mail.mail':
                     form_has_email_cc = {'email_cc', 'email_bcc'} & kwargs.keys() or \
                         'email_cc' in kwargs["website_form_signature"]
@@ -241,7 +242,6 @@ class WebsiteForm(http.Controller):
             values.update({'reply_to': values.get('email_from'), 'email_from': email_from})
         record = request.env[model_name].with_user(SUPERUSER_ID).with_context(
             mail_create_nosubscribe=True,
-            commit_assetsbundle=False,
         ).create(values)
         if custom or meta:
             _custom_label = "%s\n___________\n\n" % _("Other Information:")  # Title for custom fields
@@ -257,16 +257,13 @@ class WebsiteForm(http.Controller):
             # If there isn't, put the custom data in a message instead
             if default_field.name:
                 if default_field.ttype == 'html' or model_name == 'mail.mail':
-                    custom_content = nl2br(escape(custom_content))
+                    custom_content = nl2br_enclose(custom_content)
                 record.update({default_field.name: custom_content})
-            else:
-                values = {
-                    'body': nl2br(escape(custom_content)),
-                    'model': model_name,
-                    'message_type': 'comment',
-                    'res_id': record.id,
-                }
-                request.env['mail.message'].with_user(SUPERUSER_ID).create(values)
+            elif hasattr(record, '_message_log'):
+                record._message_log(
+                    body=nl2br_enclose(custom_content, 'p'),
+                    message_type='comment',
+                )
 
         return record.id
 
@@ -294,20 +291,15 @@ class WebsiteForm(http.Controller):
             else:
                 orphan_attachment_ids.append(attachment_id.id)
 
-        if model_name != 'mail.mail':
+        if model_name != 'mail.mail' and hasattr(record, '_message_log') and orphan_attachment_ids:
             # If some attachments didn't match a field on the model,
             # we create a mail.message to link them to the record
-            if orphan_attachment_ids:
-                values = {
-                    'body': _('<p>Attached files : </p>'),
-                    'model': model_name,
-                    'message_type': 'comment',
-                    'res_id': id_record,
-                    'attachment_ids': [(6, 0, orphan_attachment_ids)],
-                    'subtype_id': request.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment'),
-                }
-                request.env['mail.message'].with_user(SUPERUSER_ID).create(values)
-        else:
+            record._message_log(
+                attachment_ids=[(6, 0, orphan_attachment_ids)],
+                body=Markup(_('<p>Attached files: </p>')),
+                message_type='comment',
+            )
+        elif model_name == 'mail.mail' and orphan_attachment_ids:
             # If the model is mail.mail then we have no other choice but to
             # attach the custom binary field files on the attachment_ids field.
             for attachment_id_id in orphan_attachment_ids:

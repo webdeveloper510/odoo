@@ -1,24 +1,21 @@
-odoo.define('website.tour.rte', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var session = require('web.session');
-const wTourUtils = require('website.tour_utils');
-
-var domReady = new Promise(function (resolve) {
-    $(resolve);
-});
-var ready = Promise.all([domReady, session.is_bound]);
+import wTourUtils from "@website/js/tours/tour_utils";
+import { whenReady } from "@odoo/owl";
 
 wTourUtils.registerWebsitePreviewTour('rte_translator', {
     test: true,
     url: '/',
-    wait_for: ready,
-}, [{
-    content: "click language dropdown",
-    trigger: 'iframe .js_language_selector .dropdown-toggle',
-}, {
+    edition: true,
+    wait_for: whenReady(),
+}, () => [
+wTourUtils.goToTheme(),
+{
     content: "click on Add a language",
-    trigger: 'iframe a.o_add_language',
+    trigger: "we-button[data-add-language]"
+}, {
+    content: "confirm leave editor",
+    trigger: ".modal-dialog button.btn-primary"
 }, {
     content: "type Parseltongue",
     trigger: 'div[name="lang_ids"] .o_input_dropdown input',
@@ -47,6 +44,9 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     content: "click on new page",
     trigger: '.o_new_content_element a',
 }, {
+    content: "click on Use this template",
+    trigger: ".o_page_template button.btn-primary",
+}, {
     content: "insert file name",
     trigger: '.modal-dialog input[type="text"]',
     run: 'text rte_translator.xml',
@@ -68,6 +68,9 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     content: "click on new page",
     trigger: '.o_new_content_element a',
 }, {
+    content: "click on Use this template",
+    trigger: ".o_page_template button.btn-primary",
+}, {
     content: "insert page name",
     trigger: '.modal-dialog input[type="text"]',
     run: 'text rte_translator',
@@ -75,11 +78,11 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     content: "create page",
     trigger: '.modal-dialog button.btn-primary',
     extra_trigger: 'input[type="text"]:propValue(rte_translator)',
-}, {
-    content: "drop a snippet",
-    trigger: "#snippet_structure .oe_snippet:eq(1) .oe_snippet_thumbnail",
-    run: 'drag_and_drop iframe #wrap',
-}, {
+},
+wTourUtils.dragNDrop({
+    id: "s_cover",
+    name: "Cover"
+}), {
     content: "change content",
     trigger: 'iframe #wrap',
     run: function () {
@@ -90,13 +93,14 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
         $('iframe:not(.o_ignore_in_tour)').contents().find("#wrap img").attr("title", "test translate image title");
     }
 }, {
-    content: "save",
-    trigger: 'button[data-action=save]',
-    extra_trigger: 'iframe #wrap p:first b',
-}, {
+    content: "ensure change was applied",
+    trigger: 'iframe #wrap p:first b',
+    isCheck: true,
+},
+...wTourUtils.clickOnSave(),
+{
     content: "click language dropdown (3)",
     trigger: 'iframe .js_language_selector .dropdown-toggle',
-    extra_trigger: 'iframe body:not(.editor_enable)',
 }, {
     content: "click on Parseltongue version",
     trigger: 'iframe .js_language_selector a[data-url_code="pa_GB"]',
@@ -117,9 +121,9 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     trigger: 'iframe #wrap p font:first',
     run: function (actionHelper) {
         actionHelper.text('translated Parseltongue text');
-        const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+        const { Wysiwyg } = odoo.loader.modules.get('@web_editor/js/wysiwyg/wysiwyg');
         Wysiwyg.setRange(this.$anchor.contents()[0], 22);
-        this.$anchor.trigger($.Event("keyup", {key: '_', keyCode: 95}));
+        this.$anchor.trigger($.Event("keyup", {key: '_'}));
         this.$anchor.trigger('input');
     },
 }, {
@@ -128,9 +132,9 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     run: function (actionHelper) {
         actionHelper.click();
         this.$anchor.prepend('&lt;{translated}&gt;');
-        const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+        const { Wysiwyg } = odoo.loader.modules.get('@web_editor/js/wysiwyg/wysiwyg');
         Wysiwyg.setRange(this.$anchor.contents()[0], 0);
-        this.$anchor.trigger($.Event("keyup", {key: '_', keyCode: 95}));
+        this.$anchor.trigger($.Event("keyup", {key: '_'}));
         this.$anchor.trigger('input');
     },
 }, {
@@ -154,13 +158,11 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     content: "check: input marked as translated",
     trigger: 'iframe input[placeholder="test Parseltongue placeholder"].oe_translated',
     run: () => {},
-}, {
-    content: "save translation",
-    trigger: 'button[data-action=save]',
-}, {
+},
+...wTourUtils.clickOnSave(),
+{
     content: "check: content is translated",
     trigger: 'iframe #wrap p font:first:contains(translated Parseltongue text)',
-    extra_trigger: 'iframe body:not(.editor_enable)',
     run: function () {}, // it's a check
 }, {
     content: "check: content with special char is translated",
@@ -183,12 +185,13 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     content: "return to english version",
     trigger: 'iframe .js_language_selector a[data-url_code="en"]',
 }, {
-    content: "edit english version",
-    trigger: '.o_edit_website_container > a',
-    extra_trigger: 'iframe body:not(:has(#wrap p font:first:containsExact(paragraphs <b>describing</b>)))',
-}, {
+    content: "Check body",
+    trigger: "iframe body:not(:has(#wrap p font:first:containsExact(paragraphs <b>describing</b>)))",
+    run: function () {}, // it's a check
+},
+...wTourUtils.clickOnEditAndWaitEditMode(),
+{
     content: "select text",
-    extra_trigger: '#oe_snippets.o_loaded',
     trigger: 'iframe #wrap p',
     run: function (actionHelper) {
         actionHelper.click();
@@ -197,7 +200,7 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
         mousedown.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, el);
         el.dispatchEvent(mousedown);
         var mouseup = document.createEvent('MouseEvents');
-        const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+        const { Wysiwyg } = odoo.loader.modules.get('@web_editor/js/wysiwyg/wysiwyg');
         Wysiwyg.setRange(el.childNodes[2], 6, el.childNodes[2], 13);
         mouseup.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, el);
         el.dispatchEvent(mouseup);
@@ -210,15 +213,11 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
 // }, {
 //     content: "underline",
 //     trigger: '.oe-toolbar #underline',
-}, {
-    content: "save new change",
-    trigger: 'button[data-action=save]',
-    // See comment above.
-    // extra_trigger: '#wrap.o_dirty p span[style*="text-decoration-line: underline;"]',
-}, {
+},
+...wTourUtils.clickOnSave(),
+{
     content: "click language dropdown (4)",
     trigger: 'iframe .js_language_selector .dropdown-toggle',
-    extra_trigger: 'iframe body:not(.editor_enable)',
 }, {
     content: "return in Parseltongue",
     trigger: 'iframe html[lang="en-US"] .js_language_selector .js_change_lang[data-url_code="pa_GB"]',
@@ -250,4 +249,3 @@ wTourUtils.registerWebsitePreviewTour('rte_translator', {
     trigger: 'iframe body:not(.rte_translator_error)',
     run: function () {},
 }]);
-});

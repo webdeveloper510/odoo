@@ -3,16 +3,15 @@
 # 	* utm
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Duy BQ <duybq86@gmail.com>, 2022
+# Wil Odoo, 2023
 # Thi Huong Nguyen, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2024\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -29,6 +28,7 @@ msgid "%(content)s (%(model_description)s created on %(create_date)s)"
 msgstr "%(content)s (%(model_description)s tạo lúc %(create_date)s)"
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_utm_campaign__active
 #: model:ir.model.fields,field_description:utm.field_utm_medium__active
 msgid "Active"
 msgstr "Đang hoạt động"
@@ -50,12 +50,19 @@ msgstr "Approval-based Flow"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Approved"
-msgstr "Đã duyệt"
+msgstr "Đã phê duyệt"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
+msgid "Archive"
+msgstr "Lưu trữ"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Archived"
-msgstr "Đã lưu"
+msgstr "Đã lưu trữ"
 
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_tag
@@ -119,6 +126,11 @@ msgstr ""
 "results."
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
+msgid "Campaigns that are assigned to me"
+msgstr "Chiến dịch được giao cho tôi"
+
+#. module: utm
 #: model:utm.campaign,title:utm.utm_campaign_christmas_special
 msgid "Christmas Special"
 msgstr "Chương trình Giáng sinh"
@@ -170,7 +182,7 @@ msgstr "Create a stage for your campaigns"
 #: model:ir.model.fields,field_description:utm.field_utm_stage__create_uid
 #: model:ir.model.fields,field_description:utm.field_utm_tag__create_uid
 msgid "Created by"
-msgstr "Người tạo"
+msgstr "Được tạo bởi"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__create_date
@@ -179,7 +191,7 @@ msgstr "Người tạo"
 #: model:ir.model.fields,field_description:utm.field_utm_stage__create_date
 #: model:ir.model.fields,field_description:utm.field_utm_tag__create_date
 msgid "Created on"
-msgstr "Tạo lúc"
+msgstr "Được tạo vào"
 
 #. module: utm
 #. odoo-javascript
@@ -232,17 +244,12 @@ msgstr "Tên hiển thị"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid "Done"
-msgstr "Hoàn thành"
-
-#. module: utm
-#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
-msgid "Dropdown menu"
-msgstr "Trình đơn thả xuống"
+msgstr "Hoàn tất"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Edit"
-msgstr "Sửa"
+msgstr "Chỉnh sửa"
 
 #. module: utm
 #: model:utm.campaign,title:utm.utm_campaign_email_campaign_products
@@ -287,7 +294,7 @@ msgstr "Nhóm theo"
 #. module: utm
 #: model:ir.model,name:utm.model_ir_http
 msgid "HTTP Routing"
-msgstr "HTTP Routing"
+msgstr "Định tuyến HTTP"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__id
@@ -307,22 +314,13 @@ msgid "Ideas"
 msgstr "Các ý tưởng"
 
 #. module: utm
-#: model:ir.model.fields,field_description:utm.field_utm_campaign____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_medium____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_source____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_stage____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_tag____last_update
-msgid "Last Modified on"
-msgstr "Sửa lần cuối vào"
-
-#. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_medium__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_source__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_stage__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_tag__write_uid
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Cập nhật lần cuối bởi"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__write_date
@@ -343,7 +341,7 @@ msgstr "Để sau"
 #. module: utm
 #: model:ir.ui.menu,name:utm.menu_link_tracker_root
 msgid "Link Tracker"
-msgstr "Kiểm soát đường dẫn"
+msgstr "Trình theo dõi Liên kết"
 
 #. module: utm
 #. odoo-javascript
@@ -361,7 +359,7 @@ msgstr "Marketing"
 #: model:ir.model.fields,field_description:utm.field_utm_mixin__medium_id
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_form
 msgid "Medium"
-msgstr "Kênh trung gian"
+msgstr "Phương tiện"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_medium__name
@@ -376,9 +374,15 @@ msgid "Mediums"
 msgstr "Mediums"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
+msgid "My Campaigns"
+msgstr "Chiến dịch của tôi"
+
+#. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_source_mixin__name
 #: model:ir.model.fields,field_description:utm.field_utm_stage__name
 #: model:ir.model.fields,field_description:utm.field_utm_tag__name
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_tree
 msgid "Name"
 msgstr "Tên"
 
@@ -428,7 +432,12 @@ msgstr "Báo cáo"
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__user_id
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Responsible"
-msgstr "Phụ trách"
+msgstr "Người phụ trách"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
+msgid "Restore"
+msgstr "Khôi phục"
 
 #. module: utm
 #. odoo-javascript
@@ -453,7 +462,7 @@ msgstr "Bán"
 #. module: utm
 #: model:utm.stage,name:utm.campaign_stage_1
 msgid "Schedule"
-msgstr "Ấn định (thời gian)"
+msgstr "Lịch trình"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
@@ -522,6 +531,7 @@ msgid "Stage"
 msgstr "Giai đoạn"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_search
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_tree
 msgid "Stages"
@@ -530,11 +540,11 @@ msgstr "Giai đoạn"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid ""
-"Stages allow you to organize your workflow  (e.g. : plan, design, in "
-"progress,  done, …)."
+"Stages allow you to organize your workflow  (e.g. plan, design, in progress,"
+" done, …)."
 msgstr ""
-"Stages allow you to organize your workflow  (e.g. : plan, design, in "
-"progress,  done, …)."
+"Các giai đoạn cho phép bạn sắp xếp quy trình làm việc của mình (VD: kế "
+"hoạch, thiết kế, đang thực hiện, đã hoàn thành,…)."
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_tag__color
@@ -547,13 +557,14 @@ msgstr ""
 
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
-msgid "Tag name already exists !"
+msgid "Tag name already exists!"
 msgstr "Tên thẻ đã tồn tại!"
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__tag_ids
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Tags"
-msgstr "Tag"
+msgstr "Thẻ"
 
 #. module: utm
 #. odoo-python
@@ -593,13 +604,15 @@ msgid ""
 "This is a name that helps you keep track of your different campaign efforts,"
 " e.g. Fall_Drive, Christmas_Special"
 msgstr ""
-"Đây là cái tên giúp bạn kiểm soát giữa các chiến dịch marketing khác nhau: "
-"ví dụ Chiến dịch mùa thu, Sự kiện đặc biệt dịp Giáng sinh"
+"Đây là tên giúp bạn theo dõi các chiến dịch marketing khác nhau: ví dụ "
+"Fall_Drive, Christmas_Special"
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_mixin__medium_id
 msgid "This is the method of delivery, e.g. Postcard, Email, or Banner Ad"
-msgstr "Đây là phương thức như Thẻ bưu điện, Email hoặc Banner quảng cáo"
+msgstr ""
+"Đây là phương thức truyền đạt, ví dụ như bưu thiếp, email hoặc banner quảng "
+"cáo"
 
 #. module: utm
 #: model:ir.model.fields,help:utm.field_utm_mixin__source_id
@@ -607,7 +620,7 @@ msgid ""
 "This is the source of the link, e.g. Search Engine, another domain, or name "
 "of email list"
 msgstr ""
-"Đây là nguồn của liên kết, ví dụ: Công cụ tìm kiếm, tên miền khác hoặc tên "
+"Đây là nguồn của liên kết, ví dụ: công cụ tìm kiếm, tên miền khác hoặc tên "
 "của danh sách email"
 
 #. module: utm
@@ -622,11 +635,11 @@ msgstr "To be Approved"
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid ""
-"Track incoming events (e.g. : Christmas, Black Friday, ...) and publish "
-"timely content."
+"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely"
+" content."
 msgstr ""
-"Track incoming events (e.g. : Christmas, Black Friday, ...) and publish "
-"timely content."
+"Theo dõi các sự kiện sắp diễn ra (VD: Giáng sinh, Black Friday, ...) và đăng"
+" nội dung kịp thời."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_campaign
@@ -699,6 +712,21 @@ msgstr "UTMs"
 #, python-format
 msgid "Use This For My Campaigns"
 msgstr "Use This For My Campaigns"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
+msgid "e.g. \"Brainstorming\""
+msgstr "VD: \"Xây dựng ý tưởng\""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_source_view_tree
+msgid "e.g. \"Christmas Mailing\""
+msgstr "VD: \"Gửi email Giáng sinh\""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_tree
+msgid "e.g. \"Email\""
+msgstr "VD: \"Email\""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form

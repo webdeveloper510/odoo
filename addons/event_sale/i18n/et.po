@@ -3,28 +3,27 @@
 # 	* event_sale
 # 
 # Translators:
-# Andre Roomet <andreroomet@gmail.com>, 2022
-# Wanradt Koell <wanradt@gmail.com>, 2022
-# Martin Aavastik <martin@avalah.ee>, 2022
-# Piia Paurson <piia@avalah.ee>, 2022
-# Arma Gedonsky <armagedonsky@hot.ee>, 2022
-# Triine Aavik <triine@avalah.ee>, 2022
-# Rivo Zängov <eraser@eraser.ee>, 2022
-# Algo Kärp <algokarp@gmail.com>, 2022
-# Egon Raamat <egon@avalah.ee>, 2022
-# Martin Trigaux, 2022
-# Anna, 2023
+# Martin Aavastik <martin@avalah.ee>, 2023
+# Egon Raamat <egon@avalah.ee>, 2023
+# Piia Paurson <piia@avalah.ee>, 2023
+# Triine Aavik <triine@avalah.ee>, 2023
 # JanaAvalah, 2023
+# Patrick-Jordan Kiudorv, 2023
+# Arma Gedonsky <armagedonsky@hot.ee>, 2023
+# Algo Kärp <algokarp@gmail.com>, 2023
 # Eneli Õigus <enelioigus@gmail.com>, 2023
+# Rivo Zängov <eraser@eraser.ee>, 2023
 # Leaanika Randmets, 2023
+# Martin Trigaux, 2023
+# Anna, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:52+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Leaanika Randmets, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Anna, 2023\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,18 +41,14 @@ msgstr ""
 "            <span>Vaja võib olla käsitsi toiminguid.</span>"
 
 #. module: event_sale
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
+msgid "<span class=\"o_stat_text\">Sale Order</span>"
+msgstr "<span class=\"o_stat_text\">Müügitellimus</span>"
+
+#. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
 msgid "<span class=\"o_stat_text\">Sales</span>"
 msgstr "<span class=\"o_stat_text\">Müügid</span>"
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
-msgid ""
-"<span>Not enough seats available. All registrations were created as "
-"\"Unconfirmed\" and can be updated later on.</span>"
-msgstr ""
-"<span>Vabu kohti pole piisavalt. Kõik registreeringud loodi kui "
-"\"Kinnitamata\" ja neid saab hiljem uuendada.</span>"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_ticket_id_change_exception
@@ -177,17 +172,19 @@ msgstr "Loo/Uuenda registreerimisi"
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__create_uid
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__create_uid
 msgid "Created by"
-msgstr "Loonud"
+msgstr "Loodud (kelle poolt?)"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__create_date
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__create_date
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__create_date
 msgid "Created on"
-msgstr "Loomise kuupäev"
+msgstr "Loodud"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event__currency_id
+#: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__currency_id
+#: model:ir.model.fields,field_description:event_sale.field_event_type_ticket__currency_id
 msgid "Currency"
 msgstr "Valuuta"
 
@@ -209,7 +206,7 @@ msgstr "Kirjeldus"
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__display_name
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__display_name
 msgid "Display Name"
-msgstr "Kuva nimi"
+msgstr "Kuvatav nimi"
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_registration_editor
@@ -252,11 +249,6 @@ msgstr "Sündmuse konfiguraator"
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Event End Date"
 msgstr "Ürituse lõppkuupäev"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__event_ok
-msgid "Event Ok"
-msgstr "Sündmus korras"
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_event_registration
@@ -332,16 +324,16 @@ msgid "Exception:"
 msgstr "Erand:"
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__payment_status__free
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__payment_status__free
+#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__free
+#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__free
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Free"
-msgstr "Vaba"
+msgstr "Tasuta"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Group By"
-msgstr "Grupeeri"
+msgstr "Rühmitamine"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__id
@@ -361,13 +353,7 @@ msgstr "Kehtetu pileti valik \"%(ticket_name)s\" üritusele \"%(event_name)s\"."
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__invoice_partner_id
 msgid "Invoice Address"
-msgstr "Arveaadress"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_registration__is_paid
-#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__is_paid
-msgid "Is Paid"
-msgstr "On tasuline"
+msgstr "Arve aadress"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__active
@@ -375,24 +361,11 @@ msgid "Is registration active (not archived)?"
 msgstr "Kas registreerimine on aktiivne (ei ole arhiveeritud)?"
 
 #. module: event_sale
-#: model:ir.model,name:event_sale.model_account_move
-msgid "Journal Entry"
-msgstr "Andmiku kanne"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_event_configurator____last_update
-#: model:ir.model.fields,field_description:event_sale.field_event_sale_report____last_update
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor____last_update
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor_line____last_update
-msgid "Last Modified on"
-msgstr "Viimati muudetud"
-
-#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__write_uid
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__write_uid
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendas"
+msgstr "Viimati uuendatud"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__write_date
@@ -402,19 +375,9 @@ msgid "Last Updated on"
 msgstr "Viimati uuendatud"
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_order_state__done
-msgid "Locked"
-msgstr "Lukustatud"
-
-#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_registration__utm_medium_id
 msgid "Medium"
 msgstr "Levitamise vahend"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__mobile
-msgid "Mobile"
-msgstr "Mobiil"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__name
@@ -432,15 +395,11 @@ msgid "Non-free tickets"
 msgstr "Mitte-tasuta piletid"
 
 #. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__payment_status__to_pay
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__payment_status__to_pay
-msgid "Not Paid"
-msgstr "Maksmata"
-
-#. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_registration_editor__seats_available_insufficient
-msgid "Not enough seats for all registrations"
-msgstr "Kõigi registreerimiste jaoks ei jätku kohti"
+#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__to_pay
+#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__to_pay
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
+msgid "Not Sold"
+msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
@@ -449,27 +408,13 @@ msgstr "Ok"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_order_date
-#: model_terms:ir.ui.view,arch_db:event_sale.event_report_template_full_page_ticket_inherit_sale
 msgid "Order Date"
 msgstr "Tellimuse kuupäev"
-
-#. module: event_sale
-#: model_terms:ir.ui.view,arch_db:event_sale.event_report_template_full_page_ticket_inherit_sale
-msgid "Order Ref"
-msgstr "Ostu viide"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line__registration_id
 msgid "Original Registration"
 msgstr "Algne registreerimine"
-
-#. module: event_sale
-#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__payment_status__paid
-#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__payment_status__paid
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
-#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
-msgid "Paid"
-msgstr "Makstud"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
@@ -482,8 +427,7 @@ msgid "Past Events"
 msgstr "Möödunud sündmused"
 
 #. module: event_sale
-#: model:ir.model.fields,field_description:event_sale.field_event_registration__payment_status
-#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__payment_status
+#: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_status
 msgid "Payment Status"
 msgstr "Maksestaatus"
 
@@ -498,9 +442,17 @@ msgid "Phone"
 msgstr "Telefon"
 
 #. module: event_sale
+#. odoo-python
+#: code:addons/event_sale/models/sale_order.py:0
+#, python-format
+msgid ""
+"Please make sure all your event related lines are configured before "
+"confirming this order:%s"
+msgstr ""
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__price
 #: model:ir.model.fields,field_description:event_sale.field_event_type_ticket__price
-#: model_terms:ir.ui.view,arch_db:event_sale.event_report_template_full_page_ticket_inherit_sale
 msgid "Price"
 msgstr "Hind"
 
@@ -516,13 +468,16 @@ msgid "Price Reduce Tax inc"
 msgstr "Hinnalandus koos maksudega"
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__price_incl
+msgid "Price include"
+msgstr ""
+
+#. module: event_sale
 #: model:ir.model,name:event_sale.model_product_template
 #: model:ir.model.fields,field_description:event_sale.field_event_event_configurator__product_id
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket__product_id
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__product_id
 #: model:ir.model.fields,field_description:event_sale.field_event_type_ticket__product_id
-#: model:ir.model.fields,field_description:event_sale.field_sale_order_template_line__product_id
-#: model:ir.model.fields,field_description:event_sale.field_sale_order_template_option__product_id
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Product"
 msgstr "Toode"
@@ -549,16 +504,6 @@ msgid "Quotation Sent"
 msgstr "Pakkumine saadetud"
 
 #. module: event_sale
-#: model:ir.model,name:event_sale.model_sale_order_template_line
-msgid "Quotation Template Line"
-msgstr "Pakkumise põhja rida"
-
-#. module: event_sale
-#: model:ir.model,name:event_sale.model_sale_order_template_option
-msgid "Quotation Template Option"
-msgstr "Pakkumise põhja valik"
-
-#. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_form
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
 msgid "Registration"
@@ -582,6 +527,11 @@ msgid "Registration revenues"
 msgstr "Registreerimise tulu"
 
 #. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_sale_order_line__registration_ids
+msgid "Registrations"
+msgstr "Registreerimised"
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor__event_registration_ids
 msgid "Registrations to Edit"
 msgstr "Muudetavad registreerimised"
@@ -599,7 +549,6 @@ msgstr "Tulud"
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_order_id
-#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_form
 msgid "Sale Order"
 msgstr "Müügitellimus"
@@ -614,6 +563,11 @@ msgstr "Müügikorralduse rida"
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
 msgid "Sale Order Status"
 msgstr "Müügitellimuse staatus"
+
+#. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_registration__sale_status
+msgid "Sale Status"
+msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
@@ -661,9 +615,22 @@ msgid "Skip"
 msgstr "Jäta vahele"
 
 #. module: event_sale
+#: model:ir.model.fields.selection,name:event_sale.selection__event_registration__sale_status__sold
+#: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__sale_status__sold
+#: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
+#: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
+msgid "Sold"
+msgstr "Müüdud"
+
+#. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_registration__utm_source_id
 msgid "Source"
-msgstr "Alusdokument"
+msgstr "Kandideerimise allikad"
+
+#. module: event_sale
+#: model:ir.model.fields,field_description:event_sale.field_event_registration__state
+msgid "Status"
+msgstr "Olek"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_sale_report_view_search
@@ -694,6 +661,15 @@ msgstr "Tehing"
 #: model:ir.model.fields.selection,name:event_sale.selection__event_sale_report__event_registration_state__draft
 msgid "Unconfirmed"
 msgstr "Kinnitamata"
+
+#. module: event_sale
+#: model:ir.model.fields,help:event_sale.field_event_registration__state
+msgid ""
+"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
+"Registered: registrations considered taken by a client\n"
+"Attended: registrations for which the attendee attended the event\n"
+"Cancelled: registrations cancelled manually"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__sale_price_untaxed

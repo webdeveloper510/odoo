@@ -39,6 +39,7 @@ class ResConfigSettings(models.TransientModel):
     module_delivery_bpost = fields.Boolean("bpost Connector")
     module_delivery_easypost = fields.Boolean("Easypost Connector")
     module_delivery_sendcloud = fields.Boolean("Sendcloud Connector")
+    module_delivery_shiprocket = fields.Boolean("Shiprocket Connector")
     module_quality_control = fields.Boolean("Quality")
     module_quality_control_worksheet = fields.Boolean("Quality Worksheet")
     group_stock_multi_locations = fields.Boolean('Storage Locations', implied_group='stock.group_stock_multi_locations',
@@ -48,6 +49,7 @@ class ResConfigSettings(models.TransientModel):
     annual_inventory_month = fields.Selection(related='company_id.annual_inventory_month', readonly=False)
     annual_inventory_day = fields.Integer(related='company_id.annual_inventory_day', readonly=False)
     group_stock_reception_report = fields.Boolean("Reception Report", implied_group='stock.group_reception_report')
+    module_stock_dropshipping = fields.Boolean("Dropshipping")
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
@@ -59,6 +61,7 @@ class ResConfigSettings(models.TransientModel):
     def _onchange_group_stock_production_lot(self):
         if not self.group_stock_production_lot:
             self.group_lot_on_delivery_slip = False
+            self.module_product_expiry = False
 
     @api.onchange('group_stock_adv_location')
     def onchange_adv_location(self):
@@ -90,7 +93,6 @@ class ResConfigSettings(models.TransientModel):
                 putaway_rules.active = False
 
         previous_group = self.default_get(['group_stock_multi_locations', 'group_stock_production_lot', 'group_stock_tracking_lot'])
-        was_operations_showed = self.env['stock.picking.type'].with_user(SUPERUSER_ID)._default_show_operations()
         super().set_values()
 
         if not self.user_has_groups('stock.group_stock_manager'):
@@ -125,11 +127,6 @@ class ResConfigSettings(models.TransientModel):
                 if view:
                     view.active = True
 
-        if not was_operations_showed and self.env['stock.picking.type'].with_user(SUPERUSER_ID)._default_show_operations():
-            self.env['stock.picking.type'].with_context(active_test=False).sudo().search([
-                ('code', '!=', 'incoming'),
-                ('show_operations', '=', False)
-            ]).show_operations = True
         if not self.group_stock_production_lot and previous_group.get('group_stock_production_lot'):
             if self.env['product.product'].search_count([('tracking', '!=', 'none')], limit=1):
                 raise UserError(_("You have product(s) in stock that have lot/serial number tracking enabled. \nSwitch off tracking on all the products before switching off this setting."))

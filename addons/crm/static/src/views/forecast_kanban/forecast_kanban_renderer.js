@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
+import { CrmKanbanRenderer } from "@crm/views/crm_kanban/crm_kanban_renderer";
 import { useService } from "@web/core/utils/hooks";
-import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { ForecastKanbanColumnQuickCreate } from "@crm/views/forecast_kanban/forecast_kanban_column_quick_create";
 
-export class ForecastKanbanRenderer extends KanbanRenderer {
+export class ForecastKanbanRenderer extends CrmKanbanRenderer {
     setup() {
         super.setup(...arguments);
         this.fillTemporalService = useService("fillTemporalService");
@@ -25,6 +25,10 @@ export class ForecastKanbanRenderer extends KanbanRenderer {
         );
     }
 
+    isMovableField(field) {
+        return super.isMovableField(...arguments) || field.name === "date_deadline";
+    }
+
     async addForecastColumn() {
         const { name, type, granularity } = this.props.list.groupByField;
         this.fillTemporalService
@@ -37,13 +41,12 @@ export class ForecastKanbanRenderer extends KanbanRenderer {
                 granularity: granularity || "month",
             })
             .expand();
-        await this.props.list.model.root.load();
-        this.props.list.model.notify();
+        await this.props.list.load();
     }
 }
 
 ForecastKanbanRenderer.template = "crm.ForecastKanbanRenderer";
 ForecastKanbanRenderer.components = {
-    ...KanbanRenderer.components,
+    ...CrmKanbanRenderer.components,
     ForecastKanbanColumnQuickCreate,
 };

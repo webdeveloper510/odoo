@@ -30,7 +30,7 @@ class Track(models.Model):
     company_id = fields.Many2one('res.company', related='event_id.company_id')
     tag_ids = fields.Many2many('event.track.tag', string='Tags')
     description = fields.Html(translate=html_translate, sanitize_attributes=False, sanitize_form=False)
-    color = fields.Integer('Color')
+    color = fields.Integer('Agenda Color')
     priority = fields.Selection([
         ('0', 'Low'), ('1', 'Medium'),
         ('2', 'High'), ('3', 'Highest')],
@@ -59,20 +59,17 @@ class Track(models.Model):
     kanban_state_label = fields.Char(
         string='Kanban State Label', compute='_compute_kanban_state_label', store=True,
         tracking=True)
-    partner_id = fields.Many2one('res.partner', 'Contact', help="Contact of the track, may be different from speaker.")
+    partner_id = fields.Many2one('res.partner', 'Contact')
     # speaker information
     partner_name = fields.Char(
         string='Name', compute='_compute_partner_name',
-        readonly=False, store=True, tracking=10,
-        help='Speaker name is used for public display and may vary from contact name')
+        readonly=False, store=True, tracking=10)
     partner_email = fields.Char(
         string='Email', compute='_compute_partner_email',
-        readonly=False, store=True, tracking=20,
-        help='Speaker email is used for public display and may vary from contact email')
+        readonly=False, store=True, tracking=20)
     partner_phone = fields.Char(
         string='Phone', compute='_compute_partner_phone',
-        readonly=False, store=True, tracking=30,
-        help='Speaker phone is used for public display and may vary from contact phone')
+        readonly=False, store=True, tracking=30)
     partner_biography = fields.Html(
         string='Biography', compute='_compute_partner_biography',
         sanitize_attributes=False,
@@ -93,17 +90,15 @@ class Track(models.Model):
     # contact information
     contact_email = fields.Char(
         string='Contact Email', compute='_compute_contact_email',
-        readonly=False, store=True, tracking=20,
-        help="Contact email is private and used internally")
+        readonly=False, store=True, tracking=20)
     contact_phone = fields.Char(
         string='Contact Phone', compute='_compute_contact_phone',
-        readonly=False, store=True, tracking=30,
-        help="Contact phone is private and used internally")
+        readonly=False, store=True, tracking=30)
     location_id = fields.Many2one('event.track.location', 'Location')
     # time information
     date = fields.Datetime('Track Date')
     date_end = fields.Datetime('Track End Date', compute='_compute_end_date', store=True)
-    duration = fields.Float('Duration', default=0.5, help="Track duration in hours.")
+    duration = fields.Float('Duration', default=0.5)
     is_track_live = fields.Boolean(
         'Is Track Live', compute='_compute_track_time_data')
     is_track_soon = fields.Boolean(
@@ -147,7 +142,7 @@ class Track(models.Model):
                                  help="Display a Call to Action button to your Attendees while they watch your Track.")
     website_cta_title = fields.Char('Button Title')
     website_cta_url = fields.Char('Button Target URL')
-    website_cta_delay = fields.Integer('Button appears')
+    website_cta_delay = fields.Integer('Show Button')
     # time information for CTA
     is_website_cta_live = fields.Boolean(
         'Is CTA Live', compute='_compute_cta_time_data',
@@ -330,10 +325,10 @@ class Track(models.Model):
     def _compute_wishlist_visitor_ids(self):
         results = self.env['event.track.visitor']._read_group(
             [('track_id', 'in', self.ids), ('is_wishlisted', '=', True)],
-            ['track_id', 'visitor_id:array_agg'],
-            ['track_id']
+            ['track_id'],
+            ['visitor_id:array_agg'],
         )
-        visitor_ids_map = {result['track_id'][0]: result['visitor_id'] for result in results}
+        visitor_ids_map = {track.id: visitor_ids for track, visitor_ids in results}
         for track in self:
             track.wishlist_visitor_ids = visitor_ids_map.get(track.id, [])
             track.wishlist_visitor_count = len(visitor_ids_map.get(track.id, []))
@@ -405,16 +400,16 @@ class Track(models.Model):
 
         tracks = super(Track, self).create(vals_list)
 
+        post_values = {} if self.env.user.email else {'email_from': self.env.company.catchall_formatted}
         for track in tracks:
-            email_values = {} if self.env.user.email else {'email_from': self.env.company.catchall_formatted}
-            track.event_id.message_post_with_view(
+            track.event_id.message_post_with_source(
                 'website_event_track.event_track_template_new',
-                values={
+                render_values={
                     'track': track,
                     'is_html_empty': is_html_empty,
                 },
-                subtype_id=self.env.ref('website_event_track.mt_event_track').id,
-                **email_values,
+                subtype_xmlid='website_event_track.mt_event_track',
+                **post_values,
             )
             track._synchronize_with_stage(track.stage_id)
 
@@ -497,10 +492,10 @@ class Track(models.Model):
         track = self[0]
         if 'stage_id' in changes and track.stage_id.mail_template_id:
             res['stage_id'] = (track.stage_id.mail_template_id, {
+                'auto_delete_keep_log': False,
                 'composition_mode': 'comment',
-                'auto_delete_message': True,
+                'email_layout_xmlid': 'mail.mail_notification_light',
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
-                'email_layout_xmlid': 'mail.mail_notification_light'
             })
         return res
 

@@ -2,8 +2,7 @@
 import { UNREMOVABLE_ROLLBACK_CODE } from '../utils/constants.js';
 import {
     findNode,
-    isContentTextNode,
-    isVisibleEmpty,
+    isSelfClosingElement,
     nodeSize,
     rightPos,
     getState,
@@ -17,7 +16,6 @@ import {
     splitTextNode,
     paragraphRelatedElements,
     prepareUpdate,
-    isVisibleStr,
     isInPre,
     fillEmpty,
     setSelection,
@@ -28,6 +26,8 @@ import {
     isVisible,
     isUnbreakable,
     isEmptyBlock,
+    isWhitespace,
+    isVisibleTextNode,
     getOffsetAndCharSize,
     ZERO_WIDTH_CHARS,
 } from '../utils/utils.js';
@@ -49,7 +49,7 @@ export function deleteText(charSize, offset, direction, alreadyMoved) {
 
     // Do remove the character, then restore the state of the surrounding parts.
     const restore = prepareUpdate(parentElement, firstSplitOffset, parentElement, secondSplitOffset);
-    const isSpace = !isVisibleStr(middleNode) && !isInPre(middleNode);
+    const isSpace = isWhitespace(middleNode) && !isInPre(middleNode);
     const isZWS = ZERO_WIDTH_CHARS.includes(middleNode.nodeValue);
     middleNode.remove();
     restore();
@@ -96,7 +96,7 @@ Text.prototype.oDeleteForward = function (offset, alreadyMoved = false) {
 
 HTMLElement.prototype.oDeleteForward = function (offset) {
     const filterFunc = node =>
-        isVisibleEmpty(node) || isContentTextNode(node) || isNotEditableNode(node);
+        isSelfClosingElement(node) || isVisibleTextNode(node) || isNotEditableNode(node);
 
     const firstLeafNode = findNode(rightLeafOnlyNotBlockNotEditablePath(this, offset), filterFunc);
     if (firstLeafNode &&

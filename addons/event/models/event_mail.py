@@ -163,9 +163,15 @@ class EventMailScheduler(models.Model):
         for scheduler in self:
             now = fields.Datetime.now()
             if scheduler.interval_type == 'after_sub':
-                new_registrations = scheduler.event_id.registration_ids.filtered_domain(
-                    [('state', 'not in', ('cancel', 'draft'))]
-                ) - scheduler.mail_registration_ids.registration_id
+                if self.env.context.get('event_mail_registration_ids'):
+                    new_registrations = self.env['event.registration'].search([
+                        ('id', 'in', self.env.context['event_mail_registration_ids']),
+                        ('event_id', '=', scheduler.event_id.id),
+                    ]) - scheduler.mail_registration_ids.registration_id
+                else:
+                    new_registrations = scheduler.event_id.registration_ids.filtered_domain(
+                        [('state', 'not in', ('cancel', 'draft'))]
+                    ) - scheduler.mail_registration_ids.registration_id
                 scheduler._create_missing_mail_registrations(new_registrations)
 
                 # execute scheduler on registrations
@@ -188,7 +194,7 @@ class EventMailScheduler(models.Model):
                     # Mail is sent to all attendees (unconfirmed as well), so count all attendees
                     scheduler.update({
                         'mail_done': True,
-                        'mail_count_done': scheduler.event_id.seats_expected,
+                        'mail_count_done': len(scheduler.event_id.registration_ids.filtered(lambda r: r.state != 'cancel'))
                     })
         return True
 

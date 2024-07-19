@@ -1,19 +1,19 @@
 /** @odoo-module */
 
-import wTourUtils from "website.tour_utils";
+import wTourUtils from "@website/js/tours/tour_utils";
 
 wTourUtils.registerWebsitePreviewTour("text_animations", {
     test: true,
     url: "/",
     edition: true,
-}, [
+}, () => [
     wTourUtils.dragNDrop({
         id: "s_cover",
         name: "Cover",
     }),
     {
         content: "Click on the snippet title",
-        trigger: "iframe .s_cover h1 > font",
+        trigger: "iframe .s_cover h1",
         run: "dblclick", // Make sure the title is selected.
     },
     {
@@ -23,7 +23,7 @@ wTourUtils.registerWebsitePreviewTour("text_animations", {
     {
         content: "Check that the animation was applied",
         trigger: "iframe .s_cover h1 span.o_animated_text",
-        run: () => null, // it's a check
+        isCheck: true,
     },
     {
         content: "Click on the 'Animate Text' button",
@@ -32,7 +32,7 @@ wTourUtils.registerWebsitePreviewTour("text_animations", {
     {
         content: "Check that the animation was disabled for the title",
         trigger: "iframe .s_cover:not(:has(.o_animated_text))",
-        run: () => null, // it's a check
+        isCheck: true,
     },
     {
         content: "Try to apply the text animation again",
@@ -41,6 +41,6 @@ wTourUtils.registerWebsitePreviewTour("text_animations", {
     {
         content: "Check that the animation was applied",
         trigger: "iframe .s_cover:has(span.o_animated_text)",
-        run: () => null, // it's a check
+        isCheck: true,
     },
 ]);

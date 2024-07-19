@@ -3,18 +3,16 @@
 # 	* hr_holidays_attendance
 # 
 # Translators:
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2022
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
 # Jolien De Paepe, 2023
-# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jolien De Paepe, 2023\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,8 +28,18 @@ msgid "%s hours available"
 msgstr "%s uren beschikbaar"
 
 #. module: hr_holidays_attendance
+#: model:ir.model,name:hr_holidays_attendance.model_hr_leave_accrual_level
+msgid "Accrual Plan Level"
+msgstr "Opbouwplan-niveau"
+
+#. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_hr_attendance
 msgid "Attendance"
+msgstr "Aanwezigheid"
+
+#. module: hr_holidays_attendance
+#: model:ir.model.fields.selection,name:hr_holidays_attendance.selection__hr_leave_accrual_level__frequency_hourly_source__attendance
+msgid "Attendances"
 msgstr "Aanwezigheid"
 
 #. module: hr_holidays_attendance
@@ -40,6 +48,11 @@ msgstr "Aanwezigheid"
 #, python-format
 msgid "Available"
 msgstr "Beschikbaar"
+
+#. module: hr_holidays_attendance
+#: model:ir.model.fields.selection,name:hr_holidays_attendance.selection__hr_leave_accrual_level__frequency_hourly_source__calendar
+msgid "Calendar"
+msgstr "Agenda"
 
 #. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_res_company
@@ -85,6 +98,11 @@ msgid "Extra Hours Available"
 msgstr "Extra uren beschikbaar"
 
 #. module: hr_holidays_attendance
+#: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave_accrual_level__frequency_hourly_source
+msgid "Frequency Hourly Source"
+msgstr "Frequentie per uur"
+
+#. module: hr_holidays_attendance
 #. odoo-javascript
 #: code:addons/hr_holidays_attendance/static/src/xml/time_off_calendar.xml:0
 #, python-format
@@ -95,6 +113,19 @@ msgstr "Uren"
 #: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave_type__hr_attendance_overtime
 msgid "Hr Attendance Overtime"
 msgstr "HR Aanwezigheid Overwerk"
+
+#. module: hr_holidays_attendance
+#: model:ir.model.fields,help:hr_holidays_attendance.field_hr_leave_accrual_level__frequency_hourly_source
+msgid ""
+"If the source is set to Calendar, the amount of worked hours will be "
+"computed from employee calendar and time off (if the plan is based on worked"
+" time). Otherwise, the amount of worked hours will be based on Attendance "
+"records."
+msgstr ""
+"Als de bron is ingesteld op Kalender, wordt het aantal gewerkte uren "
+"berekend op basis van de kalender en het verlof van de werknemer (als het "
+"plan is gebaseerd op gewerkte tijd). Anders wordt het aantal gewerkte uren "
+"gebaseerd op de Aanwezigheidsrecords."
 
 #. module: hr_holidays_attendance
 #: model:ir.actions.act_window,name:hr_holidays_attendance.hr_leave_allocation_overtime_action
@@ -128,6 +159,11 @@ msgid "Save"
 msgstr "Opslaan"
 
 #. module: hr_holidays_attendance
+#: model_terms:ir.ui.view,arch_db:hr_holidays_attendance.hr_leave_accrual_level_view_form
+msgid "Source"
+msgstr "Bron"
+
+#. module: hr_holidays_attendance
 #. odoo-python
 #: code:addons/hr_holidays_attendance/models/hr_leave_allocation.py:0
 #, python-format
@@ -144,15 +180,6 @@ msgstr ""
 msgid "The employee does not have enough extra hours to extend this leave."
 msgstr ""
 "De werknemer heeft niet voldoende extra uren om dit verlof te verlengen."
-
-#. module: hr_holidays_attendance
-#. odoo-python
-#: code:addons/hr_holidays_attendance/models/hr_leave_allocation.py:0
-#, python-format
-msgid ""
-"The employee does not have enough extra hours to request this allocation."
-msgstr ""
-"De werknemer heeft niet genoeg extra uren om deze toewijzing aan te vragen."
 
 #. module: hr_holidays_attendance
 #. odoo-python
@@ -184,7 +211,7 @@ msgstr "Verloftoewijzing"
 #. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_hr_leave_type
 msgid "Time Off Type"
-msgstr "Verloftype"
+msgstr "Soort verlof"
 
 #. module: hr_holidays_attendance
 #: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave__employee_overtime

@@ -100,6 +100,13 @@ class StockRule(models.Model):
              "With 'Automatic No Step Added', the location is replaced in the original move.")
     rule_message = fields.Html(compute='_compute_action_message')
 
+    def copy(self, default=None):
+        self.ensure_one()
+        default = dict(default or {})
+        if 'name' not in default:
+            default['name'] = _("%s (copy)", self.name)
+        return super().copy(default=default)
+
     @api.constrains('company_id')
     def _check_company_consistency(self):
         for rule in self:
@@ -234,7 +241,7 @@ class StockRule(models.Model):
         # `location_src_id` field.
         for procurement, rule in procurements:
             if not rule.location_src_id:
-                msg = _('No source location defined on stock rule: %s!') % (rule.name, )
+                msg = _('No source location defined on stock rule: %s!', rule.name)
                 raise ProcurementException([(procurement, msg)])
 
             if rule.procure_method == 'mts_else_mto':
@@ -364,12 +371,14 @@ class StockRule(models.Model):
         :param product: the product of the procurement
         :type product: :class:`~odoo.addons.product.models.product.ProductProduct`
         :return: the cumulative delay and cumulative delay's description
-        :rtype: tuple[int, list[str, str]]
+        :rtype: tuple[defaultdict(float), list[str, str]]
         """
+        delays = defaultdict(float)
         delay = sum(self.filtered(lambda r: r.action in ['pull', 'pull_push']).mapped('delay'))
+        delays['total_delay'] += delay
         global_visibility_days = self.env['ir.config_parameter'].sudo().get_param('stock.visibility_days')
         if global_visibility_days:
-            delay += int(global_visibility_days)
+            delays['total_delay'] += int(global_visibility_days)
         if self.env.context.get('bypass_delay_description'):
             delay_description = []
         else:
@@ -379,8 +388,8 @@ class StockRule(models.Model):
                 if rule.action in ['pull', 'pull_push'] and rule.delay
             ]
         if global_visibility_days:
-            delay_description.append((_('Global Visibility Days'), _('+ %d day(s)') % int(global_visibility_days)))
-        return delay, delay_description
+            delay_description.append((_('Global Visibility Days'), _('+ %d day(s)', int(global_visibility_days))))
+        return delays, delay_description
 
 
 class ProcurementGroup(models.Model):
@@ -424,6 +433,12 @@ class ProcurementGroup(models.Model):
     stock_move_ids = fields.One2many('stock.move', 'group_id', string="Related Stock Moves")
 
     @api.model
+    def _skip_procurement(self, procurement):
+        return procurement.product_id.type not in ("consu", "product") or float_is_zero(
+            procurement.product_qty, precision_rounding=procurement.product_uom.rounding
+        )
+
+    @api.model
     def run(self, procurements, raise_user_error=True):
         """Fulfil `procurements` with the help of stock rules.
 
@@ -452,16 +467,13 @@ class ProcurementGroup(models.Model):
         for procurement in procurements:
             procurement.values.setdefault('company_id', procurement.location_id.company_id)
             procurement.values.setdefault('priority', '0')
-            procurement.values.setdefault('date_planned', fields.Datetime.now())
-            if (
-                procurement.product_id.type not in ('consu', 'product') or
-                float_is_zero(procurement.product_qty, precision_rounding=procurement.product_uom.rounding)
-            ):
+            procurement.values.setdefault('date_planned', procurement.values.get('date_planned', False) or fields.Datetime.now())
+            if self._skip_procurement(procurement):
                 continue
             rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
             if not rule:
-                error = _('No rule has been found to replenish "%s" in "%s".\nVerify the routes configuration on the product.') %\
-                    (procurement.product_id.display_name, procurement.location_id.display_name)
+                error = _('No rule has been found to replenish %r in %r.\nVerify the routes configuration on the product.',
+                    procurement.product_id.display_name, procurement.location_id.display_name)
                 procurement_errors.append((procurement, error))
             else:
                 action = 'pull' if rule.action == 'pull_push' else rule.action
@@ -518,7 +530,7 @@ class ProcurementGroup(models.Model):
         location = location_id
         while (not result) and location:
             domain = self._get_rule_domain(location, values)
-            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', False), domain)
+            result = self._search_rule(values.get('route_ids', False), values.get('product_packaging_id', False), product_id, values.get('warehouse_id', location.warehouse_id), domain)
             location = location.location_id
         return result
 

@@ -2,16 +2,13 @@
 
 import hashlib
 import json
-import logging
 
 import odoo
-from odoo import api, http, models
-from odoo.http import request
-from odoo.tools import file_open, image_process, ustr
+from odoo import api, models
+from odoo.http import request, DEFAULT_MAX_CONTENT_LENGTH
+from odoo.tools import ormcache, ustr
 from odoo.tools.misc import str2bool
 
-
-_logger = logging.getLogger(__name__)
 
 """
 Debug mode is stored in session and should always be a string.
@@ -58,6 +55,11 @@ class Http(models.AbstractModel):
         super()._pre_dispatch(rule, args)
         cls._handle_debug()
 
+    @classmethod
+    def _post_logout(cls):
+        super()._post_logout()
+        request.future_response.set_cookie('cids', max_age=0)
+
     def webclient_rendering_context(self):
         return {
             'menu_data': request.env['ir.ui.menu'].load_menus(request.session.debug),
@@ -79,24 +81,26 @@ class Http(models.AbstractModel):
         IrConfigSudo = self.env['ir.config_parameter'].sudo()
         max_file_upload_size = int(IrConfigSudo.get_param(
             'web.max_file_upload_size',
-            default=128 * 1024 * 1024,  # 128MiB
+            default=DEFAULT_MAX_CONTENT_LENGTH,
         ))
         mods = odoo.conf.server_wide_modules or []
         if request.db:
             mods = list(request.registry._init_modules) + mods
+        is_internal_user = user.has_group('base.group_user')
         session_info = {
             "uid": session_uid,
             "is_system": user._is_system() if session_uid else False,
             "is_admin": user._is_admin() if session_uid else False,
+            "is_internal_user": is_internal_user,
             "user_context": user_context,
             "db": self.env.cr.dbname,
+            "user_settings": self.env['res.users.settings']._find_or_create_for_user(user)._res_users_settings_format(),
             "server_version": version_info.get('server_version'),
             "server_version_info": version_info.get('server_version_info'),
             "support_url": "https://www.odoo.com/buy",
             "name": user.name,
             "username": user.login,
             "partner_display_name": user.partner_id.display_name,
-            "company_id": user.company_id.id if session_uid else None,  # YTI TODO: Remove this from the user context
             "partner_id": user.partner_id.id if session_uid and user.partner_id else None,
             "web.base.url": IrConfigSudo.get_param('web.base.url', default=''),
             "active_ids_limit": int(IrConfigSudo.get_param('web.active_ids_limit', default='20000')),
@@ -117,7 +121,7 @@ class Http(models.AbstractModel):
         }
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug
-        if self.env.user.has_group('base.group_user'):
+        if is_internal_user:
             # the following is only useful in the context of a webclient bootstrapping
             # but is still included in some other calls (e.g. '/web/session/authenticate')
             # to avoid access errors and unnecessary information, it is only included for users
@@ -128,6 +132,9 @@ class Http(models.AbstractModel):
             session_info['cache_hashes'].update({
                 "load_menus": hashlib.sha512(menu_json_utf8).hexdigest()[:64], # sha512/256
             })
+            # We need sudo since a user may not have access to ancestor companies
+            disallowed_ancestor_companies_sudo = user.company_ids.sudo().parent_ids - user.company_ids
+            all_companies_in_hierarchy_sudo = disallowed_ancestor_companies_sudo + user.company_ids
             session_info.update({
                 # current_company should be default_company
                 "user_companies": {
@@ -137,7 +144,18 @@ class Http(models.AbstractModel):
                             'id': comp.id,
                             'name': comp.name,
                             'sequence': comp.sequence,
+                            'child_ids': (comp.child_ids & user.company_ids).ids,
+                            'parent_id': comp.parent_id.id,
                         } for comp in user.company_ids
+                    },
+                    'disallowed_ancestor_companies': {
+                        comp.id: {
+                            'id': comp.id,
+                            'name': comp.name,
+                            'sequence': comp.sequence,
+                            'child_ids': (comp.child_ids & all_companies_in_hierarchy_sudo).ids,
+                            'parent_id': comp.parent_id.id,
+                        } for comp in disallowed_ancestor_companies_sudo
                     },
                 },
                 "show_effect": True,
@@ -159,6 +177,7 @@ class Http(models.AbstractModel):
             'profile_collectors': request.session.profile_collectors,
             'profile_params': request.session.profile_params,
             'show_effect': bool(request.env['ir.config_parameter'].sudo().get_param('base_setup.show_effect')),
+            'currencies': self.get_currencies(),
             'bundle_params': {
                 'lang': request.session.context['lang'],
             },
@@ -173,7 +192,11 @@ class Http(models.AbstractModel):
             })
         return session_info
 
+    @ormcache()
     def get_currencies(self):
         Currency = self.env['res.currency']
-        currencies = Currency.search([]).read(['symbol', 'position', 'decimal_places'])
-        return {c['id']: {'symbol': c['symbol'], 'position': c['position'], 'digits': [69,c['decimal_places']]} for c in currencies}
+        currencies = Currency.search_fetch([], ['symbol', 'position', 'decimal_places'])
+        return {
+            c.id: {'symbol': c.symbol, 'position': c.position, 'digits': [69, c.decimal_places]}
+            for c in currencies
+        }

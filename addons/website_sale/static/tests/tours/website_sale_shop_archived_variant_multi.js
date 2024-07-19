@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
+import { registry } from "@web/core/registry";
 
 function fail(errorMessage) {
+    const tour = registry.get("tourManager");
     tour._consume_tour(tour.running_tour, errorMessage);
 }
 
@@ -12,11 +13,10 @@ function assert(current, expected, info) {
     }
 }
 
-tour.register('tour_shop_archived_variant_multi', {
+registry.category("web_tour.tours").add('tour_shop_archived_variant_multi', {
     test: true,
     url: '/shop?search=Test Product 2',
-},
-[
+    steps: () => [
     {
         content: "select Test Product",
         trigger: '.oe_product_cart a:containsExact("Test Product 2")',
@@ -30,34 +30,44 @@ tour.register('tour_shop_archived_variant_multi', {
         trigger: 'input[data-attribute_name="Color"][data-value_name="Black"]',
     },
     {
-        content: "Check that brand b is not available and select it",
-        trigger: '.css_not_available input[data-attribute_name="Brand"][data-value_name="Brand B"]',
+        content: "Check that brand b is not available",
+        trigger: '.css_not_available',
+        isCheck: true,
+    },
+    {
+        content: "select brand b even though it's not available",
+        trigger: 'input[data-attribute_name="Brand"][data-value_name="Brand B"]',
     },
     {
         content: "check combination is not possible",
-        trigger: '.js_main_product.css_not_available .css_not_available_msg:contains("This combination does not exist.")'
+        trigger: '.js_main_product.css_not_available .css_not_available_msg:contains("This combination does not exist.")',
+        isCheck: true,
     },
     {
         content: "check add to cart not possible",
         trigger: '#add_to_cart.disabled',
-        run: function () {},
+        isCheck: true,
     },
     {
         content: "change second variant to remove warning",
         trigger: 'input[data-attribute_name="Color"][data-value_name="White"]',
     },
     {
+        content: "Check that brand b is not available",
+        trigger: '.css_not_available',
+        isCheck: true,
+    },
+    {
         content: "Check that second variant is disabled",
         trigger: '.css_not_available input[data-attribute_name="Color"][data-value_name="Black"]',
-        run: function () {},
+        isCheck: true,
     },
-]);
+]});
 
-tour.register('test_09_pills_variant', {
+registry.category("web_tour.tours").add('test_09_pills_variant', {
     test: true,
     url: '/shop?search=Test Product 2',
-},
-[
+    steps: () => [
     {
         content: "select Test Product",
         trigger: '.oe_product_cart a:containsExact("Test Product 2")',
@@ -95,4 +105,4 @@ tour.register('test_09_pills_variant', {
             assert(button[0].checked, true, "the radio input should be checked")
         }
     },
-]);
+]});

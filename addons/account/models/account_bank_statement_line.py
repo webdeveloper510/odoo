@@ -1,11 +1,12 @@
 from odoo import api, Command, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import html2plaintext
+from odoo.osv.expression import get_unaccent_wrapper
 
 from odoo.addons.base.models.res_bank import sanitize_account_number
 
 from xmlrpc.client import MAXINT
-from itertools import product
+
+from odoo.tools import create_index
 
 
 class AccountBankStatementLine(models.Model):
@@ -142,6 +143,24 @@ class AccountBankStatementLine(models.Model):
     statement_valid = fields.Boolean(
         related='statement_id.is_valid',
     )
+    statement_balance_end_real = fields.Monetary(
+        related='statement_id.balance_end_real',
+    )
+    statement_name = fields.Char(
+        string="Statement Name",
+        related='statement_id.name',
+    )
+
+    # Technical field to store details about the bank statement line
+    transaction_details = fields.Json(readonly=True)
+
+    def init(self):
+        super().init()
+        create_index(self.env.cr,
+                     indexname='account_bank_statement_line_internal_index_move_id_amount_idx',
+                     tablename='account_bank_statement_line',
+                     expressions=['internal_index', 'move_id', 'amount'],
+                     where='statement_id IS NULL')
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -446,39 +465,21 @@ class AccountBankStatementLine(models.Model):
             })
         return bank_account.filtered(lambda x: x.company_id in (False, self.company_id))
 
-    def _get_amounts_with_currencies(self):
-        """
-        Returns the line amount in company, journal and foreign currencies
-        """
-        self.ensure_one()
-
-        company_currency = self.journal_id.company_id.currency_id
-        journal_currency = self.journal_id.currency_id or company_currency
-        foreign_currency = self.foreign_currency_id or journal_currency or company_currency
-
-        journal_amount = self.amount
-        if foreign_currency == journal_currency:
-            transaction_amount = journal_amount
-        else:
-            transaction_amount = self.amount_currency
-        if journal_currency == company_currency:
-            company_amount = journal_amount
-        elif foreign_currency == company_currency:
-            company_amount = transaction_amount
-        else:
-            company_amount = journal_currency._convert(journal_amount, company_currency,
-                                                       self.journal_id.company_id, self.date)
-        return company_amount, company_currency, journal_amount, journal_currency, transaction_amount, foreign_currency
-
     def _get_default_amls_matching_domain(self):
+        self.ensure_one()
+        all_reconcilable_account_ids = self.env['account.account'].search([
+            ("company_id", "child_of", self.company_id.root_id.id),
+            ('reconcile', '=', True),
+        ]).ids
         return [
             # Base domain.
             ('display_type', 'not in', ('line_section', 'line_note')),
             ('parent_state', '=', 'posted'),
-            ('company_id', '=', self.company_id.id),
+            ('company_id', 'child_of', self.company_id.root_id.id),
             # Reconciliation domain.
             ('reconciled', '=', False),
-            ('account_id.reconcile', '=', True),
+            # Domain to use the account_move_line__unreconciled_index
+            ('account_id', 'in', all_reconcilable_account_ids),
             # Special domain for payments.
             '|',
             ('account_id.account_type', 'not in', ('asset_receivable', 'liability_payable')),
@@ -491,30 +492,21 @@ class AccountBankStatementLine(models.Model):
     def _get_default_journal(self):
         journal_type = self.env.context.get('journal_type', 'bank')
         return self.env['account.journal'].search([
+                *self.env['account.journal']._check_company_domain(self.env.company),
                 ('type', '=', journal_type),
-                ('company_id', '=', self.env.company.id)
             ], limit=1)
 
-    def _get_st_line_strings_for_matching(self, allowed_fields=None):
-        """ Collect the strings that could be used on the statement line to perform some matching.
-
-        :param allowed_fields: A explicit list of fields to consider.
-        :return: A list of strings.
-        """
-        self.ensure_one()
-
-        st_line_text_values = []
-        if not allowed_fields or 'payment_ref' in allowed_fields:
-            if self.payment_ref:
-                st_line_text_values.append(self.payment_ref)
-        if not allowed_fields or 'narration' in allowed_fields:
-            value = html2plaintext(self.narration or "")
-            if value:
-                st_line_text_values.append(value)
-        if not allowed_fields or 'ref' in allowed_fields:
-            if self.ref:
-                st_line_text_values.append(self.ref)
-        return st_line_text_values
+    @api.model
+    def _get_default_statement(self, journal_id=None, date=None):
+        statement = self.search(
+            domain=[
+                ('journal_id', '=', journal_id or self._get_default_journal().id),
+                ('date', '<=', date or fields.Date.today()),
+            ],
+            limit=1
+        ).statement_id
+        if not statement.is_complete:
+            return statement
 
     def _get_accounting_amounts_and_currencies(self):
         """ Retrieve the transaction amount, journal amount and the company amount with their corresponding currencies
@@ -609,8 +601,22 @@ class AccountBankStatementLine(models.Model):
                 self.journal_id.display_name,
             ))
 
-        company_amount, _company_currency, journal_amount, journal_currency, transaction_amount, foreign_currency \
-            = self._get_amounts_with_currencies()
+        company_currency = self.journal_id.company_id.sudo().currency_id
+        journal_currency = self.journal_id.currency_id or company_currency
+        foreign_currency = self.foreign_currency_id or journal_currency or company_currency
+
+        journal_amount = self.amount
+        if foreign_currency == journal_currency:
+            transaction_amount = journal_amount
+        else:
+            transaction_amount = self.amount_currency
+        if journal_currency == company_currency:
+            company_amount = journal_amount
+        elif foreign_currency == company_currency:
+            company_amount = transaction_amount
+        else:
+            company_amount = journal_currency\
+                ._convert(journal_amount, company_currency, self.journal_id.company_id, self.date)
 
         liquidity_line_vals = {
             'name': self.payment_ref,
@@ -635,53 +641,6 @@ class AccountBankStatementLine(models.Model):
             'credit': company_amount if company_amount > 0.0 else 0.0,
         }
         return [liquidity_line_vals, counterpart_line_vals]
-
-    def _retrieve_partner(self):
-        self.ensure_one()
-
-        # Retrieve the partner from the statement line.
-        if self.partner_id:
-            return self.partner_id
-
-        # Retrieve the partner from the bank account.
-        if self.account_number:
-            account_number_nums = sanitize_account_number(self.account_number)
-            if account_number_nums:
-                domain = [('sanitized_acc_number', 'ilike', account_number_nums)]
-                for extra_domain in ([('company_id', '=', self.company_id.id)], [('company_id', '=', False)]):
-                    bank_accounts = self.env['res.partner.bank'].search(extra_domain + domain)
-                    if len(bank_accounts.partner_id) == 1:
-                        return bank_accounts.partner_id
-
-        # Retrieve the partner from the partner name.
-        if self.partner_name:
-            domains = product(
-                [
-                    ('name', '=ilike', self.partner_name),
-                    ('name', 'ilike', self.partner_name),
-                ],
-                [
-                    ('company_id', '=', self.company_id.id),
-                    ('company_id', '=', False),
-                ],
-            )
-            for domain in domains:
-                partner = self.env['res.partner'].search(list(domain) + [('parent_id', '=', False)], limit=2)
-                # Return the partner if there is only one with this name
-                if len(partner) == 1:
-                    return partner
-
-        # Retrieve the partner from the 'reconcile models'.
-        rec_models = self.env['account.reconcile.model'].search([
-            ('rule_type', '!=', 'writeoff_button'),
-            ('company_id', '=', self.company_id.id),
-        ])
-        for rec_model in rec_models:
-            partner = rec_model._get_partner_from_mapping(self)
-            if partner and rec_model._is_applicable_for(self, partner):
-                return partner
-
-        return self.env['res.partner']
 
     def _seek_for_lines(self):
         """ Helper used to dispatch the journal items between:
@@ -732,8 +691,8 @@ class AccountBankStatementLine(models.Model):
                     raise UserError(_(
                         "The journal entry %s reached an invalid state regarding its related statement line.\n"
                         "To be consistent, the journal entry must always have exactly one journal item involving the "
-                        "bank/cash account."
-                    ) % st_line.move_id.display_name)
+                        "bank/cash account.",
+                        st_line.move_id.display_name))
 
                 st_line_vals_to_write.update({
                     'payment_ref': liquidity_lines.name,

@@ -1,7 +1,6 @@
-odoo.define('mail_group.mail_group_message', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const publicWidget = require('web.public.widget');
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.MailGroupMessage = publicWidget.Widget.extend({
     selector: '.o_mg_message',
@@ -9,6 +8,11 @@ publicWidget.registry.MailGroupMessage = publicWidget.Widget.extend({
         'click .o_mg_link_hide': '_onHideLinkClick',
         'click .o_mg_link_show': '_onShowLinkClick',
         'click button.o_mg_read_more': '_onReadMoreClick',
+    },
+
+    init() {
+        this._super(...arguments);
+        this.rpc = this.bindService("rpc");
     },
 
     /**
@@ -64,11 +68,8 @@ publicWidget.registry.MailGroupMessage = publicWidget.Widget.extend({
      */
      _onReadMoreClick: function (ev) {
         const $link = $(ev.target);
-        this._rpc({
-            route: $link.data('href'),
-            params: {
-                last_displayed_id: $link.data('last-displayed-id'),
-            },
+        this.rpc($link.data('href'), {
+            last_displayed_id: $link.data('last-displayed-id'),
         }).then(function (data) {
             if (!data) {
                 return;
@@ -85,5 +86,4 @@ publicWidget.registry.MailGroupMessage = publicWidget.Widget.extend({
             $showMore.remove();
         });
      },
-});
 });

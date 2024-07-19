@@ -1,15 +1,25 @@
 /** @odoo-module **/
 
-import concurrency from 'web.concurrency';
-import utils from 'web.utils';
-import weUtils from 'web_editor.utils';
-import {ColorpickerWidget} from 'web.Colorpicker';
-import {_t, _lt} from 'web.core';
-import {svgToPNG} from 'website.utils';
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { delay } from "@web/core/utils/concurrency";
+import { getDataURLFromFile } from "@web/core/utils/urls";
+import weUtils from '@web_editor/js/common/utils';
+import { _t } from "@web/core/l10n/translation";
+import { svgToPNG, webpToPNG } from "@website/js/utils";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
-
-const { Component, onMounted, reactive, useEnv, useRef, useState, useSubEnv, onWillStart, useExternalListener } = owl;
+import { mixCssColors } from '@web/core/utils/colors';
+import {
+    Component,
+    onMounted,
+    reactive,
+    useEnv,
+    useRef,
+    useState,
+    useSubEnv,
+    onWillStart,
+    useExternalListener,
+} from "@odoo/owl";
 
 const ROUTES = {
     descriptionScreen: 2,
@@ -19,19 +29,19 @@ const ROUTES = {
 };
 
 const WEBSITE_TYPES = {
-    1: {id: 1, label: _lt("a business website"), name: 'business'},
-    2: {id: 2, label: _lt("an online store"), name: 'online_store'},
-    3: {id: 3, label: _lt("a blog"), name: 'blog'},
-    4: {id: 4, label: _lt("an event website"), name: 'event'},
-    5: {id: 5, label: _lt("an elearning platform"), name: 'elearning'},
+    1: {id: 1, label: _t("a business website"), name: 'business'},
+    2: {id: 2, label: _t("an online store"), name: 'online_store'},
+    3: {id: 3, label: _t("a blog"), name: 'blog'},
+    4: {id: 4, label: _t("an event website"), name: 'event'},
+    5: {id: 5, label: _t("an elearning platform"), name: 'elearning'},
 };
 
 const WEBSITE_PURPOSES = {
-    1: {id: 1, label: _lt("get leads"), name: 'get_leads'},
-    2: {id: 2, label: _lt("develop the brand"), name: 'develop_brand'},
-    3: {id: 3, label: _lt("sell more"), name: 'sell_more'},
-    4: {id: 4, label: _lt("inform customers"), name: 'inform_customers'},
-    5: {id: 5, label: _lt("schedule appointments"), name: 'schedule_appointments'},
+    1: {id: 1, label: _t("get leads"), name: 'get_leads'},
+    2: {id: 2, label: _t("develop the brand"), name: 'develop_brand'},
+    3: {id: 3, label: _t("sell more"), name: 'sell_more'},
+    4: {id: 4, label: _t("inform customers"), name: 'inform_customers'},
+    5: {id: 5, label: _t("schedule appointments"), name: 'schedule_appointments'},
 };
 
 const PALETTE_NAMES = [
@@ -83,88 +93,55 @@ Object.assign(WelcomeScreen, {
     template: 'website.Configurator.WelcomeScreen',
 });
 
+class IndustrySelectionAutoComplete extends AutoComplete {
+    static timeout = 400;
+
+    get dropdownOptions() {
+        return {
+            ...super.dropdownOptions,
+            position: "bottom-fit",
+        }
+    }
+
+    get ulDropdownClass() {
+        return `${super.ulDropdownClass} custom-ui-autocomplete shadow-lg border-0 o_configurator_show_fast o_configurator_industry_dropdown`
+    }
+}
+
 class DescriptionScreen extends Component {
     setup() {
         this.industrySelection = useRef('industrySelection');
         this.state = useStore();
-        this.labelToId = {};
-        this.autocompleteHasResults = true;
+        this.orm = useService('orm');
 
         onMounted(() => this.onMounted());
     }
 
     onMounted() {
         this.selectWebsitePurpose();
-        $(this.industrySelection.el).autocomplete({
-            appendTo: '.o_configurator_industry_wrapper',
-            delay: 400,
-            minLength: 1,
-            source: this._autocompleteSearch.bind(this),
-            select: this._selectIndustry.bind(this),
-            open: this._customizeNoResultMenuStyle.bind(this),
-            focus: this._disableKeyboardNav.bind(this),
-            classes: {
-                'ui-autocomplete': 'custom-ui-autocomplete shadow-lg border-0 o_configurator_show_fast o_configurator_industry_dropdown',
-            },
-        });
-        if (this.state.selectedIndustry) {
-            this.industrySelection.el.value = this.state.selectedIndustry.label;
-            this.industrySelection.el.parentNode.dataset.value = this.state.selectedIndustry.label;
-            this.labelToId[this.state.selectedIndustry.label] = this.state.selectedIndustry.id;
-        }
     }
-
-    /**
-     * Clear the input and its parent label and set the selected industry to undefined.
-     *
-     * @private
-     */
-    _clearIndustrySelection() {
-        this.industrySelection.el.value = '';
-        this.industrySelection.el.parentNode.dataset.value = '';
-        this.state.selectIndustry();
-    }
-
     /**
      * Set the input's parent label value to automatically adapt input size
      * and update the selected industry.
      *
      * @private
-     * @param {String} label an industry label
+     * @param {Object} suggestion an industry
      */
-    _setSelectedIndustry(label) {
-        this.industrySelection.el.parentNode.dataset.value = label;
-        const id = this.labelToId[label];
+    _setSelectedIndustry(suggestion) {
+        const { label, id } = Object.getPrototypeOf(suggestion);
         this.state.selectIndustry(label, id);
         this.checkDescriptionCompletion();
     }
 
-    /**
-     * Called each time the suggestion menu is opened or updated. If there are no
-     * results to display the style of the "No result found" message is customized.
-     *
-     * @private
-     */
-    _customizeNoResultMenuStyle() {
-        if (!this.autocompleteHasResults) {
-            const noResultLinkEl = this.industrySelection.el.parentElement.getElementsByTagName('a')[0];
-            noResultLinkEl.classList.add('o_no_result');
-        }
+    get sources() {
+        return [
+            {
+                options: (request) => {
+                    return request.length < 1 ? [] : this._autocompleteSearch(request);
+                },
+            },
+        ];
     }
-
-    /**
-     * Disables keyboard navigation when there are no results to avoid selecting the
-     * "No result found" message by pressing the down arrow key.
-     *
-     * @private
-     * @param {Event} ev
-     */
-    _disableKeyboardNav(ev) {
-        if (!this.autocompleteHasResults) {
-            ev.preventDefault();
-        }
-    }
-
     /**
      * Called each time the autocomplete input's value changes. Only industries
      * having a label or a synonym containing all terms of the input value are
@@ -172,16 +149,13 @@ class DescriptionScreen extends Component {
      * The order received from IAP is kept (expected to be on descending hit
      * count) unless there are 7 or less matches in which case the results are
      * sorted alphabetically.
-     * The result size is limited to 15.
+     * The result size is limited to 30.
      *
-     * @param {Object} request object with a single 'term' property which is the
-     *      input current value
-     * @param {function} response callback which takes the data to suggest as
-     *      argument
+     * @param {String} term input current value
      */
-    _autocompleteSearch(request, response) {
-        const terms = request.term.toLowerCase().split(/[|,\n]+/);
-        const limit = 15;
+    _autocompleteSearch(term) {
+        const terms = term.toLowerCase().split(/[|,\n]+/);
+        const limit = 30;
         const sortLimit = 7;
         // `this.state.industries` is already sorted by hit count (from IAP).
         // That order should be kept after manipulating the recordset.
@@ -196,67 +170,23 @@ class DescriptionScreen extends Component {
         });
         if (matches.length > limit) {
             // Keep matches with the least number of words so that e.g.
-            // "restaurant" remains available even if there are 15 specific
+            // "restaurant" remains available even if there are 30 specific
             // sub-types that have a higher hit count.
             matches = matches.sort((x, y) => x.wordCount - y.wordCount)
                              .slice(0, limit)
                              .sort((x, y) => x.hitCountOrder - y.hitCountOrder);
         }
-        this.labelToId = {};
-        let labels;
-        this.autocompleteHasResults = !!matches.length;
-        if (this.autocompleteHasResults) {
-            if (matches.length <= sortLimit) {
-                // Sort results by ascending label if few of them.
-                matches.sort((x, y) => x.label < y.label ? -1 : x.label > y.label ? 1 : 0);
-            }
-            labels = matches.map(val => val.label);
-            matches.forEach(r => {
-                this.labelToId[r.label] = r.id;
-            });
-        } else {
-            labels = [_t("No result found, broaden your search.")];
+        if (matches.length <= sortLimit) {
+            // Sort results by ascending label if few of them.
+            matches = matches.sort((x, y) => (x.label < y.label ? -1 : x.label > y.label ? 1 : 0));
         }
-        response(labels);
-    }
-
-    /**
-     * Called when a menu option is selected. Update the selected industry or
-     * clear the input if the option is the "No result found" message.
-     *
-     * @private
-     * @param {Event} ev
-     * @param {Object} ui an object with label and value properties for
-     *      the selected option.
-     */
-    _selectIndustry(ev, ui) {
-        if (this.autocompleteHasResults) {
-            this._setSelectedIndustry(ui.item.label);
-        } else {
-            this._clearIndustrySelection();
-            ev.preventDefault();
-        }
-    }
-
-    /**
-     * Called on industrySelection input blur. Updates the selected industry or
-     * clears the input if its current value is not a valid industry.
-     *
-     * @private
-     * @param {Event} ev
-     */
-    _blurIndustrySelection(ev) {
-        if (this.labelToId[ev.target.value] !== undefined) {
-            this._setSelectedIndustry(ev.target.value);
-        } else {
-            this._clearIndustrySelection();
-        }
+        return matches.length ? matches : [{ label: term, id: -1 }];
     }
 
     selectWebsiteType(id) {
         this.state.selectWebsiteType(id);
         setTimeout(() => {
-            this.industrySelection.el.focus();
+            this.industrySelection.el.querySelector("input").focus();
         });
         this.checkDescriptionCompletion();
     }
@@ -269,13 +199,20 @@ class DescriptionScreen extends Component {
     checkDescriptionCompletion() {
         const {selectedType, selectedPurpose, selectedIndustry} = this.state;
         if (selectedType && selectedPurpose && selectedIndustry) {
+            // If the industry name is not known by the server, send it to the
+            // IAP server.
+            if (selectedIndustry.id === -1) {
+                this.orm.call('website', 'configurator_missing_industry', [], {
+                    'unknown_industry': selectedIndustry.label,
+                });
+            }
             this.props.navigate(ROUTES.paletteSelectionScreen);
         }
     }
 }
 
 Object.assign(DescriptionScreen, {
-    components: {SkipButton},
+    components: { SkipButton, AutoComplete: IndustrySelectionAutoComplete },
     template: 'website.Configurator.DescriptionScreen',
 });
 
@@ -298,17 +235,38 @@ class PaletteSelectionScreen extends Component {
         this.logoInputRef.el.click();
     }
 
+    /**
+     * Removes the previously uploaded logo.
+     *
+     * @param {Event} ev
+     */
+    async removeLogo(ev) {
+        ev.stopPropagation();
+        // Permit to trigger onChange even with the same file.
+        this.logoInputRef.el.value = "";
+        if (this.state.logoAttachmentId) {
+            await this._removeAttachments([this.state.logoAttachmentId]);
+        }
+        this.state.changeLogo();
+        // Remove recommended palette.
+        this.state.setRecommendedPalette();
+    }
+
     async changeLogo() {
         const logoSelectInput = this.logoInputRef.el;
         if (logoSelectInput.files.length === 1) {
+            const previousLogoAttachmentId = this.state.logoAttachmentId;
             const file = logoSelectInput.files[0];
-            const data = await utils.getDataURLFromFile(file);
+            const data = await getDataURLFromFile(file);
             const attachment = await this.rpc('/web_editor/attachment/add_data', {
                 'name': 'logo',
                 'data': data.split(',')[1],
                 'is_image': true,
             });
             if (!attachment.error) {
+                if (previousLogoAttachmentId) {
+                    await this._removeAttachments([previousLogoAttachmentId]);
+                }
                 this.state.changeLogo(data, attachment.id);
                 this.updatePalettes();
             } else {
@@ -327,6 +285,9 @@ class PaletteSelectionScreen extends Component {
         if (img.startsWith('data:image/svg+xml')) {
             img = await svgToPNG(img);
         }
+        if (img.startsWith('data:image/webp')) {
+            img = await webpToPNG(img);
+        }
         img = img.split(',')[1];
         const [color1, color2] = await this.orm.call('base.document.layout',
             'extract_image_primary_secondary_colors',
@@ -339,6 +300,16 @@ class PaletteSelectionScreen extends Component {
     selectPalette(paletteName) {
         this.state.selectPalette(paletteName);
         this.props.navigate(ROUTES.featuresSelectionScreen);
+    }
+
+    /**
+     * Removes the attachments from the DB.
+     *
+     * @private
+     * @param {Array<number>} ids the attachment ids to remove
+     */
+    async _removeAttachments(ids) {
+        this.rpc("/web_editor/attachment/remove", { ids: ids });
     }
 }
 
@@ -367,7 +338,7 @@ class ApplyConfiguratorScreen extends Component {
                 );
             } catch (error) {
                 // Wait a bit before retrying or allowing manual retry.
-                await concurrency.delay(5000);
+                await delay(5000);
                 if (retryCount < 3) {
                     return attemptConfiguratorApply(data, retryCount + 1);
                 }
@@ -377,8 +348,12 @@ class ApplyConfiguratorScreen extends Component {
         };
 
         if (themeName !== undefined) {
-            this.websiteService.showLoader({ showTips: true });
             const selectedFeatures = Object.values(this.state.features).filter((feature) => feature.selected).map((feature) => feature.id);
+            this.websiteService.showLoader({
+                showTips: true,
+                selectedFeatures: selectedFeatures,
+                showWaitingMessages: true,
+            });
             let selectedPalette = this.state.selectedPalette.name;
             if (!selectedPalette) {
                 selectedPalette = [
@@ -393,6 +368,7 @@ class ApplyConfiguratorScreen extends Component {
             const data = {
                 'selected_features': selectedFeatures,
                 'industry_id': this.state.selectedIndustry.id,
+                'industry_name': this.state.selectedIndustry.label.toLowerCase(),
                 'selected_palette': selectedPalette,
                 'theme_name': themeName,
                 'website_purpose': WEBSITE_PURPOSES[
@@ -405,10 +381,11 @@ class ApplyConfiguratorScreen extends Component {
 
             this.props.clearStorage();
 
+            this.websiteService.prepareOutLoader();
             // Here the website service goToWebsite method is not used because
             // the web client needs to be reloaded after the new modules have
             // been installed.
-            window.location.replace(`/web#action=website.website_preview&website_id=${encodeURIComponent(resp.website_id)}&enable_editor=1&with_loader=1`);
+            window.location.replace(`/web#action=website.website_preview&website_id=${encodeURIComponent(resp.website_id)}`);
         }
     }
 }
@@ -453,13 +430,35 @@ class ThemeSelectionScreen extends ApplyConfiguratorScreen {
     setup() {
         super.setup();
 
+        this.uiService = useService('ui');
         this.orm = useService('orm');
         this.state = useStore();
         this.themeSVGPreviews = [useRef('ThemePreview1'), useRef('ThemePreview2'), useRef('ThemePreview3')];
+        const proms = [];
 
-        onMounted(() => {
+        onMounted(async () => {
+            // Add a loading effect during the loading of the images inside the
+            // svgs.
+            this.uiService.block();
             this.state.themes.forEach((theme, idx) => {
-                $(this.themeSVGPreviews[idx].el).append(theme.svg);
+                // Transform the text svg into a svg element.
+                const svgEl = new DOMParser().parseFromString(theme.svg, 'image/svg+xml').documentElement;
+                for (const imgEl of svgEl.querySelectorAll('image')) {
+                    proms.push(new Promise((resolve, reject) => {
+                        imgEl.addEventListener('load', () => {
+                            resolve(imgEl);
+                        }, {once: true});
+                        imgEl.addEventListener('error', () => {
+                            reject(imgEl);
+                        }, {once: true});
+                    }));
+                }
+                $(this.themeSVGPreviews[idx].el).append(svgEl);
+            });
+            // When all the images inside the svgs are loaded then remove the
+            // loading effect.
+            Promise.allSettled(proms).then(() => {
+                this.uiService.unblock();
             });
         });
     }
@@ -575,14 +574,14 @@ class Store {
     setRecommendedPalette(color1, color2) {
         if (color1 && color2) {
             if (color1 === color2) {
-                color2 = ColorpickerWidget.mixCssColors('#FFFFFF', color1, 0.2);
+                color2 = mixCssColors('#FFFFFF', color1, 0.2);
             }
             const recommendedPalette = {
                 color1: color1,
                 color2: color2,
-                color3: ColorpickerWidget.mixCssColors('#FFFFFF', color2, 0.9),
+                color3: mixCssColors('#FFFFFF', color2, 0.9),
                 color4: '#FFFFFF',
-                color5: ColorpickerWidget.mixCssColors(color1, '#000000', 0.75),
+                color5: mixCssColors(color1, '#000000', 0.75),
             };
             CUSTOM_BG_COLOR_ATTRS.forEach((attr) => {
                 recommendedPalette[attr] = recommendedPalette[this.defaultColors[attr]];
@@ -591,6 +590,7 @@ class Store {
         } else {
             this.recommendedPalette = undefined;
         }
+        this.selectedPalette = this.recommendedPalette;
     }
 
     updateRecommendedThemes(themes) {

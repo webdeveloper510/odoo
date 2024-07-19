@@ -73,8 +73,8 @@ class FetchmailServer(models.Model):
         ('draft', 'Not Confirmed'),
         ('done', 'Confirmed'),
     ], string='Status', index=True, readonly=True, copy=False, default='draft')
-    server = fields.Char(string='Server Name', readonly=True, help="Hostname or IP of the mail server", states={'draft': [('readonly', False)]})
-    port = fields.Integer(readonly=True, states={'draft': [('readonly', False)]})
+    server = fields.Char(string='Server Name', readonly=False, help="Hostname or IP of the mail server")
+    port = fields.Integer()
     server_type = fields.Selection([
         ('imap', 'IMAP Server'),
         ('pop', 'POP Server'),
@@ -87,13 +87,13 @@ class FetchmailServer(models.Model):
     original = fields.Boolean('Keep Original', help="Whether a full original copy of each email should be kept for reference "
                                                     "and attached to each processed message. This will usually double the size of your message database.")
     date = fields.Datetime(string='Last Fetch Date', readonly=True)
-    user = fields.Char(string='Username', readonly=True, states={'draft': [('readonly', False)]})
-    password = fields.Char(readonly=True, states={'draft': [('readonly', False)]})
+    user = fields.Char(string='Username', readonly=False)
+    password = fields.Char()
     object_id = fields.Many2one('ir.model', string="Create a New Record", help="Process each incoming mail as part of a conversation "
                                                                                 "corresponding to this document type. This will create "
                                                                                 "new documents for new conversations, or attach follow-up "
                                                                                 "emails to the existing conversations (documents).")
-    priority = fields.Integer(string='Server Priority', readonly=True, states={'draft': [('readonly', False)]}, help="Defines the order of processing, lower values mean higher priority", default=5)
+    priority = fields.Integer(string='Server Priority', readonly=False, help="Defines the order of processing, lower values mean higher priority", default=5)
     message_ids = fields.One2many('mail.mail', 'fetchmail_server_id', string='Messages', readonly=True)
     configuration = fields.Text('Configuration', readonly=True)
     script = fields.Char(readonly=True, default='/mail/static/scripts/odoo-mailgate.py')
@@ -179,12 +179,12 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
 
     def button_confirm_login(self):
         for server in self:
-            connection = False
+            connection = None
             try:
                 connection = server.connect(allow_archived=True)
                 server.write({'state': 'done'})
             except UnicodeError as e:
-                raise UserError(_("Invalid server name !\n %s", tools.ustr(e)))
+                raise UserError(_("Invalid server name!\n %s", tools.ustr(e)))
             except (gaierror, timeout, IMAP4.abort) as e:
                 raise UserError(_("No response received. Check server information.\n %s", tools.ustr(e)))
             except (IMAP4.error, poplib.error_proto) as err:

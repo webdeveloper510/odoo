@@ -1,6 +1,20 @@
 /** @odoo-module **/
 
 /**
+ * @typedef Localization
+ * @property {string} dateFormat
+ * @property {string} dateTimeFormat
+ * @property {string} timeFormat
+ * @property {string} decimalPoint
+ * @property {"ltr" | "rtl"} direction
+ * @property {[number, number]} grouping
+ * @property {boolean} multiLang
+ * @property {string} thousandsSep
+ * @property {number} weekStart
+ * @property {string} code
+ */
+
+/**
  * @type {any}
  */
 const notReadyError = new Error(
@@ -16,6 +30,7 @@ const notReadyError = new Error(
  * so a code like the following would not work:
  *   import { localization } from "@web/core/l10n/localization";
  *   const dateFormat = localization.dateFormat; // dateFormat isn't set yet
+ * @type {Localization}
  */
 export const localization = {
     dateFormat: notReadyError,
@@ -27,4 +42,5 @@ export const localization = {
     multiLang: notReadyError,
     thousandsSep: notReadyError,
     weekStart: notReadyError,
+    code: notReadyError,
 };

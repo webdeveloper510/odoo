@@ -3,22 +3,18 @@
 # 	* loyalty
 # 
 # Translators:
-# 智能科技奇客罗方 <alanljj@gmail.com>, 2022
-# waveyeung <waveyeung@qq.com>, 2022
-# Martin Trigaux, 2022
-# Raymond Yu <cl_yu@hotmail.com>, 2022
-# digitalliuzg8888, 2022
+# Wil Odoo, 2023
+# 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2023
 # Chloe Wang, 2023
 # Jeffery CHEN <jeffery9@gmail.com>, 2023
-# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jeffery CHEN <jeffery9@gmail.com>, 2023\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,8 +31,9 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"        自动：顾客将有资格在其购物车中自动获得奖励。\n"
-"        使用代码：如果顾客输入一个代码，他们将有资格获得奖励"
+"        自动：顾客的购物车将自动获得奖励。\n"
+"        使用代码：顾客输入代码即可获得奖励。\n"
+"        "
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_program__available_on
@@ -46,7 +43,8 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"        管理您的方案应该在哪里是可用的"
+"        管理您的程序应在何处使用。\n"
+"        "
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_program__portal_visible
@@ -56,7 +54,8 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"        在门户网络、PoS客户票据、电子商务结账单中显示可用的积积分量和使用的奖励"
+"        在门户网站、PoS 客户票据、电子商务结账中显示可用积分和已用积分。\n"
+"        "
 
 #. module: loyalty
 #. odoo-python
@@ -64,6 +63,11 @@ msgstr ""
 #, python-format
 msgid " (Max %s)"
 msgstr "（最大%s）"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "$100"
+msgstr "$100"
 
 #. module: loyalty
 #. odoo-python
@@ -127,11 +131,26 @@ msgid "10% on your order"
 msgstr "您订单的10%"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.gift_card_report
+msgid "1000"
+msgstr "1000"
+
+#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
 msgid "2+1 Free"
 msgstr "2+1 免费"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "2023-08-20"
+msgstr "2023-08-20"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.gift_card_report
+msgid "2023-12-31"
+msgstr "2023-12-31"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_kanban
@@ -240,32 +259,6 @@ msgid "<i class=\"fa fa-tags fa-fw\" title=\"Product Tags\"/>"
 msgstr "<i class=\"fa fa-tags fa-fw\" title=\"Product Tags\"/>"
 
 #. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
-msgid ""
-"<span attrs=\"{'invisible': [('clear_wallet', '!=', True)]}\"> (or "
-"more)</span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('clear_wallet', '!=', True)]}\"> (或者更多) "
-"</span>"
-
-#. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_generate_wizard_view_form
-msgid ""
-"<span attrs=\"{'invisible': [('will_send_mail', '=', False)]}\">\n"
-"                            Generate and Send \n"
-"                        </span>\n"
-"                        <span attrs=\"{'invisible': [('will_send_mail', '=', True)]}\">\n"
-"                            Generate \n"
-"                        </span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('will_send_mail', '=', False)]}\">\n"
-"                            生成并发送\n"
-"                        </span>\n"
-"                        <span attrs=\"{'invisible': [('will_send_mail', '=', True)]}\">\n"
-"                            生成\n"
-"                        </span>"
-
-#. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_rule_view_kanban
 msgid ""
 "<span class=\"fw-bold text-decoration-underline\">Among:</span>\n"
@@ -305,19 +298,19 @@ msgstr ""
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', 'not in', ('coupons', 'next_order_coupons'))]}\">Coupons</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'loyalty')]}\">Loyalty Cards</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', 'not in', ('promotion', 'buy_x_get_y'))]}\">Promos</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'promo_code')]}\">Discount</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'gift_card')]}\">Gift Cards</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'ewallet')]}\">eWallets</span>"
+"<span class=\"o_stat_text\" invisible=\"program_type not in ('coupons', 'next_order_coupons')\">Coupons</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'loyalty'\">Loyalty Cards</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type not in ('promotion', 'buy_x_get_y')\">Promos</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'promo_code'\">Discount</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'gift_card'\">Gift Cards</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'ewallet'\">eWallets</span>"
 msgstr ""
-"<span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', 'not in', ('coupons', 'next_order_coupons'))]}\">优惠券</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'loyalty')]}\">会员卡</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', 'not in', ('promotion', 'buy_x_get_y'))]}\">促销</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'promo_code')]}\">折扣</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'gift_card')]}\">礼品卡</span>\n"
-"                                <span class=\"o_stat_text\" attrs=\"{'invisible': [('program_type', '!=', 'ewallet')]}\">电子钱包</span>"
+"<span class=\"o_stat_text\" invisible=\"program_type not in ('coupons', 'next_order_coupons')\">优惠券</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'loyalty'\">会员卡</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type not in ('promotion', 'buy_x_get_y')\">促销</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'promo_code'\">折扣优惠</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'gift_card'\">礼品卡</span>\n"
+"                                <span class=\"o_stat_text\" invisible=\"program_type != 'ewallet'\">电子钱包</span>"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
@@ -331,12 +324,33 @@ msgstr ""
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_rule_view_form
 msgid ""
-"<span colspan=\"2\" attrs=\"{'invisible': [('program_type', '!=', "
-"'coupons')]}\">Grant the amount of coupon points defined as the coupon "
-"value</span>"
+"<span colspan=\"2\" invisible=\"program_type != 'coupons'\">Grant the amount"
+" of coupon points defined as the coupon value</span>"
 msgstr ""
-"<span colspan=\"2\" attrs=\"{'invisible': [('program_type', '!=', "
-"'coupons')]}\">授予定义为优惠券价值的优惠券积积分量</span>"
+"<span colspan=\"2\" invisible=\"program_type != "
+"'coupons'\">授予定义为代用券价值的代用券点数</span>"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
+msgid "<span invisible=\"not clear_wallet\"> (or more)</span>"
+msgstr "<span invisible=\"not clear_wallet\">（或更多）</span>"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_generate_wizard_view_form
+msgid ""
+"<span invisible=\"not will_send_mail\">\n"
+"                            Generate and Send \n"
+"                        </span>\n"
+"                        <span invisible=\"will_send_mail\">\n"
+"                            Generate \n"
+"                        </span>"
+msgstr ""
+"<span invisible=\"not will_send_mail\">\n"
+"                            生成和发送 \n"
+"                        </span>\n"
+"                        <span invisible=\"will_send_mail\">\n"
+"                            生成 \n"
+"                        </span>"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_kanban
@@ -479,19 +493,19 @@ msgstr ""
 #: code:addons/loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "A coupon with the same code was found."
-msgstr "找到一个相同的优惠券代码。"
+msgstr "找到一个相同代码的优惠券。"
 
 #. module: loyalty
 #: model:ir.model.constraint,message:loyalty.constraint_loyalty_card_card_code_unique
 msgid "A coupon/loyalty card must have a unique code."
-msgstr "优惠券/会员卡必须有唯一的代码"
+msgstr "优惠券/忠诚卡必须有唯一的代码。"
 
 #. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
 msgid "A program must have at least one reward."
-msgstr "一个方案至少应该有一个奖励"
+msgstr "一个计划必须至少有一项奖励。"
 
 #. module: loyalty
 #. odoo-python
@@ -501,9 +515,15 @@ msgid "A trigger with the same code as one of your coupon already exists."
 msgstr "一个与您的优惠券的代码相同的触发器已经存在。"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.gift_card_report
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "ABCDE12345"
+msgstr "ABCDE12345"
+
+#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_needaction
 msgid "Action Needed"
-msgstr "需要动作"
+msgstr "所需操作"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_mail__active
@@ -512,7 +532,13 @@ msgstr "需要动作"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_rule__active
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_view_search
 msgid "Active"
-msgstr "启用"
+msgstr "已启用"
+
+#. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_res_partner__loyalty_card_count
+#: model:ir.model.fields,field_description:loyalty.field_res_users__loyalty_card_count
+msgid "Active loyalty cards"
+msgstr "有效会员卡"
 
 #. module: loyalty
 #. odoo-javascript
@@ -561,7 +587,7 @@ msgstr "适用于"
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_search
 msgid "Archived"
-msgstr "已归档"
+msgstr "已存档"
 
 #. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_mail__trigger__create
@@ -578,6 +604,13 @@ msgstr "附件计数"
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_rule__mode__auto
 msgid "Automatic"
 msgstr "自动的"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Automatic promo: 10% off on orders higher than $50"
+msgstr "自动促销：订单超过 $50 可享受 9 折优惠"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__available_on
@@ -600,8 +633,15 @@ msgstr "条码"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
-msgid "Buy 10 products, and get 10$ discount on the 11th one."
-msgstr ""
+msgid "Buy 10 products to get 10$ off on the 11th one"
+msgstr "购买10个产品后，第11个产品享受$10折扣"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Buy 2 products and get a third one for free"
+msgstr "购买2个产品，可以免费得到第3个"
 
 #. module: loyalty
 #: model:loyalty.program,name:loyalty.3_cabinets_plus_1_free
@@ -656,7 +696,7 @@ msgstr "清除所有促销积分"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__code
 msgid "Code"
-msgstr "代号"
+msgstr "代码"
 
 #. module: loyalty
 #: model:loyalty.program,name:loyalty.10_percent_with_code
@@ -704,6 +744,11 @@ msgid "Congratulations"
 msgstr "祝贺"
 
 #. module: loyalty
+#: model:ir.model,name:loyalty.model_res_partner
+msgid "Contact"
+msgstr "联系人"
+
+#. module: loyalty
 #. odoo-javascript
 #: code:addons/loyalty/static/src/xml/loyalty_templates.xml:0
 #, python-format
@@ -711,7 +756,10 @@ msgid "Control panel buttons"
 msgstr "控制面板按钮"
 
 #. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__coupon_ids
+#, python-format
 msgid "Coupon"
 msgstr "优惠券"
 
@@ -753,7 +801,6 @@ msgstr "优惠券：优惠券信息"
 #: code:addons/loyalty/models/loyalty_program.py:0
 #: code:addons/loyalty/models/loyalty_program.py:0
 #: code:addons/loyalty/models/loyalty_program.py:0
-#: code:addons/loyalty/models/loyalty_program.py:0
 #: model:ir.actions.act_window,name:loyalty.loyalty_card_action
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_program__program_type__coupons
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_view_tree
@@ -762,10 +809,14 @@ msgid "Coupons"
 msgstr "优惠券"
 
 #. module: loyalty
-#: model_terms:ir.actions.act_window,help:loyalty.loyalty_program_discount_loyalty_action
 #: model_terms:ir.actions.act_window,help:loyalty.loyalty_program_gift_ewallet_action
 msgid "Create a new one from scratch, or use one of the templates below."
 msgstr "从头开始创建一个新模板，或使用下面的模板之一。"
+
+#. module: loyalty
+#: model_terms:ir.actions.act_window,help:loyalty.loyalty_program_discount_loyalty_action
+msgid "Create one from scratch, or use a templates below:"
+msgstr "从头开始创建新模板，或使用以下模板之一："
 
 #. module: loyalty
 #. odoo-javascript
@@ -792,7 +843,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__create_date
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_rule__create_date
 msgid "Created on"
-msgstr "创建时间"
+msgstr "创建日期"
 
 #. module: loyalty
 #. odoo-python
@@ -836,6 +887,16 @@ msgid "Customers"
 msgstr "客户"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "DEMO_CODE"
+msgstr "DEMO_CODE"
+
+#. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "DEMO_TEXT"
+msgstr "DEMO_TEXT"
+
+#. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid ""
 "Define Discount codes on conditional rules then share it with your customers"
@@ -843,16 +904,9 @@ msgid ""
 msgstr "根据条件规则定义折扣代码，然后与您的客户共享以获得奖励。"
 
 #. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
-#, python-format
-msgid "Define promotions to apply automatically on your customers' orders."
-msgstr ""
-
-#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__description
 msgid "Description"
-msgstr "说明"
+msgstr "描述"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
@@ -878,10 +932,7 @@ msgid "Discount Applicability"
 msgstr "折扣适应性"
 
 #. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_program__program_type__promo_code
-#, python-format
 msgid "Discount Code"
 msgstr "折扣代码"
 
@@ -898,7 +949,7 @@ msgstr "折扣模式"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__payment_program_discount_product_id
 msgid "Discount Product"
-msgstr "折扣商品"
+msgstr "折扣产品"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__discount_product_domain
@@ -989,6 +1040,11 @@ msgid "Email template"
 msgstr "电子邮件模板"
 
 #. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__date_to
+msgid "End date"
+msgstr "终止日期"
+
+#. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_rule__minimum_amount_tax_mode__excl
 msgid "Excluded"
 msgstr "排除"
@@ -996,11 +1052,17 @@ msgstr "排除"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__expiration_date
 msgid "Expiration Date"
-msgstr "过期日期"
+msgstr "有效期"
 
 #. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Fidelity Card"
+msgstr "贵宾卡"
+
+#. module: loyalty
+#. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
 msgid "Fidelity Cards"
@@ -1010,8 +1072,8 @@ msgstr "富达卡"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
-msgid "Fill in your eWallet, and use it to pay future orders."
-msgstr ""
+msgid "Fill in your eWallet, to pay future orders"
+msgstr "填写您的电子钱包，用于支付未来订单"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_follower_ids
@@ -1021,7 +1083,7 @@ msgstr "关注者"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "关注者(业务伙伴)"
+msgstr "关注者（合作伙伴）"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_generate_wizard__mode
@@ -1097,13 +1159,20 @@ msgstr "生成礼品卡"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
-msgid "Generate and share unique coupons with your customers."
-msgstr ""
+msgid "Generate and share unique coupons with your customers"
+msgstr "生成独一无二的优惠券并与客户分享"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "Generate eWallet"
 msgstr "生成电子钱包"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Get 10% off on some products, with a code"
+msgstr "使用代码，部分产品可享受 9 折"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_gift_ewallet_view_form
@@ -1178,7 +1247,7 @@ msgstr "每购买一件物品即可获得 1 个积分，然后用 Y 件物品奖
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__has_message
 msgid "Has Message"
-msgstr "有信息"
+msgstr "有消息"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.gift_card_report
@@ -1203,12 +1272,12 @@ msgstr "ID"
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_card__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "确认后, 出现提示消息."
+msgstr "如果勾选此项，则需要查看新消息。"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_card__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "如果勾选此项， 某些消息将会产生传递错误。"
+msgstr "如果勾选此项， 某些消息将出现发送错误。"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_rule_view_kanban
@@ -1223,7 +1292,7 @@ msgstr "作为交换"
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_view_search
 msgid "Inactive"
-msgstr "未启用"
+msgstr "未启用的"
 
 #. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_rule__minimum_amount_tax_mode__incl
@@ -1235,12 +1304,12 @@ msgstr "包括"
 #: code:addons/loyalty/wizard/loyalty_generate_wizard.py:0
 #, python-format
 msgid "Invalid quantity."
-msgstr "无效数量"
+msgstr "数量无效。"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_is_follower
 msgid "Is Follower"
-msgstr "关注者"
+msgstr "是关注者"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__is_global_discount
@@ -1261,17 +1330,12 @@ msgstr "是支付方案"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__coupon_count_display
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_tree
 msgid "Items"
-msgstr "项"
+msgstr "项目"
 
 #. module: loyalty
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_card____last_update
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_generate_wizard____last_update
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_mail____last_update
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_program____last_update
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_reward____last_update
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_rule____last_update
-msgid "Last Modified on"
-msgstr "最后修改时间"
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "John Doe"
+msgstr "John Doe"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__write_uid
@@ -1291,7 +1355,7 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__write_date
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_rule__write_date
 msgid "Last Updated on"
-msgstr "最后更新时间"
+msgstr "上次更新日期"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_mail_view_tree
@@ -1306,14 +1370,21 @@ msgstr "限制使用"
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
 msgid "Logo"
-msgstr "Logo"
+msgstr "标识"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Loyalty Card"
+msgstr "会员卡"
 
 #. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #: code:addons/loyalty/models/loyalty_program.py:0
-#: code:addons/loyalty/models/loyalty_program.py:0
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_program__program_type__loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.res_partner_form
 #, python-format
 msgid "Loyalty Cards"
 msgstr "会员卡"
@@ -1351,11 +1422,6 @@ msgid "Loyalty point(s)"
 msgstr "会员积分"
 
 #. module: loyalty
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "主要附件"
-
-#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__discount_max_amount
 msgid "Max Discount"
 msgstr "最大折扣"
@@ -1373,7 +1439,7 @@ msgstr "如果使用限制，则最大使用量必须严格为正。"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_has_error
 msgid "Message Delivery error"
-msgstr "消息传递错误"
+msgstr "消息发送错误"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_ids
@@ -1403,6 +1469,12 @@ msgstr "多种产品"
 #. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Next Order Coupon"
+msgstr "下一个订单优惠"
+
+#. module: loyalty
+#. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_program__program_type__next_order_coupons
 #, python-format
@@ -1412,7 +1484,7 @@ msgstr "下一个订单优惠"
 #. module: loyalty
 #: model_terms:ir.actions.act_window,help:loyalty.loyalty_card_action
 msgid "No Coupons Found."
-msgstr "未找到优惠券"
+msgstr "未找到优惠券。"
 
 #. module: loyalty
 #: model_terms:ir.actions.act_window,help:loyalty.loyalty_program_gift_ewallet_action
@@ -1427,12 +1499,12 @@ msgstr "未找到方案"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_needaction_counter
 msgid "Number of Actions"
-msgstr "动作数量"
+msgstr "操作数量"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__message_has_error_counter
 msgid "Number of errors"
-msgstr "错误数"
+msgstr "错误数量"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_card__message_needaction_counter
@@ -1442,14 +1514,12 @@ msgstr "需要采取行动的消息数量"
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_card__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "发送错误的消息数量"
+msgstr "发送错误的消息的数量"
 
 #. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
-#, python-format
-msgid "Offer Y to your customers if they are buying X; for example, 2+1 free."
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "Odoo"
+msgstr "Odoo"
 
 #. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_reward__discount_applicability__order
@@ -1459,7 +1529,7 @@ msgstr "订单"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__partner_id
 msgid "Partner"
-msgstr "业务伙伴"
+msgstr "合作伙伴"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_rule_view_form
@@ -1471,7 +1541,7 @@ msgstr "积分"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_mail__points
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
 msgid "Points"
-msgstr "积分"
+msgstr "分数"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__points_display
@@ -1501,6 +1571,11 @@ msgstr "门户点名称"
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__portal_visible
 msgid "Portal Visible"
 msgstr "门户可见"
+
+#. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__pricelist_ids
+msgid "Pricelist"
+msgstr "价格表"
 
 #. module: loyalty
 #: model:ir.model,name:loyalty.model_product_template
@@ -1575,6 +1650,13 @@ msgstr "方案触发器"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
+msgid "Promo Code"
+msgstr "优惠券码"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
 msgid "Promo point(s)"
 msgstr "促销积分"
 
@@ -1589,12 +1671,6 @@ msgstr "促销"
 #. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
-#, python-format
-msgid "Promotion Program"
-msgstr "促销方案"
-
-#. module: loyalty
-#. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
 msgid "Promotional Program"
@@ -1621,10 +1697,15 @@ msgid "Quantity to generate"
 msgstr "生成的数量"
 
 #. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_card__rating_ids
+msgid "Ratings"
+msgstr "点评"
+
+#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_rule__reward_point_amount
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
 msgid "Reward"
-msgstr "奖励"
+msgstr "优惠类型"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_rule__reward_point_mode
@@ -1657,18 +1738,9 @@ msgid "Reward Type"
 msgstr "奖励类型"
 
 #. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
-#, python-format
-msgid ""
-"Reward your customers for a purchase with a coupon to use on their next "
-"order."
-msgstr ""
-
-#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__reward_ids
 msgid "Rewards"
-msgstr "奖励"
+msgstr "优惠及返利"
 
 #. module: loyalty
 #: model:ir.model.constraint,message:loyalty.constraint_loyalty_rule_reward_point_amount_positive
@@ -1689,13 +1761,20 @@ msgstr "选定的客户"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
-msgid "Sell Gift Cards, that can be used to purchase products."
-msgstr ""
+msgid "Sell Gift Cards, that allows to purchase products"
+msgstr "销售礼品卡，可用于采购产品"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_card_view_tree
 msgid "Send"
 msgstr "发送"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid "Send a coupon after an order, valid for next purchase"
+msgstr "下单后发送优惠券，下次采购可以使用"
 
 #. module: loyalty
 #: model:mail.template,description:loyalty.mail_template_gift_card
@@ -1710,7 +1789,7 @@ msgstr "发送给客户的优惠券信息"
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__sequence
 msgid "Sequence"
-msgstr "序号"
+msgstr "序列"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
@@ -1718,14 +1797,6 @@ msgid ""
 "Set up conditional rules on the order that will give access to rewards for "
 "customers"
 msgstr "在订单上设置条件规则，以便为客户提供奖励访问权限"
-
-#. module: loyalty
-#. odoo-python
-#: code:addons/loyalty/models/loyalty_program.py:0
-#, python-format
-msgid ""
-"Share a discount code with your customers to create a purchase incentive."
-msgstr ""
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
@@ -1750,6 +1821,11 @@ msgid "Split per unit is not allowed for Loyalty and eWallet programs."
 msgstr "会员和电子钱包计划不允许按单位拆分。"
 
 #. module: loyalty
+#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__date_from
+msgid "Start Date"
+msgstr "开始日期"
+
+#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__currency_symbol
 msgid "Symbol"
 msgstr "符号"
@@ -1763,6 +1839,19 @@ msgstr "谢谢,"
 #: model:ir.model.constraint,message:loyalty.constraint_loyalty_reward_discount_positive
 msgid "The discount must be strictly positive."
 msgstr "折扣必须限定为正数"
+
+#. module: loyalty
+#: model:ir.model.fields,help:loyalty.field_loyalty_program__date_to
+msgid "The end date is included in the validity period of this program"
+msgstr "结束日期包含在本项目的有效期内"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid ""
+"The loyalty program's currency must be the same as all it's pricelists ones."
+msgstr "会员项目的货币必须与所有价目表的货币相同。"
 
 #. module: loyalty
 #. odoo-python
@@ -1782,14 +1871,27 @@ msgid "The reward product quantity must be strictly positive."
 msgstr "奖励产品数量必须限定为正数。"
 
 #. module: loyalty
+#: model:ir.model.fields,help:loyalty.field_loyalty_program__date_from
+msgid "The start date is included in the validity period of this program"
+msgstr "开始日期包含在本项目的有效期内"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_program.py:0
+#, python-format
+msgid ""
+"The validity period's start date must be anterior or equal to its end date."
+msgstr "有效期的开始日期必须早于或等同于结束日期。"
+
+#. module: loyalty
 #: model_terms:ir.actions.act_window,help:loyalty.loyalty_card_action
 msgid "There haven't been any coupons generated yet."
-msgstr "目前还没有任何优惠券生成"
+msgstr "尚未生成任何优惠券。"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_reward__reward_product_ids
 msgid "These are the products that can be claimed with this rule."
-msgstr "这些是可以用这条规则来索赔的产品"
+msgstr "这些是可以根据本规则进行索赔的产品。"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_reward__discount_max_amount
@@ -1853,11 +1955,6 @@ msgid "Valid Until"
 msgstr "有效期至"
 
 #. module: loyalty
-#: model:ir.model.fields,field_description:loyalty.field_loyalty_program__date_to
-msgid "Validity"
-msgstr "有效"
-
-#. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_mail__trigger
 msgid "When"
 msgstr "时间"
@@ -1897,8 +1994,8 @@ msgstr "将发送邮件"
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 #, python-format
-msgid "Win points with each purchase, and use points to get gifts."
-msgstr ""
+msgid "Win points with each purchase, and claim gifts"
+msgstr "每次购物赢取积分，可使用积分领取礼品"
 
 #. module: loyalty
 #: model:ir.model.fields.selection,name:loyalty.selection__loyalty_rule__mode__with_code
@@ -1921,16 +2018,6 @@ msgid ""
 "You cannot delete %(name)s as it is used in 'Coupons & Loyalty'. Please "
 "archive it instead."
 msgstr "您不能删除 %(name)s，因为它用于“优惠券和会员”。请将其存档。"
-
-#. module: loyalty
-#: model:mail.template,report_name:loyalty.mail_template_loyalty_card
-msgid "Your Coupon Code"
-msgstr "您的优惠码"
-
-#. module: loyalty
-#: model:mail.template,report_name:loyalty.mail_template_gift_card
-msgid "Your Gift Card"
-msgstr "您的礼品卡"
 
 #. module: loyalty
 #: model:mail.template,subject:loyalty.mail_template_gift_card
@@ -2001,6 +2088,11 @@ msgid "item(s) bought"
 msgstr "购买的物品"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_report
+msgid "loyalty Reward"
+msgstr "会员奖赏"
+
+#. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_kanban
 msgid ""
 "on the cheapest product\n"
@@ -2062,7 +2154,7 @@ msgstr "最便宜的产品"
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
 msgid "to"
-msgstr "按"
+msgstr "到"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form

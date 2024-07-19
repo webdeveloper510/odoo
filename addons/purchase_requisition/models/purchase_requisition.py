@@ -49,7 +49,7 @@ class PurchaseRequisition(models.Model):
     name = fields.Char(string='Reference', required=True, copy=False, default='New', readonly=True)
     origin = fields.Char(string='Source Document')
     order_count = fields.Integer(compute='_compute_orders_number', string='Number of Orders')
-    vendor_id = fields.Many2one('res.partner', string="Vendor", domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    vendor_id = fields.Many2one('res.partner', string="Vendor", check_company=True)
     type_id = fields.Many2one('purchase.requisition.type', string="Agreement Type", required=True, default=_get_type_id)
     ordering_date = fields.Date(string="Ordering Date", tracking=True)
     date_end = fields.Datetime(string='Agreement Deadline', tracking=True)
@@ -59,8 +59,8 @@ class PurchaseRequisition(models.Model):
         default=lambda self: self.env.user, check_company=True)
     description = fields.Html()
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    purchase_ids = fields.One2many('purchase.order', 'requisition_id', string='Purchase Orders', states={'done': [('readonly', True)]})
-    line_ids = fields.One2many('purchase.requisition.line', 'requisition_id', string='Products to Purchase', states={'done': [('readonly', True)]}, copy=True)
+    purchase_ids = fields.One2many('purchase.order', 'requisition_id', string='Purchase Orders')
+    line_ids = fields.One2many('purchase.requisition.line', 'requisition_id', string='Products to Purchase', copy=True)
     product_id = fields.Many2one('product.product', related='line_ids.product_id', string='Product')
     state = fields.Selection(PURCHASE_REQUISITION_STATES,
                               'Status', tracking=True, required=True,
@@ -136,7 +136,6 @@ class PurchaseRequisition(models.Model):
 
     def action_draft(self):
         self.ensure_one()
-        self.name = 'New'
         self.write({'state': 'draft'})
 
     def action_done(self):
@@ -144,7 +143,8 @@ class PurchaseRequisition(models.Model):
         Generate all purchase order based on selected lines, should only be called on one agreement at a time
         """
         if any(purchase_order.state in ['draft', 'sent', 'to approve'] for purchase_order in self.mapped('purchase_ids')):
-            raise UserError(_('You have to cancel or validate every RfQ before closing the purchase requisition.'))
+            raise UserError(_("To close this purchase requisition, cancel related Requests for Quotation.\n\n"
+                "Imagine the mess if someone confirms these duplicates: double the order, double the trouble :)"))
         for requisition in self:
             for requisition_line in requisition.line_ids:
                 requisition_line.supplier_info_ids.sudo().unlink()
@@ -168,7 +168,10 @@ class PurchaseRequisitionLine(models.Model):
     _rec_name = 'product_id'
 
     product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], required=True)
-    product_uom_id = fields.Many2one('uom.uom', string='Product Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom_id = fields.Many2one(
+        'uom.uom', 'Product Unit of Measure',
+        compute='_compute_product_uom_id', store=True, readonly=False, precompute=True,
+        domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     product_qty = fields.Float(string='Quantity', digits='Product Unit of Measure')
     product_description_variants = fields.Char('Custom Description')
@@ -181,10 +184,6 @@ class PurchaseRequisitionLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        # TODO: replace with computes in master
-        for vals in vals_list:
-            if not vals.get('product_uom_id'):
-                vals['product_uom_id'] = self.env["product.product"].browse(vals.get('product_id')).uom_id.id
         lines = super().create(vals_list)
         for line, vals in zip(lines, vals_list):
             if line.requisition_id.state not in ['draft', 'cancel', 'done'] and line.requisition_id.is_quantity_copy == 'none':
@@ -199,9 +198,6 @@ class PurchaseRequisitionLine(models.Model):
         return lines
 
     def write(self, vals):
-        # TODO: replace with computes in master
-        if vals.get('product_id') and not vals.get('product_uom_id'):
-            vals['product_uom_id'] = self.env["product.product"].browse(vals.get('product_id')).uom_id.id
         res = super(PurchaseRequisitionLine, self).write(vals)
         if 'price_unit' in vals:
             if vals['price_unit'] <= 0.0 and any(
@@ -246,6 +242,11 @@ class PurchaseRequisitionLine(models.Model):
                 line_found.add(line.product_id)
             else:
                 line.qty_ordered = 0
+
+    @api.depends('product_id')
+    def _compute_product_uom_id(self):
+        for line in self:
+            line.product_uom_id = line.product_id.uom_id
 
     @api.onchange('product_id')
     def _onchange_product_id(self):

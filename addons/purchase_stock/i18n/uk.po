@@ -3,15 +3,16 @@
 # 	* purchase_stock
 # 
 # Translators:
-# Martin Trigaux, 2022
+# Martin Trigaux, 2023
+# Wil Odoo, 2023
 # Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
+"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -35,35 +36,6 @@ msgid "+ %d day(s)"
 msgstr "+ %d дні"
 
 #. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_view_form_inherit
-msgid ""
-"<span attrs=\"{'invisible': [('on_time_rate', '&gt;=', 0)]}\">No On-time "
-"Delivery Data</span>"
-msgstr ""
-"<span attrs=\"{'invisible': [('on_time_rate', '&gt;=', 0)]}\">Немає даних "
-"вчасної доставки</span>"
-
-#. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" aria-label=\"Values set here are company-specific.\" "
-"groups=\"base.group_multi_company\"/>"
-
-#. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
-msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\" groups=\"base.group_multi_company\"/>"
-
-#. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
 msgid "<span class=\"o_stat_text\">On-time Rate</span>"
 msgstr "<span class=\"o_stat_text\">Відсоток вчасної доставки</span>"
@@ -77,6 +49,22 @@ msgstr "<span class=\"o_stat_text\">Купівлі</span>"
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
 msgid "<span class=\"o_stat_value\">%</span>"
 msgstr "<span class=\"o_stat_value\">%</span>"
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_view_form_inherit
+msgid "<span invisible=\"on_time_rate &gt;= 0\">No On-time Delivery Data</span>"
+msgstr ""
+"<span invisible=\"on_time_rate &gt;= 0\">Немає даних вчасної доставки</span>"
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
+msgid "<span> days</span>"
+msgstr "<span> дні</span>"
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_kanban_catalog_purchase_only
+msgid "<span>Forecasted: </span>"
+msgstr "<span>Прогнозовано: </span>"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.report_purchaseorder_document
@@ -93,13 +81,13 @@ msgstr "<strong>Адреса доставки:</strong>"
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_purchase_order_line__qty_received_method
 msgid ""
-"According to product configuration, the received quantity can be automatically computed by mechanism :\n"
+"According to product configuration, the received quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
-"Відповідно до налаштувань товару, отримана кількість може бути автоматично розрахована за механізмом:\n"
-"  - Вручну: кількість встановлюється вручну у рядку\n"
-"  - Складькі переміщення: кількість встановлюється з підтверджених надходжень\n"
+"Відповідно до налаштувань товару, отримана кількість може бути автоматично обчислена механізмом:\n"
+"- Вручну: кількість встановлюється вручну на рядку\n"
+"- Переміщення запасів: кількість надходить із підтверджених комплектувань\n"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_rule__action
@@ -107,26 +95,9 @@ msgid "Action"
 msgstr "Дія"
 
 #. module: purchase_stock
-#: model:ir.model.fields,help:purchase_stock.field_purchase_report__avg_receipt_delay
-msgid ""
-"Amount of time between expected and effective receipt date. Due to a hack "
-"needed to calculate this,               every record will show the same "
-"average value, therefore only use this as an aggregated value with "
-"group_operator=avg"
-msgstr ""
-"Сума часу між очікуваною та реальною датою отримання. Через хак, необхідний "
-"для обчислення цього, кожен запис буде показувати однакове середнє значення,"
-" тому використовуйте його лише як сукупне значення з group_operator=avg"
-
-#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__effective_date
 msgid "Arrival"
 msgstr "Отримання"
-
-#. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_purchase_report__avg_receipt_delay
-msgid "Average Receipt Delay"
-msgstr "Середня затримка надходження"
 
 #. module: purchase_stock
 #. odoo-python
@@ -170,15 +141,15 @@ msgstr "Контакт"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid "Corresponding receipt not found."
 msgstr "Відповідну квитанцію не знайдено."
 
 #. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_stock_move__created_purchase_line_id
-msgid "Created Purchase Order Line"
-msgstr "Створено рядок замовлення на купівлю"
+#: model:ir.model.fields,field_description:purchase_stock.field_stock_move__created_purchase_line_ids
+msgid "Created Purchase Order Lines"
+msgstr "Створені рядки замовлення на купівлю"
 
 #. module: purchase_stock
 #. odoo-python
@@ -241,15 +212,9 @@ msgid "Display Name"
 msgstr "Назва для відображення"
 
 #. module: purchase_stock
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_purchase
-#: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_stock
-msgid "Documentation"
-msgstr "Документація"
-
-#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order_line__move_dest_ids
-msgid "Downstream Moves"
-msgstr "Переміщення вниз"
+msgid "Downstream moves alt"
+msgstr "Рухи alt за течією"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__dest_address_id
@@ -284,7 +249,7 @@ msgstr "Винятки:"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "For the product %s, the warehouse of the operation type (%s) is inconsistent"
@@ -341,24 +306,9 @@ msgid "Incoming Shipments"
 msgstr "Вхідні поставки"
 
 #. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__incoterm_id
-msgid "Incoterm"
-msgstr "Інкотерм"
-
-#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__incoterm_location
 msgid "Incoterm Location"
 msgstr "Місцезнаходження Incoterm"
-
-#. module: purchase_stock
-#: model:ir.model.fields,help:purchase_stock.field_purchase_order__incoterm_id
-msgid ""
-"International Commercial Terms are a series of predefined commercial terms "
-"used in international transactions."
-msgstr ""
-"Міжнародні комерційні умови, комплект міжнародних правил з тлумачення "
-"найбільш широко використовуваних торговельних термінів в галузі міжнародної "
-"торгівлі."
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__is_shipped
@@ -379,11 +329,6 @@ msgstr "Запис у журналі"
 #: model:ir.model,name:purchase_stock.model_account_move_line
 msgid "Journal Item"
 msgstr "Елемент журналу"
-
-#. module: purchase_stock
-#: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report____last_update
-msgid "Last Modified on"
-msgstr "Остання модифікація"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_product_supplierinfo__last_purchase_date
@@ -430,7 +375,7 @@ msgstr "Перенести очікувану дату створення зап
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.exception_on_po
 msgid "Next transfer(s) impacted:"
-msgstr "Наступні переміщення вплинули:"
+msgstr "Наступні переміщення вплинули на:"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
@@ -511,6 +456,13 @@ msgid "Partially Received"
 msgstr "Отримано частково"
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_category__property_account_creditor_price_difference_categ
+#: model:ir.model.fields,field_description:purchase_stock.field_product_product__property_account_creditor_price_difference
+#: model:ir.model.fields,field_description:purchase_stock.field_product_template__property_account_creditor_price_difference
+msgid "Price Difference Account"
+msgstr "Рахунок різниці в ціні"
+
+#. module: purchase_stock
 #. odoo-javascript
 #: code:addons/purchase_stock/static/src/js/tours/purchase_stock.js:0
 #, python-format
@@ -530,9 +482,15 @@ msgid "Product"
 msgstr "Товар"
 
 #. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_product_category
 #: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report__category_id
 msgid "Product Category"
 msgstr "Категорія товару"
+
+#. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_product_replenish
+msgid "Product Replenish"
+msgstr "Поповнення товару"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_replenishment_info__supplierinfo_id
@@ -682,6 +640,11 @@ msgid "Show Set Supplier Button"
 msgstr "Показати кнопку Установити постачальника"
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_replenish__show_vendor
+msgid "Show Vendor"
+msgstr "Показати постачальника"
+
+#. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__show_supplier
 msgid "Show supplier column"
 msgstr "Відображати колонку постачальника"
@@ -698,7 +661,7 @@ msgid "Stock Moves"
 msgstr "Переміщення запасів"
 
 #. module: purchase_stock
-#: model:ir.model,name:purchase_stock.model_report_stock_report_product_product_replenishment
+#: model:ir.model,name:purchase_stock.model_stock_forecasted_product_product
 msgid "Stock Replenishment Report"
 msgstr "Звіт поповнення складу"
 
@@ -706,6 +669,11 @@ msgstr "Звіт поповнення складу"
 #: model:ir.model,name:purchase_stock.model_stock_rule
 msgid "Stock Rule"
 msgstr "Складське правило"
+
+#. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_stock_valuation_layer
+msgid "Stock Valuation Layer"
+msgstr "Етап оцінювання запасу"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_report_stock_report_stock_rule
@@ -716,6 +684,11 @@ msgstr "Звіт складського правила"
 #: model:ir.model,name:purchase_stock.model_stock_replenishment_info
 msgid "Stock supplier replenishment information"
 msgstr "Інформація про поповнення запасів постачальника"
+
+#. module: purchase_stock
+#: model:ir.model,name:purchase_stock.model_stock_replenishment_option
+msgid "Stock warehouse replenishment option"
+msgstr "Опція поповнення залишків на складі"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_product_supplierinfo
@@ -742,7 +715,7 @@ msgstr "Створено наступне замовлення на поповн
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "The quantities on your purchase order indicate less than billed. You should "
@@ -766,6 +739,27 @@ msgstr ""
 "постачальників."
 
 #. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_product_product__property_account_creditor_price_difference
+#: model:ir.model.fields,help:purchase_stock.field_product_template__property_account_creditor_price_difference
+msgid ""
+"This account is used in automated inventory valuation to record the price "
+"difference between a purchase order and its related vendor bill when "
+"validating this vendor bill."
+msgstr ""
+"Цей обліковий запис використовується для автоматичної оцінки запасів для "
+"запису різниці цін між замовленням на купівлю та відповідним рахунком "
+"постачальника під час перевірки цього рахунка постачальника."
+
+#. module: purchase_stock
+#: model:ir.model.fields,help:purchase_stock.field_product_category__property_account_creditor_price_difference_categ
+msgid ""
+"This account will be used to value price difference between purchase price "
+"and accounting cost."
+msgstr ""
+"Цей рахунок буде використовуватись для обліку різниці між ціною в рахунку за"
+" товар та ціною в замовленні на купівлю."
+
+#. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_purchase
 msgid ""
 "This adds a dropshipping route to apply on products in order to request your"
@@ -787,7 +781,7 @@ msgstr "Це визначатиме тип операції вхідної ві�
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid ""
 "Those dates couldn’t be modified accordingly on the receipt %s which had "
@@ -797,7 +791,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid "Those dates have been updated accordingly on the receipt %s."
 msgstr "Ці дати були відповідно оновлені в отриманні %s."
@@ -814,7 +808,7 @@ msgstr "Переміщення"
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid ""
 "Unable to cancel purchase order %s as some receptions have already been "
@@ -831,6 +825,7 @@ msgid "Validate the receipt of all ordered products."
 msgstr "Підтвердіть отримання всіх замовлених товарів."
 
 #. module: purchase_stock
+#: model:ir.model.fields,field_description:purchase_stock.field_product_replenish__supplier_id
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__vendor_id
 #: model:ir.model.fields,field_description:purchase_stock.field_vendor_delay_report__partner_id
 #: model_terms:ir.ui.view,arch_db:purchase_stock.view_warehouse_orderpoint_tree_editable_inherited_mrp
@@ -890,7 +885,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order_line.py:0
 #, python-format
 msgid ""
 "You cannot decrease the ordered quantity below the received quantity.\n"
@@ -901,7 +896,7 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
-#: code:addons/purchase_stock/models/purchase.py:0
+#: code:addons/purchase_stock/models/purchase_order.py:0
 #, python-format
 msgid "You must set a Vendor Location for this partner %s"
 msgstr "Ви повинні вказати розташування для цього партнера %s"

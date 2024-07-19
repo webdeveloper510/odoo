@@ -5,6 +5,12 @@
     // Makes sure the dropdown menus are already in a
     // fixed position before the positioning computations begin.
     position: fixed;
+    margin-top: var(--Dropdown_menu-margin-y, #{map-get($spacers, 1)});
+    margin-bottom: var(--Dropdown_menu-margin-y, #{map-get($spacers, 1)});
+
+    &.o-dropdown--menu-submenu {
+      --Dropdown_menu-margin-y: 0;
+    }
 
     .dropdown-toggle:focus, .dropdown-item:focus {
       background-color: transparent;
@@ -56,7 +62,7 @@
       outline: none;
       box-shadow: none !important;
     }
-    &.dropdown-item:not(.o_menu_item) {
+    &.dropdown-item {
       &::after, &::before {
         // Changes the placement of bootstrap dropdown carets for subdropdowns
         @include o-position-absolute($right: 0, $top: 0);

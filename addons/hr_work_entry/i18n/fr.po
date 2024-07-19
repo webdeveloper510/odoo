@@ -3,18 +3,16 @@
 # 	* hr_work_entry
 # 
 # Translators:
-# Cécile Collart <cco@odoo.com>, 2023
-# Martin Trigaux, 2023
-# Wil Odoo, 2023
-# Jolien De Paepe, 2023
+# Jolien De Paepe, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:52+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,6 +26,17 @@ msgstr ""
 #, python-format
 msgid "%s work entries"
 msgstr "Prestations de %s"
+
+#. module: hr_work_entry
+#: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_employee_view_form
+msgid ""
+"<span class=\"o_stat_text\">\n"
+"                            Work Entries\n"
+"                            </span>"
+msgstr ""
+"<span class=\"o_stat_text\">\n"
+"                            Prestations\n"
+"                            </span>"
 
 #. module: hr_work_entry
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_form
@@ -51,7 +60,7 @@ msgstr "Archivé"
 #. module: hr_work_entry
 #: model:hr.work.entry.type,name:hr_work_entry.work_entry_type_attendance
 msgid "Attendance"
-msgstr "Présence"
+msgstr "Présences"
 
 #. module: hr_work_entry
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_tree
@@ -64,6 +73,7 @@ msgid "Cancelled"
 msgstr "Annulé"
 
 #. module: hr_work_entry
+#: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry__code
 #: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__code
 msgid ""
 "Careful, the Code is used in many references, changing it could lead to "
@@ -71,11 +81,6 @@ msgid ""
 msgstr ""
 "Attention, le Code est utilisé dans de nombreuses références, le modifier "
 "pourrait entraîner des changements indésirables."
-
-#. module: hr_work_entry
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__code
-msgid "Code"
-msgstr "Code"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__color
@@ -156,11 +161,6 @@ msgid "Draft"
 msgstr "Brouillon"
 
 #. module: hr_work_entry
-#: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_type_view_kanban
-msgid "Dropdown menu"
-msgstr "Menu déroulant"
-
-#. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__duration
 msgid "Duration"
 msgstr "Durée"
@@ -179,6 +179,12 @@ msgid "End"
 msgstr "Fin"
 
 #. module: hr_work_entry
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__external_code
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__external_code
+msgid "External Code"
+msgstr "Code externe"
+
+#. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__date_start
 msgid "From"
 msgstr "De"
@@ -192,6 +198,11 @@ msgstr "Prestation RH"
 #: model:ir.model,name:hr_work_entry.model_hr_work_entry_type
 msgid "HR Work Entry Type"
 msgstr "Type de prestations RH"
+
+#. module: hr_work_entry
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_employee__has_work_entries
+msgid "Has Work Entries"
+msgstr "A des prestations"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee__id
@@ -210,25 +221,18 @@ msgstr ""
 "prestations sans le supprimer."
 
 #. module: hr_work_entry
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee____last_update
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry____last_update
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type____last_update
-msgid "Last Modified on"
-msgstr "Dernière modification le"
-
-#. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee__write_uid
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__write_uid
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__write_uid
 msgid "Last Updated by"
-msgstr "Dernière mise à jour par"
+msgstr "Mis à jour par"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee__write_date
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__write_date
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "Mis à jour le"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee__user_id
@@ -250,6 +254,17 @@ msgstr "Aucune donnée à afficher"
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_form
 msgid "Note: Validated work entries cannot be modified."
 msgstr "Note : Les prestations validées ne peuvent pas être modifiées"
+
+#. module: hr_work_entry
+#: model:hr.work.entry.type,name:hr_work_entry.overtime_work_entry_type
+msgid "Overtime Hours"
+msgstr "Heures supplémentaires"
+
+#. module: hr_work_entry
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__code
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__code
+msgid "Payroll Code"
+msgstr "Code Paie"
 
 #. module: hr_work_entry
 #: model:ir.model,name:hr_work_entry.model_resource_calendar_leaves
@@ -338,6 +353,12 @@ msgid "Undefined Type"
 msgstr "Type non défini"
 
 #. module: hr_work_entry
+#: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry__external_code
+#: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__external_code
+msgid "Use this code to export your data to a third party"
+msgstr "Utilisez ce code pour exporter vos données à un externe"
+
+#. module: hr_work_entry
 #: model:ir.model.fields.selection,name:hr_work_entry.selection__hr_work_entry__state__validated
 msgid "Validated"
 msgstr "Validé"
@@ -353,7 +374,6 @@ msgid "Work Detail"
 msgstr "Détail du travail"
 
 #. module: hr_work_entry
-#: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_employee_view_form
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_pivot
 msgid "Work Entries"
 msgstr "Prestations"

@@ -1,18 +1,9 @@
-odoo.define('website.s_dynamic_snippet_carousel_options', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const options = require('web_editor.snippets.options');
-const s_dynamic_snippet_options = require('website.s_dynamic_snippet_options');
+import options from "@web_editor/js/editor/snippets.options";
+import s_dynamic_snippet_options from "@website/snippets/s_dynamic_snippet/options";
 
 const dynamicSnippetCarouselOptions = s_dynamic_snippet_options.extend({
-    /**
-     * @override
-     */
-    onBuilt() {
-        this._super(...arguments);
-        // TODO Remove in master.
-        this.$target[0].dataset['snippet'] = 's_dynamic_snippet_carousel';
-    },
 
     //--------------------------------------------------------------------------
     // Options
@@ -53,5 +44,4 @@ const dynamicSnippetCarouselOptions = s_dynamic_snippet_options.extend({
 
 options.registry.dynamic_snippet_carousel = dynamicSnippetCarouselOptions;
 
-return dynamicSnippetCarouselOptions;
-});
+export default dynamicSnippetCarouselOptions;

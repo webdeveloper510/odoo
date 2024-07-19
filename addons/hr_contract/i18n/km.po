@@ -1,25 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_contract
-# 
+# * hr_contract
+#
 # Translators:
-# Chan Nath <channath@gmail.com>, 2023
-# Sengtha Chay <sengtha@gmail.com>, 2023
-# Samkhann Seang <seangsamkhann@gmail.com>, 2023
-# Lux Sok <sok.lux@gmail.com>, 2023
-# 
+# Sengtha Chay <sengtha@gmail.com>, 2018
+# Chan Nath <channath@gmail.com>, 2018
+# Samkhann Seang <seangsamkhann@gmail.com>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server saas~11.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Lux Sok <sok.lux@gmail.com>, 2023\n"
-"Language-Team: Khmer (https://app.transifex.com/odoo/teams/41243/km/)\n"
+"POT-Creation-Date: 2023-05-16 13:48+0000\n"
+"PO-Revision-Date: 2018-09-18 09:49+0000\n"
+"Last-Translator: Samkhann Seang <seangsamkhann@gmail.com>, 2018\n"
+"Language-Team: Khmer (https://www.transifex.com/odoo/teams/41243/km/)\n"
+"Language: km\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: km\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: hr_contract
@@ -45,7 +43,7 @@ msgid "/ month"
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
 msgid ""
 "<span attrs=\"{'invisible' : [('contracts_count', '!=', 1)]}\" class=\"o_stat_text text-danger\">\n"
 "                                    Contract\n"
@@ -56,7 +54,18 @@ msgid ""
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
+msgid ""
+"<span attrs=\"{'invisible' : [('contracts_count', '=', 1)]}\" class=\"o_stat_text\">\n"
+"                                        Contracts\n"
+"                                    </span>\n"
+"                                    <span attrs=\"{'invisible' : [('contracts_count', '&gt;', 1)]}\" class=\"o_stat_text\">\n"
+"                                        Contract\n"
+"                                    </span>"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
 msgid ""
 "<span class=\"o_stat_text text-danger\" attrs=\"{'invisible' : [('contract_warning', '=', False)]}\" title=\"In Contract Since\">\n"
 "                                    In Contract Since\n"
@@ -64,17 +73,37 @@ msgid ""
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form2
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_hr_employee_view_form3
+msgid "<span class=\"o_stat_text text-success\" attrs=\"{'invisible' : [('contract_warning', '=', True)]}\" title=\"In Contract Since\"> In Contract Since</span>"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
 msgid ""
-"<span class=\"o_stat_text text-success\" attrs=\"{'invisible' : "
-"[('contract_warning', '=', True)]}\" title=\"In Contract Since\"> In "
-"Contract Since</span>"
+"<span class=\"o_stat_text\">\n"
+"                                            To\n"
+"                                        </span>"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
+msgid ""
+"<span class=\"o_stat_text\">\n"
+"                                        From\n"
+"                                    </span>"
+msgstr ""
+
+#. module: hr_contract
+#. odoo-python
+#: code:addons/hr_contract/models/hr_contract.py:0
+#, python-format
+msgid "According to the contract's end date, this contract has been put in red on the %s. Please advise and correct."
 msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_needaction
 msgid "Action Needed"
-msgstr "តម្រូវការសកម្មភាព"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__active
@@ -94,7 +123,7 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_ids
 msgid "Activities"
-msgstr "សកម្មភាព"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_exception_decoration
@@ -105,7 +134,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_state
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__activity_state
 msgid "Activity State"
-msgstr "ស្ថានភាពសកម្មភាព"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_type_icon
@@ -131,22 +160,29 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Archived"
-msgstr "ទុកជាឯកសារ"
+msgstr "ឯកសារ"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_attachment_count
 msgid "Attachment Count"
-msgstr "ចំនួនឯកសារភ្ជាប់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_res_users__bank_account_id
 msgid "Bank Account Number"
-msgstr "លេខគណនីធនាគារ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__calendar_mismatch
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__calendar_mismatch
 msgid "Calendar Mismatch"
+msgstr ""
+
+#. module: hr_contract
+#. odoo-javascript
+#: code:addons/hr_contract/static/src/widgets/tooltip_warning_widget.js:0
+#, python-format
+msgid "Calendar Mismatch: The employee's calendar does not match this contract's calendar. This could lead to unexpected behaviors."
 msgstr ""
 
 #. module: hr_contract
@@ -165,39 +201,38 @@ msgstr "ក្រុមហ៊ុន"
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__vehicle
 #: model:ir.model.fields,field_description:hr_contract.field_res_users__vehicle
 msgid "Company Vehicle"
-msgstr "រថយន្តរបស់ក្រុមហ៊ុន"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__company_country_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__company_country_id
 msgid "Company country"
-msgstr "ក្រុមហ៊ុនក្នុងស្រុក"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__contract_id
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_departure_wizard_view_form
 msgid "Contract"
-msgstr "កុងត្រា"
+msgstr ""
 
 #. module: hr_contract
 #. odoo-python
 #: code:addons/hr_contract/models/hr_contract.py:0
 #, python-format
-msgid ""
-"Contract %(contract)s: start date (%(start)s) must be earlier than contract "
-"end date (%(end)s)."
+msgid "Contract %(contract)s: start date (%(start)s) must be earlier than contract end date (%(end)s)."
 msgstr ""
 
 #. module: hr_contract
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__contracts_count
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contracts_count
 msgid "Contract Count"
-msgstr "ចំនួនកិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
 msgid "Contract Details"
-msgstr "ព័ត៌មានកិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
@@ -220,18 +255,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__name
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
 msgid "Contract Reference"
-msgstr "សេចក្តីយោងកិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
 msgid "Contract Start Date"
-msgstr "កាលបរិច្ឆេទចាប់ផ្តើមកុងត្រា"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__contract_type_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__contract_type_id
 msgid "Contract Type"
-msgstr "ប្រភេទកិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__contract_wage
@@ -248,12 +283,12 @@ msgstr ""
 #: model:mail.message.subtype,description:hr_contract.mt_contract_pending
 #: model:mail.message.subtype,description:hr_contract.mt_department_contract_pending
 msgid "Contract about to expire"
-msgstr "កិច្ចសន្យានឹងផុតកំណត់"
+msgstr ""
 
 #. module: hr_contract
 #: model:mail.message.subtype,description:hr_contract.mt_contract_close
 msgid "Contract expired"
-msgstr "កិច្ចសន្យាបានផុតកំណត់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_contract_history
@@ -263,25 +298,29 @@ msgstr ""
 #. module: hr_contract
 #: model:mail.message.subtype,name:hr_contract.mt_department_contract_pending
 msgid "Contract to Renew"
-msgstr "កិច្ចសន្យាដើម្បីបន្ត"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.actions.act_window,name:hr_contract.action_hr_contract
 #: model:ir.actions.act_window,name:hr_contract.hr_contract_history_view_form_action
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__contract_ids
-#: model:ir.ui.menu,name:hr_contract.hr_menu_contract_history
 #: model:ir.ui.menu,name:hr_contract.menu_human_resources_configuration_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_list
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_activity
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_contract.resource_calendar_view_form
 msgid "Contracts"
-msgstr "កិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.actions.act_window,name:hr_contract.hr_contract_history_to_review_view_list_action
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 msgid "Contracts to Review"
+msgstr ""
+
+#. module: hr_contract
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
+msgid "Contracts to review"
 msgstr ""
 
 #. module: hr_contract
@@ -292,23 +331,23 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type__country_id
 msgid "Country"
-msgstr "ប្រទេស"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__country_code
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__country_code
 msgid "Country Code"
-msgstr "កូដប្រទេស"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_form
 msgid "Create"
-msgstr "ការបង្កើត"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.actions.act_window,help:hr_contract.action_hr_contract
 msgid "Create a new contract"
-msgstr "បង្កើតកិច្ចសន្យាថ្មី"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__create_uid
@@ -326,13 +365,13 @@ msgstr "បង្កើតនៅ"
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__currency_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__currency_id
 msgid "Currency"
-msgstr "រូបិយប័ណ្ណ"
+msgstr "រូបិយវត្ថុ"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contract_id
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
 msgid "Current Contract"
-msgstr "កិច្ចសន្យាបច្ចុប្បន្ន"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_form
@@ -352,16 +391,17 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type__default_resource_calendar_id
 msgid "Default Working Hours"
-msgstr "ម៉ោងធ្វើការលំនាំដើម"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
 msgid "Delete"
-msgstr "លុប"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__department_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__department_id
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Department"
 msgstr "ដេប៉ាតឺម៉ង់"
 
@@ -374,8 +414,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_contract/wizard/hr_departure_wizard.py:0
 #, python-format
-msgid ""
-"Departure date can't be earlier than the start date of current contract."
+msgid "Departure date can't be earlier than the start date of current contract."
 msgstr ""
 
 #. module: hr_contract
@@ -387,17 +426,7 @@ msgstr "ឈ្មោះសំរាប់បង្ហាញ"
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
-msgid "Dropdown menu"
-msgstr "ម៉ឺនុយទម្លាក់ចុះ"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_kanban
 msgid "Edit Contract"
-msgstr "កែប្រែកិច្ចសន្យា"
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-msgid "Employed"
 msgstr ""
 
 #. module: hr_contract
@@ -411,12 +440,12 @@ msgstr "បុគ្គលិក"
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_contract
 msgid "Employee Contract"
-msgstr "កិច្ចសន្យាការងារ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__contract_ids
 msgid "Employee Contracts"
-msgstr "កិច្ចសន្យាការងារ"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_form
@@ -437,57 +466,57 @@ msgstr ""
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__wage
 #: model:ir.model.fields,help:hr_contract.field_hr_contract_history__wage
 msgid "Employee's monthly gross wage."
-msgstr "ប្រាក់ខែសរុបរបស់និយោជិក។"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.actions.act_window,name:hr_contract.hr_contract_history_view_list_action
 msgid "Employees"
-msgstr "និយោជិក"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__date_end
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__date_end
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "End Date"
-msgstr "កាលបរិច្ឆេទបញ្ចប់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__date_end
 msgid "End date of the contract (if it's a fixed-term contract)."
-msgstr "កាលបរិច្ឆេទបញ្ចប់នៃកិច្ចសន្យា (ប្រសិនបើវាជាកិច្ចសន្យារយៈពេលថេរ) ។"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__trial_date_end
 msgid "End date of the trial period (if there is one)."
-msgstr "បញ្ចប់កាលបរិច្ឆេទនៃរយៈពេលសាកល្បង (ប្រសិនបើមាន) ។"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__trial_date_end
 msgid "End of Trial Period"
-msgstr "ចុងបញ្ចប់នៃការសាកល្បង"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__state__close
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__state__close
 #: model:mail.message.subtype,name:hr_contract.mt_contract_close
 msgid "Expired"
-msgstr "បានផុតកំណត់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__first_contract_date
 #: model:ir.model.fields,field_description:hr_contract.field_hr_employee__first_contract_date
-#: model:ir.model.fields,field_description:hr_contract.field_hr_employee_public__first_contract_date
 msgid "First Contract Date"
-msgstr "កាលបរិច្ឆេទកុងត្រាទីមួយ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_follower_ids
 msgid "Followers"
-msgstr "អ្នកតាម"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "អ្នកដើរតាម (ដៃគូរ)"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__activity_type_icon
@@ -497,17 +526,17 @@ msgstr ""
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Future Activities"
-msgstr "សកម្មភាពទៅមុខ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__kanban_state__done
 msgid "Green"
-msgstr "បៃតង"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__kanban_state__normal
 msgid "Grey"
-msgstr "ពណ៌ប្រផេះ"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
@@ -517,15 +546,14 @@ msgstr "ជា​ក្រុម​តាម"
 
 #. module: hr_contract
 #: model:ir.actions.server,name:hr_contract.ir_cron_data_contract_update_state_ir_actions_server
-#: model:ir.cron,cron_name:hr_contract.ir_cron_data_contract_update_state
 msgid "HR Contract: update state"
-msgstr "កិច្ចសន្យាធនធានមនុស្ស: ធ្វើបច្ចុប្បន្នភាពទីតំាង"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__hr_responsible_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__hr_responsible_id
 msgid "HR Responsible"
-msgstr "ធនធានមនុស្សទទួលខុសត្រូវ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__has_message
@@ -542,12 +570,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type__id
 msgid "ID"
-msgstr "អត្តសញ្ញាណ"
+msgstr "ID"
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_exception_icon
 msgid "Icon"
-msgstr "រូបតំណាង"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__activity_exception_icon
@@ -557,12 +585,12 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "ប្រសិនបើបានគូសធីកសារថ្មីទាមទារការយកចិត្តទុកដាក់របស់អ្នក។"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "ប្រសិនបើបានគូសធីកសារខ្លះមានកំហុសបញ្ជូន។"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__is_under_contract
@@ -572,7 +600,7 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_is_follower
 msgid "Is Follower"
-msgstr "ត្រូវតាមអ្នក"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__job_id
@@ -585,14 +613,7 @@ msgstr "តំណែង"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__kanban_state
 msgid "Kanban State"
-msgstr "រដ្ឋកាណាន"
-
-#. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract____last_update
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history____last_update
-#: model:ir.model.fields,field_description:hr_contract.field_hr_payroll_structure_type____last_update
-msgid "Last Modified on"
-msgstr "កាលបរិច្ឆេតកែប្រែចុងក្រោយ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__write_uid
@@ -609,17 +630,12 @@ msgstr "ផ្លាស់ប្តូរចុងក្រោយ"
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Late Activities"
-msgstr "សកម្មភាពចុងក្រោយ"
-
-#. module: hr_contract
-#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "ឯកសារភ្ជាប់សំខាន់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_has_error
 msgid "Message Delivery error"
-msgstr "កំហុសក្នុងការផ្ញើសារ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_ids
@@ -643,13 +659,6 @@ msgid "New"
 msgstr "ថ្មី"
 
 #. module: hr_contract
-#. odoo-javascript
-#: code:addons/hr_contract/static/src/js/hr_contract_history_list_controller.js:0
-#, python-format
-msgid "New Employee"
-msgstr ""
-
-#. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
 msgstr ""
@@ -657,31 +666,21 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "កាលកំណត់សកម្មភាពបន្ទាប់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_summary
 msgid "Next Activity Summary"
-msgstr "ការសង្ខេបសកម្មភាពបន្ទាប់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_type_id
 msgid "Next Activity Type"
-msgstr "ប្រភេទសកម្មភាពបន្ទាប់"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 msgid "No Contracts"
-msgstr ""
-
-#. module: hr_contract
-#: model_terms:ir.actions.act_window,help:hr_contract.hr_contract_history_view_list_action
-msgid "No data to display"
-msgstr ""
-
-#. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-msgid "Not Running"
 msgstr ""
 
 #. module: hr_contract
@@ -698,7 +697,7 @@ msgstr "កំណត់សម្គាល់"
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_needaction_counter
 msgid "Number of Actions"
-msgstr "ចំនួនសកម្មភាព"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__message_has_error_counter
@@ -707,13 +706,13 @@ msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_needaction_counter
-msgid "Number of messages requiring action"
+msgid "Number of messages which requires an action"
 msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "ចំនួនសារដែលមានកំហុសឆ្គងនៃការដឹកជញ្ជូន"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_form
@@ -726,14 +725,14 @@ msgid "Person responsible for validating the employee's contracts."
 msgstr ""
 
 #. module: hr_contract
-#: model:ir.model,name:hr_contract.model_hr_employee_public
-msgid "Public Employee"
+#: model:ir.model.fields,field_description:hr_contract.field_hr_contract__rating_ids
+msgid "Ratings"
 msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__kanban_state__blocked
 msgid "Red"
-msgstr "ក្រហម"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_list
@@ -742,41 +741,36 @@ msgid "Reference Working Time"
 msgstr ""
 
 #. module: hr_contract
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_public_view_form
-msgid "Related User"
-msgstr "អ្នកប្រើប្រាស់ពាក់ព័ន្ធ"
-
-#. module: hr_contract
 #: model:ir.model,name:hr_contract.model_resource_calendar
 msgid "Resource Working Time"
-msgstr "ពេលវេលាធ្វើការធនធាន"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_resource_resource
 msgid "Resources"
-msgstr "ធនធាន"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__activity_user_id
 msgid "Responsible User"
-msgstr "អ្នកទទួលខុសត្រូវ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract__state__open
 #: model:ir.model.fields.selection,name:hr_contract.selection__hr_contract_history__state__open
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Running"
-msgstr "កំពុងរត់"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
+#: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Running Contracts"
 msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
 msgid "Salary Information"
-msgstr "ព័ត៌មានប្រាក់ខែ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_hr_payroll_structure_type
@@ -791,7 +785,7 @@ msgstr ""
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Search Contract"
-msgstr "ស្វែងរកកិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
@@ -818,16 +812,15 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__date_start
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Start Date"
-msgstr "កាលបរិច្ឆេទ​ចាប់ផ្តើម"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__state
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__state
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_history_view_search
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
-#: model_terms:ir.ui.view,arch_db:hr_contract.hr_employee_public_view_form
 msgid "Status"
-msgstr "ស្ថានភាព"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__activity_state
@@ -838,15 +831,11 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"ស្ថានភាពផ្អែកលើសកម្មភាព\n"
-"ហួសកាលកំណត់: កាលបរិច្ឆេទដល់កំណត់ត្រូវបានកន្លងផុតទៅហើយ\n"
-"ថ្ងៃនេះ: កាលបរិច្ឆេទសកម្មភាពនៅថ្ងៃនេះ\n"
-"គ្រោងទុក: សកម្មភាពនាពេលអនាគត។"
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__state
 msgid "Status of the contract"
-msgstr "ស្ថានភាពនៃកិច្ចសន្យា"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,help:hr_contract.field_hr_contract__country_code
@@ -855,8 +844,6 @@ msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
-"គាត់ជាលេខកូដប្រទេស ISO នៅក្នុងតួអក្សរពីរ។ "
-"អ្នកអាចប្រើប្រអប់នេះសម្រាប់ការស្វែងរករហ័ស។"
 
 #. module: hr_contract
 #. odoo-python
@@ -868,12 +855,12 @@ msgstr ""
 #. module: hr_contract
 #: model:mail.message.subtype,name:hr_contract.mt_contract_pending
 msgid "To Renew"
-msgstr "បន្តជាថ្មី"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Today Activities"
-msgstr "សកម្មភាពថ្ងៃនេះ"
+msgstr ""
 
 #. module: hr_contract
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_form
@@ -893,32 +880,37 @@ msgstr ""
 #. module: hr_contract
 #: model:ir.model,name:hr_contract.model_res_users
 msgid "User"
-msgstr "អ្នកប្រើប្រាស់"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__visa_expire
-msgid "Visa Expiration Date"
+msgid "Visa Expire Date"
 msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__visa_no
 msgid "Visa No"
-msgstr "លេខទិដ្ឋាការ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__wage
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__wage
 msgid "Wage"
-msgstr "ប្រាក់ឈ្នួល"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__permit_no
 msgid "Work Permit No"
-msgstr "លេខប័ណ្ណការងារ"
+msgstr ""
 
 #. module: hr_contract
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract__resource_calendar_id
 #: model:ir.model.fields,field_description:hr_contract.field_hr_contract_history__resource_calendar_id
 #: model_terms:ir.ui.view,arch_db:hr_contract.hr_contract_view_search
 msgid "Working Schedule"
-msgstr "កាលវិភាគការងារ"
+msgstr ""
+
+#. module: hr_contract
+#: model:ir.ui.menu,name:hr_contract.menu_resource_calendar_view
+msgid "Working Times"
+msgstr ""

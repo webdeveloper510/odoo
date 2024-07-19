@@ -266,7 +266,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'turlututu',
+                'name': 'turlututu installment #1',
                 'partner_id': self.partner_b.id,
                 'account_id': self.partner_b.property_account_payable_id.id,
                 'amount_currency': 338.4,
@@ -274,7 +274,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'turlututu',
+                'name': 'turlututu installment #2',
                 'partner_id': self.partner_b.id,
                 'account_id': self.partner_b.property_account_payable_id.id,
                 'amount_currency': 789.6,
@@ -323,7 +323,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'turlututu',
+                'name': 'turlututu installment #1',
                 'account_id': self.partner_b.property_account_payable_id.id,
                 'partner_id': self.partner_b.id,
                 'amount_currency': 331.2,
@@ -331,7 +331,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             },
             {
                 **self.term_line_vals_1,
-                'name': 'turlututu',
+                'name': 'turlututu installment #2',
                 'account_id': self.partner_b.property_account_payable_id.id,
                 'partner_id': self.partner_b.id,
                 'amount_currency': 772.8,
@@ -786,13 +786,13 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             # https://github.com/odoo/odoo/blob/385884afd31f25d61e99d139ecd4c574d99a1863/addons/purchase/views/account_move_views.xml#L26
             self.env.user.groups_id -= self.env.ref('purchase.group_purchase_manager')
             self.env.user.groups_id -= self.env.ref('purchase.group_purchase_user')
-        # 'invisible': ['|', ('state', '!=', 'draft'), ('move_type', '!=', 'in_invoice')]
+        # invisible="state != 'draft' or move_type != 'in_invoice'"
         # This is an in_refund invoice, `invoice_vendor_bill_id` is not supposed to be visible
         # and therefore not supposed to be changed.
         view = self.env.ref('account.view_move_form')
         tree = etree.fromstring(view.arch)
         for node in tree.xpath('//field[@name="invoice_vendor_bill_id"]'):
-            del node.attrib['attrs']
+            del node.attrib['invisible']
         view.arch = etree.tostring(tree)
 
         move_form = Form(self.invoice)

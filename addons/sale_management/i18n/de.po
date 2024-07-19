@@ -3,18 +3,16 @@
 # 	* sale_management
 # 
 # Translators:
-# Felix Schubert <felix.schubert@go-erp.com>, 2022
-# Michael Hofer, 2022
-# Martin Trigaux, 2023
-# Larissa Manderfeld, 2023
+# Wil Odoo, 2023
+# Larissa Manderfeld, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-04 09:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Larissa Manderfeld, 2023\n"
+"POT-Creation-Date: 2024-01-05 12:30+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Larissa Manderfeld, 2024\n"
 "Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,24 +21,28 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: sale_management
-#: model:sale.order.template.line,name:sale_management.sale_order_template_line_1
-msgid "4 Person Desk"
-msgstr "Schreibtisch für 4 Personen"
+#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
+msgid "1.5"
+msgstr "1,5"
+
+#. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
+msgid ""
+"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+"company-specific.\" groups=\"base.group_multi_company\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
+"company-specific.\" groups=\"base.group_multi_company\"/>"
+
+#. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
+msgid "<span invisible=\"not require_payment\">of</span>"
+msgstr "<span invisible=\"not require_payment\">von</span>"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
 msgid "<span>Options</span>"
 msgstr "<span>Optionen</span>"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "<span>Payment</span>"
-msgstr "<span>Zahlung</span>"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "<span>Signature</span>"
-msgstr "<span>Signatur</span>"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__active
@@ -167,6 +169,15 @@ msgid "Default Template"
 msgstr "Standardvorlage"
 
 #. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
+msgid ""
+"Default values will be overwritten by values provided by the quotation "
+"template."
+msgstr ""
+"Die Standardwerte werden durch die in der Angebotsvorlage angegebenen Werte "
+"überschrieben."
+
+#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__name
@@ -174,15 +185,6 @@ msgstr "Standardvorlage"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
 msgid "Description"
 msgstr "Beschreibung"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
-msgid ""
-"Design your quotation templates using building blocks<br/>\n"
-"                            <em attrs=\"{'invisible': [('module_sale_quotation_builder','=',False)]}\">Warning: this option will install the Website app.</em>"
-msgstr ""
-"Gestalten Sie Ihre Angebotsvorlagen aus Bausteinen<br/>\n"
-"                            <em attrs=\"{'invisible': [('module_sale_quotation_builder','=',False)]}\">Warnung: Diese Option installiert die Website-Applikation.</em>"
 
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_digest_digest
@@ -215,6 +217,7 @@ msgid "Display Type"
 msgstr "Anzeigetyp"
 
 #. module: sale_management
+#. odoo-python
 #: code:addons/sale_management/models/digest.py:0
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
@@ -223,9 +226,9 @@ msgstr ""
 "Übersicht des Benutzers."
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
-msgid "Documentation"
-msgstr "Dokumentation"
+#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
+msgid "Extra Chips"
+msgstr "Extra-Chips"
 
 #. module: sale_management
 #: model:ir.model.constraint,message:sale_management.constraint_sale_order_template_line_non_accountable_fields_null
@@ -261,6 +264,16 @@ msgid "ID"
 msgstr "ID"
 
 #. module: sale_management
+#: model:ir.model.fields,help:sale_management.field_sale_order_template__journal_id
+msgid ""
+"If set, SO with this template will invoice in this journal; otherwise the "
+"sales journal with the lowest sequence is used."
+msgstr ""
+"Falls festgelegt, werden Verkaufsaufträge mit dieser Vorlage in diesem "
+"Journal in Rechnung gestellt. Andernfalls wird das Verkaufsjournal mit der "
+"niedrigsten Sequenz verwendet."
+
+#. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__active
 msgid ""
 "If unchecked, it will allow you to hide the quotation template without "
@@ -270,17 +283,19 @@ msgstr ""
 "ausblenden, ohne sie zu entfernen."
 
 #. module: sale_management
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__journal_id
+msgid "Invoicing Journal"
+msgstr "Rechnungsjournal"
+
+#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_digest_digest__kpi_all_sale_total_value
 msgid "Kpi All Sale Total Value"
 msgstr "KPI Alle Verkäufe Gesamtwert"
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_option____last_update
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template____last_update
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line____last_update
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option____last_update
-msgid "Last Modified on"
-msgstr "Letzte Änderung am"
+#: model:sale.order.template.line,name:sale_management.sale_order_template_line_1
+msgid "Large Meeting Table"
+msgstr "Großer Besprechungstisch"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_uid
@@ -343,11 +358,6 @@ msgid "Online Signature"
 msgstr "Online-Signatur"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "Online confirmation"
-msgstr "Online-Bestätigung"
-
-#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sale_order_template_option_ids
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
@@ -364,6 +374,18 @@ msgstr "Optionale Produktlinien"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
 msgid "Options"
 msgstr "Optionen"
+
+#. module: sale_management
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__prepayment_percent
+msgid "Prepayment percentage"
+msgstr "Vorauszahlungsprozentsatz"
+
+#. module: sale_management
+#. odoo-python
+#: code:addons/sale_management/models/sale_order_template.py:0
+#, python-format
+msgid "Prepayment percentage must be a valid percentage."
+msgstr "Der Vorauszahlungsprozentsatz muss ein gültiger Prozentsatz sein."
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__is_present
@@ -389,11 +411,6 @@ msgstr "Menge"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 msgid "Quantity:"
 msgstr "Menge:"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_res_config_settings__module_sale_quotation_builder
-msgid "Quotation Builder"
-msgstr "Angebotsersteller"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__number_of_days
@@ -441,8 +458,8 @@ msgstr "Angebotsvorlagen"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "Quotation expires after"
-msgstr "Angebot verfällt nach"
+msgid "Quotation Validity"
+msgstr "Angebotsgültigkeit"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
@@ -522,8 +539,8 @@ msgid ""
 msgstr ""
 "Verkaufen Sie das gleiche Produkt in verschiedenen Größen oder Farben? "
 "Probieren Sie das Produktraster aus und bestücken Sie Ihre Aufträge mit "
-"mehreren Mengen jeder Variante. Diese Funktion gibt es auch in der Anwendung"
-" „Einkauf“."
+"mehreren Mengen jeder Variante. Diese Funktion gibt es auch in der App "
+"„Einkauf“."
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__sequence
@@ -563,6 +580,13 @@ msgstr ""
 "Der Administrator kann in den Verkaufseinstellungen Allgemeine "
 "Geschäftsbedingungen festlegen. Die hier festgelegten Begriffe werden "
 "stattdessen angezeigt, wenn Sie diese Angebotsvorlage auswählen."
+
+#. module: sale_management
+#: model:ir.model.fields,help:sale_management.field_sale_order_template__prepayment_percent
+msgid "The percentage of the amount needed to be paid to confirm quotations."
+msgstr ""
+"Der Prozentsatz des Betrags, der zur Bestätigung von Angeboten gezahlt "
+"werden muss."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__mail_template_id
@@ -630,12 +654,14 @@ msgstr ""
 "                Nutzen Sie Cross-Selling und Rabatte, um Ihre Umsätze zu steigern."
 
 #. module: sale_management
+#. odoo-python
 #: code:addons/sale_management/models/sale_order_option.py:0
 #, python-format
 msgid "You cannot add options to a confirmed order."
 msgstr "Sie können keine Optionen zu einem bestätigten Auftrag hinzufügen."
 
 #. module: sale_management
+#. odoo-python
 #: code:addons/sale_management/models/sale_order_template_line.py:0
 #, python-format
 msgid ""
@@ -646,6 +672,7 @@ msgstr ""
 " die aktuelle Zeile löschen und eine neue Zeile vom richtigen Typ anlegen."
 
 #. module: sale_management
+#. odoo-python
 #: code:addons/sale_management/models/sale_order.py:0
 #, python-format
 msgid ""
@@ -656,12 +683,14 @@ msgstr ""
 " Bitte ändern Sie das Unternehmen Ihres Angebots oder entfernen Sie die Produkte anderer Unternehmen (%(bad_products)s)."
 
 #. module: sale_management
+#. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 #, python-format
 msgid "Your template cannot contain products from multiple companies."
 msgstr "Ihre Vorlage darf keine Produkte mehrerer Unternehmen enthalten."
 
 #. module: sale_management
+#. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 #, python-format
 msgid ""

@@ -21,14 +21,15 @@ class ProductProduct(models.Model):
             # so we check for it
             cart = website and request and hasattr(request, 'website') and website.sale_get_order() or None
             if cart:
-                return sum(
-                    cart._get_common_product_lines(product=self).mapped('product_uom_qty')
-                )
+                return sum(cart._get_common_product_lines(product=self).mapped('product_uom_qty'))
         return 0
 
     def _is_sold_out(self):
-        combination_info = self.with_context(website_sale_stock_get_quantity=True).product_tmpl_id._get_combination_info(product_id=self.id)
-        return combination_info['product_type'] == 'product' and combination_info['free_qty'] <= 0
+        self.ensure_one()
+        if not self.type == 'product':
+            return False
+        free_qty = self.env['website'].get_current_website()._get_product_available_qty(self.sudo())
+        return free_qty <= 0
 
     def _website_show_quick_add(self):
         return (self.allow_out_of_stock_order or not self._is_sold_out()) and super()._website_show_quick_add()

@@ -104,7 +104,7 @@ class IrConfigParameter(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        self.clear_caches()
+        self.env.registry.clear_cache()
         return super(IrConfigParameter, self).create(vals_list)
 
     def write(self, vals):
@@ -112,11 +112,11 @@ class IrConfigParameter(models.Model):
             illegal = _default_parameters.keys() & self.mapped('key')
             if illegal:
                 raise ValidationError(_("You cannot rename config parameters with keys %s", ', '.join(illegal)))
-        self.clear_caches()
+        self.env.registry.clear_cache()
         return super(IrConfigParameter, self).write(vals)
 
     def unlink(self):
-        self.clear_caches()
+        self.env.registry.clear_cache()
         return super(IrConfigParameter, self).unlink()
 
     @api.ondelete(at_uninstall=False)

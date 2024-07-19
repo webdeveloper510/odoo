@@ -1,29 +1,44 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
-import { BooleanField } from "../boolean/boolean_field";
+import { booleanField, BooleanField } from "../boolean/boolean_field";
 
 export class BooleanToggleField extends BooleanField {
-    get isReadonly() {
-        return this.props.record.isReadonly(this.props.name);
-    }
-    onChange(newValue) {
-        this.props.update(newValue, { save: this.props.autosave });
+    static template = "web.BooleanToggleField";
+    static props = {
+        ...BooleanField.props,
+        autosave: { type: Boolean, optional: true },
+    };
+
+    async onChange(newValue) {
+        this.state.value = newValue;
+        const changes = { [this.props.name]: newValue };
+        await this.props.record.update(changes, { save: this.props.autosave });
     }
 }
 
-BooleanToggleField.template = "web.BooleanToggleField";
-
-BooleanToggleField.displayName = _lt("Toggle");
-BooleanToggleField.props = {
-    ...BooleanField.props,
-    autosave: { type: Boolean, optional: true },
+export const booleanToggleField = {
+    ...booleanField,
+    component: BooleanToggleField,
+    displayName: _t("Toggle"),
+    supportedOptions: [
+        {
+            label: _t("Autosave"),
+            name: "autosave",
+            type: "boolean",
+            default: true,
+            help: _t(
+                "If checked, the record will be saved immediately when the field is modified."
+            ),
+        },
+    ],
+    extractProps({ options }, dynamicInfo) {
+        return {
+            autosave: "autosave" in options ? Boolean(options.autosave) : true,
+            readonly: dynamicInfo.readonly,
+        };
+    },
 };
-BooleanToggleField.extractProps = ({ attrs }) => {
-    return {
-        autosave: "autosave" in attrs.options ? Boolean(attrs.options.autosave) : true,
-    };
-};
 
-registry.category("fields").add("boolean_toggle", BooleanToggleField);
+registry.category("fields").add("boolean_toggle", booleanToggleField);

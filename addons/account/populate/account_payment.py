@@ -34,7 +34,7 @@ class AccountPayment(models.Model):
             :return (list<int>): the ids of partner the company has access to.
             """
             return self.env['res.partner'].search([
-                '|', ('company_id', '=', company_id), ('company_id', '=', False),
+                *self.env['res.partner']._check_company_domain(company_id),
                 ('id', 'in', self.env.registry.populated_models['res.partner']),
             ]).ids
 
@@ -47,7 +47,7 @@ class AccountPayment(models.Model):
             :return (list<int>): the ids of the bank and cash journals of a company
             """
             return self.env['account.journal'].search([
-                ('company_id', '=', company_id),
+                *self.env['account.journal']._check_company_domain(company_id),
                 ('type', 'in', ('cash', 'bank')),
             ]).ids
 
@@ -105,7 +105,7 @@ class AccountPayment(models.Model):
             return random.choice(search_payment_method_line_ids(values['payment_type'], values['journal_id']))
 
         company_ids = self.env['res.company'].search([
-            ('chart_template_id', '!=', False),
+            ('chart_template', '!=', False),
             ('id', 'in', self.env.registry.populated_models['res.company']),
         ])
         if not company_ids:

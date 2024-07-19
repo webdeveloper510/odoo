@@ -128,6 +128,7 @@
                                         <field name="author"/>
                                         <field name="body" required="1"/>
                                         <field name="size"/>
+                                        <field name="has_important_sibling"/>
                                     </tree>
                                 </field>
                             </page>
@@ -350,17 +351,20 @@
             <field name="arch" type="xml">
                 <form>
                     <sheet>
+                        <field name="precision_rounding"/>
                         <field name="line_ids" mode="tree">
                             <tree editable="bottom">
                                 <field name="value"/>
                                 <field name="edit"/>
                                 <field name="count"/>
+                                <field name="one_compute"/>
                             </tree>
                             <form>
                                 <!-- this view makes sure that field "same" is not considered -->
                                 <field name="value"/>
                                 <field name="edit"/>
                                 <field name="count"/>
+                                <field name="one_compute"/>
                             </form>
                         </field>
                     </sheet>

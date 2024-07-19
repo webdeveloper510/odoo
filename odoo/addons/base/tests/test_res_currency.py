@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from lxml import etree
+from odoo import Command
 from odoo.tests.common import TransactionCase
 
 
-class TestResConfig(TransactionCase):
+class TestResCurrency(TransactionCase):
     def test_view_company_rate_label(self):
         """Tests the label of the company_rate and inverse_company_rate fields
         are well set according to the company currency in the currency form view and the currency rate list view.
@@ -21,3 +22,82 @@ class TestResConfig(TransactionCase):
                 node_inverse_company_rate = tree.xpath('//field[@name="inverse_company_rate"]')[0]
                 self.assertEqual(node_company_rate.get('string'), f'Unit per {expected_currency}')
                 self.assertEqual(node_inverse_company_rate.get('string'), f'{expected_currency} per Unit')
+
+    def test_currency_cache(self):
+        currencyA, currencyB = self.env['res.currency'].create([{
+            'name': 'AAA',
+            'symbol': 'AAA',
+            'rate_ids': [Command.create({'name': '2009-09-09', 'rate': 1})]
+        }, {
+            'name': 'BBB',
+            'symbol': 'BBB',
+            'rate_ids': [
+                Command.create({'name': '2009-09-09', 'rate': 1}),
+                Command.create({'name': '2011-11-11', 'rate': 2}),
+            ],
+        }])
+
+        self.assertEqual(currencyA._convert(
+            from_amount=100,
+            to_currency=currencyB,
+            company=self.env.company,
+            date='2010-10-10',
+        ), 100)
+
+        # update the (cached) rate of the to_currency used in the previous query
+        self.env['res.currency.rate'].search([
+            ('currency_id', '=', currencyB.id),
+            ('name', '=', '2009-09-09')]
+        ).rate = 3
+
+        # repeat _convert call
+        # the cached conversion rate is invalid due to the rate change -> query
+        with self.assertQueryCount(1):
+            self.assertEqual(currencyA._convert(
+                from_amount=100,
+                to_currency=currencyB,
+                company=self.env.company,
+                date='2010-10-10',
+            ), 300)
+
+        # create a new rate of the to_currency for the date used in the previous query
+        self.env['res.currency.rate'].create({
+            'name': '2010-10-10',
+            'rate': 4,
+            'currency_id': currencyB.id,
+            'company_id': self.env.company.id,
+        })
+
+        # repeat _convert call
+        # the cached conversion rate is invalid due to the new rate of the to_currency -> query
+        with self.assertQueryCount(1):
+            self.assertEqual(currencyA._convert(
+                from_amount=100,
+                to_currency=currencyB,
+                company=self.env.company,
+                date='2010-10-10',
+            ), 400)
+
+        # only one query is done when changing the convert params
+        with self.assertQueryCount(1):
+            self.assertEqual(currencyA._convert(
+                from_amount=100,
+                to_currency=currencyB,
+                company=self.env.company,
+                date='2011-11-11',
+            ), 200)
+
+        # cache holds multiple values
+        with self.assertQueryCount(0):
+            self.assertEqual(currencyA._convert(
+                from_amount=100,
+                to_currency=currencyB,
+                company=self.env.company,
+                date='2010-10-10',
+            ), 400)
+            self.assertEqual(currencyA._convert(
+                from_amount=100,
+                to_currency=currencyB,
+                company=self.env.company,
+                date='2011-11-11',
+            ), 200)

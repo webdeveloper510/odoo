@@ -14,7 +14,9 @@ class TestSessionInfo(common.HttpCase):
         cls.company_a = cls.env['res.company'].create({'name': "A"})
         cls.company_b = cls.env['res.company'].create({'name': "B"})
         cls.company_c = cls.env['res.company'].create({'name': "C"})
-        cls.companies = [cls.company_a, cls.company_b, cls.company_c]
+        cls.company_b_branch = cls.env['res.company'].create({'name': "B Branch", 'parent_id': cls.company_b.id})
+        cls.allowed_companies = cls.company_a + cls.company_b_branch + cls.company_c
+        cls.disallowed_ancestor_companies = cls.company_b
 
         cls.user_password = "info"
         cls.user = common.new_test_user(
@@ -25,7 +27,7 @@ class TestSessionInfo(common.HttpCase):
             tz="UTC")
         cls.user.write({
             'company_id': cls.company_a.id,
-            'company_ids': [Command.set([company.id for company in cls.companies])],
+            'company_ids': [Command.set(cls.allowed_companies.ids)],
         })
 
         cls.payload = json.dumps(dict(jsonrpc="2.0", method="call", id=str(uuid4())))
@@ -47,11 +49,25 @@ class TestSessionInfo(common.HttpCase):
                 'id': company.id,
                 'name': company.name,
                 'sequence': company.sequence,
-            } for company in self.companies
+                'child_ids': company.child_ids.ids,
+                'parent_id': company.parent_id.id,
+            } for company in self.allowed_companies
         }
+
+        expected_disallowed_ancestor_companies = {
+            str(company.id): {
+                'id': company.id,
+                'name': company.name,
+                'sequence': company.sequence,
+                'child_ids': company.child_ids.ids,
+                'parent_id': company.parent_id.id,
+            } for company in self.disallowed_ancestor_companies
+        }
+
         expected_user_companies = {
             'current_company': self.company_a.id,
             'allowed_companies': expected_allowed_companies,
+            'disallowed_ancestor_companies': expected_disallowed_ancestor_companies,
         }
         self.assertEqual(
             result['user_companies'],
@@ -63,12 +79,3 @@ class TestSessionInfo(common.HttpCase):
         response = self.url_open("/web/session/modules", data=self.payload, headers=self.headers)
         data = response.json()
         self.assertTrue(isinstance(data['result'], list))
-
-    def test_load_polish_lang(self):
-        # Regression test, making sure languages without thousand separators
-        # work correctly
-        lang_pl = self.env['res.lang']._activate_lang('pl_PL')
-        self.user.lang = lang_pl.code
-        self.authenticate(self.user.login, self.user_password)
-        res = self.url_open('/web')
-        res.raise_for_status()

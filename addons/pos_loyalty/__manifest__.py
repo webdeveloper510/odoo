@@ -17,6 +17,7 @@
         'views/pos_loyalty_menu_views.xml',
         'views/res_config_settings_view.xml',
         'views/loyalty_program_views.xml',
+        'views/res_partner_views.xml',
     ],
     'demo': [
         'data/pos_loyalty_demo.xml',
@@ -24,13 +25,11 @@
     'installable': True,
     'auto_install': True,
     'assets': {
-        'point_of_sale.assets': [
-            'pos_loyalty/static/src/css/Loyalty.scss',
-            'pos_loyalty/static/src/js/**/*',
-            'pos_loyalty/static/src/xml/**/*',
+        'point_of_sale._assets_pos': [
+            'pos_loyalty/static/src/**/*',
         ],
         'web.assets_tests': [
-            'pos_loyalty/static/src/tours/**/*',
+            'pos_loyalty/static/tests/tours/**/*',
         ],
     },
     'license': 'LGPL-3',

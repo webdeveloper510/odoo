@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from "website.tour_utils";
+import wTourUtils from "@website/js/tours/tour_utils";
 
 const clickOnImgAndWaitForLoad = [
     {
@@ -13,7 +13,7 @@ const clickOnImgAndWaitForLoad = [
         run: () => null,
     },
 ];
-const enterEditModeOfTestProduct = [
+const enterEditModeOfTestProduct = () => [
     {
         content: "Click on the product anchor",
         trigger: "iframe a:contains('Test Remove Image')",
@@ -38,8 +38,8 @@ const removeImg = [
 wTourUtils.registerWebsitePreviewTour("add_and_remove_main_product_image_no_variant", {
     url: "/shop?search=Test Remove Image",
     test: true,
-}, [
-    ...enterEditModeOfTestProduct,
+}, () => [
+    ...enterEditModeOfTestProduct(),
     {
         content: "Double click on the product image",
         trigger: "iframe #o-carousel-product img[alt='Test Remove Image']",
@@ -59,8 +59,8 @@ wTourUtils.registerWebsitePreviewTour("add_and_remove_main_product_image_no_vari
 wTourUtils.registerWebsitePreviewTour("remove_main_product_image_with_variant", {
     url: "/shop?search=Test Remove Image",
     test: true,
-}, [
-    ...enterEditModeOfTestProduct,
+}, () => [
+    ...enterEditModeOfTestProduct(),
     ...clickOnImgAndWaitForLoad,
     ...wTourUtils.clickOnSave(),
     ...wTourUtils.clickOnEditAndWaitEditMode(),

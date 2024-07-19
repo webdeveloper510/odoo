@@ -3,21 +3,15 @@
 # 	* uom
 # 
 # Translators:
-# Odoo Thaidev <odoothaidev@gmail.com>, 2022
-# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
-# monchai7 <montchye@gmail.com>, 2022
-# Martin Trigaux, 2022
-# Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2022
-# Wichanon Jamwutthipreecha, 2022
-# Amin Cheloh <amincheloh@gmail.com>, 2022
+# Wil Odoo, 2023
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-23 08:03+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -166,12 +160,6 @@ msgid "ID"
 msgstr "ไอดี"
 
 #. module: uom
-#: model:ir.model.fields,field_description:uom.field_uom_category____last_update
-#: model:ir.model.fields,field_description:uom.field_uom_uom____last_update
-msgid "Last Modified on"
-msgstr "แก้ไขครั้งล่าสุดเมื่อ"
-
-#. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__write_uid
 #: model:ir.model.fields,field_description:uom.field_uom_uom__write_uid
 msgid "Last Updated by"
@@ -222,7 +210,7 @@ msgstr "อ้างอิง UoM"
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__rounding
 msgid "Rounding Precision"
-msgstr "ปัจจัยการปัดเศษ"
+msgstr "ความแม่นยำในการปัดเศษ"
 
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.uom_uom_view_search
@@ -240,6 +228,7 @@ msgid "Smaller than the reference Unit of Measure"
 msgstr "เล็กกว่าหน่วยวัดอ้างอิง"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid ""
@@ -271,7 +260,7 @@ msgid ""
 "of Measure that cannot be further split, such as a piece."
 msgstr ""
 "ปริมาณที่คำนวณได้จะเป็นจำนวนทวีคูณของค่านี้ ใช้ 1.0 "
-"สำหรับหน่วยวัดที่ไม่สามารถแยกเพิ่มเติมได้ เช่น หน่วย"
+"สำหรับหน่วยวัดที่ไม่สามารถแยกเพิ่มเติมได้ เช่น ชิ้น"
 
 #. module: uom
 #: model:ir.model.constraint,message:uom.constraint_uom_uom_factor_gt_zero
@@ -279,6 +268,7 @@ msgid "The conversion ratio for a unit of measure cannot be 0!"
 msgstr "อัตราการแปลงสำหรับหน่วยวัดไม่สามารถเป็น 0!"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid ""
@@ -299,6 +289,7 @@ msgid "The rounding precision must be strictly positive."
 msgstr "ความแม่นยำในการปัดเศษต้องเป็นค่าบวกเท่านั้น"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid ""
@@ -313,6 +304,7 @@ msgstr ""
 "ซึ่งควรอยู่ในหมวดหมู่เดียวกัน"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "The value of ratio could not be Zero"
@@ -382,18 +374,21 @@ msgstr ""
 "            ชั่วโมง วัน"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "UoM category %s must have at least one reference unit of measure."
 msgstr "หมวดหมู่ UoM %s ต้องมีหน่วยวัดอ้างอิงอย่างน้อยหนึ่งหน่วย"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "UoM category %s should have a reference unit of measure."
 msgstr "หมวดหมู่ UoM %s ควรมีหน่วยวัดอ้างอิง"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "UoM category %s should only have one reference unit of measure."
@@ -410,6 +405,7 @@ msgid "Volume"
 msgstr "ปริมาตร"
 
 #. module: uom
+#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "Warning for %s"
@@ -442,7 +438,7 @@ msgstr "ซม."
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_floz
 msgid "fl oz (US)"
-msgstr "fl oz (US)"
+msgstr "ออนซ์ (สหรัฐอเมริกา)"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_foot
@@ -462,7 +458,7 @@ msgstr "ft³"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_gal
 msgid "gal (US)"
-msgstr "gal (US)"
+msgstr "แกลลอน (US)"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_inch
@@ -517,7 +513,7 @@ msgstr "ออนซ์"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_qt
 msgid "qt (US)"
-msgstr "qt (US)"
+msgstr "จำนวน (US)"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_yard

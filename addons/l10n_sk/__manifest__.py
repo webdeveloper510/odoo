@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Slovak - Accounting',
+    'icon': '/account/static/description/l10n.png',
+    'countries': ['sk'],
     'version': '1.0',
-    'author': '26HOUSE',
-    'website': 'http://www.26house.com',
+    'author': '26HOUSE (http://www.26house.com)',
+    'website': 'https://www.odoo.com/documentation/17.0/applications/finance/fiscal_localizations.html',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """
-Slovakia accounting chart and localization: Chart of Accounts 2020, basic VAT rates + 
+Slovakia accounting chart and localization: Chart of Accounts 2020, basic VAT rates +
 fiscal positions.
 
 Tento modul definuje:
@@ -17,25 +18,24 @@ Tento modul definuje:
 
 • Základné fiškálne pozície pre slovenskú legislatívu
 
- 
+
 Pre viac informácií kontaktujte info@26house.com alebo navštívte https://www.26house.com.
-    
+
     """,
     'depends': [
-        'account',
         'base_iban',
         'base_vat',
+        'account',
     ],
     'data': [
-          'data/l10n_sk_coa_data.xml',
-          'data/account.account.template.csv',
-          'data/account.group.template.csv',
-          'data/l10n_sk_coa_post_data.xml',
-          'data/account_tax_group_data.xml',
-          'data/account_tax_data.xml',
-          'data/account_fiscal_position_data.xml',
-          'data/account_chart_template_data.xml'
+        'views/res_partner_views.xml',
+        'views/res_company_views.xml',
+        'views/report_invoice.xml',
+        'views/account_move_views.xml',
+        'views/report_template.xml',
     ],
-    'demo': ['data/demo_company.xml'],
+    'demo': [
+        'demo/demo_company.xml',
+    ],
     'license': 'LGPL-3',
 }

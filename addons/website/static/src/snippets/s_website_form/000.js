@@ -1,18 +1,25 @@
-odoo.define('website.s_website_form', function (require) {
-    'use strict';
+/** @odoo-module **/
 
-    var core = require('web.core');
-    var time = require('web.time');
-    const {ReCaptcha} = require('google_recaptcha.ReCaptchaV3');
-    const session = require('web.session');
-    var ajax = require('web.ajax');
-    var publicWidget = require('web.public.widget');
-    const dom = require('web.dom');
-    const concurrency = require('web.concurrency');
-    const wUtils = require('website.utils');
-
-    var _t = core._t;
-    var qweb = core.qweb;
+    import {ReCaptcha} from "@google_recaptcha/js/recaptcha";
+    import { session } from "@web/session";
+    import publicWidget from "@web/legacy/js/public/public_widget";
+    import dom from "@web/legacy/js/core/dom";
+    import { delay } from "@web/core/utils/concurrency";
+    import { debounce } from "@web/core/utils/timing";
+    import { _t } from "@web/core/l10n/translation";
+    import { renderToElement } from "@web/core/utils/render";
+    import { post } from "@web/core/network/http_service";
+    import { localization } from "@web/core/l10n/localization";
+import {
+    formatDate,
+    formatDateTime,
+    parseDate,
+    parseDateTime,
+    serializeDate,
+    serializeDateTime,
+} from "@web/core/l10n/dates";
+const { DateTime } = luxon;
+import wUtils from '@website/js/utils';
 
     publicWidget.registry.EditModeWebsiteForm = publicWidget.Widget.extend({
         selector: '.s_website_form form, form.s_website_form', // !compatibility
@@ -23,13 +30,14 @@ odoo.define('website.s_website_form', function (require) {
         start: function () {
             if (this.editableMode) {
                 // We do not initialize the datetime picker in edit mode but want the dates to be formated
-                const dateTimeFormat = time.getLangDatetimeFormat();
-                const dateFormat = time.getLangDateFormat();
-                this.$target[0].querySelectorAll('.s_website_form_input.datetimepicker-input').forEach(el => {
+                this.el.querySelectorAll('.s_website_form_input.datetimepicker-input').forEach(el => {
                     const value = el.getAttribute('value');
                     if (value) {
-                        const format = el.closest('.s_website_form_field').dataset.type === 'date' ? dateFormat : dateTimeFormat;
-                        el.value = moment.unix(value).format(format);
+                    const format =
+                        el.closest(".s_website_form_field").dataset.type === "date"
+                            ? formatDate
+                            : formatDateTime;
+                        el.value = format(DateTime.fromSeconds(parseInt(value)));
                     }
                 });
             }
@@ -42,6 +50,9 @@ odoo.define('website.s_website_form', function (require) {
         events: {
             'click .s_website_form_send, .o_website_form_send': 'send', // !compatibility
             'submit': 'send',
+            "change input[type=file]": "_onFileChange",
+            "click input.o_add_files_button": "_onAddFilesButtonClick",
+            "click .o_file_delete": "_onFileDeleteClick",
         },
 
         /**
@@ -54,32 +65,33 @@ odoo.define('website.s_website_form', function (require) {
             this._visibilityFunctionByFieldName = new Map();
             this._visibilityFunctionByFieldEl = new Map();
             this.__started = new Promise(resolve => this.__startResolve = resolve);
+            this.orm = this.bindService("orm");
         },
         willStart: async function () {
             const res = this._super(...arguments);
-            if (!this.$target[0].classList.contains('s_website_form_no_recaptcha')) {
+            if (!this.el.classList.contains('s_website_form_no_recaptcha')) {
                 this._recaptchaLoaded = true;
                 this._recaptcha.loadLibs();
             }
             // fetch user data (required by fill-with behavior)
             this.preFillValues = {};
             if (session.user_id) {
-                this.preFillValues = (await this._rpc({
-                    model: 'res.users',
-                    method: 'read',
-                    args: [session.user_id, this._getUserPreFillFields()],
-                }))[0] || {};
+                this.preFillValues = (await this.orm.read(
+                    "res.users",
+                    [session.user_id],
+                    this._getUserPreFillFields()
+                ))[0] || {};
             }
             return res;
         },
         start: function () {
             // Reset the form first, as it is still filled when coming back
             // after a redirect.
-            this.$target[0].reset();
+            this.resetForm();
 
             // Prepare visibility data and update field visibilities
             const visibilityFunctionsByFieldName = new Map();
-            for (const fieldEl of this.$target[0].querySelectorAll('[data-visibility-dependency]')) {
+            for (const fieldEl of this.el.querySelectorAll('[data-visibility-dependency]')) {
                 const inputName = fieldEl.querySelector('.s_website_form_input').name;
                 if (!visibilityFunctionsByFieldName.has(inputName)) {
                     visibilityFunctionsByFieldName.set(inputName, []);
@@ -92,35 +104,22 @@ odoo.define('website.s_website_form', function (require) {
                 this._visibilityFunctionByFieldName.set(name, () => funcs.some(func => func()));
             }
 
-            this._onFieldInputDebounced = _.debounce(this._onFieldInput.bind(this), 400);
+            this._onFieldInputDebounced = debounce(this._onFieldInput.bind(this), 400);
             this.$el.on('input.s_website_form', '.s_website_form_field', this._onFieldInputDebounced);
 
-            // Initialize datetimepickers
-            var datepickers_options = {
-                minDate: moment({y: 1000}),
-                maxDate: moment({y: 9999, M: 11, d: 31}),
-                calendarWeeks: true,
-                icons: {
-                    time: 'fa fa-clock-o',
-                    date: 'fa fa-calendar',
-                    next: 'fa fa-chevron-right',
-                    previous: 'fa fa-chevron-left',
-                    up: 'fa fa-chevron-up',
-                    down: 'fa fa-chevron-down',
-                },
-                locale: moment.locale(),
-                format: time.getLangDatetimeFormat(),
-                extraFormats: ['X'],
-            };
-            const $datetimes = this.$target.find('.s_website_form_datetime, .o_website_form_datetime'); // !compatibility
-            $datetimes.datetimepicker(datepickers_options);
-
-            // Adapt options to date-only pickers
-            datepickers_options.format = time.getLangDateFormat();
-            const $dates = this.$target.find('.s_website_form_date, .o_website_form_date'); // !compatibility
-            $dates.datetimepicker(datepickers_options);
-
-            this.$allDates = $datetimes.add($dates);
+            this.$allDates = this.$el.find('.s_website_form_datetime, .o_website_form_datetime, .s_website_form_date, .o_website_form_date');
+            for (const field of this.$allDates) {
+                const input = field.querySelector("input");
+                const defaultValue = input.getAttribute("value");
+                this.call("datetime_picker", "create", {
+                    target: input,
+                    onChange: () => input.dispatchEvent(new Event("input", { bubbles: true })),
+                    pickerProps: {
+                        type: field.matches('.s_website_form_date, .o_website_form_date') ? 'date' : 'datetime',
+                        value: defaultValue && DateTime.fromSeconds(parseInt(defaultValue)),
+                    },
+                }).enable();
+            }
             this.$allDates.addClass('s_website_form_datepicker_initialized');
 
             // Display form values from tag having data-for attribute
@@ -128,7 +127,7 @@ odoo.define('website.s_website_form', function (require) {
             // Because, using t-att- inside form make it non-editable
             // Data-fill-with attribute is given during registry and is used by
             // to know which user data should be used to prfill fields.
-            let dataForValues = wUtils.getParsedDataFor(this.$target[0].id, document);
+            let dataForValues = wUtils.getParsedDataFor(this.el.id, document);
             this.editTranslations = !!this._getContext(true).edit_translations;
             // On the "edit_translations" mode, a <span/> with a translated term
             // will replace the attribute value, leading to some inconsistencies
@@ -147,7 +146,7 @@ odoo.define('website.s_website_form', function (require) {
                 // the values to submit() for these fields but this could break
                 // customizations that use the current behavior as a feature.
                 for (const name of fieldNames) {
-                    const fieldEl = this.$target[0].querySelector(`[name="${CSS.escape(name)}"]`);
+                    const fieldEl = this.el.querySelector(`[name="${CSS.escape(name)}"]`);
 
                     // In general, we want the data-for and prefill values to
                     // take priority over set default values. The 'email_to'
@@ -156,7 +155,7 @@ odoo.define('website.s_website_form', function (require) {
                     if (name === 'email_to' && fieldEl.value
                             // The following value is the default value that
                             // is set if the form is edited in any way. (see the
-                            // website.form_editor_registry module in editor
+                            // @website/js/form_editor_registry module in editor
                             // assets bundle).
                             // TODO that value should probably never be forced
                             // unless explicitely manipulated by the user or on
@@ -188,46 +187,54 @@ odoo.define('website.s_website_form', function (require) {
                 });
             }
             // Check disabled states
-            this.inputEls = this.$target[0].querySelectorAll('.s_website_form_field.s_website_form_field_hidden_if .s_website_form_input');
+            this.inputEls = this.el.querySelectorAll('.s_website_form_field.s_website_form_field_hidden_if .s_website_form_input');
             this._disabledStates = new Map();
             for (const inputEl of this.inputEls) {
                 this._disabledStates[inputEl] = inputEl.disabled;
             }
+
+            // Add the files zones where the file blocks will be displayed.
+            this.el.querySelectorAll("input[type=file]").forEach(inputEl => {
+                const filesZoneEl = document.createElement("DIV");
+                filesZoneEl.classList.add("o_files_zone", "row", "gx-1");
+                inputEl.parentNode.insertBefore(filesZoneEl, inputEl);
+            });
 
             return this._super(...arguments).then(() => this.__startResolve());
         },
 
         destroy: function () {
             this._super.apply(this, arguments);
-            this.$target.find('button').off('click');
+            this.$el.find('button').off('click');
 
-            // Empty imputs
-            this.$target[0].reset();
+            // Empty inputs
+            this.resetForm();
 
             // Apply default values
-            const dateTimeFormat = time.getLangDatetimeFormat();
-            const dateFormat = time.getLangDateFormat();
-            this.$target[0].querySelectorAll('input[type="text"], input[type="email"], input[type="number"]').forEach(el => {
+            this.el.querySelectorAll('input[type="text"], input[type="email"], input[type="number"]').forEach(el => {
                 let value = el.getAttribute('value');
                 if (value) {
                     if (el.classList.contains('datetimepicker-input')) {
-                        const format = el.closest('.s_website_form_field').dataset.type === 'date' ? dateFormat : dateTimeFormat;
-                        value = moment.unix(value).format(format);
+                        const format =
+                            el.closest(".s_website_form_field").dataset.type === "date"
+                                ? formatDate
+                                : formatDateTime;
+                        value = format(DateTime.fromSeconds(parseInt(value)));
                     }
                     el.value = value;
                 }
             });
-            this.$target[0].querySelectorAll('textarea').forEach(el => el.value = el.textContent);
+            this.el.querySelectorAll('textarea').forEach(el => el.value = el.textContent);
 
             // Remove saving of the error colors
-            this.$target.find('.o_has_error').removeClass('o_has_error').find('.form-control, .form-select').removeClass('is-invalid');
+            this.$el.find('.o_has_error').removeClass('o_has_error').find('.form-control, .form-select').removeClass('is-invalid');
 
             // Remove the status message
-            this.$target.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
+            this.$el.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
 
             // Remove the success message and display the form
-            this.$target.removeClass('d-none');
-            this.$target.parent().find('.s_website_form_end_message').addClass('d-none');
+            this.$el.removeClass('d-none');
+            this.$el.parent().find('.s_website_form_end_message').addClass('d-none');
 
             // Reinitialize dates
             this.$allDates.removeClass('s_website_form_datepicker_initialized');
@@ -238,7 +245,7 @@ odoo.define('website.s_website_form', function (require) {
             }
 
             // All 'hidden if' fields start with d-none
-            this.$target[0].querySelectorAll('.s_website_form_field_hidden_if:not(.d-none)').forEach(el => el.classList.add('d-none'));
+            this.el.querySelectorAll('.s_website_form_field_hidden_if:not(.d-none)').forEach(el => el.classList.add('d-none'));
 
             // Reset the initial default values.
             for (const [fieldEl, initialValue] of this.initialValues.entries()) {
@@ -255,22 +262,37 @@ odoo.define('website.s_website_form', function (require) {
         send: async function (e) {
             e.preventDefault(); // Prevent the default submit behavior
              // Prevent users from crazy clicking
-            const $button = this.$target.find('.s_website_form_send, .o_website_form_send');
+            const $button = this.$el.find('.s_website_form_send, .o_website_form_send');
             $button.addClass('disabled') // !compatibility
                    .attr('disabled', 'disabled');
             this.restoreBtnLoading = dom.addButtonLoadingEffect($button[0]);
 
             var self = this;
 
-            self.$target.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
+            self.$el.find('#s_website_form_result, #o_website_form_result').empty(); // !compatibility
             if (!self.check_error_fields({})) {
-                self.update_status('error', _t("Please fill in the form correctly."));
+                if (this.fileInputError) {
+                    const errorMessage = this.fileInputError.type === "number"
+                        ? _t(
+                            "Please fill in the form correctly. You uploaded too many files. (Maximum %s files)", 
+                            this.fileInputError.limit
+                        )
+                        : _t(
+                            "Please fill in the form correctly. The file \"%s\" is too big. (Maximum %s MB)", 
+                            this.fileInputError.fileName,
+                            this.fileInputError.limit
+                        );
+                    this.update_status("error", errorMessage);
+                    delete this.fileInputError;
+                } else {
+                    this.update_status("error", _t("Please fill in the form correctly."));
+                }
                 return false;
             }
 
             // Prepare form inputs
-            this.form_fields = this.$target.serializeArray();
-            $.each(this.$target.find('input[type=file]:not([disabled])'), (outer_index, input) => {
+            this.form_fields = this.$el.serializeArray();
+            $.each(this.$el.find('input[type=file]:not([disabled])'), (outer_index, input) => {
                 $.each($(input).prop('files'), function (index, file) {
                     // Index field name as ajax won't accept arrays of files
                     // when aggregating multiple files into a single field value
@@ -284,7 +306,7 @@ odoo.define('website.s_website_form', function (require) {
             // Serialize form inputs into a single object
             // Aggregate multiple values into arrays
             var form_values = {};
-            _.each(this.form_fields, function (input) {
+            this.form_fields.forEach((input) => {
                 if (input.name in form_values) {
                     // If a value already exists for this field,
                     // we are facing a x2many field, so we store
@@ -302,23 +324,17 @@ odoo.define('website.s_website_form', function (require) {
             });
 
             // force server date format usage for existing fields
-            this.$target.find('.s_website_form_field:not(.s_website_form_custom)')
+            this.$el.find('.s_website_form_field:not(.s_website_form_custom)')
             .find('.s_website_form_date, .s_website_form_datetime').each(function () {
                 const inputEl = this.querySelector('input');
-
-                // Datetimepicker('viewDate') will return `new Date()` if the
-                // input is empty but we want to keep the empty value
-                if (!inputEl.value) {
+                const { value } = inputEl;
+                if (!value) {
                     return;
                 }
 
-                var date = $(this).datetimepicker('viewDate').clone().locale('en');
-                var format = 'YYYY-MM-DD';
-                if ($(this).hasClass('s_website_form_datetime')) {
-                    date = date.utc();
-                    format = 'YYYY-MM-DD HH:mm:ss';
-                }
-                form_values[inputEl.getAttribute('name')] = date.format(format);
+                form_values[inputEl.getAttribute("name")] = this.matches(".s_website_form_date")
+                    ? serializeDate(parseDate(value))
+                    : serializeDateTime(parseDateTime(value));
             });
 
             if (this._recaptchaLoaded) {
@@ -331,14 +347,22 @@ odoo.define('website.s_website_form', function (require) {
                 }
             }
 
+            if (odoo.csrf_token) {
+                form_values.csrf_token = odoo.csrf_token;
+            }
+
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(form_values)) {
+                formData.append(key, value);
+            }
+
             // Post form and handle result
-            ajax.post(this.$target.attr('action') + (this.$target.data('force_action') || this.$target.data('model_name')), form_values)
+            post(this.$el.attr('action') + (this.$el.data('force_action') || this.$el.data('model_name')), formData)
             .then(async function (result_data) {
                 // Restore send button behavior
-                self.$target.find('.s_website_form_send, .o_website_form_send')
+                self.$el.find('.s_website_form_send, .o_website_form_send')
                     .removeAttr('disabled')
                     .removeClass('disabled'); // !compatibility
-                result_data = JSON.parse(result_data);
                 if (!result_data.id) {
                     // Failure, the server didn't return the created record ID
                     self.update_status('error', result_data.error ? result_data.error : false);
@@ -348,10 +372,10 @@ odoo.define('website.s_website_form', function (require) {
                     }
                 } else {
                     // Success, redirect or update status
-                    let successMode = self.$target[0].dataset.successMode;
-                    let successPage = self.$target[0].dataset.successPage;
+                    let successMode = self.el.dataset.successMode;
+                    let successPage = self.el.dataset.successPage;
                     if (!successMode) {
-                        successPage = self.$target.attr('data-success_page'); // Compatibility
+                        successPage = self.$el.attr('data-success_page'); // Compatibility
                         successMode = successPage ? 'redirect' : 'nothing';
                     }
                     switch (successMode) {
@@ -384,10 +408,18 @@ odoo.define('website.s_website_form', function (require) {
                             if (successPage.charAt(0) === "#") {
                                 const successAnchorEl = document.getElementById(successPage.substring(1));
                                 if (successAnchorEl) {
-                                    await dom.scrollTo(successAnchorEl, {
-                                        duration: 500,
-                                        extraOffset: 0,
-                                    });
+                                    // Check if the target of the link is a modal.
+                                    if (successAnchorEl.classList.contains("modal")) {
+                                        // Trigger a "hashChange" event to
+                                        // notify the popup widget to show the
+                                        // popup.
+                                        window.location.href = successPage;
+                                    } else {
+                                        await dom.scrollTo(successAnchorEl, {
+                                            duration: 500,
+                                            extraOffset: 0,
+                                        });
+                                    }
                                 }
                                 break;
                             }
@@ -398,28 +430,28 @@ odoo.define('website.s_website_form', function (require) {
                             // Prevent double-clicking on the send button and
                             // add a upload loading effect (delay before success
                             // message)
-                            await concurrency.delay(dom.DEBOUNCE);
+                            await delay(dom.DEBOUNCE);
 
-                            self.$target[0].classList.add('d-none');
-                            self.$target[0].parentElement.querySelector('.s_website_form_end_message').classList.remove('d-none');
+                            self.el.classList.add('d-none');
+                            self.el.parentElement.querySelector('.s_website_form_end_message').classList.remove('d-none');
                             break;
                         }
                         default: {
                             // Prevent double-clicking on the send button and
                             // add a upload loading effect (delay before success
                             // message)
-                            await concurrency.delay(dom.DEBOUNCE);
+                            await delay(dom.DEBOUNCE);
 
                             self.update_status('success');
                             break;
                         }
                     }
 
-                    self.$target[0].reset();
+                    self.resetForm();
                     self.restoreBtnLoading();
                 }
             })
-            .guardedCatch(error => {
+            .catch(error => {
                 this.update_status(
                     'error',
                     error.status && error.status === 413 ? _t("Uploaded file is too large.") : "",
@@ -427,11 +459,28 @@ odoo.define('website.s_website_form', function (require) {
             });
         },
 
+        /**
+         * Resets a form.
+         */
+        resetForm() {
+            this.el.reset();
+
+            // For file inputs, remove the files zone, restore the file input
+            // and remove the files list.
+            this.el.querySelectorAll("input[type=file]").forEach(inputEl => {
+                const fieldEl = inputEl.closest(".s_website_form_field");
+                fieldEl.querySelectorAll(".o_files_zone").forEach(el => el.remove());
+                fieldEl.querySelectorAll(".o_add_files_button").forEach(el => el.remove());
+                inputEl.classList.remove("d-none");
+                delete inputEl.fileList;
+            });
+        },
+
         check_error_fields: function (error_fields) {
             var self = this;
             var form_valid = true;
             // Loop on all fields
-            this.$target.find('.form-field, .s_website_form_field').each(function (k, field) { // !compatibility
+            this.$el.find('.form-field, .s_website_form_field').each(function (k, field) { // !compatibility
                 var $field = $(field);
                 // FIXME that seems broken, "for" does not contain the field
                 // but this is used to retrieve errors sent from the server...
@@ -454,10 +503,8 @@ odoo.define('website.s_website_form', function (require) {
                         // filter neither on required, nor on checkbox and
                         // checking the validity of the group of checkbox is
                         // currently done for each checkbox of that group...
-                        var checkboxes = _.filter(inputs, function (input) {
-                            return input.required && input.type === 'checkbox';
-                        });
-                        return !_.any(checkboxes, checkbox => checkbox.checkValidity());
+                        var checkboxes = inputs.filter(input => input.required && input.type === 'checkbox');
+                        return !checkboxes.some((checkbox) => checkbox.checkValidity());
 
                     // Special cases for dates and datetimes
                     // FIXME this seems like dead code, the inputs do not use
@@ -467,13 +514,17 @@ odoo.define('website.s_website_form', function (require) {
                     // consider checking the date inputs are not disabled before
                     // saying they are invalid (see checkValidity used here))
                     } else if ($(input).hasClass('s_website_form_date') || $(input).hasClass('o_website_form_date')) { // !compatibility
-                        if (!self.is_datetime_valid(input.value, 'date')) {
+                        const date = parseDate(input.value);
+                        if (!date || !date.isValid) {
                             return true;
                         }
                     } else if ($(input).hasClass('s_website_form_datetime') || $(input).hasClass('o_website_form_datetime')) { // !compatibility
-                        if (!self.is_datetime_valid(input.value, 'datetime')) {
+                        const date = parseDateTime(input.value);
+                        if (!date || !date.isValid) {
                             return true;
                         }
+                    } else if (input.type === "file" && !self.isFileInputValid(input)) {
+                        return true;
                     }
 
                     // Note that checkValidity also takes care of the case where
@@ -489,15 +540,13 @@ odoo.define('website.s_website_form', function (require) {
                 });
 
                 // Update field color if invalid or erroneous
-                // TODO in master: remove `.form-control-file` just below as it
-                // will be useless since it became `form-control` in BS5.
-                const $controls = $field.find('.form-control, .form-select, .form-check-input, .form-control-file');
+                const $controls = $field.find('.form-control, .form-select, .form-check-input');
                 $field.removeClass('o_has_error');
                 $controls.removeClass('is-invalid');
                 if (invalid_inputs.length || error_fields[field_name]) {
                     $field.addClass('o_has_error');
                     $controls.addClass('is-invalid');
-                    if (_.isString(error_fields[field_name])) {
+                    if (typeof error_fields[field_name] === "string") {
                         $field.popover({content: error_fields[field_name], trigger: 'hover', container: 'body', placement: 'top'});
                         // update error message and show it.
                         const popover = Popover.getInstance($field);
@@ -510,45 +559,9 @@ odoo.define('website.s_website_form', function (require) {
             return form_valid;
         },
 
-        is_datetime_valid: function (value, type_of_date) {
-            if (value === "") {
-                return true;
-            } else {
-                try {
-                    this.parse_date(value, type_of_date);
-                    return true;
-                } catch (_e) {
-                    return false;
-                }
-            }
-        },
-
-        // This is a stripped down version of format.js parse_value function
-        parse_date: function (value, type_of_date, value_if_empty) {
-            var date_pattern = time.getLangDateFormat(),
-                time_pattern = time.getLangTimeFormat();
-            var date_pattern_wo_zero = date_pattern.replace('MM', 'M').replace('DD', 'D'),
-                time_pattern_wo_zero = time_pattern.replace('HH', 'H').replace('mm', 'm').replace('ss', 's');
-            switch (type_of_date) {
-                case 'datetime':
-                    var datetime = moment(value, [date_pattern + ' ' + time_pattern, date_pattern_wo_zero + ' ' + time_pattern_wo_zero], true);
-                    if (datetime.isValid()) {
-                        return time.datetime_to_str(datetime.toDate());
-                    }
-                    throw new Error(_.str.sprintf(_t("'%s' is not a correct datetime"), value));
-                case 'date':
-                    var date = moment(value, [date_pattern, date_pattern_wo_zero], true);
-                    if (date.isValid()) {
-                        return time.date_to_str(date.toDate());
-                    }
-                    throw new Error(_.str.sprintf(_t("'%s' is not a correct date"), value));
-            }
-            return value;
-        },
-
         update_status: function (status, message) {
             if (status !== 'success') { // Restore send button behavior if result is an error
-                this.$target.find('.s_website_form_send, .o_website_form_send')
+                this.$el.find('.s_website_form_send, .o_website_form_send')
                     .removeAttr('disabled')
                     .removeClass('disabled'); // !compatibility
                 this.restoreBtnLoading();
@@ -563,9 +576,42 @@ odoo.define('website.s_website_form', function (require) {
             // before any qweb rendering which depends on xml assets
             // because the event handlers are binded before the call to
             // willStart for public widgets...
-            this.__started.then(() => $result.replaceWith(qweb.render(`website.s_website_form_status_${status}`, {
+            this.__started.then(() => $result.replaceWith(renderToElement(`website.s_website_form_status_${status}`, {
                 message: message,
             })));
+        },
+
+        /**
+         * Checks if the file input is valid: if the number of files uploaded
+         * and their size do not exceed the limits that were set.
+         *
+         * @param {HTMLElement} inputEl an input of type file
+         * @returns {Boolean} true if the input is valid, false otherwise.
+         */
+        isFileInputValid(inputEl) {
+            // Note: the `maxFilesNumber` and `maxFileSize` data-attributes may
+            // not always be present, if the Form comes from an older version
+            // for example.
+
+            // Checking the number of files.
+            const maxFilesNumber = inputEl.dataset.maxFilesNumber;
+            if (maxFilesNumber && inputEl.files.length > maxFilesNumber) {
+                // Store information to display the error message later.
+                this.fileInputError = {type: "number", limit: maxFilesNumber};
+                return false;
+            }
+            // Checking the files size.
+            const maxFileSize = inputEl.dataset.maxFileSize; // in megabytes.
+            const bytesInMegabyte = 1_000_000;
+            if (maxFileSize) {
+                for (const file of Object.values(inputEl.files)) {
+                    if (file.size / bytesInMegabyte > maxFileSize) {
+                        this.fileInputError = {type: "size", limit: maxFileSize, fileName: file.name};
+                        return false;
+                    }
+                }
+            }
+            return true;
         },
 
         //----------------------------------------------------------------------
@@ -629,14 +675,16 @@ odoo.define('website.s_website_form', function (require) {
                 case '!fileSet':
                     return value.name === '';
             }
+
+            const format = value.includes(':')
+                ? localization.dateTimeFormat
+                : localization.dateFormat;
             // Date & Date Time comparison requires formatting the value
-            if (value.includes(':')) {
-                const datetimeFormat = time.getLangDatetimeFormat();
-                value = moment(value, datetimeFormat)._d.getTime() / 1000;
-            } else {
-                const dateFormat = time.getLangDateFormat();
-                value = moment(value, dateFormat)._d.getTime() / 1000;
-            }
+            const dateTime = DateTime.fromFormat(value, format);
+            // If invalid, any value other than "NaN" would cause certain
+            // conditions to be broken.
+            value = dateTime.isValid ? dateTime.toUnixInteger() : NaN;
+
             comparable = parseInt(comparable);
             between = parseInt(between) || '';
             switch (comparator) {
@@ -678,8 +726,8 @@ odoo.define('website.s_website_form', function (require) {
                     return false;
                 }
 
-                const formData = new FormData(this.$target[0]);
-                const currentValueOfDependency = ["contains","!contains"].includes(comparator)
+                const formData = new FormData(this.el);
+                const currentValueOfDependency = ["contains", "!contains"].includes(comparator)
                     ? formData.getAll(dependencyName).join()
                     : formData.get(dependencyName);
                 return this._compareTo(comparator, currentValueOfDependency, visibilityCondition, between);
@@ -720,6 +768,35 @@ odoo.define('website.s_website_form', function (require) {
                 inputEl.disabled = !haveToBeVisible;
             }
         },
+        /**
+         * Creates a block containing the file name and a cross to delete it.
+         *
+         * @private
+         * @param {Object} fileDetails the details of the file being uploaded
+         * @param {HTMLElement} filesZoneEl the zone where the file blocks are
+         *      displayed
+         */
+        _createFileBlock(fileDetails, filesZoneEl) {
+            const fileBlockEl = renderToElement("website.file_block", {fileName: fileDetails.name});
+            fileBlockEl.fileDetails = fileDetails;
+            filesZoneEl.append(fileBlockEl);
+        },
+        /**
+         * Creates the file upload button (= a button to replace the file input,
+         * in order to modify its text content more easily).
+         *
+         * @private
+         * @param {HTMLElement} inputEl the file input
+         */
+        _createAddFilesButton(inputEl) {
+            const addFilesButtonEl = document.createElement("INPUT");
+            addFilesButtonEl.classList.add("o_add_files_button", "form-control");
+            addFilesButtonEl.type = "button";
+            addFilesButtonEl.value = inputEl.hasAttribute("multiple")
+                ? _t("Add Files") : _t("Replace File");
+            inputEl.parentNode.insertBefore(addFilesButtonEl, inputEl);
+            inputEl.classList.add("d-none");
+        },
 
         //----------------------------------------------------------------------
         // Handlers
@@ -732,5 +809,96 @@ odoo.define('website.s_website_form', function (require) {
         _onFieldInput() {
             this._updateFieldsVisibility();
         },
+        /**
+         * Called when files are uploaded: updates the button text content,
+         * displays the file blocks (containing the files name and a cross to
+         * delete them) and manages the files.
+         *
+         * @private
+         * @param {Event} ev
+         */
+        _onFileChange(ev) {
+            const fileInputEl = ev.currentTarget;
+            const fieldEl = fileInputEl.closest(".s_website_form_field");
+            const uploadedFiles = fileInputEl.files;
+            const addFilesButtonEl = fieldEl.querySelector(".o_add_files_button");
+
+            // The zone where the file blocks are displayed.
+            let filesZoneEl = fieldEl.querySelector(".o_files_zone");
+            // Update the button text content.
+            if (!addFilesButtonEl) {
+                this._createAddFilesButton(fileInputEl);
+            }
+
+            // Create a list to keep track of the files.
+            if (!fileInputEl.fileList) {
+                fileInputEl.fileList = new DataTransfer();
+            }
+
+            // If only one file can be uploaded, delete the previous file.
+            if (!fileInputEl.hasAttribute("multiple") && uploadedFiles.length > 0) {
+                fileInputEl.fileList = new DataTransfer();
+                const fileBlockEl = fieldEl.querySelector(".o_file_block");
+                if (fileBlockEl) {
+                    fileBlockEl.remove();
+                }
+            }
+
+            // Add the uploaded files if they are not already there.
+            for (const newFile of uploadedFiles) {
+                if (![...fileInputEl.fileList.files].some(file => newFile.name === file.name &&
+                    newFile.size === file.size && newFile.type === file.type)) {
+                    fileInputEl.fileList.items.add(newFile);
+                    const fileDetails = {name: newFile.name, size: newFile.size, type: newFile.type};
+                    this._createFileBlock(fileDetails, filesZoneEl);
+                }
+            }
+            // Update the input files.
+            fileInputEl.files = fileInputEl.fileList.files;
+        },
+        /**
+         * Called when a file is deleted by clicking on the cross on the block
+         * describing it.
+         *
+         * @private
+         * @param {Event} ev
+         */
+        _onFileDeleteClick(ev) {
+            const fileBlockEl = ev.target.closest(".o_file_block");
+            const fieldEl = fileBlockEl.closest(".s_website_form_field");
+            const fileInputEl = fieldEl.querySelector("input[type=file]");
+            const fileDetails = fileBlockEl.fileDetails;
+            const addFilesButtonEl = fieldEl.querySelector(".o_add_files_button");
+
+            // Create a new file list containing the remaining files.
+            const newFileList = new DataTransfer();
+            for (const file of Object.values(fileInputEl.fileList.files)) {
+                if (file.name !== fileDetails.name || file.size !== fileDetails.size
+                    || file.type !== fileDetails.type) {
+                    newFileList.items.add(file);
+                }
+            }
+            // Update the input lists and remove the file block.
+            Object.assign(fileInputEl, {fileList: newFileList, files: newFileList.files});
+            fileBlockEl.remove();
+
+            // Restore the file input if there are no files uploaded and update
+            // the fields visibility.
+            if (!newFileList.files.length) {
+                fileInputEl.classList.remove("d-none");
+                addFilesButtonEl.remove();
+                this._updateFieldsVisibility();
+            }
+        },
+        /**
+         * Detects when the fake input file button is clicked to simulate a
+         * click on the real input.
+         *
+         * @private
+         * @param {MouseEvent} ev
+         */
+        _onAddFilesButtonClick(ev) {
+            const fileInputEl = ev.target.parentNode.querySelector("input[type=file]");
+            fileInputEl.click();
+        },
     });
-});

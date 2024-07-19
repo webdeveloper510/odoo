@@ -1,9 +1,8 @@
-odoo.define("website.tour.edit_link_popover", function (require) {
-"use strict";
+/** @odoo-module **/
 
-const { browser } = require('@web/core/browser/browser');
-const { patch } = require("@web/core/utils/patch");
-const wTourUtils = require('website.tour_utils');
+import wTourUtils from "@website/js/tours/tour_utils";
+import { browser } from "@web/core/browser/browser";
+import { patch } from "@web/core/utils/patch";
 
 const FIRST_PARAGRAPH = 'iframe #wrap .s_text_image p:nth-child(2)';
 
@@ -30,7 +29,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     test: true,
     url: '/',
     edition: true,
-}, [
+}, () => [
     // 1. Test links in page content (web_editor)
     wTourUtils.dragNDrop({
         id: 's_text_image',
@@ -43,7 +42,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     },
     {
         content: "Click on 'Link' to open Link Dialog",
-        trigger: "#toolbar #create-link",
+        trigger: "#toolbar:not(.oe-floating) #create-link",
     },
     {
         content: "Type the link URL /contactus",
@@ -93,7 +92,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     // 2. Test links in navbar (website)
     {
         content: "Click navbar menu Home",
-        trigger: 'iframe #top_menu a:contains("Home")',
+        trigger: 'iframe .top_menu a:contains("Home")',
     },
     {
         content: "Popover should be shown (2)",
@@ -113,7 +112,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     {
         content: "Click on the Home menu again",
         extra_trigger: 'div:not(.o_loading_dummy) > #oe_snippets',
-        trigger: 'iframe #top_menu a:contains("Home")[href="/contactus"]',
+        trigger: 'iframe .top_menu a:contains("Home")[href="/contactus"]',
     },
     {
         content: "Popover should be shown with updated preview data (2)",
@@ -136,7 +135,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     // 3. Test other links (CTA in navbar & links in footer)
     {
         content: "Click CTA in navbar",
-        trigger: 'iframe #top_menu_container a.btn-primary[href="/contactus"]',
+        trigger: 'iframe .o_main_nav a.btn-primary[href="/contactus"]',
     },
     {
         content: "Popover should be shown (3)",
@@ -145,7 +144,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     },
     {
         content: "Toolbar should be shown (3)",
-        trigger: '#toolbar:has(#o_link_dialog_url_input:propValue(/contactus))',
+        trigger: '.oe-toolbar:not(.oe-floating):has(#o_link_dialog_url_input:propValue(/contactus))',
         run: function () {}, // it's a check
     },
     {
@@ -159,7 +158,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
     },
     {
         content: "Toolbar should be shown (4)",
-        trigger: '#toolbar:has(#o_link_dialog_url_input:propValue(/))',
+        trigger: '.oe-toolbar:not(.oe-floating):has(#o_link_dialog_url_input:propValue(/))',
         run: function () {}, // it's a check
     },
     // 4. Popover should close when clicking non-link element
@@ -192,7 +191,7 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
         extra_trigger: 'iframe .o_edit_menu_popover a.o_we_full_url[target="_blank"]',
         run: (actions) => {
             // We do not want to open a link in a tour
-            patch(browser, 'window_open_action', {
+            patch(browser, {
                 open: (url) => {
                     if (window.location.hostname === url.hostname && url.pathname.startsWith('/@/')) {
                         document.querySelector('body').classList.add('new_backend_window_opened');
@@ -208,4 +207,3 @@ wTourUtils.registerWebsitePreviewTour('edit_link_popover', {
         run: () => {}, // it's a check
     },
 ]);
-});

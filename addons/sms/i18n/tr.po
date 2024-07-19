@@ -3,30 +3,31 @@
 # 	* sms
 # 
 # Translators:
-# Buket Şeker <buket_skr@hotmail.com>, 2022
-# abc Def <hdogan1974@gmail.com>, 2022
-# Yedigen, 2022
-# Ramiz Deniz Öner <deniz@denizoner.com>, 2022
-# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2022
-# Murat Durmuş <muratd@projetgrup.com>, 2022
-# Martin Trigaux, 2022
-# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2022
-# Levent Karakaş <levent@mektup.at>, 2022
-# Murat Kaplan <muratk@projetgrup.com>, 2022
-# Ozlem Cikrikci <ozlemc@eskayazilim.com.tr>, 2022
-# Ediz Duman <neps1192@gmail.com>, 2023
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2023
-# Tugay Hatıl <tugayh@projetgrup.com>, 2023
-# Halil, 2023
+# Buket Şeker <buket_skr@hotmail.com>, 2023
 # Melih Melik Sonmez, 2023
+# Levent Karakaş <levent@mektup.at>, 2023
+# Ediz Duman <neps1192@gmail.com>, 2023
+# Nadir Gazioglu <nadirgazioglu@gmail.com>, 2023
+# Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2023
+# abc Def <hdogan1974@gmail.com>, 2023
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2023
+# Ozlem Cikrikci <ozlemc@eskayazilim.com.tr>, 2023
+# Yedigen, 2023
+# Ramiz Deniz Öner <deniz@denizoner.com>, 2023
+# Tugay Hatıl <tugayh@projetgrup.com>, 2023
+# Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2023
+# Murat Kaplan <muratk@projetgrup.com>, 2023
+# Halil, 2023
+# Murat Durmuş <muratd@projetgrup.com>, 2023
+# Martin Trigaux, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Melih Melik Sonmez, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Martin Trigaux, 2023\n"
 "Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,18 +46,21 @@ msgid "# Valid recipients"
 msgstr "# Geçerli alıcılar"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_template.py:0
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (kopya)"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/wizard/sms_composer.py:0
 #, python-format
 msgid "%s invalid recipients"
 msgstr "%s geçersiz alıcı"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_sms.py:0
 #, python-format
 msgid ""
@@ -74,6 +78,11 @@ msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
+msgid "<span class=\"o_stat_text\">Preview</span>"
+msgstr ""
+
+#. module: sms
+#: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
 "                                <span class=\"o_stat_text\">Context Action</span>"
@@ -83,12 +92,26 @@ msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
-msgid ""
-"<span class=\"text-warning\" attrs=\"{'invisible': [('no_record', '=', "
-"False)]}\">No records</span>"
+msgid "<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
 msgstr ""
-"<span class=\"text-warning\" attrs=\"{'invisible': [('no_record', '=', "
-"False)]}\">Kayıt yok</span>"
+
+#. module: sms
+#: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
+msgid ""
+"<span invisible=\"sms_method != 'sms'\">\n"
+"                                The message will be sent as an SMS to the recipients of the template\n"
+"                                and will not appear in the messaging history.\n"
+"                            </span>\n"
+"                            <span invisible=\"sms_method != 'note'\">\n"
+"                                The SMS will not be sent, it will only be posted as an\n"
+"                                internal note in the messaging history.\n"
+"                            </span>\n"
+"                            <span invisible=\"sms_method != 'comment'\">\n"
+"                                The SMS will be sent as an SMS to the recipients of the\n"
+"                                template and it will also be posted as an internal note\n"
+"                                in the messaging history.\n"
+"                            </span>"
+msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
@@ -105,15 +128,14 @@ msgstr ""
 "                        <span> üzerinde bir ülke ayarladığınızdan emin olun </span>"
 
 #. module: sms
-#: model:ir.model.fields,field_description:sms.field_res_partner__message_needaction
-msgid "Action Needed"
-msgstr "Eylem Gerekiyor"
+#: model:ir.model.constraint,message:sms.constraint_sms_tracker_sms_uuid_unique
+msgid "A record for this UUID already exists"
+msgstr ""
 
 #. module: sms
-#: model:ir.model.fields,field_description:sms.field_ir_actions_server__state
-#: model:ir.model.fields,field_description:sms.field_ir_cron__state
-msgid "Action To Do"
-msgstr "Yapılması Gerekenler"
+#: model:ir.model.fields,field_description:sms.field_res_partner__message_needaction
+msgid "Action Needed"
+msgstr "Aksiyon Gerekiyor"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
@@ -125,11 +147,16 @@ msgstr ""
 "ekleyin"
 
 #. module: sms
-#. openerp-web
-#: code:addons/sms/static/src/components/notification_group/notification_group.xml:0
+#: model:ir.model.fields,help:sms.field_sms_sms__uuid
+msgid "Alternate way to identify a SMS record, used for delivery reports"
+msgstr ""
+
+#. module: sms
+#. odoo-javascript
+#: code:addons/sms/static/src/core/failure_model_patch.js:0
 #, python-format
-msgid "An error occurred when sending an SMS."
-msgstr "SMS gönderilirken bir hata oluştu."
+msgid "An error occurred when sending an SMS"
+msgstr ""
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_template__model_id
@@ -179,7 +206,8 @@ msgid "Buy credits"
 msgstr "Kredi Satınal"
 
 #. module: sms
-#: code:addons/sms/models/sms_api.py:0
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "Buy credits."
 msgstr "Kredi satın alın."
@@ -212,23 +240,14 @@ msgid "Choose a language:"
 msgstr "Bir dil seçin:"
 
 #. module: sms
+#: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
+msgid "Choose a template..."
+msgstr ""
+
+#. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
 msgid "Choose an example"
 msgstr "Bir örnek seçin"
-
-#. module: sms
-#: model:ir.model.fields,help:sms.field_ir_actions_server__sms_method
-#: model:ir.model.fields,help:sms.field_ir_cron__sms_method
-msgid ""
-"Choose method for SMS sending:\n"
-"SMS: mass SMS\n"
-"Post as Message: log on document\n"
-"Post as Note: mass SMS with archives"
-msgstr ""
-"SMS gönderme yöntemini seçin:\n"
-"SMS: toplu SMS\n"
-"Mesaj Olarak Gönder: belgede oturum aç\n"
-"Not Olarak Gönder: arşivli toplu SMS"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.mail_resend_message_view_form
@@ -253,6 +272,25 @@ msgid "Content"
 msgstr "İçerik"
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_country_not_supported
+#: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_country_not_supported
+msgid "Country Not Supported"
+msgstr ""
+
+#. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_registration_needed
+#: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_registration_needed
+msgid "Country-specific Registration Required"
+msgstr ""
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+#, python-format
+msgid "Country-specific registration required."
+msgstr ""
+
+#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__create_uid
 #: model:ir.model.fields,field_description:sms.field_sms_resend__create_uid
 #: model:ir.model.fields,field_description:sms.field_sms_resend_recipient__create_uid
@@ -260,6 +298,7 @@ msgstr "İçerik"
 #: model:ir.model.fields,field_description:sms.field_sms_template__create_uid
 #: model:ir.model.fields,field_description:sms.field_sms_template_preview__create_uid
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__create_uid
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__create_uid
 msgid "Created by"
 msgstr "Oluşturan"
 
@@ -271,6 +310,7 @@ msgstr "Oluşturan"
 #: model:ir.model.fields,field_description:sms.field_sms_template__create_date
 #: model:ir.model.fields,field_description:sms.field_sms_template_preview__create_date
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__create_date
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__create_date
 msgid "Created on"
 msgstr "Oluşturulma"
 
@@ -290,6 +330,11 @@ msgid "Dear {{ object.display_name }} this is an automated SMS."
 msgstr "Sayın {{ object.display_name }} bu otomatik bir SMS'tir."
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__sent
+msgid "Delivered"
+msgstr "Teslim Edilen"
+
+#. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
 msgid "Discard"
 msgstr "Vazgeç"
@@ -302,6 +347,7 @@ msgstr "Vazgeç"
 #: model:ir.model.fields,field_description:sms.field_sms_template__display_name
 #: model:ir.model.fields,field_description:sms.field_sms_template_preview__display_name
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__display_name
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__display_name
 msgid "Display Name"
 msgstr "Görünüm Adı"
 
@@ -346,6 +392,13 @@ msgid "Email Thread"
 msgstr "E-Posta İşlemleri"
 
 #. module: sms
+#. odoo-javascript
+#: code:addons/sms/static/src/components/phone_field/phone_field.js:0
+#, python-format
+msgid "Enable SMS"
+msgstr "SMS'i Etkinleştir"
+
+#. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__error
 msgid "Error"
 msgstr "Hata"
@@ -354,6 +407,11 @@ msgstr "Hata"
 #: model:ir.model.fields,field_description:sms.field_sms_resend_recipient__failure_type
 msgid "Error Message"
 msgstr "Hata Mesajı"
+
+#. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_expired
+msgid "Expired"
+msgstr "Süresi Doldu"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__failure_type
@@ -392,6 +450,7 @@ msgid "Followers (Partners)"
 msgstr "Takipçiler (İş ortakları)"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/wizard/sms_composer.py:0
 #, python-format
 msgid "Following numbers are not correctly encoded: %s"
@@ -426,6 +485,7 @@ msgstr "Kayıtlı Olmayan Hesabı Var"
 #: model:ir.model.fields,field_description:sms.field_sms_template__id
 #: model:ir.model.fields,field_description:sms.field_sms_template_preview__id
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__id
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__id
 msgid "ID"
 msgstr "ID"
 
@@ -435,18 +495,35 @@ msgid "If checked, new messages require your attention."
 msgstr "İşaretliyse, yeni mesajlar dikkatinize sunulacak."
 
 #. module: sms
+#: model:ir.model.fields,help:sms.field_account_analytic_account__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_calendar_event__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_crm_team__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_crm_team_member__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_discuss_channel__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_fleet_vehicle__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_fleet_vehicle_log_contract__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_fleet_vehicle_log_services__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_gamification_badge__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_gamification_challenge__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_hr_department__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_hr_employee__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_hr_job__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_loyalty_card__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_lunch_supplier__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_blacklist__message_has_sms_error
-#: model:ir.model.fields,help:sms.field_mail_channel__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread_blacklist__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread_cc__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_thread_main_attachment__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread_phone__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_maintenance_equipment__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_maintenance_equipment_category__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_maintenance_request__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_phone_blacklist__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_product_pricelist__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_product_product__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_product_template__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_rating_mixin__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_res_partner__message_has_error
 #: model:ir.model.fields,help:sms.field_res_partner__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_res_users__message_has_sms_error
@@ -509,6 +586,12 @@ msgid "Insufficient Credit"
 msgstr "Yetersiz Kredi"
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_invalid_destination
+msgid "Invalid Destination"
+msgstr ""
+
+#. module: sms
+#. odoo-python
 #: code:addons/sms/wizard/sms_composer.py:0
 #, python-format
 msgid "Invalid recipient number. Please update it."
@@ -517,7 +600,7 @@ msgstr "Geçersiz alıcı numarası. Lütfen güncelleyin."
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_is_follower
 msgid "Is Follower"
-msgstr "Takipçi"
+msgstr "Takipçi mi"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__recipient_single_valid
@@ -535,17 +618,6 @@ msgid "Language"
 msgstr "Dil"
 
 #. module: sms
-#: model:ir.model.fields,field_description:sms.field_sms_composer____last_update
-#: model:ir.model.fields,field_description:sms.field_sms_resend____last_update
-#: model:ir.model.fields,field_description:sms.field_sms_resend_recipient____last_update
-#: model:ir.model.fields,field_description:sms.field_sms_sms____last_update
-#: model:ir.model.fields,field_description:sms.field_sms_template____last_update
-#: model:ir.model.fields,field_description:sms.field_sms_template_preview____last_update
-#: model:ir.model.fields,field_description:sms.field_sms_template_reset____last_update
-msgid "Last Modified on"
-msgstr "Son Düzenleme"
-
-#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__write_uid
 #: model:ir.model.fields,field_description:sms.field_sms_resend__write_uid
 #: model:ir.model.fields,field_description:sms.field_sms_resend_recipient__write_uid
@@ -553,6 +625,7 @@ msgstr "Son Düzenleme"
 #: model:ir.model.fields,field_description:sms.field_sms_template__write_uid
 #: model:ir.model.fields,field_description:sms.field_sms_template_preview__write_uid
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__write_uid
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__write_uid
 msgid "Last Updated by"
 msgstr "Son Güncelleyen"
 
@@ -564,8 +637,14 @@ msgstr "Son Güncelleyen"
 #: model:ir.model.fields,field_description:sms.field_sms_template__write_date
 #: model:ir.model.fields,field_description:sms.field_sms_template_preview__write_date
 #: model:ir.model.fields,field_description:sms.field_sms_template_reset__write_date
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__write_date
 msgid "Last Updated on"
 msgstr "Son Güncelleme"
+
+#. module: sms
+#: model:ir.model,name:sms.model_sms_tracker
+msgid "Link SMS to mailing/sms tracking models"
+msgstr ""
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__mail_message_id
@@ -573,14 +652,19 @@ msgid "Mail Message"
 msgstr "Posta Mesajı"
 
 #. module: sms
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__mail_notification_id
+msgid "Mail Notification"
+msgstr ""
+
+#. module: sms
 #: model:ir.model.fields,field_description:sms.field_ir_model__is_mail_thread_sms
 msgid "Mail Thread SMS"
 msgstr "Posta Konusu SMS'i"
 
 #. module: sms
-#: model:ir.model.fields,field_description:sms.field_res_partner__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Ana Ek"
+#: model:ir.model.fields,field_description:sms.field_sms_sms__to_delete
+msgid "Marked for deletion"
+msgstr ""
 
 #. module: sms
 #: model:ir.model,name:sms.model_mail_message
@@ -599,16 +683,6 @@ msgstr "Mesaj Teslim hatası"
 #: model:ir.model,name:sms.model_mail_notification
 msgid "Message Notifications"
 msgstr "Mesaj Bildirimleri"
-
-#. module: sms
-#: model:ir.model.fields,help:sms.field_mail_mail__message_type
-#: model:ir.model.fields,help:sms.field_mail_message__message_type
-msgid ""
-"Message type: email for email message, notification for system message, "
-"comment for other messages such as user replies"
-msgstr ""
-"Mesaj türü: e-posta mesajı için e-posta, sistem mesajı için bildirim,bir "
-"kullanıcı cevaplar gibi diğer mesajlar için Yorum"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_ids
@@ -637,6 +711,21 @@ msgid "No Record"
 msgstr "Kayıt Yok"
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_not_allowed
+msgid "Not Allowed"
+msgstr "İzin verilmedi"
+
+#. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_not_delivered
+msgid "Not Delivered"
+msgstr "Teslim Edilmedi"
+
+#. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__note
+msgid "Note only"
+msgstr ""
+
+#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_resend_recipient__notification_id
 msgid "Notification"
 msgstr "Bildirimler"
@@ -659,7 +748,7 @@ msgstr "Sayı alanı"
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Eylemlerin Adedi"
+msgstr "Aksiyon Sayısı"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_has_error_counter
@@ -714,11 +803,6 @@ msgid "Partner"
 msgstr "İş Ortağı"
 
 #. module: sms
-#: model:ir.model,name:sms.model_mail_thread_phone
-msgid "Phone Blacklist Mixin"
-msgstr "Telefon Kara Listesi Karması"
-
-#. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__phone_sanitized_blacklisted
 msgid "Phone Blacklisted"
 msgstr "Kara Listeye Alınmış Telefon"
@@ -742,24 +826,9 @@ msgid "Phone/Mobile"
 msgstr "Telefon/Mobil"
 
 #. module: sms
-#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__comment
-msgid "Post as Message"
-msgstr "Mesaj Olarak Gönder"
-
-#. module: sms
-#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__note
-msgid "Post as Note"
-msgstr "Not Olarak Gönder"
-
-#. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_composer__composition_mode__comment
 msgid "Post on a document"
 msgstr "Bir dokümanda yayınla"
-
-#. module: sms
-#: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
-msgid "Preview"
-msgstr "Önizle"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
@@ -772,9 +841,19 @@ msgid "Proceed"
 msgstr "Devam Et"
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__process
+msgid "Processing"
+msgstr "İşleniyor"
+
+#. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
 msgid "Put in queue"
 msgstr "Sıraya koy"
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_res_partner__rating_ids
+msgid "Ratings"
+msgstr "Değerlendirmeler"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.mail_resend_message_view_form
@@ -818,6 +897,18 @@ msgid "Record reference"
 msgstr "Referansı kaydet"
 
 #. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+#, python-format
+msgid "Register now."
+msgstr ""
+
+#. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_rejected
+msgid "Rejected"
+msgstr "Reddedildi"
+
+#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_template__model
 msgid "Related Document Model"
 msgstr "İlgili Döküman Modeli"
@@ -859,13 +950,11 @@ msgid "Retry"
 msgstr "Yinele"
 
 #. module: sms
-#. openerp-web
+#. odoo-javascript
 #: code:addons/sms/static/src/components/sms_button/sms_button.xml:0
-#: code:addons/sms/static/src/models/message_view.js:0
-#: code:addons/sms/static/src/models/message_view.js:0
+#: code:addons/sms/static/src/core/notification_model_patch.js:0
 #: model:ir.actions.act_window,name:sms.sms_sms_action
 #: model:ir.model.fields,field_description:sms.field_mail_notification__sms_id
-#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_message__message_type__sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__notification_type__sms
 #: model:ir.ui.menu,name:sms.sms_sms_menu
@@ -875,41 +964,68 @@ msgid "SMS"
 msgstr "SMS"
 
 #. module: sms
-#. openerp-web
+#. odoo-javascript
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
 #, python-format
 msgid "SMS ("
 msgstr "SMS ("
 
 #. module: sms
-#: model:ir.model,name:sms.model_sms_api
-msgid "SMS API"
-msgstr "SMS API"
+#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__comment
+msgid "SMS (with note)"
+msgstr ""
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__sms_method__sms
+msgid "SMS (without note)"
+msgstr ""
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_account_analytic_account__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_calendar_event__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_crm_team__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_crm_team_member__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_discuss_channel__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_fleet_vehicle__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_fleet_vehicle_log_contract__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_fleet_vehicle_log_services__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_gamification_badge__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_gamification_challenge__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_hr_department__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_hr_employee__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_hr_job__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_loyalty_card__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_lunch_supplier__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_blacklist__message_has_sms_error
-#: model:ir.model.fields,field_description:sms.field_mail_channel__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread_blacklist__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread_cc__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_thread_main_attachment__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread_phone__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_maintenance_equipment__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_maintenance_equipment_category__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_maintenance_request__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_phone_blacklist__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_product_pricelist__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_product_product__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_product_template__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_rating_mixin__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_res_partner__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_res_users__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr "SMS İleti hatası"
 
 #. module: sms
-#. openerp-web
-#: code:addons/sms/static/src/models/notification_group.js:0
+#. odoo-javascript
+#: code:addons/sms/static/src/messaging_menu/messaging_menu_patch.js:0
 #, python-format
 msgid "SMS Failures"
 msgstr "SMS Hataları"
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_mail_notification__sms_id_int
+msgid "SMS ID"
+msgstr "SMS ID"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_mail_notification__sms_number
@@ -922,7 +1038,7 @@ msgid "SMS Preview"
 msgstr "SMS Önizleme"
 
 #. module: sms
-#. openerp-web
+#. odoo-javascript
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
 #, python-format
@@ -966,10 +1082,16 @@ msgid "SMS Templates"
 msgstr "SMS Şablonları"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/wizard/sms_template_reset.py:0
 #, python-format
 msgid "SMS Templates have been reset"
 msgstr "SMS Şablonları sıfırlandı"
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_mail_notification__sms_tracker_ids
+msgid "SMS Trackers"
+msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
@@ -977,9 +1099,24 @@ msgid "SMS content"
 msgstr "SMS içeriği"
 
 #. module: sms
+#. odoo-python
+#: code:addons/sms/models/ir_actions_server.py:0
+#, python-format
+msgid "SMS template model of %(action_name)s does not match action model."
+msgstr ""
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_sms_sms__sms_tracker_id
+msgid "SMS trackers"
+msgstr ""
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_sms_tracker__sms_uuid
+msgid "SMS uuid"
+msgstr ""
+
+#. module: sms
 #: model:ir.actions.server,name:sms.ir_cron_sms_scheduler_action_ir_actions_server
-#: model:ir.cron,cron_name:sms.ir_cron_sms_scheduler_action
-#: model:ir.cron,name:sms.ir_cron_sms_scheduler_action
 msgid "SMS: SMS Queue Manager"
 msgstr "SMS: SMS Kuyruk Yöneticisi"
 
@@ -1008,25 +1145,30 @@ msgid "Send Now"
 msgstr "Şimdi Gönder"
 
 #. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__state__sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
 msgid "Send SMS"
 msgstr "SMS Gönder"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_template.py:0
 #, python-format
 msgid "Send SMS (%s)"
 msgstr "SMS gönder (%s)"
 
 #. module: sms
-#. openerp-web
+#: model:ir.model.fields,field_description:sms.field_ir_actions_server__sms_method
+#: model:ir.model.fields,field_description:sms.field_ir_cron__sms_method
+msgid "Send SMS As"
+msgstr ""
+
+#. module: sms
+#. odoo-javascript
 #: code:addons/sms/static/src/components/sms_button/sms_button.js:0
-#: code:addons/sms/static/src/js/fields_phone_widget.js:0
-#: code:addons/sms/static/src/js/fields_phone_widget.js:0
 #: model:ir.actions.act_window,name:sms.res_partner_act_window_sms_composer_multi
 #: model:ir.actions.act_window,name:sms.res_partner_act_window_sms_composer_single
 #: model:ir.actions.act_window,name:sms.sms_composer_action_form
-#: model:ir.model.fields.selection,name:sms.selection__ir_actions_server__state__sms
 #, python-format
 msgid "Send SMS Text Message"
 msgstr "SMS Metin Mesajı Gönderin"
@@ -1047,17 +1189,6 @@ msgid "Send an SMS"
 msgstr "Bir SMS Gönder"
 
 #. module: sms
-#: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
-msgid "Send as"
-msgstr "Olarak gönder"
-
-#. module: sms
-#: model:ir.model.fields,field_description:sms.field_ir_actions_server__sms_method
-#: model:ir.model.fields,field_description:sms.field_ir_cron__sms_method
-msgid "Send as (SMS)"
-msgstr "(SMS) olarak gönder"
-
-#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__mass_force_send
 msgid "Send directly"
 msgstr "Doğrudan gönder"
@@ -1073,13 +1204,14 @@ msgid "Sending Failures"
 msgstr "Gönderme Hataları"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/ir_actions_server.py:0
 #, python-format
 msgid "Sending SMS can only be done on a mail.thread or a transient model"
 msgstr "SMS gönderme yalnızca mail.thread veya geçici bir modelde yapılabilir"
 
 #. module: sms
-#: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__sent
+#: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__pending
 msgid "Sent"
 msgstr "Gönderildi"
 
@@ -1133,6 +1265,7 @@ msgid "Stored Recipient Number"
 msgstr "Saklanan Alıcı Numarası"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_sms.py:0
 #, python-format
 msgid "Success"
@@ -1164,13 +1297,29 @@ msgid "Templates"
 msgstr "Şablonlar"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_sms.py:0
 #, python-format
 msgid "The SMS Text Messages could not be resent."
 msgstr "SMS Metin Mesajları yeniden gönderilemedi."
 
 #. module: sms
-#: code:addons/sms/models/sms_api.py:0
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+#, python-format
+msgid "The content of the message violates rules applied by our providers."
+msgstr ""
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+#, python-format
+msgid "The destination country is not supported."
+msgstr ""
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "The number you're trying to reach is not correctly formatted."
 msgstr "Ulaşmaya çalıştığınız sayı doğru biçimlendirilmemiş."
@@ -1182,10 +1331,18 @@ msgid "The type of document this template can be used with"
 msgstr "Bu şablon ile birlikte kullanılabilen belge türünü"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_sms.py:0
 #, python-format
 msgid "There are no SMS Text Messages to resend."
 msgstr "Yeniden gönderilecek SMS Metin Mesajları yoktur."
+
+#. module: sms
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
+#, python-format
+msgid "This SMS has been removed as the number was already used."
+msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.res_partner_view_form
@@ -1201,6 +1358,8 @@ msgid "Try Again"
 msgstr "Tekrar deneyin"
 
 #. module: sms
+#: model:ir.model.fields,field_description:sms.field_ir_actions_server__state
+#: model:ir.model.fields,field_description:sms.field_ir_cron__state
 #: model:ir.model.fields,field_description:sms.field_mail_mail__message_type
 #: model:ir.model.fields,field_description:sms.field_mail_message__message_type
 msgid "Type"
@@ -1211,24 +1370,30 @@ msgstr "Tür"
 #: model:ir.model.fields,help:sms.field_ir_cron__state
 msgid ""
 "Type of server action. The following values are available:\n"
-"- 'Execute Python Code': a block of python code that will be executed\n"
-"- 'Create a new Record': create a new record with new values\n"
 "- 'Update a Record': update the values of a record\n"
-"- 'Execute several actions': define an action that triggers several other server actions\n"
+"- 'Create Activity': create an activity (Discuss)\n"
 "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-"- 'Add Followers': add followers to a record (Discuss)\n"
-"- 'Create Next Activity': create an activity (Discuss)\n"
-"- 'Send SMS Text Message': send SMS, log them on documents (SMS)"
+"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
+"- 'Create Record': create a new record with new values\n"
+"- 'Execute Code': a block of Python code that will be executed\n"
+"- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
+"- 'Execute Existing Actions': define an action that triggers several other server actions\n"
 msgstr ""
-"Sunucu eylemi türü. Aşağıdaki değerler mevcuttur:\n"
-"- 'Python Kodunu Yürüt': yürütülecek bir python kodu bloğu\n"
-"- 'Yeni Kayıt Oluştur': yeni değerlerle yeni bir kayıt oluşturun\n"
-"- 'Bir Kaydı Güncelle': bir kaydın değerlerini güncelleyin\n"
-"- 'Birkaç eylemi yürütün': diğer birkaç sunucu eylemini tetikleyen bir eylem tanımlayın\n"
-"- 'E-posta Gönder': bir mesaj, not gönderin veya bir e-posta gönderin (Tartış)\n"
-"- 'Takipçi Ekle': Bir kayda takipçi ekleyin (Tartış)\n"
-"- 'Sonraki Aktiviteyi Oluştur': bir aktivite oluşturun (Tartış)\n"
-"- 'SMS Metin Mesajı Gönder': SMS gönderin, belgelere kaydedin (SMS)"
+
+#. module: sms
+#: model:ir.model.fields,field_description:sms.field_sms_sms__uuid
+msgid "UUID"
+msgstr "UUID"
+
+#. module: sms
+#: model:ir.model.constraint,message:sms.constraint_sms_sms_uuid_unique
+msgid "UUID must be unique"
+msgstr ""
+
+#. module: sms
+#: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__unknown
+msgid "Unknown error"
+msgstr "Bilinmeyen hata"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_acc
@@ -1247,11 +1412,25 @@ msgid "Use blacklist"
 msgstr "Kullanıcı Kara Liste"
 
 #. module: sms
+#: model:ir.model.fields,help:sms.field_mail_mail__message_type
+#: model:ir.model.fields,help:sms.field_mail_message__message_type
+msgid ""
+"Used to categorize message generator\n"
+"'email': generated by an incoming email e.g. mailgateway\n"
+"'comment': generated by user input e.g. through discuss or composer\n"
+"'email_outgoing': generated by a mailing\n"
+"'notification': generated by system e.g. tracking messages\n"
+"'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n"
+"'user_notification': generated for a specific recipient"
+msgstr ""
+
+#. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_composer__res_ids_count
 msgid "Visible records count"
 msgstr "Görünür kayıt sayısı"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/models/sms_sms.py:0
 #, python-format
 msgid "Warning"
@@ -1274,31 +1453,41 @@ msgstr ""
 "Bu modelin SMS yoluyla mesajları ve bildirimleri destekleyip desteklemediği"
 
 #. module: sms
+#: model:ir.model.fields,help:sms.field_sms_sms__to_delete
+msgid ""
+"Will automatically be deleted, while notifications will not be deleted in "
+"any case."
+msgstr ""
+
+#. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_number_format
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_number_format
 msgid "Wrong Number Format"
 msgstr "Yanlış Sayı Biçimi"
 
 #. module: sms
+#. odoo-python
 #: code:addons/sms/wizard/sms_resend.py:0
 #, python-format
 msgid "You do not have access to the message and/or related document."
 msgstr "Mesaja ve / veya ilgili belgeye erişiminiz yok."
 
 #. module: sms
-#: code:addons/sms/models/sms_api.py:0
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "You don't have an eligible IAP account."
 msgstr "Uygun bir IAP hesabınız yok."
 
 #. module: sms
-#: code:addons/sms/models/sms_api.py:0
+#. odoo-python
+#: code:addons/sms/tools/sms_api.py:0
 #, python-format
 msgid "You don't have enough credits on your IAP account."
 msgstr "IAP hesabınızda yeterli krediniz yok."
 
 #. module: sms
-#. openerp-web
+#. odoo-javascript
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.js:0
 #, python-format
 msgid ""
@@ -1306,7 +1495,7 @@ msgid ""
 msgstr "SMS Metin Mesajınız boşluk bırakmayan en az bir karakter içermelidir"
 
 #. module: sms
-#. openerp-web
+#. odoo-javascript
 #: code:addons/sms/static/src/components/sms_widget/fields_sms_widget.xml:0
 #, python-format
 msgid "characters, fits in"

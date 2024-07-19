@@ -1,12 +1,12 @@
-/** @odoo-module alias=account.tax.group.tour.tests */
-"use strict";
+/** @odoo-module */
 
-import tour from 'web_tour.tour';
+import { registry } from "@web/core/registry";
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
-tour.register('account_tax_group', {
+registry.category("web_tour.tours").add('account_tax_group', {
     test: true,
     url: "/web",
-}, [tour.stepUtils.showAppsMenuItem(),
+    steps: () => [stepUtils.showAppsMenuItem(),
     {
         id: 'account_menu_click',
         content: "Go to Invoicing",
@@ -21,9 +21,9 @@ tour.register('account_tax_group', {
         trigger: 'a:contains("Bills")',
     },
     {
-        extra_trigger: '.breadcrumb:contains("Bills")',
+        extra_trigger: '.o_breadcrumb .text-truncate:contains("Bills")',
         content: "Create new bill",
-        trigger: '.o_list_button_add',
+        trigger: '.o_control_panel_main_buttons .d-none .o_list_button_add',
     },
     // Set a vendor
     {
@@ -58,7 +58,7 @@ tour.register('account_tax_group', {
         content: "Save the account move",
         trigger: '.o_form_button_save',
     },
-    ...tour.stepUtils.saveForm(),
+    ...stepUtils.saveForm(),
     // Edit tax group amount
     {
         content: "Edit tax group amount",
@@ -93,7 +93,7 @@ tour.register('account_tax_group', {
         trigger: 'div[name="invoice_line_ids"] tbody tr.o_data_row .o_list_number[name="quantity"] input',
         run: function (actions) {
             let keydownEvent = jQuery.Event('keydown');
-            keydownEvent.which = 13;
+            keydownEvent.key = "Enter";
             this.$anchor.trigger(keydownEvent);
         },
     },
@@ -102,7 +102,7 @@ tour.register('account_tax_group', {
         content: "Save the account move",
         trigger: '.o_form_button_save',
     },
-    ...tour.stepUtils.saveForm(),
+    ...stepUtils.saveForm(),
     // Check new tax group value
     {
         content: "Check new value of tax group",
@@ -124,5 +124,6 @@ tour.register('account_tax_group', {
     {
         content: "Check tax value is reset",
         trigger: '.o_tax_group_amount_value:contains("120")',
+        isCheck: true,
     },
-]);
+]});

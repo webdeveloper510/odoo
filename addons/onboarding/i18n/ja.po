@@ -3,17 +3,17 @@
 # 	* onboarding
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Ryoko Tsuda <ryoko@quartile.co>, 2022
-# Junko Augias, 2023
+# Wil Odoo, 2023
+# Ryoko Tsuda <ryoko@quartile.co>, 2024
+# Junko Augias, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Junko Augias, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Junko Augias, 2024\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,9 +22,19 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "#{alt}"
+msgstr "#{alt}"
+
+#. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__progress_ids
 msgid "All Onboarding Progress Records (across companies)."
 msgstr "全てのオンボーディング進捗レコード (各社間)"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "All done!"
+msgstr "すべて完了！"
 
 #. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__progress_ids
@@ -32,14 +42,23 @@ msgid "All related Onboarding Progress Step Records (across companies)"
 msgstr "全ての関連オンボーディング進捗ステップレコード (各社間)"
 
 #. module: onboarding
-#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
-msgid "Background color"
-msgstr "背景色"
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_alt
+msgid "Alt Text for the Step Image"
+msgstr "ステップ画像のAltテキスト"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__blue
-msgid "Blue"
-msgstr "青"
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
+#, python-format
+msgid ""
+"An \"Opening Action\" is required for the following steps to be linked to an"
+" onboarding panel: %(step_titles)s"
+msgstr "以下のステップをオンボーディング・パネルにリンクさせるには、 \"オープニングアクション\"が必要です：%(step_titles)s"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Are you sure you want to hide these configuration steps?"
+msgstr "これらの設定ステップを本当に隠しますか？"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__button_text
@@ -47,17 +66,33 @@ msgid "Button text"
 msgstr "ボタンテキスト"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Cancel"
+msgstr "取消"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close"
+msgstr "閉じる"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close Panel"
+msgstr "パネルを閉じる"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Close the onboarding panel"
+msgstr "オンボーディングパネルを閉じる"
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_close_action_name
 msgid "Closing action"
 msgstr "終了アクション"
 
 #. module: onboarding
-#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__panel_background_color
-msgid "Color gradient added to the panel's background."
-msgstr ""
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__company_id
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__company_id
 msgid "Company"
 msgstr "会社"
 
@@ -110,6 +145,16 @@ msgid "Font Awesome Icon when completed"
 msgstr "完了時のFont Awesomeアイコン"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Get them out of my sight!"
+msgstr "非表示にする"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_container
+msgid "Hide Onboarding Tips"
+msgstr "オンボーディングのヒントを隠す"
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__id
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__id
@@ -118,20 +163,17 @@ msgid "ID"
 msgstr "ID"
 
 #. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__is_per_company
+msgid "Is per company"
+msgstr "会社ごと"
+
+#. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding_step__current_step_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress__onboarding_state__just_done
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_progress_step__step_state__just_done
 msgid "Just done"
 msgstr "完了"
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress____last_update
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step____last_update
-msgid "Last Modified on"
-msgstr "最終更新日"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__write_uid
@@ -150,10 +192,17 @@ msgid "Last Updated on"
 msgstr "最終更新日"
 
 #. module: onboarding
-#: code:addons/onboarding/models/onboarding_step.py:0
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
 #, python-format
 msgid "Let's do it"
 msgstr "やってみましょう"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__text_completed
+msgid "Message at completion"
+msgstr "完了時のメッセージ"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__name
@@ -174,9 +223,11 @@ msgstr ""
 "ステップを開くときに実行するオンボーディングステップモデルアクションの名前、 例: action_open_onboarding_1_step_1"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__none
-msgid "None"
-msgstr "なし"
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding.py:0
+#, python-format
+msgid "Nice work! Your configuration is done."
+msgstr "よくできました！環境設定が完了しました。"
 
 #. module: onboarding
 #: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__current_onboarding_state__not_done
@@ -188,8 +239,6 @@ msgstr "未完了"
 
 #. module: onboarding
 #: model:ir.model,name:onboarding.model_onboarding_onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__onboarding_id
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__onboarding_id
 msgid "Onboarding"
 msgstr "オンボーディング"
 
@@ -262,7 +311,9 @@ msgstr "オンボーディングステップ"
 
 #. module: onboarding
 #: model:ir.actions.act_window,name:onboarding.action_view_onboarding_onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__onboarding_ids
 #: model:ir.ui.menu,name:onboarding.menu_onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_step_view_form
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_tree
 msgid "Onboardings"
 msgstr "オンボーディング"
@@ -283,27 +334,12 @@ msgid "Opening action"
 msgstr "開始アクション"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__orange
-msgid "Orange"
-msgstr "橙"
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_background_color
-msgid "Panel's Background color"
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__panel_background_image
-msgid "Panel's background image"
-msgstr ""
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__progress_step_ids
 msgid "Progress Steps Trackers"
 msgstr "プログレスステップトラッカー"
 
 #. module: onboarding
-#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_id
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_progress_step__progress_ids
 msgid "Related Onboarding Progress Tracker"
 msgstr "関連したオンボーディング進捗トラッカー"
 
@@ -316,18 +352,34 @@ msgstr "関連したオンボーディング追跡済"
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__sequence
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__sequence
 msgid "Sequence"
-msgstr "付番"
+msgstr "シーケンス"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_per_company
 msgid "Should be done per company?"
-msgstr "会社ごとに行わなければならないか？"
+msgstr "会社ごとに行う必要がありますか？"
 
 #. module: onboarding
-#: code:addons/onboarding/models/onboarding_step.py:0
+#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__step_image_alt
+msgid "Show when impossible to load the image"
+msgstr "画像をロードできないときに表示"
+
+#. module: onboarding
+#. odoo-python
+#: code:addons/onboarding/models/onboarding_onboarding_step.py:0
 #, python-format
-msgid "Step Completed! - Click to review"
-msgstr ""
+msgid "Step Completed!"
+msgstr "ステップ完了！"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image
+msgid "Step Image"
+msgstr "ステップ画像"
+
+#. module: onboarding
+#: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__step_image_filename
+msgid "Step Image Filename"
+msgstr "ステップ画像ファイル名"
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__current_progress_step_id
@@ -335,28 +387,24 @@ msgid "Step Progress"
 msgstr "ステップ進捗"
 
 #. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_onboarding_view_form
+msgid "Steps"
+msgstr "ステップ"
+
+#. module: onboarding
 #: model:ir.model.fields,help:onboarding.field_onboarding_onboarding_step__button_text
 msgid "Text on the panel's button to start this step"
 msgstr "このステップを開始するためのパネルのボタン上のテキスト"
 
 #. module: onboarding
+#: model:ir.model.fields,help:onboarding.field_onboarding_onboarding__text_completed
+msgid "Text shown on onboarding when completed"
+msgstr "完了時にオンボーディングで表示されるテキスト"
+
+#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__done_text
 msgid "Text to show when step is completed"
 msgstr "ステップが完了したときに表示するテキスト"
-
-#. module: onboarding
-#: model:ir.model.constraint,message:onboarding.constraint_onboarding_progress_onboarding_company_uniq
-msgid ""
-"There cannot be multiple records of the same onboarding completion for the "
-"same company."
-msgstr ""
-
-#. module: onboarding
-#: model:ir.model.constraint,message:onboarding.constraint_onboarding_progress_step_progress_step_uniq
-msgid ""
-"There cannot be multiple records of the same onboarding step completion for "
-"the same Progress record."
-msgstr ""
 
 #. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding_step__title
@@ -370,15 +418,15 @@ msgid "Toggle visibility"
 msgstr "トグル可視性"
 
 #. module: onboarding
-#: model:ir.model.fields.selection,name:onboarding.selection__onboarding_onboarding__panel_background_color__violet
-msgid "Violet"
-msgstr "スミレ色"
-
-#. module: onboarding
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_onboarding__is_onboarding_closed
 #: model:ir.model.fields,field_description:onboarding.field_onboarding_progress__is_onboarding_closed
 msgid "Was panel closed?"
-msgstr "パネルは閉じられましたか？"
+msgstr "パネルはクローズされましたか？"
+
+#. module: onboarding
+#: model_terms:ir.ui.view,arch_db:onboarding.onboarding_step
+msgid "o_onboarding_confetti"
+msgstr "o_onboarding_confetti"
 
 #. module: onboarding
 #: model_terms:ir.ui.view,arch_db:onboarding.onboarding_panel

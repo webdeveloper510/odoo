@@ -45,7 +45,7 @@ class AccountEdiXmlUBLANZ(models.AbstractModel):
             vals['endpoint_id'] = partner.company_registry
 
         for party_tax_scheme in vals['party_tax_scheme_vals']:
-            party_tax_scheme['tax_scheme_id'] = 'GST'
+            party_tax_scheme['tax_scheme_vals'] = {'id': 'GST'}
 
         return vals
 
@@ -70,7 +70,7 @@ class AccountEdiXmlUBLANZ(models.AbstractModel):
         # EXTENDS account.edi.xml.ubl_bis3
         vals_list = super()._get_tax_category_list(invoice, taxes)
         for vals in vals_list:
-            vals['tax_scheme_id'] = 'GST'
+            vals['tax_scheme_vals'] = {'id': 'GST'}
         return vals_list
 
     def _export_invoice_vals(self, invoice):
@@ -78,7 +78,7 @@ class AccountEdiXmlUBLANZ(models.AbstractModel):
         vals = super()._export_invoice_vals(invoice)
 
         vals['vals'].update({
-            'customization_id': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0',
+            'customization_id': self._get_customization_ids()['ubl_a_nz'],
         })
 
         return vals

@@ -3,19 +3,17 @@
 # 	* website_profile
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2022
-# Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2022
-# Ryoko Tsuda <ryoko@quartile.co>, 2022
+# Wil Odoo, 2023
 # Junko Augias, 2023
+# Ryoko Tsuda <ryoko@quartile.co>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: Junko Augias, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Ryoko Tsuda <ryoko@quartile.co>, 2023\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,7 +40,7 @@ msgstr "(未検証)"
 msgid ""
 ". Collect points on the forum or on the eLearning platform. Those points "
 "will make you reach new ranks."
-msgstr "フォーラムやeラーニング・プラットフォームでポイントを集めましょう。そのポイントで新しいランクに到達できます。"
+msgstr "。フォーラムやeラーニング・プラットフォームでポイントを集めましょう。そのポイントで新しいランクに到達できます。"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_content
@@ -51,13 +49,13 @@ msgstr "。また検索してみて下さい。"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right me-1\"/>All Badges"
-msgstr ""
+msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
+msgstr "<i class=\"fa fa-arrow-right\"/>バッジ獲得 "
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> All Badges"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
+msgid "<i class=\"fa fa-close me-1\"/>Cancel"
+msgstr "<i class=\"fa fa-close me-1\"/>取消"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
@@ -70,9 +68,24 @@ msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
 msgstr "<i class=\"fa fa-pencil me-1\"/>編集"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
+msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
+msgstr "<i class=\"fa fa-pencil me-1\"/>編集"
+
+#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
 msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
 msgstr "<i class=\"fa fa-pencil me-2\"/>プロフィールを編集"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
+msgstr "<i class=\"oi oi-arrow-right me-1\"/>全てのバッジ"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
+msgstr "<i class=\"oi oi-arrow-right\"/>全てのバッジ"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -107,7 +120,7 @@ msgstr "<span class=\"fw-bold\">略歴</span>"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid "<span class=\"fw-bold\">City</span>"
-msgstr "<span class=\"fw-bold\">都道府県</span>"
+msgstr "<span class=\"fw-bold\">都市</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
@@ -122,11 +135,11 @@ msgstr "<span class=\"fw-bold\">Eメール</span>"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid "<span class=\"fw-bold\">Name</span>"
-msgstr "<span class=\"fw-bold\">氏名</span>"
+msgstr "<span class=\"fw-bold\">名前</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
-msgid "<span class=\"fw-bold\">Public profile</span>"
+msgid "<span class=\"fw-bold\">Public Profile</span>"
 msgstr "<span class=\"fw-bold\">公開プロフィール</span>"
 
 #. module: website_profile
@@ -163,8 +176,8 @@ msgstr "<span id=\"email_validated_message\">おめでとうございます。�
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
-msgid "<strong class=\"mb-3 text-white me-2\">Rank by :</strong>"
-msgstr ""
+msgid "<strong class=\"mb-3 text-white me-2\">Rank by:</strong>"
+msgstr "<strong class=\"mb-3 text-white me-2\">以下によるランク:</strong>"
 
 #. module: website_profile
 #: model:mail.template,body_html:website_profile.validation_email
@@ -182,7 +195,7 @@ msgid ""
 "                            <t t-out=\"object.company_id.name or ''\">YourCompany</t> Profile validation\n"
 "                        </span>\n"
 "                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\">\n"
+"                    <td t-if=\"not user.company_id.uses_default_logo\" valign=\"middle\" align=\"right\">\n"
 "                        <img t-attf-src=\"/logo.png?company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\">\n"
 "                    </td>\n"
 "                </tr>\n"
@@ -256,6 +269,92 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: 16px; background-color: #F1F1F1; color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"padding: 16px; background-color: white; color: #454748; border-collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- HEADER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr>\n"
+"                    <td valign=\"middle\">\n"
+"                        <span style=\"font-size: 20px; font-weight: bold;\">\n"
+"                            <t t-out=\"object.company_id.name or ''\">YourCompany</t> プロフィール検証\n"
+"                        </span>\n"
+"                    </td>\n"
+"                    <td t-if=\"not user.company_id.uses_default_logo\" valign=\"middle\" align=\"right\">\n"
+"                        <img t-attf-src=\"/logo.png?company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\">\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <td colspan=\"2\" style=\"text-align:center;\">\n"
+"                        <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\">\n"
+"                    </td>\n"
+"                </tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTENT -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr>\n"
+"                    <td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                        <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                            こんにちは、<t t-out=\"object.name or ''\">Marc Demo</t>様、<br><br>\n"
+"                             eメールを検証して、\"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\" ウェブサイトにアクセスできるようにして下さい。\n"
+"                            eメールを検証するには、以下をクリックして下さい。\n"
+"                            <div style=\"margin: 16px 0px 16px 0px;\">\n"
+"                                <a t-att-href=\"ctx.get('token_url')\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"                                    アカウントを検証する\n"
+"                                </a>\n"
+"                            </div>\n"
+"                            ご参加ありがとうございます！\n"
+"                        </p>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <td style=\"text-align:center;\">\n"
+"                        <hr width=\"100%\" style=\"background-color:rgb(204,204,204);border:medium none;clear:both;display:block;font-size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\">\n"
+"                    </td>\n"
+"                </tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- FOOTER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\" font-family: 'Verdana Regular'; color: #454748; min-width: 590px; background-color: white; font-size: 11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr>\n"
+"                    <td valign=\"middle\" align=\"left\">\n"
+"                         <t t-out=\"user.company_id.name or ''\">YourCompany</t>\n"
+"                    </td>\n"
+"                    <td valign=\"middle\" align=\"right\" style=\"opacity: 0.7;\">\n"
+"                        <t t-out=\"user.company_id.phone or ''\">+1 650-123-4567</t>\n"
+"                        <t t-if=\"user.company_id.email\">\n"
+"                            | <a t-attf-href=\"'mailto:%s' % {{ user.company_id.email }}\" style=\"text-decoration:none; color: #454748;\" t-out=\"user.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                        </t>\n"
+"                        <t t-if=\"user.company_id.website\">\n"
+"                            | <a t-attf-href=\"{{ user.company_id.website }}\" style=\"text-decoration:none; color: #454748;\" t-out=\"user.company_id.website or ''\">http://www.example.com</a>\n"
+"                        </t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- POWERED BY -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
+"        <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"            Powered by <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=forum\" style=\"color: #875A7B;\">Odoo</a>\n"
+"        </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
@@ -296,6 +395,11 @@ msgid "Badges"
 msgstr "バッジ"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "Badges are your collection of achievements. Wear them proudly! <br/>"
+msgstr "バッジはあなたの功績のコレクションです。誇りを持って身につけましょう！<br/>"
+
+#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
 msgid ""
 "Besides gaining reputation with your questions and answers,\n"
@@ -303,7 +407,8 @@ msgid ""
 "                        appear on your profile page, and your posts."
 msgstr ""
 "質問や回答をすることで高い評価を得ることができます。\n"
-"　　　　　　特に役に立った場合にはバッジを獲得できます。<br class=\"d-none d-lg-inline-block\"/>バッジはプロフィールページと投稿に表示されます。"
+"　　　　　　特に役に立った場合にはバッジを獲得できます。<br class=\"d-none d-lg-inline-block\"/>バッジ\n"
+"はプロフィールページと投稿に表示されます。"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
@@ -313,7 +418,7 @@ msgstr "略歴"
 #. module: website_profile
 #: model:ir.model.fields,field_description:website_profile.field_gamification_badge__can_publish
 msgid "Can Publish"
-msgstr "公開可能"
+msgstr "公開可"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
@@ -338,12 +443,17 @@ msgstr "プロフィールを編集"
 #. module: website_profile
 #: model:mail.template,name:website_profile.validation_email
 msgid "Forum: Email Verification"
-msgstr "フォーラム:Eメール認証"
+msgstr "フォーラム: Eメール認証"
 
 #. module: website_profile
 #: model:ir.model,name:website_profile.model_gamification_badge
 msgid "Gamification Badge"
 msgstr "ゲーミフィケーションのバッジ"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
+msgid "Get"
+msgstr "取得"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
@@ -408,7 +518,14 @@ msgstr "まだバッジがありません！"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_content
 msgid "No user found for"
-msgstr "以下のユーザが見つかりません"
+msgstr "以下用のユーザが見つかりません"
+
+#. module: website_profile
+#. odoo-python
+#: code:addons/website_profile/controllers/main.py:0
+#, python-format
+msgid "Not have enough karma to view other users' profile."
+msgstr "他のユーザのプロフィールを閲覧するためカルマが不足しています"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
@@ -419,16 +536,11 @@ msgstr "回答やコメントからの通知を受け取るには、有効なメ
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
-msgid "Rank badge"
-msgstr ""
-
-#. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
 msgid "Ranks"
 msgstr "ランク"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.private_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_access_denied
 msgid "Return to the website."
 msgstr "ウェブサイトに戻る。"
 
@@ -450,7 +562,7 @@ msgstr "メールアドレスを確認するためにフォーラム訪問者に
 #. module: website_profile
 #: model:ir.model.fields,help:website_profile.field_gamification_badge__website_url
 msgid "The full URL to access the document through the website."
-msgstr "ウェブサイトを介してドキュメントにアクセスするために完全なURLです。"
+msgstr "サイト経由して、文書にアクセスする完全なURL。"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
@@ -458,7 +570,9 @@ msgid "This month"
 msgstr "今月"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.private_profile
+#. odoo-python
+#: code:addons/website_profile/controllers/main.py:0
+#, python-format
 msgid "This profile is private!"
 msgstr "このプロフィールは非公開です。"
 
@@ -474,6 +588,7 @@ msgid "Unpublished"
 msgstr "未公開"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_biography_editor
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid "Update"
 msgstr "更新"
@@ -501,7 +616,7 @@ msgstr "認証メールを以下に送信:"
 #. module: website_profile
 #: model:ir.model.fields,field_description:website_profile.field_gamification_badge__website_published
 msgid "Visible on current website"
-msgstr "現在のウェブサイトで見える状態"
+msgstr "現在のサイトに表示"
 
 #. module: website_profile
 #: model:ir.model,name:website_profile.model_website
@@ -511,12 +626,18 @@ msgstr "ウェブサイト"
 #. module: website_profile
 #: model:ir.model.fields,field_description:website_profile.field_gamification_badge__website_url
 msgid "Website URL"
-msgstr "ウェブサイトURL"
+msgstr "サイトURL"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
 msgid "When you finish a course or reach milestones, you're awarded badges."
-msgstr "コースを終了したり、マイルストーンを達成したりすると、バッジを獲得できます。"
+msgstr "コース終了やマイルストン達成で、バッジを獲得できます。"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_biography_editor
+#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
+msgid "Write a few words about yourself..."
+msgstr "あなた自身について一言書いて下さい"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.all_user_card
@@ -556,7 +677,7 @@ msgstr "パンくず"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
 msgid "or"
-msgstr "または"
+msgstr "又は"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
@@ -584,9 +705,27 @@ msgid "xp"
 msgstr "xp"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
+msgid ""
+"xp\n"
+"                        to level up!"
+msgstr ""
+"xp\n"
+"                        レベルアップする！"
+
+#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
 msgid "your account settings"
 msgstr "アカウントセッティング"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
+msgid ""
+"{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else "
+"''}}"
+msgstr ""
+"{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else "
+"''}}"
 
 #. module: website_profile
 #: model:mail.template,subject:website_profile.validation_email

@@ -3,16 +3,15 @@
 # 	* website_profile
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Aimée Mendoza Sánchez, 2023
+# Wil Odoo, 2023
 # Larissa Manderfeld, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Larissa Manderfeld, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
@@ -41,30 +40,28 @@ msgid ""
 ". Collect points on the forum or on the eLearning platform. Those points "
 "will make you reach new ranks."
 msgstr ""
-". Recopilar puntos en el foro o en la plataforma eLearning. Esos puntos te "
-"harán alcanzar nuevos rangos."
+". Acumule puntos desde el foro o desde la plataforma de eLearning. Estos "
+"puntos le ayudarán a alcanzar nuevos rangos."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_content
 msgid ". Try another search."
-msgstr "Intente otra búsqueda"
+msgstr ". Intente otra búsqueda."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right me-1\"/>All Badges"
-msgstr "<i class=\"fa fa-arrow-right me-1\"/>Todas las insignias"
+msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
+msgstr "<i class=\"fa fa-arrow-right\"/> Obtener insignias"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> All Badges"
-msgstr "<i class=\"fa fa-arrow-right\"/> Todas las insignias"
+#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
+msgid "<i class=\"fa fa-close me-1\"/>Cancel"
+msgstr "<i class=\"fa fa-close me-1\"/>Cancelar"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid "<i class=\"fa fa-pencil fa-1g float-sm-none float-md-start\" title=\"Edit\"/>"
-msgstr ""
-"<i class=\"fa fa-pencil fa-1g float-sm-none float-md-start\" "
-"title=\"Editar\"/>"
+msgstr "<i class=\"fa fa-pencil fa-1g float-sm-none float-md-start\" title=\"Edit\"/>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
@@ -72,9 +69,24 @@ msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
 msgstr "<i class=\"fa fa-pencil me-1\"/>EDITAR"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
+msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
+msgstr "<i class=\"fa fa-pencil me-1\"/>Editar"
+
+#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
 msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
 msgstr "<i class=\"fa fa-pencil me-2\"/>EDITAR PERFIL"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
+msgstr "<i class=\"oi oi-arrow-right me-1\"/>Todas las insignias"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
+msgstr "<i class=\"oi oi-arrow-right\"/> Todas las insignias"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -128,7 +140,7 @@ msgstr "<span class=\"fw-bold\">Nombre</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
-msgid "<span class=\"fw-bold\">Public profile</span>"
+msgid "<span class=\"fw-bold\">Public Profile</span>"
 msgstr "<span class=\"fw-bold\">Perfil público</span>"
 
 #. module: website_profile
@@ -162,12 +174,12 @@ msgid ""
 "<span id=\"email_validated_message\">Congratulations! Your email has just "
 "been validated.</span>"
 msgstr ""
-"<span id=\"email_validated_message\">    ¡Felicitaciones! Su correo "
-"electrónico acaba de ser validado.</span>"
+"<span id=\"email_validated_message\">¡Felicitaciones! Su correo electrónico "
+"acaba de ser validado.</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
-msgid "<strong class=\"mb-3 text-white me-2\">Rank by :</strong>"
+msgid "<strong class=\"mb-3 text-white me-2\">Rank by:</strong>"
 msgstr "<strong class=\"mb-3 text-white me-2\">Clasificar por:</strong>"
 
 #. module: website_profile
@@ -186,7 +198,7 @@ msgid ""
 "                            <t t-out=\"object.company_id.name or ''\">YourCompany</t> Profile validation\n"
 "                        </span>\n"
 "                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\">\n"
+"                    <td t-if=\"not user.company_id.uses_default_logo\" valign=\"middle\" align=\"right\">\n"
 "                        <img t-attf-src=\"/logo.png?company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\">\n"
 "                    </td>\n"
 "                </tr>\n"
@@ -273,7 +285,7 @@ msgstr ""
 "                            Validación del perfil de <t t-out=\"object.company_id.name or ''\">SuCompañía</t> \n"
 "                        </span>\n"
 "                    </td>\n"
-"                    <td valign=\"middle\" align=\"right\">\n"
+"                    <td t-if=\"not user.company_id.uses_default_logo\" valign=\"middle\" align=\"right\">\n"
 "                        <img t-attf-src=\"/logo.png?company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\">\n"
 "                    </td>\n"
 "                </tr>\n"
@@ -365,7 +377,7 @@ msgstr "<u>aquí</u>"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
 msgid "About"
-msgstr "Acerca de"
+msgstr "Sobre"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
@@ -384,6 +396,12 @@ msgstr "Todo el tiempo"
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
 msgid "Badges"
 msgstr "Insignias"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "Badges are your collection of achievements. Wear them proudly! <br/>"
+msgstr ""
+"Las insignias son una colección de sus logros. ¡Úselas con orgullo! <br/>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -434,7 +452,12 @@ msgstr "Foro: verificación por correo electrónico"
 #. module: website_profile
 #: model:ir.model,name:website_profile.model_gamification_badge
 msgid "Gamification Badge"
-msgstr "Insignia de gamificación"
+msgstr "Insignia de ludificación"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
+msgid "Get"
+msgstr "Obtener"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
@@ -469,7 +492,7 @@ msgstr "Karma mínimo para ver el perfil de otro usuario"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
 msgid "Mobile sub-nav"
-msgstr "Sub-navegación móvil"
+msgstr "Subnavegación móvil"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
@@ -484,7 +507,7 @@ msgstr "Navegación"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
 msgid "Next rank:"
-msgstr "Siguiente grado:"
+msgstr "Siguiente rango:"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_main
@@ -494,12 +517,19 @@ msgstr "Todavía no hay tabla de clasificación :("
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
 msgid "No badges yet!"
-msgstr "Todavía no cuenta con insignias"
+msgstr "¡Todavía no cuenta con insignias!"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_content
 msgid "No user found for"
-msgstr "No se encuenta ningún usuario con"
+msgstr "No se encuenta ningún usuario para"
+
+#. module: website_profile
+#. odoo-python
+#: code:addons/website_profile/controllers/main.py:0
+#, python-format
+msgid "Not have enough karma to view other users' profile."
+msgstr "No tiene suficiente karma para ver el perfil de otro usuario."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
@@ -512,23 +542,18 @@ msgstr ""
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
-msgid "Rank badge"
-msgstr "Insignia de rango"
-
-#. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
 msgid "Ranks"
 msgstr "Rangos"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.private_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_access_denied
 msgid "Return to the website."
-msgstr "Regresar al sitio web."
+msgstr "Regrese al sitio web."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
 msgid "Search"
-msgstr "Búsqueda"
+msgstr "Buscar"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
@@ -539,7 +564,7 @@ msgstr "Buscar usuarios"
 #: model:mail.template,description:website_profile.validation_email
 msgid "Sent to forum visitors to confirm their mail address"
 msgstr ""
-"Enviar a los visitantes del foro para confirmar sus direcciones de correo "
+"Enviado a los visitantes del foro para confirmar sus direcciones de correo "
 "electrónico"
 
 #. module: website_profile
@@ -553,7 +578,9 @@ msgid "This month"
 msgstr "Este mes"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.private_profile
+#. odoo-python
+#: code:addons/website_profile/controllers/main.py:0
+#, python-format
 msgid "This profile is private!"
 msgstr "Este perfil es privado"
 
@@ -569,6 +596,7 @@ msgid "Unpublished"
 msgstr "No publicado"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_biography_editor
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid "Update"
 msgstr "Actualizar"
@@ -611,7 +639,14 @@ msgstr "URL del sitio web"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
 msgid "When you finish a course or reach milestones, you're awarded badges."
-msgstr "Cuando terminas un curso o alcanzas hitos, se te otorgan insignias."
+msgstr ""
+"Cada vez que termine un curso o cumpla un hito, se le otorgarán insignias."
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.user_biography_editor
+#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
+msgid "Write a few words about yourself..."
+msgstr "Escriba un poco sobre usted..."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.all_user_card
@@ -626,9 +661,9 @@ msgid ""
 "content. Points can also be earned on the forum. Follow this link to the "
 "guidelines of the forum."
 msgstr ""
-"Usted puede obtener más puntos contestando pruebas al final del contenido de"
-" cada curso. Los puntos también se pueden ganar en el foro. Siga este enlace"
-" a las directrices del foro."
+"Puede obtener más puntos si responde los cuestionarios que se encuentran al "
+"final de cada contenido del curso. También se pueden obtener puntos en el "
+"foro. Consulte en este enlace las normas del foro."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
@@ -642,7 +677,8 @@ msgstr ""
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
 msgid "Your account does not have an email set up. Please set it up on"
-msgstr "No se ha establecido un correo electrónico en su cuenta, configúrelo."
+msgstr ""
+"No se ha establecido un correo electrónico en su cuenta, configúrelo en"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
@@ -681,9 +717,27 @@ msgid "xp"
 msgstr "xp"
 
 #. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
+msgid ""
+"xp\n"
+"                        to level up!"
+msgstr ""
+"xp\n"
+"                        para subir de nivel!"
+
+#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
 msgid "your account settings"
 msgstr "sus ajustes de cuenta"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
+msgid ""
+"{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else "
+"''}}"
+msgstr ""
+"{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else "
+"''}}"
 
 #. module: website_profile
 #: model:mail.template,subject:website_profile.validation_email

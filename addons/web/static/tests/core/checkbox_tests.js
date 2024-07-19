@@ -69,22 +69,16 @@ QUnit.module("Components", (hooks) => {
         assert.strictEqual(value, false);
     });
 
-    QUnit.test("does not call onChange prop when disabled", async (assert) => {
+    QUnit.test("checkbox with props disabled", async (assert) => {
         const env = await makeTestEnv();
 
-        let onChangeCalled = false;
-        class Parent extends Component {
-            onChange(checked) {
-                onChangeCalled = true;
-            }
-        }
+        class Parent extends Component {}
         Parent.template = xml`<CheckBox onChange="onChange" disabled="true"/>`;
         Parent.components = { CheckBox };
 
         await mount(Parent, target, { env });
         assert.containsOnce(target, ".o-checkbox input");
-        await click(target.querySelector("input"));
-        assert.strictEqual(onChangeCalled, false);
+        assert.ok(target.querySelector(".o-checkbox input").disabled);
     });
 
     QUnit.test("can toggle value by pressing ENTER", async (assert) => {
@@ -134,7 +128,7 @@ QUnit.module("Components", (hooks) => {
 
         // Click on label
         assert.verifySteps([]);
-        await click(target, ".o-checkbox > .form-check-label", true);
+        await click(target, ".o-checkbox > .form-check-label", { skipVisibilityCheck: true });
         assert.notOk(target.querySelector(".o-checkbox input").checked);
         assert.verifySteps(["false"]);
 
@@ -160,18 +154,11 @@ QUnit.module("Components", (hooks) => {
         // Pressing Space when focus is on the input is a standard behavior
         // So we simulate it and verify that it will have its standard behavior.
         assert.strictEqual(document.activeElement, target.querySelector(".o-checkbox input"));
-        const event = triggerEvent(
-            document.activeElement,
-            null,
-            "keydown",
-            { key: "Space" },
-            { fast: true }
-        );
+        const event = await triggerEvent(document.activeElement, null, "keydown", { key: "Space" });
         assert.ok(!event.defaultPrevented);
         target.querySelector(".o-checkbox input").checked = true;
         assert.verifySteps([]);
-        triggerEvent(target, ".o-checkbox input", "change", {}, { fast: true });
-        await nextTick();
+        await triggerEvent(target, ".o-checkbox input", "change");
         assert.ok(target.querySelector(".o-checkbox input").checked);
         assert.verifySteps(["true"]);
     });

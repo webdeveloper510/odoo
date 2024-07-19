@@ -1,16 +1,17 @@
-odoo.define('test_main_flows.tour', function (require) {
-"use strict";
+/** @odoo-module **/
 
-const {_t} = require('web.core');
-const {Markup} = require('web.utils');
-const tour = require('web_tour.tour');
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
-tour.register('main_flow_tour', {
+import { markup } from "@odoo/owl";
+
+registry.category("web_tour.tours").add('main_flow_tour', {
     test: true,
     url: "/web",
-}, [
-...tour.stepUtils.goToAppSteps('sale.sale_menu_root', Markup(_t('Organize your sales activities with the <b>Sales app</b>.'))),
-tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"),
+    steps: () => [
+...stepUtils.goToAppSteps('sale.sale_menu_root', markup(_t('Organize your sales activities with the <b>Sales app</b>.'))),
+stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
 {
 // Add Stockable product
     mobile: false,
@@ -24,11 +25,11 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"
     position: "bottom"
 }, {
     trigger: '.o-kanban-button-new',
-    extra_trigger: "li.breadcrumb-item.active:contains('Products')",
+    extra_trigger: ".o_breadcrumb .active:contains('Products')",
     content: _t("Let's create your first product."),
     position: 'bottom',
 }, {
-    trigger: '.o_field_widget[name=name] input',
+    trigger: '.o_field_widget[name=name] textarea',
     extra_trigger: '.o_form_sheet',
     content: _t("Let's enter the name."),
     position: 'left',
@@ -76,9 +77,9 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"
     content: _t("Save this product and the modifications you've made to it."),
     position: 'bottom',
 },
-tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
+stepUtils.autoExpandMoreButtons('.o_form_saved'),
 {
-    trigger: ".oe_button_box .oe_stat_button div[name=bom_count]",
+    trigger: ".o-form-buttonbox .oe_stat_button div[name=bom_count]",
     extra_trigger: '.o_form_saved',
     content: _t('See Bill of material'),
     position: 'bottom',
@@ -116,7 +117,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "left",
 }, {
     mobile: true,
-    trigger: '.modal-body .o_form_editable .o_field_widget[name="name"] input',
+    trigger: '.modal-body .o_form_editable .o_field_widget[name="name"] textarea',
     content: _t("Select a product, or create a new one on the fly."),
     position: "right",
     run: "text the_flow.component1",
@@ -148,7 +149,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".o_field_widget[name=partner_id] input",
-    extra_trigger: ".breadcrumb-item.active:contains(the_flow.component1)",
+    extra_trigger: ".o_breadcrumb .active:contains(the_flow.component1)",
     content: _t('Select a seller'),
     position: 'top',
     run: "text the_flow.vendor",
@@ -220,7 +221,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 // Add second component
     mobile: false,
     trigger: ".o_field_x2many_list_row_add > a",
-    extra_trigger: ".breadcrumb-item.active:contains('the_flow.product')",
+    extra_trigger: ".o_breadcrumb .active:contains('the_flow.product')",
     content: _t("Click here to add some lines."),
     position: "bottom",
 }, {
@@ -242,7 +243,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "left",
 }, {
     mobile: true,
-    trigger: ".modal-body .o_form_editable .o_field_widget[name=name] input",
+    trigger: ".modal-body .o_form_editable .o_field_widget[name=name] textarea",
     content: _t("Select a product, or create a new one on the fly."),
     position: "right",
     run: "text the_flow.component2",
@@ -279,7 +280,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t("Select a vendor, or create a new one on the fly."),
     position: "bottom",
 },
-...tour.stepUtils.mobileKanbanSearchMany2X('Vendor', 'the_flow.vendor'),
+...stepUtils.mobileKanbanSearchMany2X('Vendor', 'the_flow.vendor'),
 {
     mobile: false,
     trigger: ".o_field_widget[name=seller_ids] .o_field_x2many_list_row_add > a",
@@ -288,7 +289,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     mobile: false,
     trigger: ".o_field_widget[name=partner_id] input",
-    extra_trigger: ".breadcrumb-item.active:contains(the_flow.component2)",
+    extra_trigger: ".o_breadcrumb .active:contains(the_flow.component2)",
     content: _t('Select a seller'),
     position: 'top',
     run: "text the_flow.vendor",
@@ -324,22 +325,26 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     trigger: 'label:contains("Vendor Taxes")',
     // click somewhere else to exit cell focus
 }, {
-    mobile: false,
-    trigger: '.breadcrumb .o_back_button',
+    trigger: '.o_back_button',
     content: _t('Go back'),
     position: 'bottom',
 }, {
     mobile: false,
-    trigger: ".breadcrumb-item:first",
-    content: Markup(_t("Use the breadcrumbs to <b>go back to products</b>.")),
-    position: "bottom"
+    trigger: '.breadcrumb .o_back_button',
+    extra_trigger: ".o_breadcrumb .active:contains('the_flow.product')",
+    content: _t('Go back'),
+    position: 'bottom',
+}, {
+    trigger: '.o_back_button',
+    extra_trigger: ".o_breadcrumb .active:contains('Bill of Materials')",
+    content: _t('Go back'),
+    position: 'bottom',
+}, {
+    trigger: '.o_back_button',
+    extra_trigger: ".o_breadcrumb .active:contains('the_flow.product')",
+    content: _t('Go back'),
+    position: 'bottom',
 },
-...tour.stepUtils.goBackBreadcrumbsMobile(
-        Markup(_t("Use the breadcrumbs to <b>go back to products</b>.")),
-        undefined,
-        ".breadcrumb-item.active:contains('Bill of Materials')",
-        ".breadcrumb-item.active:contains('the_flow.product')"
-    ),
 {
 // Add service product
     trigger: '.o-kanban-button-new',
@@ -347,7 +352,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t("Let's create your second product."),
     position: 'bottom',
 }, {
-    trigger: '.o_field_widget[name=name] input',
+    trigger: '.o_field_widget[name=name] textarea',
     extra_trigger: '.o_form_sheet',
     content: _t("Let's enter the name."),
     position: 'left',
@@ -399,7 +404,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "left",
 }, {
     mobile: true,
-    trigger: '.o_field_widget[name=name] input',
+    trigger: '.o_field_widget[name=name] textarea',
     extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Project')",
     content: _t('Let\'s enter the name.'),
     position: 'left',
@@ -415,7 +420,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t('Save'),
     position: 'right',
 }, {
-    trigger: '.o_form_button_save',
+    trigger: '.o_form_status_indicator .o_form_button_save',
     content: _t("Save this product and the modifications you've made to it."),
     position: 'bottom',
 }, {
@@ -425,15 +430,15 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t('Go back to the home menu'),
     position: 'bottom',
 },
-...tour.stepUtils.goToAppSteps('crm.crm_menu_root', Markup(_t('Organize your sales activities with the <b>CRM app</b>.'))),
+...stepUtils.goToAppSteps('crm.crm_menu_root', markup(_t('Organize your sales activities with the <b>CRM app</b>.'))),
 {
     trigger: ".o-kanban-button-new",
     extra_trigger: '.o_opportunity_kanban',
-    content: Markup(_t("Click here to <b>create your first opportunity</b> and add it to your pipeline.")),
+    content: markup(_t("Click here to <b>create your first opportunity</b> and add it to your pipeline.")),
     position: "bottom"
 }, {
     trigger: ".o_kanban_quick_create .o_field_widget[name=name] input",
-    content: Markup(_t("<b>Choose a name</b> for your opportunity.")),
+    content: markup(_t("<b>Choose a name</b> for your opportunity.")),
     position: "right",
     run: "text the_flow.opportunity",
 }, {
@@ -473,12 +478,12 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
 }, {
     trigger: ".o_kanban_quick_create .o_kanban_add",
     extra_trigger: ".o_kanban_quick_create .o_field_widget[name=partner_id] .o_external_button", // Wait name_create
-    content: Markup(_t("Click here to <b>add your opportunity</b>.")),
+    content: markup(_t("Click here to <b>add your opportunity</b>.")),
     position: "right",
 }, {
     mobile: false,
     trigger: ".o_kanban_group:first .o_kanban_record span:contains('the_flow.opportunity')",
-    content: Markup(_t("<b>Drag &amp; drop opportunities</b> between columns as you progress in your sales cycle.")),
+    content: markup(_t("<b>Drag &amp; drop opportunities</b> between columns as you progress in your sales cycle.")),
     position: "right",
     run: "drag_and_drop_native .o_opportunity_kanban .o_kanban_group:eq(2) ",
 }, {
@@ -493,7 +498,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "bottom",
 }, {
     mobile: true,
-    trigger: ".o_statusbar_status .btn.dropdown-toggle",
+    trigger: ".o_statusbar_status .dropdown-toggle:visible",
     content: _t("Change status from New to proposition."),
     position: "bottom",
 }, {
@@ -503,7 +508,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     position: "bottom",
 },
 // Create a quotation
-...tour.stepUtils.statusbarButtonsSteps('New Quotation', Markup(_t('<p><b>Create a quotation</p>'))),
+...stepUtils.statusbarButtonsSteps('New Quotation', markup(_t('<p><b>Create a quotation</p>'))),
 {
     mobile: false,
     trigger: ".o_field_widget[name=order_line] .o_field_x2many_list_row_add > a",
@@ -539,7 +544,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t("Select a product, or create a new one on the fly. The product will define the default sales price (that you can change), taxes and description automatically."),
     position: "right",
 },
-...tour.stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.product'),
+...stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.product'),
 {
     mobile: false,
     trigger: ".o_field_widget[name=order_line] .o_field_x2many_list_row_add > a",
@@ -551,6 +556,10 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     extra_trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Order Lines')",
     content: _t('Save & New'),
     position: 'right',
+}, {
+    mobile: true,
+    trigger: ".modal-footer .btn-primary:contains('Save & New'):not([disabled])",
+    run: () => {}, // check if the new record is displayed
 }, {
     /**
      * We need both triggers because the "sale_product_configurator" module replaces the
@@ -581,7 +590,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t("Select a product, or create a new one on the fly. The product will define the default sales price (that you can change), taxes and description automatically."),
     position: "right",
 },
-...tour.stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.service'),
+...stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.service'),
 {
     mobile: true,
     trigger: ".modal-footer .btn-primary:contains('Save & Close')",
@@ -589,7 +598,7 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t('Save & Close'),
     position: 'right',
 },
-...tour.stepUtils.statusbarButtonsSteps('Send by Email', _t("Try to send it to email"), ".o_statusbar_status .btn:contains('Quotation')"),
+...stepUtils.statusbarButtonsSteps('Send by Email', _t("Try to send it to email"), ".o_statusbar_status .dropdown-toggle:contains('Quotation')"),
 {
     trigger: ".o_field_widget[name=email] input",
     content: _t("Enter an email address"),
@@ -604,15 +613,15 @@ tour.stepUtils.autoExpandMoreButtons('.o_form_saved'),
     content: _t("Try to send it to email"),
     position: "bottom",
 },
-...tour.stepUtils.statusbarButtonsSteps('Confirm', Markup(_t("<p>Confirm this quotation</p>"))),
+...stepUtils.statusbarButtonsSteps('Confirm', markup(_t("<p>Confirm this quotation</p>"))),
 {
     edition: "enterprise",
     trigger: '.o_menu_toggle',
     content: _t('Go back to the home menu'),
     position: 'bottom',
 },
-...tour.stepUtils.goToAppSteps('stock.menu_stock_root', _t('Go to Inventory')),
-tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Overview')"),
+...stepUtils.goToAppSteps('stock.menu_stock_root', _t('Go to Inventory')),
+stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Inventory Overview')"),
 {
     mobile: false,
     trigger: ".o_menu_sections button[data-menu-xmlid='stock.menu_stock_config_settings']",
@@ -649,7 +658,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Ove
     content: _t("Write the name of your product."),
     position: "top",
 },
-...tour.stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.component2'),
+...stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.component2'),
 {
     // FIXME WOWL: remove first part of selector when legacy view is dropped
     trigger: "input.o_field_widget[name=product_min_qty], .o_field_widget[name=product_min_qty] input",
@@ -665,15 +674,15 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Inventory Ove
 }, {
     mobile: false,
     trigger: ".o_list_button_save",
-    content: Markup(_t("<p>Save this reordering rule</p>")),
+    content: markup(_t("<p>Save this reordering rule</p>")),
     position: "bottom"
 }, {
     mobile: true,
     trigger: ".o_form_button_save",
-    content: Markup(_t("<p>Save this reordering rule</p>")),
+    content: markup(_t("<p>Save this reordering rule</p>")),
     position: "bottom"
 },
-tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
+stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('OP/')"),
 {
 //Go to purchase:
     edition: "enterprise",
@@ -681,7 +690,7 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
     content: _t('Go back to the home menu'),
     position: 'bottom',
 },
-...tour.stepUtils.goToAppSteps('purchase.menu_purchase_root', _t('Go to Purchase')),
+...stepUtils.goToAppSteps('purchase.menu_purchase_root', _t('Go to Purchase')),
 {
     mobile: false,
     trigger: '.o_data_row:has(.o_data_cell:contains("the_flow.vendor")) .o_data_cell:first',
@@ -693,28 +702,23 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
     content: _t('Select the generated request for quotation'),
     position: 'bottom',
 },
-...tour.stepUtils.statusbarButtonsSteps('Confirm Order', _t("Confirm quotation")),
-...tour.stepUtils.statusbarButtonsSteps('Receive Products', _t("Receive Product"), ".o_statusbar_status .btn.dropdown-toggle:contains('Purchase Order')"),
-...tour.stepUtils.statusbarButtonsSteps('Validate', _t("Validate"), ".o_statusbar_status .btn.dropdown-toggle:contains('Ready')"),
+...stepUtils.statusbarButtonsSteps('Confirm Order', _t("Confirm quotation")),
+...stepUtils.statusbarButtonsSteps('Receive Products', _t("Receive Product"), ".o_statusbar_status .dropdown-toggle:contains('Purchase Order')"),
+...stepUtils.statusbarButtonsSteps('Validate', _t("Validate"), ".o_statusbar_status:contains('Ready')"),
 {
-    trigger: ".modal-footer .btn-primary",
-    extra_trigger: ".modal-dialog",
-    content: _t("Apply"),
-    position: "bottom",
-}, {
-    trigger: ".o_back_button a, .breadcrumb-item:not('.active'):last",
+    trigger: ".o_back_button, .breadcrumb-item:not('.active'):last",
     content: _t('go back to the purchase order'),
     position: 'bottom',
 },
-...tour.stepUtils.statusbarButtonsSteps('Create Bill', _t('go to Vendor Bills'), ".o_statusbar_status .btn.dropdown-toggle:contains('Purchase Order')"),
+...stepUtils.statusbarButtonsSteps('Create Bill', _t('go to Vendor Bills'), ".o_statusbar_status .dropdown-toggle:contains('Purchase Order')"),
 {
     trigger:".o_field_widget[name=invoice_date] input",
     extra_trigger: ".o_form_label .o_field_widget:contains('Vendor Bill')",
     content: _t('Set the invoice date'),
     run: "text 01/01/2020",
 },
-...tour.stepUtils.statusbarButtonsSteps('Confirm', _t("Try to send it to email"), ".o_statusbar_status .btn.dropdown-toggle:contains('Draft')"),
-...tour.stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .btn.dropdown-toggle:contains('Posted')"),
+...stepUtils.statusbarButtonsSteps('Confirm', _t("Try to send it to email"), ".o_statusbar_status .o_arrow_button_current:contains('Draft')"),
+...stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .o_arrow_button_current:contains('Posted')"),
 {
     trigger: ".modal-footer .btn-primary",
     content: _t("Validate"),
@@ -725,8 +729,8 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('OP/')"),
     content: _t('Go back to the home menu'),
     position: 'bottom',
 },
-...tour.stepUtils.goToAppSteps('mrp.menu_mrp_root', _t('Go to Manufacturing')),
-tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing Orders'), li.breadcrumb-item.active:contains('Work Centers Overview')"),
+...stepUtils.goToAppSteps('mrp.menu_mrp_root', _t('Go to Manufacturing')),
+stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Manufacturing Orders'), .o_breadcrumb .active:contains('Work Centers Overview')"),
 {
     mobile: false,
     trigger: ".o_menu_sections button[data-menu-xmlid='mrp.menu_mrp_manufacturing']",
@@ -744,36 +748,24 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Manufacturing
 }, {
     mobile: true,
     trigger: '.o_kanban_record .o_kanban_record_title:contains("the_flow.product"):first',
-    extra_trigger: "li.breadcrumb-item.active:contains('Manufacturing Orders')",
+    extra_trigger: ".o_breadcrumb .active:contains('Manufacturing Orders')",
     content: _t('Select the generated manufacturing order'),
     position: 'bottom',
-},
-...tour.stepUtils.statusbarButtonsSteps('Unreserve', _t("Unreserve")),
-{
+}, {
     trigger: ".o_field_widget[name=qty_producing] input",
-    extra_trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first .o_field_widget[name=forecast_availability]:contains('Available')",
-    position: 'left',
-    content: _t("Produce"),
-    run: "text 1",
+    content: _t('Set the quantity producing'),
+    position: "right",
+    run: 'text 1',
 },
-...tour.stepUtils.statusbarButtonsSteps('Check availability', _t("Check availability")),
-{
-    trigger: ".o_field_widget[name=qty_producing] input",
-    extra_trigger: ".o_field_widget[name=move_raw_ids] tr[data-id]:first .o_field_widget[name=forecast_availability]:contains('1')",
-    position: 'left',
-    content: _t("Produce"),
-    run: "text 1",
-},
-
-...tour.stepUtils.statusbarButtonsSteps('Mark as Done', _t("Mark as Done"), ".o_statusbar_status .btn.dropdown-toggle:contains('To Close')"),
+...stepUtils.statusbarButtonsSteps('Produce All', _t("Produce All"), ".o_statusbar_status .dropdown-toggle:contains('To Close')"),
 {
     edition: "enterprise",
     trigger: '.o_menu_toggle',
     content: _t('Go back to the home menu'),
     position: 'bottom',
 },
-...tour.stepUtils.goToAppSteps('sale.sale_menu_root', Markup(_t('Organize your sales activities with the <b>Sales app</b>.'))),
-tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"),
+...stepUtils.goToAppSteps('sale.sale_menu_root', markup(_t('Organize your sales activities with the <b>Sales app</b>.'))),
+stepUtils.openBurgerMenu(".o_breadcrumb .active:contains('Quotations')"),
 {
     mobile: false,
     trigger: ".o_menu_sections button[data-menu-xmlid='sale.sale_order_menu']",
@@ -786,26 +778,26 @@ tour.stepUtils.openBuggerMenu("li.breadcrumb-item.active:contains('Quotations')"
 }, {
     mobile: false,
     trigger: ".o_data_cell:contains('the_flow.customer')",
-    extra_trigger: '.o_control_panel .breadcrumb:contains("Sales Orders")',
+    extra_trigger: '.o_control_panel .o_breadcrumb:contains("Sales Orders")',
     content: _t("Go to the last sale order"),
     position: "right"
 }, {
     mobile: true,
     trigger: ".o_kanban_record .o_kanban_record_title:contains('the_flow.customer')",
-    extra_trigger: '.o_control_panel .breadcrumb:contains("Sales Orders")',
+    extra_trigger: '.o_control_panel .o_breadcrumb:contains("Sales Orders")',
     content: _t("Go to the last sale order"),
     position: "bottom"
 },
-tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_panel .breadcrumb:contains("S0")')),
+stepUtils.mobileModifier(stepUtils.autoExpandMoreButtons('.o_control_panel .o_breadcrumb:contains("S0")')),
 {
     mobile: false,
-    trigger: '.oe_button_box .oe_stat_button:has(div[name=tasks_count])',
+    trigger: '.o-form-buttonbox .oe_stat_button:has(div[name=tasks_count])',
     content: _t('See Tasks'),
     position: 'right',
 }, {
     mobile: true,
-    trigger: '.oe_button_box .oe_stat_button:has(div[name=tasks_count])',
-    extra_trigger: '.o_control_panel .breadcrumb:contains("S0")',
+    trigger: '.o-form-buttonbox .oe_stat_button:has(div[name=tasks_count])',
+    extra_trigger: '.o_control_panel .o_breadcrumb:contains("S0")',
     content: _t('See Tasks'),
     position: 'bottom',
 }, {
@@ -845,10 +837,10 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     content: "save",
     trigger: ".o_form_button_save",
 },
-...tour.stepUtils.goBackBreadcrumbsMobile(
+...stepUtils.goBackBreadcrumbsMobile(
         _t('Back to the sale order'),
         undefined,
-        ".breadcrumb-item.active:contains('the_flow.service')"
+        ".o_breadcrumb .active:contains('the_flow.service')"
     ),
 {
     mobile: false,
@@ -857,14 +849,14 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     content: _t('Back to the sale order'),
     position: 'bottom',
 },
-...tour.stepUtils.statusbarButtonsSteps('Create Invoice', _t("Validate"), ".o_field_widget[name=order_line]"),
+...stepUtils.statusbarButtonsSteps('Create Invoice', _t("Validate"), ".o_field_widget[name=order_line]"),
 {
     trigger: ".modal-footer .btn-primary",
     content: _t("Create and View Invoices"),
     position: "bottom",
 },
-...tour.stepUtils.statusbarButtonsSteps('Confirm', _t("Validate"), ".breadcrumb-item.active:contains('Draft Invoice')"),
-...tour.stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .btn.dropdown-toggle:contains('Posted')"),
+...stepUtils.statusbarButtonsSteps('Confirm', _t("Validate"), ".o_breadcrumb .active:contains('Draft Invoice')"),
+...stepUtils.statusbarButtonsSteps('Register Payment', _t("Register Payment"), ".o_statusbar_status .o_arrow_button_current:contains('Posted')"),
 {
     trigger: ".modal-footer .btn-primary",
     content: _t("Validate"),
@@ -872,7 +864,7 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
 }, {
     edition: "community",
     content: "wait for payment registration to succeed",
-    trigger: "span.bg-success:contains('Paid')",
+    trigger: "span.text-bg-success:contains('Paid')",
     auto: true,
     run() {}
 },{
@@ -948,13 +940,12 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
 }, {
     mobile: false,
     edition: "enterprise",
-    trigger: "button[name='button_validate'].btn-primary",
-    extra_trigger: "button[name='button_validate'].btn-primary",
+    trigger: "button.btn-primary:contains('Validate')",
     content: _t("Reconcile the bank transaction"),
 },
 // exit reconciliation widget
 {
-    ...tour.stepUtils.toggleHomeMenu(),
+    ...stepUtils.toggleHomeMenu(),
     mobile: false,
     auto: true,
 },
@@ -971,5 +962,4 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     trigger: 'a:contains("Customer Invoices")',
     auto: true,
     run() {}
-}]);
-});
+}]});

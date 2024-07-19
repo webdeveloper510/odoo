@@ -3,18 +3,16 @@
 # 	* analytic
 # 
 # Translators:
-# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
-# Martin Trigaux, 2023
-# Wichanon Jamwutthipreecha, 2023
-# Rasareeyar Lappiam, 2023
+# Rasareeyar Lappiam, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-23 08:23+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Rasareeyar Lappiam, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,13 +28,6 @@ msgid "%s (copy)"
 msgstr "%s (สำเนา)"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
-#, python-format
-msgid "(no accounts)"
-msgstr "(ไม่มีบัญชี)"
-
-#. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 msgid "<span class=\"o_stat_text\">Analytic Accounts</span>"
 msgstr "<span class=\"o_stat_text\">บัญชีวิเคราะห์</span>"
@@ -44,7 +35,25 @@ msgstr "<span class=\"o_stat_text\">บัญชีวิเคราะห์</
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 msgid "<span class=\"o_stat_text\">Gross Margin</span>"
-msgstr "<span class=\"o_stat_text\">อัตรากำไรขั้นต้น</span>"
+msgstr "<span class=\"o_stat_text\">กำไรขั้นต้น</span>"
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_plan.py:0
+#, python-format
+msgid ""
+"A 'Project' plan needs to exist and its id needs to be set as "
+"`analytic.project_plan` in the system variables"
+msgstr ""
+"จำเป็นต้องมีแผน 'โปรเจ็กต์' และต้องตั้งค่ารหัสเป็น `analytic.project_plan` "
+"ในตัวแปรของระบบ"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Account field"
+msgstr "ช่องบัญชี"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__account_ids
@@ -62,6 +71,18 @@ msgid "Active"
 msgstr "เปิดใช้งาน"
 
 #. module: analytic
+#: model:account.analytic.account,name:analytic.analytic_active_account
+msgid "Active account"
+msgstr "บัญชีที่ใช้งานอยู่"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "Add a Line"
+msgstr "เพิ่มรายการ"
+
+#. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.action_account_analytic_account_form
 #: model_terms:ir.actions.act_window,help:analytic.action_analytic_account_form
 msgid "Add a new analytic account"
@@ -70,8 +91,7 @@ msgstr "เพิ่มบัญชีวิเคราะห์รายกา
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_administratif
 msgid "Administrative"
-msgstr ""
-"Administrative divisions of a country. E.g. Fed. State, Departement, Canton"
+msgstr "ฝ่ายธุรการ"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__all_account_count
@@ -86,9 +106,14 @@ msgstr "จำนวน"
 
 #. module: analytic
 #. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Amount field"
+msgstr "ช่องจำนวนเงิน"
+
+#. module: analytic
+#. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_distribution
-#: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution
 #, python-format
 msgid "Analytic"
 msgstr "การวิเคราะห์"
@@ -96,10 +121,9 @@ msgstr "การวิเคราะห์"
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_account
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__name
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__account_id
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__auto_account_id
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_search
-#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Analytic Account"
 msgstr "บัญชีวิเคราะห์"
 
@@ -121,9 +145,18 @@ msgid "Analytic Accounts Count"
 msgstr "จำนวนบัญชีวิเคราะห์"
 
 #. module: analytic
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__analytic_distribution
+#: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution
+msgid "Analytic Distribution"
+msgstr "การกระจายการวิเคราะห์"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 #: model:ir.model,name:analytic.model_account_analytic_distribution_model
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_tree_view
+#, python-format
 msgid "Analytic Distribution Model"
 msgstr "โมเดลการกระจายการวิเคราะห์"
 
@@ -137,13 +170,6 @@ msgstr "โมเดลการกระจายการวิเคราะ
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_distribution_search
 msgid "Analytic Distribution Search"
 msgstr "การค้นหาการกระจายการวิเคราะห์"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Analytic Distribution Template"
-msgstr "เทมเพลตการกระจายการวิเคราะห์"
 
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_form
@@ -161,12 +187,12 @@ msgstr "รายการวิเคราะห์"
 #. module: analytic
 #: model:ir.model,name:analytic.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "ไลน์การวิเคราะห์"
+msgstr "บรรทัดการวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__line_ids
 msgid "Analytic Lines"
-msgstr "ไลน์การวิเคราะห์"
+msgstr "บรรทัดการวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_analytic_mixin
@@ -175,7 +201,6 @@ msgstr "มิกซ์อินเชิงวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__analytic_plan_id
-#: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Analytic Plan"
 msgstr "แผนการวิเคราะห์"
 
@@ -197,11 +222,6 @@ msgstr "แผนการวิเคราะห์"
 #: model:ir.model.fields,field_description:analytic.field_analytic_mixin__analytic_precision
 msgid "Analytic Precision"
 msgstr "ความแม่นยำในการวิเคราะห์"
-
-#. module: analytic
-#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
-msgid "Analytic distribution to apply"
-msgstr ""
 
 #. module: analytic
 #. odoo-python
@@ -257,6 +277,13 @@ msgid "Balance:"
 msgstr "ยอดคงเหลือ:"
 
 #. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Business domain"
+msgstr "โดเมนธุรกิจ"
+
+#. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_partners_camp_to_camp
 msgid "Camp to Camp"
 msgstr "แคมป์สู่แคมป์"
@@ -284,12 +311,19 @@ msgstr "จำนวนแผนย่อย"
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__children_ids
 msgid "Childrens"
-msgstr "เด็ก"
+msgstr "ย่อย"
 
 #. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_plan_action
 msgid "Click to add a new analytic account plan."
 msgstr "คลิกเพื่อเพิ่มแผนบัญชีวิเคราะห์ใหม่"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "Close"
+msgstr "ปิด"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__color
@@ -308,16 +342,21 @@ msgstr "การพาณิชย์และการตลาด"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__company_id
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__company_id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model__company_id
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__company_id
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__company_id
 msgid "Company"
-msgstr "บริษัทเดียว"
+msgstr "บริษัท"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__complete_name
 msgid "Complete Name"
 msgstr "ชื่อเต็ม"
+
+#. module: analytic
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
+msgid "Conditions to meet"
+msgstr "เงื่อนไขที่ต้องปฏิบัติตาม"
 
 #. module: analytic
 #: model:ir.model,name:analytic.model_res_config_settings
@@ -411,6 +450,11 @@ msgid "Delta PC"
 msgstr "Delta PC"
 
 #. module: analytic
+#: model:account.analytic.plan,name:analytic.analytic_plan_departments
+msgid "Departments"
+msgstr "แผนก"
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__name
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__description
 msgid "Description"
@@ -419,7 +463,14 @@ msgstr "คำอธิบาย"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_desertic_hispafuentes
 msgid "Desertic - Hispafuentes"
-msgstr "ทะเลทราย - Hispafuentes"
+msgstr "Desertic - Hispafuentes"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Disable save"
+msgstr "ปิดการใช้งานการบันทึก"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__display_name
@@ -429,6 +480,11 @@ msgstr "ทะเลทราย - Hispafuentes"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__display_name
 msgid "Display Name"
 msgstr "แสดงชื่อ"
+
+#. module: analytic
+#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
+msgid "Distribution to apply"
+msgstr "แจกจ่ายเพื่อนำไปใช้"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability__business_domain
@@ -444,6 +500,13 @@ msgstr "ผู้ติดตาม"
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "ผู้ติดตาม (พาร์ทเนอร์)"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Force applicability"
+msgstr "บังคับการบังคับใช้"
 
 #. module: analytic
 #: model:ir.actions.act_window,name:analytic.account_analytic_line_action
@@ -488,30 +551,19 @@ msgid ""
 "                analytic accounts. You can track costs and revenues to analyse\n"
 "                your margins easily."
 msgstr ""
-"ใน Odoo มีการใช้คำสั่งขายและโปรเจกต์โดยใช้\n"
+"ใน Odoo มีการใช้คำสั่งขายและโปรเจ็กต์โดยใช้\n"
 "                บัญชีวิเคราะห์ คุณสามารถติดตามต้นทุนและรายได้เพื่อวิเคราะห์\n"
 "                อัตรากำไรขั้นต้นของคุณได้อย่างง่ายดาย"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Invalid"
-msgstr "ไม่ถูกต้อง"
+#: model:account.analytic.plan,name:analytic.analytic_plan_internal
+msgid "Internal"
+msgstr "ภายใน"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_is_follower
 msgid "Is Follower"
 msgstr "เป็นผู้ติดตาม"
-
-#. module: analytic
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_account____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_applicability____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_distribution_model____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line____last_update
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan____last_update
-msgid "Last Modified on"
-msgstr "แก้ไขครั้งล่าสุดเมื่อ"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__write_uid
@@ -532,13 +584,6 @@ msgid "Last Updated on"
 msgstr "อัปเดตครั้งล่าสุดเมื่อ"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Loading..."
-msgstr "กำลังโหลด..."
-
-#. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_think_big_systems
 msgid "Lumber Inc"
 msgstr "Lumber Inc"
@@ -546,19 +591,11 @@ msgstr "Lumber Inc"
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_luminous_technologies
 msgid "Luminous Technologies"
-msgstr "Luminous Technologies"
+msgstr "เทคโนโลยีเรืองแสง"
 
 #. module: analytic
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "เอกสารหลักที่แนบมา"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__applicability__mandatory
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_plan__default_applicability__mandatory
-#, python-format
 msgid "Mandatory"
 msgstr "จำเป็น"
 
@@ -594,13 +631,6 @@ msgid "Nebula"
 msgstr "Nebula"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "No Analytic Accounts for this plan"
-msgstr "ไม่มีบัญชีวิเคราะห์สำหรับแผนนี้"
-
-#. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action_entries
 msgid "No activity yet"
 msgstr "ยังไม่มีกิจกรรม"
@@ -614,8 +644,8 @@ msgstr "ยังไม่มีกิจกรรมในบัญชีนี
 #. odoo-javascript
 #: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
 #, python-format
-msgid "No plans available"
-msgstr "ไม่มีแผนให้บริการ"
+msgid "No analytic plans found"
+msgstr "ไม่พบแผนการวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__message_needaction_counter
@@ -638,13 +668,6 @@ msgid "Number of messages with delivery error"
 msgstr "จํานวนข้อความที่มีข้อผิดพลาดในการส่ง"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "OK"
-msgstr "โอเค"
-
-#. module: analytic
 #. odoo-python
 #: code:addons/analytic/models/analytic_mixin.py:0
 #, python-format
@@ -661,21 +684,18 @@ msgstr "ค่าใช้จ่ายในการดำเนินงาน
 #: code:addons/analytic/models/analytic_mixin.py:0
 #, python-format
 msgid "Operation not supported"
-msgstr "ไม่รองรับการทำงาน"
+msgstr "ไม่รองรับการดำเนินการ"
 
 #. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_applicability__applicability__optional
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_plan__default_applicability__optional
-#, python-format
 msgid "Optional"
 msgstr "เลือกได้"
 
 #. module: analytic
 #: model:ir.model.fields.selection,name:analytic.selection__account_analytic_line__category__other
 msgid "Other"
-msgstr "อื่น ๆ"
+msgstr "อื่นๆ"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_our_super_product
@@ -704,23 +724,39 @@ msgid "Partner Category"
 msgstr "หมวดหมู่พาร์ทเนอร์"
 
 #. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Percentage"
+msgstr "เปอร์เซ็นต์"
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__plan_id
-#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__plan_id
 msgid "Plan"
 msgstr "แผน"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
+#, python-format
+msgid "Product field"
+msgstr "ช่องผลิตภัณฑ์"
+
+#. module: analytic
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_line__account_id
+msgid "Project Account"
+msgstr "บัญชีโปรเจ็กต์"
+
+#. module: analytic
+#: model:account.analytic.plan,name:analytic.analytic_plan_projects
+msgid "Projects"
+msgstr "โปรเจ็กต์"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_line__unit_amount
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_tree
 msgid "Quantity"
 msgstr "ปริมาณ"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Quick search: %s"
-msgstr "ค้นหาด่วน: %s"
 
 #. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__code
@@ -747,9 +783,21 @@ msgstr ""
 "                เกี่ยวกับค่าใช้จ่าย (เช่น การออกใบแจ้งหนี้ค่าเดินทางใหม่)"
 
 #. module: analytic
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__root_id
+msgid "Root"
+msgstr "รูท"
+
+#. module: analytic
 #: model:ir.model.fields,field_description:analytic.field_account_analytic_account__root_plan_id
 msgid "Root Plan"
-msgstr "แผน Root"
+msgstr "แผนรูท"
+
+#. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "Save as new analytic distribution model"
+msgstr "บันทึกเป็นรูปแบบการกระจายการวิเคราะห์ใหม่"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_seagate_p2
@@ -759,21 +807,7 @@ msgstr "Seagate P2"
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_line_filter
 msgid "Search Analytic Lines"
-msgstr "ค้นหาไลน์การวิเคราะห์"
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Search More..."
-msgstr "ค้นหาเพิ่มเติม..."
-
-#. module: analytic
-#. odoo-javascript
-#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js:0
-#, python-format
-msgid "Search: Analytic Account"
-msgstr "ค้นหา: บัญชีวิเคราะห์"
+msgstr "ค้นหารายการการวิเคราะห์"
 
 #. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_distribution_model__company_id
@@ -809,9 +843,9 @@ msgstr ""
 "ระบบจะใช้สิ่งนี้เป็นบัญชีการวิเคราะห์โดยอัตโนมัติ)"
 
 #. module: analytic
-#: model_terms:ir.ui.view,arch_db:analytic.account_analytic_distribution_model_form_view
-msgid "Simultaneous conditions to meet"
-msgstr ""
+#: model:ir.model.fields,field_description:analytic.field_account_analytic_plan__sequence
+msgid "Sequence"
+msgstr "ลำดับ"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_spark
@@ -822,17 +856,6 @@ msgstr "Spark Systems"
 #: model_terms:ir.ui.view,arch_db:analytic.account_analytic_plan_form_view
 msgid "Subplans"
 msgstr "แผนย่อย"
-
-#. module: analytic
-#. odoo-python
-#: code:addons/analytic/models/analytic_line.py:0
-#, python-format
-msgid ""
-"The selected account belongs to another company than the one you're trying "
-"to create an analytic item for"
-msgstr ""
-"บัญชีที่เลือกเป็นของ บริษัท "
-"อื่นที่ไม่ใช่บัญชีที่คุณกำลังพยายามสร้างรายการวิเคราะห์สำหรับ"
 
 #. module: analytic
 #: model:account.analytic.account,name:analytic.analytic_absences
@@ -895,4 +918,4 @@ msgstr ""
 #. module: analytic
 #: model_terms:ir.ui.view,arch_db:analytic.view_account_analytic_account_form
 msgid "e.g. Project XYZ"
-msgstr "เช่น โปรเจกต์ XYZ"
+msgstr "เช่น โปรเจ็กต์ XYZ"

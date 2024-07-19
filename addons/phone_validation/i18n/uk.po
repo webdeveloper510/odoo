@@ -3,16 +3,16 @@
 # 	* phone_validation
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
+# Wil Odoo, 2023
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:03+0000\n"
-"PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,6 +21,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/models/phone_blacklist.py:0
 #: code:addons/phone_validation/models/phone_blacklist.py:0
 #, python-format
@@ -50,6 +51,7 @@ msgid "Archived"
 msgstr "Заархівовано"
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/models/phone_blacklist.py:0
 #, python-format
 msgid "Are you sure you want to unblacklist this Phone Number?"
@@ -60,6 +62,11 @@ msgstr "Ви впевнені, що хочете видалити цей ном�
 #: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist__message_attachment_count
 msgid "Attachment Count"
 msgstr "Підрахунок прикріплення"
+
+#. module: phone_validation
+#: model:ir.model,name:phone_validation.model_base
+msgid "Base"
+msgstr "База"
 
 #. module: phone_validation
 #: model_terms:ir.ui.view,arch_db:phone_validation.phone_blacklist_view_form
@@ -92,6 +99,7 @@ msgid "Blacklisted phone numbers won't receive SMS Mailings anymore."
 msgstr "Номери телефонів із чорного списку більше не отримують SMS-розсилки."
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/models/res_users.py:0
 #, python-format
 msgid ""
@@ -189,10 +197,34 @@ msgstr ""
 "розсилку SMS з жодного списку"
 
 #. module: phone_validation
+#. odoo-python
+#: code:addons/phone_validation/tools/phone_validation.py:0
+#, python-format
+msgid "Impossible number %s: not a valid country prefix."
+msgstr "Нереальний номер %s: недійсний префікс країни."
+
+#. module: phone_validation
+#. odoo-python
+#: code:addons/phone_validation/tools/phone_validation.py:0
+#, python-format
+msgid "Impossible number %s: not enough digits."
+msgstr "Нереальний номер %s: недостатня кількість цифр."
+
+#. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/tools/phone_validation.py:0
 #, python-format
 msgid "Impossible number %s: probably invalid number of digits."
 msgstr "Неможлива цифра %s: ймовірно, неправильна кількість цифр."
+
+#. module: phone_validation
+#. odoo-python
+#: code:addons/phone_validation/tools/phone_validation.py:0
+#: code:addons/phone_validation/tools/phone_validation.py:0
+#: code:addons/phone_validation/tools/phone_validation.py:0
+#, python-format
+msgid "Impossible number %s: too many digits."
+msgstr "Нереальний номер %s: забагато цифр."
 
 #. module: phone_validation
 #: model:ir.model.fields,help:phone_validation.field_mail_thread_phone__mobile_blacklisted
@@ -217,12 +249,14 @@ msgstr ""
 " і телефону."
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/tools/phone_validation.py:0
 #, python-format
 msgid "Invalid number %s: probably incorrect prefix."
 msgstr "Неможлива кількість %s: ймовірно невірний префікс."
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/models/mail_thread_phone.py:0
 #: code:addons/phone_validation/models/mail_thread_phone.py:0
 #, python-format
@@ -234,12 +268,6 @@ msgstr "Недійсне основне поле телефону на моде�
 #: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist__message_is_follower
 msgid "Is Follower"
 msgstr "Стежить"
-
-#. module: phone_validation
-#: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist____last_update
-#: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist_remove____last_update
-msgid "Last Modified on"
-msgstr "Остання модифікація"
 
 #. module: phone_validation
 #: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist__write_uid
@@ -254,12 +282,6 @@ msgid "Last Updated on"
 msgstr "Останнє оновлення"
 
 #. module: phone_validation
-#: model:ir.model.fields,field_description:phone_validation.field_mail_thread_phone__message_main_attachment_id
-#: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Основне прикріплення"
-
-#. module: phone_validation
 #: model:ir.model.fields,field_description:phone_validation.field_mail_thread_phone__message_has_error
 #: model:ir.model.fields,field_description:phone_validation.field_phone_blacklist__message_has_error
 msgid "Message Delivery error"
@@ -272,6 +294,7 @@ msgid "Messages"
 msgstr "Повідомлення"
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/models/mail_thread_phone.py:0
 #, python-format
 msgid "Missing definition of phone fields."
@@ -347,6 +370,7 @@ msgid "Phone/Mobile"
 msgstr "Телефон/мобільний"
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/models/mail_thread_phone.py:0
 #, python-format
 msgid ""
@@ -372,6 +396,7 @@ msgid "Sanitized Number"
 msgstr "Очищений номер"
 
 #. module: phone_validation
+#. odoo-python
 #: code:addons/phone_validation/tools/phone_validation.py:0
 #, python-format
 msgid "Unable to parse %(phone)s: %(error)s"
@@ -383,10 +408,11 @@ msgid "Unblacklist"
 msgstr "Забрати з чорного списку"
 
 #. module: phone_validation
-#: code:addons/phone_validation/models/phone_blacklist.py:0
+#. odoo-python
+#: code:addons/phone_validation/wizard/phone_blacklist_remove.py:0
 #, python-format
-msgid "Unblacklisting Reason: %s"
-msgstr "Причина Вилучення з Чорного Списку: %s"
+msgid "Unblock Reason: %(reason)s"
+msgstr "Причина розблокування: %(reason)s"
 
 #. module: phone_validation
 #: model:ir.model,name:phone_validation.model_res_users

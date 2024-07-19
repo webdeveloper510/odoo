@@ -17,11 +17,10 @@ export const standardViewProps = {
         type: Object,
     },
     resModel: String,
-    arch: { type: String },
+    arch: { type: Element },
     bannerRoute: { type: String, optional: true },
     className: { type: String, optional: true },
-    comparison: { validate: () => true }, // fix problem with validation with type: [Object, null]
-    // Issue OWL: https://github.com/odoo/owl/issues/910
+    comparison: { type: [Object, { value: null }], optional: true },
     context: { type: Object },
     createRecord: { type: Function, optional: true },
     display: { type: Object, optional: true },

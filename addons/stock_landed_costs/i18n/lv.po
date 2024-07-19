@@ -3,20 +3,21 @@
 # 	* stock_landed_costs
 # 
 # Translators:
-# Arnis Putniņš <arnis@allegro.lv>, 2022
-# ievaputnina <ievai.putninai@gmail.com>, 2022
-# Konstantins Zabogonskis <inculin4ik@gmail.com>, 2022
-# Anzelika Adejanova, 2022
-# Martin Trigaux, 2022
+# Aleksejs Ivanovs, 2023
+# Arnis Putniņš <arnis@allegro.lv>, 2023
+# Anzelika Adejanova, 2023
 # Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023
+# ievaputnina <ievai.putninai@gmail.com>, 2023
+# Konstantins Zabogonskis <inculin4ik@gmail.com>, 2023
+# Martin Trigaux, 2023
 # Will Sensors, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"POT-Creation-Date: 2024-01-29 10:44+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Will Sensors, 2024\n"
 "Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
 "MIME-Version: 1.0\n"
@@ -26,6 +27,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
@@ -40,13 +42,18 @@ msgid "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\
 msgstr ""
 
 #. module: stock_landed_costs
+#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
+msgid "<span class=\"o_stat_text\">Valuation</span>"
+msgstr ""
+
+#. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_account_move_line__product_type
 msgid ""
 "A storable product is a product for which you manage stock. The Inventory app has to be installed.\n"
 "A consumable product is a product for which stock is not managed.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"Uzglabājams produkts ir produkts, kuram Jūs pārvaldat krājumus. Jābūt instalētam \"Inventory\" modulim.\n"
+"Noliktavas produkts ir produkts, kuram Jūs pārvaldat krājumus. Jābūt instalētam \"Inventory\" modulim.\n"
 "Palīgmateriāls ir produkts, kuram krājumi netiek pārvaldīti.\n"
 "Pakalpojums ir nemateriāls produkts, ko jūs sniedzat."
 
@@ -78,7 +85,7 @@ msgstr "Aktivitātes izņēmuma noformējums"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_state
 msgid "Activity State"
-msgstr "Aktivitātes stāvoklis"
+msgstr "Aktivitātes stadija"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_type_icon
@@ -98,7 +105,7 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__target_model
 msgid "Apply On"
-msgstr "Lietot"
+msgstr "Pielietot"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_attachment_count
@@ -150,14 +157,9 @@ msgid "Company"
 msgstr "Uzņēmums"
 
 #. module: stock_landed_costs
-#: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__company_id
-msgid "Company related to this journal"
-msgstr "Reģistra uzņēmums"
-
-#. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
 msgid "Compute"
-msgstr "Compute"
+msgstr "Aprēķināt"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_res_config_settings
@@ -181,6 +183,7 @@ msgid "Cost Lines"
 msgstr ""
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -254,7 +257,7 @@ msgstr "Apraksts"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__display_name
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__display_name
 msgid "Display Name"
-msgstr "Parādīt vārdu"
+msgstr "Attēlotais nosaukums"
 
 #. module: stock_landed_costs
 #: model:mail.message.subtype,name:stock_landed_costs.mt_stock_landed_cost_open
@@ -277,11 +280,11 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost_lines__split_method
 msgid ""
-"Equal : Cost will be equally divided.\n"
-"By Quantity : Cost will be divided according to product's quantity.\n"
-"By Current cost : Cost will be divided according to product's current cost.\n"
-"By Weight : Cost will be divided depending on its weight.\n"
-"By Volume : Cost will be divided depending on its volume."
+"Equal: Cost will be equally divided.\n"
+"By Quantity: Cost will be divided according to product's quantity.\n"
+"By Current cost: Cost will be divided according to product's current cost.\n"
+"By Weight: Cost will be divided depending on its weight.\n"
+"By Volume: Cost will be divided depending on its volume."
 msgstr ""
 
 #. module: stock_landed_costs
@@ -292,12 +295,12 @@ msgstr "Sekotāji"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Sekotāji (Partneri)"
+msgstr "Sekotāji (kontaktpersonas)"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Fonts awesome icon piem. fa-tasks"
+msgstr "Fonts awesome ikona, piem. fa-tasks"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -312,7 +315,7 @@ msgstr "Grupēt pēc"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__has_message
 msgid "Has Message"
-msgstr "ir ziņojums"
+msgstr "Ir ziņojums"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__id
@@ -422,25 +425,25 @@ msgid "Landed cost validated"
 msgstr ""
 
 #. module: stock_landed_costs
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost____last_update
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines____last_update
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines____last_update
-msgid "Last Modified on"
-msgstr "Pēdējoreiz mainīts"
+#: model_terms:ir.actions.act_window,help:stock_landed_costs.action_stock_landed_cost
+msgid ""
+"Landed costs allow you to include additional costs (shipment, insurance, "
+"customs duties, etc) into the cost of the product."
+msgstr ""
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_uid
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__write_uid
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__write_uid
 msgid "Last Updated by"
-msgstr "Pēdējoreiz atjaunoja"
+msgstr "Pēdējoreiz atjaunināja"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_date
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__write_date
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__write_date
 msgid "Last Updated on"
-msgstr "Pēdējoreiz atjaunots"
+msgstr "Pēdējoreiz atjaunināts"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -451,11 +454,6 @@ msgstr "Pēdējās aktivitātes"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_res_company__lc_journal_id
 msgid "Lc Journal"
 msgstr ""
-
-#. module: stock_landed_costs
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Galvenais pielikums"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_has_error
@@ -479,6 +477,7 @@ msgid "Name"
 msgstr "Nosaukums"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
@@ -494,7 +493,7 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Nākamais aktivitāšu kalendāra pasākums"
+msgstr "Nākamās darbības kalendāra pasākums"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_date_deadline
@@ -532,6 +531,7 @@ msgid "Number of messages with delivery error"
 msgstr "Ziņojumu, kas satur piegādes kļūdu, skaits"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Only draft landed costs can be validated"
@@ -548,12 +548,14 @@ msgid "Picking"
 msgstr "Izsniegšana"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Please configure Stock Expense Account for product: %s."
 msgstr ""
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Please define %s on which those additional costs should apply."
@@ -587,6 +589,11 @@ msgid "Quantity"
 msgstr "Daudzums"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__rating_ids
+msgid "Ratings"
+msgstr "Reitingi"
+
+#. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_user_id
 msgid "Responsible User"
 msgstr "Atbildīgie lietotāji"
@@ -610,7 +617,7 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__state
 msgid "State"
-msgstr "Posmi"
+msgstr "Stadija"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -659,7 +666,7 @@ msgstr "Šodienas aktivitātes"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__amount_total
 msgid "Total"
-msgstr "Summa"
+msgstr "Kopā"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__picking_ids
@@ -678,16 +685,12 @@ msgid "Validate"
 msgstr "Pārbaudīt"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
 "Validated landed costs cannot be cancelled, but you could create negative "
 "landed costs to reverse them"
-msgstr ""
-
-#. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
-msgid "Valuation"
 msgstr ""
 
 #. module: stock_landed_costs
@@ -704,12 +707,12 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__vendor_bill_id
 msgid "Vendor Bill"
-msgstr "Izmaksa"
+msgstr "Iepirkuma rēķins"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__volume
 msgid "Volume"
-msgstr "Apjoms"
+msgstr "Skaļums"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__website_message_ids
@@ -727,6 +730,7 @@ msgid "Weight"
 msgstr "Svars"
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -735,6 +739,7 @@ msgid ""
 msgstr ""
 
 #. module: stock_landed_costs
+#. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 #, python-format
 msgid ""

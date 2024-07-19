@@ -8,12 +8,24 @@ import {
     patchWithCleanup,
     triggerEvent,
 } from "@web/../tests/helpers/utils";
+import { registry } from "@web/core/registry";
+import { uiService } from "@web/core/ui/ui_service";
+import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 
 import { scanBarcode, BarcodeDialog } from "@web/webclient/barcode/barcode_scanner";
+import { createWebClient } from "@web/../tests/webclient/helpers";
+import { dialogService } from "@web/core/dialog/dialog_service";
+import { overlayService } from "@web/core/overlay/overlay_service";
 
 QUnit.module("Barcode scanner", {});
 
 QUnit.test("Barcode scanner crop overlay", async (assert) => {
+    registry.category("services").add("ui", uiService);
+    registry.category("services").add("hotkey", hotkeyService);
+    registry.category("services").add("dialog", dialogService);
+    registry.category("services").add("overlay", overlayService);
+
+    const { env } = await createWebClient({});
     const firstBarcodeValue = "Odoo";
     const secondBarcodeValue = "O-CMD-TEST";
 
@@ -60,17 +72,17 @@ QUnit.test("Barcode scanner crop overlay", async (assert) => {
 
     patchWithCleanup(BarcodeDialog.prototype, {
         async isVideoReady() {
-            return this._super(...arguments).then(() => {
+            return super.isVideoReady(...arguments).then(() => {
                 videoReady.resolve();
             });
         },
         onResize(overlayInfo) {
             assert.step(JSON.stringify(overlayInfo));
-            return this._super(...arguments);
+            return super.onResize(...arguments);
         },
     });
 
-    const firstBarcodeFound = scanBarcode();
+    const firstBarcodeFound = scanBarcode(env);
     await videoReady;
     // Needed due to the change on the props in the Crop component
     await nextTick();
@@ -113,7 +125,7 @@ QUnit.test("Barcode scanner crop overlay", async (assert) => {
     barcodeToGenerate = secondBarcodeValue;
     videoReady = makeDeferred();
 
-    const secondBarcodeFound = scanBarcode();
+    const secondBarcodeFound = scanBarcode(env);
     await videoReady;
     const secondValueScanned = await secondBarcodeFound;
     assert.strictEqual(

@@ -1,10 +1,15 @@
-odoo.define('web_editor.utils', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const {ColorpickerWidget} = require('web.Colorpicker');
+import {SIZES, MEDIAS_BREAKPOINTS} from "@web/core/ui/ui_service";
+import {
+    normalizeCSSColor,
+    isCSSColor,
+} from '@web/core/utils/colors';
 
 let editableWindow = window;
 const _setEditableWindow = (ew) => editableWindow = ew;
+let editableDocument = document;
+const _setEditableDocument = (ed) => editableDocument = ed;
 
 const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = ['primary', 'secondary', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'success', 'info', 'warning', 'danger'];
 
@@ -85,6 +90,7 @@ const DEFAULT_PALETTE = {
 const BACKGROUND_IMAGE_ATTRIBUTES = new Set([
     "originalId", "originalSrc", "mimetype", "resizeWidth", "glFilter", "quality", "bgSrc",
     "filterOptions",
+    "mimetypeBeforeConversion",
 ]);
 
 /**
@@ -96,11 +102,11 @@ const BACKGROUND_IMAGE_ATTRIBUTES = new Set([
  *                  - the inverse otherwise
  */
 function _computePxByRem(toRem) {
-    if (_computePxByRem.PX_BY_REM === undefined) {
-        const htmlStyle = editableWindow.getComputedStyle(editableWindow.document.documentElement);
-        _computePxByRem.PX_BY_REM = parseFloat(htmlStyle['font-size']);
+    if (editableDocument.PX_BY_REM === undefined) {
+        const htmlStyle = editableWindow.getComputedStyle(editableDocument.documentElement);
+        editableDocument.PX_BY_REM = parseFloat(htmlStyle['font-size']);
     }
-    return toRem ? (1 / _computePxByRem.PX_BY_REM) : _computePxByRem.PX_BY_REM;
+    return toRem ? (1 / editableDocument.PX_BY_REM) : editableDocument.PX_BY_REM;
 }
 /**
  * Converts the given (value + unit) string to a numeric value expressed in
@@ -209,8 +215,8 @@ function _areCssValuesEqual(value1, value2, cssProp, $target) {
     }
 
     // They may be colors, normalize then re-compare the resulting string
-    const color1 = ColorpickerWidget.normalizeCSSColor(value1);
-    const color2 = ColorpickerWidget.normalizeCSSColor(value2);
+    const color1 = normalizeCSSColor(value1);
+    const color2 = normalizeCSSColor(value2);
     if (color1 === color2) {
         return true;
     }
@@ -310,7 +316,7 @@ function _getCSSVariableValue(key, htmlStyle) {
     // Get trimmed value from the HTML element
     let value = htmlStyle.getPropertyValue(`--${key}`).trim();
     // If it is a color value, it needs to be normalized
-    value = ColorpickerWidget.normalizeCSSColor(value);
+    value = normalizeCSSColor(value);
     // Normally scss-string values are "printed" single-quoted. That way no
     // magic conversation is needed when customizing a variable: either save it
     // quoted for strings or non quoted for colors, numbers, etc. However,
@@ -326,7 +332,7 @@ function _getCSSVariableValue(key, htmlStyle) {
  * @returns {string} the normalized color
  */
 function _normalizeColor(color) {
-    if (ColorpickerWidget.isCSSColor(color)) {
+    if (isCSSColor(color)) {
         return color;
     }
     return _getCSSVariableValue(color);
@@ -459,8 +465,47 @@ function _shouldEditableMediaBeEditable(mediaEl) {
         && nonEditableAncestorRootEl.parentElement
         && nonEditableAncestorRootEl.parentElement.isContentEditable;
 }
+/**
+ * Checks if the view of the targeted element is mobile.
+ *
+ * @param {HTMLElement} targetEl - target of the editor
+ * @returns {boolean}
+ */
+function _isMobileView(targetEl) {
+    const mobileViewThreshold = MEDIAS_BREAKPOINTS[SIZES.LG].minWidth;
+    const clientWidth = targetEl.ownerDocument.defaultView?.frameElement?.clientWidth ||
+        targetEl.ownerDocument.documentElement.clientWidth;
+    return clientWidth && clientWidth < mobileViewThreshold;
+}
+/**
+ * Returns the label of a link element.
+ *
+ * @param {HTMLElement} linkEl
+ * @returns {string}
+ */
+function _getLinkLabel(linkEl) {
+    return linkEl.textContent.replaceAll("\u200B", "").replaceAll("\uFEFF", "");
+}
+/**
+ * Forwards an image source to its carousel thumbnail.
+ * @param {HTMLElement} imgEl
+ */
+function _forwardToThumbnail(imgEl) {
+    const carouselEl = imgEl.closest(".carousel");
+    if (carouselEl) {
+        const carouselInnerEl = imgEl.closest(".carousel-inner");
+        const carouselItemEl = imgEl.closest(".carousel-item");
+        if (carouselInnerEl && carouselItemEl) {
+            const imageIndex = [...carouselInnerEl.children].indexOf(carouselItemEl);
+            const miniatureEl = carouselEl.querySelector(`.carousel-indicators [data-bs-slide-to="${imageIndex}"]`);
+            if (miniatureEl && miniatureEl.style.backgroundImage) {
+                miniatureEl.style.backgroundImage = `url(${imgEl.getAttribute("src")})`;
+            }
+        }
+    }
+}
 
-return {
+export default {
     COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES: COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES,
     CSS_SHORTHANDS: CSS_SHORTHANDS,
     CSS_UNITS_CONVERSION: CSS_UNITS_CONVERSION,
@@ -482,8 +527,11 @@ return {
     generateHTMLId: _generateHTMLId,
     getColorClass: _getColorClass,
     setEditableWindow: _setEditableWindow,
+    setEditableDocument: _setEditableDocument,
     addBackgroundImageAttributes: _addBackgroundImageAttributes,
     isBackgroundImageAttribute: _isBackgroundImageAttribute,
     shouldEditableMediaBeEditable: _shouldEditableMediaBeEditable,
+    isMobileView: _isMobileView,
+    getLinkLabel: _getLinkLabel,
+    forwardToThumbnail: _forwardToThumbnail,
 };
-});

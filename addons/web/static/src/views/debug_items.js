@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { editModelDebug } from "@web/core/debug/debug_utils";
 import { formatDateTime, deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatMany2one } from "@web/views/fields/formatters";
-import { evalDomain } from "@web/views/utils";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 
 import { Component, onWillStart, useState, xml } from "@odoo/owl";
@@ -25,29 +25,24 @@ debugRegistry.category("view").add("viewSeparator", viewSeparator);
 // Get view
 //------------------------------------------------------------------------------
 
-class GetViewDialog extends Component {}
-GetViewDialog.template = xml`
-<Dialog title="this.constructor.title">
-    <pre t-esc="props.arch"/>
-</Dialog>`;
+class GetViewDialog extends Component {
+    setup() {
+        this.title = _t("Get View");
+    }
+}
+GetViewDialog.template = "web.DebugMenu.GetViewDialog";
 GetViewDialog.components = { Dialog };
 GetViewDialog.props = {
-    arch: { type: String },
+    arch: { type: Element },
     close: { type: Function },
 };
-GetViewDialog.title = _lt("Get View");
 
 export function getView({ component, env }) {
-    let { arch } = component.props;
-    if ("viewInfo" in component.props) {
-        //legacy
-        arch = component.props.viewInfo.arch;
-    }
     return {
         type: "item",
-        description: env._t("Get View"),
+        description: _t("Get View"),
         callback: () => {
-            env.services.dialog.add(GetViewDialog, { arch });
+            env.services.dialog.add(GetViewDialog, { arch: component.props.arch });
         },
         sequence: 340,
     };
@@ -70,8 +65,11 @@ export function editView({ accessRights, component, env }) {
         type = component.props.viewInfo.type;
         type = type === "tree" ? "list" : type;
     }
+    if (!type) {
+        return;
+    }
     const displayName = type[0].toUpperCase() + type.slice(1);
-    const description = env._t("Edit View: ") + displayName;
+    const description = _t("Edit View: ") + displayName;
     return {
         type: "item",
         description,
@@ -103,7 +101,7 @@ export function editSearchView({ accessRights, component, env }) {
     if (searchViewId === undefined) {
         return null;
     }
-    const description = env._t("Edit SearchView");
+    const description = _t("Edit SearchView");
     return {
         type: "item",
         description,
@@ -124,7 +122,7 @@ class GetMetadataDialog extends Component {
     setup() {
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
-        this.title = this.env._t("View Metadata");
+        this.title = _t("View Metadata");
         this.state = useState({});
         onWillStart(() => this.loadMetadata());
     }
@@ -174,7 +172,7 @@ export function viewMetadata({ component, env }) {
     }
     return {
         type: "item",
-        description: env._t("View Metadata"),
+        description: _t("View Metadata"),
         callback: () => {
             env.services.dialog.add(GetMetadataDialog, {
                 resModel: component.props.resModel,
@@ -188,28 +186,67 @@ export function viewMetadata({ component, env }) {
 debugRegistry.category("form").add("viewMetadata", viewMetadata);
 
 // -----------------------------------------------------------------------------
+// View Raw Record Data
+// -----------------------------------------------------------------------------
+
+class RawRecordDialog extends Component {
+    get content() {
+        const record = this.props.record;
+        return JSON.stringify(record, Object.keys(record).sort(), 2);
+    }
+}
+RawRecordDialog.template = xml`
+<Dialog title="props.title">
+    <pre t-esc="content"/>
+</Dialog>`;
+RawRecordDialog.components = { Dialog };
+RawRecordDialog.props = {
+    record: { type: Object },
+    title: { type: String },
+    close: { type: Function },
+};
+
+export function viewRawRecord({ component, env }) {
+    const { resId, resModel } = component.model.config;
+    if (!resId) {
+        return null;
+    }
+    const description = _t("View Raw Record Data");
+    return {
+        type: "item",
+        description,
+        callback: async () => {
+            const records = await component.model.orm.read(resModel, [resId]);
+            env.services.dialog.add(RawRecordDialog, {
+                title: _t("Raw Record Data: %s(%s)", resModel, resId),
+                record: records[0],
+            });
+        },
+        sequence: 325,
+    };
+}
+
+debugRegistry.category("form").add("viewRawRecord", viewRawRecord);
+
+// -----------------------------------------------------------------------------
 // Set Defaults
 // -----------------------------------------------------------------------------
 
 class SetDefaultDialog extends Component {
     setup() {
         this.orm = useService("orm");
-        this.title = this.env._t("Set Defaults");
+        this.title = _t("Set Defaults");
         this.state = {
             fieldToSet: "",
             condition: "",
             scope: "self",
         };
-        const root = this.props.component.model.root;
-        this.fields = root.fields;
-        this.fieldsInfo = root.activeFields;
-        this.fieldNamesInView = root.fieldNames;
+        this.fields = this.props.record.fields;
+        this.activeFields = this.props.record.activeFields;
+        this.fieldNamesInView = this.props.record.fieldNames;
         this.fieldNamesBlackList = ["message_attachment_count"];
-        this.fieldsValues = root.data;
+        this.fieldsValues = this.props.record.data;
         this.modifierDatas = {};
-        this.fieldNamesInView.forEach((fieldName) => {
-            this.modifierDatas[fieldName] = this.fieldsInfo[fieldName].modifiers;
-        });
         this.defaultFields = this.getDefaultFields();
         this.conditions = this.getConditions();
     }
@@ -218,26 +255,22 @@ class SetDefaultDialog extends Component {
         return this.fieldNamesInView
             .filter((fieldName) => !this.fieldNamesBlackList.includes(fieldName))
             .map((fieldName) => {
-                const modifierData = this.modifierDatas[fieldName];
-                let invisibleOrReadOnly;
-                if (modifierData) {
-                    const evalContext = this.props.component.model.root.evalContext;
-                    invisibleOrReadOnly =
-                        evalDomain(modifierData.invisible, evalContext) ||
-                        evalDomain(modifierData.readonly, evalContext);
-                }
                 const fieldInfo = this.fields[fieldName];
                 const valueDisplayed = this.display(fieldInfo, this.fieldsValues[fieldName]);
                 const value = valueDisplayed[0];
                 const displayed = valueDisplayed[1];
+                const evalContext = this.props.record.evalContextWithVirtualIds;
                 // ignore fields which are empty, invisible, readonly, o2m or m2m
                 if (
                     !value ||
-                    invisibleOrReadOnly ||
+                    evaluateBooleanExpr(this.activeFields[fieldName].invisible, evalContext) ||
+                    evaluateBooleanExpr(this.activeFields[fieldName].readonly, evalContext) ||
                     fieldInfo.type === "one2many" ||
                     fieldInfo.type === "many2many" ||
                     fieldInfo.type === "binary" ||
-                    this.fieldsInfo[fieldName].options.isPassword
+                    Object.entries(this.props.fieldNodes)
+                        .filter(([key, value]) => value.name === fieldName)
+                        .some(([key, value]) => value.options.isPassword)
                 ) {
                     return false;
                 }
@@ -299,7 +332,7 @@ class SetDefaultDialog extends Component {
             fieldToSet = serializeDateTime(fieldToSet);
         }
         await this.orm.call("ir.default", "set", [
-            this.props.resModel,
+            this.props.record.resModel,
             this.state.fieldToSet,
             fieldToSet,
             this.state.scope === "self",
@@ -311,15 +344,20 @@ class SetDefaultDialog extends Component {
 }
 SetDefaultDialog.template = "web.DebugMenu.SetDefaultDialog";
 SetDefaultDialog.components = { Dialog };
+SetDefaultDialog.props = {
+    record: { type: Object },
+    fieldNodes: { type: Object },
+    close: { type: Function },
+};
 
 export function setDefaults({ component, env }) {
     return {
         type: "item",
-        description: env._t("Set Defaults"),
+        description: _t("Set Defaults"),
         callback: () => {
             env.services.dialog.add(SetDefaultDialog, {
-                resModel: component.props.resModel,
-                component,
+                record: component.model.root,
+                fieldNodes: component.props.archInfo.fieldNodes,
             });
         },
         sequence: 310,
@@ -336,7 +374,7 @@ export function manageAttachments({ component, env }) {
     if (!resId) {
         return null; // No record
     }
-    const description = env._t("Manage Attachments");
+    const description = _t("Manage Attachments");
     return {
         type: "item",
         description,

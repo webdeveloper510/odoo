@@ -150,9 +150,8 @@ class EscposDriver(Thread):
             return
         while True:
             error = True
+            timestamp, task, data = self.queue.get(True)
             try:
-                timestamp, task, data = self.queue.get(True)
-
                 printer = self.get_escpos_printer()
 
                 if printer == None:

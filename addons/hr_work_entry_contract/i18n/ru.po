@@ -3,21 +3,16 @@
 # 	* hr_work_entry_contract
 # 
 # Translators:
-# Irina Fedulova <istartlin@gmail.com>, 2022
-# ILMIR <karamov@it-projects.info>, 2022
-# Martin Trigaux, 2022
+# Martin Trigaux, 2023
 # Alena Vlasova, 2023
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
-# Ivan Kropotkin <yelizariev@itpp.dev>, 2023
-# alenafairy, 2023
 # Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:52+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -41,9 +36,9 @@ msgstr ""
 "\n"
 "        Определяет источник для создания рабочих записей\n"
 "\n"
-"        Рабочий график: Рабочие записи будут генерироваться на основе рабочего времени, указанного ниже.\n"
-"        Посещения: Рабочие записи будут генерироваться на основе посещений сотрудника. (требуется модуль Посещаемость)\n"
-"        Планирование: Рабочие записи будут генерироваться на основе планирования сотрудника. (требуется модуль Планирование)\n"
+"        Рабочее расписание: Рабочие записи будут генерироваться на основе указанных ниже рабочих часов.\n"
+"        Посещения: Рабочие записи будут генерироваться на основе посещений сотрудника. (требуется приложение Attendance)\n"
+"        Планирование: Рабочие записи будут генерироваться на основе планирования сотрудника. (требуется приложение \"Планирование\")\n"
 "    "
 
 #. module: hr_work_entry_contract
@@ -95,7 +90,7 @@ msgstr "Позволяет связать тип записи о работе с
 #. module: hr_work_entry_contract
 #: model_terms:ir.ui.view,arch_db:hr_work_entry_contract.hr_work_entry_regeneration_wizard
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "Отменить"
 
 #. module: hr_work_entry_contract
 #: model:hr.work.entry.type,name:hr_work_entry_contract.work_entry_type_compensatory
@@ -110,12 +105,12 @@ msgstr "Договор"
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__create_uid
 msgid "Created by"
-msgstr "Создал"
+msgstr "Создано"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__create_date
 msgid "Created on"
-msgstr "Дата создания"
+msgstr "Создано"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__display_name
@@ -141,7 +136,7 @@ msgstr "Сотрудник"
 #. module: hr_work_entry_contract
 #: model:ir.model,name:hr_work_entry_contract.model_hr_contract
 msgid "Employee Contract"
-msgstr "Договор с сотрудником"
+msgstr "Договор с Сотрудником"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__employee_ids
@@ -163,11 +158,10 @@ msgstr "Дополнительные часы"
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__date_from
 msgid "From"
-msgstr "Из"
+msgstr "От"
 
 #. module: hr_work_entry_contract
 #: model:ir.actions.server,name:hr_work_entry_contract.ir_cron_generate_missing_work_entries_ir_actions_server
-#: model:ir.cron,cron_name:hr_work_entry_contract.ir_cron_generate_missing_work_entries
 msgid "Generate Missing Work Entries"
 msgstr "Создание записей о пропущенных работах"
 
@@ -189,7 +183,7 @@ msgstr "Общее время отдыха"
 #. module: hr_work_entry_contract
 #: model:ir.model,name:hr_work_entry_contract.model_hr_work_entry
 msgid "HR Work Entry"
-msgstr "Рабочая запись HR"
+msgstr "HR Ввод данных о работе"
 
 #. module: hr_work_entry_contract
 #: model:ir.model,name:hr_work_entry_contract.model_hr_work_entry_type
@@ -199,12 +193,12 @@ msgstr "HR Тип Ввода данных о работе"
 #. module: hr_work_entry_contract
 #: model:hr.work.entry.type,name:hr_work_entry_contract.work_entry_type_home_working
 msgid "Home Working"
-msgstr "Работа удаленно"
+msgstr "Работа на дому"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__id
 msgid "ID"
-msgstr "Идентификатор"
+msgstr "ID"
 
 #. module: hr_work_entry_contract
 #. odoo-python
@@ -227,14 +221,9 @@ msgid "Last Generation Date"
 msgstr "Дата последнего поколения"
 
 #. module: hr_work_entry_contract
-#: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard____last_update
-msgid "Last Modified on"
-msgstr "Последнее изменение"
-
-#. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__write_uid
 msgid "Last Updated by"
-msgstr "Последний раз обновил"
+msgstr "Последнее обновление"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__write_date
@@ -259,22 +248,26 @@ msgstr "Долгосрочный отпуск"
 #. module: hr_work_entry_contract
 #: model:hr.work.entry.type,name:hr_work_entry_contract.work_entry_type_legal_leave
 msgid "Paid Time Off"
-msgstr "Оплачиваемый отпуск"
+msgstr "Оплачиваемое отсутствие"
 
 #. module: hr_work_entry_contract
 #: model:ir.model,name:hr_work_entry_contract.model_hr_work_entry_regeneration_wizard
 #: model_terms:ir.ui.view,arch_db:hr_work_entry_contract.hr_work_entry_regeneration_wizard
 msgid "Regenerate Employee Work Entries"
-msgstr "Создать заново рабочие записи сотрудников"
+msgstr "Регенерация записей о работе сотрудников"
 
 #. module: hr_work_entry_contract
 #. odoo-javascript
-#: code:addons/hr_work_entry_contract/static/src/js/work_entries_controller_mixin.js:0
 #: code:addons/hr_work_entry_contract/static/src/views/work_entry_calendar/work_entry_calendar.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_work_entry_contract.hr_work_entry_regeneration_wizard
 #, python-format
 msgid "Regenerate Work Entries"
 msgstr "Регенерация рабочих записей"
+
+#. module: hr_work_entry_contract
+#: model:ir.model,name:hr_work_entry_contract.model_resource_calendar
+msgid "Resource Working Time"
+msgstr "Рабочее время"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__search_criteria_completed
@@ -284,7 +277,7 @@ msgstr "Критерии поиска выполнены"
 #. module: hr_work_entry_contract
 #: model:hr.work.entry.type,name:hr_work_entry_contract.work_entry_type_sick_leave
 msgid "Sick Time Off"
-msgstr "Отпуск по болезни"
+msgstr "Отсутствие по болезни"
 
 #. module: hr_work_entry_contract
 #. odoo-python
@@ -319,27 +312,27 @@ msgstr ""
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_type__is_leave
 msgid "Time Off"
-msgstr "Отсутствие"
+msgstr "Отпуск"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__date_to
 msgid "To"
-msgstr "По"
+msgstr "Кому"
 
 #. module: hr_work_entry_contract
 #: model:hr.work.entry.type,name:hr_work_entry_contract.work_entry_type_unpaid_leave
 msgid "Unpaid"
-msgstr "Без оплаты"
+msgstr "Неоплаченный"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__valid
 msgid "Valid"
-msgstr "Корректный"
+msgstr "Действительный"
 
 #. module: hr_work_entry_contract
 #: model_terms:ir.ui.view,arch_db:hr_work_entry_contract.hr_work_entry_regeneration_wizard
 msgid "Work Entries"
-msgstr "Рабочие записи"
+msgstr "Записи о работе"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry_regeneration_wizard__validated_work_entry_ids
@@ -355,7 +348,7 @@ msgstr "Регенерация рабочих мест"
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_contract__work_entry_source
 #: model:ir.model.fields,field_description:hr_work_entry_contract.field_hr_work_entry__work_entry_source
 msgid "Work Entry Source"
-msgstr "Источник рабочей записи"
+msgstr "Источник поступления на работу"
 
 #. module: hr_work_entry_contract
 #: model:ir.model.fields.selection,name:hr_work_entry_contract.selection__hr_contract__work_entry_source__calendar

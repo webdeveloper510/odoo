@@ -3,21 +3,23 @@
 # 	* website_sale_loyalty
 # 
 # Translators:
-# gezza <geza.nagy@oregional.hu>, 2022
-# Kovács Tibor <kovika@gmail.com>, 2022
-# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2022
-# Martin Trigaux, 2022
-# Ákos Nagy <akos.nagy@oregional.hu>, 2022
-# Tamás Németh <ntomasz81@gmail.com>, 2022
-# krnkris, 2022
+# Tamás Dombos, 2023
+# Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2023
+# gezza <geza.nagy@oregional.hu>, 2023
+# Kovács Tibor <kovika@gmail.com>, 2023
+# Gergő Kertész <gergo.kertesz@maxflow.hu>, 2023
+# Martin Trigaux, 2023
+# Ákos Nagy <akos.nagy@oregional.hu>, 2023
+# Tamás Németh <ntomasz81@gmail.com>, 2023
+# krnkris, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 10:24+0000\n"
-"PO-Revision-Date: 2022-09-22 05:57+0000\n"
-"Last-Translator: krnkris, 2022\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: krnkris, 2023\n"
 "Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,12 +28,24 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "<strong> - </strong>"
+msgstr ""
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "<strong>Coupons - </strong>"
+msgstr ""
+
+#. module: website_sale_loyalty
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "A coupon is needed for coupon programs."
 msgstr ""
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "A coupon with the same code was found."
@@ -51,6 +65,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Claim"
 msgstr ""
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Code:"
+msgstr "Kód:"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
@@ -93,11 +112,6 @@ msgid "Discount & Loyalty"
 msgstr ""
 
 #. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.reduction_coupon_code
-msgid "Discount code or gift card"
-msgstr ""
-
-#. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.cart_discount
 msgid "Discount:"
 msgstr "Árengedmény:"
@@ -115,7 +129,19 @@ msgstr "Megjelenített név"
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
 msgid "Done"
-msgstr "Kész"
+msgstr "Befejezve"
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Expired Date:"
+msgstr ""
+
+#. module: website_sale_loyalty
+#. odoo-javascript
+#: code:addons/website_sale_loyalty/static/src/js/website_sale_loyalty_delivery.js:0
+#, python-format
+msgid "Free"
+msgstr "Szabad"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
@@ -143,11 +169,6 @@ msgid "Invalid or expired promo code."
 msgstr "Érvénytelen vagy lejárt promóciós kód"
 
 #. module: website_sale_loyalty
-#: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share____last_update
-msgid "Last Modified on"
-msgstr "Legutóbb frissítve"
-
-#. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__write_uid
 msgid "Last Updated by"
 msgstr "Frissítette"
@@ -155,7 +176,7 @@ msgstr "Frissítette"
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__write_date
 msgid "Last Updated on"
-msgstr "Frissítve ekkor"
+msgstr "Frissítve"
 
 #. module: website_sale_loyalty
 #: model:ir.ui.menu,name:website_sale_loyalty.menu_loyalty
@@ -203,7 +224,8 @@ msgid "Promo Code"
 msgstr ""
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "Provide either a coupon or a program."
 msgstr ""
@@ -223,16 +245,17 @@ msgstr "Közzététel korlátozása erre a weboldalra."
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_sale_order
 msgid "Sales Order"
-msgstr "Vevői rendelések"
+msgstr "Megrendelések"
 
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Értékesítési megrendelés sor"
+msgstr "Vevői megrendelés sor"
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_card_view_tree_inherit_website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_program_view_tree_inherit_website_sale_loyalty
 #, python-format
@@ -255,6 +278,7 @@ msgid "Show Discount in Subtotal"
 msgstr ""
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/controllers/main.py:0
 #, python-format
 msgid ""
@@ -268,16 +292,23 @@ msgid "The following promo code was applied on your order:"
 msgstr ""
 
 #. module: website_sale_loyalty
+#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "The promo code must be unique."
 msgstr ""
 
 #. module: website_sale_loyalty
-#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#. odoo-python
+#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
 #, python-format
 msgid "The shared website should correspond to the website of the program."
 msgstr ""
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
+msgid "Use"
+msgstr "Használja"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__website_id

@@ -1,19 +1,13 @@
-odoo.define('web.dialog_tests', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var Dialog = require('web.Dialog');
-var testUtils = require('web.test_utils');
-var Widget = require('web.Widget');
+import Dialog from "@web/legacy/js/core/dialog";
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
+import Widget from "@web/legacy/js/core/widget";
 
 var ESCAPE_KEY = $.Event("keyup", { which: 27 });
 
 async function createEmptyParent(debug) {
-    var widget = new Widget();
-
-    await testUtils.mock.addMockEnvironment(widget, {
-        debug: debug || false,
-    });
-    return widget;
+    return new Widget();
 }
 
 QUnit.module('core', {}, function () {
@@ -321,6 +315,4 @@ QUnit.module('core', {}, function () {
         await testUtils.nextTick();
         assert.containsNone(document.body, ".modal[role='dialog']");
     });
-});
-
 });

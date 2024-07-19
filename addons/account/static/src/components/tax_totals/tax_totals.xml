@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
 
-    <t t-name="account.TaxGroupComponent" owl="1">
+    <t t-name="account.TaxGroupComponent">
         <tr>
             <td class="o_td_label">
-                <label class="o_form_label o_tax_total_label" t-esc="props.taxGroup.tax_group_name"/>
+                <label class="o_form_label o_tax_total_label" t-out="props.taxGroup.tax_group_name"/>
             </td>
 
             <td  class="o_tax_group">
@@ -38,13 +38,13 @@
         </tr>
     </t>
 
-    <t t-name="account.TaxTotalsField" owl="1">
-        <table t-if="totals" class="oe_right">
+    <t t-name="account.TaxTotalsField">
+        <table t-if="totals">
             <tbody>
                 <t t-foreach="totals.subtotals" t-as="subtotal" t-key="subtotal['name']">
                     <tr>
                         <td class="o_td_label">
-                            <label class="o_form_label o_tax_total_label" t-esc="subtotal['name']"/>
+                            <label class="o_form_label o_tax_total_label" t-out="subtotal['name']"/>
                         </td>
 
                         <td class="o_list_monetary">

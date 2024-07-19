@@ -8,7 +8,8 @@ import requests
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from .const import VALID_KEYS
+from odoo.addons.payment_ogone import const
+
 
 _logger = logging.getLogger(__name__)
 
@@ -94,7 +95,7 @@ class PaymentProvider(models.Model):
         """
 
         def _filter_key(_key):
-            return not incoming or _key in VALID_KEYS
+            return not incoming or _key in const.VALID_KEYS
 
         key = self.ogone_shakey_out if incoming else self.ogone_shakey_in  # Swapped for Ogone's POV
         if format_keys:
@@ -131,3 +132,10 @@ class PaymentProvider(models.Model):
             _logger.exception("invalid API request at %s with data %s", url, payload)
             raise ValidationError("Ogone: " + _("The communication with the API failed."))
         return response.content
+
+    def _get_default_payment_method_codes(self):
+        """ Override of `payment` to return the default payment method codes. """
+        default_codes = super()._get_default_payment_method_codes()
+        if self.code != 'ogone':
+            return default_codes
+        return const.DEFAULT_PAYMENT_METHODS_CODES

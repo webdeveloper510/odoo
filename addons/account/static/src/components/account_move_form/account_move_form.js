@@ -37,12 +37,10 @@ AccountMoveFormNotebook.props = {
 }
 export class AccountMoveFormRenderer extends FormRenderer {
     async saveBeforeTabChange() {
-        if (this.props.record.mode === "edit" && this.props.record.isDirty) {
+        if (this.props.record.isInEdition && await this.props.record.isDirty()) {
             const contentEl = document.querySelector('.o_content');
             const scrollPos = contentEl.scrollTop;
-            await this.props.record.save({
-                stayInEdition: true,
-            });
+            await this.props.record.save();
             if (scrollPos) {
                 contentEl.scrollTop = scrollPos;
             }
@@ -60,7 +58,7 @@ export class AccountMoveFormCompiler extends FormCompiler {
         for (const attr of originalNoteBook.attributes) {
             noteBook.setAttribute(attr.name, attr.value);
         }
-        noteBook.setAttribute("onBeforeTabSwitch", "() => this.saveBeforeTabChange()");
+        noteBook.setAttribute("onBeforeTabSwitch", "() => __comp__.saveBeforeTabChange()");
         const slots = originalNoteBook.childNodes;
         append(noteBook, [...slots]);
         return noteBook;

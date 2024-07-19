@@ -4,8 +4,11 @@ import {
     clickSave,
     editInput,
     getFixture,
+    makeDeferred,
+    nextTick,
     patchWithCleanup,
     triggerEvent,
+    triggerEvents,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { NameAndSignature } from "@web/core/signature/name_and_signature";
@@ -60,10 +63,67 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.module("Signature Field");
 
+    QUnit.test("signature can be drawn", async function (assert) {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            resId: 1,
+            serverData,
+            arch: `<form>
+                        <field name="sign" widget="signature" />
+                    </form>`,
+            mockRPC: async (route) => {
+                if (route === "/web/sign/get_fonts/") {
+                    return {};
+                }
+            },
+        });
+
+        assert.containsNone(target, "div[name=sign] img.o_signature");
+        assert.containsOnce(
+            target,
+            "div[name=sign] div.o_signature svg",
+            "should have a valid signature widget"
+        );
+
+        // Click on the widget to open signature modal
+        await click(target, "div[name=sign] div.o_signature");
+        assert.containsOnce(target, ".modal .modal-body .o_web_sign_name_and_signature");
+        assert.containsNone(target, ".modal .btn.btn-primary:not([disabled])");
+
+        // Use a drag&drop simulation to draw a signature
+        const def = makeDeferred();
+        const jSignatureEl = target.querySelector(".modal .o_web_sign_signature");
+        $(jSignatureEl).on("change", def.resolve);
+        const { x, y, width, height } = target
+            .querySelector("canvas.jSignature")
+            .getBoundingClientRect();
+        await triggerEvents(jSignatureEl, "canvas.jSignature", [
+            ["mousedown", { clientX: x + 1, clientY: y + 1 }],
+            ["mousemove", { clientX: x + width - 1, clientY: height + height - 1 }],
+            ["mouseup", { clientX: x + width - 1, clientY: height + height - 1 }],
+        ]);
+        await def; // makes sure the signature stroke is taken into account by jSignature
+        await nextTick(); // await owl rendering
+        assert.containsOnce(target, ".modal .btn.btn-primary:not([disabled])");
+
+        // Click on "Adopt and Sign" button
+        await click(target, ".modal .btn.btn-primary:not([disabled])");
+        assert.containsNone(target, ".modal");
+
+        // The signature widget should now display the signature img
+        assert.containsNone(target, "div[name=sign] div.o_signature svg");
+        assert.containsOnce(target, "div[name=sign] img.o_signature");
+
+        const signImgSrc = target.querySelector("div[name=sign] img.o_signature").dataset.src;
+        assert.notOk(signImgSrc.includes("placeholder"));
+        assert.ok(signImgSrc.startsWith("data:image/png;base64,"));
+    });
+
     QUnit.test("Set simple field in 'full_name' node option", async function (assert) {
         patchWithCleanup(NameAndSignature.prototype, {
             setup() {
-                this._super.apply(this, arguments);
+                super.setup(...arguments);
                 assert.step(this.props.signature.name);
             },
         });
@@ -96,13 +156,18 @@ QUnit.module("Fields", (hooks) => {
             ".modal .modal-body a.o_web_sign_auto_button",
             'should open a modal with "Auto" button'
         );
+        assert.hasClass(
+            target.querySelector(".o_web_sign_auto_button"),
+            "active",
+            "'Auto' panel is visible by default"
+        );
         assert.verifySteps(["Pop's Chock'lit"]);
     });
 
     QUnit.test("Set m2o field in 'full_name' node option", async function (assert) {
         patchWithCleanup(NameAndSignature.prototype, {
             setup() {
-                this._super.apply(this, arguments);
+                super.setup(...arguments);
                 assert.step(this.props.signature.name);
             },
         });
@@ -183,7 +248,7 @@ QUnit.module("Fields", (hooks) => {
 
             const rec = serverData.models.partner.records.find((rec) => rec.id === 1);
             rec.sign = "3 kb";
-            rec.__last_update = "2022-08-05 08:37:00"; // 1659688620000
+            rec.write_date = "2022-08-05 08:37:00"; // 1659688620000
 
             // 1659692220000, 1659695820000
             const lastUpdates = ["2022-08-05 09:37:00", "2022-08-05 10:37:00"];
@@ -203,9 +268,9 @@ QUnit.module("Fields", (hooks) => {
                     if (route === "/web/sign/get_fonts/") {
                         return {};
                     }
-                    if (method === "write") {
-                        assert.step("write");
-                        args[1].__last_update = lastUpdates[index];
+                    if (method === "web_save") {
+                        assert.step("web_save");
+                        args[1].write_date = lastUpdates[index];
                         args[1].sign = "4 kb";
                         index++;
                     }
@@ -216,7 +281,7 @@ QUnit.module("Fields", (hooks) => {
                 "1659688620000"
             );
 
-            await click(target, ".o_field_signature img", true);
+            await click(target, ".o_field_signature img", { skipVisibilityCheck: true });
             assert.containsOnce(target, ".modal canvas");
 
             let canvas = target.querySelector(".modal canvas");
@@ -244,13 +309,13 @@ QUnit.module("Fields", (hooks) => {
             );
 
             await clickSave(target);
-            assert.verifySteps(["write"]);
+            assert.verifySteps(["web_save"]);
             assert.strictEqual(
                 getUnique(target.querySelector(".o_field_signature img")),
                 "1659692220000"
             );
 
-            await click(target, ".o_field_signature img", true);
+            await click(target, ".o_field_signature img", { skipVisibilityCheck: true });
             assert.containsOnce(target, ".modal canvas");
 
             canvas = target.querySelector(".modal canvas");
@@ -272,7 +337,7 @@ QUnit.module("Fields", (hooks) => {
                 `data:image/png;base64,${MYB64_2}`
             );
             await clickSave(target);
-            assert.verifySteps(["write"]);
+            assert.verifySteps(["web_save"]);
             assert.strictEqual(
                 getUnique(target.querySelector(".o_field_signature img")),
                 "1659695820000"
@@ -292,7 +357,7 @@ QUnit.module("Fields", (hooks) => {
 
         const rec = serverData.models.partner.records.find((rec) => rec.id === 1);
         rec.sign = "3 kb";
-        rec.__last_update = "2022-08-05 08:37:00"; // 1659688620000
+        rec.write_date = "2022-08-05 08:37:00"; // 1659688620000
 
         // 1659692220000, 1659695820000
         const lastUpdates = ["2022-08-05 09:37:00", "2022-08-05 10:37:00"];
@@ -309,9 +374,9 @@ QUnit.module("Fields", (hooks) => {
                         <field name="sign" widget="signature" />
                     </form>`,
             mockRPC(route, { method, args }) {
-                if (method === "write") {
-                    assert.step("write");
-                    args[1].__last_update = lastUpdates[index];
+                if (method === "web_save") {
+                    assert.step("web_save");
+                    args[1].write_date = lastUpdates[index];
                     args[1].sign = "4 kb";
                     index++;
                 }
@@ -332,6 +397,6 @@ QUnit.module("Fields", (hooks) => {
             getUnique(target.querySelector(".o_field_signature img")),
             "1659692220000"
         );
-        assert.verifySteps(["write"]);
+        assert.verifySteps(["web_save"]);
     });
 });

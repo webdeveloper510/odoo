@@ -1,39 +1,41 @@
 /** @odoo-module */
 
-import { _t } from 'web.core';
-import { Markup } from 'web.utils';
-import tour from 'web_tour.tour';
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
-tour.register('survey_tour', {
+import { markup } from "@odoo/owl";
+
+registry.category("web_tour.tours").add('survey_tour', {
     url: "/web",
     rainbowManMessage: _t("Congratulations! You are now ready to collect feedback like a pro :-)"),
     sequence: 225,
-}, [
-    ...tour.stepUtils.goToAppSteps('survey.menu_surveys', Markup(_t("Ready to change the way you <b>gather data</b>?"))),
+    steps: () => [
+    ...stepUtils.goToAppSteps('survey.menu_surveys', markup(_t("Ready to change the way you <b>gather data</b>?"))),
 {
     trigger: '.btn-outline-primary.o_survey_load_sample',
-    content: Markup(_t("Load a <b>sample Survey</b> to get started quickly.")),
+    content: markup(_t("Load a <b>sample Survey</b> to get started quickly.")),
     position: 'left',
 }, {
     trigger: 'button[name=action_test_survey]',
     content: _t("Let's give it a spin!"),
     position: 'bottom',
 }, {
-    trigger: '.o_survey_start button[type=submit]',
+    trigger: 'button[type=submit]',
     content: _t("Let's get started!"),
     position: 'bottom',
 }, {
-    trigger: '.o_survey_simple_choice button[type=submit]',
+    trigger: 'button[type=submit]',
     extra_trigger: '.js_question-wrapper span:contains("How frequently")',
     content: _t("Whenever you pick an answer, Odoo saves it for you."),
-    position: 'bottom', 
+    position: 'bottom',
 }, {
-    trigger: '.o_survey_numerical_box button[type=submit]',
+    trigger: 'button[type=submit]',
     extra_trigger: '.js_question-wrapper span:contains("How many")',
     content: _t("Only a single question left!"),
     position: 'bottom',
 }, {
-    trigger: '.o_survey_matrix button[value=finish]',
+    trigger: 'button[value=finish]',
     extra_trigger: '.js_question-wrapper span:contains("How likely")',
     content: _t("Now that you are done, submit your form."),
     position: 'bottom',
@@ -58,4 +60,4 @@ tour.register('survey_tour', {
     content: _t("Use the breadcrumbs to quickly go back to the dashboard."),
     position: 'bottom',
 }
-]);
+]});

@@ -2,22 +2,13 @@
 /* global BarcodeDetector */
 
 import { browser } from "@web/core/browser/browser";
-import Dialog from "web.OwlDialog";
-import { delay } from "web.concurrency";
-import { loadJS, templates } from "@web/core/assets";
+import { Dialog } from "@web/core/dialog/dialog";
+import { delay } from "@web/core/utils/concurrency";
+import { loadJS } from "@web/core/assets";
 import { isVideoElementReady, buildZXingBarcodeDetector } from "./ZXingBarcodeDetector";
 import { CropOverlay } from "./crop_overlay";
-import { Deferred } from "@web/core/utils/concurrency";
 
-import {
-    App,
-    Component,
-    onMounted,
-    onWillStart,
-    onWillUnmount,
-    useRef,
-    useState,
-} from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
 export class BarcodeDialog extends Component {
@@ -103,13 +94,10 @@ export class BarcodeDialog extends Component {
      */
     async isVideoReady() {
         // FIXME: even if it shouldn't happened, a timeout could be useful here.
-        return new Promise(async (resolve) => {
-            while (!isVideoElementReady(this.videoPreviewRef.el)) {
-                await delay(10);
-            }
-            this.state.isReady = true;
-            resolve();
-        });
+        while (!isVideoElementReady(this.videoPreviewRef.el)) {
+            await delay(10);
+        }
+        this.state.isReady = true;
     }
 
     onResize(overlayInfo) {
@@ -127,7 +115,8 @@ export class BarcodeDialog extends Component {
      * @param {string} result found code
      */
     onResult(result) {
-        this.props.onClose({ barcode: result });
+        this.props.close();
+        this.props.onResult(result);
     }
 
     /**
@@ -136,7 +125,8 @@ export class BarcodeDialog extends Component {
      * @param {Error} error
      */
     onError(error) {
-        this.props.onClose({ error });
+        this.props.close();
+        this.props.onError(error);
     }
 
     /**
@@ -199,26 +189,17 @@ export function isBarcodeScannerSupported() {
  *
  * @returns {Promise<string>} resolves when a {qr,bar}code has been detected
  */
-export async function scanBarcode(facingMode = "environment") {
-    const promise = new Deferred();
-    const appForBarcodeDialog = new App(BarcodeDialog, {
-        env: owl.Component.env,
-        dev: owl.Component.env.isDebug(),
-        templates,
-        translatableAttributes: ["data-tooltip"],
-        translateFn: _t,
-        props: {
-            onClose: (result = {}) => {
-                appForBarcodeDialog.destroy();
-                if (result.error) {
-                    promise.reject({ error: result.error });
-                } else {
-                    promise.resolve(result.barcode);
-                }
-            },
-            facingMode: facingMode,
-        },
+export async function scanBarcode(env, facingMode = "environment") {
+    let res;
+    let rej;
+    const promise = new Promise((resolve, reject) => {
+        res = resolve;
+        rej = reject;
     });
-    await appForBarcodeDialog.mount(document.body);
+    env.services.dialog.add(BarcodeDialog, {
+        facingMode,
+        onResult: (result) => res(result),
+        onError: (error) => rej(error),
+    });
     return promise;
 }

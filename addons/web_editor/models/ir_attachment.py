@@ -5,8 +5,15 @@ from werkzeug.urls import url_quote
 
 from odoo import api, models, fields, tools
 
-SUPPORTED_IMAGE_MIMETYPES = ['image/gif', 'image/jpe', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg+xml']
-SUPPORTED_IMAGE_EXTENSIONS = ['.gif', '.jpe', '.jpeg', '.jpg', '.png', '.svg']
+SUPPORTED_IMAGE_MIMETYPES = {
+    'image/gif': '.gif',
+    'image/jpe': '.jpe',
+    'image/jpeg': '.jpeg',
+    'image/jpg': '.jpg',
+    'image/png': '.png',
+    'image/svg+xml': '.svg',
+    'image/webp': '.webp',
+}
 
 
 class IrAttachment(models.Model):
@@ -35,7 +42,12 @@ class IrAttachment(models.Model):
                 continue
 
             if attachment.type == 'url':
-                attachment.image_src = attachment.url
+                if attachment.url.startswith('/'):
+                    # Local URL
+                    attachment.image_src = attachment.url
+                else:
+                    name = url_quote(attachment.name)
+                    attachment.image_src = '/web/image/%s-redirect/%s' % (attachment.id, name)
             else:
                 # Adding unique in URLs for cache-control
                 unique = attachment.checksum[:8]

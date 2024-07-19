@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import * as spreadsheet from "@odoo/o-spreadsheet";
 import { _t } from "@web/core/l10n/translation";
 import { OdooChart } from "./odoo_chart";
 
@@ -22,7 +22,8 @@ chartRegistry.add("odoo_pie", {
 function createOdooChartRuntime(chart, getters) {
     const background = chart.background || "#FFFFFF";
     const { datasets, labels } = chart.dataSource.getData();
-    const chartJsConfig = getPieConfiguration(chart, labels);
+    const locale = getters.getLocale();
+    const chartJsConfig = getPieConfiguration(chart, labels, locale);
     const colors = new ChartColors();
     for (const { label, data } of datasets) {
         const backgroundColor = getPieColors(colors, datasets);
@@ -37,9 +38,9 @@ function createOdooChartRuntime(chart, getters) {
     return { background, chartJsConfig };
 }
 
-function getPieConfiguration(chart, labels) {
+function getPieConfiguration(chart, labels, locale) {
     const fontColor = chartFontColor(chart.background);
-    const config = getDefaultChartJsRuntime(chart, labels, fontColor);
+    const config = getDefaultChartJsRuntime(chart, labels, fontColor, { locale });
     config.type = chart.type.replace("odoo_", "");
     const legend = {
         ...config.options.legend,
@@ -47,14 +48,15 @@ function getPieConfiguration(chart, labels) {
         labels: { fontColor },
     };
     legend.position = chart.legendPosition;
-    config.options.legend = legend;
+    config.options.plugins = config.options.plugins || {};
+    config.options.plugins.legend = legend;
     config.options.layout = {
         padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
     };
-    config.options.tooltips = {
+    config.options.plugins.tooltip = {
         callbacks: {
-            title: function (tooltipItems, data) {
-                return data.datasets[tooltipItems[0].datasetIndex].label;
+            title: function (tooltipItem) {
+                return tooltipItem.label;
             },
         },
     };

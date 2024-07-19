@@ -1,10 +1,9 @@
 /** @odoo-module **/
 
-import { useBus, useService } from "@web/core/utils/hooks";
-import { SearchModel } from "@web/search/search_model";
 import { CallbackRecorder, useSetupAction } from "@web/webclient/actions/action_hook";
-
 import { Component, onWillStart, onWillUpdateProps, toRaw, useSubEnv } from "@odoo/owl";
+import { SearchModel } from "@web/search/search_model";
+import { useBus, useService } from "@web/core/utils/hooks";
 
 export const SEARCH_KEYS = ["comparison", "context", "domain", "groupBy", "orderBy"];
 
@@ -18,11 +17,17 @@ export class WithSearch extends Component {
         }
 
         const SearchModelClass = this.props.SearchModel || SearchModel;
-        this.searchModel = new SearchModelClass(this.env, {
-            user: useService("user"),
-            orm: useService("orm"),
-            view: useService("view"),
-        });
+        this.searchModel = new SearchModelClass(
+            this.env,
+            {
+                user: useService("user"),
+                orm: useService("orm"),
+                view: useService("view"),
+                field: useService("field"),
+                name: useService("name"),
+            },
+            this.props.searchModelArgs
+        );
 
         useSubEnv({ searchModel: this.searchModel });
 
@@ -64,12 +69,12 @@ WithSearch.props = {
     resModel: String,
 
     globalState: { type: Object, optional: true },
+    searchModelArgs: { type: Object, optional: true },
 
     display: { type: Object, optional: true },
 
     // search query elements
-    comparison: { validate: () => true, optional: true }, // fix problem with validation with type: [Object, null]
-    // Issue OWL: https://github.com/odoo/owl/issues/910
+    comparison: { type: [Object, { value: null }], optional: true },
     context: { type: Object, optional: true },
     domain: { type: Array, element: [String, Array], optional: true },
     groupBy: { type: Array, element: String, optional: true },

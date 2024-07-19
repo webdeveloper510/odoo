@@ -27,6 +27,9 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
         })
 
+        currency_grp = cls.env.ref('base.group_multi_currency')
+        cls.env.user.write({'groups_id': [(4, currency_grp.id)]})
+
         cls.env.company.anglo_saxon_accounting = True
 
     def test_kit_anglo_saxo_price_diff(self):
@@ -60,9 +63,7 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
         po = po_form.save()
         po.button_confirm()
 
-        action = po.picking_ids.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        po.picking_ids.button_validate()
 
         action = po.action_create_invoice()
         invoice = self.env['account.move'].browse(action['res_id'])
@@ -138,7 +139,7 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_line_ids.qty_done = 1
+        receipt.move_line_ids.quantity = 1
         receipt.button_validate()
 
         self.assertEqual(receipt.state, 'done')
@@ -161,13 +162,13 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
             })],
         })
         delivery.action_confirm()
-        delivery.move_ids.move_line_ids.qty_done = 1
+        delivery.move_ids.move_line_ids.quantity = 1
         delivery.button_validate()
 
         self.assertEqual(component01.stock_valuation_layer_ids.mapped('value'), [25, -25])
         self.assertEqual(component02.stock_valuation_layer_ids.mapped('value'), [75, -75])
 
-        with mute_logger('odoo.tests.common.onchange'):
+        with mute_logger('odoo.tests.form.onchange'):
             with Form(bom_kit) as kit_form:
                 with kit_form.bom_line_ids.edit(0) as line:
                     line.cost_share = 30
@@ -178,7 +179,7 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
         wizard = wizard_form.save()
         action = wizard.create_returns()
         return_picking = self.env["stock.picking"].browse(action["res_id"])
-        return_picking.move_ids.move_line_ids.qty_done = 1
+        return_picking.move_ids.move_line_ids.quantity = 1
         return_picking.button_validate()
 
         self.assertEqual(component01.stock_valuation_layer_ids.mapped('value'), [25, -25, 25])
@@ -224,9 +225,7 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
         po = po_form.save()
         po.button_confirm()
 
-        action = po.picking_ids.button_validate()
-        wizard = Form(self.env[action['res_model']].with_context(action['context'])).save()
-        wizard.process()
+        po.picking_ids.button_validate()
 
         svl = po.order_line.move_ids.stock_valuation_layer_ids.ensure_one()
         input_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id)])

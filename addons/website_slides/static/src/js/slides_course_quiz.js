@@ -1,19 +1,19 @@
 /** @odoo-module **/
 
-    import publicWidget from 'web.public.widget';
-    import Dialog from 'web.Dialog';
-    import  { qweb as QWeb, _t } from 'web.core';
-    import session from 'web.session';
-    import { Markup } from 'web.utils';
+    import publicWidget from '@web/legacy/js/public/public_widget';
+    import Dialog from '@web/legacy/js/core/dialog';
+    import { renderToElement } from "@web/core/utils/render";
+    import { session } from "@web/session";
     import CourseJoin from '@website_slides/js/slides_course_join';
     import QuestionFormWidget from '@website_slides/js/slides_course_quiz_question_form';
     import SlideQuizFinishModal from '@website_slides/js/slides_course_quiz_finish';
     import { SlideCoursePage } from '@website_slides/js/slides_course_page';
 
-    import SlideEnroll from '@website_slides/js/slides_course_enroll_email';
+    import { _t } from "@web/core/l10n/translation";
+
+    import { markup } from "@odoo/owl";
 
     const CourseJoinWidget = CourseJoin.courseJoinWidget;
-    const SlideEnrollDialog = SlideEnroll.slideEnrollDialog;
 
     /**
      * This widget is responsible of displaying quiz questions and propositions. Submitting the quiz will fetch the
@@ -37,7 +37,6 @@
             'click .o_wslides_js_quiz_add': '_onCreateQuizClick',
             'click .o_wslides_js_quiz_edit_question': '_onEditQuestionClick',
             'click .o_wslides_js_quiz_delete_question': '_onDeleteQuestionClick',
-            'click .o_wslides_js_channel_enroll': '_onSendRequestToResponsibleClick',
         },
 
         custom_events: {
@@ -55,22 +54,27 @@
         */
         init: function (parent, slide_data, channel_data, quiz_data) {
             this._super.apply(this, arguments);
-            this.slide = _.defaults(slide_data, {
+            this.slide = Object.assign({
                 id: 0,
                 name: '',
                 hasNext: false,
                 completed: false,
                 isMember: false,
-            });
+                isMemberOrInvited: false,
+            }, slide_data);
             this.quiz = quiz_data || false;
             if (this.quiz) {
                 this.quiz.questionsCount = quiz_data.questions.length;
             }
             this.isMember = slide_data.isMember || false;
+            this.isMemberOrInvited = slide_data.isMemberOrInvited || false;
             this.publicUser = session.is_website_user;
             this.userId = session.user_id;
             this.redirectURL = encodeURIComponent(document.URL);
             this.channel = channel_data;
+
+            this.rpc = this.bindService("rpc");
+            this.orm = this.bindService("orm");
         },
 
         /**
@@ -107,6 +111,11 @@
             });
         },
 
+        destroy() {
+            this._unbindSortable();
+            return this._super(...arguments);
+        },
+
         //--------------------------------------------------------------------------
         // Private
         //--------------------------------------------------------------------------
@@ -114,7 +123,7 @@
         _showErrorMessage: function (errorCode) {
             var message = _t('There was an error validating this quiz.');
             if (errorCode === 'slide_quiz_incomplete') {
-                message = _t('All questions must be answered !');
+                message = _t('All questions must be answered!');
             } else if (errorCode === 'slide_quiz_done') {
                 message = _t('This quiz is already done. Retaking it is not possible.');
             } else if (errorCode === 'public_user') {
@@ -137,12 +146,23 @@
          * @private
          */
         _bindSortable: function () {
-            this.$el.sortable({
-                handle: '.o_wslides_js_quiz_sequence_handler',
-                items: '.o_wslides_js_lesson_quiz_question',
-                stop: this._reorderQuestions.bind(this),
-                placeholder: 'o_wslides_js_quiz_sequence_highlight position-relative my-3'
-            });
+            this.bindedSortable = this.call(
+                "sortable",
+                "create",
+                {
+                    ref: { el: this.el },
+                    handle: ".o_wslides_js_quiz_sequence_handler",
+                    elements: ".o_wslides_js_lesson_quiz_question",
+                    onDrop: this._reorderQuestions.bind(this),
+                    clone: false,
+                    placeholderClasses: ['o_wslides_js_quiz_sequence_highlight', 'position-relative', 'my-3'],
+                    applyChangeOnDrop: true
+                },
+            ).enable();
+        },
+
+        _unbindSortable: function () {
+            this.bindedSortable?.cleanup();
         },
 
         /**
@@ -174,12 +194,9 @@
          * @private
          */
         _reorderQuestions: function () {
-            this._rpc({
-                route: '/web/dataset/resequence',
-                params: {
-                    model: "slide.question",
-                    ids: this._getQuestionsIds()
-                }
+            this.rpc('/web/dataset/resequence', {
+                model: "slide.question",
+                ids: this._getQuestionsIds()
             }).then(this._modifyQuestionsSequence.bind(this))
         },
         /*
@@ -188,15 +205,12 @@
          */
         _fetchQuiz: function () {
             var self = this;
-            return self._rpc({
-                route:'/slides/slide/quiz/get',
-                params: {
-                    'slide_id': self.slide.id,
-                }
+            return self.rpc('/slides/slide/quiz/get', {
+                'slide_id': self.slide.id,
             }).then(function (quiz_data) {
                 self.slide.sessionAnswers = quiz_data.session_answers;
                 self.quiz = {
-                    description_safe: Markup(quiz_data.slide_description),
+                    description_safe: quiz_data.slide_description ? markup(quiz_data.slide_description) : '',
                     questions: quiz_data.slide_questions || [],
                     questionsCount: quiz_data.slide_questions.length,
                     quizAttemptsCount: quiz_data.quiz_attempts_count || 0,
@@ -280,7 +294,7 @@
                 $question.find('a.o_wslides_quiz_answer').each(function () {
                     var $answer = $(this);
                     if (!$answer.find('input[type=radio]')[0].checked &&
-                        _.contains(self.slide.sessionAnswers, $answer.data('answerId'))) {
+                        self.slide.sessionAnswers.includes($answer.data('answerId'))) {
                         $answer.find('input[type=radio]').prop('checked', true);
                     }
                 });
@@ -296,13 +310,13 @@
          */
         _renderValidationInfo: function () {
             var $validationElem = this.$('.o_wslides_js_lesson_quiz_validation');
-            $validationElem.html(
-                QWeb.render('slide.slide.quiz.validation', {'widget': this})
+            $validationElem.empty().append(
+                renderToElement('slide.slide.quiz.validation', {'widget': this})
             );
         },
         /*
         * Toggle additional resource info box
-        * 
+        *
         * @private
         * @param {Boolean} show - Whether show or hide the information
         */
@@ -324,6 +338,7 @@
                     isQuiz: true,
                     channel: this.channel,
                     isMember: this.isMember,
+                    isMemberOrInvited: this.isMemberOrInvited,
                     publicUser: this.publicUser,
                     beforeJoin: this._saveQuizAnswersToSession.bind(this),
                     afterJoin: this._afterJoin.bind(this),
@@ -355,12 +370,9 @@
          * @private
          */
          async _submitQuiz() {
-            const data = await this._rpc({
-                route: '/slides/slide/quiz/submit',
-                params: {
-                    slide_id: this.slide.id,
-                    answer_ids: this._getQuizAnswers(),
-                }
+            const data = await this.rpc('/slides/slide/quiz/submit', {
+                slide_id: this.slide.id,
+                answer_ids: this._getQuizAnswers(),
             });
             if (data.error) {
                 this._showErrorMessage(data.error);
@@ -372,9 +384,9 @@
             const {rankProgress, completed, channel_completion: completion} = this.quiz;
             // two of the rankProgress properties are HTML messages, mark if set
             if ('description' in rankProgress) {
-                rankProgress['description'] = Markup(rankProgress['description'] || '');
+                rankProgress['description'] = markup(rankProgress['description'] || '');
                 rankProgress['previous_rank']['motivational'] =
-                    Markup(rankProgress['previous_rank']['motivational'] || '');
+                    markup(rankProgress['previous_rank']['motivational'] || '');
             }
             if (completed) {
                 this._disableAnswers();
@@ -468,11 +480,8 @@
          * @private
          */
         _onClickReset: function () {
-            this._rpc({
-                route: '/slides/slide/quiz/reset',
-                params: {
-                    slide_id: this.slide.id
-                }
+            this.rpc('/slides/slide/quiz/reset', {
+                slide_id: this.slide.id
             }).then(function () {
                 window.location.reload();
             });
@@ -486,11 +495,8 @@
         _saveQuizAnswersToSession: function () {
             this._hideErrorMessage();
 
-            return this._rpc({
-                route: '/slides/slide/quiz/save_to_session',
-                params: {
-                    'quiz_answers': {'slide_id': this.slide.id, 'slide_answers': this._getQuizAnswers()},
-                }
+            return this.rpc('/slides/slide/quiz/save_to_session', {
+                'quiz_answers': {'slide_id': this.slide.id, 'slide_answers': this._getQuizAnswers()},
             });
         },
         /**
@@ -551,20 +557,6 @@
             new ConfirmationDialog(this, {
                 questionId: question.data('questionId'),
                 questionTitle: question.data('title')
-            }).open();
-        },
-
-        /**
-         * Handler for the contact responsible link below a Quiz
-         * @param ev
-         * @private
-         */
-        _onSendRequestToResponsibleClick: function(ev) {
-            ev.preventDefault();
-            var channelId = $(ev.currentTarget).data('channelId');
-            new SlideEnrollDialog(this, {
-                channelId: channelId,
-                $element: $(ev.currentTarget).closest('.alert.alert-info')
             }).open();
         },
 
@@ -656,14 +648,14 @@
          * @param options
          */
         init: function (parent, options) {
-            options = _.defaults(options || {}, {
+            options = Object.assign({
                 title: _t('Delete Question'),
                 buttons: [
                     { text: _t('Yes'), classes: 'btn-primary', click: this._onConfirmClick },
                     { text: _t('No'), close: true}
                 ],
                 size: 'medium'
-            });
+            }, options || {});
             this.questionId = options.questionId;
             this.questionTitle = options.questionTitle;
             this._super.apply(this, arguments);
@@ -677,11 +669,7 @@
          */
         _onConfirmClick: function () {
             var self = this;
-            this._rpc({
-                model: 'slide.question',
-                method: 'unlink',
-                args: [this.questionId],
-            }).then(function () {
+            this.orm.unlink("slide.question", [this.questionId]).then(function () {
                 self.trigger_up('delete_question', { questionId: self.questionId });
                 self.close();
             });
@@ -690,7 +678,7 @@
 
     publicWidget.registry.websiteSlidesQuizNoFullscreen = SlideCoursePage.extend({
         selector: '.o_wslides_lesson_main', // selector of complete page, as we need slide content and aside content table
-        custom_events: _.extend({}, SlideCoursePage.prototype.custom_events, {
+        custom_events: Object.assign({}, SlideCoursePage.prototype.custom_events, {
             slide_go_next: '_onQuizNextSlide',
         }),
 
@@ -754,7 +742,7 @@
                 return slide;
             }
             // A quiz in a documentation on non fullscreen view
-            return $(`.o_wslides_js_lesson_quiz[data-id="${slideId}"`).data();
+            return $(`.o_wslides_js_lesson_quiz[data-id="${slideId}"]`).data();
         },
 
         /**

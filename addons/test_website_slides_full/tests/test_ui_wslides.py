@@ -32,13 +32,13 @@ class TestUi(AccountTestInvoicingCommon, TestUICommon):
 
         # Specify Accounting Data
         cash_journal = self.env['account.journal'].create({'name': 'Cash - Test', 'type': 'cash', 'code': 'CASH - Test'})
+        self.env.ref('website.default_website').company_id = self.env.company
         self.env['payment.provider'].sudo().search([('code', '=', 'demo')]).write({
             'journal_id': cash_journal.id,
             'state': 'test',
             'website_id': self.env.ref('website.default_website').id,
             'company_id': self.env.company.id,
         })
-        self.env.ref('website.default_website').company_id = self.env.company
         a_recv = self.env['account.account'].create({
             'code': 'X1012',
             'name': 'Debtors - (test)',
@@ -168,8 +168,4 @@ class TestUi(AccountTestInvoicingCommon, TestUICommon):
             ]
         })
 
-        self.browser_js(
-            '/slides',
-            'odoo.__DEBUG__.services["web_tour.tour"].run("certification_member")',
-            'odoo.__DEBUG__.services["web_tour.tour"].tours.certification_member.ready',
-            login=user_demo.login)
+        self.start_tour('/slides', 'certification_member', login=user_demo.login, timeout=90)

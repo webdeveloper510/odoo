@@ -121,8 +121,6 @@ $line-height-truncate: 1.25em;
         top: -40px;
 
         @include media-breakpoint-up(lg) {
-            font-size: 1rem;
-
             .o_wslides_nav_navbar_right {
                 padding-left: $spacer;
                 margin-left: auto;
@@ -167,7 +165,7 @@ $line-height-truncate: 1.25em;
 
     .o_wslides_js_lesson_quiz_question {
         .list-group-item  {
-            font-size: 1rem;
+            @include font-size(1rem);
 
             input:checked + i.fa-circle {
                 color: $primary !important;
@@ -187,7 +185,7 @@ $line-height-truncate: 1.25em;
     a.o_wslides_js_quiz_is_correct {
         color: black;
         input:checked + i.fa-check-circle-o {
-            color: $primary !important;
+            color: $success !important;
         }
     }
 
@@ -231,15 +229,15 @@ $line-height-truncate: 1.25em;
 }
 
 .o_wslides_channel_completion_completed {
-    font-size: 1rem;
+    @include font-size(1rem);
 }
 
 // New home page
 // **************************************************
 .o_wslides_home_main {
     .o_wslides_home_aside_loggedin {
+        background: none;
         @include media-breakpoint-up(lg) {
-            background: none;
             border: none;
         }
     }
@@ -251,7 +249,6 @@ $line-height-truncate: 1.25em;
     .o_wprofile_progress_circle {
         margin-left: auto;
         margin-right: auto;
-        max-width: 200px;
     }
 }
 
@@ -527,6 +524,7 @@ $line-height-truncate: 1.25em;
             background-position: center;
             padding-bottom: 35%;
         }
+
     }
     .o_wslides_lesson_card {
         .o_wslides_background_image img {
@@ -534,6 +532,7 @@ $line-height-truncate: 1.25em;
             width: 100%;
             object-fit: cover;
         }
+
     }
 }
 
@@ -559,6 +558,13 @@ $line-height-truncate: 1.25em;
             }
         }
 
+        .o_wslides_lesson_aside_list_links i {
+            padding-right: 10px;
+            &.fa-flag {
+                padding-right: 6px;
+            }
+        }
+
         .o_wslides_lesson_aside_list {
             .o_wslides_lesson_aside_list_link {
                 @include o-hover-text-color($gray-600, $headings-color );
@@ -575,7 +581,7 @@ $line-height-truncate: 1.25em;
                 line-height: unset;
             }
             .o_wslides_button_complete {
-                margin-left: 5px;
+                margin-left: 3px;
             }
             button.o_wslides_button_complete i {
                 color: $gray-600;
@@ -614,6 +620,27 @@ $line-height-truncate: 1.25em;
 // when the completion progressbar become visible / hidden
 .o_wslides_lesson_header_container {
     height: 80px;
+}
+
+.o_wslides_fs_sidebar_section {
+    a[aria-expanded="true"] i.fa-caret-left{
+        display: none;
+    }
+    a[aria-expanded="false"] i.fa-caret-down{
+        display: none;
+    }
+}
+
+li.o_wslides_fs_sidebar_list_item:not(.active) {
+    ul.small {
+        display:none;
+    }
+}
+
+li.o_wslides_fs_sidebar_list_item.active {
+    a.o_wslides_fs_slide_link {
+        font-weight: 300;
+    }
 }
 
 // Modals
@@ -677,7 +704,7 @@ $line-height-truncate: 1.25em;
         background-color: #875A7B;
         padding:5px 15px;
         font-weight:bold;
-        font-size:13px;
+        @include font-size(13px);
     }
 
     .tooltip > .arrow {

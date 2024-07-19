@@ -1,14 +1,13 @@
-odoo.define("website.tour.unsplash_beacon", function (require) {
-"use strict";
+/** @odoo-module **/
 
-const tour = require("web_tour.tour");
+import { registry } from "@web/core/registry";
 
-tour.register("test_unsplash_beacon", {
+registry.category("web_tour.tours").add("test_unsplash_beacon", {
     test: true,
     url: "/",
-}, [{
-    content: "Verify whether beacon was sent.",
-    trigger: 'img[data-beacon="sent"]',
-    run: () => {}, // This is a check.
-}]);
+    steps: () => [{
+        content: "Verify whether beacon was sent.",
+        trigger: 'img[data-beacon="sent"]',
+        isCheck: true,
+    }],
 });
