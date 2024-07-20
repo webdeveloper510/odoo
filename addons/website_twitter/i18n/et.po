@@ -3,20 +3,19 @@
 # 	* website_twitter
 # 
 # Translators:
-# Rivo Zängov <eraser@eraser.ee>, 2023
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
 # JanaAvalah, 2023
-# Leaanika Randmets, 2023
-# Andre Roomet <andreroomet@gmail.com>, 2023
 # Triine Aavik <triine@avalah.ee>, 2023
-# Eneli Õigus <enelioigus@gmail.com>, 2023
 # Anna, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:10+0000\n"
+"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
 "Last-Translator: Anna, 2023\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
@@ -42,11 +41,14 @@ msgstr ""
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                            Show me how to obtain the Twitter API key and Twitter API secret"
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                Show me how to obtain the Twitter API key and Twitter API secret"
 msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                            Näita mulle, kuidas hankida Twitteri API võtit ning secretit. "
+
+#. module: website_twitter
+#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
+msgid "<span class=\"o_form_label\">Twitter Roller</span>"
+msgstr "<span class=\"o_form_label\">Twitter Roller</span>"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -81,7 +83,6 @@ msgid "API secret"
 msgstr "API secret"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -105,17 +106,17 @@ msgstr ""
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_uid
 msgid "Created by"
-msgstr "Loodud (kelle poolt?)"
+msgstr "Loonud"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_res_config_settings__twitter_screen_name
@@ -134,7 +135,6 @@ msgid "Get favorites from this screen name"
 msgstr "Saa lemmikuid sellest nimest"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid "HTTP Error: Something is misconfigured"
@@ -151,16 +151,20 @@ msgid "ID"
 msgstr "ID"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid "Internet connection refused: We failed to reach a twitter server."
 msgstr "Internetiühenduse katkestus: Me ei saanud ühendust Twitteri serveriga"
 
 #. module: website_twitter
+#: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet____last_update
+msgid "Last Modified on"
+msgstr "Viimati muudetud"
+
+#. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__write_date
@@ -187,7 +191,6 @@ msgstr ""
 "portaali juurdepääsuprotsess"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/controllers/main.py:0
 #, python-format
 msgid ""
@@ -198,21 +201,19 @@ msgstr ""
 "seadetes (see ei pea olema sinu oma)."
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/controllers/main.py:0
 #, python-format
 msgid "Please set the Twitter API Key and Secret in the Website Settings."
-msgstr "Palun määra Twitterile API võti ja secret veebilehe seadetes."
+msgstr "Palun määra Twitteri API võti ja salasõna veebilehe seadetes."
 
 #. module: website_twitter
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_twitter/static/src/js/website.twitter.editor.js:0
 #, python-format
 msgid "Reload"
 msgstr "Laadi uuesti"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -237,7 +238,6 @@ msgstr ""
 "ja secret'iga. "
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -247,7 +247,6 @@ msgstr ""
 " uuesti."
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -258,7 +257,6 @@ msgstr ""
 "süsteemis esineva tõrke tõttu. Proovi hiljem uuesti."
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -269,7 +267,6 @@ msgstr ""
 "Twitteri API võtit ja secretit."
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -278,7 +275,6 @@ msgid ""
 msgstr "Päring oli vigane. Autentimisteta päringud loetakse vigaseks."
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid "There was no new data to return."
@@ -292,7 +288,7 @@ msgstr "Twitter'i postituse ID"
 #. module: website_twitter
 #: model:ir.model.fields,field_description:website_twitter.field_website_twitter_tweet__tweet
 msgid "Tweets"
-msgstr "Twitter'i postitused"
+msgstr "Postitused"
 
 #. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
@@ -330,7 +326,7 @@ msgid "Twitter API secret you can get it from https://apps.twitter.com/"
 msgstr "Twitter'i API secret leiad: https://apps.twitter.com/"
 
 #. module: website_twitter
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_twitter/static/src/xml/website.twitter.xml:0
 #, python-format
 msgid "Twitter Configuration"
@@ -342,17 +338,11 @@ msgid "Twitter Portal"
 msgstr "Twitter'i portaal"
 
 #. module: website_twitter
-#: model_terms:ir.ui.view,arch_db:website_twitter.res_config_settings_view_form
-msgid "Twitter Roller"
-msgstr "Twitter Roller"
-
-#. module: website_twitter
 #: model_terms:ir.ui.view,arch_db:website_twitter.website_twitter_snippet
 msgid "Twitter Scroller"
 msgstr "Twitteri kerija"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -363,14 +353,12 @@ msgstr ""
 "secretit!"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid "Twitter is down or being upgraded."
 msgstr "Twitterit uuendatakse või Twitter on maas. "
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/models/res_config_settings.py:0
 #, python-format
 msgid ""
@@ -391,7 +379,6 @@ msgid "Twitter tutorial"
 msgstr "Twitter'i õpetus"
 
 #. module: website_twitter
-#. odoo-python
 #: code:addons/website_twitter/controllers/main.py:0
 #, python-format
 msgid ""
@@ -402,7 +389,7 @@ msgstr ""
 " Palun lisage rohkem või valige mõni muu nimi. "
 
 #. module: website_twitter
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_twitter/static/src/xml/website.twitter.xml:0
 #, python-format
 msgid "Twitter's user"
@@ -410,6 +397,8 @@ msgstr "Twitter'i kasutaja"
 
 #. module: website_twitter
 #: model:ir.actions.server,name:website_twitter.ir_cron_twitter_actions_ir_actions_server
+#: model:ir.cron,cron_name:website_twitter.ir_cron_twitter_actions
+#: model:ir.cron,name:website_twitter.ir_cron_twitter_actions
 msgid "Twitter: Fetch new favorites"
 msgstr "Twitter: Hangi uued lemmikud"
 

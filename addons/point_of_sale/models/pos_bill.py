@@ -15,7 +15,7 @@ class Bill(models.Model):
     def name_create(self, name):
         try:
             value = float(name)
-        except ValueError:
+        except:
             raise UserError(_("The name of the Coins/Bills must be a number."))
         result = super().create({"name": name, "value": value})
-        return result.id, result.display_name
+        return result.name_get()[0]

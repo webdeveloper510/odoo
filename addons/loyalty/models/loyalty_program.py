@@ -21,9 +21,6 @@ class LoyaltyProgram(models.Model):
     currency_id = fields.Many2one('res.currency', 'Currency', compute='_compute_currency_id',
         readonly=False, required=True, store=True, precompute=True)
     currency_symbol = fields.Char(related='currency_id.symbol')
-    pricelist_ids = fields.Many2many(
-        'product.pricelist', string="Pricelist", domain="[('currency_id', '=', currency_id)]"
-    )
 
     total_order_count = fields.Integer("Total Order Count", compute="_compute_total_order_count")
 
@@ -53,14 +50,7 @@ class LoyaltyProgram(models.Model):
         ('next_order_coupons', 'Next Order Coupons')],
         default='promotion', required=True,
     )
-    date_from = fields.Date(
-        string="Start Date",
-        help="The start date is included in the validity period of this program",
-    )
-    date_to = fields.Date(
-        string="End date",
-        help="The end date is included in the validity period of this program",
-    )
+    date_to = fields.Date(string='Validity')
     limit_usage = fields.Boolean(string='Limit Usage')
     max_usage = fields.Integer()
     # Dictates when the points can be used:
@@ -111,24 +101,6 @@ class LoyaltyProgram(models.Model):
             'Max usage must be strictly positive if a limit is used.'),
     ]
 
-    @api.constrains('currency_id', 'pricelist_ids')
-    def _check_pricelist_currency(self):
-        if any(
-            pricelist.currency_id != program.currency_id
-            for program in self
-            for pricelist in program.pricelist_ids
-        ):
-            raise UserError(_(
-                "The loyalty program's currency must be the same as all it's pricelists ones."
-            ))
-
-    @api.constrains('date_from', 'date_to')
-    def _check_date_from_date_to(self):
-        if any(p.date_to and p.date_from and p.date_from > p.date_to for p in self):
-            raise UserError(_(
-                "The validity period's start date must be anterior or equal to its end date."
-            ))
-
     @api.constrains('reward_ids')
     def _constrains_reward_ids(self):
         if self.env.context.get('loyalty_skip_reward_check'):
@@ -175,8 +147,8 @@ class LoyaltyProgram(models.Model):
 
     @api.depends('coupon_ids')
     def _compute_coupon_count(self):
-        read_group_data = self.env['loyalty.card']._read_group([('program_id', 'in', self.ids)], ['program_id'], ['__count'])
-        count_per_program = {program.id: count for program, count in read_group_data}
+        read_group_data = self.env['loyalty.card']._read_group([('program_id', 'in', self.ids)], ['program_id'], ['program_id'])
+        count_per_program = {r['program_id'][0]: r['program_id_count'] for r in read_group_data}
         for program in self:
             program.coupon_count = count_per_program.get(program.id, 0)
 
@@ -216,7 +188,7 @@ class LoyaltyProgram(models.Model):
     def _program_type_default_values(self):
         # All values to change when program_type changes
         # NOTE: any field used in `rule_ids`, `reward_ids` and `communication_plan_ids` MUST be present in the kanban view for it to work properly.
-        first_sale_product = self.env['product.product'].search([('company_id', 'in', [False, self.env.company.id]), ('sale_ok', '=', True)], limit=1)
+        first_sale_product = self.env['product.product'].search([('sale_ok', '=', True)], limit=1)
         return {
             'coupons': {
                 'applies_on': 'current',
@@ -297,7 +269,6 @@ class LoyaltyProgram(models.Model):
                 'rule_ids': [(5, 0, 0), (0, 0, {
                     'reward_point_amount': '1',
                     'reward_point_mode': 'money',
-                    'reward_point_split': False,
                     'product_ids': self.env.ref('loyalty.ewallet_product_50', raise_if_not_found=False),
                 })],
                 'reward_ids': [(5, 0, 0), (0, 0, {
@@ -461,49 +432,57 @@ class LoyaltyProgram(models.Model):
             return {
                 'gift_card': {
                     'title': _("Gift Card"),
-                    'description': _("Sell Gift Cards, that allows to purchase products"),
+                    'description': _("Sell Gift Cards, that can be used to purchase products."),
                     'icon': 'gift_card',
                 },
                 'ewallet': {
                     'title': _("eWallet"),
-                    'description': _("Fill in your eWallet, to pay future orders"),
+                    'description': _("Fill in your eWallet, and use it to pay future orders."),
                     'icon': 'ewallet',
                 },
             }
         return {
             'promotion': {
-                'title': _("Promotional Program"),
-                'description': _("Automatic promo: 10% off on orders higher than $50"),
+                'title': _("Promotion Program"),
+                'description': _(
+                    "Define promotions to apply automatically on your customers' orders."
+                ),
                 'icon': 'promotional_program',
             },
             'promo_code': {
-                'title': _("Promo Code"),
-                'description': _("Get 10% off on some products, with a code"),
+                'title': _("Discount Code"),
+                'description': _(
+                    "Share a discount code with your customers to create a purchase incentive."
+                ),
                 'icon': 'promo_code',
             },
             'buy_x_get_y': {
                 'title': _("Buy X Get Y"),
-                'description': _("Buy 2 products and get a third one for free"),
+                'description': _(
+                    "Offer Y to your customers if they are buying X; for example, 2+1 free."
+                ),
                 'icon': '2_plus_1',
             },
             'next_order_coupons': {
-                'title': _("Next Order Coupon"),
-                'description': _("Send a coupon after an order, valid for next purchase"),
+                'title': _("Next Order Coupons"),
+                'description': _(
+                    "Reward your customers for a purchase with a coupon to use on their next order."
+                ),
                 'icon': 'coupons',
             },
             'loyalty': {
-                'title': _("Loyalty Card"),
-                'description': _("Win points with each purchase, and claim gifts"),
+                'title': _("Loyalty Cards"),
+                'description': _("Win points with each purchase, and use points to get gifts."),
                 'icon': 'loyalty_cards',
             },
             'coupons': {
-                'title': _("Coupon"),
-                'description': _("Generate and share unique coupons with your customers"),
+                'title': _("Coupons"),
+                'description': _("Generate and share unique coupons with your customers."),
                 'icon': 'coupons',
             },
             'fidelity': {
-                'title': _("Fidelity Card"),
-                'description': _("Buy 10 products to get 10$ off on the 11th one"),
+                'title': _("Fidelity Cards"),
+                'description': _("Buy 10 products, and get 10$ discount on the 11th one."),
                 'icon': 'fidelity_cards',
             },
         }

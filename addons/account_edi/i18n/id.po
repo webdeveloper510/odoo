@@ -3,15 +3,15 @@
 # 	* account_edi
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
 # Abe Manyo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-04-14 05:51+0000\n"
+"PO-Revision-Date: 2022-09-22 05:44+0000\n"
 "Last-Translator: Abe Manyo, 2024\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
@@ -54,11 +54,6 @@ msgstr "Pembatalan EDI telah diminta."
 #, python-format
 msgid "A request for cancellation of the EDI has been called off."
 msgstr "Permintaan pembatalan EDI telah dibatalkan."
-
-#. module: account_edi
-#: model:ir.model,name:account_edi.model_account_move_send
-msgid "Account Move Send"
-msgstr "Kirim Account Move"
 
 #. module: account_edi
 #: model:ir.model,name:account_edi.model_ir_attachment
@@ -135,12 +130,27 @@ msgid "Display Name"
 msgstr "Nama Tampilan"
 
 #. module: account_edi
+#. odoo-python
+#: code:addons/account_edi/models/account_edi_format.py:0
+#, python-format
+msgid "Display the currency"
+msgstr "Tampilkan mata uang"
+
+#. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
+#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "Download"
 msgstr "Unduh"
 
 #. module: account_edi
+#: model:ir.actions.server,name:account_edi.ir_cron_edi_network_ir_actions_server
+#: model:ir.cron,cron_name:account_edi.ir_cron_edi_network
+msgid "EDI : Perform web services operations"
+msgstr "EDI : Lakukan operasi layanan web"
+
+#. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
+#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "EDI Documents"
 msgstr "Dokumen EDI"
 
@@ -153,11 +163,6 @@ msgstr "Format EDI"
 #: model:ir.model.fields,help:account_edi.field_account_journal__compatible_edi_ids
 msgid "EDI format that support moves in this journal"
 msgstr "Format EDI yang mendukung pergerakan di jurnal ini"
-
-#. module: account_edi
-#: model:ir.actions.server,name:account_edi.ir_cron_edi_network_ir_actions_server
-msgid "EDI: Perform web services operations"
-msgstr "EDI: Lakukan operasi layanan web"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_bank_statement_line__edi_blocking_level
@@ -219,12 +224,18 @@ msgid "Edi Web Services To Process"
 msgstr "EDI Layanan Web Untuk Diproses"
 
 #. module: account_edi
+#: model_terms:ir.ui.view,arch_db:account_edi.view_account_journal_form_inherited
+msgid "Electronic Data Interchange"
+msgstr "Electronic Data Interchange (EDI)"
+
+#. module: account_edi
 #: model:ir.model,name:account_edi.model_account_edi_document
 msgid "Electronic Document for an account.move"
 msgstr "Dokumen Elektronik untuk account.move"
 
 #. module: account_edi
 #: model:ir.actions.act_window,name:account_edi.action_open_edi_documents
+#: model:ir.actions.act_window,name:account_edi.action_open_payment_edi_documents
 #: model:ir.model.fields,field_description:account_edi.field_account_bank_statement_line__edi_state
 #: model:ir.model.fields,field_description:account_edi.field_account_journal__edi_format_ids
 #: model:ir.model.fields,field_description:account_edi.field_account_move__edi_state
@@ -243,6 +254,11 @@ msgid "Electronic invoicing state"
 msgstr "Status faktur elektronik"
 
 #. module: account_edi
+#: model:ir.model,name:account_edi.model_mail_template
+msgid "Email Templates"
+msgstr "Templat Email"
+
+#. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__error
 #: model:ir.model.fields.selection,name:account_edi.selection__account_edi_document__blocking_level__error
 #: model:ir.model.fields.selection,name:account_edi.selection__account_move__edi_blocking_level__error
@@ -258,8 +274,8 @@ msgstr "Format Nama"
 #: model:ir.model.fields,help:account_edi.field_account_bank_statement_line__edi_error_count
 #: model:ir.model.fields,help:account_edi.field_account_move__edi_error_count
 #: model:ir.model.fields,help:account_edi.field_account_payment__edi_error_count
-msgid "How many EDIs are in error for this move?"
-msgstr "Berapa banyak EDi yang mengalami error pada pergerakan ini?"
+msgid "How many EDIs are in error for this move ?"
+msgstr "Berapa banyak EDI yang mengalami error untuk pergerakan ini ?"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__id
@@ -297,16 +313,27 @@ msgid "Journal Entry"
 msgstr "Entri Jurnal"
 
 #. module: account_edi
+#: model:ir.model,name:account_edi.model_account_move_line
+msgid "Journal Item"
+msgstr "Item Jurnal"
+
+#. module: account_edi
+#: model:ir.model.fields,field_description:account_edi.field_account_edi_document____last_update
+#: model:ir.model.fields,field_description:account_edi.field_account_edi_format____last_update
+msgid "Last Modified on"
+msgstr "Terakhir diubah pada"
+
+#. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__write_uid
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__write_uid
 msgid "Last Updated by"
-msgstr "Terakhir Diperbarui oleh"
+msgstr "Terakhir diperbarui oleh"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__write_date
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_format__write_date
 msgid "Last Updated on"
-msgstr "Terakhir Diperbarui pada"
+msgstr "Terakhir diperbarui pada"
 
 #. module: account_edi
 #: model:ir.model.fields,field_description:account_edi.field_account_edi_document__move_id
@@ -325,9 +352,20 @@ msgid "Only one edi document by move by format"
 msgstr "Hanya satu dokumen edi per pergerakan per format"
 
 #. module: account_edi
+#: model:ir.model,name:account_edi.model_account_payment
+msgid "Payments"
+msgstr "Pembayaran"
+
+#. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
+#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "Process now"
 msgstr "Proses sekarang"
+
+#. module: account_edi
+#: model:ir.model,name:account_edi.model_uom_uom
+msgid "Product Unit of Measure"
+msgstr "Satuan Produk"
 
 #. module: account_edi
 #: model:ir.model,name:account_edi.model_ir_actions_report
@@ -341,6 +379,7 @@ msgstr "Permintaan Pembatalan EDI"
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
+#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "Retry"
 msgstr "Ulangi"
 
@@ -369,6 +408,17 @@ msgstr ""
 "Status agregat untuk semua EDI dengan layanan-web untuk pergerakan ini"
 
 #. module: account_edi
+#. odoo-python
+#: code:addons/account_edi/models/account_edi_format.py:0
+#, python-format
+msgid ""
+"The currency (%s) of the document you are uploading is not active in this database.\n"
+"Please activate it and update the currency rate if needed before trying again to import."
+msgstr ""
+"Mata uang (%s) dari dokumen yang Anda unggah tidak aktif di database ini.\n"
+"Mohon ktifkan dan update currency rate bila ANda membutuhkannya sebelum mencoba mengimpor lagi."
+
+#. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_edi_document__attachment_id
 msgid ""
 "The file generated by edi_format_id when the invoice is posted (and this "
@@ -387,8 +437,19 @@ msgstr ""
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
-msgid "The invoice will soon be sent to"
-msgstr "Faktur akan sebentar lagi dikirim ke"
+msgid ""
+"The invoice will be processed asynchronously by the following E-invoicing "
+"service :"
+msgstr ""
+"Faktur akan diproses secara asinkron dengan mengikuti layanan E-faktur :"
+
+#. module: account_edi
+#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
+msgid ""
+"The payment will be processed asynchronously by the following E-invoicing "
+"service :"
+msgstr ""
+"Pembayaran akan diproses secara asinkron dengan mengikuti layanan E-faktur :"
 
 #. module: account_edi
 #: model:ir.model.fields,help:account_edi.field_account_edi_document__error
@@ -451,5 +512,6 @@ msgstr ""
 
 #. module: account_edi
 #: model_terms:ir.ui.view,arch_db:account_edi.view_move_form_inherit
+#: model_terms:ir.ui.view,arch_db:account_edi.view_payment_form_inherit
 msgid "⇒ See errors"
 msgstr "⇒ Lihat error"

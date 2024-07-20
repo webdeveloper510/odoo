@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import wTourUtils from '@website/js/tours/tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 const snippets = [
     {
@@ -44,7 +44,7 @@ wTourUtils.registerWebsitePreviewTour('conditional_visibility_1', {
     edition: true,
     url: '/',
     test: true,
-}, () => [
+}, [
 wTourUtils.dragNDrop(snippets[0]),
 wTourUtils.clickOnSnippet(snippets[0]),
 wTourUtils.changeOption('ConditionalVisibility', 'we-toggler'),
@@ -73,7 +73,6 @@ wTourUtils.changeOption('ConditionalVisibility', 'we-toggler'),
     content: 'Check if the rule was applied',
     extra_trigger: '.o_website_preview:only-child',
     trigger: 'iframe #wrap',
-    allowInvisible: true,
     run: function (actions) {
         const style = window.getComputedStyle(this.$anchor[0].getElementsByClassName('s_text_image')[0]);
         if (style.display !== 'none') {
@@ -99,7 +98,7 @@ wTourUtils.registerWebsitePreviewTour("conditional_visibility_3", {
     test: true,
     url: "/",
 },
-() => [
+[
 checkEyeIcon("Text - Image", true),
 // Drag a "Banner" snippet on the website.
 wTourUtils.dragNDrop(snippets[1]),
@@ -108,7 +107,10 @@ wTourUtils.clickOnSnippet(snippets[1]),
 wTourUtils.changeOption("ConditionalVisibility", "we-toggler"),
 wTourUtils.changeOption("ConditionalVisibility", '[data-name="visibility_conditional"]'),
 checkEyeIcon("Banner", true),
-wTourUtils.goBackToBlocks(),
+{
+    content: "click on 'Blocks'",
+    trigger: "#snippets_menu button:contains('Blocks')",
+},
 // Drag a "Popup" snippet on the website.
 wTourUtils.dragNDrop(snippets[2]),
 {
@@ -145,7 +147,7 @@ wTourUtils.registerWebsitePreviewTour("conditional_visibility_4", {
     test: true,
     url: "/",
 },
-() => [
+[
 // Click on the "Text-Image" snippet.
 wTourUtils.clickOnSnippet(snippets[0]),
 {
@@ -171,8 +173,8 @@ wTourUtils.clickOnSnippet(snippets[0]),
 wTourUtils.clickOnSnippet(snippets[1]),
 {
     content: "Drag the 'Banner' snippet to the end of the page",
-    trigger: "iframe .o_overlay_move_options .o_move_handle",
-    run: "drag_and_drop_native iframe #wrapwrap footer",
+    trigger: "iframe .o_overlay_move_options .ui-draggable-handle",
+    run: "drag_and_drop iframe #wrapwrap footer",
 },
 ...checkEyesIconAfterSave(false),
 {
@@ -186,7 +188,7 @@ wTourUtils.registerWebsitePreviewTour("conditional_visibility_5", {
     edition: true,
     test: true,
     url: "/",
-}, () => [
+}, [
     wTourUtils.dragNDrop(snippets[0]),
     {
         content: "Click on the image of the dragged snippet",

@@ -628,9 +628,10 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=move.ids).create({
             'date': fields.Date.from_string('2021-02-01'),
+            'refund_method': 'refund',
             'journal_id': move.journal_id.id,
         })
-        reversal = move_reversal.refund_moves()
+        reversal = move_reversal.reverse_moves()
         reversed_move = self.env['account.move'].browse(reversal['res_id'])
         self.assertRecordValues(reversed_move.line_ids, [
             {
@@ -919,11 +920,12 @@ class TestAccountMove(AccountTestInvoicingCommon):
         ])
         moves.action_post()
 
-        moves.line_ids\
+        res = moves.line_ids\
             .filtered(lambda x: x.account_id == self.company_data['default_account_receivable'])\
             .reconcile()
 
-        exchange_diff = moves.line_ids.matched_debit_ids.exchange_move_id
+        self.assertTrue(res.get('partials'))
+        exchange_diff = res['partials'].exchange_move_id
         self.assertTrue(exchange_diff)
         with self.assertRaises(UserError), self.cr.savepoint():
             exchange_diff.button_draft()
@@ -1013,9 +1015,9 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
         self.assertRecordValues(sale_move.line_ids.sorted(lambda x: -x.balance), [
             # pylint: disable=C0326
-            {'name': 'debit',  'debit': 115.0, 'credit':   0.0, 'account_id': test_account.id,                                  'tax_ids': [],           'tax_base_amount': 0,   'tax_tag_invert': False, 'tax_repartition_line_id': False},
-            {'name': '15%',    'debit':   0.0, 'credit':  15.0, 'account_id': self.company_data['default_account_tax_sale'].id, 'tax_ids': [],           'tax_base_amount': 100, 'tax_tag_invert': True,  'tax_repartition_line_id': sale_invoice_rep_line.id},
-            {'name': 'credit', 'debit':   0.0, 'credit': 100.0, 'account_id': test_account.id,                                  'tax_ids': sale_tax.ids, 'tax_base_amount': 0,   'tax_tag_invert': True,  'tax_repartition_line_id': False},
+            {'name': 'debit',   'debit': 115.0, 'credit':   0.0, 'account_id': test_account.id,                                  'tax_ids': [],           'tax_base_amount': 0,   'tax_tag_invert': False, 'tax_repartition_line_id': False},
+            {'name': 'Tax 15%', 'debit':   0.0, 'credit':  15.0, 'account_id': self.company_data['default_account_tax_sale'].id, 'tax_ids': [],           'tax_base_amount': 100, 'tax_tag_invert': True,  'tax_repartition_line_id': sale_invoice_rep_line.id},
+            {'name': 'credit',  'debit':   0.0, 'credit': 100.0, 'account_id': test_account.id,                                  'tax_ids': sale_tax.ids, 'tax_base_amount': 0,   'tax_tag_invert': True,  'tax_repartition_line_id': False},
         ])
 
         # Same with a purchase tax
@@ -1040,9 +1042,9 @@ class TestAccountMove(AccountTestInvoicingCommon):
         purchase_invoice_rep_line = purchase_tax.invoice_repartition_line_ids.filtered(lambda x: x.repartition_type == 'tax')
         self.assertRecordValues(purchase_move.line_ids.sorted(lambda x: x.balance), [
             # pylint: disable=C0326
-            {'name': 'credit', 'credit': 115.0, 'debit':   0.0, 'account_id': test_account.id,                                      'tax_ids': [],               'tax_base_amount': 0,   'tax_tag_invert': False, 'tax_repartition_line_id': False},
-            {'name': '15%',    'credit':   0.0, 'debit':  15.0, 'account_id': self.company_data['default_account_tax_purchase'].id, 'tax_ids': [],               'tax_base_amount': 100, 'tax_tag_invert': False,  'tax_repartition_line_id': purchase_invoice_rep_line.id},
-            {'name': 'debit',  'credit':   0.0, 'debit': 100.0, 'account_id': test_account.id,                                      'tax_ids': purchase_tax.ids, 'tax_base_amount': 0,   'tax_tag_invert': False,  'tax_repartition_line_id': False},
+            {'name': 'credit',           'credit': 115.0, 'debit':   0.0, 'account_id': test_account.id,                                      'tax_ids': [],               'tax_base_amount': 0,   'tax_tag_invert': False, 'tax_repartition_line_id': False},
+            {'name': 'Purchase Tax 15%', 'credit':   0.0, 'debit':  15.0, 'account_id': self.company_data['default_account_tax_purchase'].id, 'tax_ids': [],               'tax_base_amount': 100, 'tax_tag_invert': False,  'tax_repartition_line_id': purchase_invoice_rep_line.id},
+            {'name': 'debit',            'credit':   0.0, 'debit': 100.0, 'account_id': test_account.id,                                      'tax_ids': purchase_tax.ids, 'tax_base_amount': 0,   'tax_tag_invert': False,  'tax_repartition_line_id': False},
         ])
 
     @freeze_time('2021-10-01 00:00:00')
@@ -1169,38 +1171,3 @@ class TestAccountMove(AccountTestInvoicingCommon):
         wizard.force_post = True
         wizard.validate_move()
         self.assertTrue(self.test_move.state == 'posted')
-
-    def test_cumulated_balance(self):
-        move = self.env['account.move'].create({
-            'line_ids': [Command.create({
-                'balance': 100,
-                'account_id': self.company_data['default_account_receivable'].id,
-            }), Command.create({
-                'balance': 100,
-                'account_id': self.company_data['default_account_tax_sale'].id,
-            }), Command.create({
-                'balance': -200,
-                'account_id': self.company_data['default_account_revenue'].id,
-            })]
-        })
-
-        for order, expected in [
-            ('balance DESC', [
-                (100, 0),
-                (100, -100),
-                (-200, -200),
-            ]),
-            ('balance ASC', [
-                (-200, 0),
-                (100, 200),
-                (100, 100),
-            ]),
-        ]:
-            read_results = self.env['account.move.line'].search_read(
-                domain=[('move_id', '=', move.id)],
-                fields=['balance', 'cumulated_balance'],
-                order=order,
-            )
-            for (balance, cumulated_balance), read_result in zip(expected, read_results):
-                self.assertAlmostEqual(balance, read_result['balance'])
-                self.assertAlmostEqual(cumulated_balance, read_result['cumulated_balance'])

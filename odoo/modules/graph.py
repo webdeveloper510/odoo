@@ -3,7 +3,6 @@
 
 """ Modules dependency graph. """
 
-import functools
 import itertools
 import logging
 
@@ -11,15 +10,6 @@ import odoo
 import odoo.tools as tools
 
 _logger = logging.getLogger(__name__)
-
-
-@functools.lru_cache(maxsize=1)
-def _ignored_modules(cr):
-    result = ['studio_customization']
-    if tools.sql.column_exists(cr, 'ir_module_module', 'imported'):
-        cr.execute('SELECT name FROM ir_module_module WHERE imported')
-        result += [m[0] for m in cr.fetchall()]
-    return result
 
 class Graph(dict):
     """ Modules dependency graph.
@@ -71,7 +61,7 @@ class Graph(dict):
             info = odoo.modules.module.get_manifest(module)
             if info and info['installable']:
                 packages.append((module, info)) # TODO directly a dict, like in get_modules_with_version
-            elif module not in _ignored_modules(cr):
+            elif module != 'studio_customization':
                 _logger.warning('module %s: not installable, skipped', module)
 
         dependencies = dict([(p, info['depends']) for p, info in packages])

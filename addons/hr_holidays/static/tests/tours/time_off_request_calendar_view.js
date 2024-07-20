@@ -1,12 +1,14 @@
-/** @odoo-module **/
+odoo.define('hr_holidays.tour_time_off_request_calendar_view', function (require) {
+'use strict';
 
-import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_service/tour_utils";
+var tour = require('web_tour.tour');
 
-registry.category("web_tour.tours").add('time_off_request_calendar_view', {
+tour.register('time_off_request_calendar_view', {
     test: true,
     url: '/web',
-    steps: () => [stepUtils.showAppsMenuItem(),
+},
+[
+    tour.stepUtils.showAppsMenuItem(),
     {
         content: "Open Time Off app",
         trigger: '.o_app[data-menu-xmlid="hr_holidays.menu_hr_holidays_root"]',
@@ -41,4 +43,5 @@ registry.category("web_tour.tours").add('time_off_request_calendar_view', {
         trigger: '.btn:contains("Save")',
         run: 'click',
     }
-]});
+]);
+});

@@ -10,7 +10,7 @@ import {
     patchWithCleanup,
     triggerEvent,
 } from "@web/../tests/helpers/utils";
-import { currencies } from "@web/core/currency";
+import { session } from "@web/session";
 
 let serverData;
 let target;
@@ -252,12 +252,15 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("with currency digits != 2 - float field", async function (assert) {
         // need to also add it to the session (as currencies are loaded there)
-        patchWithCleanup(currencies, {
-            3: {
-                name: "VEF",
-                symbol: "Bs.F",
-                position: "after",
-                digits: [0, 4],
+        patchWithCleanup(session, {
+            currencies: {
+                ...session.currencies,
+                3: {
+                    name: "VEF",
+                    symbol: "Bs.F",
+                    position: "after",
+                    digits: [0, 4],
+                },
             },
         });
 
@@ -310,12 +313,15 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("with currency digits != 2 - monetary field", async function (assert) {
         // need to also add it to the session (as currencies are loaded there)
-        patchWithCleanup(currencies, {
-            3: {
-                name: "VEF",
-                symbol: "Bs.F",
-                position: "after",
-                digits: [0, 4],
+        patchWithCleanup(session, {
+            currencies: {
+                ...session.currencies,
+                3: {
+                    name: "VEF",
+                    symbol: "Bs.F",
+                    position: "after",
+                    digits: [0, 4],
+                },
             },
         });
 
@@ -400,7 +406,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <tree editable="bottom">
                     <field name="float_field" widget="monetary"/>
-                    <field name="currency_id" column_invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
                 </tree>`,
         });
 
@@ -495,7 +501,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <tree editable="bottom">
                     <field name="monetary_field"/>
-                    <field name="currency_id" column_invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
                 </tree>`,
         });
 
@@ -679,7 +685,7 @@ QUnit.module("Fields", (hooks) => {
             string: "m2m",
             type: "many2many",
             relation: "partner",
-            default: [[4, 2]],
+            default: [[6, false, [2]]],
         };
         serverData.views = {
             "partner,false,list": `
@@ -771,11 +777,7 @@ QUnit.module("Fields", (hooks) => {
                 </tree>`,
         });
 
-        await click(
-            target.querySelector(
-                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_list_button_add"
-            )
-        );
+        await click(target.querySelector(".o_list_button_add"));
         assert.containsOnce(
             target,
             ".o_selected_row .o_field_widget[name=float_field] input",
@@ -863,12 +865,15 @@ QUnit.module("Fields", (hooks) => {
             },
         ];
 
-        patchWithCleanup(currencies, {
-            1: {
-                name: "USD",
-                symbol: "$",
-                position: "before",
-                digits: [0, 4],
+        patchWithCleanup(session, {
+            currencies: {
+                ...session.currencies,
+                1: {
+                    name: "USD",
+                    symbol: "$",
+                    position: "before",
+                    digits: [0, 4],
+                },
             },
         });
 

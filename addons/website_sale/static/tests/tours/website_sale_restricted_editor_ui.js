@@ -1,11 +1,11 @@
 /** @odoo-modules */
 
-import wTourUtils from '@website/js/tours/tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 wTourUtils.registerWebsitePreviewTour('website_sale_restricted_editor_ui', {
     test: true,
     url: `/shop`,
-}, () => [
+}, [
     {
         content: "Open the site menu to check what is inside",
         trigger: '[data-menu-xmlid="website.menu_site"]',
@@ -37,7 +37,7 @@ wTourUtils.registerWebsitePreviewTour('website_sale_restricted_editor_ui', {
     },
     {
         content: "Check that you landed on a form view and that the record was unpublished",
-        trigger: '.o-form-buttonbox [name="is_published"] .fa-globe.text-danger',
+        trigger: '.o_form_sheet [name="is_published"] .fa-globe.text-danger',
         run: () => {},
     },
 ]);

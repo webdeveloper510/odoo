@@ -4,7 +4,6 @@
 # 
 # Translators:
 # Hamid Darabi, 2023
-# Yousef Shadmanesh <y.shadmanesh@gmail.com>, 2023
 # Hamed Mohammadi <hamed@dehongi.com>, 2023
 # Mohammad Tahmasebi <hit.tah75@gmail.com>, 2023
 # Martin Trigaux, 2023
@@ -13,10 +12,10 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-10-10 10:22+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
@@ -26,7 +25,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/controllers/home.py:0
 #, python-format
 msgid "%(browser)s on %(platform)s"
@@ -35,14 +33,13 @@ msgstr "%(browser)s در %(platform)s"
 #. module: auth_totp
 #: model:ir.model,name:auth_totp.model_auth_totp_wizard
 msgid "2-Factor Setup Wizard"
-msgstr " راه‌اندازی آسان 2 عاملی"
+msgstr " راه‌اندازی آسان دو عاملی"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format
 msgid "2-Factor authentication is now enabled."
-msgstr "اکنون اعتبارسنجی 2 عاملی امکان‌پذیر است."
+msgstr "اکنون اعتبارسنجی دو عاملی امکان‌پذیر است."
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
@@ -61,6 +58,20 @@ msgid ""
 msgstr ""
 "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>\n"
 "                            Learn More"
+
+#. module: auth_totp
+#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
+msgid ""
+"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
+"muted\">This account is protected!</span>"
+msgstr ""
+
+#. module: auth_totp
+#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
+msgid ""
+"<span attrs=\"{'invisible': [('totp_enabled', '=', False)]}\" class=\"text-"
+"muted\">Your account is protected!</span>"
+msgstr ""
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
@@ -78,7 +89,7 @@ msgid ""
 "                                    <span class=\"d-block d-md-none\">When requested to do so, copy the key below</span>"
 msgstr ""
 "<span class=\"d-none d-md-block\">هنگامی که این درخواست مطرح می‌شود، بارکد زیر را اسکن کنید</span>\n"
-"                                    <span class=\"d-block d-md-none\">When در صورت درخواست، کلید زیر را کپی کنید</span>"
+"                                    <span class=\"d-block d-md-none\">When requested to do so, copy the key below</span>"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_wizard
@@ -88,24 +99,6 @@ msgid ""
 msgstr ""
 "<span class=\"text-muted\">موارد رایج عبارتند از اعتبارسنج‌های Authy,   "
 "Google یا نرم‌افزار اعتبارسنجی مایکروسافت. </span>"
-
-#. module: auth_totp
-#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
-msgid ""
-"<span invisible=\"not totp_enabled\" class=\"text-muted\">This account is "
-"protected!</span>"
-msgstr ""
-"<span invisible=\"not totp_enabled\" class=\"text-muted\"> این حساب حفاظت "
-"شده است!</span>"
-
-#. module: auth_totp
-#: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_field
-msgid ""
-"<span invisible=\"not totp_enabled\" class=\"text-muted\">Your account is "
-"protected!</span>"
-msgstr ""
-"<span invisible=\"not totp_enabled\" class=\"text-muted\"> حساب شما حفاظت "
-"شده است! </span>"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.view_totp_form
@@ -213,7 +206,7 @@ msgstr "غیرفعال‌ کردن اعتبارسنجی دو عاملی"
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device__display_name
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__display_name
 msgid "Display Name"
-msgstr "نام نمایش داده شده"
+msgstr "نام نمایشی"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.auth_totp_form
@@ -243,16 +236,21 @@ msgid "ID"
 msgstr "شناسه"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/controllers/home.py:0
 #, python-format
 msgid "Invalid authentication code format."
 msgstr "قالب کد اعتبارسنجی نامعتبر است. "
 
 #. module: auth_totp
+#: model:ir.model.fields,field_description:auth_totp.field_auth_totp_device____last_update
+#: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard____last_update
+msgid "Last Modified on"
+msgstr "آخرین اصلاح در"
+
+#. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__write_uid
 msgid "Last Updated by"
-msgstr "آخرین بروز رسانی توسط"
+msgstr "آخرین تغییر توسط"
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_auth_totp_wizard__write_date
@@ -314,7 +312,6 @@ msgid "Secret"
 msgstr "محرمانه"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format
 msgid "The verification code should only contain numbers"
@@ -342,7 +339,6 @@ msgid "Trusted Devices"
 msgstr "دستگاه های قابل اعتماد"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-Factor Authentication Activation"
@@ -375,7 +371,7 @@ msgid ""
 msgstr ""
 "اعتبارسنجی دو. عاملی (2FA) یک سیستم اعتبارسنجی دو مرحله‌ای است. \n"
 "مرحله‌ی اول با رمز عبور شما و مرحله‌ی دوم با کدی که از یک اپلیکیشن تلفن همراه دریافت می‌کنید.\n"
-"چند نمونه‌ی رایج از این نمونه‌ها عبارتند از Authy، برنامه‌ی اعتبارسنجی Google یا برنامه‌ی اعتبارسنجی مایکروسافت."
+"چند نمونه‌ی رایج از این نمونه‌ها عبارتند از Autyh، برنامه‌ی اعتبارسنجی Google یا برنامه‌ی اعتبارسنجی مایکروسافت."
 
 #. module: auth_totp
 #: model:ir.model.fields,field_description:auth_totp.field_res_users__totp_enabled
@@ -385,29 +381,26 @@ msgstr "اعتبارسنجی دو عاملی"
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.res_users_view_search
 msgid "Two-factor authentication Disabled"
-msgstr "اعتبارسنجی دو عاملی غیرفعال شد"
+msgstr "اعتبارسنجی دوعاملی غیرفعال شد"
 
 #. module: auth_totp
 #: model_terms:ir.ui.view,arch_db:auth_totp.res_users_view_search
 msgid "Two-factor authentication Enabled"
-msgstr "اعتبارسنجی دو عاملی فعال شد"
+msgstr "اعتبارسنجی دوعاملی غیرفعال شد"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication already enabled"
 msgstr "اعتبارسنجی دو عاملی از قبل فعال شده است"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication can only be enabled for yourself"
 msgstr "فعال‌سازی اعتبارسنجی دو عاملی تنها برای شما امکان‌پذیر است"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #, python-format
 msgid "Two-factor authentication disabled for the following user(s): %s"
@@ -432,7 +425,6 @@ msgid "Verification Code"
 msgstr "کد تاییدیه"
 
 #. module: auth_totp
-#. odoo-python
 #: code:addons/auth_totp/models/res_users.py:0
 #: code:addons/auth_totp/wizard/auth_totp_wizard.py:0
 #, python-format

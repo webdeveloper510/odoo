@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import wUtils from '@website/js/utils';
-import { Component } from "@odoo/owl";
+import wUtils from 'website.utils';
+
+const { Component } = owl;
 
 export class WebsiteSwitcherSystray extends Component {
     setup() {
@@ -25,17 +25,17 @@ export class WebsiteSwitcherSystray extends Component {
                 if (website.domain && !wUtils.isHTTPSorNakedDomainRedirection(website.domain, window.location.origin)) {
                     const { location: { pathname, search, hash } } = this.websiteService.contentWindow;
                     const path = pathname + search + hash;
-                    window.location.href = `${encodeURI(website.domain)}/web#action=website.website_preview&path=${encodeURIComponent(path)}&website_id=${encodeURIComponent(website.id)}`;
+                    window.location.href = `${website.domain}/web#action=website.website_preview&path=${encodeURIComponent(path)}&website_id=${encodeURIComponent(website.id)}`;
                 } else {
-                    this.websiteService.goToWebsite({ websiteId: website.id, path: "", lang: "default" });
+                    this.websiteService.goToWebsite({ websiteId: website.id });
                     if (!website.domain) {
                         const closeFn = this.notificationService.add(
-                            _t(
+                            this.env._t(
                                 "This website does not have a domain configured. To avoid unexpected behaviours during website edition, we recommend closing (or refreshing) other browser tabs.\nTo remove this message please set a domain in your website settings"
                             ),
                             {
                                 type: "warning",
-                                title: _t(
+                                title: this.env._t(
                                     "No website domain configured for this website."
                                 ),
                                 sticky: true,

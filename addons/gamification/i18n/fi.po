@@ -3,30 +3,30 @@
 # 	* gamification
 # 
 # Translators:
-# Timo Koukkari <ti.ko@netikka.fi>, 2023
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2023
-# Svante Suominen <svante.suominen@web-veistamo.fi>, 2023
-# Johanna Valkonen <miujohanna@gmail.com>, 2023
-# Jussi Lehto <jussi@gulfeo.com>, 2023
-# Sari Mäyrä <sari.mayra@sv-oy.fi>, 2023
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2023
-# Jenni Heikkilä <jenni.heikkila@sv-oy.fi>, 2023
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2023
-# Miku Laitinen <miku.laitinen@gmail.com>, 2023
-# Joni Winsten, 2023
+# Timo Koukkari <ti.ko@netikka.fi>, 2022
+# Svante Suominen <svante.suominen@web-veistamo.fi>, 2022
+# Jussi Lehto <jussi@gulfeo.com>, 2022
+# Sari Mäyrä <sari.mayra@sv-oy.fi>, 2022
+# Johanna Valkonen <miujohanna@gmail.com>, 2022
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Jenni Heikkilä <jenni.heikkila@sv-oy.fi>, 2022
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
+# Joni Winsten, 2022
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2022
+# Martin Trigaux, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Topi Aura <topi@aurat.fi>, 2022
+# Miika Nissi <miika.nissi@tawasta.fi>, 2022
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023
-# Martin Trigaux, 2023
-# Topi Aura <topi@aurat.fi>, 2023
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
-# Miika Nissi <miika.nissi@tawasta.fi>, 2023
+# Miku Laitinen <miku.laitinen@gmail.com>, 2024
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-05-23 08:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:46+0000\n"
 "Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
@@ -56,6 +56,46 @@ msgid "%s has refused the challenge"
 msgstr "%s on hylännyt haasteen"
 
 #. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid "<br/> %(rank)d. %(user_name)s - %(reward_name)s"
+msgstr "<br/> %(rank)d. %(user_name)s - %(reward_name)s"
+
+#. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid ""
+"<br/>Nobody has succeeded to reach every goal, no badge is rewarded for this"
+" challenge."
+msgstr ""
+"<br/>Kukaan ei ole onnistunut saavuttamaan kaikkia tavoitteita, joten tästä "
+"haasteesta ei ole vielä myönnetty ansiomerkkejä."
+
+#. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid ""
+"<br/>Reward (badge %(badge_name)s) for every succeeding user was sent to "
+"%(users)s."
+msgstr ""
+"<br/>Palkinto (ansiomerkki %(badge_name)s) lähetettiin jokaiselle "
+"onnistuneelle käyttäjälle: %(users)s."
+
+#. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid ""
+"<br/>Special rewards were sent to the top competing users. The ranking for "
+"this challenge is :"
+msgstr ""
+"<br/>Erityispalkinto lähetettiin parhaiten menestyneille käyttäjille. Tämän "
+"haasteen tuloslistaus:"
+
+#. module: gamification
 #: model:mail.template,body_html:gamification.mail_template_data_new_rank_reached
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
@@ -68,10 +108,10 @@ msgid ""
 "                    <span t-out=\"object.name or ''\">Joel Willis</span>!\n"
 "                </p>\n"
 "                <p>\n"
-"                    You just reached a new rank: <strong t-out=\"object.rank_id.name or ''\">Newbie</strong>\n"
+"                    You just reached a new rank : <strong t-out=\"object.rank_id.name or ''\">Newbie</strong>\n"
 "                </p>\n"
 "                <t t-if=\"object.next_rank_id.name\">\n"
-"                    <p>Continue your work to become a <strong t-out=\"object.next_rank_id.name or ''\">Student</strong>!</p>\n"
+"                    <p>Continue your work to become a <strong t-out=\"object.next_rank_id.name or ''\">Student</strong> !</p>\n"
 "                </t>\n"
 "                <div style=\"margin: 16px 0px 16px 0px;\">\n"
 "                    <t t-set=\"gamification_redirection_data\" t-value=\"object.get_gamification_redirection_data()\"></t>\n"
@@ -107,7 +147,7 @@ msgstr ""
 "                   <span t-out=\"object.name or ''\">Joel Willis</span>!\n"
 "                </p>\n"
 "                <p>\n"
-"                    Saavutit juuri uuden sijoituksen: <strong t-out=\"object.rank_id.name or ''\">Aloittelija</strong>\n"
+"                    Saavutit juuri uuden sijoituksen : <strong t-out=\"object.rank_id.name or ''\">Newbie</strong>\n"
 "                </p>\n"
 "                <t t-if=\"object.next_rank_id.name\">\n"
 "                    <p>Jatka työtäsi tullaksesi <strong t-out=\"object.next_rank_id.name or ''\">opiskelijaksi</strong>!</p>\n"
@@ -129,7 +169,7 @@ msgstr ""
 "        </tr>\n"
 "        <tr t-if=\"user.signature\">\n"
 "            <td style=\"padding:15px 20px 10px 20px;\">\n"
-"                <t t-out=\"user.signature or ''\">--<br>Mitchell Ylläpitäjä</t>\n"
+"                <t t-out=\"user.signature or ''\">--<br>Mitchell admin</t>\n"
 "            </td>\n"
 "        </tr>\n"
 "    </tbody>\n"
@@ -164,11 +204,11 @@ msgstr ""
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_kanban_view
 msgid ""
-"<i role=\"img\" class=\"text-700 fa fa-clock-o fa-3x\" title=\"Goal in "
-"Progress\" aria-label=\"Goal in Progress\"/>"
+"<i role=\"img\" class=\"fa fa-clock-o fa-3x\" title=\"Goal in Progress\" "
+"aria-label=\"Goal in Progress\"/>"
 msgstr ""
-"<i role=\"img\" class=\"text-700 fa fa-clock-o fa-3x\" title=\"Tavoite "
-"käynnissä\" aria-label=\"Tavoite käynnissä\"/>"
+"<i role=\"img\" class=\"fa fa-clock-o fa-3x\" title=\"Keskeneräinen "
+"tavoite\" aria-label=\"Keskeneräinen tavoite\"/>"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_kanban_view
@@ -190,8 +230,12 @@ msgstr ""
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
-msgid "<span class=\"o_stat_text\">Related Goals</span>"
-msgstr "<span class=\"o_stat_text\">Liittyvät tavoitteet</span>"
+msgid ""
+"<span class=\"o_stat_text\">Related</span>\n"
+"                                <span class=\"o_stat_text\">Goals</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Liittyvät</span>\n"
+"                                <span class=\"o_stat_text\">tavoitteet</span>"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_rank_view_form
@@ -211,7 +255,7 @@ msgid ""
 "                <tr><td valign=\"middle\">\n"
 "                    <span style=\"font-size: 10px;\">Your Badge</span><br>\n"
 "                    <span style=\"font-size: 20px; font-weight: bold;\" t-out=\"object.badge_id.name or ''\"></span>\n"
-"                </td><td valign=\"middle\" align=\"right\" t-if=\"not object.user_id.company_id.uses_default_logo\">\n"
+"                </td><td valign=\"middle\" align=\"right\">\n"
 "                    <img t-attf-src=\"/logo.png?company={{ object.user_id.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"object.user_id.company_id.name\">\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
@@ -226,8 +270,8 @@ msgid ""
 "            <table width=\"590\" border=\"0\" cellpadding=\"0\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"top\" style=\"font-size: 14px;\">\n"
 "                    <div>\n"
-"                        Congratulations <t t-out=\"object.user_id.name or ''\"></t>!<br>\n"
-"                        You just received badge <strong t-out=\"object.badge_id.name or ''\"></strong>!<br>\n"
+"                        Congratulations <t t-out=\"object.user_id.name or ''\"></t> !<br>\n"
+"                        You just received badge <strong t-out=\"object.badge_id.name or ''\"></strong> !<br>\n"
 "                        <table t-if=\"not is_html_empty(object.badge_id.description)\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"width: 560px; margin-top: 5px;\">\n"
 "                            <tbody><tr>\n"
 "                                <td valign=\"center\">\n"
@@ -298,9 +342,9 @@ msgstr ""
 "        <td align=\"center\" style=\"min-width: 590px;\">\n"
 "            <table width=\"590\" border=\"0\" cellpadding=\"0\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"middle\">\n"
-"                    <span style=\"font-size: 10px;\">Merkkisi</span><br>\n"
+"                    <span style=\"font-size: 10px;\">Ansiomerkkisi</span><br>\n"
 "                    <span style=\"font-size: 20px; font-weight: bold;\" t-out=\"object.badge_id.name or ''\"></span>\n"
-"                </td><td valign=\"middle\" align=\"right\" t-if=\"not object.user_id.company_id.uses_default_logo\">\n"
+"                </td><td valign=\"middle\" align=\"right\">\n"
 "                    <img t-attf-src=\"/logo.png?company={{ object.user_id.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"object.user_id.company_id.name\">\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
@@ -316,7 +360,7 @@ msgstr ""
 "                <tr><td valign=\"top\" style=\"font-size: 14px;\">\n"
 "                    <div>\n"
 "                        Onnittelut <t t-out=\"object.user_id.name or ''\"></t>!<br>\n"
-"                        Sait juuri virkamerkin <strong t-out=\"object.badge_id.name or ''\"></strong>!<br>\n"
+"                        Sait juuri ansiomerkin <strong t-out=\"object.badge_id.name or ''\"></strong>!<br>\n"
 "                        <table t-if=\"not is_html_empty(object.badge_id.description)\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"width: 560px; margin-top: 5px;\">\n"
 "                            <tbody><tr>\n"
 "                                <td valign=\"center\">\n"
@@ -328,7 +372,7 @@ msgstr ""
 "                            </tr></tbody>\n"
 "                        </table>\n"
 "                       <br>\n"
-"                       <t t-if=\"object.sender_id\">\n"
+"                       <t t-if=\"object.sender_id\"> \n"
 "                            Tämän merkin on myöntänyt <strong t-out=\"object.sender_id.name or ''\"></strong>.\n"
 "                       </t>\n"
 "                       <br>\n"
@@ -352,7 +396,7 @@ msgstr ""
 "        <td align=\"center\" style=\"min-width: 590px;\">\n"
 "            <table width=\"590\" border=\"0\" cellpadding=\"0\" style=\"min-width: 590px; background-color: white; font-size: 12px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"middle\" align=\"left\">\n"
-"                    <t t-out=\"object.user_id.company_id.name or ''\">Yrityksesi</t>\n"
+"                    <t t-out=\"object.user_id.company_id.name or ''\">Yrityksenne</t>\n"
 "                </td></tr>\n"
 "                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: 0.7;\">\n"
 "                    <t t-out=\"object.user_id.company_id.phone or ''\">+1 650-123-4567</t>\n"
@@ -373,7 +417,7 @@ msgstr ""
 "<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
 "    <table width=\"590\" border=\"0\" cellpadding=\"0\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; padding: 8px; border-collapse:separate;\">\n"
 "      <tr><td style=\"text-align: center; font-size: 14px;\">\n"
-"        Voimana <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=gamification\" style=\"color: #875A7B;\">Odoo</a>\n"
+"        Järjestelmää pyörittää <a target=\"_blank\" href=\"https://www.odoo.com?utm_source=db&amp;utm_medium=gamification\" style=\"color: #875A7B;\">Odoo</a>\n"
 "      </td></tr>\n"
 "    </table>\n"
 "</td></tr>\n"
@@ -839,15 +883,6 @@ msgid "Active"
 msgstr "Aktiivinen"
 
 #. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_karma_tracking.py:0
-#: code:addons/gamification/models/res_users.py:0
-#: code:addons/gamification/tests/test_karma_tracking.py:0
-#, python-format
-msgid "Add Manually"
-msgstr "Lisää manuaalisesti"
-
-#. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
 msgid "Advanced Options"
 msgstr "Lisäasetukset"
@@ -1055,7 +1090,7 @@ msgstr "Haasteet"
 #: model:ir.model.fields,help:gamification.field_gamification_badge__rule_max
 msgid "Check to set a monthly limit per person of sending this badge"
 msgstr ""
-"Valitse asettaaksesi kuukausittainen raja ansiomerkin myöntämismäärille"
+"Valitse asettaaksesi kuukausittainen raja ansiomerkin myöntämismäärille."
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_definition_form_view
@@ -1100,13 +1135,6 @@ msgstr "Ehto"
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
 msgid "Consolidated"
 msgstr "Konsolidoitu"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_karma_tracking.py:0
-#, python-format
-msgid "Consolidation from %s to %s"
-msgstr "Konsolidointi %s :sta %s :een"
 
 #. module: gamification
 #: model:ir.actions.act_window,name:gamification.action_new_simplified_res_users
@@ -1201,11 +1229,6 @@ msgid "Data"
 msgstr "Data"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
-msgid "Date"
-msgstr "Päivämäärä"
-
-#. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_goal_definition__field_date_id
 msgid "Date Field"
 msgstr "Päivämääräkenttä"
@@ -1258,7 +1281,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__description
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__description
 #: model:ir.model.fields,field_description:gamification.field_gamification_karma_rank__description
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__reason
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_rank_view_form
 msgid "Description"
 msgstr "Kuvaus"
@@ -1325,7 +1347,7 @@ msgstr "Luonnos"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_newbie
-msgid "Earn your first points and join the adventure!"
+msgid "Earn your first points and join the adventure !"
 msgstr "Ansaitse ensimmäiset pisteesi ja liity seikkailuun!"
 
 #. module: gamification
@@ -1423,11 +1445,6 @@ msgid "Full Suffix"
 msgstr "Yksikkö"
 
 #. module: gamification
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__gain
-msgid "Gain"
-msgstr "Voitto"
-
-#. module: gamification
 #: model:ir.model,name:gamification.model_gamification_badge
 msgid "Gamification Badge"
 msgstr "Pelillistämisen ansiomerkki"
@@ -1484,11 +1501,13 @@ msgstr "Pelillistäminen: Haastekertomus"
 
 #. module: gamification
 #: model:ir.actions.server,name:gamification.ir_cron_check_challenge_ir_actions_server
+#: model:ir.cron,cron_name:gamification.ir_cron_check_challenge
 msgid "Gamification: Goal Challenge Check"
 msgstr "Pelillistäminen: Tavoitteiden haasteiden tarkistus"
 
 #. module: gamification
-#: model:ir.actions.server,name:gamification.ir_cron_consolidate_ir_actions_server
+#: model:ir.actions.server,name:gamification.ir_cron_consolidate_last_month_ir_actions_server
+#: model:ir.cron,cron_name:gamification.ir_cron_consolidate_last_month
 msgid "Gamification: Karma tracking consolidation"
 msgstr "Pelillistäminen: Karman seurannan konsolidointi"
 
@@ -1599,11 +1618,6 @@ msgstr "Myönnä ansiomerkki"
 #: model_terms:ir.ui.view,arch_db:gamification.badge_form_view
 msgid "Grant this Badge"
 msgstr "Myönnä tämä ansiomerkki"
-
-#. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "Granted By"
-msgstr "Myöntäjä"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_user_kanban_view
@@ -1782,7 +1796,6 @@ msgstr "On seuraaja"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_res_users__karma
-#: model_terms:ir.ui.view,arch_db:gamification.res_users_view_form
 msgid "Karma"
 msgstr "Karma"
 
@@ -1792,24 +1805,18 @@ msgid "Karma Changes"
 msgstr "Karman muutokset"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_form
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
-msgid "Karma Owner"
-msgstr "Karman omistaja"
-
-#. module: gamification
-#: model:ir.actions.act_window,name:gamification.gamification_karma_tracking_action
-#: model:ir.ui.menu,name:gamification.gamification_karma_tracking_menu
-msgid "Karma Tracking"
-msgstr "Karman seuranta"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/res_users.py:0
-#, python-format
-msgid "Karma Updates"
-msgstr "Karman päivitykset"
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge_user____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge_user_wizard____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_challenge____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_challenge_line____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_goal____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_goal_definition____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_goal_wizard____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_karma_rank____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking____last_update
+msgid "Last Modified on"
+msgstr "Viimeksi muokattu"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__last_report_date
@@ -1875,9 +1882,10 @@ msgid "List of goals that will be set"
 msgstr "Listaus tavoitteista, jotka asetetaan"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "Manual"
-msgstr "Manuaalinen"
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge__message_main_attachment_id
+#: model:ir.model.fields,field_description:gamification.field_gamification_challenge__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Pääliitetiedosto"
 
 #. module: gamification
 #: model:gamification.karma.rank,name:gamification.rank_master
@@ -1945,11 +1953,6 @@ msgid "My Goals"
 msgstr "Omat tavoitteeni"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "My Karma"
-msgstr "Oma karmani"
-
-#. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__stat_my_monthly_sending
 msgid "My Monthly Sending Total"
 msgstr "Kuukaudessa myöntämäni yhteissumma"
@@ -2010,11 +2013,6 @@ msgid "Next Report Date"
 msgstr "Seuraava raportointipäivä"
 
 #. module: gamification
-#: model_terms:ir.actions.act_window,help:gamification.gamification_karma_tracking_action
-msgid "No Karma Tracking"
-msgstr "Ei karman seurantaa"
-
-#. module: gamification
 #: model_terms:ir.actions.act_window,help:gamification.goals_from_challenge_act
 msgid "No goal found"
 msgstr "Tavoitetta ei löytynyt"
@@ -2033,17 +2031,6 @@ msgstr "Kukaan ei ratkaise haasteita kuin sinä."
 #: model:ir.model.fields.selection,name:gamification.selection__gamification_badge__rule_auth__nobody
 msgid "No one, assigned through challenges"
 msgstr "Ei kukaan, haasteiden kautta määrätty"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_challenge.py:0
-#, python-format
-msgid ""
-"Nobody has succeeded to reach every goal, no badge is rewarded for this "
-"challenge."
-msgstr ""
-"Kukaan ei ole onnistunut saavuttamaan jokaista tavoitetta, eikä tästä "
-"haasteesta palkita merkillä."
 
 #. module: gamification
 #. odoo-python
@@ -2112,7 +2099,8 @@ msgstr "Vaihdettaessa"
 #: model:ir.model.fields,help:gamification.field_gamification_badge__rule_auth_badge_ids
 msgid "Only the people having these badges can give this badge"
 msgstr ""
-"Vain henkilöt, joilla itsellä on kyseinen ansiomerkki, voivat myöntää niitä."
+"Vain henkilöt, joilla itsellä on kyseinen ansiomerkki, voivat  myöntää "
+"niitä."
 
 #. module: gamification
 #: model:ir.model.fields,help:gamification.field_gamification_badge__rule_auth_user_ids
@@ -2164,11 +2152,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__period
 msgid "Periodicity"
 msgstr "Jaksotus"
-
-#. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
-msgid "Previous Total"
-msgstr "Edellinen yhteensä"
 
 #. module: gamification
 #: model:gamification.badge,name:gamification.badge_problem_solver
@@ -2233,23 +2216,23 @@ msgstr "Saavuta seuraava sijoitus ja tule voimakäyttäjäksi!"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_bachelor
-msgid "Reach the next rank and gain a very magic wand!"
-msgstr "Saavuta seuraava sijoitus ja saat taikasauvan!"
+msgid "Reach the next rank and gain a very magic wand !"
+msgstr "Saavuta seuraava sija ja ansaitse maaginen taikasauva !"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_master
-msgid "Reach the next rank and gain a very nice hat!"
-msgstr "Saavuta seuraava sijoitus ja saat erittäin hienon hatun!"
+msgid "Reach the next rank and gain a very nice hat !"
+msgstr "Saavuta seuraava sija ja ansaitse erittäin kiva hattu !"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_student
-msgid "Reach the next rank and gain a very nice mug!"
-msgstr "Saavuta seuraava sijoitus ja saat erittäin hienon mukin!"
+msgid "Reach the next rank and gain a very nice mug !"
+msgstr "Saavuta seuraava sija ja ansaitse todella hieno muki !"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_doctor
-msgid "Reach the next rank and gain a very nice unicorn!"
-msgstr "Saavuta seuraava sijoitus ja saat erittäin hienon yksisarvisen!"
+msgid "Reach the next rank and gain a very nice unicorn !"
+msgstr "Saavuta seuraava sija ja ansaitse erittäin mukava yksisarvinen !"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_bachelor
@@ -2295,7 +2278,7 @@ msgstr "Liittyvät tavoitteet"
 #. module: gamification
 #: model:ir.model.fields,help:gamification.field_gamification_badge_user_wizard__user_id
 msgid "Related user name for the resource to manage its access."
-msgstr "Liittyvä käyttäjätunnus resurssille sen oikeuksien määrittämiseksi."
+msgstr "Liittyvä käyttäjätunnus resurssille sen oikeuksien määrittämiseksi"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__remaining_sending
@@ -2354,17 +2337,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
 msgid "Reward"
 msgstr "Palkinto"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_challenge.py:0
-#, python-format
-msgid ""
-"Reward (badge %(badge_name)s) for every succeeding user was sent to "
-"%(users)s."
-msgstr ""
-"Palkinto (merkki %(badge_name)s) jokaisesta seuraavasta käyttäjästä "
-"lähetettiin osoitteeseen %(users)s."
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__reward_failure
@@ -2490,7 +2462,7 @@ msgstr "Järjestys"
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.view_goal_wizard_update_current
 msgid "Set the current value you have reached for this goal"
-msgstr "Määrittele tähän mennessä saavuttamasi arvot tälle tavoitteelle."
+msgstr "Määrittele tähän mennessä saavutamasi arvot kyseiselle haasteelle."
 
 #. module: gamification
 #: model:gamification.goal.definition,name:gamification.definition_base_company_data
@@ -2528,28 +2500,6 @@ msgid "Silver badges count"
 msgstr "Hopeamerkkien määrä"
 
 #. module: gamification
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__origin_ref
-msgid "Source"
-msgstr "Lähde"
-
-#. module: gamification
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__origin_ref_model_name
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "Source Type"
-msgstr "Lähdetyyppi"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_challenge.py:0
-#, python-format
-msgid ""
-"Special rewards were sent to the top competing users. The ranking for this "
-"challenge is:"
-msgstr ""
-"Parhaiten kilpaileville käyttäjille lähetettiin erityispalkintoja. Tämän "
-"haasteen sijoitus on seuraava:"
-
-#. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
 msgid "Start Challenge"
 msgstr "Käynnistä haaste"
@@ -2571,7 +2521,7 @@ msgstr "Käynnistä tavoite"
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_search_view
 #: model_terms:ir.ui.view,arch_db:gamification.goal_search_view
 msgid "State"
-msgstr "Alue"
+msgstr "Tila"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_form_view
@@ -2615,14 +2565,6 @@ msgstr "Asetettu tavoitearvo"
 #: model_terms:ir.ui.view,arch_db:gamification.goal_kanban_view
 msgid "Target: less than"
 msgstr "Tavoite: vähemmän kuin"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/tests/test_karma_tracking.py:0
-#: code:addons/gamification/tests/test_karma_tracking.py:0
-#, python-format
-msgid "Test Reason"
-msgstr "Testisyy"
 
 #. module: gamification
 #: model:ir.model.fields,help:gamification.field_gamification_goal_definition__action_id
@@ -2863,7 +2805,6 @@ msgstr "Päivittää"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__granted_count
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
 msgid "Total"
 msgstr "Yhteensä"
 
@@ -2871,11 +2812,6 @@ msgstr "Yhteensä"
 #: model:ir.model,name:gamification.model_gamification_karma_tracking
 msgid "Track Karma Changes"
 msgstr "Seuraa karman muutoksia"
-
-#. module: gamification
-#: model_terms:ir.actions.act_window,help:gamification.gamification_karma_tracking_action
-msgid "Track the sources of the users karma and monitor"
-msgstr "Seuraa käyttäjien karman lähteitä ja seuraa"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_form
@@ -2888,6 +2824,8 @@ msgid "Tracking Date"
 msgstr "Seurauspäivämäärä"
 
 #. module: gamification
+#: model:ir.actions.act_window,name:gamification.gamification_karma_tracking_action
+#: model:ir.ui.menu,name:gamification.gamification_karma_tracking_menu
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
 msgid "Trackings"
 msgstr "Seuranta"
@@ -2915,24 +2853,15 @@ msgid "Update %s"
 msgstr "Päivitä %s"
 
 #. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_karma_tracking.py:0
 #: model:ir.model,name:gamification.model_res_users
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_user__user_id
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_user_wizard__user_id
 #: model:ir.model.fields,field_description:gamification.field_gamification_goal__user_id
 #: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__user_id
+#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
 #: model_terms:ir.ui.view,arch_db:gamification.goal_search_view
-#, python-format
 msgid "User"
 msgstr "Käyttäjä"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/res_users.py:0
-#, python-format
-msgid "User Creation"
-msgstr "Käyttäjän luominen"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__user_domain
@@ -3097,8 +3026,8 @@ msgstr "esim. ongelmanratkaisija"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_rank_view_form
-msgid "e.g. Reach this rank to gain a free mug!"
-msgstr "esim. Saavuta tämä arvo saavuttaaksesi ilmaisen mukin!"
+msgid "e.g. Reach this rank to gain a free mug !"
+msgstr "esim. Saavuta tämä sija saadaksesi ilmaisen mukin!"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_definition_form_view
@@ -3133,7 +3062,7 @@ msgstr "kuin tavoite."
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_user_kanban_view
 msgid "the"
-msgstr "se"
+msgstr " "
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_kanban_view

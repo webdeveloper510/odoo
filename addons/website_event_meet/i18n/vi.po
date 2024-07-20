@@ -3,15 +3,16 @@
 # 	* website_event_meet
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Vo Thanh Thuy, 2022
 # Thi Huong Nguyen, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:56+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2024\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -19,6 +20,16 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: vi\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
+msgid "&amp;nbsp;"
+msgstr "&amp;nbsp;"
+
+#. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_aside
+msgid "<b>&amp;#9900;&amp;nbsp;</b>"
+msgstr "<b>&amp;#9900;&amp;nbsp;</b>"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_main
@@ -35,12 +46,27 @@ msgid "<span class=\"badge text-bg-danger\">Unpublished</span>"
 msgstr "<span class=\"badge text-bg-danger\">Đã huỷ đăng</span>"
 
 #. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_aside
+msgid "<span class=\"h5 m-3\">Other Rooms</span>"
+msgstr ""
+
+#. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.community_aside
+msgid "<span>Create a Room</span>"
+msgstr "<span>Tạo một phòng</span>"
+
+#. module: website_event_meet
+#: model_terms:ir.ui.view,arch_db:website_event_meet.community_main
+msgid "<span>Join a room</span>"
+msgstr "<span>Tham gia một phòng</span>"
+
+#. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_main
 msgid ""
-"<span>Oops! This room is full!</span><br/>Come back later to have a chat "
+"<span>Oops! This room is full !</span><br/>Come back later to have a chat "
 "with us!"
 msgstr ""
-"<span>Phòng này hiện đã đủ người</span><br/> Vui lòng quay lại sau và trò "
+"<span>Rất tiếc! Phòng này đã đủ chỗ !</span><br/>Hãy quay lại sau và trò "
 "chuyện với chúng tôi!"
 
 #. module: website_event_meet
@@ -77,21 +103,21 @@ msgstr "Cho phép tạo phòng"
 #. odoo-javascript
 #: code:addons/website_event_meet/static/src/js/website_event_meeting_room.js:0
 #, python-format
-msgid "Are you sure you want to close this room?"
-msgstr "Bạn có chắc chắn muốn đóng phòng này không? "
+msgid "Are you sure you want to close this room ?"
+msgstr "Bạn có chắc muốn đóng phòng này không? "
 
 #. module: website_event_meet
 #. odoo-javascript
 #: code:addons/website_event_meet/static/src/js/website_event_meeting_room.js:0
 #, python-format
-msgid "Are you sure you want to duplicate this room?"
-msgstr "Bạn có chắc chắn muốn nhân bản phòng này không? "
+msgid "Are you sure you want to duplicate this room ?"
+msgstr "Bạn có chắc muốn nhân bản phòng này không? "
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__target_audience
 #: model_terms:ir.ui.view,arch_db:website_event_meet.event_meeting_room_view_search
 msgid "Audience"
-msgstr "Đối tượng"
+msgstr "Khán giả"
 
 #. module: website_event_meet
 #. odoo-javascript
@@ -119,7 +145,7 @@ msgstr "Có thể đăng"
 #: code:addons/website_event_meet/static/src/xml/website_event_meeting_room.xml:0
 #, python-format
 msgid "Capacity"
-msgstr "Sức chứa"
+msgstr "Công suất"
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__chat_room_id
@@ -184,7 +210,7 @@ msgstr "Tên hiển thị"
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.community_main
 msgid "Dropdown menu"
-msgstr "Menu thả xuống"
+msgstr "Trình đơn thả xuống"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
@@ -250,11 +276,6 @@ msgid "Is Published"
 msgstr "Được đăng"
 
 #. module: website_event_meet
-#: model_terms:ir.ui.view,arch_db:website_event_meet.community_main
-msgid "Join a room"
-msgstr "Tham gia phòng"
-
-#. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_card
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_main
 msgid "Join us next time to chat about"
@@ -279,9 +300,14 @@ msgid "Languages Menu"
 msgstr "Menu ngôn ngữ"
 
 #. module: website_event_meet
+#: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room____last_update
+msgid "Last Modified on"
+msgstr "Sửa lần cuối vào"
+
+#. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__write_uid
 msgid "Last Updated by"
-msgstr "Cập nhật lần cuối bởi"
+msgstr "Last Updated by"
 
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__write_date
@@ -344,11 +370,6 @@ msgid "No Room Open"
 msgstr "Không có phòng mở"
 
 #. module: website_event_meet
-#: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_aside
-msgid "Other Rooms"
-msgstr "Phòng khác"
-
-#. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__room_participant_count
 msgid "Participant count"
 msgstr "Số người tham dự "
@@ -360,8 +381,8 @@ msgstr "Số người tham dự tối đa "
 
 #. module: website_event_meet
 #: model:event.meeting.room,name:website_event_meet.event_meeting_room_1
-msgid "Reducing the ecological footprint with wood?"
-msgstr "Giảm thiểu dấu chân sinh thái bằng gỗ?"
+msgid "Reducing the ecological footprint with wood ?"
+msgstr "Giảm thiểu dấu chân môi trường bằng gỗ? "
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.event_meeting_room_view_form
@@ -435,7 +456,7 @@ msgstr "Bắt đầu một chủ đề"
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__summary
 #: model_terms:ir.ui.view,arch_db:website_event_meet.event_meeting_room_view_search
 msgid "Summary"
-msgstr "Tóm tắt"
+msgstr "Tổng kết"
 
 #. module: website_event_meet
 #. odoo-javascript
@@ -455,10 +476,10 @@ msgstr "Sự kiện"
 #, python-format
 msgid ""
 "The event %s starts on %s (%s). \n"
-"Join us there to chat about \"%s\"!"
+"Join us there to chat about \"%s\" !"
 msgstr ""
-"Sự kiện %s bắt đầu vào %s (%s). \n"
-"Hãy tham gia để trò chuyện về \"%s\"!"
+"Sự kiện %s bắt đầu lúc %s (%s). \n"
+"Hãy tới tham gia để trò chuyện về \"%s\" !"
 
 #. module: website_event_meet
 #: model:ir.model.fields,help:website_event_meet.field_event_meeting_room__website_url
@@ -491,7 +512,7 @@ msgstr ""
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__website_published
 msgid "Visible on current website"
-msgstr "Hiển thị trên trang web hiện tại"
+msgstr "Hiển thị ở website hiện tại"
 
 #. module: website_event_meet
 #: model:event.meeting.room,name:website_event_meet.event_meeting_room_2
@@ -500,7 +521,7 @@ msgstr "Vos meubles préférés ?"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.community_aside
-msgid "Want to create your own discussion room?"
+msgid "Want to create your own discussion room ?"
 msgstr "Bạn muốn tạo phòng thảo luận riêng? "
 
 #. module: website_event_meet
@@ -511,7 +532,7 @@ msgstr "Menu sự kiện website"
 #. module: website_event_meet
 #: model:ir.model.fields,field_description:website_event_meet.field_event_meeting_room__website_url
 msgid "Website URL"
-msgstr "URL trang web"
+msgstr "Địa chỉ website"
 
 #. module: website_event_meet
 #: model_terms:ir.ui.view,arch_db:website_event_meet.meeting_room_main

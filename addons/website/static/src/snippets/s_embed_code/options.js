@@ -1,39 +1,14 @@
 /** @odoo-module **/
-import { Dialog } from "@web/core/dialog/dialog";
-import { CodeEditor } from "@web/core/code_editor/code_editor";
-import { useService } from "@web/core/utils/hooks";
-import options from '@web_editor/js/editor/snippets.options';
-import { _t } from "@web/core/l10n/translation";
-import { EditHeadBodyDialog } from "@website/components/edit_head_body_dialog/edit_head_body_dialog";
-import { cloneContentEls } from "@website/js/utils";
 
-import { Component, useState } from "@odoo/owl";
+import Dialog from 'web.Dialog';
+import core from 'web.core';
+import options from 'web_editor.snippets.options';
+import { loadBundle } from "@web/core/assets";
+import { cloneContentEls } from "website.utils";
 
-class CodeEditorDialog extends Component {
-    static template = "website.s_embed_code_dialog";
-    static components = { Dialog, CodeEditor };
-    setup() {
-        this.dialog = useService("dialog");
-        this.state = useState({ value: this.props.value });
-    }
-    onCodeChange(newValue) {
-        this.state.value = newValue;
-    }
-    onConfirm() {
-        this.props.confirm(this.state.value);
-        this.props.close();
-    }
-    onInjectHeadOrBody() {
-        this.dialog.add(EditHeadBodyDialog);
-        this.props.close();
-    }
-}
+const _t = core._t;
 
 options.registry.EmbedCode = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.dialog = this.bindService("dialog");
-    },
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
@@ -41,24 +16,82 @@ options.registry.EmbedCode = options.Class.extend({
     async editCode() {
         const $container = this.$target.find('.s_embed_code_embedded');
         const templateEl = this.$target[0].querySelector("template.s_embed_code_saved");
-        const embedContent = templateEl.innerHTML.trim();
+        let embedContent = templateEl.innerHTML.trim();
+
+        await loadBundle({
+            jsLibs: [
+                '/web/static/lib/ace/ace.js',
+                '/web/static/lib/ace/mode-xml.js',
+                '/web/static/lib/ace/mode-qweb.js',
+            ],
+        });
 
         await new Promise(resolve => {
-            this.dialog.add(CodeEditorDialog, {
+            const $content = $(core.qweb.render('website.custom_code_dialog_content', {
+                contentText: _t(`If you need to add analytics or marketing tags, inject code in your <head> or <body> instead. The option is in the "Theme" tab.`)
+            }));
+            const aceEditor = this._renderAceEditor($content.find('.o_ace_editor_container')[0], embedContent || "");
+            const dialog = new Dialog(this, {
                 title: _t("Edit embedded code"),
-                value: embedContent,
-                mode: "xml",
-                confirm: (newValue) => {
-                    // Removes scripts tags from the DOM as we don't want them
-                    // to interfere during edition, but keeps them in a
-                    // `<template>` that will be saved to the database.
-                    templateEl.content.replaceChildren(cloneContentEls(newValue, true));
-                    $container[0].replaceChildren(cloneContentEls(newValue));
-                }
-            }, {
-                onClose: resolve,
+                $content,
+                buttons: [
+                    {
+                        text: _t("Save"),
+                        classes: 'btn-primary',
+                        click: async () => {
+                            embedContent = aceEditor.getValue();
+
+                            // Removes scripts tags from the DOM as we don't
+                            // want them to interfere during edition, but keeps
+                            // them in a `<template>` that will be saved to the
+                            // database.
+                            templateEl.content.replaceChildren(cloneContentEls(embedContent, true));
+                            $container[0].replaceChildren(cloneContentEls(embedContent));
+                        },
+                        close: true,
+                    },
+                    {
+                        text: _t("Discard"),
+                        close: true,
+                    },
+                ],
             });
+            dialog.on('closed', this, resolve);
+            dialog.open();
         });
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {DOMElement} node
+     * @param {String} content text of the editor
+     * @returns {Object}
+     */
+    _renderAceEditor(node, content) {
+        const aceEditor = window.ace.edit(node);
+        aceEditor.setTheme('ace/theme/monokai');
+        aceEditor.setValue(content, 1);
+        aceEditor.setOptions({
+            minLines: 20,
+            maxLines: Infinity,
+            showPrintMargin: false,
+        });
+        aceEditor.renderer.setOptions({
+            highlightGutterLine: true,
+            showInvisibles: true,
+            fontSize: 14,
+        });
+
+        const aceSession = aceEditor.getSession();
+        aceSession.setOptions({
+            mode: "ace/mode/xml",
+            useWorker: false,
+        });
+        return aceEditor;
     },
 });
 

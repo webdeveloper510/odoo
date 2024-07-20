@@ -6,7 +6,6 @@ from odoo.addons.project.tests.test_project_sharing import TestProjectSharingCom
 from odoo.addons.sms.tests.common import SMSCommon
 from odoo.tests import tagged
 
-
 class TestProjectSharingWithSms(TestProjectSharingCommon, SMSCommon):
     @classmethod
     def setUpClass(cls):
@@ -64,7 +63,6 @@ class TestProjectSharingWithSms(TestProjectSharingCommon, SMSCommon):
             })
         self.assertEqual(self.project_portal.stage_id, self.project_stage_with_sms)
         self.assertSMSIapSent([self.project_portal.partner_id.mobile])
-
 
 @tagged('post_install', '-at_install')
 class TestPostInstallProjectSharingWithSms(TestProjectSharingWithSms):

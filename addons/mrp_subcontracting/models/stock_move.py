@@ -34,7 +34,7 @@ class StockMove(models.Model):
         for move in self:
             if not move.is_subcontract:
                 continue
-            if not move.picked or float_is_zero(move.quantity, precision_rounding=move.product_uom.rounding):
+            if float_is_zero(move.quantity_done, precision_rounding=move.product_uom.rounding):
                 continue
             productions = move._get_subcontract_production()
             if not productions or (productions[:1].consumption == 'strict' and not productions[:1]._has_tracked_component()):
@@ -68,19 +68,18 @@ class StockMove(models.Model):
         if to_set_moves:
             super(StockMove, to_set_moves)._set_quantity_done(qty)
 
-    def _set_quantity(self):
+    def _quantity_done_set(self):
         to_set_moves = self
         for move in self:
             if move.is_subcontract and move._subcontracting_possible_record():
-                move_line_quantities = sum(move.move_line_ids.filtered(lambda ml: ml.picked).mapped('quantity'))
-                delta_qty = move.quantity - move_line_quantities
+                delta_qty = move.quantity_done - move._quantity_done_sml()
                 if float_compare(delta_qty, 0, precision_rounding=move.product_uom.rounding) > 0:
                     move._auto_record_components(delta_qty)
                     to_set_moves -= move
-                elif float_compare(delta_qty, 0, precision_rounding=move.product_uom.rounding) < 0:
+                elif float_compare(delta_qty, 0, precision_rounding=move.product_uom.rounding) < 0 and not move.picking_id.immediate_transfer:
                     move.with_context(transfer_qty=True)._reduce_subcontract_order_qty(abs(delta_qty))
         if to_set_moves:
-            super(StockMove, to_set_moves)._set_quantity()
+            super(StockMove, to_set_moves)._quantity_done_set()
 
     def _auto_record_components(self, qty):
         self.ensure_one()
@@ -142,8 +141,8 @@ class StockMove(models.Model):
                 if move.state in ('done', 'cancel') or not move.is_subcontract:
                     continue
                 move.move_orig_ids.production_id.filtered(lambda p: p.state not in ('done', 'cancel')).write({
-                    'date_start': move.date,
-                    'date_finished': move.date,
+                    'date_planned_finished': move.date,
+                    'date_planned_start': move.date,
                 })
         return res
 
@@ -168,7 +167,10 @@ class StockMove(models.Model):
                 'show_lots_text': False,
             })
         elif self.env.user.has_group('base.group_portal'):
-            action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_operations').id, 'form')]
+            if self.picking_type_id.show_reserved:
+                action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_operations').id, 'form')]
+            else:
+                action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_nosuggest_operations').id, 'form')]
         return action
 
     def action_show_subcontract_details(self):
@@ -181,7 +183,7 @@ class StockMove(models.Model):
             form_view = self.env.ref('mrp_subcontracting.mrp_subcontracting_portal_move_form_view')
             ctx.update(no_breadcrumbs=False)
         return {
-            'name': _('Raw Materials for %s', self.product_id.display_name),
+            'name': _('Raw Materials for %s') % (self.product_id.display_name),
             'type': 'ir.actions.act_window',
             'res_model': 'stock.move',
             'views': [(tree_view.id, 'list'), (form_view.id, 'form')],
@@ -189,6 +191,10 @@ class StockMove(models.Model):
             'domain': [('id', 'in', moves.ids)],
             'context': ctx
         }
+
+    def _set_quantities_to_reservation(self):
+        move_untouchable = self.filtered(lambda m: m.is_subcontract and m._get_subcontract_production()._has_tracked_component())
+        return super(StockMove, self - move_untouchable)._set_quantities_to_reservation()
 
     def _action_cancel(self):
         productions_to_cancel_ids = OrderedSet()
@@ -216,10 +222,17 @@ class StockMove(models.Model):
             bom = move._get_subcontract_bom()
             if not bom:
                 continue
+            if float_is_zero(move.product_qty, precision_rounding=move.product_uom.rounding) and\
+                    move.picking_id.immediate_transfer is True:
+                raise UserError(_("To subcontract, use a planned transfer."))
             move.write({
                 'is_subcontract': True,
                 'location_id': move.picking_id.partner_id.with_company(move.company_id).property_stock_subcontractor.id
             })
+            if float_compare(move.product_qty, 0, precision_rounding=move.product_uom.rounding) <= 0:
+                # If a subcontracted amount is decreased, don't create a MO that would be for a negative value.
+                # We don't care if the MO decreases even when done since everything is handled through picking
+                continue
         res = super()._action_confirm(merge=merge, merge_into=merge_into)
         for move in res:
             if move.is_subcontract:
@@ -286,6 +299,11 @@ class StockMove(models.Model):
         vals['location_id'] = self.location_id.id
         return vals
 
+    def _should_bypass_set_qty_producing(self):
+        if (self.production_id | self.raw_material_production_id)._get_subcontract_move():
+            return False
+        return super()._should_bypass_set_qty_producing()
+
     def _should_bypass_reservation(self, forced_location=False):
         """ If the move is subcontracted then ignore the reservation. """
         should_bypass_reservation = super()._should_bypass_reservation(forced_location=forced_location)
@@ -296,8 +314,7 @@ class StockMove(models.Model):
     def _update_subcontract_order_qty(self, new_quantity):
         for move in self:
             quantity_to_remove = move.product_uom_qty - new_quantity
-            if not float_is_zero(quantity_to_remove, precision_rounding=move.product_uom.rounding):
-                move._reduce_subcontract_order_qty(quantity_to_remove)
+            move._reduce_subcontract_order_qty(quantity_to_remove)
 
     def _reduce_subcontract_order_qty(self, quantity_to_remove):
         self.ensure_one()
@@ -308,7 +325,7 @@ class StockMove(models.Model):
         if wip_production:
             self.env['change.production.qty'].with_context(skip_activity=True).create({
                 'mo_id': wip_production.id,
-                'product_qty': wip_production.product_qty + quantity_to_remove
+                'product_qty': wip_production.product_uom_qty + quantity_to_remove
             }).change_prod_qty()
 
         # Cancel productions until reach new_quantity
@@ -319,7 +336,7 @@ class StockMove(models.Model):
             else:
                 self.env['change.production.qty'].with_context(skip_activity=True).create({
                     'mo_id': production.id,
-                    'product_qty': production.product_qty - quantity_to_remove
+                    'product_qty': production.product_uom_qty - quantity_to_remove
                 }).change_prod_qty()
                 break
 

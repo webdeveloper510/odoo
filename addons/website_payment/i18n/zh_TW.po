@@ -3,15 +3,17 @@
 # 	* website_payment
 # 
 # Translators:
-# Wil Odoo, 2023
+# Benson <Benson.Dr@Gmail.com>, 2023
+# Martin Trigaux, 2023
+# Levi Siuzdak (sile), 2023
 # Tony Ng, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-05-23 08:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:56+0000\n"
 "Last-Translator: Tony Ng, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -66,7 +68,7 @@ msgid "<b>Payment Method:</b>"
 msgstr "<b>付款方式:</b>"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "<option value=\"\">Country...</option>"
 msgstr "<option value=\"\">國家...</option>"
 
@@ -77,7 +79,7 @@ msgid ""
 "                                If you believe that it is an error, please contact the website administrator."
 msgstr ""
 "<strong>找不到合適的付款方式.</strong><br/>\n"
-"                                如果您認為這是一個錯誤，請聯繫網站管理員"
+"                                如果您認為這是一個異常狀況，請聯繫網站管理員"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
@@ -102,7 +104,6 @@ msgid "Activate Payments"
 msgstr "啟用付款功能"
 
 #. module: website_payment
-#: model:ir.actions.server,name:website_payment.action_activate_stripe
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Activate Stripe"
 msgstr "啟用 Stripe"
@@ -112,7 +113,7 @@ msgstr "啟用 Stripe"
 #: code:addons/website_payment/static/src/snippets/s_donation/options.js:0
 #, python-format
 msgid "Add a description here"
-msgstr "在這兒增加說明"
+msgstr "在這兒添加說明"
 
 #. module: website_payment
 #. odoo-javascript
@@ -127,10 +128,10 @@ msgstr "添加新的預設選項"
 #: code:addons/website_payment/static/src/snippets/s_donation/options.xml:0
 #, python-format
 msgid "Amount"
-msgstr "金額"
+msgstr "總額"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Amount ("
 msgstr "金額 ("
 
@@ -164,21 +165,26 @@ msgid "Configure %s"
 msgstr "%s 配置"
 
 #. module: website_payment
+#: model:ir.actions.server,name:website_payment.action_stripe_connect_account
+msgid "Connect to Stripe"
+msgstr ""
+
+#. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
 #: model:ir.model,name:website_payment.model_res_country
 #, python-format
 msgid "Country"
 msgstr "國家"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid ""
 "Country\n"
-"                    <span class=\"s_website_form_mark\"> *</span>"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"國家/地區\n"
-"                    <span class=\"s_website_form_mark\"> *（必填）</span>"
+"國家\n"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-python
@@ -218,20 +224,14 @@ msgid "Display Options"
 msgstr "顯示選項"
 
 #. module: website_payment
-#. odoo-python
-#: code:addons/website_payment/controllers/portal.py:0
-#, python-format
-msgid "Donate"
-msgstr "捐助"
-
-#. module: website_payment
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "Donate Now"
 msgstr "馬上捐款"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 #: model_terms:ir.ui.view,arch_db:website_payment.snippets
 msgid "Donation"
 msgstr "捐款"
@@ -262,26 +262,26 @@ msgstr "捐贈通知"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
 #, python-format
 msgid "Email"
 msgstr "電郵"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid ""
 "Email\n"
-"                    <span class=\"s_website_form_mark\"> *</span>"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"電子郵件\n"
-"                    <span class=\"s_website_form_mark\"> *（必填）</span>"
+"電郵地址\n"
+"                            <span class=\"s_website_form_mark\"> *（必填）</span>"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
 #, python-format
 msgid "Email is invalid"
-msgstr "電郵地址無效"
+msgstr "電子郵件地址無效"
 
 #. module: website_payment
 #. odoo-python
@@ -292,7 +292,7 @@ msgstr "請填入電子郵件"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
 #, python-format
 msgid "Field '%s' is mandatory"
 msgstr "欄位“%s”必須填入"
@@ -340,19 +340,19 @@ msgstr "最低"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
 #, python-format
 msgid "Name"
 msgstr "名稱"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid ""
 "Name\n"
-"                    <span class=\"s_website_form_mark\"> *</span>"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "名稱\n"
-"                    <span class=\"s_website_form_mark\"> *（必填）</span>"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. odoo-python
@@ -383,7 +383,7 @@ msgid "Other than Paypal"
 msgstr "除 PayPal 以外"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Payment Details"
 msgstr "付款詳情"
 
@@ -398,13 +398,6 @@ msgid "Payment Transaction"
 msgstr "付款交易"
 
 #. module: website_payment
-#. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
-#, python-format
-msgid "Payment processing failed"
-msgstr "付款處理失敗"
-
-#. module: website_payment
 #. odoo-python
 #: code:addons/website_payment/models/payment_transaction.py:0
 #, python-format
@@ -414,7 +407,12 @@ msgstr "收到的捐贈款項，詳情如下："
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_account_payment
 msgid "Payments"
-msgstr "付款"
+msgstr "收付款"
+
+#. module: website_payment
+#: model:ir.model.fields,field_description:website_payment.field_res_config_settings__module_payment_paypal
+msgid "Paypal - Express Checkout"
+msgstr ""
 
 #. module: website_payment
 #: model:ir.model.fields.selection,name:website_payment.selection__res_config_settings__providers_state__paypal_only
@@ -444,6 +442,13 @@ msgid "Recipient Email"
 msgstr "受款人電郵地址"
 
 #. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#, python-format
+msgid "Server Error"
+msgstr "伺服器錯誤"
+
+#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "Shop - Payment"
 msgstr "網店 － 付款"
@@ -460,7 +465,7 @@ msgstr "無論金額大小，我們都萬分感謝您的協助。"
 
 #. module: website_payment
 #. odoo-javascript
-#: code:addons/website_payment/static/src/js/payment_form.js:0
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
 #, python-format
 msgid "Some information is missing to process your payment."
 msgstr "還缺了一些資訊來處理您的付款。"
@@ -468,7 +473,7 @@ msgstr "還缺了一些資訊來處理您的付款。"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
 msgid "Step"
-msgstr "步驟"
+msgstr "跳號"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
@@ -502,6 +507,13 @@ msgid "There is nothing to pay."
 msgstr "沒有須付款項目。"
 
 #. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#, python-format
+msgid "Validation Error"
+msgstr "驗證錯誤"
+
+#. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "View Alternatives"
 msgstr "查看替代方案"
@@ -510,6 +522,13 @@ msgstr "查看替代方案"
 #: model_terms:ir.ui.view,arch_db:website_payment.res_config_settings_view_form
 msgid "View other providers"
 msgstr "查看其他服務商"
+
+#. module: website_payment
+#. odoo-javascript
+#: code:addons/website_payment/static/src/js/website_payment_form.js:0
+#, python-format
+msgid "We could not obtain payment fees."
+msgstr "我們無法獲得付款費用。"
 
 #. module: website_payment
 #: model:ir.model.fields,field_description:website_payment.field_payment_provider__website_id
@@ -522,12 +541,12 @@ msgid "Website: Donation"
 msgstr "網站：捐款"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Write us a comment"
 msgstr "留下回應給我們"
 
 #. module: website_payment
-#: model_terms:ir.ui.view,arch_db:website_payment.donation_information
+#: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Your comment"
 msgstr "你的回應"
 

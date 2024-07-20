@@ -16,6 +16,7 @@ class TestUsersHttp(HttpCase):
             'groups_id': [Command.set([self.env.ref('base.group_portal').id])],
         })
         self.env['res.users.apikeys'].with_user(portal_user)._generate(None, 'Portal API Key')
+        portal_user.invalidate_recordset()
         self.assertTrue(portal_user.api_key_ids)
 
         # Request the deactivation of the portal account as portal through the route meant for this purpose
@@ -38,6 +39,6 @@ class TestUsersHttp(HttpCase):
         # Assert the deletion of the account is added to the deletion processing queue.
         self.assertTrue(self.env['res.users.deletion'].search([('user_id', '=', portal_user.id)]))
         # Run the cron processing the deletion queue
-        self.env.ref('base.ir_cron_res_users_deletion').method_direct_trigger()
+        self.env['res.users.deletion']._gc_portal_users()
         # Assert the account is completely deleted
         self.assertFalse(portal_user.exists())

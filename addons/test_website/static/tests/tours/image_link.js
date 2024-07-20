@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from '@website/js/tours/tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 /**
  * The purpose of this tour is to check the link on image flow.
@@ -22,7 +22,7 @@ wTourUtils.registerWebsitePreviewTour('test_image_link', {
     test: true,
     url: '/',
     edition: true,
-}, () => [
+}, [
     wTourUtils.dragNDrop({
         id: 's_text_image',
         name: 'Text - Image',

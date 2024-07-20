@@ -33,7 +33,7 @@ class ProjectCustomerPortal(CustomerPortal):
         domain = [('project_id', '=', project.id)]
         # pager
         url = "/my/projects/%s" % project.id
-        values = self._prepare_tasks_values(page, date_begin, date_end, sortby, search, search_in, groupby, url, domain, su=bool(access_token), project=project)
+        values = self._prepare_tasks_values(page, date_begin, date_end, sortby, search, search_in, groupby, url, domain, su=bool(access_token))
         # adding the access_token to the pager's url args,
         # so we are not prompted for loging when switching pages
         # if access_token is None, the arg is not present in the URL
@@ -46,11 +46,10 @@ class ProjectCustomerPortal(CustomerPortal):
             pager=pager,
             project=project,
             task_url=f'projects/{project.id}/task',
-            preview_object=project,
         )
-
+        # default value is set to 'project' in _prepare_tasks_values, so we have to set it to 'none' here.
         if not groupby:
-            values['groupby'] = 'project' if self._display_project_groupby(project) else 'none'
+            values['groupby'] = 'none'
 
         return self._get_page_view_values(project, access_token, values, 'my_projects_history', False, **kwargs)
 
@@ -70,7 +69,7 @@ class ProjectCustomerPortal(CustomerPortal):
         domain = self._prepare_project_domain()
 
         searchbar_sortings = self._prepare_searchbar_sortings()
-        if not sortby:
+        if not sortby or sortby not in searchbar_sortings:
             sortby = 'date'
         order = searchbar_sortings[sortby]['order']
 
@@ -131,13 +130,8 @@ class ProjectCustomerPortal(CustomerPortal):
                 values['task_id'] = task_id
             return request.render("project.project_sharing_portal", values)
         project_sudo = project_sudo if access_token else project_sudo.with_user(request.env.user)
-        if not groupby:
-            groupby = 'stage'
         values = self._project_get_page_view_values(project_sudo, access_token, page, date_begin, date_end, sortby, search, search_in, groupby, **kw)
         return request.render("project.portal_my_project", values)
-
-    def _get_project_sharing_company(self, project):
-        return project.company_id or request.env.user.company_id
 
     def _prepare_project_sharing_session_info(self, project, task=None):
         session_info = request.env['ir.http'].session_info()
@@ -154,11 +148,10 @@ class ProjectCustomerPortal(CustomerPortal):
             "translations": translation_hash,
         }
 
-        project_company = self._get_project_sharing_company(project)
-
+        project_company = project.company_id
         session_info.update(
             cache_hashes=cache_hashes,
-            action_name=project.action_project_sharing(),
+            action_name='project.project_sharing_project_task_action',
             project_id=project.id,
             user_companies={
                 'current_company': project_company.id,
@@ -256,7 +249,6 @@ class ProjectCustomerPortal(CustomerPortal):
             'user': request.env.user,
             'project_accessible': project_accessible,
             'task_link_section': [],
-            'preview_object': task,
         }
 
         values = self._get_page_view_values(task, access_token, values, history, False, **kwargs)
@@ -276,36 +268,30 @@ class ProjectCustomerPortal(CustomerPortal):
 
         return values
 
-    def _task_get_searchbar_sortings(self, milestones_allowed, project=False):
+    def _task_get_searchbar_sortings(self, milestones_allowed):
         values = {
             'date': {'label': _('Newest'), 'order': 'create_date desc', 'sequence': 1},
             'name': {'label': _('Title'), 'order': 'name', 'sequence': 2},
+            'project': {'label': _('Project'), 'order': 'project_id, stage_id', 'sequence': 3},
             'stage': {'label': _('Stage'), 'order': 'stage_id, project_id', 'sequence': 5},
-            'status': {'label': _('Status'), 'order': 'state', 'sequence': 6},
+            'status': {'label': _('Status'), 'order': 'kanban_state', 'sequence': 6},
             'priority': {'label': _('Priority'), 'order': 'priority desc', 'sequence': 8},
             'date_deadline': {'label': _('Deadline'), 'order': 'date_deadline asc', 'sequence': 9},
             'update': {'label': _('Last Stage Update'), 'order': 'date_last_stage_update desc', 'sequence': 11},
         }
-        if not project:
-            values['project'] = {'label': _('Project'), 'order': 'project_id, stage_id', 'sequence': 3}
         if milestones_allowed:
             values['milestone'] = {'label': _('Milestone'), 'order': 'milestone_id', 'sequence': 7}
         return values
 
-    # Meant to be overridden in documents_project
-    def _display_project_groupby(self, project):
-        return not project
-
-    def _task_get_searchbar_groupby(self, milestones_allowed, project=False):
+    def _task_get_searchbar_groupby(self, milestones_allowed):
         values = {
             'none': {'input': 'none', 'label': _('None'), 'order': 1},
+            'project': {'input': 'project', 'label': _('Project'), 'order': 2},
             'stage': {'input': 'stage', 'label': _('Stage'), 'order': 4},
             'status': {'input': 'status', 'label': _('Status'), 'order': 5},
             'priority': {'input': 'priority', 'label': _('Priority'), 'order': 7},
             'customer': {'input': 'customer', 'label': _('Customer'), 'order': 10},
         }
-        if self._display_project_groupby(project):
-            values['project'] = {'input': 'project', 'label': _('Project'), 'order': 2}
         if milestones_allowed:
             values['milestone'] = {'input': 'milestone', 'label': _('Milestone'), 'order': 6}
         return dict(sorted(values.items(), key=lambda item: item[1]["order"]))
@@ -317,7 +303,7 @@ class ProjectCustomerPortal(CustomerPortal):
             'customer': 'partner_id',
             'milestone': 'milestone_id',
             'priority': 'priority',
-            'status': 'state',
+            'status': 'kanban_state',
         }
 
     def _task_get_order(self, order, groupby):
@@ -327,20 +313,18 @@ class ProjectCustomerPortal(CustomerPortal):
             return order
         return '%s, %s' % (field_name, order)
 
-    def _task_get_searchbar_inputs(self, milestones_allowed, project=False):
+    def _task_get_searchbar_inputs(self, milestones_allowed):
         values = {
             'all': {'input': 'all', 'label': _('Search in All'), 'order': 1},
             'content': {'input': 'content', 'label': Markup(_('Search <span class="nolabel"> (in Content)</span>')), 'order': 1},
             'ref': {'input': 'ref', 'label': _('Search in Ref'), 'order': 1},
+            'project': {'input': 'project', 'label': _('Search in Project'), 'order': 2},
             'users': {'input': 'users', 'label': _('Search in Assignees'), 'order': 3},
             'stage': {'input': 'stage', 'label': _('Search in Stages'), 'order': 4},
             'status': {'input': 'status', 'label': _('Search in Status'), 'order': 5},
             'priority': {'input': 'priority', 'label': _('Search in Priority'), 'order': 7},
-            'customer': {'input': 'customer', 'label': _('Search in Customer'), 'order': 10},
             'message': {'input': 'message', 'label': _('Search in Messages'), 'order': 11},
         }
-        if not project:
-            values['project'] = {'input': 'project', 'label': _('Search in Project'), 'order': 2}
         if milestones_allowed:
             values['milestone'] = {'input': 'milestone', 'label': _('Search in Milestone'), 'order': 6}
 
@@ -369,20 +353,21 @@ class ProjectCustomerPortal(CustomerPortal):
         if search_in in ('priority', 'all'):
             search_domain.append([('priority', 'ilike', search == 'normal' and '0' or '1')])
         if search_in in ('status', 'all'):
-            state_dict = dict(map(reversed, request.env['project.task']._fields['state']._description_selection(request.env)))
-            search_domain.append([('state', 'ilike', state_dict.get(search, search))])
+            search_domain.append([
+                ('kanban_state', 'ilike', 'normal' if search == 'In Progress' else 'done' if search == 'Ready' else 'blocked' if search == 'Blocked' else search)
+            ])
         return OR(search_domain)
 
-    def _prepare_tasks_values(self, page, date_begin, date_end, sortby, search, search_in, groupby, url="/my/tasks", domain=None, su=False, project=False):
+    def _prepare_tasks_values(self, page, date_begin, date_end, sortby, search, search_in, groupby, url="/my/tasks", domain=None, su=False):
         values = self._prepare_portal_layout_values()
 
         Task = request.env['project.task']
         milestone_domain = AND([domain, [('allow_milestones', '=', 'True')]])
         milestones_allowed = Task.sudo().search_count(milestone_domain, limit=1) == 1
-        searchbar_sortings = dict(sorted(self._task_get_searchbar_sortings(milestones_allowed, project).items(),
+        searchbar_sortings = dict(sorted(self._task_get_searchbar_sortings(milestones_allowed).items(),
                                          key=lambda item: item[1]["sequence"]))
-        searchbar_inputs = self._task_get_searchbar_inputs(milestones_allowed, project)
-        searchbar_groupby = self._task_get_searchbar_groupby(milestones_allowed, project)
+        searchbar_inputs = self._task_get_searchbar_inputs(milestones_allowed)
+        searchbar_groupby = self._task_get_searchbar_groupby(milestones_allowed)
 
         if not domain:
             domain = []
@@ -439,13 +424,12 @@ class ProjectCustomerPortal(CustomerPortal):
             else:
                 grouped_tasks = [tasks] if tasks else []
 
-
-            task_states = dict(Task_sudo._fields['state']._description_selection(request.env))
+            task_states = dict(Task_sudo._fields['kanban_state']._description_selection(request.env))
             if sortby == 'status':
                 if groupby == 'none' and grouped_tasks:
-                    grouped_tasks[0] = grouped_tasks[0].sorted(lambda tasks: task_states.get(tasks.state))
+                    grouped_tasks[0] = grouped_tasks[0].sorted(lambda tasks: task_states.get(tasks.kanban_state))
                 else:
-                    grouped_tasks.sort(key=lambda tasks: task_states.get(tasks[0].state))
+                    grouped_tasks.sort(key=lambda tasks: task_states.get(tasks[0].kanban_state))
             return grouped_tasks
 
         values.update({
@@ -487,12 +471,13 @@ class ProjectCustomerPortal(CustomerPortal):
 
         # extends filterby criteria with project (criteria name is the project id)
         # Note: portal users can't view projects they don't follow
-        project_groups = request.env['project.task']._read_group(AND([[('project_id', 'not in', projects.ids)], task_domain or []]),
-                                                                ['project_id'])
-        for [project] in project_groups:
-            proj_name = project.sudo().display_name if project else _('Others')
+        project_groups = request.env['project.task'].read_group(AND([[('project_id', 'not in', projects.ids)], task_domain or []]),
+                                                                ['project_id'], ['project_id'])
+        for group in project_groups:
+            proj_id = group['project_id'][0] if group['project_id'] else False
+            proj_name = group['project_id'][1] if group['project_id'] else _('Others')
             searchbar_filters.update({
-                str(project.id): {'label': proj_name, 'domain': [('project_id', '=', project.id)]}
+                str(proj_id): {'label': proj_name, 'domain': [('project_id', '=', proj_id)]}
             })
         return searchbar_filters
 

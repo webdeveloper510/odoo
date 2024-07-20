@@ -2,13 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.base.tests.test_ir_actions import TestServerActionsBase
-from odoo.addons.mail.tests.common import MailCommon
+from odoo.addons.test_mail.tests.common import TestMailCommon
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 
 @tagged('ir_actions')
-class TestServerActionsEmail(MailCommon, TestServerActionsBase):
+class TestServerActionsEmail(TestMailCommon, TestServerActionsBase):
 
     def setUp(self):
         super(TestServerActionsEmail, self).setUp()
@@ -78,9 +78,6 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         with self.assertSinglePostNotifications(
                 [{'partner': self.test_partner, 'type': 'email', 'status': 'ready'}],
                 message_info={'content': 'Hello %s' % self.test_partner.name,
-                              'fields_values': {
-                                'author_id': self.env.user.partner_id,
-                              },
                               'message_type': 'notification',
                               'subtype': 'mail.mt_comment',
                              }

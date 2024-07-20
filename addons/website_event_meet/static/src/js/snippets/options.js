@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import options from '@web_editor/js/editor/snippets.options';
+import options from 'web_editor.snippets.options';
 
 options.registry.WebsiteEvent.include({
 
@@ -9,7 +9,14 @@ options.registry.WebsiteEvent.include({
      */
     async start() {
         const res = await this._super(...arguments);
-        const rpcData = await this.orm.read("event.event", [this.eventId], ["meeting_room_allow_creation"]);
+        const rpcData = await this._rpc({
+            model: 'event.event',
+            method: 'read',
+            args: [
+                [this.eventId],
+                ['meeting_room_allow_creation'],
+            ],
+        });
         this.meetingRoomAllowCreation = rpcData[0]['meeting_room_allow_creation'];
         return res;
     },
@@ -22,8 +29,12 @@ options.registry.WebsiteEvent.include({
      * @see this.selectClass for parameters
      */
     allowRoomCreation(previewMode, widgetValue, params) {
-        return this.orm.write("event.event", [this.eventId], {
-            meeting_room_allow_creation: widgetValue,
+        return this._rpc({
+            model: 'event.event',
+            method: 'write',
+            args: [[this.eventId], {
+                meeting_room_allow_creation: widgetValue
+            }],
         // TODO: Remove the request_save in master, it's already done by the
         // data-page-options set to true in the template.
         }).then(() => this.trigger_up('request_save', {reload: true, optionSelector: this.data.selector}));

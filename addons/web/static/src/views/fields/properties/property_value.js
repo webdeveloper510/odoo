@@ -1,12 +1,19 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { CheckBox } from "@web/core/checkbox/checkbox";
-import { DateTimeInput } from "@web/core/datetime/datetime_input";
-import { Domain } from "@web/core/domain";
+import { _lt } from "@web/core/l10n/translation";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { CheckBox } from "@web/core/checkbox/checkbox";
+import { DateTimePicker, DatePicker } from "@web/core/datepicker/datepicker";
+import { Domain } from "@web/core/domain";
+import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
+import { useService } from "@web/core/utils/hooks";
+import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
+import { m2oTupleFromData } from "@web/views/fields/many2one/many2one_field";
+import { PropertyTags } from "./property_tags";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { formatFloat, formatInteger, formatMany2one } from "@web/views/fields/formatters";
+import { parseFloat, parseInteger } from "@web/views/fields/parsers";
 import {
     deserializeDate,
     deserializeDateTime,
@@ -15,15 +22,8 @@ import {
     serializeDate,
     serializeDateTime,
 } from "@web/core/l10n/dates";
-import { _t } from "@web/core/l10n/translation";
-import { TagsList } from "@web/core/tags_list/tags_list";
-import { useService } from "@web/core/utils/hooks";
-import { formatInteger, formatMany2one } from "@web/views/fields/formatters";
-import { formatFloat } from "@web/core/utils/numbers";
-import { m2oTupleFromData } from "@web/views/fields/many2one/many2one_field";
-import { parseFloat, parseInteger } from "@web/views/fields/parsers";
-import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
-import { PropertyTags } from "./property_tags";
+
+import { Component } from "@odoo/owl";
 
 /**
  * Represent one property value.
@@ -104,8 +104,7 @@ export class PropertyValue extends Component {
                 const hasAccess = many2manyValue[1] !== null;
                 return {
                     id: many2manyValue[0],
-                    comodel: this.props.comodel,
-                    text: hasAccess ? many2manyValue[1] : _t("No Access"),
+                    text: hasAccess ? many2manyValue[1] : _lt("No Access"),
                     onClick:
                         hasAccess &&
                         this.clickableRelational &&
@@ -325,10 +324,10 @@ export class PropertyValue extends Component {
      * @returns {array} [record id, record name]
      */
     async _nameGet(recordId) {
-        const result = await this.orm.read(this.props.comodel, [recordId], ["display_name"], {
+        const result = await this.orm.call(this.props.comodel, "name_get", [[recordId]], {
             context: this.props.context,
         });
-        return [result[0].id, result[0].display_name];
+        return result[0];
     }
 }
 
@@ -338,7 +337,8 @@ PropertyValue.components = {
     Dropdown,
     DropdownItem,
     CheckBox,
-    DateTimeInput,
+    DateTimePicker,
+    DatePicker,
     Many2XAutocomplete,
     TagsList,
     AutoComplete,

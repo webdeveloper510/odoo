@@ -2,9 +2,9 @@
 
 import { WebsiteEditorComponent } from '@website/components/editor/editor';
 import { WebsiteTranslator } from '@website/components/translator/translator';
-import { patch } from "@web/core/utils/patch";
+import { patch } from 'web.utils';
 
-patch(WebsiteEditorComponent.prototype, {
+patch(WebsiteEditorComponent.prototype, 'website_slides_editor', {
     /**
      * @override
      */
@@ -14,12 +14,12 @@ patch(WebsiteEditorComponent.prototype, {
             this.websiteContext.edition = false;
             this.websiteService.goToWebsite({path: `${pathname}?fullscreen=0`, edition: true});
         } else {
-            super.publicRootReady(...arguments);
+            this._super(...arguments);
         }
     }
 });
 
-patch(WebsiteTranslator.prototype, {
+patch(WebsiteTranslator.prototype, 'website_slides_translator', {
     /**
      * When editing translations of a slide in fullscreen mode: force fullscreen off.
      * Indeed, the fullscreen layout is not fit for content edition.
@@ -36,7 +36,7 @@ patch(WebsiteTranslator.prototype, {
                 translation: true
             });
         } else {
-            super.publicRootReady(...arguments);
+            this._super(...arguments);
         }
     }
 });

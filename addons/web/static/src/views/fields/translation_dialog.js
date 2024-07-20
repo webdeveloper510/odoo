@@ -2,14 +2,15 @@
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
-import { loadLanguages, _t } from "@web/core/l10n/translation";
+import { sprintf } from "@web/core/utils/strings";
+import { loadLanguages } from "@web/core/l10n/translation";
 
 import { Component, onWillStart } from "@odoo/owl";
 
 export class TranslationDialog extends Component {
     setup() {
         super.setup();
-        this.title = _t("Translate: %s", this.props.fieldName);
+        this.title = sprintf(this.env._t("Translate: %s"), this.props.fieldName);
 
         this.orm = useService("orm");
         this.user = useService("user");

@@ -1,12 +1,12 @@
 /** @odoo-module */
 
-import { registry } from "@web/core/registry";
-import wTourUtils from "@website/js/tours/tour_utils";
+import tour from 'web_tour.tour';
 
-registry.category("web_tour.tours").add('configurator_translation', {
+tour.register('configurator_translation', {
     test: true,
     url: '/website/configurator',
-    steps: () => [
+},
+[
     // Configurator first screen
     {
         content: "click next",
@@ -58,13 +58,10 @@ registry.category("web_tour.tours").add('configurator_translation', {
         trigger: '.o_website_loader_container',
         run: function () {}, // it's a check
     }, {
-        content: "Wait until the configurator is finished",
-        trigger: ".o_website_preview[data-view-xmlid='website.homepage']",
+        content: "Wait untill the configurator is finished",
+        trigger: '#oe_snippets.o_loaded',
         timeout: 30000,
-        isCheck: true,
-    },
-    ...wTourUtils.clickOnEditAndWaitEditMode(),
-    {
+    }, {
         // Check the content of the save button to make sure the website is in
         // Parseltongue. (The editor should be in the website's default language,
         // which should be parseltongue in this test.)
@@ -75,4 +72,4 @@ registry.category("web_tour.tours").add('configurator_translation', {
          trigger: 'iframe body:not(.editor_enable)',
          run: function () {}, // It's a check.
     }
-]});
+]);

@@ -1,26 +1,21 @@
 /** @odoo-module **/
 
-import { loadBundle } from "@web/core/assets";
+import { loadJS } from "@web/core/assets";
 import { registry } from "@web/core/registry";
-import { getColor, hexToRGBA } from "@web/core/colors/colors";
+import { getColor, hexToRGBA } from "@web/views/graph/colors";
 import { standardFieldProps } from "../standard_field_props";
+import { useService } from "@web/core/utils/hooks";
 
 import { Component, onWillStart, useEffect, useRef } from "@odoo/owl";
-import { cookie } from "@web/core/browser/cookie";
 
 export class JournalDashboardGraphField extends Component {
-    static template = "web.JournalDashboardGraphField";
-    static props = {
-        ...standardFieldProps,
-        graphType: String,
-    };
-
     setup() {
         this.chart = null;
+        this.cookies = useService("cookie");
         this.canvasRef = useRef("canvas");
-        this.data = JSON.parse(this.props.record.data[this.props.name]);
+        this.data = JSON.parse(this.props.value);
 
-        onWillStart(async () => await loadBundle("web.chartjs_lib"));
+        onWillStart(() => loadJS("/web/static/lib/Chart/Chart.js"));
 
         useEffect(() => {
             this.renderChart();
@@ -47,12 +42,17 @@ export class JournalDashboardGraphField extends Component {
             config = this.getBarChartConfig();
         }
         this.chart = new Chart(this.canvasRef.el, config);
+        // To perform its animations, ChartJS will perform each animation
+        // step in the next animation frame. The initial rendering itself
+        // is delayed for consistency. We can avoid this by manually
+        // advancing the animation service.
+        Chart.animationService.advance();
     }
     getLineChartConfig() {
         const labels = this.data[0].values.map(function (pt) {
             return pt.x;
         });
-        const color10 = getColor(10, cookie.get("color_scheme"));
+        const color10 = getColor(10, this.cookies.current.color_scheme);
         const borderColor = this.data[0].is_sample_data ? hexToRGBA(color10, 0.1) : color10;
         const backgroundColor = this.data[0].is_sample_data
             ? hexToRGBA(color10, 0.05)
@@ -73,27 +73,21 @@ export class JournalDashboardGraphField extends Component {
                 ],
             },
             options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        intersect: false,
-                        position: "nearest",
-                        caretSize: 0,
-                    },
-                },
+                legend: { display: false },
                 scales: {
-                    y: {
-                        display: false,
-                    },
-                    x: {
-                        display: false,
-                    },
+                    yAxes: [{ display: false }],
+                    xAxes: [{ display: false }],
                 },
                 maintainAspectRatio: false,
                 elements: {
                     line: {
                         tension: 0.000001,
                     },
+                },
+                tooltips: {
+                    intersect: false,
+                    position: "nearest",
+                    caretSize: 0,
                 },
             },
         };
@@ -104,8 +98,8 @@ export class JournalDashboardGraphField extends Component {
         const labels = [];
         const backgroundColor = [];
 
-        const color13 = getColor(13, cookie.get("color_scheme"));
-        const color19 = getColor(19, cookie.get("color_scheme"));
+        const color13 = getColor(13, this.cookies.current.color_scheme);
+        const color19 = getColor(19, this.cookies.current.color_scheme);
         this.data[0].values.forEach((pt) => {
             data.push(pt.value);
             labels.push(pt.label);
@@ -131,20 +125,16 @@ export class JournalDashboardGraphField extends Component {
                 ],
             },
             options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        intersect: false,
-                        position: "nearest",
-                        caretSize: 0,
-                    },
-                },
+                legend: { display: false },
                 scales: {
-                    y: {
-                        display: false,
-                    },
+                    yAxes: [{ display: false }],
                 },
                 maintainAspectRatio: false,
+                tooltips: {
+                    intersect: false,
+                    position: "nearest",
+                    caretSize: 0,
+                },
                 elements: {
                     line: {
                         tension: 0.000001,
@@ -155,12 +145,18 @@ export class JournalDashboardGraphField extends Component {
     }
 }
 
-export const journalDashboardGraphField = {
-    component: JournalDashboardGraphField,
-    supportedTypes: ["text"],
-    extractProps: ({ attrs }) => ({
-        graphType: attrs.graph_type,
-    }),
+JournalDashboardGraphField.template = "web.JournalDashboardGraphField";
+JournalDashboardGraphField.props = {
+    ...standardFieldProps,
+    graphType: String,
 };
 
-registry.category("fields").add("dashboard_graph", journalDashboardGraphField);
+JournalDashboardGraphField.supportedTypes = ["text"];
+
+JournalDashboardGraphField.extractProps = ({ attrs }) => {
+    return {
+        graphType: attrs.graph_type,
+    };
+};
+
+registry.category("fields").add("dashboard_graph", JournalDashboardGraphField);

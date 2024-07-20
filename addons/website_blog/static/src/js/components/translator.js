@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
 import { WebsiteTranslator } from '@website/components/translator/translator';
-import { patch } from "@web/core/utils/patch";
+import { patch } from 'web.utils';
 
-patch(WebsiteTranslator.prototype, {
+patch(WebsiteTranslator.prototype, 'website_blog_translator', {
     /**
      * @override
      */
     _beforeEditorActive() {
-        super._beforeEditorActive(...arguments);
+        this._super(...arguments);
         $(this.websiteService.pageDocument).find('[data-translate-error-tooltip]').tooltip({
             container: this.websiteService.pageDocument.body,
             trigger: 'click',

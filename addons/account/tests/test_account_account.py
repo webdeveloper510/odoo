@@ -402,8 +402,8 @@ class TestAccountAccount(AccountTestInvoicingCommon):
         self.assertRecordValues(company.account_opening_move_id.line_ids.sorted(), [
             # pylint: disable=bad-whitespace
             {'account_id': account.id,              'balance': 300.0},
-            {'account_id': account.id,              'balance': -500.0},
             {'account_id': balancing_account.id,    'balance': 200.0},
+            {'account_id': account.id,              'balance': -500.0},
         ])
 
         account.opening_balance = 0
@@ -444,9 +444,9 @@ class TestAccountAccount(AccountTestInvoicingCommon):
         self.assertRecordValues(company.account_opening_move_id.line_ids.sorted(), [
             # pylint: disable=bad-whitespace
             {'account_id': account.id,              'balance': 100.0,   'amount_currency': 200.0},
+            {'account_id': balancing_account.id,    'balance': 800.0,   'amount_currency': 800.0},
             {'account_id': account.id,              'balance': 100.0,   'amount_currency': 200.0},
             {'account_id': account.id,              'balance': -1000.0, 'amount_currency': -2000.0},
-            {'account_id': balancing_account.id,    'balance': 800.0,   'amount_currency': 800.0},
         ])
 
         account.opening_debit = 1000

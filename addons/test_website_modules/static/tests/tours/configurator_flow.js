@@ -1,11 +1,14 @@
-/** @odoo-module **/
+odoo.define('test_website_modules.tour.configurator_flow', function (require) {
+'use strict';
 
-import { registry } from "@web/core/registry";
+const tour = require('web_tour.tour');
+const wTourUtils = require('website.tour_utils');
 
-registry.category("web_tour.tours").add('configurator_flow', {
+tour.register('configurator_flow', {
     test: true,
     url: '/web#action=website.action_website_configuration',
-    steps: () => [
+},
+[
     {
         content: "click on create new website",
         trigger: 'button[name="action_website_create_new"]',
@@ -15,7 +18,7 @@ registry.category("web_tour.tours").add('configurator_flow', {
         run: 'text Website Test',
     }, {
         content: "validate the website creation modal",
-        trigger: 'button.btn-primary:contains("Create")',
+        trigger: 'button.btn-primary',
     },
     // Configurator first screen
     {
@@ -71,22 +74,23 @@ registry.category("web_tour.tours").add('configurator_flow', {
         trigger: '.o_website_loader_container',
         run: function () {}, // it's a check
     }, {
-        content: "Wait until the configurator is finished",
-        trigger: ".o_website_preview[data-view-xmlid='website.homepage']",
+        content: "Wait untill the configurator is finished",
+        trigger: '#oe_snippets.o_loaded',
         timeout: 30000,
-        isCheck: true,
-    }, {
+    },
+    ...wTourUtils.clickOnSave(),
+    {
         content: "check menu and footer links are correct",
         trigger: 'body:not(.editor_enable)', // edit mode left
         run: function () {
             const $iframe = this.$anchor.find('iframe.o_iframe:not(.o_ignore_in_tour)');
             for (const menu of ['Home', 'Events', 'Courses', 'Pricing', 'News', 'Success Stories', 'Contact us']) {
-                if (!$iframe.contents().find(`.top_menu a:contains(${menu})`).length) {
+                if (!$iframe.contents().find(`#top_menu a:contains(${menu})`).length) {
                     console.error(`Missing ${menu} menu. It should have been created by the configurator.`);
                 }
             }
             for (const url of ['/', '/event', '/slides', '/pricing', '/blog/', '/blog/', '/contactus']) {
-                if (!$iframe.contents().find(`.top_menu a[href^='${url}']`).length) {
+                if (!$iframe.contents().find(`#top_menu a[href^='${url}']`).length) {
                     console.error(`Missing ${url} menu URL. It should have been created by the configurator.`);
                 }
             }
@@ -97,4 +101,5 @@ registry.category("web_tour.tours").add('configurator_flow', {
             }
         },
     },
-]});
+]);
+});

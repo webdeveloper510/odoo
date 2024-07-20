@@ -1,8 +1,9 @@
 /** @odoo-module */
 
-import { PortalHomeCounters } from '@portal/js/portal';
+import publicWidget from 'web.public.widget';
+import "portal.portal"; // force dependencies
 
-PortalHomeCounters.include({
+publicWidget.registry.PortalHomeCounters.include({
     /**
      * @override
      */

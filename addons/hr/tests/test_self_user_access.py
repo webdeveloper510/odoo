@@ -112,12 +112,13 @@ class TestSelfAccessRights(TestHrCommon):
         cls.richard_emp = cls.env['hr.employee'].create({
             'name': 'Richard',
             'user_id': cls.richard.id,
-            'private_phone': '21454',
+            'address_home_id': cls.env['res.partner'].create({'name': 'Richard', 'phone': '21454', 'type': 'private'}).id,
         })
         cls.hubert = new_test_user(cls.env, login='hub', groups='base.group_user', name='Simple employee', email='hub@example.com')
         cls.hubert_emp = cls.env['hr.employee'].create({
             'name': 'Hubert',
             'user_id': cls.hubert.id,
+            'address_home_id': cls.env['res.partner'].create({'name': 'Hubert', 'type': 'private'}).id,
         })
 
         cls.protected_fields_emp = OrderedDict([(k, v) for k, v in cls.env['hr.employee']._fields.items() if v.groups == 'hr.group_hr_user'])
@@ -216,17 +217,3 @@ class TestSelfAccessRights(TestHrCommon):
     def testSearchUserEMployee(self):
         # Searching user based on employee_id field should not raise bad query error
         self.env['res.users'].with_user(self.richard).search([('employee_id', 'ilike', 'Hubert')])
-
-    def test_onchange_readable_fields_with_no_access(self):
-        """
-            The purpose is to test that the onchange logic takes into account `SELF_READABLE_FIELDS`.
-
-            The view contains fields that are in `SELF_READABLE_FIELDS` (example: `private_street`).
-            Even if the user does not have read access to the employee,
-            it should not cause an access error if these fields are in `SELF_READABLE_FIELDS`.
-        """
-        self.env['res.lang']._activate_lang("fr_FR")
-        with Form(self.richard.with_user(self.richard), view='hr.res_users_view_form_profile') as form:
-            # triggering an onchange should not trigger some access error
-            form.lang = "fr_FR"
-            form.tz = "Europe/Brussels"

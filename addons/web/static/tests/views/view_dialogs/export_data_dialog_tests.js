@@ -20,11 +20,6 @@ import { makeFakeUserService } from "../../helpers/mock_services";
 
 const serviceRegistry = registry.category("services");
 
-async function exportAllAction(target) {
-    await click(target, ".o_cp_action_menus .dropdown-toggle");
-    await click(target, ".o_cp_action_menus .dropdown-item");
-}
-
 QUnit.module("ViewDialogs", (hooks) => {
     let serverData;
     let target;
@@ -258,13 +253,12 @@ QUnit.module("ViewDialogs", (hooks) => {
             mockRPC(route, args) {
                 if (args.method === "create") {
                     assert.strictEqual(args.model, "ir.exports");
-                    const [values] = args.args[0];
                     assert.strictEqual(
-                        values.name,
+                        args.args[0].name,
                         "Export template",
                         "the template name is correctly sent"
                     );
-                    return [2];
+                    return 2;
                 }
                 if (args.method === "search_read") {
                     assert.deepEqual(
@@ -780,7 +774,6 @@ QUnit.module("ViewDialogs", (hooks) => {
             activateElement: () => {},
             deactivateElement: () => {},
             size: 4,
-            isSmall: true,
         };
         const fakeUIService = {
             start(env) {
@@ -994,7 +987,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             domain: [["bar", "!=", "glou"]],
         });
 
-        await exportAllAction(target);
+        await click(target.querySelector(".o_list_export_xlsx"));
     });
 
     QUnit.test("Direct export grouped list ", async function (assert) {
@@ -1046,7 +1039,7 @@ QUnit.module("ViewDialogs", (hooks) => {
             domain: [["bar", "!=", "glou"]],
         });
 
-        await exportAllAction(target);
+        await click(target.querySelector(".o_list_export_xlsx"));
     });
 
     QUnit.test("Export dialog with duplicated fields", async function (assert) {
@@ -1298,7 +1291,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                 "should have 3 th, 1 for selector, 1 for columns, 1 for optional columns"
             );
 
-            await exportAllAction(target);
+            await click(target.querySelector(".o_list_export_xlsx"));
         }
     );
 

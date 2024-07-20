@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Many2XAutocomplete } from '@web/views/fields/relational_utils';
-import { Many2OneField, many2OneField } from '@web/views/fields/many2one/many2one_field';
+import { Many2OneField } from '@web/views/fields/many2one/many2one_field';
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
@@ -67,11 +67,6 @@ export class PartnerMany2XAutocomplete extends Many2XAutocomplete {
 
 }
 
-PartnerMany2XAutocomplete.props = {
-    ...Many2XAutocomplete.props,
-    canCreate: { type: Boolean, optional: true },
-}
-
 export class PartnerAutoCompleteMany2one extends Many2OneField {
     get Many2XAutocompleteProps() {
         return {
@@ -86,9 +81,4 @@ PartnerAutoCompleteMany2one.components = {
     Many2XAutocomplete: PartnerMany2XAutocomplete,
 }
 
-export const partnerAutoCompleteMany2one = {
-    ...many2OneField,
-    component: PartnerAutoCompleteMany2one,
-};
-
-registry.category("fields").add("res_partner_many2one", partnerAutoCompleteMany2one);
+registry.category("fields").add("res_partner_many2one", PartnerAutoCompleteMany2one);

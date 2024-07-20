@@ -12,7 +12,7 @@ import { omit } from "@web/core/utils/objects";
 /**
  * @typedef {Object} OdooModelMetaData
  * @property {string} resModel
- * @property {Array<Field>|undefined} fields
+ * @property {Array<Object>|undefined} fields
  */
 
 export class OdooViewsDataSource extends LoadableDataSource {
@@ -28,10 +28,9 @@ export class OdooViewsDataSource extends LoadableDataSource {
         this._metaData = JSON.parse(JSON.stringify(params.metaData));
         /** @protected */
         this._initialSearchParams = JSON.parse(JSON.stringify(params.searchParams));
-        const userContext = this._orm.user.context;
         this._initialSearchParams.context = omit(
             this._initialSearchParams.context || {},
-            ...Object.keys(userContext)
+            ...Object.keys(this._orm.user.context)
         );
         /** @private */
         this._customDomain = this._initialSearchParams.domain;
@@ -43,7 +42,7 @@ export class OdooViewsDataSource extends LoadableDataSource {
     get _searchParams() {
         return {
             ...this._initialSearchParams,
-            domain: this.getComputedDomain(),
+            domain: this._customDomain,
         };
     }
 
@@ -90,31 +89,15 @@ export class OdooViewsDataSource extends LoadableDataSource {
      * @returns {Array}
      */
     getComputedDomain() {
-        const userContext = this._orm.user.context;
-        return new Domain(this._customDomain).toList({
-            ...this._initialSearchParams.context,
-            ...userContext,
-        });
+        return this._customDomain;
     }
 
-    /**
-     * Get the current domain as a string
-     * @returns { string }
-     */
-    getInitialDomainString() {
-        return new Domain(this._initialSearchParams.domain).toString();
-    }
-
-    /**
-     *
-     * @param {string} domain
-     */
     addDomain(domain) {
-        const newDomain = Domain.and([this._initialSearchParams.domain, domain]).toString();
+        const newDomain = Domain.and([this._initialSearchParams.domain, domain]);
         if (newDomain.toString() === new Domain(this._customDomain).toString()) {
             return;
         }
-        this._customDomain = newDomain;
+        this._customDomain = newDomain.toList();
         if (this._loadPromise === undefined) {
             // if the data source has never been loaded, there's no point
             // at reloading it now.

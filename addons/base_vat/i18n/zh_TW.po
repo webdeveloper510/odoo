@@ -3,15 +3,16 @@
 # 	* base_vat
 # 
 # Translators:
+# Martin Trigaux, 2022
 # Wil Odoo, 2023
 # Tony Ng, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-03-21 21:59+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Tony Ng, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -50,6 +51,17 @@ msgid "49-098-576 or 49098576"
 msgstr "49-098-576 或 49098576"
 
 #. module: base_vat
+#: model_terms:ir.ui.view,arch_db:base_vat.res_config_settings_view_form
+msgid ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
+"specific.\" aria-label=\"Values set here are company-specific.\" "
+"groups=\"base.group_multi_company\" role=\"img\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"此處設定的值是特定於每間公司的。\" aria-"
+"label=\"此處設定的值是特定於每間公司的。\" groups=\"base.group_multi_company\" "
+"role=\"img\"/>"
+
+#. module: base_vat
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
@@ -81,15 +93,6 @@ msgid "Config Settings"
 msgstr "配置設定"
 
 #. module: base_vat
-#. odoo-python
-#: code:addons/base_vat/models/res_partner.py:0
-#, python-format
-msgid ""
-"Connection with the VIES server failed. The VAT number %s could not be "
-"validated."
-msgstr "與 VIES 伺服器連接失敗。增值稅號%s無法驗證。"
-
-#. module: base_vat
 #: model:ir.model,name:base_vat.model_res_partner
 msgid "Contact"
 msgstr "聯絡人"
@@ -109,15 +112,9 @@ msgid "DO1-01-85004-3 or 101850043"
 msgstr "DO1-01-85004-3 或 101850043"
 
 #. module: base_vat
-#: model:ir.model.fields,help:base_vat.field_res_partner__vies_valid
-#: model:ir.model.fields,help:base_vat.field_res_users__vies_valid
-msgid "European VAT numbers are automatically checked on the VIES database."
-msgstr "VIES 數據庫會自動檢查歐洲增值稅號。"
-
-#. module: base_vat
 #: model:ir.model,name:base_vat.model_account_fiscal_position
 msgid "Fiscal Position"
-msgstr "財務規則"
+msgstr "財政狀況"
 
 #. module: base_vat
 #. odoo-python
@@ -136,15 +133,9 @@ msgstr "HU12345676 或 12345678-1-11 或 8071592153"
 #. module: base_vat
 #: model_terms:ir.ui.view,arch_db:base_vat.res_config_settings_view_form
 msgid ""
-"If this checkbox is ticked, the default fiscal position that applies will "
-"depend upon the output of the verification by the European VIES Service."
-msgstr "如果勾選，則適用的默認財務狀況將取決於歐洲 VIES 服務的核查結果。"
-
-#. module: base_vat
-#: model:ir.model.fields,field_description:base_vat.field_res_partner__vies_valid
-#: model:ir.model.fields,field_description:base_vat.field_res_users__vies_valid
-msgid "Intra-Community Valid"
-msgstr "社群內有效"
+"If this checkbox is ticked, you will not be able to save a contact if its "
+"VAT number cannot be verified by the European VIES service."
+msgstr "如果勾選此復選框，則在歐洲 VIES 服務無法驗證合同的統一編號時，您將無法儲存合同。"
 
 #. module: base_vat
 #. odoo-python
@@ -154,12 +145,6 @@ msgid "MXGODE561231GR8 or GODE561231GR8"
 msgstr "MXGODE561231GR8 或 GODE561231GR8"
 
 #. module: base_vat
-#: model:ir.model.fields,field_description:base_vat.field_res_partner__perform_vies_validation
-#: model:ir.model.fields,field_description:base_vat.field_res_users__perform_vies_validation
-msgid "Perform Vies Validation"
-msgstr "執行 Vies 驗證"
-
-#. module: base_vat
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
@@ -167,9 +152,10 @@ msgid "TR1234567890 (VERGINO) or TR17291716060 (TCKIMLIKNO)"
 msgstr "TR1234567890 (VERGINO) 或 TR17291716060 (TCKIMLIKNO)"
 
 #. module: base_vat
-#: model_terms:ir.ui.view,arch_db:base_vat.view_partner_base_vat_form
-msgid "Tax ID"
-msgstr "稅務編號"
+#: model:ir.model.fields,field_description:base_vat.field_res_partner__vies_failed_message
+#: model:ir.model.fields,field_description:base_vat.field_res_users__vies_failed_message
+msgid "Technical field display a message to the user if the VIES check fails."
+msgstr ""
 
 #. module: base_vat
 #. odoo-python
@@ -197,8 +183,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_vat/models/res_partner.py:0
 #, python-format
-msgid "The VAT number %s could not be interpreted by the VIES server."
-msgstr "VIES 伺服器無法解析增值稅號%s。"
+msgid "The VAT number %s failed the VIES VAT validation check."
+msgstr ""
 
 #. module: base_vat
 #. odoo-python
@@ -208,15 +194,6 @@ msgid ""
 "The country detected for this foreign VAT number does not match the one set "
 "on this fiscal position."
 msgstr "檢測到此外國統一編號的國家與此財務狀況中設置的國家不匹配。"
-
-#. module: base_vat
-#. odoo-python
-#: code:addons/base_vat/models/res_partner.py:0
-#, python-format
-msgid ""
-"The request for VAT validation was not processed. VIES service has responded"
-" with the following error: %s"
-msgstr "增值稅驗證請求未獲處理。VIES 服務回覆以下錯誤：%s"
 
 #. module: base_vat
 #. odoo-python
@@ -235,12 +212,6 @@ msgstr "驗證統一編號"
 #: model_terms:ir.ui.view,arch_db:base_vat.res_config_settings_view_form
 msgid "Verify VAT numbers using the European VIES service"
 msgstr "使用歐洲 VIES 服務驗證統一編號"
-
-#. module: base_vat
-#: model:ir.model.fields,field_description:base_vat.field_res_partner__vies_vat_to_check
-#: model:ir.model.fields,field_description:base_vat.field_res_users__vies_vat_to_check
-msgid "Vies Vat To Check"
-msgstr "增值稅驗證"
 
 #. module: base_vat
 #. odoo-python

@@ -1,24 +1,23 @@
-/** @odoo-module **/
-
-import { _t } from "@web/core/l10n/translation";
+/** @odoo-module */
 import { useService } from '@web/core/utils/hooks';
 import { WebsiteEditorComponent } from '../editor/editor';
 import { WebsiteDialog } from '../dialog/dialog';
-import { browser } from "@web/core/browser/browser";
-import { useEffect, useRef, Component, xml } from "@odoo/owl";
+import localStorage from 'web.local_storage';
+
+const { useEffect, useRef, Component, xml } = owl;
 
 const localStorageNoDialogKey = 'website_translator_nodialog';
 
 export class AttributeTranslateDialog extends Component {
     setup() {
-        this.title = _t("Translate Attribute");
+        this.title = this.env._t("Translate Attribute");
 
         this.formEl = useRef('form-container');
 
         useEffect(() => {
             this.translation = $(this.props.node).data('translation');
             const $group = $('<div/>', {class: 'mb-3'}).appendTo(this.formEl.el);
-            for (const [attr, node] of Object.entries(this.translation)) {
+            _.each(this.translation, function (node, attr) {
                 const $node = $(node);
                 const $label = $('<label class="col-form-label"></label>').text(attr);
                 const $input = $('<input class="form-control"/>').val($node.html());
@@ -40,7 +39,7 @@ export class AttributeTranslateDialog extends Component {
                     $originalNode[0].classList.add('oe_translated');
                 });
                 $group.append($label).append($input);
-            }
+            });
         }, () => [this.props.node]);
     }
 }
@@ -51,7 +50,7 @@ AttributeTranslateDialog.template = 'website.AttributeTranslateDialog';
 // possible to interact with the content of `.o_translation_select` elements.
 export class SelectTranslateDialog extends Component {
     setup() {
-        this.title = _t("Translate Selection Option");
+        this.title = this.env._t("Translate Selection Option");
         this.inputEl = useRef('input');
         this.optionEl = this.props.node;
     }
@@ -80,12 +79,12 @@ SelectTranslateDialog.template = xml`
 
 export class TranslatorInfoDialog extends Component {
     setup() {
-        this.strongOkButton = _t("Ok, never show me this again");
-        this.okButton = _t("Ok");
+        this.strongOkButton = this.env._t("Ok, never show me this again");
+        this.okButton = this.env._t("Ok");
     }
 
     onStrongOkClick() {
-        browser.localStorage.setItem(localStorageNoDialogKey, true);
+        localStorage.setItem(localStorageNoDialogKey, true);
     }
 }
 TranslatorInfoDialog.components = { WebsiteDialog };
@@ -163,7 +162,7 @@ export class WebsiteTranslator extends WebsiteEditorComponent {
         const $editable = this.getEditableArea();
         const translationRegex = /<span [^>]*data-oe-translation-initial-sha="([^"]+)"[^>]*>(.*)<\/span>/;
         let $edited = $();
-        attrs.forEach((attr) => {
+        _.each(attrs, function (attr) {
             const attrEdit = $editable.filter('[' + attr + '*="data-oe-translation-initial-sha="]').filter(':empty, input, select, textarea, img');
             attrEdit.each(function () {
                 var $node = $(this);
@@ -249,7 +248,7 @@ export class WebsiteTranslator extends WebsiteEditorComponent {
             ev.preventDefault();
         });
 
-        if (!browser.localStorage.getItem(localStorageNoDialogKey)) {
+        if (!localStorage.getItem(localStorageNoDialogKey)) {
             this.dialogService.add(TranslatorInfoDialog);
         }
 
@@ -270,9 +269,9 @@ export class WebsiteTranslator extends WebsiteEditorComponent {
         styleEl.sheet.insertRule(`[data-oe-translation-state] {background: ${toTranslateColor} !important;}`);
 
         const showNotification = ev => {
-            let message = _t('This translation is not editable.');
+            let message = this.env._t('This translation is not editable.');
             if (ev.target.closest('.s_table_of_content_navbar_wrap')) {
-                message = _t('Translate header in the text. Menu is generated automatically.');
+                message = this.env._t('Translate header in the text. Menu is generated automatically.');
             }
             this.env.services.notification.add(message, {
                 type: 'info',
@@ -317,7 +316,7 @@ export class WebsiteTranslator extends WebsiteEditorComponent {
         this.$translations.each(function () {
             var $node = $(this);
             var translation = $node.data('translation');
-            Object.values(translation).forEach((node) => {
+            _.each(translation, function (node, attr) {
                 var trans = self.getTranslationObject(node);
                 trans.value = (trans.value ? trans.value : $node.html()).replace(/[ \t\n\r]+/, ' ');
                 trans.state = node.dataset.oeTranslationState;

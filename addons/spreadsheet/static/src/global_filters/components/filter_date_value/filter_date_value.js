@@ -1,18 +1,17 @@
 /** @odoo-module */
 
-import { Component, onWillUpdateProps } from "@odoo/owl";
-import { DateTimeInput } from "@web/core/datetime/datetime_input";
-import { FILTER_DATE_OPTION, monthsOptions } from "@spreadsheet/assets_backend/constants";
-import { getPeriodOptions } from "@web/search/utils/dates";
+import { YearPicker } from "../year_picker";
+import { dateOptions } from "@spreadsheet/global_filters/helpers";
 
 const { DateTime } = luxon;
+const { Component, onWillUpdateProps } = owl;
 
 export class DateFilterValue extends Component {
     setup() {
         this._setStateFromProps(this.props);
         onWillUpdateProps(this._setStateFromProps);
-        this.dateOptions = this.getDateOptions();
     }
+
     _setStateFromProps(props) {
         this.period = props.period;
         /** @type {number|undefined} */
@@ -25,36 +24,29 @@ export class DateFilterValue extends Component {
                 : undefined;
     }
 
-    /**
-     * Returns a list of time options to choose from according to the requested
-     * type. Each option contains its (translated) description.
-     * see getPeriodOptions
-     *
-     * @returns {Array<Object>}
-     */
-    getDateOptions() {
-        const periodOptions = getPeriodOptions(DateTime.local());
-        const quarters = FILTER_DATE_OPTION["quarter"].map((quarterId) =>
-            periodOptions.find((option) => option.id === quarterId)
-        );
-        return quarters.concat(monthsOptions);
+    dateOptions(type) {
+        return type ? dateOptions(type) : [];
+    }
+
+    isYear() {
+        return this.props.type === "year";
     }
 
     isSelected(periodId) {
         return this.period === periodId;
     }
 
-    /**
-     * @param {Event & { target: HTMLSelectElement }} ev
-     */
     onPeriodChanged(ev) {
         this.period = ev.target.value;
         this._updateFilter();
     }
 
     onYearChanged(date) {
+        if (!date) {
+            date = undefined;
+        }
         this.date = date;
-        this.yearOffset = date.year - DateTime.now().year;
+        this.yearOffset = date && date.year - DateTime.now().year;
         this._updateFilter();
     }
 
@@ -66,10 +58,11 @@ export class DateFilterValue extends Component {
     }
 }
 DateFilterValue.template = "spreadsheet_edition.DateFilterValue";
-DateFilterValue.components = { DateTimeInput };
+DateFilterValue.components = { YearPicker };
 
 DateFilterValue.props = {
     // See @spreadsheet_edition/bundle/global_filters/filters_plugin.RangeType
+    type: { validate: (t) => ["year", "month", "quarter"].includes(t) },
     onTimeRangeChanged: Function,
     yearOffset: { type: Number, optional: true },
     period: { type: String, optional: true },

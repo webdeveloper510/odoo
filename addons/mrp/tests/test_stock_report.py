@@ -23,10 +23,6 @@ class TestMrpStockReports(TestReportsCommon):
             'name': 'Double Choco Cake',
             'type': 'product',
         })
-        byproduct = self.env['product.product'].create({
-            'name': 'by-product',
-            'type': 'product',
-        })
 
         # Creates two BOM: one creating a regular slime, one using regular slimes.
         bom_chococake = self.env['mrp.bom'].create({
@@ -38,8 +34,6 @@ class TestMrpStockReports(TestReportsCommon):
             'bom_line_ids': [
                 (0, 0, {'product_id': product_chocolate.id, 'product_qty': 4}),
             ],
-            'byproduct_ids':
-                [(0, 0, {'product_id': byproduct.id, 'product_qty': 2})],
         })
         bom_double_chococake = self.env['mrp.bom'].create({
             'product_id': product_double_chococake.id,
@@ -82,27 +76,16 @@ class TestMrpStockReports(TestReportsCommon):
         self.assertEqual(len(lines), 2, "Must have two line.")
         line_1 = lines[0]
         line_2 = lines[1]
-        self.assertEqual(line_1['document_in']['id'], mo_1.id)
+        self.assertEqual(line_1['document_in'].id, mo_1.id)
         self.assertEqual(line_1['quantity'], 4)
-        self.assertEqual(line_1['document_out']['id'], mo_2.id)
-        self.assertEqual(line_2['document_in']['id'], mo_1.id)
+        self.assertEqual(line_1['document_out'].id, mo_2.id)
+        self.assertEqual(line_2['document_in'].id, mo_1.id)
         self.assertEqual(line_2['quantity'], 6)
         self.assertEqual(line_2['document_out'], False)
         self.assertEqual(draft_picking_qty['in'], 0)
         self.assertEqual(draft_picking_qty['out'], 0)
         self.assertEqual(draft_production_qty['in'], 0)
         self.assertEqual(draft_production_qty['out'], 0)
-
-        mo_form = Form(mo_1)
-        mo_form.qty_producing = 10
-        mo_form.save()
-        mo_1.move_byproduct_ids.quantity = 18
-        mo_1.button_mark_done()
-
-        self.env.flush_all()  # flush to correctly build report
-        report_values = self.env['report.mrp.report_mo_overview']._get_report_data(mo_1.id)['byproducts']['details'][0]
-        self.assertEqual(report_values['name'], byproduct.name)
-        self.assertEqual(report_values['quantity'], 18)
 
     def test_report_forecast_2_production_backorder(self):
         """ Creates a manufacturing order and produces half the quantity.
@@ -140,9 +123,8 @@ class TestMrpStockReports(TestReportsCommon):
         pick = mo_1.move_raw_ids.move_orig_ids.picking_id
         pick.picking_type_id.show_operations = True  # Could be false without demo data, as the lot group is disabled
         pick_form = Form(pick)
-        with Form(pick.move_ids_without_package, view='stock.view_stock_move_operations') as form:
-            with form.move_line_ids.edit(0) as move_line:
-                move_line.quantity = 20
+        with pick_form.move_line_ids_without_package.edit(0) as move_line:
+            move_line.qty_done = 20
         pick = pick_form.save()
         pick.button_validate()
         # Produces 3 products then creates a backorder for the remaining product.
@@ -158,7 +140,7 @@ class TestMrpStockReports(TestReportsCommon):
         # Checks the forecast report.
         report_values, docs, lines = self.get_report_forecast(product_template_ids=product_apple_pie.product_tmpl_id.ids)
         self.assertEqual(len(lines), 1, "Must have only one line about the backorder")
-        self.assertEqual(lines[0]['document_in']['id'], mo_2.id)
+        self.assertEqual(lines[0]['document_in'].id, mo_2.id)
         self.assertEqual(lines[0]['quantity'], 1)
         self.assertEqual(lines[0]['document_out'], False)
 
@@ -199,61 +181,10 @@ class TestMrpStockReports(TestReportsCommon):
             context = mo.action_product_forecast_report()['context']
             _, _, lines = self.get_report_forecast(product_template_ids=product_banana.product_tmpl_id.ids, context=context)
             for line in lines:
-                if line['document_in']['id'] == mo.id:
+                if line['document_in'] == mo:
                     self.assertTrue(line['is_matched'], "The corresponding MO line should be matched in the forecast report.")
                 else:
                     self.assertFalse(line['is_matched'], "A line of the forecast report not linked to the MO shoud not be matched.")
-
-    def test_kit_packaging_delivery_slip(self):
-        superkit = self.env['product.product'].create({
-            'name': 'Super Kit',
-            'type': 'consu',
-            'packaging_ids': [(0, 0, {
-                'name': '6-pack',
-                'qty': 6,
-            })],
-        })
-
-        compo01, compo02 = self.env['product.product'].create([{
-            'name': n,
-            'type': 'product',
-            'uom_id': self.env.ref('uom.product_uom_meter').id,
-            'uom_po_id': self.env.ref('uom.product_uom_meter').id,
-        } for n in ['Compo 01', 'Compo 02']])
-
-        self.env['mrp.bom'].create({
-            'product_tmpl_id': superkit.product_tmpl_id.id,
-            'product_qty': 1,
-            'type': 'phantom',
-            'bom_line_ids': [
-                (0, 0, {'product_id': compo01.id, 'product_qty': 1}),
-                (0, 0, {'product_id': compo02.id, 'product_qty': 1}),
-            ],
-        })
-
-        for back_order, expected_vals in [('never', [12, 12, 2, 2]), ('always', [24, 12, 4, 2])]:
-            picking_form = Form(self.env['stock.picking'])
-            picking_form.picking_type_id = self.picking_type_in
-            picking_form.partner_id = self.partner
-            with picking_form.move_ids_without_package.new() as move:
-                move.product_id = superkit
-                move.product_uom = self.env.ref('uom.product_uom_dozen')
-                move.product_uom_qty = 2
-            picking = picking_form.save()
-            picking.move_ids.product_packaging_id = superkit.packaging_ids
-            picking.action_confirm()
-
-            picking.move_ids.write({'quantity': 12, 'picked': True})
-            picking.picking_type_id.create_backorder = back_order
-            picking.button_validate()
-            non_kit_aggregate_values = picking.move_line_ids._get_aggregated_product_quantities()
-            self.assertFalse(non_kit_aggregate_values)
-            aggregate_values = picking.move_line_ids._get_aggregated_product_quantities(kit_name=superkit.display_name)
-            for line in aggregate_values.values():
-                self.assertItemsEqual([line[val] for val in ['qty_ordered', 'quantity', 'packaging_qty', 'packaging_quantity']], expected_vals)
-
-            html_report = self.env['ir.actions.report']._render_qweb_html('stock.report_deliveryslip', picking.ids)[0]
-            self.assertTrue(html_report, "report generated successfully")
 
     def test_subkit_in_delivery_slip(self):
         """
@@ -306,7 +237,7 @@ class TestMrpStockReports(TestReportsCommon):
         picking = picking_form.save()
         picking.action_confirm()
 
-        picking.move_ids.write({'quantity': 1, 'picked': True})
+        picking.move_ids.quantity_done = 1
         move = picking.move_ids.filtered(lambda m: m.name == "Super Kit" and m.product_id == compo03)
         move.move_line_ids.result_package_id = self.env['stock.quant.package'].create({'name': 'Package0001'})
         picking.button_validate()
@@ -324,40 +255,4 @@ class TestMrpStockReports(TestReportsCommon):
                 break
             if keys[0] in line:
                 keys = keys[1:]
-
-
         self.assertFalse(keys, "All keys should be in the report with the defined order")
-
-    def test_mo_overview(self):
-        """ Test that the overview does not traceback when the final produced qty is 0
-        """
-        product_chocolate = self.env['product.product'].create({
-            'name': 'Chocolate',
-            'type': 'consu',
-        })
-        product_chococake = self.env['product.product'].create({
-            'name': 'Choco Cake',
-            'type': 'product',
-        })
-        self.env['mrp.bom'].create({
-            'product_id': product_chococake.id,
-            'product_tmpl_id': product_chococake.product_tmpl_id.id,
-            'product_uom_id': product_chococake.uom_id.id,
-            'product_qty': 1.0,
-            'type': 'normal',
-            'bom_line_ids': [
-                (0, 0, {'product_id': product_chocolate.id, 'product_qty': 4}),
-            ],
-        })
-        mo = self.env['mrp.production'].create({
-            'name': 'MO',
-            'product_qty': 1.0,
-            'product_id': product_chococake.id,
-        })
-
-        mo.action_confirm()
-        mo.button_mark_done()
-        mo.qty_produced = 0.
-
-        overview_values = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
-        self.assertEqual(overview_values['data']['id'], mo.id, "computing overview value should work")

@@ -34,7 +34,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         draft_purchase_qty = docs['draft_purchase_qty']
         pending_qty_in = docs['qty']['in']
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
+        self.assertEqual(lines[0]['document_in'].id, po.id)
         self.assertEqual(lines[0]['quantity'], 5)
         self.assertEqual(lines[0]['document_out'], False)
         self.assertEqual(draft_picking_qty_in, 0)
@@ -43,7 +43,9 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         # Receives 5 products.
         receipt = po.picking_ids
-        receipt.button_validate()
+        res_dict = receipt.button_validate()
+        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
+        wizard.process()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         draft_picking_qty_in = docs['draft_picking_qty']['in']
         draft_purchase_qty = docs['draft_purchase_qty']
@@ -64,7 +66,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         draft_purchase_qty = docs['draft_purchase_qty']
         pending_qty_in = docs['qty']['in']
         self.assertEqual(len(lines), 1, "Must have 1 line for now.")
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
+        self.assertEqual(lines[0]['document_in'].id, po.id)
         self.assertEqual(lines[0]['quantity'], 5)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
@@ -106,7 +108,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         draft_purchase_qty = docs['draft_purchase_qty']
         pending_qty_in = docs['qty']['in']
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
+        self.assertEqual(lines[0]['document_in'].id, po.id)
         self.assertEqual(lines[0]['quantity'], 4)
         self.assertEqual(lines[0]['document_out'], False)
         self.assertEqual(draft_picking_qty_in, 0)
@@ -116,7 +118,9 @@ class TestPurchaseStockReports(TestReportsCommon):
         receipt = po.picking_ids
 
         # Receives 4 products.
-        receipt.button_validate()
+        res_dict = receipt.button_validate()
+        wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
+        wizard.process()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         draft_picking_qty_in = docs['draft_picking_qty']['in']
         draft_purchase_qty = docs['draft_purchase_qty']
@@ -137,7 +141,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         draft_purchase_qty = docs['draft_purchase_qty']
         pending_qty_in = docs['qty']['in']
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_in']['id'], po.id)
+        self.assertEqual(lines[0]['document_in'].id, po.id)
         self.assertEqual(lines[0]['quantity'], 6)
         self.assertEqual(draft_picking_qty_in, 0)
         self.assertEqual(draft_purchase_qty, 0)
@@ -162,7 +166,7 @@ class TestPurchaseStockReports(TestReportsCommon):
             context = po.order_line[0].action_product_forecast_report()['context']
             _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids, context=context)
             for line in lines:
-                if line['document_in']['id'] == po.id:
+                if line['document_in'] == po:
                     self.assertTrue(line['is_matched'], "The corresponding PO line should be matched in the forecast report.")
                 else:
                     self.assertFalse(line['is_matched'], "A line of the forecast report not linked to the PO shoud not be matched.")
@@ -223,10 +227,9 @@ class TestPurchaseStockReports(TestReportsCommon):
             'location_dest_id': receipt_move.location_dest_id.id,
             'product_id': self.product.id,
             'product_uom_id': uom_12.id,
-            'quantity': 1,
+            'qty_done': 1,
             'picking_id': receipt.id,
         })]
-        receipt.move_ids.picked = True
         receipt.button_validate()
 
         data = self.env['vendor.delay.report'].read_group(
@@ -273,17 +276,16 @@ class TestPurchaseStockReports(TestReportsCommon):
             'location_dest_id': child_loc_01.id,
             'product_id': self.product.id,
             'product_uom_id': self.product.uom_id.id,
-            'quantity': 6,
+            'qty_done': 6,
             'picking_id': receipt.id,
         }), (0, 0, {
             'location_id': receipt_move.location_id.id,
             'location_dest_id': child_loc_02.id,
             'product_id': self.product.id,
             'product_uom_id': self.product.uom_id.id,
-            'quantity': 4,
+            'qty_done': 4,
             'picking_id': receipt.id,
         })]
-        receipt.move_ids.picked = True
         receipt.button_validate()
 
         data = self.env['vendor.delay.report'].read_group(
@@ -313,7 +315,7 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         receipt01 = po.picking_ids
         receipt01_move = receipt01.move_ids
-        receipt01_move.quantity = 6
+        receipt01_move.quantity_done = 6
         action = receipt01.button_validate()
         Form(self.env[action['res_model']].with_context(action['context'])).save().process()
 
@@ -327,8 +329,7 @@ class TestPurchaseStockReports(TestReportsCommon):
         self.assertEqual(data['on_time_rate'], 60)
 
         receipt02 = receipt01.backorder_ids
-        receipt02.move_ids.quantity = 4
-        receipt02.move_ids.picked = True
+        receipt02.move_ids.quantity_done = 4
         receipt02.button_validate()
 
         (receipt01 | receipt02).move_ids.invalidate_recordset()
@@ -357,8 +358,7 @@ class TestPurchaseStockReports(TestReportsCommon):
 
         receipt01 = po.picking_ids
         receipt01_move = receipt01.move_ids
-        receipt01_move.quantity = 6
-        receipt01_move.picked = True
+        receipt01_move.quantity_done = 6
         action = receipt01.button_validate()
         Form(self.env[action['res_model']].with_context(action['context'])).save().process_cancel_backorder()
 

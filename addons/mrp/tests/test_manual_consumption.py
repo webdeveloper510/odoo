@@ -9,9 +9,9 @@ from odoo.tests import tagged, Form, HttpCase
 class TestTourManualConsumption(HttpCase):
     def test_mrp_manual_consumption(self):
         """Test manual consumption mechanism. Test when manual consumption is
-        True, quantity won't be updated automatically. Bom line with tracked
+        True, quantity_done won't be updated automatically. Bom line with tracked
         products or operations should be set to manual consumption automatically.
-        Also test that when manually change quantity, manual consumption
+        Also test that when manually change quantity_done, manual consumption
         will be set to True. Also test when create backorder, the manual consumption
         should be set according to the bom.
         """
@@ -58,25 +58,22 @@ class TestTourManualConsumption(HttpCase):
         mo = mo_form.save()
         move_nt, move_sn, move_lot = mo.move_raw_ids
         self.assertEqual(move_nt.manual_consumption, False)
-        self.assertEqual(move_nt.quantity, 5)
-        self.assertTrue(move_nt.picked)
+        self.assertEqual(move_nt.quantity_done, 5)
         self.assertEqual(move_sn.manual_consumption, True)
-        self.assertEqual(move_sn.quantity, 5)
-        self.assertFalse(move_sn.picked)
+        self.assertEqual(move_sn.quantity_done, 0)
         self.assertEqual(move_lot.manual_consumption, True)
-        self.assertEqual(move_lot.quantity, 5)
-        self.assertFalse(move_lot.picked)
+        self.assertEqual(move_lot.quantity_done, 0)
 
         action_id = self.env.ref('mrp.menu_mrp_production_action').action
         url = "/web#model=mrp.production&view_type=form&action=%s&id=%s" % (str(action_id.id), str(mo.id))
-        self.start_tour(url, "test_mrp_manual_consumption", login="admin", timeout=100)
+        self.start_tour(url, "test_mrp_manual_consumption", login="admin", timeout=200)
 
         self.assertEqual(move_nt.manual_consumption, True)
-        self.assertEqual(move_nt.quantity, 6.0)
+        self.assertEqual(move_nt.quantity_done, 6.0)
         self.assertEqual(move_sn.manual_consumption, True)
-        self.assertEqual(move_sn.quantity, 0)
+        self.assertEqual(move_sn.quantity_done, 0)
         self.assertEqual(move_lot.manual_consumption, True)
-        self.assertEqual(move_lot.quantity, 0)
+        self.assertEqual(move_lot.quantity_done, 0)
 
         backorder = mo.procurement_group_id.mrp_production_ids - mo
         move_nt = backorder.move_raw_ids.filtered(lambda m: m.product_id == product_nt)
@@ -86,51 +83,6 @@ class TestTourManualConsumption(HttpCase):
         self.assertEqual(move_sn.manual_consumption, True)
         self.assertEqual(move_lot.manual_consumption, True)
 
-    def test_mrp_manual_consumption_02(self):
-        """
-        test that when a new quantity is manually set for a component,
-        and the field picked is set to True,
-        and the MO is marked as done, the component quantity is not overwritten.
-        """
-        Product = self.env['product.product']
-        product_finish = Product.create({
-            'name': 'finish',
-            'type': 'product',
-            'tracking': 'none',})
-        product_nt = Product.create({
-            'name': 'No tracking',
-            'type': 'product',
-            'tracking': 'none',})
-        bom = self.env['mrp.bom'].create({
-            'product_id': product_finish.id,
-            'product_tmpl_id': product_finish.product_tmpl_id.id,
-            'product_qty': 1,
-            'type': 'normal',
-            'bom_line_ids': [
-                (0, 0, {'product_id': product_nt.id, 'product_qty': 1, 'manual_consumption': True}),
-            ],
-        })
-
-        mo_form = Form(self.env['mrp.production'])
-        mo_form.product_id = product_finish
-        mo_form.bom_id = bom
-        mo_form.product_qty = 10
-        mo = mo_form.save()
-        mo.action_confirm()
-
-        self.assertEqual(mo.state, 'confirmed')
-        move_nt = mo.move_raw_ids
-        self.assertEqual(move_nt.manual_consumption, True)
-        self.assertEqual(move_nt.quantity, 0)
-        self.assertFalse(move_nt.picked)
-
-        action_id = self.env.ref('mrp.menu_mrp_production_action').action
-        url = "/web#model=mrp.production&view_type=form&action=%s&id=%s" % (str(action_id.id), str(mo.id))
-        self.start_tour(url, "test_mrp_manual_consumption_02", login="admin", timeout=100)
-
-        self.assertEqual(move_nt.manual_consumption, True)
-        self.assertEqual(move_nt.picked, True)
-        self.assertEqual(move_nt.quantity, 16.0)
 
 class TestManualConsumption(TestMrpCommon):
     @classmethod
@@ -160,13 +112,12 @@ class TestManualConsumption(TestMrpCommon):
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo_form.save()
-        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c1.id).mapped("quantity")), 4)
-        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c2.id).mapped("quantity")), 1)
-        self.assertEqual(sorted(mo.move_raw_ids.mapped('picked')), sorted([False, True]))
+        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c1.id).mapped("quantity_done")), 0)
+        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c2.id).mapped("quantity_done")), 1)
 
         details_operation_form = Form(mo.move_raw_ids.filtered(lambda m: m.product_id == c1), view=self.env.ref('stock.view_stock_move_operations'))
         with details_operation_form.move_line_ids.edit(0) as ml:
-            ml.quantity = 4
+            ml.qty_done = 4
             ml.lot_id = lot
         details_operation_form.save()
 
@@ -202,8 +153,8 @@ class TestManualConsumption(TestMrpCommon):
         mo_form = Form(mo)
         mo_form.qty_producing = 1
         mo_form.save()
-        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c1.id).mapped("quantity")), 4)
-        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c2.id).mapped("quantity")), 1)
+        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c1.id).mapped("quantity_done")), 4)
+        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id.id == c2.id).mapped("quantity_done")), 1)
 
         action = mo.button_mark_done()
         backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
@@ -237,37 +188,3 @@ class TestManualConsumption(TestMrpCommon):
         mo = self.env[action['res_model']].browse(action['res_id'])
         self.assertTrue(mo.move_raw_ids.filtered(lambda m: m.product_id == p1).manual_consumption)
         self.assertFalse(mo.move_raw_ids.filtered(lambda m: m.product_id == p2).manual_consumption)
-
-    def test_manual_consumption_with_different_component_price(self):
-        """
-        Test that the moves are merged correctly, even if the products have been used with different prices:
-        - Create a product with a price of $10 and use it in a BoM with 1 unit.
-        - Create a MO with this BoM and confirm it.
-        - Update the price of the component to $20 and adjust the consumed quantity to 2.
-        - Mark the MO as done.
-        - Another move should be created and merged with the first move.
-
-        """
-        self.bom_4.consumption = 'warning'
-        component = self.bom_4.bom_line_ids.product_id
-        component.write({
-            'type': 'product',
-            'standard_price': 10,
-        })
-        self.env['stock.quant']._update_available_quantity(component, self.stock_location, 2)
-        mo = self.env['mrp.production'].create({
-            'product_qty': 1,
-            'bom_id': self.bom_4.id,
-        })
-        mo.action_confirm()
-        self.assertEqual(mo.state, 'confirmed')
-        component.standard_price = 20
-        mo.move_raw_ids.quantity = 2.0
-        mo.move_raw_ids.picked = True
-        mo.move_raw_ids.manual_consumption = True
-        self.assertEqual(mo.state, 'progress')
-        action = mo.button_mark_done()
-        consumption_warning = Form(self.env['mrp.consumption.warning'].with_context(**action['context']))
-        action = consumption_warning.save().action_confirm()
-        self.assertEqual(len(mo.move_raw_ids), 1)
-        self.assertEqual(mo.move_raw_ids.quantity, 2)

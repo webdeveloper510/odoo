@@ -3,16 +3,14 @@
 import { NavBar } from '@web/webclient/navbar/navbar';
 import { useService, useBus } from '@web/core/utils/hooks';
 import { registry } from "@web/core/registry";
-import { patch } from "@web/core/utils/patch";
-import { UserMenu } from "@web/webclient/user_menu/user_menu";
-import { useEffect } from "@odoo/owl";
+import { patch } from 'web.utils';
 
 const websiteSystrayRegistry = registry.category('website_systray');
-websiteSystrayRegistry.add("UserMenu", { Component: UserMenu }, { sequence: 14 });
+const { useEffect } = owl;
 
-patch(NavBar.prototype, {
+patch(NavBar.prototype, 'website_navbar', {
     setup() {
-        super.setup();
+        this._super();
         this.websiteService = useService('website');
         this.websiteCustomMenus = useService('website_custom_menus');
 
@@ -46,32 +44,25 @@ patch(NavBar.prototype, {
         useBus(websiteSystrayRegistry, 'CONTENT-UPDATED', renderAndAdapt);
     },
 
-    get shouldDisplayWebsiteSystray() {
-        return this.websiteService.currentWebsite && this.websiteService.isRestrictedEditor;
-    },
-
-    // Somehow a setter is needed in `patch()` to avoid an owl error.
-    set shouldDisplayWebsiteSystray(_) {},
-
     /**
      * @override
      */
     get systrayItems() {
-        if (this.shouldDisplayWebsiteSystray) {
+        if (this.websiteService.currentWebsite && this.websiteService.isRestrictedEditor) {
             return websiteSystrayRegistry
                 .getEntries()
                 .map(([key, value], index) => ({ key, ...value, index }))
                 .filter((item) => ('isDisplayed' in item ? item.isDisplayed(this.env) : true))
                 .reverse();
         }
-        return super.systrayItems;
+        return this._super();
     },
 
     /**
      * @override
      */
     get currentAppSections() {
-        const currentAppSections = super.currentAppSections;
+        const currentAppSections = this._super();
         if (this.currentApp && this.currentApp.xmlid === 'website.menu_website_configuration') {
             return this.websiteCustomMenus.addCustomMenus(currentAppSections).filter(section => section.childrenTree.length);
         }
@@ -86,6 +77,6 @@ patch(NavBar.prototype, {
         if (websiteMenu) {
             return this.websiteCustomMenus.open(menu);
         }
-        return super.onNavBarDropdownItemSelection(menu);
+        return this._super(menu);
     },
 });

@@ -5,13 +5,15 @@ import { ActionContainer } from '@web/webclient/actions/action_container';
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
 import { session } from '@web/session';
-import { Component, markup, useEffect, useExternalListener, useState } from "@odoo/owl";
+
+const { Component, useEffect, useExternalListener, useState } = owl;
 
 export class ProjectSharingWebClient extends Component {
     setup() {
         window.parent.document.body.style.margin = "0"; // remove the margin in the parent body
         this.actionService = useService('action');
         this.user = useService("user");
+        useService("legacy_service_provider");
         useOwnDebugContext({ categories: ["default"] });
         this.state = useState({
             fullscreen: false,
@@ -32,9 +34,6 @@ export class ProjectSharingWebClient extends Component {
 
     async _showView() {
         const { action_name, project_id, open_task_action } = session;
-        if (action_name.help) {
-            action_name.help = markup(action_name.help);
-        }
         await this.actionService.doAction(
             action_name,
             {
@@ -67,6 +66,5 @@ export class ProjectSharingWebClient extends Component {
     }
 }
 
-ProjectSharingWebClient.props = {};
 ProjectSharingWebClient.components = { ActionContainer, MainComponentsContainer };
 ProjectSharingWebClient.template = 'project.ProjectSharingWebClient';

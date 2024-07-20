@@ -4,9 +4,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { parseFloatTime } from "@web/views/fields/parsers";
 import { useInputField } from "@web/views/fields/input_field_hook";
-import { useRecordObserver } from "@web/model/relational_model/utils";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, useState, onWillUpdateProps, onWillStart, onWillDestroy } from "@odoo/owl";
+
+const { Component, useState, onWillUpdateProps, onWillStart, onWillDestroy } = owl;
 
 function formatMinutes(value) {
     if (value === false) {
@@ -24,39 +23,53 @@ function formatMinutes(value) {
 }
 
 export class MrpTimer extends Component {
-    static template = "mrp.MrpTimer";
-    static props = {
-        value: { type: Number },
-        ongoing: { type: Boolean, optional: true },
-    };
-    static defaultProps = { ongoing: false };
-
     setup() {
+        this.orm = useService('orm');
         this.state = useState({
             // duration is expected to be given in minutes
-            duration: this.props.value,
+            duration:
+                this.props.value !== undefined ? this.props.value : this.props.record.data.duration,
         });
-        this.lastDateTime = Date.now();
-        this.ongoing = this.props.ongoing;
-        onWillStart(() => {
+        useInputField({
+            getValue: () => this.durationFormatted,
+            refName: "numpadDecimal",
+            parse: (v) => parseFloatTime(v),
+        });
+
+        this.ongoing =
+            this.props.ongoing !== undefined
+                ? this.props.ongoing
+                : this.props.record.data.is_user_working;
+
+        onWillStart(async () => {
+            if(this.props.ongoing === undefined && !this.props.record.model.useSampleModel && this.props.record.data.state == "progress") {
+                const additionalDuration = await this.orm.call('mrp.workorder', 'get_working_duration', [this.props.record.resId]);
+                this.state.duration += additionalDuration;
+            }
             if (this.ongoing) {
                 this._runTimer();
-                this._runSleepTimer();
             }
         });
         onWillUpdateProps((nextProps) => {
-            const rerun = !this.ongoing && nextProps.ongoing;
-            this.ongoing = nextProps.ongoing;
+            const newOngoing =
+                "ongoing" in nextProps
+                    ? nextProps.ongoing
+                    : "record" in nextProps && nextProps.record.data.is_user_working;
+            const rerun = !this.ongoing && newOngoing;
+            this.ongoing = newOngoing;
             if (rerun) {
                 this.state.duration = nextProps.value;
                 this._runTimer();
-                this._runSleepTimer();
             }
         });
         onWillDestroy(() => clearTimeout(this.timer));
     }
 
     get durationFormatted() {
+        if(this.props.value!=this.state.duration && this.props.record && this.props.record.isDirty){
+            if (typeof this.props.setDirty==='function')this.props.setDirty(false);
+            this.state.duration=this.props.value
+        }
         return formatMinutes(this.state.duration);
     }
 
@@ -68,64 +81,10 @@ export class MrpTimer extends Component {
             }
         }, 1000);
     }
-
-    //updates the time when the computer wakes from sleep mode
-    _runSleepTimer() {
-        this.timer = setTimeout(async () => {
-            const diff = Date.now() - this.lastDateTime - 10000;
-            if (diff > 1000) {
-                this.state.duration += diff / (1000 * 60);
-            }
-            this.lastDateTime = Date.now();
-            this._runSleepTimer();
-        }, 10000);
-    }
 }
 
-class MrpTimerField extends Component {
-    static template = "mrp.MrpTimerField";
-    static components = { MrpTimer };
-    static props = standardFieldProps;
+MrpTimer.supportedTypes = ["float"];
+MrpTimer.template = "mrp.MrpTimer";
 
-    setup() {
-        this.orm = useService("orm");
-        useInputField({
-            getValue: () => this.durationFormatted,
-            refName: "numpadDecimal",
-            parse: (v) => parseFloatTime(v),
-        });
-
-        useRecordObserver(async (record) => {
-            if (!this.props.record.model.useSampleModel && record.data.state === "progress") {
-                this.duration = await this.orm.call(
-                    "mrp.workorder",
-                    "get_duration",
-                    [this.props.record.resId]
-                );
-            } else {
-                this.duration = record.data[this.props.name];
-            }
-        })
-
-        onWillDestroy(() => clearTimeout(this.timer));
-    }
-
-    get durationFormatted() {
-        if (this.props.record.data[this.props.name] != this.duration && this.props.record.dirty) {
-            this.duration = this.props.record.data[this.props.name];
-        }
-        return formatMinutes(this.duration);
-    }
-
-    get ongoing() {
-        return this.props.record.data.is_user_working;
-    }
-}
-
-export const mrpTimerField = {
-    component: MrpTimerField,
-    supportedTypes: ["float"],
-};
-
-registry.category("fields").add("mrp_timer", mrpTimerField);
+registry.category("fields").add("mrp_timer", MrpTimer);
 registry.category("formatters").add("mrp_timer", formatMinutes);

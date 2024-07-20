@@ -18,12 +18,12 @@ class StockValuationLayer(models.Model):
 
     company_id = fields.Many2one('res.company', 'Company', readonly=True, required=True)
     product_id = fields.Many2one('product.product', 'Product', readonly=True, required=True, check_company=True, auto_join=True)
-    categ_id = fields.Many2one('product.category', related='product_id.categ_id', store=True)
+    categ_id = fields.Many2one('product.category', related='product_id.categ_id')
     product_tmpl_id = fields.Many2one('product.template', related='product_id.product_tmpl_id')
     quantity = fields.Float('Quantity', readonly=True, digits='Product Unit of Measure')
     uom_id = fields.Many2one(related='product_id.uom_id', readonly=True, required=True)
     currency_id = fields.Many2one('res.currency', 'Currency', related='company_id.currency_id', readonly=True, required=True)
-    unit_cost = fields.Float('Unit Value', digits='Product Price', readonly=True, group_operator=None)
+    unit_cost = fields.Monetary('Unit Value', readonly=True)
     value = fields.Monetary('Total Value', readonly=True)
     remaining_qty = fields.Float(readonly=True, digits='Product Unit of Measure')
     remaining_value = fields.Monetary('Remaining Value', readonly=True)
@@ -35,30 +35,12 @@ class StockValuationLayer(models.Model):
     account_move_line_id = fields.Many2one('account.move.line', 'Invoice Line', readonly=True, check_company=True, index="btree_not_null")
     reference = fields.Char(related='stock_move_id.reference')
     price_diff_value = fields.Float('Invoice value correction with invoice currency')
-    warehouse_id = fields.Many2one('stock.warehouse', string="Receipt WH", compute='_compute_warehouse_id', search='_search_warehouse_id')
 
     def init(self):
         tools.create_index(
             self._cr, 'stock_valuation_layer_index',
             self._table, ['product_id', 'remaining_qty', 'stock_move_id', 'company_id', 'create_date']
         )
-
-    def _compute_warehouse_id(self):
-        for svl in self:
-            if svl.stock_move_id.location_id.usage == "internal":
-                svl.warehouse_id = svl.stock_move_id.location_id.warehouse_id.id
-            else:
-                svl.warehouse_id = svl.stock_move_id.location_dest_id.warehouse_id.id
-
-    def _search_warehouse_id(self, operator, value):
-        layer_ids = self.search([
-            '|',
-            ('stock_move_id.location_dest_id.warehouse_id', operator, value),
-            '&',
-            ('stock_move_id.location_id.usage', '=', 'internal'),
-            ('stock_move_id.location_id.warehouse_id', operator, value),
-        ]).ids
-        return [('id', 'in', layer_ids)]
 
     def _validate_accounting_entries(self):
         am_vals = []
@@ -91,7 +73,12 @@ class StockValuationLayer(models.Model):
         for svl in self:
             svl.stock_move_id._account_analytic_entry_move()
 
-    # TODO: delete in master, no longer in use
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        if 'unit_cost' in fields:
+            fields.remove('unit_cost')
+        return super().read_group(domain, fields, groupby, offset, limit, orderby, lazy)
+
     def action_open_layer(self):
         self.ensure_one()
         return {
@@ -99,35 +86,6 @@ class StockValuationLayer(models.Model):
             'type': 'ir.actions.act_window',
             'views': [[False, "form"]],
             'res_id': self.id,
-        }
-
-    def action_open_journal_entry(self):
-        self.ensure_one()
-        if not self.account_move_id:
-            return
-        return {
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'account.move',
-            'res_id': self.account_move_id.id
-        }
-
-    def action_valuation_at_date(self):
-        #  Handler called when the user clicked on the 'Valuation at Date' button.
-        #  Opens wizard to display, at choice, the products inventory or a computed
-        #  inventory at a given date.
-        context = {}
-        if ("default_product_id" in self.env.context):
-            context["product_id"] = self.env.context["default_product_id"]
-        elif ("default_product_tmpl_id" in self.env.context):
-            context["product_tmpl_id"] = self.env.context["default_product_tmpl_id"]
-
-        return {
-            "res_model": "stock.quantity.history",
-            "views": [[False, "form"]],
-            "target": "new",
-            "type": "ir.actions.act_window",
-            "context": context,
         }
 
     def action_open_reference(self):
@@ -159,7 +117,7 @@ class StockValuationLayer(models.Model):
             if float_is_zero(candidate.quantity, precision_rounding=rounding):
                 continue
             candidate_quantity = abs(candidate.quantity)
-            returned_qty = sum([sm.product_uom._compute_quantity(sm.quantity, self.uom_id)
+            returned_qty = sum([sm.product_uom._compute_quantity(sm.quantity_done, self.uom_id)
                                 for sm in candidate.stock_move_id.returned_move_ids if sm.state == 'done'])
             candidate_quantity -= returned_qty
             if float_is_zero(candidate_quantity, precision_rounding=rounding):
@@ -198,7 +156,7 @@ class StockValuationLayer(models.Model):
             if float_is_zero(svl.quantity, precision_rounding=rounding):
                 continue
             relevant_qty = abs(svl.quantity)
-            returned_qty = sum([sm.product_uom._compute_quantity(sm.quantity, self.uom_id)
+            returned_qty = sum([sm.product_uom._compute_quantity(sm.quantity_done, self.uom_id)
                                 for sm in svl.stock_move_id.returned_move_ids if sm.state == 'done'])
             relevant_qty -= returned_qty
             if float_is_zero(relevant_qty, precision_rounding=rounding):

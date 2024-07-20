@@ -7,12 +7,16 @@ from odoo.tools import TEXT_URL_REGEX
 
 
 @tagged('-at_install', 'post_install')
-class TestMailRenderMixin(common.HttpCase):
-
+class TestMailRenderMixin(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.base_url = cls.env["mail.render.mixin"].get_base_url()
+
+    def setUp(self):
+        super().setUp()
+        r = self.patch_requests()
+        r.side_effect = NotImplementedError
 
     def test_shorten_links(self):
         test_links = [

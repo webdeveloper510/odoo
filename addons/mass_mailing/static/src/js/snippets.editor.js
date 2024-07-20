@@ -1,23 +1,24 @@
-/** @odoo-module **/
+odoo.define('mass_mailing.snippets.editor', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import snippetsEditor from "@web_editor/js/editor/snippets.editor";
+const {_lt} = require('web.core');
+const snippetsEditor = require('web_editor.snippet.editor');
 
-export const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
-    events: Object.assign({}, snippetsEditor.SnippetsMenu.prototype.events, {
+const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
+    events: _.extend({}, snippetsEditor.SnippetsMenu.prototype.events, {
         'click .o_we_customize_design_btn': '_onDesignTabClick',
     }),
-    custom_events: Object.assign({}, snippetsEditor.SnippetsMenu.prototype.custom_events, {
+    custom_events: _.extend({}, snippetsEditor.SnippetsMenu.prototype.custom_events, {
         drop_zone_over: '_onDropZoneOver',
         drop_zone_out: '_onDropZoneOut',
         drop_zone_start: '_onDropZoneStart',
         drop_zone_stop: '_onDropZoneStop',
     }),
-    tabs: Object.assign({}, snippetsEditor.SnippetsMenu.prototype.tabs, {
+    tabs: _.extend({}, snippetsEditor.SnippetsMenu.prototype.tabs, {
         DESIGN: 'design',
     }),
     optionsTabStructure: [
-        ['design-options', _t("Design Options")],
+        ['design-options', _lt("Design Options")],
     ],
 
     //--------------------------------------------------------------------------
@@ -32,26 +33,11 @@ export const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
             this.$editable = this.options.wysiwyg.getEditable();
         });
     },
-    /**
-     * @override
-     */
-    callPostSnippetDrop: async function ($target) {
-        $target.find('img[loading=lazy]').removeAttr('loading');
-        return this._super(...arguments);
-    },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * @override
-     */
-    _computeSnippetTemplates: function (html) {
-        const $html = $(`<div>${html}</div>`);
-        $html.find('img').attr('loading', 'lazy');
-        return this._super($html.html().trim());
-    },
     /**
      * @override
      */
@@ -88,6 +74,22 @@ export const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
     _updateRightPanelContent: function ({content, tab}) {
         this._super(...arguments);
         this.$('.o_we_customize_design_btn').toggleClass('active', tab === this.tabs.DESIGN);
+    },
+    /**
+     * @override
+     */
+    _computeSnippetTemplates: function (html) {
+        const $html = $(html);
+        const btnSelector = '.note-editable .oe_structure > div.o_mail_snippet_general .btn:not(.btn-link)';
+        const $colorpickers = $html.find('[data-selector] > we-colorpicker[data-css-property="background-color"]');
+        for (const colorpicker of $colorpickers) {
+            const $option = $(colorpicker).parent();
+            const selectors = $option.data('selector').split(',');
+            const filteredSelectors = selectors.filter(selector => !selector.includes(btnSelector)).join(',');
+            $option.attr('data-selector', filteredSelectors);
+        }
+        html = $html.toArray().map(node => node.outerHTML).join('');
+        return this._super(html);
     },
 
     //--------------------------------------------------------------------------
@@ -127,8 +129,6 @@ export const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
         if (!$oEditable.find('.oe_drop_zone.oe_insert:not(.oe_vertical):only-child').length) {
             $oEditable.attr('contenteditable', true);
         }
-        // Refocus again to save updates when calling `_onWysiwygBlur`
-        this.$editable.get(0).ownerDocument.defaultView.focus();
     },
     /**
      * @override
@@ -199,3 +199,6 @@ export const MassMailingSnippetsMenu = snippetsEditor.SnippetsMenu.extend({
     },
 });
 
+return MassMailingSnippetsMenu;
+
+});

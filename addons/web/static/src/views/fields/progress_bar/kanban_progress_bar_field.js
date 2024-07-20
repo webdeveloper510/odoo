@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { progressBarField, ProgressBarField } from "./progress_bar_field";
+import { ProgressBarField } from "./progress_bar_field";
 
 export class KanbanProgressBarField extends ProgressBarField {
     get isEditable() {
@@ -9,9 +9,4 @@ export class KanbanProgressBarField extends ProgressBarField {
     }
 }
 
-export const kanbanProgressBarField = {
-    ...progressBarField,
-    component: KanbanProgressBarField,
-};
-
-registry.category("fields").add("kanban.progressbar", kanbanProgressBarField);
+registry.category("fields").add("kanban.progressbar", KanbanProgressBarField);

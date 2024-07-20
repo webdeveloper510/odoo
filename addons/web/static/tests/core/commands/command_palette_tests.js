@@ -29,14 +29,14 @@ class FooterComponent extends Component {}
 FooterComponent.template = xml`<span>My footer</span>`;
 
 class TestComponent extends Component {
-    get OverlayContainer() {
-        return registry.category("main_components").get("OverlayContainer");
+    get DialogContainer() {
+        return registry.category("main_components").get("DialogContainer");
     }
 }
 TestComponent.template = xml`
   <div>
     <div class="o_dialog_container"/>
-    <t t-component="OverlayContainer.Component" t-props="OverlayContainer.props" />
+    <t t-component="DialogContainer.Component" t-props="DialogContainer.props" />
   </div>
 `;
 

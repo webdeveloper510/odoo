@@ -7,8 +7,11 @@ from odoo.tests import tagged
 class TestCIIUS(TestUBLCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls,
+                   chart_template_ref=None,
+                   edi_format_ref="account_edi_ubl_cii.edi_facturx_1_0_05",
+                   ):
+        super().setUpClass(chart_template_ref=chart_template_ref, edi_format_ref=edi_format_ref)
 
         cls.partner_1 = cls.env['res.partner'].create({
             'name': "partner_1",
@@ -51,13 +54,15 @@ class TestCIIUS(TestUBLCommon):
                 },
             ],
         )
-
-        # Default XML acting as the default EDI
-        edi_attachment = self.env['ir.attachment'].search([
-            ('res_model', '=', 'account.move'),
-            ('res_id', '=', invoice.id)
-        ])
-        self.assertEqual(edi_attachment.name, "factur-x.xml")
+        collected_streams = self.env['ir.actions.report']._render_qweb_pdf_prepare_streams(
+            report_ref='account.report_invoice_with_payments',
+            data=None,
+            res_ids=invoice.ids,
+        )
+        self.assertTrue(
+            bytes("<rsm:CrossIndustryInvoice", 'utf8') in collected_streams[invoice.id]['stream'].getvalue(),
+            "Any invoice's PDF should contain a factur-x.xml"
+        )
 
     def test_import_facturx_us_company(self):
         """ Even for a US company, importing a PDF containing a Factur-X xml

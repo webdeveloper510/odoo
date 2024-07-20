@@ -3,6 +3,7 @@
 import base64
 import json
 import os
+import tempfile
 
 from io import BytesIO
 from zipfile import ZipFile
@@ -15,7 +16,6 @@ from unittest.mock import patch
 
 from odoo import release
 from odoo.addons import __path__ as __addons_path__
-from odoo.exceptions import UserError
 from odoo.tools import mute_logger
 
 
@@ -27,7 +27,7 @@ class TestImportModule(odoo.tests.TransactionCase):
         with ZipFile(archive, 'w') as zipf:
             for path, data in files:
                 zipf.writestr(path, data)
-        return self.env['ir.module.module']._import_zipfile(archive)
+        return self.env['ir.module.module'].import_zipfile(archive)
 
     def test_import_zip(self):
         """Assert the behaviors expected by the module import feature using a ZIP archive"""
@@ -44,7 +44,7 @@ class TestImportModule(odoo.tests.TransactionCase):
                 b'"id","name"\n' \
                 b'bar,bar'
             ),
-            ('foo/data.sql', b"INSERT INTO res_currency (name, symbol, active) VALUES ('New Currency', 'NCU', TRUE);"),
+            ('foo/data.sql', b"INSERT INTO res_partner (active, name) VALUES (true, 'baz');"),
             ('foo/static/css/style.css', b".foo{color: black;}"),
             ('foo/static/js/foo.js', b"console.log('foo')"),
             ('bar/__manifest__.py', b"{'data': ['data.xml']}"),
@@ -52,7 +52,6 @@ class TestImportModule(odoo.tests.TransactionCase):
                 <data>
                     <record id="foo" model="res.country">
                         <field name="name">foo</field>
-                        <field name="code">XX</field>
                     </record>
                 </data>
             """),
@@ -62,7 +61,7 @@ class TestImportModule(odoo.tests.TransactionCase):
         self.assertEqual(self.env.ref('foo.foo').name, 'foo')
         self.assertEqual(self.env.ref('foo.bar')._name, 'res.partner')
         self.assertEqual(self.env.ref('foo.bar').name, 'bar')
-        self.assertEqual(self.env['res.currency'].search_count([('symbol', '=', 'NCU')]), 1)
+        self.assertEqual(self.env['res.partner'].search_count([('name', '=', 'baz')]), 1)
 
         self.assertEqual(self.env.ref('bar.foo')._name, 'res.country')
         self.assertEqual(self.env.ref('bar.foo').name, 'foo')
@@ -78,39 +77,9 @@ class TestImportModule(odoo.tests.TransactionCase):
         files = [
             ('foo/__manifest__.py', b"foo")
         ]
-        error_message = "Error while importing module 'foo'"
-        with (
-            mute_logger("odoo.addons.base_import_module.models.ir_module"),
-            self.assertRaises(UserError, msg=error_message),
-        ):
-            self.import_zipfile(files)
-
-    def test_import_zip_invalid_data(self):
-        """Assert no data remains in the db if module import fails"""
-        files = [
-            ('foo/__manifest__.py', b"{'data': ['foo.xml', 'bar.xml']}"),
-            ('foo/foo.xml', b"""
-                <data>
-                    <record id="foo" model="res.partner">
-                        <field name="name">foo</field>
-                    </record>
-                </data>
-            """),
-            # typo in model to throw an error
-            ('foo/bar.xml', b"""
-                <data>
-                    <record id="bar" model="res.prtner">
-                        <field name="name">bar</field>
-                    </record>
-                </data>
-            """),
-        ]
-        with (
-            mute_logger("odoo.addons.base_import_module.models.ir_module"),
-            self.assertRaises(UserError),
-        ):
-            self.import_zipfile(files)
-        self.assertFalse(self.env.ref('foo.foo', raise_if_not_found=False))
+        with mute_logger("odoo.addons.base_import_module.models.ir_module"):
+            result = self.import_zipfile(files)
+        self.assertIn("Error while importing module 'foo'", result[0])
 
     def test_import_zip_data_not_in_manifest(self):
         """Assert a data file not mentioned in the manifest is not imported"""
@@ -146,9 +115,8 @@ class TestImportModule(odoo.tests.TransactionCase):
         ]
         with self.assertLogs('odoo.addons.base_import_module.models.ir_module') as log_catcher:
             self.import_zipfile(files)
-            self.assertEqual(len(log_catcher.output), 2)
+            self.assertEqual(len(log_catcher.output), 1)
             self.assertIn('module foo: skip unsupported file res.partner.xls', log_catcher.output[0])
-            self.assertIn("Successfully imported module 'foo'", log_catcher.output[1])
             self.assertFalse(self.env.ref('foo.foo', raise_if_not_found=False))
 
     def test_import_zip_extract_only_useful(self):
@@ -200,6 +168,37 @@ class TestImportModule(odoo.tests.TransactionCase):
             set(addons_path).difference(__addons_path__),
             'No directory must be added in the addons path during import')
 
+    def test_import_module_addons_path(self):
+        """Assert it's possible to import a module using directly `_import_module` without zip from the addons path"""
+        files = [
+            ('foo/__manifest__.py', b"{'data': ['data.xml']}"),
+            ('foo/data.xml', b"""
+                <data>
+                    <record id="foo" model="res.partner">
+                        <field name="name">foo</field>
+                    </record>
+                </data>
+            """),
+            ('foo/static/css/style.css', b".foo{color: black;}"),
+        ]
+        with tempfile.TemporaryDirectory() as module_dir:
+            for path, data in files:
+                os.makedirs(os.path.join(module_dir, os.path.dirname(path)), exist_ok=True)
+                with open(os.path.join(module_dir, path), 'wb') as fp:
+                    fp.write(data)
+            try:
+                __addons_path__.append(module_dir)
+                self.env['ir.module.module']._import_module('foo', os.path.join(module_dir, 'foo'))
+            finally:
+                __addons_path__.remove(module_dir)
+
+        self.assertEqual(self.env.ref('foo.foo')._name, 'res.partner')
+        self.assertEqual(self.env.ref('foo.foo').name, 'foo')
+        static_path, static_data = files[2]
+        static_attachment = self.env['ir.attachment'].search([('url', '=', '/%s' % static_path)])
+        self.assertEqual(static_attachment.name, os.path.basename(static_path))
+        self.assertEqual(static_attachment.datas, base64.b64encode(static_data))
+
     def test_import_and_uninstall_module(self):
         bundle = 'web.assets_backend'
         path = '/test_module/static/src/js/test.js'
@@ -222,7 +221,7 @@ class TestImportModule(odoo.tests.TransactionCase):
             archive.writestr('test_module/static/src/js/test.js', "console.log('AAA');")
 
         # Import test module
-        self.env['ir.module.module']._import_zipfile(stream)
+        self.env['ir.module.module'].import_zipfile(stream)
 
         attachment = self.env['ir.attachment'].search([('url', '=', path)])
         self.assertEqual(attachment.name, 'test.js')
@@ -280,7 +279,7 @@ class TestImportModule(odoo.tests.TransactionCase):
             archive.writestr(path, "console.log('AAA');")
 
         # Import test module
-        self.env['ir.module.module'].with_user(self.test_user)._import_zipfile(stream)
+        self.env['ir.module.module'].with_user(self.test_user).import_zipfile(stream)
 
         attachment = self.env['ir.attachment'].search([('url', '=', f'/{path}')])
         self.assertEqual(attachment.name, 'test.js')
@@ -307,7 +306,7 @@ class TestImportModule(odoo.tests.TransactionCase):
             archive.writestr(path, "console.log('BBB');")
 
         # Import test module
-        self.env['ir.module.module'].with_user(self.test_user)._import_zipfile(stream)
+        self.env['ir.module.module'].with_user(self.test_user).import_zipfile(stream)
 
         attachment = self.env['ir.attachment'].search([('url', '=', f'/{path}')])
         self.assertEqual(attachment.name, 'test.js')
@@ -380,20 +379,3 @@ class TestImportModuleHttp(TestImportModule, odoo.tests.HttpCase):
         self.assertEqual(asset.path, asset_path)
         asset_data = files[1][1]
         self.assertEqual(self.url_open(asset_path).content, asset_data)
-
-    def test_check_zip_dependencies(self):
-        files = [
-            ('foo/__manifest__.py', b"{'data': ['data.xml']}")
-        ]
-        archive = BytesIO()
-        with ZipFile(archive, 'w') as zipf:
-            for path, data in files:
-                zipf.writestr(path, data)
-        modules_dependencies, _not_found = self.env['ir.module.module']._get_missing_dependencies(archive.getvalue())
-        import_module = self.env['base.import.module'].create({
-                'module_file': base64.b64encode(archive.getvalue()),
-                'state': 'init',
-                'modules_dependencies': modules_dependencies,
-            })
-        dependencies_names = import_module.get_dependencies_to_install_names()
-        self.assertEqual(dependencies_names, [])

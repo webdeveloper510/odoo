@@ -25,48 +25,36 @@ class AccountFrFec(models.TransientModel):
     export_type = fields.Selection([
         ('official', 'Official FEC report (posted entries only)'),
         ('nonofficial', 'Non-official FEC report (posted and unposted entries)'),
-    ], string='Export Type', required=True, default='official')
-    excluded_journal_ids = fields.Many2many('account.journal', string="Excluded Journals", domain="[('company_id', 'parent_of', current_company_id)]")
+        ], string='Export Type', required=True, default='official')
 
     @api.onchange('test_file')
     def _onchange_export_file(self):
         if not self.test_file:
             self.export_type = 'official'
 
-    def _get_where_query(self):
-        where_params = {'company_id': self.env.company.id}
-        where_query = "am.company_id = %(company_id)s\n"
-        # For official report: only use posted entries
-        if self.export_type == "official":
-            where_query += "AND am.state = 'posted'\n"
-        if self.excluded_journal_ids:
-            where_params['excluded_journal_ids'] = tuple(self.excluded_journal_ids.ids)
-            where_query += "AND am.journal_id NOT IN %(excluded_journal_ids)s\n"
-        return where_query, where_params
-
     def _do_query_unaffected_earnings(self):
         ''' Compute the sum of ending balances for all accounts that are of a type that does not bring forward the balance in new fiscal years.
             This is needed because we have to display only one line for the initial balance of all expense/revenue accounts in the FEC.
         '''
-        where_query, where_params = self._get_where_query()
-        sql_query = f'''
+
+        sql_query = '''
         SELECT
             'OUV' AS JournalCode,
             'Balance initiale' AS JournalLib,
-            'OUVERTURE/' || %(formatted_date_year)s AS EcritureNum,
-            %(formatted_date_from)s AS EcritureDate,
+            'OUVERTURE/' || %s AS EcritureNum,
+            %s AS EcritureDate,
             '120/129' AS CompteNum,
             'Benefice (perte) reporte(e)' AS CompteLib,
             '' AS CompAuxNum,
             '' AS CompAuxLib,
             '-' AS PieceRef,
-            %(formatted_date_from)s AS PieceDate,
+            %s AS PieceDate,
             '/' AS EcritureLib,
             replace(CASE WHEN COALESCE(sum(aml.balance), 0) <= 0 THEN '0,00' ELSE to_char(SUM(aml.balance), '000000000000000D99') END, '.', ',') AS Debit,
             replace(CASE WHEN COALESCE(sum(aml.balance), 0) >= 0 THEN '0,00' ELSE to_char(-SUM(aml.balance), '000000000000000D99') END, '.', ',') AS Credit,
             '' AS EcritureLet,
             '' AS DateLet,
-            %(formatted_date_from)s AS ValidDate,
+            %s AS ValidDate,
             '' AS Montantdevise,
             '' AS Idevise
         FROM
@@ -74,17 +62,25 @@ class AccountFrFec(models.TransientModel):
             LEFT JOIN account_move am ON am.id=aml.move_id
             JOIN account_account aa ON aa.id = aml.account_id
         WHERE
-            {where_query}
-            AND am.date < %(date_from)s
+            am.date < %s
+            AND am.company_id = %s
             AND aa.include_initial_balance IS NOT TRUE
         '''
-        self._cr.execute(sql_query, {
-            **where_params,
-            'formatted_date_year': self.date_from.year,
-            'formatted_date_from': fields.Date.to_string(self.date_from).replace('-', ''),
-            'date_from': self.date_from,
-        })
-        return list(self._cr.fetchone())
+        # For official report: only use posted entries
+        if self.export_type == "official":
+            sql_query += '''
+            AND am.state = 'posted'
+            '''
+        company = self.env.company
+        formatted_date_from = fields.Date.to_string(self.date_from).replace('-', '')
+        date_from = self.date_from
+        formatted_date_year = date_from.year
+        self._cr.execute(
+            sql_query, (formatted_date_year, formatted_date_from, formatted_date_from, formatted_date_from, self.date_from, company.id))
+        listrow = []
+        row = self._cr.fetchone()
+        listrow = list(row)
+        return listrow
 
     def _get_company_legal_data(self, company):
         """
@@ -107,7 +103,6 @@ class AccountFrFec(models.TransientModel):
             return company.vat
 
     def generate_fec(self):
-        #pylint: disable=sql-injection
         self.ensure_one()
         if not (self.env.is_admin() or self.env.user.has_group('account.group_account_user')):
             raise AccessDenied()
@@ -152,8 +147,8 @@ class AccountFrFec(models.TransientModel):
         rows_to_write = [header]
         # INITIAL BALANCE
         unaffected_earnings_account = self.env['account.account'].search([
-            *self.env['account.account']._check_company_domain(company),
             ('account_type', '=', 'equity_unaffected'),
+            ('company_id', '=', company.id)
         ], limit=1)
         unaffected_earnings_line = True  # used to make sure that we add the unaffected earning initial balance only once
         if unaffected_earnings_account:
@@ -166,26 +161,24 @@ class AccountFrFec(models.TransientModel):
             aa_name = f"COALESCE(aa.name->>'{lang}', aa.name->>'en_US')"
         else:
             aa_name = "aa.name"
-
-        where_query, where_params = self._get_where_query()
         sql_query = f'''
         SELECT
             'OUV' AS JournalCode,
             'Balance initiale' AS JournalLib,
-            'OUVERTURE/' || %(formatted_date_year)s AS EcritureNum,
-            %(formatted_date_from)s AS EcritureDate,
+            'OUVERTURE/' || %s AS EcritureNum,
+            %s AS EcritureDate,
             MIN(aa.code) AS CompteNum,
             replace(replace(MIN({aa_name}), '|', '/'), '\t', '') AS CompteLib,
             '' AS CompAuxNum,
             '' AS CompAuxLib,
             '-' AS PieceRef,
-            %(formatted_date_from)s AS PieceDate,
+            %s AS PieceDate,
             '/' AS EcritureLib,
             replace(CASE WHEN sum(aml.balance) <= 0 THEN '0,00' ELSE to_char(SUM(aml.balance), '000000000000000D99') END, '.', ',') AS Debit,
             replace(CASE WHEN sum(aml.balance) >= 0 THEN '0,00' ELSE to_char(-SUM(aml.balance), '000000000000000D99') END, '.', ',') AS Credit,
             '' AS EcritureLet,
             '' AS DateLet,
-            %(formatted_date_from)s AS ValidDate,
+            %s AS ValidDate,
             '' AS Montantdevise,
             '' AS Idevise,
             MIN(aa.id) AS CompteID
@@ -194,21 +187,29 @@ class AccountFrFec(models.TransientModel):
             LEFT JOIN account_move am ON am.id=aml.move_id
             JOIN account_account aa ON aa.id = aml.account_id
         WHERE
-            {where_query}
-            AND am.date < %(date_from)s
+            am.date < %s
+            AND am.company_id = %s
             AND aa.include_initial_balance = 't'
-        GROUP BY aml.account_id, aa.account_type
-        HAVING aa.account_type not in ('asset_receivable', 'liability_payable') AND round(sum(aml.balance), %(currency_digits)s) != 0
         '''
+
+        # For official report: only use posted entries
+        if self.export_type == "official":
+            sql_query += '''
+            AND am.state = 'posted'
+            '''
+
+        sql_query += '''
+        GROUP BY aml.account_id, aa.account_type
+        HAVING aa.account_type not in ('asset_receivable', 'liability_payable') AND round(sum(aml.balance), %s) != 0
+        '''
+        formatted_date_from = fields.Date.to_string(self.date_from).replace('-', '')
+        date_from = self.date_from
+        formatted_date_year = date_from.year
         currency_digits = 2
-        params = {
-            **where_params,
-            'formatted_date_year': self.date_from.year,
-            'formatted_date_from': fields.Date.to_string(self.date_from).replace('-', ''),
-            'date_from': self.date_from,
-            'currency_digits': currency_digits,
-        }
-        self._cr.execute(sql_query, params)
+
+        self._cr.execute(
+            sql_query, (formatted_date_year, formatted_date_from, formatted_date_from, formatted_date_from, self.date_from, company.id,
+                        currency_digits))
 
         for row in self._cr.fetchall():
             listrow = list(row)
@@ -237,9 +238,8 @@ class AccountFrFec(models.TransientModel):
             and (unaffected_earnings_results[11] != '0,00'
                  or unaffected_earnings_results[12] != '0,00')):
             #search an unaffected earnings account
-            unaffected_earnings_account = self.env['account.account'].search([
-                ('account_type', '=', 'equity_unaffected')
-            ], limit=1)
+            unaffected_earnings_account = self.env['account.account'].search([('account_type', '=', 'equity_unaffected'),
+                                                                              ('company_id', '=', company.id)], limit=1)
             if unaffected_earnings_account:
                 unaffected_earnings_results[4] = unaffected_earnings_account.code
                 unaffected_earnings_results[5] = unaffected_earnings_account.name
@@ -250,8 +250,8 @@ class AccountFrFec(models.TransientModel):
         SELECT
             'OUV' AS JournalCode,
             'Balance initiale' AS JournalLib,
-            'OUVERTURE/' || %(formatted_date_year)s AS EcritureNum,
-            %(formatted_date_from)s AS EcritureDate,
+            'OUVERTURE/' || %s AS EcritureNum,
+            %s AS EcritureDate,
             MIN(aa.code) AS CompteNum,
             replace(MIN({aa_name}), '|', '/') AS CompteLib,
             CASE WHEN MIN(aa.account_type) IN ('asset_receivable', 'liability_payable')
@@ -268,13 +268,13 @@ class AccountFrFec(models.TransientModel):
             ELSE ''
             END AS CompAuxLib,
             '-' AS PieceRef,
-            %(formatted_date_from)s AS PieceDate,
+            %s AS PieceDate,
             '/' AS EcritureLib,
             replace(CASE WHEN sum(aml.balance) <= 0 THEN '0,00' ELSE to_char(SUM(aml.balance), '000000000000000D99') END, '.', ',') AS Debit,
             replace(CASE WHEN sum(aml.balance) >= 0 THEN '0,00' ELSE to_char(-SUM(aml.balance), '000000000000000D99') END, '.', ',') AS Credit,
             '' AS EcritureLet,
             '' AS DateLet,
-            %(formatted_date_from)s AS ValidDate,
+            %s AS ValidDate,
             '' AS Montantdevise,
             '' AS Idevise,
             MIN(aa.id) AS CompteID
@@ -284,13 +284,24 @@ class AccountFrFec(models.TransientModel):
             LEFT JOIN res_partner rp ON rp.id=aml.partner_id
             JOIN account_account aa ON aa.id = aml.account_id
         WHERE
-            {where_query}
-            AND am.date < %(date_from)s
+            am.date < %s
+            AND am.company_id = %s
             AND aa.include_initial_balance = 't'
-        GROUP BY aml.account_id, aa.account_type, rp.ref, rp.id
-        HAVING aa.account_type in ('asset_receivable', 'liability_payable') AND round(sum(aml.balance), %(currency_digits)s) != 0
         '''
-        self._cr.execute(sql_query, params)
+
+        # For official report: only use posted entries
+        if self.export_type == "official":
+            sql_query += '''
+            AND am.state = 'posted'
+            '''
+
+        sql_query += '''
+        GROUP BY aml.account_id, aa.account_type, rp.ref, rp.id
+        HAVING aa.account_type in ('asset_receivable', 'liability_payable') AND round(sum(aml.balance), %s) != 0
+        '''
+        self._cr.execute(
+            sql_query, (formatted_date_year, formatted_date_from, formatted_date_from, formatted_date_from, self.date_from, company.id,
+                        currency_digits))
 
         for row in self._cr.fetchall():
             listrow = list(row)
@@ -338,7 +349,7 @@ class AccountFrFec(models.TransientModel):
                 ELSE REGEXP_REPLACE(replace(aml.name, '|', '/'), '[\\t\\n\\r]', ' ', 'g') END AS EcritureLib,
             replace(CASE WHEN aml.debit = 0 THEN '0,00' ELSE to_char(aml.debit, '000000000000000D99') END, '.', ',') AS Debit,
             replace(CASE WHEN aml.credit = 0 THEN '0,00' ELSE to_char(aml.credit, '000000000000000D99') END, '.', ',') AS Credit,
-            CASE WHEN rec.id IS NULL THEN ''::text ELSE rec.id::text END AS EcritureLet,
+            CASE WHEN rec.name IS NULL THEN '' ELSE rec.name END AS EcritureLet,
             CASE WHEN aml.full_reconcile_id IS NULL THEN '' ELSE TO_CHAR(rec.create_date, 'YYYYMMDD') END AS DateLet,
             TO_CHAR(am.date, 'YYYYMMDD') AS ValidDate,
             CASE
@@ -355,15 +366,16 @@ class AccountFrFec(models.TransientModel):
             LEFT JOIN res_currency rc ON rc.id = aml.currency_id
             LEFT JOIN account_full_reconcile rec ON rec.id = aml.full_reconcile_id
         WHERE
-            {where_query}
-            AND am.date >= %(date_from)s
-            AND am.date <= %(date_to)s
+            am.date >= %s
+            AND am.date <= %s
+            AND am.company_id = %s
+            {"AND am.state = 'posted'" if self.export_type == 'official' else ""}
         ORDER BY
             am.date,
             am.name,
             aml.id
-        LIMIT %(limit)s
-        OFFSET %(offset)s
+        LIMIT %s
+        OFFSET %s
         '''
 
         with io.BytesIO() as fecfile:
@@ -380,7 +392,10 @@ class AccountFrFec(models.TransientModel):
             query_offset = 0
             has_more_results = True
             while has_more_results:
-                self._cr.execute(sql_query, {**params, 'date_to': self.date_to, 'limit': query_limit + 1, 'offset': query_offset})
+                self._cr.execute(
+                    sql_query,
+                    (self.date_from, self.date_to, company.id, query_limit + 1, query_offset)
+                )
                 query_offset += query_limit
                 has_more_results = self._cr.rowcount > query_limit # we load one more result than the limit to check if there is more
                 query_results = self._cr.fetchall()
@@ -402,7 +417,7 @@ class AccountFrFec(models.TransientModel):
             'fec_data': base64_result,
             # Filename = <siren>FECYYYYMMDD where YYYMMDD is the closing date
             'filename': '%sFEC%s%s.csv' % (company_legal_data, end_date, suffix),
-        })
+            })
 
         # Set fiscal year lock date to the end date (not in test)
         fiscalyear_lock_date = self.env.company.fiscalyear_lock_date
@@ -412,7 +427,7 @@ class AccountFrFec(models.TransientModel):
             'name': 'FEC',
             'type': 'ir.actions.act_url',
             'url': "web/content/?model=account.fr.fec&id=" + str(self.id) + "&filename_field=filename&field=fec_data&download=true&filename=" + self.filename,
-            'target': 'new',
+            'target': 'self',
         }
 
     def _csv_write_rows(self, rows, lineterminator=u'\r\n'): #DEPRECATED; will disappear in master

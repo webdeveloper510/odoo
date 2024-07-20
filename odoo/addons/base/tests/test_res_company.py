@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import Command
-from odoo.exceptions import UserError, ValidationError
+
+from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase
 
 
@@ -38,29 +38,3 @@ class TestCompany(TransactionCase):
             'company_ids': main_company.ids,
         })
         user.action_unarchive()
-
-    def test_logo_check(self):
-        """Ensure uses_default_logo is properly (re-)computed."""
-        company = self.env['res.company'].create({'name': 'foo'})
-
-        self.assertTrue(company.logo, 'Should have a default logo')
-        self.assertTrue(company.uses_default_logo)
-        company.partner_id.image_1920 = False
-        # No logo means we fall back to another default logo for the website route -> uses_default
-        self.assertTrue(company.uses_default_logo)
-        company.partner_id.image_1920 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        self.assertFalse(company.uses_default_logo)
-
-    def test_unlink_company_with_children(self):
-        """Ensure that companies with child companies cannot be deleted."""
-
-        parent_company = self.env['res.company'].create({
-            'name': 'Parent Company',
-            'child_ids': [
-                Command.create({'name': 'Child Company'}),
-            ],
-        })
-
-        with self.assertRaises(UserError):
-            parent_company.unlink()
-        self.assertTrue(parent_company.exists())

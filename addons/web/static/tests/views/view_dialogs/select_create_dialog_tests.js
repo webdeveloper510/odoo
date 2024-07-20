@@ -19,7 +19,8 @@ import {
     editFavoriteName,
     removeFacet,
     saveFavorite,
-    toggleSearchBarMenu,
+    toggleFavoriteMenu,
+    toggleFilterMenu,
     toggleMenuItem,
     toggleSaveFavorite,
 } from "@web/../tests/search/helpers";
@@ -124,6 +125,9 @@ QUnit.module("ViewDialogs", (hooks) => {
                             fields: ["display_name", "foo", "bar"],
                             groupby: ["bar"],
                             orderby: "",
+                            expand: false,
+                            expand_orderby: null,
+                            expand_limit: null,
                             lazy: true,
                             limit: 80,
                             offset: 0,
@@ -148,7 +152,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                                     ["display_name", "ilike", "piou"],
                                     ["foo", "ilike", "piou"],
                                 ],
-                                specification: { display_name: {}, foo: {} },
+                                fields: ["display_name", "foo"],
                                 limit: 80,
                                 offset: 0,
                                 order: "",
@@ -167,7 +171,7 @@ QUnit.module("ViewDialogs", (hooks) => {
                                     uid: 7,
                                 }, // not part of the test, may change
                                 domain: [["display_name", "like", "a"]],
-                                specification: { display_name: {}, foo: {} },
+                                fields: ["display_name", "foo"],
                                 limit: 80,
                                 offset: 0,
                                 order: "",
@@ -224,6 +228,7 @@ QUnit.module("ViewDialogs", (hooks) => {
         const webClient = await createWebClient({ serverData, mockRPC });
         webClient.env.services.dialog.add(SelectCreateDialog, {
             noCreate: true,
+            readonly: true, //Not used
             resModel: "partner",
             domain: [["id", "=", session.user_context.uid]],
         });
@@ -310,13 +315,13 @@ QUnit.module("ViewDialogs", (hooks) => {
                 if (route === "/web/dataset/call_kw/instrument/get_formview_id") {
                     return Promise.resolve(false);
                 }
-                if (route === "/web/dataset/call_kw/instrument/web_save") {
+                if (route === "/web/dataset/call_kw/instrument/create") {
                     assert.deepEqual(
-                        args.args[1],
-                        { badassery: [[4, 1]], name: "ABC" },
+                        args.args,
+                        [{ badassery: [[6, false, [1]]], name: "ABC" }],
                         "The method create should have been called with the right arguments"
                     );
-                    return [{ id: 90 }];
+                    return Promise.resolve(false);
                 }
             },
         });
@@ -360,7 +365,7 @@ QUnit.module("ViewDialogs", (hooks) => {
 
         patchWithCleanup(listView.Controller.prototype, {
             setup() {
-                super.setup(...arguments);
+                this._super(...arguments);
                 useSetupAction({
                     getContext: () => ({ shouldBeInFilterContext: true }),
                 });
@@ -402,12 +407,13 @@ QUnit.module("ViewDialogs", (hooks) => {
         assert.containsN(target, ".o_data_row", 3, "should contain 3 records");
 
         // filter on bar
-        await toggleSearchBarMenu(target);
+        await toggleFilterMenu(target);
         await toggleMenuItem(target, "Bar");
 
         assert.containsN(target, ".o_data_row", 2, "should contain 2 records");
 
         // save filter
+        await toggleFavoriteMenu(target);
         await toggleSaveFavorite(target);
         await editFavoriteName(target, "some name");
         await saveFavorite(target);
@@ -480,27 +486,6 @@ QUnit.module("ViewDialogs", (hooks) => {
         }
     );
 
-    QUnit.test("SelectCreateDialog: multiple clicks on record", async function (assert) {
-        serverData.views = {
-            "partner,false,list": `<tree><field name="display_name"/></tree>`,
-            "partner,false,search": `<search><field name="foo"/></search>`,
-        };
-        const webClient = await createWebClient({ serverData });
-        webClient.env.services.dialog.add(SelectCreateDialog, {
-            resModel: "partner",
-            onSelected: async function (records) {
-                assert.step(`select record ${records[0]}`);
-            },
-        });
-
-        await nextTick();
-        click(target.querySelector(".modal .o_data_row .o_data_cell"));
-        click(target.querySelector(".modal .o_data_row .o_data_cell"));
-        click(target.querySelector(".modal .o_data_row .o_data_cell"));
-        await nextTick();
-        assert.verifySteps(["select record 1"], "should have called onSelected only once");
-    });
-
     QUnit.test("SelectCreateDialog: default props, create a record", async function (assert) {
         serverData.views = {
             "partner,false,list": `<tree><field name="display_name"/></tree>`,
@@ -525,7 +510,6 @@ QUnit.module("ViewDialogs", (hooks) => {
         assert.containsOnce(target, ".o_dialog footer button.o_select_button");
         assert.containsOnce(target, ".o_dialog footer button.o_create_button");
         assert.containsOnce(target, ".o_dialog footer button.o_form_button_cancel");
-        assert.containsNone(target, ".o_dialog .o_control_panel_main_buttons .o_list_button_add");
 
         await click(target.querySelector(".o_dialog footer button.o_create_button"));
 

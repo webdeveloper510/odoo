@@ -1,6 +1,6 @@
 // Type definitions for QUnit v2.9.2
 
-import { Component } from "@odoo/owl";
+const { Component } = owl;
 
 // Project: http://qunitjs.com/
 // Definitions by: James Bracy <https://github.com/waratuman>

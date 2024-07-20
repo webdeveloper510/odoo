@@ -3,18 +3,19 @@
 # 	* account_edi_proxy_client
 # 
 # Translators:
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2023
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2023
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-04-14 05:51+0000\n"
+"PO-Revision-Date: 2022-09-22 05:44+0000\n"
 "Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
@@ -44,6 +45,11 @@ msgid "Active"
 msgstr "Aktiivinen"
 
 #. module: account_edi_proxy_client
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_format_code
+msgid "Code"
+msgstr "Koodi"
+
+#. module: account_edi_proxy_client
 #: model:ir.model,name:account_edi_proxy_client.model_res_company
 msgid "Companies"
 msgstr "Yritykset"
@@ -64,11 +70,6 @@ msgid "Created on"
 msgstr "Luotu"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__demo
-msgid "Demo mode"
-msgstr "Demotila"
-
-#. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
@@ -84,9 +85,14 @@ msgid "EDI Proxy Users"
 msgstr "EDI-välityspalvelimen käyttäjien nimet"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_mode
-msgid "EDI operating mode"
-msgstr "EDI-toimintatila"
+#: model:ir.model,name:account_edi_proxy_client.model_account_edi_format
+msgid "EDI format"
+msgstr "EDI-muoto"
+
+#. module: account_edi_proxy_client
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_format_id
+msgid "Edi Format"
+msgstr "EDI-muoto"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_identification
@@ -102,6 +108,11 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__id_client
 msgid "Id Client"
 msgstr "Käyttäjätilin ID"
+
+#. module: account_edi_proxy_client
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user____last_update
+msgid "Last Modified on"
+msgstr "Viimeksi muokattu"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__write_uid
@@ -124,24 +135,9 @@ msgid "Private Key Filename"
 msgstr "Yksityisen avaimen tiedostonimi"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__prod
-msgid "Production mode"
-msgstr "Tuotantotila"
-
-#. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__proxy_type
-msgid "Proxy Type"
-msgstr "Välityspalvelimen tyyppi"
-
-#. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__refresh_token
 msgid "Refresh Token"
-msgstr "Uudista pääsytunniste"
-
-#. module: account_edi_proxy_client
-#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__test
-msgid "Test mode"
-msgstr "Testitila"
+msgstr "Uudista Token"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,help:account_edi_proxy_client.field_account_edi_proxy_client_user__private_key
@@ -150,8 +146,12 @@ msgstr "Käyttäjän salakirjoituksen avain"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,help:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_identification
-msgid "The unique id that identifies this user, typically the vat"
-msgstr "Yksilöllinen tunniste, joka yksilöi käyttäjän, tyypillisesti ALV"
+msgid ""
+"The unique id that identifies this user for on the edi format, typically the"
+" vat"
+msgstr ""
+"Yksilöllinen tunnus, joka tunnistaa tämän käyttäjän EDI-muodosta, "
+"tyypillisesti ALV"
 
 #. module: account_edi_proxy_client
 #. odoo-python
@@ -186,14 +186,9 @@ msgstr ""
 "yritettiin ottaa yhteyttä oli %r"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_active_company_proxy
-msgid "This company has an active user already created for this EDI type"
-msgstr "Tällä yrityksellä on jo luotu aktiivinen käyttäjä tälle EDI-tyypille"
-
-#. module: account_edi_proxy_client
-#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_active_edi_identification
-msgid "This edi identification is already assigned to an active user"
-msgstr "Tämä EDI-tunnus on jo määritetty aktiiviselle käyttäjälle"
+#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_edi_identification_per_format
+msgid "This edi identification is already assigned to a user"
+msgstr "EDI-tunniste on jo asetettu käyttäjälle"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_id_client

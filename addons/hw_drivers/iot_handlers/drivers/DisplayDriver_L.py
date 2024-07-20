@@ -18,7 +18,6 @@ from odoo.addons.hw_drivers.driver import Driver
 from odoo.addons.hw_drivers.event_manager import event_manager
 from odoo.addons.hw_drivers.main import iot_devices
 from odoo.addons.hw_drivers.tools import helpers
-from odoo.tools.misc import file_open
 
 path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../views'))
 loader = jinja2.FileSystemLoader(path)
@@ -204,7 +203,7 @@ class DisplayController(http.Controller):
         cust_js = None
         interfaces = ni.interfaces()
 
-        with file_open("hw_drivers/static/src/js/worker.js") as js:
+        with open(os.path.join(os.path.dirname(__file__), "../../static/src/js/worker.js")) as js:
             cust_js = js.read()
 
         display_ifaces = []
@@ -233,12 +232,3 @@ class DisplayController(http.Controller):
             'display_identifier': display_identifier,
             'pairing_code': connection_manager.pairing_code,
         })
-
-    @http.route('/point_of_sale/iot_devices', type='json', auth='none', methods=['POST'])
-    def get_iot_devices(self):
-        iot_device = [{
-            'name': iot_devices[device].device_name,
-            'type': iot_devices[device].device_type,
-        } for device in iot_devices]
-
-        return json.dumps({'iot_device_status': iot_device})

@@ -13,6 +13,7 @@ class AccountPayment(models.Model):
     l10n_latam_check_id = fields.Many2one(
         comodel_name='account.payment',
         string='Check',
+        readonly=True, states={'draft': [('readonly', False)]},
         copy=False,
         check_company=True,
     )
@@ -39,15 +40,17 @@ class AccountPayment(models.Model):
         comodel_name='res.bank',
         string='Check Bank',
         compute='_compute_l10n_latam_check_bank_id', store=True, readonly=False,
+        states={'posted': [('readonly', True)], 'cancel': [('readonly', True)]},
     )
     l10n_latam_check_issuer_vat = fields.Char(
         string='Check Issuer VAT',
         compute='_compute_l10n_latam_check_issuer_vat', store=True, readonly=False,
+        states={'posted': [('readonly', True)], 'cancel': [('readonly', True)]},
     )
     l10n_latam_check_payment_date = fields.Date(
         string='Check Cash-In Date',
         help="Date from when you can cash in the check, turn the check into cash",
-        readonly=False,
+        readonly=True, states={'draft': [('readonly', False)]},
     )
 
     # This is a technical field for the view only
@@ -275,9 +278,9 @@ class AccountPayment(models.Model):
         res = super()._get_trigger_fields_to_synchronize()
         return res + ('l10n_latam_check_number',)
 
-    def _prepare_move_line_default_vals(self, write_off_line_vals=None, force_balance=None):
+    def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         """ Add check name and operation on liquidity line """
-        res = super()._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals, force_balance=force_balance)
+        res = super()._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
         check = self if (self.payment_method_line_id.code == 'new_third_party_checks' or (self.payment_method_line_id.code == 'check_printing' and self.l10n_latam_manual_checks)) \
             else self.l10n_latam_check_id
         if check:
@@ -288,13 +291,13 @@ class AccountPayment(models.Model):
             })
         return res
 
-    @api.depends('check_number', 'payment_method_line_id')
-    def _compute_display_name(self):
+    def name_get(self):
         """ Add check number to display_name on check_id m2o field """
-        super()._compute_display_name()
-        for rec in self:
+        res_names = super().name_get()
+        for i, (res_name, rec) in enumerate(zip(res_names, self)):
             if rec.check_number and rec.payment_method_line_id.code == 'new_third_party_checks':
-                rec.display_name = "{} {}".format(rec.display_name, _("(Check %s)", rec.check_number))
+                res_names[i] = (res_name[0], "%s %s" % (res_name[1], _("(Check %s)", rec.check_number)))
+        return res_names
 
     def button_open_check_operations(self):
         ''' Redirect the user to the invoice(s) paid by this payment.

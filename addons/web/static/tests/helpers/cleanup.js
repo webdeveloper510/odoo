@@ -51,8 +51,16 @@ if (window.QUnit) {
         { tagName: "SCRIPT", attr: "id", value: "" },
         { tagName: "DIV", attr: "class", value: "o_notification_manager" },
         { tagName: "DIV", attr: "class", value: "tooltip fade bs-tooltip-auto" },
-        { tagName: "DIV", attr: "class", value: "tooltip fade bs-tooltip-auto show" },
-        { tagName: "DIV", attr: "class", value: "tooltip tooltip-field-info fade bs-tooltip-auto" },
+        {
+            tagName: "DIV",
+            attr: "class",
+            value: "tooltip fade bs-tooltip-auto show",
+        },
+        {
+            tagName: "DIV",
+            attr: "class",
+            value: "tooltip tooltip-field-info fade bs-tooltip-auto",
+        },
         {
             tagName: "DIV",
             attr: "class",

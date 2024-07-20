@@ -19,10 +19,10 @@ class StockWarehouse(models.Model):
 
     buy_to_resupply = fields.Boolean('Buy to Resupply', default=True,
                                      help="When products are bought, they can be delivered to this warehouse")
-    buy_pull_id = fields.Many2one('stock.rule', 'Buy rule', copy=False)
+    buy_pull_id = fields.Many2one('stock.rule', 'Buy rule')
 
-    def _generate_global_route_rules_values(self):
-        rules = super()._generate_global_route_rules_values()
+    def _get_global_route_rules_values(self):
+        rules = super(StockWarehouse, self)._get_global_route_rules_values()
         location_id = self.in_type_id.default_location_dest_id
         rules.update({
             'buy_pull_id': {
@@ -75,16 +75,8 @@ class ReturnPicking(models.TransientModel):
 
     def _prepare_move_default_values(self, return_line, new_picking):
         vals = super(ReturnPicking, self)._prepare_move_default_values(return_line, new_picking)
-        if self.location_id.usage == "supplier":
-            vals['purchase_line_id'], vals['partner_id'] = return_line.move_id._get_purchase_line_and_partner_from_chain()
+        vals['purchase_line_id'] = return_line.move_id.purchase_line_id.id
         return vals
-
-    def _create_returns(self):
-        new_picking_id, picking_type_id = super()._create_returns()
-        picking = self.env['stock.picking'].browse(new_picking_id)
-        if len(picking.move_ids.partner_id) == 1:
-            picking.partner_id = picking.move_ids.partner_id
-        return new_picking_id, picking_type_id
 
 
 class Orderpoint(models.Model):
@@ -160,7 +152,7 @@ class Orderpoint(models.Model):
         self.ensure_one()
         domain = [('orderpoint_id', 'in', self.ids)]
         if self.env.context.get('written_after'):
-            domain = AND([domain, [('write_date', '>=', self.env.context.get('written_after'))]])
+            domain = AND([domain, [('write_date', '>', self.env.context.get('written_after'))]])
         order = self.env['purchase.order.line'].search(domain, limit=1).order_id
         if order:
             action = self.env.ref('purchase.action_rfq_form')

@@ -5,7 +5,7 @@ from datetime import datetime as dt, time
 from datetime import timedelta as td
 from freezegun import freeze_time
 
-from odoo import SUPERUSER_ID, Command
+from odoo import SUPERUSER_ID
 from odoo.tests import Form, tagged
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
@@ -44,14 +44,6 @@ class TestReorderingRule(TransactionCase):
         warehouse_1.write({'reception_steps': 'two_steps'})
         warehouse_2 = self.env['stock.warehouse'].create({'name': 'WH 2', 'code': 'WH2', 'company_id': self.env.company.id, 'partner_id': self.env.company.partner_id.id, 'reception_steps': 'one_step'})
 
-        # Create and set specific buyer for partner
-        buyer_id = self.env['res.users'].create({
-            'login': 'buyer1',
-            'name': 'Buyer1',
-            'email': 'buyer1@example.com',
-        })
-        self.partner.buyer_id = buyer_id.id
-
         # create reordering rule
         orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
         orderpoint_form.warehouse_id = warehouse_1
@@ -68,6 +60,7 @@ class TestReorderingRule(TransactionCase):
             move.product_id = self.product_01
             move.product_uom_qty = 10.0
         customer_picking = picking_form.save()
+        # picking confirm
         customer_picking.action_confirm()
         # Run scheduler
         self.env['procurement.group'].run_scheduler()
@@ -86,7 +79,6 @@ class TestReorderingRule(TransactionCase):
         self.assertEqual(order_point.name, purchase_order.origin, 'Source document on purchase order should be the name of the reordering rule.')
         self.assertEqual(purchase_order.order_line.product_qty, 10)
         self.assertEqual(purchase_order.order_line.name, 'Product A')
-        self.assertEqual(purchase_order.user_id, buyer_id)
 
         # Increase the quantity on the RFQ before confirming it
         purchase_order.order_line.product_qty = 12
@@ -720,11 +712,13 @@ class TestReorderingRule(TransactionCase):
 
         po.button_confirm()
         picking = po.picking_ids
-        picking.button_validate()
+        action = picking.button_validate()
+        wizard = Form(self.env[(action.get('res_model'))].with_context(action['context'])).save()
+        wizard.process()
 
         self.assertRecordValues(picking.move_line_ids, [
-            {'product_id': self.product_01.id, 'quantity': 1.0, 'state': 'done', 'location_dest_id': stock_location.id},
-            {'product_id': self.product_01.id, 'quantity': 2.0, 'state': 'done', 'location_dest_id': sub_location.id},
+            {'product_id': self.product_01.id, 'qty_done': 1.0, 'state': 'done', 'location_dest_id': stock_location.id},
+            {'product_id': self.product_01.id, 'qty_done': 2.0, 'state': 'done', 'location_dest_id': sub_location.id},
         ])
 
     def test_2steps_and_partner_on_orderpoint(self):
@@ -885,8 +879,9 @@ class TestReorderingRule(TransactionCase):
 
         moves = self.env['stock.move'].search([('product_id', '=', self.product_01.id)], order='id desc')
         self.assertRecordValues(moves, [
-            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 1},
             {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 1},
+            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 1},
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 0},
         ])
 
     def test_add_line_to_existing_draft_po(self):
@@ -1066,8 +1061,7 @@ class TestReorderingRule(TransactionCase):
                 'product_uom_qty': 1,
                 'location_id': warehouse.lot_stock_id.id,
                 'location_dest_id': self.env.ref('stock.stock_location_customers').id,
-            })],
-            'state': 'draft',
+            })]
         })
         picking.with_user(user).action_assign()
         # check that the PO line quantity has been updated
@@ -1100,37 +1094,3 @@ class TestReorderingRule(TransactionCase):
         self.assertEqual(orderpoint.supplier_id, product.seller_ids, 'The supplier should be set in the orderpoint')
         self.assertEqual(orderpoint.product_uom, product.uom_id, 'The orderpoint uom should be the same as the product uom')
         self.assertEqual(orderpoint.qty_to_order, 6000)
-
-    def test_tax_po_line_reordering_rule_with_branch_company(self):
-        """
-        Test that the parent company tax is correctly set in the purchase order line
-        when the scheduler is triggered and the branch company is used."
-        """
-        self.env.company.write({
-            'child_ids': [Command.create({
-                'name': 'Branch A',
-                'zip': '85120',
-            })],
-        })
-        self.cr.precommit.run()  # load the CoA
-        branch = self.env.company.child_ids
-        product = self.env['product.product'].with_company(branch).create({
-            'name': 'Storable Product',
-            'type': 'product',
-            'seller_ids': [Command.create({'partner_id': self.partner.id, 'min_qty': 1})],
-        })
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', branch.id)], limit=1)
-        product.env['stock.warehouse.orderpoint'].create({
-            'warehouse_id': warehouse.id,
-            'location_id': warehouse.lot_stock_id.id,
-            'product_id': product.id,
-            'product_min_qty': 10,
-            'product_max_qty': 0,
-        })
-        # run the scheduler
-        self.env['procurement.group'].run_scheduler()
-        # check that the PO line is created
-        po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
-        self.assertEqual(len(po_line), 1, 'There should be only one PO line')
-        self.assertEqual(po_line.product_qty, 10, 'The PO line quantity should be 10')
-        self.assertTrue(po_line.taxes_id)

@@ -125,9 +125,6 @@ class MassMailCase(MailCase, MockLinkTracker):
             if 'failure_type' in recipient_info or status in ('error', 'cancel', 'bounce'):
                 self.assertEqual(recipient_trace.failure_type, recipient_info['failure_type'])
 
-            if 'failure_reason' in recipient_info:
-                self.assertEqual(recipient_trace.failure_reason, recipient_info['failure_reason'])
-
             if check_mail:
                 if author is None:
                     author = self.env.user.partner_id
@@ -204,14 +201,13 @@ class MassMailCase(MailCase, MockLinkTracker):
             'to': 'bounce@test.example.com',  # TDE check: bounce alias ?
             'message_id': tools.generate_tracking_message_id('MailTest'),
             'bounced_partner': self.env['res.partner'].sudo(),
-            'bounced_message': self.env['mail.message'].sudo(),
-            'body': 'This is the bounce email',
+            'bounced_message': self.env['mail.message'].sudo()
         }
         if bounce_base_values:
             parsed_bounce_values.update(bounce_base_values)
         parsed_bounce_values.update({
             'bounced_email': trace.email,
-            'bounced_msg_ids': [trace.message_id],
+            'bounced_msg_id': [trace.message_id],
         })
         self.env['mail.thread']._routing_handle_bounce(False, parsed_bounce_values)
         return trace
@@ -304,35 +300,23 @@ class MassMailCase(MailCase, MockLinkTracker):
     def _create_mailing_list(cls):
         """ Shortcut to create mailing lists. Currently hardcoded, maybe evolve
         in a near future. """
-        cls.mailing_list_1, cls.mailing_list_2, cls.mailing_list_3, cls.mailing_list_4 = cls.env['mailing.list'].with_context(cls._test_context).create([
-            {
-                'contact_ids': [
-                    (0, 0, {'name': 'Déboulonneur', 'email': 'fleurus@example.com'}),
-                    (0, 0, {'name': 'Gorramts', 'email': 'gorramts@example.com'}),
-                    (0, 0, {'name': 'Ybrant', 'email': 'ybrant@example.com'}),
-                ],
-                'name': 'List1',
-                'is_public': True,
-            }, {
-                'contact_ids': [
-                    (0, 0, {'name': 'Gilberte', 'email': 'gilberte@example.com'}),
-                    (0, 0, {'name': 'Gilberte En Mieux', 'email': 'gilberte@example.com'}),
-                    (0, 0, {'name': 'Norbert', 'email': 'norbert@example.com'}),
-                    (0, 0, {'name': 'Ybrant', 'email': 'ybrant@example.com'}),
-                ],
-                'name': 'List2',
-                'is_public': True,
-            }, {
-                'contact_ids': [
-                    (0, 0, {'name': 'Déboulonneur', 'email': 'fleurus@example.com'}),
-                ],
-                'name': 'List3',
-                'is_public': True,
-            }, {
-                'name': 'List4',
-            }
-        ])
-        cls.mailing_list_3.subscription_ids[0].opt_out = True
+        cls.mailing_list_1 = cls.env['mailing.list'].with_context(cls._test_context).create({
+            'name': 'List1',
+            'contact_ids': [
+                (0, 0, {'name': 'Déboulonneur', 'email': 'fleurus@example.com'}),
+                (0, 0, {'name': 'Gorramts', 'email': 'gorramts@example.com'}),
+                (0, 0, {'name': 'Ybrant', 'email': 'ybrant@example.com'}),
+            ]
+        })
+        cls.mailing_list_2 = cls.env['mailing.list'].with_context(cls._test_context).create({
+            'name': 'List2',
+            'contact_ids': [
+                (0, 0, {'name': 'Gilberte', 'email': 'gilberte@example.com'}),
+                (0, 0, {'name': 'Gilberte En Mieux', 'email': 'gilberte@example.com'}),
+                (0, 0, {'name': 'Norbert', 'email': 'norbert@example.com'}),
+                (0, 0, {'name': 'Ybrant', 'email': 'ybrant@example.com'}),
+            ]
+        })
 
     @classmethod
     def _create_mailing_list_of_x_contacts(cls, contacts_nbr):
@@ -341,11 +325,8 @@ class MassMailCase(MailCase, MockLinkTracker):
         return cls.env['mailing.list'].with_context(cls._test_context).create({
             'name': 'Test List',
             'contact_ids': [
-                (0, 0, {
-                    'name': f'Contact %{idx}',
-                    'email': f'contact%{idx}@example.com'
-                })
-                for idx in range(contacts_nbr)
+                (0, 0, {'name': 'Contact %s' % i, 'email': 'contact%s@example.com' % i})
+                for i in range(contacts_nbr)
             ],
         })
 
@@ -357,12 +338,9 @@ class MassMailCommon(MailCommon, MassMailCase):
         super(MassMailCommon, cls).setUpClass()
 
         cls.user_marketing = mail_new_test_user(
-            cls.env,
+            cls.env, login='user_marketing',
             groups='base.group_user,base.group_partner_manager,mass_mailing.group_mass_mailing_user',
-            login='user_marketing',
-            name='Martial Marketing',
-            signature='--\nMartial',
-        )
+            name='Martial Marketing', signature='--\nMartial')
 
         cls.email_reply_to = 'MyCompany SomehowAlias <test.alias@test.mycompany.com>'
 

@@ -2,18 +2,20 @@
 
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { getFixture, nextTick } from "@web/../tests/helpers/utils";
-import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
+import { FilterMenu } from "@web/search/filter_menu/filter_menu";
+import { GroupByMenu } from "@web/search/group_by_menu/group_by_menu";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { mount } from "../helpers/utils";
 import {
     getMenuItemTexts,
     makeWithSearch,
     setupControlPanelServiceRegistry,
-    toggleSearchBarMenu,
+    toggleFilterMenu,
+    toggleGroupByMenu,
     toggleMenuItem,
 } from "./helpers";
 
-import { Component, onWillUpdateProps, onWillStart, useState, xml, useSubEnv } from "@odoo/owl";
+import { Component, onWillUpdateProps, onWillStart, useState, xml } from "@odoo/owl";
 
 let target;
 let serverData;
@@ -233,10 +235,11 @@ QUnit.module("Search", (hooks) => {
             assert.expect(3);
 
             class TestComponent extends Component {}
-            TestComponent.components = { SearchBarMenu };
+            TestComponent.components = { FilterMenu, GroupByMenu };
             TestComponent.template = xml`
                 <div class="o_test_component">
-                    <SearchBarMenu/>
+                    <FilterMenu/>
+                    <GroupByMenu/>
                 </div>
             `;
 
@@ -251,10 +254,10 @@ QUnit.module("Search", (hooks) => {
                 Component: TestComponent,
                 searchViewId: 1,
             });
-            await toggleSearchBarMenu(target);
+            await toggleFilterMenu(target);
             await assert.ok(getMenuItemTexts(target), ["True Domain"]);
 
-            await toggleSearchBarMenu(target);
+            await toggleGroupByMenu(target);
             await assert.ok(getMenuItemTexts(target), ["Name"]);
         }
     );
@@ -266,18 +269,18 @@ QUnit.module("Search", (hooks) => {
 
             class TestComponent extends Component {
                 setup() {
-                    onWillStart(() => {
+                    owl.onWillStart(() => {
                         assert.deepEqual(this.props.domain, []);
                     });
-                    onWillUpdateProps((nextProps) => {
+                    owl.onWillUpdateProps((nextProps) => {
                         assert.deepEqual(nextProps.domain, [[1, "=", 1]]);
                     });
                 }
             }
-            TestComponent.components = { SearchBarMenu };
+            TestComponent.components = { FilterMenu };
             TestComponent.template = xml`
                 <div class="o_test_component">
-                    <SearchBarMenu/>
+                    <FilterMenu/>
                 </div>
             `;
 
@@ -287,7 +290,7 @@ QUnit.module("Search", (hooks) => {
                 Component: TestComponent,
                 searchViewId: 1,
             });
-            await toggleSearchBarMenu(target);
+            await toggleFilterMenu(target);
             await toggleMenuItem(target, "True domain");
         }
     );
@@ -312,7 +315,7 @@ QUnit.module("Search", (hooks) => {
 
         class Parent extends Component {
             setup() {
-                useSubEnv({ config: {} });
+                owl.useSubEnv({ config: {} });
                 this.searchState = useState({
                     resModel: "animal",
                     domain: [["type", "=", "carnivorous"]],
@@ -360,7 +363,7 @@ QUnit.module("Search", (hooks) => {
 
         class Parent extends Component {
             setup() {
-                useSubEnv({ config: {} });
+                owl.useSubEnv({ config: {} });
                 this.searchState = useState({
                     resModel: "animal",
                     domain: [["type", "=", "carnivorous"]],

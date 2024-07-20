@@ -3,15 +3,17 @@
 # 	* barcodes
 # 
 # Translators:
-# Wil Odoo, 2024
+# Martin Trigaux, 2022
+# Ryoko Tsuda <ryoko@quartile.co>, 2023
+# Junko Augias, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"Last-Translator: Junko Augias, 2023\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,11 +22,10 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
-msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*'?"
-msgstr " '*' は有効な正規表現バーコードパターンではありません。意図されているのは、以下ですか:'.*'?"
+msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*' ?"
+msgstr ""
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -36,7 +37,7 @@ msgid ""
 msgstr ""
 "<i>バーコード表現規則</i> はバーコードがどのように認識され、分類されるかを定義します。\n"
 "バーコードスキャン時に、パターンが合致する規則のうち <i>一番始めのもの</i> を採用します。\n"
-"パターンシンタックスは正規表現です。正規表現がバーコードのプレフィクスに一致することをもち、バーコードが規則に合致すると判断します。"
+"パターン構文は正規表現です。正規表現がバーコードのプレフィクスに一致することをもち、バーコードが規則に合致すると判断します。"
 
 #. module: barcodes
 #: model_terms:ir.actions.act_window,help:barcodes.action_barcode_nomenclature_form
@@ -59,7 +60,7 @@ msgstr "エイリアス"
 #. module: barcodes
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_nomenclature__upc_ean_conv__always
 msgid "Always"
-msgstr "常に可能"
+msgstr "常に作成"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__name
@@ -75,13 +76,6 @@ msgstr "このバーコード表現規則の内部識別"
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_rule__encoding__any
 msgid "Any"
 msgstr "どれでも"
-
-#. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
-#, python-format
-msgid "Barcode"
-msgstr "バーコード"
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
@@ -119,7 +113,7 @@ msgid "Barcode Scanned"
 msgstr "スキャンされたバーコード"
 
 #. module: barcodes
-#. odoo-javascript
+#. openerp-web
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Barcode: "
@@ -180,6 +174,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: barcodes
+#: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature____last_update
+#: model:ir.model.fields,field_description:barcodes.field_barcode_rule____last_update
+msgid "Last Modified on"
+msgstr "最終更新日"
+
+#. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_uid
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__write_uid
 msgid "Last Updated by"
@@ -194,7 +194,7 @@ msgstr "最終更新日"
 #. module: barcodes
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_nomenclature__upc_ean_conv__none
 msgid "Never"
-msgstr "しない"
+msgstr "作成しない"
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_res_company__nomenclature_id
@@ -206,23 +206,13 @@ msgstr "体系"
 msgid ""
 "Patterns can also define how numerical values, such as weight or price, can be\n"
 "                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n"
-"                                define where the number's digits are encoded. Floats are also supported with the\n"
-"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n"
-"                                the barcode field on the associated records <i>must</i> show these digits as\n"
+"                                define where the number's digits are encoded. Floats are also supported with the \n"
+"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases, \n"
+"                                the barcode field on the associated records <i>must</i> show these digits as \n"
 "                                zeroes."
 msgstr ""
-"パターンは重量や価格などの数値がバーコードにどのようにエンコードされるかも\n"
-"                                定義することができます。それらパターンは <code>{NNN}</code>のように表現され、\n"
-"　　　　　　　　N は数字の桁をエンコードする場所を定義します。小数点が D で示される\n"
-"                               例えば <code>{NNNDD}</code>浮動小数点もサポートされています。これらの場合、\n"
-"                                関連するレコードのバーコードフィールドはこれらの数値をゼロとして示す<i>必要があります</i>。"
-
-#. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.js:0
-#, python-format
-msgid "Please, Scan again!"
-msgstr "もう一度スキャンして下さい。"
+"パターンは重量や単価等の数値がどのようにバーコード化されるかも定義します。それらパターンは <code>{NNN}</code> のように表現され、「NNN」は数値の各桁を示します。\n"
+"浮動小数点数も <code>{NNNDD}</code> のように表現され、「DD」は小数点以下の各桁を示します。バーコードのこの部分は必要に応じて<i>ゼロ埋め</i>しなければなりません。"
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__name
@@ -237,19 +227,12 @@ msgstr "規則"
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__sequence
 msgid "Sequence"
-msgstr "シーケンス"
+msgstr "付番"
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid "Tables"
 msgstr "テーブル"
-
-#. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
-#, python-format
-msgid "Tap to scan"
-msgstr "タップしてスキャン"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern
@@ -267,16 +250,14 @@ msgid "The matched pattern will alias to this barcode"
 msgstr "一致したパターンはこのバーコードにエイリアスします"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
 "There is a syntax error in the barcode pattern %(pattern)s: a rule can only "
 "contain one pair of braces."
-msgstr "バーコードパターン%(pattern)sにシンタックスエラーがあります: 1 つの規則には中括弧を 1 組しか含めることができません。"
+msgstr "バーコードパターン%(pattern)sにシンタックスエラーがあります: 1 つのルールには中括弧を 1 組しか含めることができません。"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -285,7 +266,6 @@ msgid ""
 msgstr "バーコードパターン %(pattern)sにシンタックスエラーがあります: 中括弧には後にD'sが続くN'sのみ含むことができます。"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -297,7 +277,7 @@ msgstr "バーコードパターン%(pattern)sにシンタックスエラーが�
 msgid ""
 "This rule will apply only if the barcode is encoded with the specified "
 "encoding"
-msgstr "この規則は、バーコードが指定されたエンコーディングでエンコードされている場合にのみ適用されます"
+msgstr "このルールは、バーコードが指定されたエンコーディングでエンコードされている場合にのみ適用されます"
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__type
@@ -311,7 +291,7 @@ msgid ""
 "setting determines if a UPC/EAN barcode should be automatically converted in"
 " one way or another when trying to match a rule with the other encoding."
 msgstr ""
-"UPCコードは、プレフィックスとしてゼロを付けてJAN/EANに変換できます。 この設定では、ある規則と他のエンコーディングを一致させるときにUPC "
+"UPCコードは、プレフィックスとしてゼロを付けてJAN/EANに変換できます。 この設定では、あるルールと他のエンコーディングを一致させるときにUPC "
 "/EANバーコードを自動的に変換するかどうかを決定します。"
 
 #. module: barcodes
@@ -335,7 +315,7 @@ msgid "Unit Product"
 msgstr "個数管理品"
 
 #. module: barcodes
-#. odoo-javascript
+#. openerp-web
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Unknown barcode command"
@@ -345,7 +325,7 @@ msgstr "不明なバーコードコマンド"
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__sequence
 msgid ""
 "Used to order rules such that rules with a smaller sequence match first"
-msgstr "より小さな付番規則が最初に一致するように規則を順序付けするために使用されます"
+msgstr "より小さなシーケンスのルールが最初に一致するようにルールを順序付けするために使用されます"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcodes_barcode_events_mixin___barcode_scanned

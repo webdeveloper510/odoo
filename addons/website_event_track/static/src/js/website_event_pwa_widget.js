@@ -1,4 +1,5 @@
-/** @odoo-module **/
+odoo.define("website_event_track.website_event_pwa_widget", function (require) {
+    "use strict";
 
     /*
      * The "deferredPrompt" Promise will resolve only if the "beforeinstallprompt" event
@@ -6,18 +7,17 @@
      * to avoid missed-events (as the browser can trigger it very early in the page lifecycle).
      */
     var deferredPrompt = new Promise(function (resolve, reject) {
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("beforeinstallprompt", function (ev) {
-                ev.preventDefault();
-                resolve(ev);
-            });
-        } else {
-            console.log("ServiceWorker not supported");
+        if (!("serviceWorker" in navigator)) {
+            return reject();
         }
+        window.addEventListener("beforeinstallprompt", function (ev) {
+            ev.preventDefault();
+            resolve(ev);
+        });
     });
 
-    import publicWidget from "@web/legacy/js/public/public_widget";
-    import { utils as uiUtils } from "@web/core/ui/ui_service";
+    var config = require("web.config");
+    var publicWidget = require("web.public.widget");
 
     var PWAInstallBanner = publicWidget.Widget.extend({
         template: "pwa_install_banner",
@@ -58,7 +58,9 @@
                 .then(this._registerServiceWorker.bind(this))
                 .then(function () {
                     // Don't wait for the prompt's Promise as it may never resolve.
-                    deferredPrompt.then(self._showInstallBanner.bind(self));
+                    deferredPrompt.then(self._showInstallBanner.bind(self)).catch(function () {
+                        console.log("ServiceWorker not supported");
+                    });
                 })
                 .then(this._prefetch.bind(this));
         },
@@ -154,7 +156,7 @@
          * @private
          */
         _showInstallBanner: function () {
-            if (!uiUtils.isSmall()) {
+            if (!config.device.isMobile) {
                 return;
             }
             var self = this;
@@ -194,11 +196,15 @@
                             console.log("User dismissed the install prompt");
                         }
                     });
+                })
+                .catch(function () {
+                    console.log("ServiceWorker not supported");
                 });
         },
     });
 
-    export default {
+    return {
         PWAInstallBanner: PWAInstallBanner,
         WebsiteEventPWAWidget: publicWidget.registry.WebsiteEventPWAWidget,
     };
+});

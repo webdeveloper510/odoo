@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
-import { browser } from '@web/core/browser/browser';
 import { registry } from '@web/core/registry';
-import { ResizablePanel } from '@web/core/resizable_panel/resizable_panel';
 import { useService, useBus } from '@web/core/utils/hooks';
-import { ResourceEditor } from '../../components/resource_editor/resource_editor';
+import core from 'web.core';
+import { AceEditorAdapterComponent } from '../../components/ace_editor/ace_editor';
 import { WebsiteEditorComponent } from '../../components/editor/editor';
 import { WebsiteTranslator } from '../../components/translator/translator';
 import { unslugHtmlDataObject } from '../../services/website_service';
@@ -13,19 +11,10 @@ import {OptimizeSEODialog} from '@website/components/dialog/seo';
 import { WebsiteDialog } from "@website/components/dialog/dialog";
 import { routeToUrl } from "@web/core/browser/router_service";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import wUtils from '@website/js/utils';
-import { renderToElement } from "@web/core/utils/render";
-import { SIZES, utils as uiUtils } from "@web/core/ui/ui_service";
-import {
-    Component,
-    onWillStart,
-    onMounted,
-    onWillUnmount,
-    useRef,
-    useEffect,
-    useState,
-    useExternalListener,
-} from "@odoo/owl";
+import { sprintf } from "@web/core/utils/strings";
+import wUtils from 'website.utils';
+
+const { Component, onWillStart, onMounted, onWillUnmount, useRef, useEffect, useState, useExternalListener } = owl;
 
 class BlockPreview extends Component {}
 BlockPreview.template = 'website.BlockPreview';
@@ -79,12 +68,15 @@ export class WebsitePreview extends Component {
                 // really considered as the same domain, the user will share the
                 // same session and CORS errors won't be a thing in such a case)
                 this.dialogService.add(WebsiteDialog, {
-                    title: _t("Redirecting..."),
-                    body: _t("You are about to be redirected to the domain configured for your website ( %s ). This is necessary to edit or view your website from the Website app. You might need to log back in.", this.websiteDomain),
+                    title: this.env._t("Redirecting..."),
+                    body: sprintf(this.env._t(
+                        "You are about to be redirected to the domain configured for your website ( %s ). " +
+                        "This is necessary to edit or view your website from the Website app. You might need to log back in."
+                    ), this.websiteDomain),
                     showSecondaryButton: false,
                 }, {
                     onClose: () => {
-                        window.location.href = `${encodeURI(this.websiteDomain)}/web#action=website.website_preview&path=${encodedPath}&website_id=${encodeURIComponent(this.websiteId)}`;
+                         window.location.href = `${this.websiteDomain}/web#action=website.website_preview&path=${encodedPath}&website_id=${encodeURIComponent(this.websiteId)}`;
                     }
                 });
             } else {
@@ -97,14 +89,6 @@ export class WebsitePreview extends Component {
             if (this.isRestored) {
                 return;
             }
-
-            const isScreenLargeEnoughForEdit =
-                uiUtils.getSize() >= SIZES.MD;
-            if (!isScreenLargeEnoughForEdit && this.props.action.context.params) {
-                this.props.action.context.params.enable_editor = false;
-                this.props.action.context.params.with_loader = false;
-            }
-
             this.websiteService.context.showNewContentModal = this.props.action.context.params && this.props.action.context.params.display_new_content;
             this.websiteService.context.edition = this.props.action.context.params && !!this.props.action.context.params.enable_editor;
             this.websiteService.context.translation = this.props.action.context.params && !!this.props.action.context.params.edit_translations;
@@ -118,9 +102,9 @@ export class WebsitePreview extends Component {
                 this.websiteService.showLoader({ showTips: true });
             }
         }, () => [this.props.action.context.params]);
-
+        
         useEffect(() => {
-            this.websiteContext.showResourceEditor = false;
+            this.websiteContext.showAceEditor = false;
         }, () => [
             this.websiteContext.showNewContentModal,
             this.websiteContext.edition,
@@ -134,10 +118,16 @@ export class WebsitePreview extends Component {
             // OdooFrameContentLoaded event to unblock the iframe, as it is
             // triggered faster than the load event.
             this.iframe.el.addEventListener('OdooFrameContentLoaded', () => this.websiteService.unblockPreview('load-iframe'), { once: true });
+            this.env.services.messaging.modelManager.messagingCreatedPromise.then(() => {
+                this.env.services.messaging.modelManager.messaging.update({ isWebsitePreviewOpen: true });
+            });
         });
 
         onWillUnmount(() => {
-            this.websiteService.context.showResourceEditor = false;
+            this.env.services.messaging.modelManager.messagingCreatedPromise.then(() => {
+                this.env.services.messaging.modelManager.messaging.update({ isWebsitePreviewOpen: false });
+            });
+            this.websiteService.context.showAceEditor = false;
             const { pathname, search, hash } = this.iframe.el.contentWindow.location;
             this.websiteService.lastUrl = `${pathname}${search}${hash}`;
             this.websiteService.currentWebsiteId = null;
@@ -263,11 +253,6 @@ export class WebsitePreview extends Component {
         return false;
     }
 
-    get aceEditorWidth() {
-        const storedWidth = browser.localStorage.getItem("ace_editor_width");
-        return storedWidth ? parseInt(storedWidth) : 720;
-    }
-
     reloadIframe(url) {
         return new Promise((resolve, reject) => {
             this.websiteService.websiteRootInstance = undefined;
@@ -294,7 +279,7 @@ export class WebsitePreview extends Component {
         if (this.websiteService.isRestrictedEditor) {
             const $wrap = $(this.iframe.el.contentDocument.querySelector('#wrapwrap.homepage')).find('#wrap');
             if ($wrap.length && $wrap.html().trim() === '') {
-                this.$welcomeMessage = $(renderToElement('website.homepage_editor_welcome_message'));
+                this.$welcomeMessage = $(core.qweb.render('website.homepage_editor_welcome_message'));
                 this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
                 this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
                 $wrap.empty().append(this.$welcomeMessage);
@@ -393,12 +378,8 @@ export class WebsitePreview extends Component {
         }
         if (this.lastHiddenPageURL !== this.iframe.el.contentWindow.location.href) {
             // Hide Ace Editor when moving to another page.
-            this.websiteService.context.showResourceEditor = false;
+            this.websiteService.context.showAceEditor = false;
             this.lastHiddenPageURL = undefined;
-        }
-        if (this.props.action.context.params?.with_loader) {
-            this.websiteService.hideLoader();
-            this.props.action.context.params.with_loader = false;
         }
         this.iframe.el.contentWindow.addEventListener('beforeunload', this._onPageUnload.bind(this));
         this._replaceBrowserUrl();
@@ -449,13 +430,14 @@ export class WebsitePreview extends Component {
             const { href, target, classList } = linkEl;
             if (classList.contains('o_add_language')) {
                 ev.preventDefault();
-                const searchParams = new URLSearchParams(href);
+                // TODO: in master adapt the href in template to only be the
+                // return URL and use it directly here to pass to url_return
                 this.action.doAction('base.action_view_base_language_install', {
                     target: 'new',
                     additionalContext: {
                         params: {
                             website_id: this.websiteId,
-                            url_return: searchParams.get("url_return"),
+                            url_return: $.deparam(href).url_return || '/[lang]',
                         },
                     },
                 });
@@ -476,7 +458,7 @@ export class WebsitePreview extends Component {
             } else if (href && target !== '_blank' && !isEditing) {
                 if (this._isTopWindowURL(linkEl)) {
                     ev.preventDefault();
-                    browser.location.assign(href);
+                    this.router.redirect(href);
                 } else if (this.iframe.el.contentWindow.location.pathname !== new URL(href).pathname) {
                     // This scenario triggers a navigation inside the iframe.
                     this.websiteService.websiteRootInstance = undefined;
@@ -511,10 +493,6 @@ export class WebsitePreview extends Component {
             url.searchParams.delete('autoplay');
             iframeEl.src = url.toString();
         }
-    }
-
-    _onResourceEditorResize(width) {
-        browser.localStorage.setItem("ace_editor_width", width);
     }
 
     _onPageUnload() {
@@ -559,8 +537,8 @@ export class WebsitePreview extends Component {
         }
         ev.preventDefault();
         const path = this.websiteService.contentWindow.location;
-        const debugMode = this.env.debug ? `?debug=${this.env.debug}` : "";
-        browser.location.assign(
+        const debugMode = this.env.debug ? `?debug=${odoo.debug}` : "";
+        this.router.redirect(
             `/web${debugMode}#action=website.website_preview&path=${encodeURIComponent(path)}`
         );
     }
@@ -570,8 +548,7 @@ WebsitePreview.components = {
     WebsiteEditorComponent,
     BlockPreview,
     WebsiteTranslator,
-    ResourceEditor,
-    ResizablePanel,
+    AceEditorAdapterComponent,
 };
 
 registry.category('actions').add('website_preview', WebsitePreview);

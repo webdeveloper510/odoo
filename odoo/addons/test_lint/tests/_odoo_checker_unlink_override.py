@@ -1,15 +1,13 @@
 import astroid
-import pylint.interfaces
-from pylint import checkers
+import contextlib
+from pylint import checkers, interfaces
 
-def parse_version(s):
-    # can't use odoo.tools.parse_version because pythonpath is screwed from
-    # inside pylint on runbot
-    return [s.rjust(3, '0') for s in s.split('.')]
 
 class OdooBaseChecker(checkers.BaseChecker):
-    if parse_version(pylint.__version__) < parse_version('2.14.0'):
-        __implements__ = pylint.interfaces.IAstroidChecker
+    with contextlib.suppress(AttributeError):  # TODO, TODO, remove once pylint minimal version is 3.0.0
+        __implements__ = interfaces.IAstroidChecker
+        # see https://github.com/pylint-dev/pylint/commit/358264aaf622505f6d2e8bc699618382981a078c
+
     name = 'odoo'
 
     msgs = {

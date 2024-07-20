@@ -1,7 +1,7 @@
 /** @odoo-modules */
 
-import wTourUtils from '@website/js/tours/tour_utils';
-import { registry } from "@web/core/registry";
+import tour from 'web_tour.tour';
+import wTourUtils from 'website.tour_utils';
 
 const PRODUCT_CATEGORY_ID = 2;
 
@@ -9,10 +9,10 @@ wTourUtils.registerWebsitePreviewTour('category_page_and_products_snippet_editio
     test: true,
     url: `/shop/category/${PRODUCT_CATEGORY_ID}`,
     edition: true,
-}, () => [
+}, [
     Object.assign(wTourUtils.dragNDrop({id: 's_dynamic_snippet_products', name: 'Products'}), {
         content: "Drag and drop the product snippet inside the category area",
-        run: 'drag_and_drop_native iframe #category_header',
+        run: 'drag_and_drop iframe #category_header',
     }),
     {
         content: "Click on the product snippet to show its options",
@@ -29,10 +29,10 @@ wTourUtils.registerWebsitePreviewTour('category_page_and_products_snippet_editio
     ...wTourUtils.clickOnSave(),
 ]);
 
-registry.category("web_tour.tours").add('category_page_and_products_snippet_use', {
+tour.register('category_page_and_products_snippet_use', {
     test: true,
     url: `/shop/category/${PRODUCT_CATEGORY_ID}`,
-    steps: () => [
+}, [
     {
         content: "Check that the snippet displays the right products",
         // Wait for at least one shown product
@@ -56,4 +56,4 @@ registry.category("web_tour.tours").add('category_page_and_products_snippet_use'
             }
         },
     },
-]});
+]);

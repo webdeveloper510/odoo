@@ -3,19 +3,18 @@
 # 	* barcodes
 # 
 # Translators:
+# Nikola Iliev, 2023
 # Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2023
 # aleksandar ivanov, 2023
-# Igor Sheludko <igor.sheludko@gmail.com>, 2023
 # Martin Trigaux, 2023
-# KeyVillage, 2023
 # Maria Boyadjieva <marabo2000@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Maria Boyadjieva <marabo2000@gmail.com>, 2023\n"
 "Language-Team: Bulgarian (https://app.transifex.com/odoo/teams/41243/bg/)\n"
 "MIME-Version: 1.0\n"
@@ -25,11 +24,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
-msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*'?"
-msgstr ""
+msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*' ?"
+msgstr " '*' не е валиден шаблона на баркод Regex. Имахте предвид '.*' ?"
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -85,13 +83,6 @@ msgid "Any"
 msgstr "Всеки"
 
 #. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
-#, python-format
-msgid "Barcode"
-msgstr "Баркод"
-
-#. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
 msgid "Barcode Event Mixin"
 msgstr ""
@@ -127,7 +118,7 @@ msgid "Barcode Scanned"
 msgstr "Сканиран баркод "
 
 #. module: barcodes
-#. odoo-javascript
+#. openerp-web
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Barcode: "
@@ -154,7 +145,7 @@ msgstr "Създадено на"
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__display_name
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__display_name
 msgid "Display Name"
-msgstr "Име за Показване"
+msgstr "Име за показване"
 
 #. module: barcodes
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_rule__encoding__ean13
@@ -188,6 +179,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: barcodes
+#: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature____last_update
+#: model:ir.model.fields,field_description:barcodes.field_barcode_rule____last_update
+msgid "Last Modified on"
+msgstr "Последна промяна на"
+
+#. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_uid
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__write_uid
 msgid "Last Updated by"
@@ -214,18 +211,17 @@ msgstr ""
 msgid ""
 "Patterns can also define how numerical values, such as weight or price, can be\n"
 "                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n"
-"                                define where the number's digits are encoded. Floats are also supported with the\n"
-"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n"
-"                                the barcode field on the associated records <i>must</i> show these digits as\n"
+"                                define where the number's digits are encoded. Floats are also supported with the \n"
+"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases, \n"
+"                                the barcode field on the associated records <i>must</i> show these digits as \n"
 "                                zeroes."
 msgstr ""
-
-#. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.js:0
-#, python-format
-msgid "Please, Scan again!"
-msgstr ""
+"Шаблоните могат и да определят как цифровите стойности като тегло или цена могат да се\n"
+"                                кодират в баркода. Те са посочени от <code>{NNN}</code> където N\n"
+"                                определят къде са кодирани цифрите на номерата. Плаващите запетаи се поддържат и с \n"
+"                                десетични стойности с D като <code>{NNNDD}</code>. В подобни случаи \n"
+"                                полето с баркода на сродните записи <i>трябва да</i> показва тези цифри като \n"
+"                                нули."
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__name
@@ -248,13 +244,6 @@ msgid "Tables"
 msgstr "Маси"
 
 #. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
-#, python-format
-msgid "Tap to scan"
-msgstr "Докоснете, за да сканирате"
-
-#. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern
 msgid "The barcode matching pattern"
 msgstr "Шаблонът за съчетаване на баркод"
@@ -270,7 +259,6 @@ msgid "The matched pattern will alias to this barcode"
 msgstr "Съчетаният шаблон ще играе ролята на псевдоним за този баркод"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -279,7 +267,6 @@ msgid ""
 msgstr ""
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -288,7 +275,6 @@ msgid ""
 msgstr ""
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -342,7 +328,7 @@ msgid "Unit Product"
 msgstr "Единица продукт"
 
 #. module: barcodes
-#. odoo-javascript
+#. openerp-web
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Unknown barcode command"

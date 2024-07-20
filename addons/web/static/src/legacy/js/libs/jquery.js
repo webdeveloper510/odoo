@@ -1,4 +1,5 @@
-/** @odoo-module **/
+odoo.define('web.jquery.extensions', function () {
+'use strict';
 
 /**
  * The jquery library extensions and fixes should be done here to avoid patching
@@ -114,7 +115,7 @@ $.fn.extend({
         events = events.split(' ');
         return this.each(function () {
             var el = this;
-            events.forEach((evNameNamespaced) => {
+            _.each(events, function (evNameNamespaced) {
                 var evName = evNameNamespaced.split('.')[0];
                 var handler = $._data(el, 'events')[evName].pop();
                 $._data(el, 'events')[evName].unshift(handler);
@@ -272,3 +273,4 @@ $.fn.animate = function (properties, ...rest) {
     }
     return originalAnimate.call(this, props, ...rest);
 };
+});

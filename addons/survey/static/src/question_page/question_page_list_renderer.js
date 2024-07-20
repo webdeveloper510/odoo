@@ -2,7 +2,8 @@
 
 import { makeContext } from "@web/core/context";
 import { ListRenderer } from "@web/views/list/list_renderer";
-import { useEffect } from "@odoo/owl";
+
+const { useEffect } = owl;
 
 export class QuestionPageListRenderer extends ListRenderer {
     setup() {
@@ -49,18 +50,10 @@ export class QuestionPageListRenderer extends ListRenderer {
         return classNames.join(" ");
     }
 
-    getCellClass(column, record) {
-        const classNames = super.getCellClass(column, record);
-        if (column.type === "button_group") {
-            return `${classNames} text-end`;
-        }
-        return classNames;
-    }
-
     getSectionColumns(columns) {
         let titleColumnIndex = 0;
         let found = false;
-        let colspan = 1;
+        let colspan = 1
         for (let index = 0; index < columns.length; index++) {
             const col = columns[index];
             if (!found && col.name !== this.titleField) {
@@ -77,11 +70,9 @@ export class QuestionPageListRenderer extends ListRenderer {
             colspan += 1;
         }
 
-        const sectionColumns = columns
-            .slice(0, titleColumnIndex + 1)
-            .concat(columns.slice(titleColumnIndex + colspan));
+        const sectionColumns = columns.slice(0, titleColumnIndex + 1).concat(columns.slice(titleColumnIndex + colspan));
 
-        sectionColumns[titleColumnIndex] = { ...sectionColumns[titleColumnIndex], colspan };
+        sectionColumns[titleColumnIndex] = {...sectionColumns[titleColumnIndex], colspan};
 
         return sectionColumns;
     }
@@ -104,9 +95,9 @@ export class QuestionPageListRenderer extends ListRenderer {
      * @override
      */
     focusCell(column, forward = true) {
-        const actualColumn = column.name
-            ? this.state.columns.find((col) => col.name === column.name)
-            : column;
+        const actualColumn = column.name ? this.state.columns.find(
+            (col) => col.name === column.name
+        ) : column;
         super.focusCell(actualColumn, forward);
     }
 
@@ -115,32 +106,10 @@ export class QuestionPageListRenderer extends ListRenderer {
             case "enter":
             case "tab":
             case "shift+tab": {
-                this.props.list.leaveEditMode();
+                this.props.list.unselectRecord(true);
                 return true;
             }
         }
         return super.onCellKeydownEditMode(...arguments);
-    }
-
-    /**
-     * Save the survey after a question used as trigger is deleted. This allows
-     * immediate feedback on the form view as the triggers will be removed
-     * anyway on the records by the ORM.
-     *
-     * @override
-     * @param record
-     * @return {Promise<void>}
-     */
-    async onDeleteRecord(record) {
-        const triggeredRecords = this.props.list.records.filter(
-            (rec) => rec.data.triggering_question_ids.records.map(a => a.resId).includes(record.resId)
-        );
-        if (triggeredRecords.length) {
-            const res = await super.onDeleteRecord(record);
-            await this.props.list.model.root.save();
-            return res;
-        } else {
-            return super.onDeleteRecord(record);
-        }
     }
 }

@@ -79,6 +79,22 @@ PENSION_FUND_TYPE_SELECTION = [
 ]
 
 
+class AccountTaxTemplate(models.Model):
+    _inherit = 'account.tax.template'
+
+    l10n_it_withholding_type = fields.Selection(WITHHOLDING_TYPE_SELECTION, string="Withholding tax type (Italy)", help="Withholding tax type. Only for Italian accounting EDI.")
+    l10n_it_withholding_reason = fields.Selection(WITHHOLDING_REASON_SELECTION, string="Withholding tax reason (Italy)", help="Withholding tax reason. Only for Italian accounting EDI.")
+    l10n_it_pension_fund_type = fields.Selection(PENSION_FUND_TYPE_SELECTION, string="Pension fund type (Italy)", help="Pension Fund Type. Only for Italian accounting EDI.")
+
+    def _get_tax_vals(self, company, tax_template_to_tax):
+        values = super()._get_tax_vals(company, tax_template_to_tax)
+        values.update({
+            "l10n_it_withholding_type": self.l10n_it_withholding_type,
+            "l10n_it_withholding_reason": self.l10n_it_withholding_reason,
+            "l10n_it_pension_fund_type": self.l10n_it_pension_fund_type,
+        })
+        return values
+
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
@@ -89,7 +105,11 @@ class AccountTax(models.Model):
     def _l10n_it_get_tax_kind(self):
         return ((self.l10n_it_withholding_type and 'withholding')
                 or (self.l10n_it_pension_fund_type and 'pension_fund')
-                or super()._l10n_it_get_tax_kind())
+                or 'vat')
+
+    def _l10n_it_filter_kind(self, kind):
+        """ Filters taxes depending on _l10n_it_get_tax_kind. """
+        return self.filtered(lambda tax: tax._l10n_it_get_tax_kind() == kind)
 
     @api.constrains('amount', 'l10n_it_withholding_type', 'l10n_it_withholding_reason', 'l10n_it_pension_fund_type')
     def _validate_withholding(self):

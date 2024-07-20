@@ -3,18 +3,18 @@
 # 	* website_event_booth
 # 
 # Translators:
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
-# Miika Nissi <miika.nissi@tawasta.fi>, 2023
-# Martin Trigaux, 2023
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
+# Martin Trigaux, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Miika Nissi <miika.nissi@tawasta.fi>, 2022
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
+"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"PO-Revision-Date: 2022-09-22 05:56+0000\n"
+"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,20 +35,29 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
-"                                        <span>Sorry, several booths are now sold out. Please change your choices before validating again.</span>"
+"                                    <span>Sorry, several booths are now sold out. Please change your choices before validating again.</span>"
 msgstr ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
-"                                        <span>Valitettavasti useat näytteilleasettajien alueet on nyt myyty loppuun. Ole hyvä ja vaihda valintojasi ennen kuin vahvistat uudelleen.</span>"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
-msgid "<i class=\"fa fa-map-o me-2\"/>View Plan"
-msgstr "<i class=\"fa fa-map-o me-2\"/>Näytä suunnitelma"
+"                                    <span>Ikävä kyllä näytteilleasettajien alueet on jo loppuunmyyty. Muuta valintaa ennen kuin yrität vahvistaa.</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "<span class=\"fa fa-gear me-1\"/> Configure Booths"
-msgstr "<span class=\"fa fa-gear me-1\"/> Määritä näytteilleasettajien alueet"
+msgid ""
+"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configure\" "
+"title=\"Configure event booths\"/><em>Configure Booths</em>"
+msgstr ""
+"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configure\" "
+"title=\"Configure event booths\"/><em>Määritä näytteilleasettajien "
+"alueet</em>"
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
+msgid ""
+"<span class=\"alert alert-info\">This event is finished. It's no longer "
+"possible to book a booth.</span>"
+msgstr ""
+"<span class=\"alert alert-info\">Tilaisuus on jo päättynyt. Ei ole enää "
+"mahdollista varata näytteilleasettajan aluetta.</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -57,27 +66,8 @@ msgstr "<span class=\"text-nowrap\">Loppuunmyyty</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
-msgid "<span>Book my Booth(s)</span>"
-msgstr "<span>Varaa oma näytteilleasettajan alue</span>"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "<span>Book my Booths</span>"
 msgstr "<span>Palaa omiin näytteilleasettajien alueisiin</span>"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
-msgid ""
-"<span>Booth Selection</span><span class=\"fa fa-angle-right d-inline-block "
-"align-middle mx-sm-3 text-muted fs-5\"/>"
-msgstr ""
-"<span>Näytteilleasettajan alueen valinta</span><span class=\"fa fa-angle-"
-"right d-inline-block align-middle mx-sm-3 text-muted fs-5\"/>"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
-msgid "<span>Confirmed</span>"
-msgstr "<span>Hyväksytty</span>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
@@ -98,6 +88,16 @@ msgstr ""
 "                            <span> *</span>"
 
 #. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
+msgid "<strong>Contact Details</strong>"
+msgstr "<strong>Yhteystiedot</strong>"
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
+msgid "Book my Booths"
+msgstr "Palaa omiin näytteilleasettajan alueisiin"
+
+#. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_type_view_form
 msgid "Booth Menu Item"
 msgstr "Näytteilleasettajan alueen valikon kohde"
@@ -108,47 +108,28 @@ msgid "Booth Register"
 msgstr "Näytteilleasettajan alueen ilmoittautuminen"
 
 #. module: website_event_booth
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_event_booth/static/src/xml/event_booth_registration_templates.xml:0
 #, python-format
 msgid "Booth Registration completed!"
 msgstr "Näytteilleasettajan alueen ilmoittautuminen valmis!"
 
 #. module: website_event_booth
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
 #, python-format
 msgid "Booth registration failed."
 msgstr "Näytteilleasettajan alueen ilmoittautuminen epäonnistui."
 
 #. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
+msgid "Booths"
+msgstr "Näytteilleasettajan alueet"
+
+#. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_event_type__booth_menu
 msgid "Booths on Website"
 msgstr "Näytteilleasettajien alueet verkkosivulla"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Check our"
-msgstr "Tutustu meidän"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
-msgid "Choose your type of booth"
-msgstr "Valitse näytteilleasettajan alueen tyyppi"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
-msgid "Contact Details"
-msgstr "Yhteystiedot"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_order_progress
-msgid ""
-"Contact Details<span class=\"fa fa-angle-right d-inline-block align-middle "
-"mx-sm-3 text-muted fs-5\"/>"
-msgstr ""
-"Yhteystiedot<span class=\"fa fa-angle-right d-inline-block align-middle mx-"
-"sm-3 text-muted fs-5\"/>"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -171,11 +152,6 @@ msgid "Event Booths Menus"
 msgstr "Näytteilleasettajan alueen valikot"
 
 #. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Event Finished"
-msgstr "Tapahtuma loppunut"
-
-#. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_event_type
 msgid "Event Template"
 msgstr "Tapahtuman mallipohja"
@@ -186,32 +162,11 @@ msgid "Exhibition Map"
 msgstr "Messualueen kartta"
 
 #. module: website_event_booth
-#. odoo-python
 #: code:addons/website_event_booth/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 #, python-format
 msgid "Get A Booth"
 msgstr "Hanki näytteilleasettajan alue"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "It's no longer possible to book a booth."
-msgstr "Näytteilleasettajan alueen varaaminen ei ole enää mahdollista."
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Link to list of future events"
-msgstr "Linkki tulevien tapahtumien luetteloon"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "List of Future Events"
-msgstr "Luettelo tulevista tapahtumista"
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
-msgid "Location"
-msgstr "Sijainti"
 
 #. module: website_event_booth
 #: model:ir.model.fields,field_description:website_event_booth.field_website_event_menu__menu_type
@@ -220,20 +175,20 @@ msgstr "Valikkotyyppi"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
+msgid "Mobile"
+msgstr "Matkapuhelin"
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration_details
 msgid "Phone"
 msgstr "Puhelin"
 
 #. module: website_event_booth
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
 #, python-format
 msgid "Please fill out the form correctly."
 msgstr "Ole hyvä ja täytä lomake oikein."
-
-#. module: website_event_booth
-#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "Registration Not Open."
-msgstr "Rekisteröinti ei ole avoinna."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -241,7 +196,7 @@ msgid "Sorry, all the booths are sold out."
 msgstr "Valitettavasti kaikki näytteilleasettajien alueet on loppuunmyyty."
 
 #. module: website_event_booth
-#. odoo-javascript
+#. openerp-web
 #: code:addons/website_event_booth/static/src/js/booth_register.js:0
 #, python-format
 msgid "The booth category doesn't exist."
@@ -249,10 +204,13 @@ msgstr "Tätä näytteilleasettajan alueen kategoriaa ei ole olemassa."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
-msgid "This event is not open to exhibitors registration at this time."
-msgstr ""
-"Näytteilleasettajien rekisteröinti ei ole tällä hetkellä avoinna tähän "
-"tapahtumaan."
+msgid "This event is not open to exhibitors registration,"
+msgstr "Tähän tilaisuuteen ei voi rekisteröityä näytteilleasettajana,"
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
+msgid "View Floor Plan"
+msgstr "Näytä kerroksen kartta"
 
 #. module: website_event_booth
 #: model:ir.model,name:website_event_booth.model_website_event_menu
@@ -260,11 +218,26 @@ msgid "Website Event Menu"
 msgstr "Verkkosivun tapahtumavalikko"
 
 #. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
+msgid "check our"
+msgstr "tutustu"
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
+msgid "for this event."
+msgstr "tähän tapahtumaan."
+
+#. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
 msgid "if you have any question."
-msgstr "mikäli sinulla on kysyttävää."
+msgstr "mikäli sinulla on kysyttävää"
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
 msgid "list of future events"
 msgstr "lista tulevista tapahtumista"
+
+#. module: website_event_booth
+#: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_layout
+msgid "you can"
+msgstr "voit"

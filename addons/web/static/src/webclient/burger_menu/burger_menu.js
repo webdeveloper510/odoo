@@ -85,7 +85,6 @@ BurgerMenu.components = {
     MobileSwitchCompanyMenu,
     Transition,
 };
-BurgerMenu.props = {};
 
 const systrayItem = {
     Component: BurgerMenu,

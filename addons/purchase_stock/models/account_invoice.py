@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import fields, models
 from odoo.tools import float_compare, float_is_zero
 from odoo.tools.misc import groupby
 
@@ -44,17 +44,47 @@ class AccountMove(models.Model):
                     continue
 
                 # Retrieve accounts needed to generate the price difference.
-                debit_pdiff_account = False
-                if line.product_id.cost_method == 'standard':
-                    debit_pdiff_account = line.product_id.property_account_creditor_price_difference \
-                        or line.product_id.categ_id.property_account_creditor_price_difference_categ
-                    debit_pdiff_account = move.fiscal_position_id.map_account(debit_pdiff_account)
-                else:
-                    debit_pdiff_account = line.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=move.fiscal_position_id)['expense']
-                if not debit_pdiff_account:
+                debit_expense_account = line._get_price_diff_account()
+                if not debit_expense_account:
                     continue
+                # Retrieve stock valuation moves.
+                valuation_stock_moves = self.env['stock.move'].search([
+                    ('purchase_line_id', '=', line.purchase_line_id.id),
+                    ('state', '=', 'done'),
+                    ('product_qty', '!=', 0.0),
+                ]) if line.purchase_line_id else self.env['stock.move']
 
-                price_unit_val_dif, relevant_qty = line._get_price_unit_val_dif_and_relevant_qty()
+                if line.product_id.cost_method != 'standard' and line.purchase_line_id:
+                    if move.move_type == 'in_refund':
+                        valuation_stock_moves = valuation_stock_moves.filtered(lambda stock_move: stock_move._is_out())
+                    else:
+                        valuation_stock_moves = valuation_stock_moves.filtered(lambda stock_move: stock_move._is_in())
+
+                    if not valuation_stock_moves:
+                        continue
+
+                    valuation_price_unit_total, valuation_total_qty = valuation_stock_moves._get_valuation_price_and_qty(line, move.currency_id)
+                    valuation_price_unit = valuation_price_unit_total / valuation_total_qty
+                    valuation_price_unit = line.product_id.uom_id._compute_price(valuation_price_unit, line.product_uom_id)
+                else:
+                    # Valuation_price unit is always expressed in invoice currency, so that it can always be computed with the good rate
+                    price_unit = line.product_id.uom_id._compute_price(line.product_id.standard_price, line.product_uom_id)
+                    price_unit = -price_unit if line.move_id.move_type == 'in_refund' else price_unit
+                    valuation_date = valuation_stock_moves and max(valuation_stock_moves.mapped('date')) or move.date
+                    valuation_price_unit = line.company_currency_id._convert(
+                        price_unit, move.currency_id,
+                        move.company_id, valuation_date, round=False
+                    )
+
+
+                price_unit = line._get_gross_unit_price()
+
+                price_unit_val_dif = price_unit - valuation_price_unit
+                # If there are some valued moves, we only consider their quantity already used
+                if line.product_id.cost_method == 'standard':
+                    relevant_qty = line.quantity
+                else:
+                    relevant_qty = line._get_out_and_not_invoiced_qty(valuation_stock_moves)
                 price_subtotal = relevant_qty * price_unit_val_dif
 
                 # We consider there is a price difference if the subtotal is not zero. In case a
@@ -82,7 +112,7 @@ class AccountMove(models.Model):
                             line.company_currency_id,
                             line.company_id, fields.Date.today(),
                         ),
-                        'account_id': debit_pdiff_account.id,
+                        'account_id': debit_expense_account.id,
                         'analytic_distribution': line.analytic_distribution,
                         'display_type': 'cogs',
                     }
@@ -157,13 +187,3 @@ class AccountMove(models.Model):
         for invoice in self.filtered(lambda x: x.move_type == 'in_refund'):
             rslt += invoice.mapped('invoice_line_ids.purchase_line_id.move_ids').filtered(lambda x: x.state == 'done' and x.location_dest_id.usage == 'supplier')
         return rslt
-
-    @api.depends('purchase_id')
-    def _compute_incoterm_location(self):
-        super()._compute_incoterm_location()
-        for move in self:
-            purchase_locations = move.line_ids.purchase_line_id.order_id.mapped('incoterm_location')
-            incoterm_res = next((incoterm for incoterm in purchase_locations if incoterm), False)
-            # if multiple purchase order we take an incoterm that is not false
-            if incoterm_res:
-                move.incoterm_location = incoterm_res

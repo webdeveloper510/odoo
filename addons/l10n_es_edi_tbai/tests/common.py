@@ -12,7 +12,7 @@ from pytz import timezone
 class TestEsEdiTbaiCommon(AccountEdiTestCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref='es_full', edi_format_ref='l10n_es_edi_tbai.edi_es_tbai'):
+    def setUpClass(cls, chart_template_ref='l10n_es.account_chart_template_full', edi_format_ref='l10n_es_edi_tbai.edi_es_tbai'):
         super().setUpClass(chart_template_ref=chart_template_ref, edi_format_ref=edi_format_ref)
 
         cls.frozen_today = datetime(year=2022, month=1, day=1, hour=0, minute=0, second=0, tzinfo=timezone('utc'))
@@ -82,7 +82,7 @@ class TestEsEdiTbaiCommon(AccountEdiTestCommon):
         :param trailing_xml_id: The trailing tax's xml id.
         :return:                An account.tax record
         """
-        return cls.env.ref(f'account.{cls.env.company.id}_account_tax_template_{trailing_xml_id}')
+        return cls.env.ref(f'l10n_es.{cls.env.company.id}_account_tax_template_{trailing_xml_id}')
 
     @classmethod
     def create_invoice(cls, **kwargs):
@@ -136,10 +136,10 @@ class TestEsEdiTbaiCommon(AccountEdiTestCommon):
       <DetallesFactura>
         <IDDetalleFactura>
           <DescripcionDetalle>producta</DescripcionDetalle>
-          <Cantidad>5.00000000</Cantidad>
-          <ImporteUnitario>1000.00000000</ImporteUnitario>
-          <Descuento>1000.00000000</Descuento>
-          <ImporteTotal>4840.00000000</ImporteTotal>
+          <Cantidad>5.00</Cantidad>
+          <ImporteUnitario>1000.00</ImporteUnitario>
+          <Descuento>1000.00</Descuento>
+          <ImporteTotal>4840.00</ImporteTotal>
         </IDDetalleFactura>
       </DetallesFactura>
       <ImporteTotalFactura>4840.00</ImporteTotalFactura>
@@ -254,10 +254,10 @@ class TestEsEdiTbaiCommon(AccountEdiTestCommon):
                     <DetalleIVA>
                         <CompraBienesCorrientesGastosBienesInversion>C</CompraBienesCorrientesGastosBienesInversion>
                         <InversionSujetoPasivo>N</InversionSujetoPasivo>
-                        <BaseImponible>4000.00</BaseImponible>
+                        <BaseImponible>4000.0</BaseImponible>
                         <TipoImpositivo>21.0</TipoImpositivo>
-                        <CuotaIVASoportada>840.00</CuotaIVASoportada>
-                        <CuotaIVADeducible>840.00</CuotaIVADeducible>
+                        <CuotaIVASoportada>840.0</CuotaIVASoportada>
+                        <CuotaIVADeducible>840.0</CuotaIVADeducible>
                     </DetalleIVA>
                 </IVA>
         </FacturaRecibida>
@@ -303,17 +303,17 @@ class TestEsEdiTbaiCommon(AccountEdiTestCommon):
                     <DetalleIVA>
                         <CompraBienesCorrientesGastosBienesInversion>C</CompraBienesCorrientesGastosBienesInversion>
                         <InversionSujetoPasivo>N</InversionSujetoPasivo>
-                        <BaseImponible>4000.00</BaseImponible>
+                        <BaseImponible>4000.0</BaseImponible>
                         <TipoImpositivo>21.0</TipoImpositivo>
-                        <CuotaIVASoportada>840.00</CuotaIVASoportada>
-                        <CuotaIVADeducible>840.00</CuotaIVADeducible>
+                        <CuotaIVASoportada>840.0</CuotaIVASoportada>
+                        <CuotaIVADeducible>840.0</CuotaIVADeducible>
                     </DetalleIVA><DetalleIVA>
                         <CompraBienesCorrientesGastosBienesInversion>G</CompraBienesCorrientesGastosBienesInversion>
                         <InversionSujetoPasivo>N</InversionSujetoPasivo>
-                        <BaseImponible>8000.00</BaseImponible>
+                        <BaseImponible>8000.0</BaseImponible>
                         <TipoImpositivo>21.0</TipoImpositivo>
-                        <CuotaIVASoportada>1680.00</CuotaIVASoportada>
-                        <CuotaIVADeducible>1680.00</CuotaIVADeducible>
+                        <CuotaIVASoportada>1680.0</CuotaIVASoportada>
+                        <CuotaIVADeducible>1680.0</CuotaIVADeducible>
                     </DetalleIVA>
                 </IVA>
             </FacturaRecibida>

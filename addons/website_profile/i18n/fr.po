@@ -3,15 +3,16 @@
 # 	* website_profile
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Cécile Collart <cco@odoo.com>, 2022
 # Jolien De Paepe, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
 "Last-Translator: Jolien De Paepe, 2023\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -50,13 +51,13 @@ msgstr ". Essayez une autre recherche."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
-msgstr "<i class=\"fa fa-arrow-right\"/> Obtenir des badges"
+msgid "<i class=\"fa fa-arrow-right me-1\"/>All Badges"
+msgstr "<i class=\"fa fa-arrow-right me-1\"/>Tous les badges"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
-msgid "<i class=\"fa fa-close me-1\"/>Cancel"
-msgstr "<i class=\"fa fa-close me-1\"/>Annuler"
+#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
+msgid "<i class=\"fa fa-arrow-right\"/> All Badges"
+msgstr "<i class=\"fa fa-arrow-right\"/> Tous les badges"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
@@ -71,24 +72,9 @@ msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
 msgstr "<i class=\"fa fa-pencil me-1\"/>MODIFIER"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
-msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
-msgstr "<i class=\"fa fa-pencil me-1\"/>Modifier"
-
-#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
 msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
 msgstr "<i class=\"fa fa-pencil me-2\"/>MODIFIER LE PROFIL"
-
-#. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Tous les badges"
-
-#. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
-msgstr "<i class=\"oi oi-arrow-right\"/> Tous les badges"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -142,7 +128,7 @@ msgstr "<span class=\"fw-bold\">Nom</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
-msgid "<span class=\"fw-bold\">Public Profile</span>"
+msgid "<span class=\"fw-bold\">Public profile</span>"
 msgstr "<span class=\"fw-bold\">Profil public</span>"
 
 #. module: website_profile
@@ -181,7 +167,7 @@ msgstr ""
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
-msgid "<strong class=\"mb-3 text-white me-2\">Rank by:</strong>"
+msgid "<strong class=\"mb-3 text-white me-2\">Rank by :</strong>"
 msgstr "<strong class=\"mb-3 text-white me-2\">Classer par :</strong>"
 
 #. module: website_profile
@@ -200,7 +186,7 @@ msgid ""
 "                            <t t-out=\"object.company_id.name or ''\">YourCompany</t> Profile validation\n"
 "                        </span>\n"
 "                    </td>\n"
-"                    <td t-if=\"not user.company_id.uses_default_logo\" valign=\"middle\" align=\"right\">\n"
+"                    <td valign=\"middle\" align=\"right\">\n"
 "                        <img t-attf-src=\"/logo.png?company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\">\n"
 "                    </td>\n"
 "                </tr>\n"
@@ -287,7 +273,7 @@ msgstr ""
 "                            Validation du profil de <t t-out=\"object.company_id.name or ''\">YourCompany</t> \n"
 "                        </span>\n"
 "                    </td>\n"
-"                    <td t-if=\"not user.company_id.uses_default_logo\" valign=\"middle\" align=\"right\">\n"
+"                    <td valign=\"middle\" align=\"right\">\n"
 "                        <img t-attf-src=\"/logo.png?company={{ user.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"user.company_id.name\">\n"
 "                    </td>\n"
 "                </tr>\n"
@@ -307,14 +293,14 @@ msgstr ""
 "                    <td valign=\"top\" style=\"font-size: 13px;\">\n"
 "                        <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                            Bonjour <t t-out=\"object.name or ''\">Marc Demo</t>,<br><br>\n"
-"                            Nous vous avons invité à valider votre adresse email afin d'avoir accès au site web de \"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\".\n"
-"                            Pour valider votre adresse email, veuillez cliquer sur le lien suivant :\n"
+"                            Nous vous avons invité à valider votre email afin d'avoir accès au site web de \"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\".\n"
+"                            Pour valider votre email, cliquez sur le lien suivant :\n"
 "                            <div style=\"margin: 16px 0px 16px 0px;\">\n"
 "                                <a t-att-href=\"ctx.get('token_url')\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
 "                                    Valider mon compte\n"
 "                                </a>\n"
 "                            </div>\n"
-"                            Merci pour votre participant !\n"
+"                            Merci pour votre participation !\n"
 "                        </p>\n"
 "                    </td>\n"
 "                </tr>\n"
@@ -400,13 +386,6 @@ msgid "Badges"
 msgstr "Badges"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "Badges are your collection of achievements. Wear them proudly! <br/>"
-msgstr ""
-"Les badges sont la collection de vos réalisations. Portez-les fièrement ! "
-"<br/>"
-
-#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
 msgid ""
 "Besides gaining reputation with your questions and answers,\n"
@@ -458,14 +437,9 @@ msgid "Gamification Badge"
 msgstr "Badge de ludification"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
-msgid "Get"
-msgstr "Obtenez"
-
-#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
 msgid "Home"
-msgstr "Page d'accueil"
+msgstr "Accueil"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
@@ -500,7 +474,7 @@ msgstr "Sous-navigateur mobile"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
 msgid "More info"
-msgstr "Plus d'infos"
+msgstr "Plus d'informations"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_sub_nav
@@ -528,15 +502,6 @@ msgid "No user found for"
 msgstr "Aucun utilisateur trouvé pour"
 
 #. module: website_profile
-#. odoo-python
-#: code:addons/website_profile/controllers/main.py:0
-#, python-format
-msgid "Not have enough karma to view other users' profile."
-msgstr ""
-"Vous n'avez pas assez de points karma pour voir le profil d'autres "
-"utilisateurs."
-
-#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid ""
 "Please enter a valid email address in order to receive notifications from "
@@ -547,11 +512,16 @@ msgstr ""
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
+msgid "Rank badge"
+msgstr "Badge de rang"
+
+#. module: website_profile
+#: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
 msgid "Ranks"
 msgstr "Rangs"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.profile_access_denied
+#: model_terms:ir.ui.view,arch_db:website_profile.private_profile
 msgid "Return to the website."
 msgstr "Retourner au site web."
 
@@ -581,9 +551,7 @@ msgid "This month"
 msgstr "Ce mois"
 
 #. module: website_profile
-#. odoo-python
-#: code:addons/website_profile/controllers/main.py:0
-#, python-format
+#: model_terms:ir.ui.view,arch_db:website_profile.private_profile
 msgid "This profile is private!"
 msgstr "Ce profil est privé ! "
 
@@ -599,7 +567,6 @@ msgid "Unpublished"
 msgstr "Non publié"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_biography_editor
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
 msgid "Update"
 msgstr "Mettre à jour"
@@ -632,12 +599,12 @@ msgstr "Visible sur le site web actuel"
 #. module: website_profile
 #: model:ir.model,name:website_profile.model_website
 msgid "Website"
-msgstr "Site Web"
+msgstr "Site web"
 
 #. module: website_profile
 #: model:ir.model.fields,field_description:website_profile.field_gamification_badge__website_url
 msgid "Website URL"
-msgstr "URL de site web"
+msgstr "URL du site web"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
@@ -645,12 +612,6 @@ msgid "When you finish a course or reach milestones, you're awarded badges."
 msgstr ""
 "Quand vous finissez un cours ou atteignez des étapes importantes, vous "
 "recevez des badges."
-
-#. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.user_biography_editor
-#: model_terms:ir.ui.view,arch_db:website_profile.user_profile_edit_content
-msgid "Write a few words about yourself..."
-msgstr "Décrivez-vous en quelques mots..."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.all_user_card
@@ -703,7 +664,7 @@ msgstr "point"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.all_user_card
 msgid "this month"
-msgstr "ce mois-ci"
+msgstr "ce mois"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.all_user_card
@@ -721,27 +682,9 @@ msgid "xp"
 msgstr "xp"
 
 #. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
-msgid ""
-"xp\n"
-"                        to level up!"
-msgstr ""
-"xp\n"
-"                        pour passer au niveau suivant !"
-
-#. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.email_validation_banner
 msgid "your account settings"
 msgstr "vos paramètres de compte"
-
-#. module: website_profile
-#: model_terms:ir.ui.view,arch_db:website_profile.profile_next_rank_card
-msgid ""
-"{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else "
-"''}}"
-msgstr ""
-"{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else "
-"''}}"
 
 #. module: website_profile
 #: model:mail.template,subject:website_profile.validation_email

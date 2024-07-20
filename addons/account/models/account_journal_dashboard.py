@@ -9,7 +9,7 @@ from odoo import models, api, _, fields
 from odoo.exceptions import UserError
 from odoo.osv import expression
 from odoo.release import version
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF, SQL
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF
 from odoo.tools.misc import formatLang, format_date as odoo_format_date, get_lang
 
 
@@ -32,30 +32,11 @@ class account_journal(models.Model):
     has_statement_lines = fields.Boolean(compute='_compute_current_statement_balance') # technical field used to avoid computing the value multiple times
     entries_count = fields.Integer(compute='_compute_entries_count')
     has_sequence_holes = fields.Boolean(compute='_compute_has_sequence_holes')
-    last_statement_id = fields.Many2one(comodel_name='account.bank.statement', compute='_compute_last_bank_statement')
 
     def _compute_current_statement_balance(self):
         query_result = self._get_journal_dashboard_bank_running_balance()
         for journal in self:
             journal.has_statement_lines, journal.current_statement_balance = query_result.get(journal.id)
-
-    def _compute_last_bank_statement(self):
-        self.env.cr.execute("""
-            SELECT journal.id, statement.id
-              FROM account_journal journal
-         LEFT JOIN LATERAL (
-                      SELECT id, company_id
-                        FROM account_bank_statement
-                       WHERE journal_id = journal.id
-                    ORDER BY first_line_index DESC
-                       LIMIT 1
-                   ) statement ON TRUE
-             WHERE journal.id = ANY(%s)
-               AND statement.company_id = ANY(%s)
-        """, [self.ids, self.env.companies.ids])
-        last_statements = {journal_id: statement_id for journal_id, statement_id in self.env.cr.fetchall()}
-        for journal in self:
-            journal.last_statement_id = self.env['account.bank.statement'].browse(last_statements.get(journal.id))
 
     def _kanban_dashboard(self):
         dashboard_data = self._get_journal_dashboard_data_batched()
@@ -97,14 +78,8 @@ class account_journal(models.Model):
               JOIN mail_activity activity ON activity.res_id = move.id AND activity.res_model = 'account.move'
          LEFT JOIN mail_activity_type act_type ON activity.activity_type_id = act_type.id
              WHERE move.journal_id = ANY(%(ids)s)
-               AND move.company_id = ANY(%(company_ids)s)
         """
-        self.env.cr.execute(sql_query, {
-            'ids': self.ids,
-            'company_ids': self.env.companies.ids,
-            'today': today,
-            'lang': lang,
-        })
+        self.env.cr.execute(sql_query, {'ids': self.ids, 'today': today, 'lang': lang})
         for activity in self.env.cr.dictfetchall():
             act = {
                 'id': activity['id'],
@@ -123,26 +98,21 @@ class account_journal(models.Model):
             journal.json_activity_data = json.dumps({'activities': activities[journal.id]})
 
     def _query_has_sequence_holes(self):
+        self.env['res.company'].flush_model(['fiscalyear_lock_date'])
         self.env['account.move'].flush_model(['journal_id', 'date', 'sequence_prefix', 'sequence_number', 'state'])
-        queries = []
-        for company in self.env.companies:
-            queries.append(SQL(
-                """
-                    SELECT move.journal_id,
-                           move.sequence_prefix
-                      FROM account_move move
-                     WHERE move.journal_id = ANY(%(journal_ids)s)
-                       AND move.company_id = %(company_id)s
-                       AND (move.state = 'posted' OR (move.state = 'draft' AND move.name != '/'))
-                       AND %(fiscalyear_lock_date_clause)s
-                  GROUP BY move.journal_id, move.sequence_prefix
-                    HAVING COUNT(*) != MAX(move.sequence_number) - MIN(move.sequence_number) + 1
-                """,
-                journal_ids=self.ids,
-                company_id=company.id,
-                fiscalyear_lock_date_clause=SQL('move.date > %s', lock_date) if (lock_date := company.fiscalyear_lock_date) else SQL('TRUE')
-            ))
-        self.env.cr.execute(SQL(' UNION ALL '.join(['%s'] * len(queries)), *queries))
+        self.env.cr.execute("""
+            SELECT move.journal_id,
+                   move.sequence_prefix
+              FROM account_move move
+              JOIN res_company company ON company.id = move.company_id
+             WHERE move.journal_id = ANY(%(journal_ids)s)
+               AND (move.state = 'posted' OR (move.state = 'draft' AND move.name != '/'))
+               AND (company.fiscalyear_lock_date IS NULL OR move.date > company.fiscalyear_lock_date)
+          GROUP BY move.journal_id, move.sequence_prefix
+            HAVING COUNT(*) != MAX(move.sequence_number) - MIN(move.sequence_number) + 1
+        """, {
+            'journal_ids': self.ids,
+        })
         return self.env.cr.fetchall()
 
     def _compute_has_sequence_holes(self):
@@ -152,14 +122,11 @@ class account_journal(models.Model):
 
     def _compute_entries_count(self):
         res = {
-            journal.id: count
-            for journal, count in self.env['account.move']._read_group(
-                domain=[
-                    *self.env['account.move']._check_company_domain(self.env.companies),
-                    ('journal_id', 'in', self.ids),
-                ],
+            r['journal_id'][0]: r['journal_id_count']
+            for r in self.env['account.move']._read_group(
+                domain=[('journal_id', 'in', self.ids)],
+                fields=['journal_id'],
                 groupby=['journal_id'],
-                aggregates=['__count'],
             )
         }
         for journal in self:
@@ -172,6 +139,11 @@ class account_journal(models.Model):
             return ['', _('Cash: Balance')]
         elif self.type == 'bank':
             return ['', _('Bank: Balance')]
+
+    # TODO remove in master
+    def get_line_graph_datas(self):
+        self.ensure_one()
+        return self._get_bank_cash_graph_data()[self.id]
 
     def _get_bank_cash_graph_data(self):
         """Computes the data used to display the graph for bank and cash journals in the accounting dashboard"""
@@ -194,22 +166,20 @@ class account_journal(models.Model):
              WHERE move.journal_id = ANY(%s)
                AND move.date > %s
                AND move.date <= %s
-               AND move.company_id = ANY(%s)
           GROUP BY move.date, move.journal_id
           ORDER BY move.date DESC
         """
-        self.env.cr.execute(query, (self.ids, last_month, today, self.env.companies.ids))
+        self.env.cr.execute(query, (self.ids, last_month, today))
         query_result = group_by_journal(self.env.cr.dictfetchall())
 
         result = {}
         for journal in self:
             graph_title, graph_key = journal._graph_title_and_key()
-            # User may have read access on the journal but not on the company
-            currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
+            currency = journal.currency_id or journal.company_id.currency_id
             journal_result = query_result[journal.id]
 
             color = '#875A7B' if 'e' in version else '#7c7bad'
-            is_sample_data = not journal_result and not journal.has_statement_lines
+            is_sample_data = not journal.has_statement_lines
 
             data = []
             if is_sample_data:
@@ -237,6 +207,11 @@ class account_journal(models.Model):
             result[journal.id] = [{'values': data, 'title': graph_title, 'key': graph_key, 'area': True, 'color': color, 'is_sample_data': is_sample_data}]
         return result
 
+    # TODO remove in master
+    def get_bar_graph_datas(self):
+        self.ensure_one()
+        return self._get_sale_purchase_graph_data()[self.id]
+
     def _get_sale_purchase_graph_data(self):
         today = fields.Date.today()
         day_of_week = int(format_datetime(today, 'e', locale=get_lang(self.env).code))
@@ -256,12 +231,10 @@ class account_journal(models.Model):
                AND move.state = 'posted'
                AND move.payment_state in ('not_paid', 'partial')
                AND move.move_type IN %(invoice_types)s
-               AND move.company_id = ANY(%(company_ids)s)
           GROUP BY move.journal_id
         """, {
             'invoice_types': tuple(self.env['account.move'].get_invoice_types(True)),
             'journal_ids': self.ids,
-            'company_ids': self.env.companies.ids,
             'start_week1': first_day_of_week + timedelta(days=-7),
             'start_week2': first_day_of_week + timedelta(days=0),
             'start_week3': first_day_of_week + timedelta(days=7),
@@ -271,8 +244,7 @@ class account_journal(models.Model):
         query_results = {r['journal_id']: r for r in self.env.cr.dictfetchall()}
         result = {}
         for journal in self:
-            # User may have read access on the journal but not on the company
-            currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
+            currency = journal.currency_id or journal.company_id.currency_id
             graph_title, graph_key = journal._graph_title_and_key()
             sign = 1 if journal.type == 'sale' else -1
             journal_data = query_results.get(journal.id)
@@ -309,14 +281,18 @@ class account_journal(models.Model):
             result[journal.id] = [{'values': data, 'title': graph_title, 'key': graph_key, 'is_sample_data': is_sample_data}]
         return result
 
+    # TODO remove in master
+    def get_journal_dashboard_datas(self):
+        return self._get_journal_dashboard_data_batched()[self.id]
+
     def _get_journal_dashboard_data_batched(self):
         self.env['account.move'].flush_model()
         self.env['account.move.line'].flush_model()
         dashboard_data = {}  # container that will be filled by functions below
         for journal in self:
             dashboard_data[journal.id] = {
-                'currency_id': journal.currency_id.id or journal.company_id.sudo().currency_id.id,
-                'show_company': len(self.env.companies) > 1 or journal.company_id.id != self.env.company.id,
+                'currency_id': journal.currency_id.id or journal.company_id.currency_id.id,
+                'company_count': len(self.env.companies),
             }
         self._fill_bank_cash_dashboard_data(dashboard_data)
         self._fill_sale_purchase_dashboard_data(dashboard_data)
@@ -337,14 +313,11 @@ class account_journal(models.Model):
         :type domain: list[tuple]
         """
         res = {
-            journal.id: count
-            for journal, count in self.env[model]._read_group(
-                domain=[
-                   *self.env[model]._check_company_domain(self.env.companies),
-                   ('journal_id', 'in', self.ids),
-               ] + domain,
+            r['journal_id'][0]: r['journal_id_count']
+            for r in self.env[model]._read_group(
+                domain=[('journal_id', 'in', self.ids)] + domain,
+                fields=['journal_id'],
                 groupby=['journal_id'],
-                aggregates=['__count'],
             )
         }
         for journal in self:
@@ -366,93 +339,71 @@ class account_journal(models.Model):
                AND NOT st_line.is_reconciled
                AND st_line_move.to_check IS NOT TRUE
                AND st_line_move.state = 'posted'
-               AND st_line_move.company_id IN %s
           GROUP BY st_line_move.journal_id
-        """, [tuple(bank_cash_journals.ids), tuple(self.env.companies.ids)])
+        """, [tuple(bank_cash_journals.ids)])
         number_to_reconcile = {
             journal_id: count
             for journal_id, count in self.env.cr.fetchall()
         }
 
         # Last statement
-        bank_cash_journals.last_statement_id.mapped(lambda s: s.balance_end_real)  # prefetch
+        self.env.cr.execute("""
+            SELECT journal.id, statement.id
+              FROM account_journal journal
+         LEFT JOIN LATERAL (
+                      SELECT id
+                        FROM account_bank_statement
+                       WHERE journal_id = journal.id
+                    ORDER BY first_line_index DESC
+                       LIMIT 1
+                   ) statement ON TRUE
+             WHERE journal.id = ANY(%s)
+        """, [self.ids])
+        last_statements = {journal_id: statement_id for journal_id, statement_id in self.env.cr.fetchall()}
+        self.env['account.bank.statement'].browse(i for i in last_statements.values() if i).mapped('balance_end_real')  # prefetch
 
         outstanding_pay_account_balances = bank_cash_journals._get_journal_dashboard_outstanding_payments()
 
-        # Misc Entries (journal items in the default_account not linked to bank.statement.line)
-        misc_domain = []
-        for journal in bank_cash_journals:
-            date_limit = journal.last_statement_id.date or journal.company_id.fiscalyear_lock_date
-            misc_domain.append(
-                [('account_id', '=', journal.default_account_id.id), ('date', '>', date_limit)]
-                if date_limit else
-                [('account_id', '=', journal.default_account_id.id)]
-            )
-        misc_domain = [
-            *self.env['account.move.line']._check_company_domain(self.env.companies),
-            ('statement_line_id', '=', False),
-            ('parent_state', '=', 'posted'),
-            ('payment_id', '=', False),
-      ] + expression.OR(misc_domain)
-
-        misc_totals = {
-            account: (balance, count_lines, currencies)
-            for account, balance, count_lines, currencies in self.env['account.move.line']._read_group(
-                domain=misc_domain,
-                aggregates=['amount_currency:sum', 'id:count', 'currency_id:recordset'],
-                groupby=['account_id'])
-        }
-
         # To check
         to_check = {
-            journal: (amount, count)
-            for journal, amount, count in self.env['account.bank.statement.line']._read_group(
+            res['journal_id'][0]: (res['amount'], res['journal_id_count'])
+            for res in self.env['account.bank.statement.line'].read_group(
                 domain=[
                     ('journal_id', 'in', bank_cash_journals.ids),
-                    ('move_id.company_id', 'in', self.env.companies.ids),
                     ('move_id.to_check', '=', True),
                     ('move_id.state', '=', 'posted'),
                 ],
+                fields=['amount'],
                 groupby=['journal_id'],
-                aggregates=['amount:sum', '__count'],
             )
         }
 
         for journal in bank_cash_journals:
-            # User may have read access on the journal but not on the company
-            currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
+            last_statement = self.env['account.bank.statement'].browse(last_statements.get(journal.id))
+            currency = journal.currency_id or journal.company_id.currency_id
             has_outstanding, outstanding_pay_account_balance = outstanding_pay_account_balances[journal.id]
-            to_check_balance, number_to_check = to_check.get(journal, (0, 0))
-            misc_balance, number_misc, misc_currencies = misc_totals.get(journal.default_account_id, (0, 0, currency))
-            currency_consistent = misc_currencies == currency
-            accessible = journal.company_id.id in journal.company_id._accessible_branches().ids
+            to_check_balance, number_to_check = to_check.get(journal.id, (0, 0))
 
             dashboard_data[journal.id].update({
                 'number_to_check': number_to_check,
                 'to_check_balance': currency.format(to_check_balance),
                 'number_to_reconcile': number_to_reconcile.get(journal.id, 0),
                 'account_balance': currency.format(journal.current_statement_balance),
-                'has_at_least_one_statement': bool(journal.last_statement_id),
-                'nb_lines_bank_account_balance': bool(journal.has_statement_lines) and accessible,
+                'has_at_least_one_statement': bool(last_statement),
+                'nb_lines_bank_account_balance': bool(journal.has_statement_lines),
                 'outstanding_pay_account_balance': currency.format(outstanding_pay_account_balance),
                 'nb_lines_outstanding_pay_account_balance': has_outstanding,
-                'last_balance': currency.format(journal.last_statement_id.balance_end_real),
-                'last_statement_id': journal.last_statement_id.id,
+                'last_balance': currency.format(last_statement.balance_end_real),
                 'bank_statements_source': journal.bank_statements_source,
                 'is_sample_data': journal.has_statement_lines,
-                'nb_misc_operations': number_misc,
-                'misc_class': 'text-warning' if not currency_consistent else '',
-                'misc_operations_balance': currency.format(misc_balance) if currency_consistent else None,
             })
 
     def _fill_sale_purchase_dashboard_data(self, dashboard_data):
         """Populate all sale and purchase journal's data dict with relevant information for the kanban card."""
         sale_purchase_journals = self.filtered(lambda journal: journal.type in ('sale', 'purchase'))
-        purchase_journals = self.filtered(lambda journal: journal.type == 'purchase')
-        sale_journals = self.filtered(lambda journal: journal.type == 'sale')
         if not sale_purchase_journals:
             return
-        bills_field_list = [
+        field_list = [
             "account_move.journal_id",
             "(CASE WHEN account_move.move_type IN ('out_refund', 'in_refund') THEN -1 ELSE 1 END) * account_move.amount_residual AS amount_total",
             "(CASE WHEN account_move.move_type IN ('in_invoice', 'in_refund', 'in_receipt') THEN -1 ELSE 1 END) * account_move.amount_residual_signed AS amount_total_company",
@@ -461,86 +412,38 @@ class account_journal(models.Model):
             "account_move.invoice_date",
             "account_move.company_id",
         ]
-        payment_field_list = [
-            "account_move_line.journal_id",
-            "account_move_line.move_id",
-            "-account_move_line.amount_residual AS amount_total_company",
-        ]
-        # DRAFTS
-        query, params = sale_purchase_journals._get_draft_bills_query().select(*bills_field_list)
+        query, params = sale_purchase_journals._get_open_bills_to_pay_query().select(*field_list)
+        self.env.cr.execute(query, params)
+        query_results_to_pay = group_by_journal(self.env.cr.dictfetchall())
+
+        query, params = sale_purchase_journals._get_draft_bills_query().select(*field_list)
         self.env.cr.execute(query, params)
         query_results_drafts = group_by_journal(self.env.cr.dictfetchall())
 
-        # WAITING BILLS AND PAYMENTS
-        query_results_to_pay = {}
-        if purchase_journals:
-            query, params = purchase_journals._get_open_payments_query().select(*payment_field_list)
-            self.env.cr.execute(query, params)
-            query_results_payments_to_pay = group_by_journal(self.env.cr.dictfetchall())
-            for journal in purchase_journals:
-                query_results_to_pay[journal.id] = query_results_payments_to_pay[journal.id]
-        if sale_journals:
-            query, params = sale_journals._get_open_bills_to_pay_query().select(*bills_field_list)
-            self.env.cr.execute(query, params)
-            query_results_bills_to_pay = group_by_journal(self.env.cr.dictfetchall())
-            for journal in sale_journals:
-                query_results_to_pay[journal.id] = query_results_bills_to_pay[journal.id]
-
-        # LATE BILLS AND PAYMENTS
-        late_query_results = {}
-        if purchase_journals:
-            query, params = purchase_journals._get_late_payment_query().select(*payment_field_list)
-            self.env.cr.execute(query, params)
-            late_payments_query_results = group_by_journal(self.env.cr.dictfetchall())
-            for journal in purchase_journals:
-                late_query_results[journal.id] = late_payments_query_results[journal.id]
-        if sale_journals:
-            query, params = sale_journals._get_late_bills_query().select(*bills_field_list)
-            self.env.cr.execute(query, params)
-            late_bills_query_results = group_by_journal(self.env.cr.dictfetchall())
-            for journal in sale_journals:
-                late_query_results[journal.id] = late_bills_query_results[journal.id]
+        query, params = sale_purchase_journals._get_late_bills_query().select(*field_list)
+        self.env.cr.execute(query, params)
+        late_query_results = group_by_journal(self.env.cr.dictfetchall())
 
         to_check_vals = {
-            journal.id: (amount_total_signed_sum, count)
-            for journal, amount_total_signed_sum, count in self.env['account.move']._read_group(
-                domain=[
-                    *self.env['account.move']._check_company_domain(self.env.companies),
-                    ('journal_id', 'in', sale_purchase_journals.ids),
-                    ('to_check', '=', True),
-                ],
-                groupby=['journal_id'],
-                aggregates=['amount_total_signed:sum', '__count'],
+            vals['journal_id'][0]: vals
+            for vals in self.env['account.move'].read_group(
+                domain=[('journal_id', 'in', sale_purchase_journals.ids), ('to_check', '=', True)],
+                fields=['amount_total_signed'],
+                groupby='journal_id',
             )
         }
 
-        self.env.cr.execute(SQL("""
-            SELECT id, moves_exists
-            FROM account_journal journal
-            LEFT JOIN LATERAL (
-                SELECT EXISTS(SELECT 1
-                              FROM account_move move
-                              WHERE move.journal_id = journal.id
-                              AND move.company_id = ANY (%(companies_ids)s) AND
-                                  move.journal_id = ANY (%(journal_ids)s)) AS moves_exists
-            ) moves ON TRUE
-            WHERE journal.id = ANY (%(journal_ids)s);
-        """,
-            journal_ids=sale_purchase_journals.ids,
-            companies_ids=self.env.companies.ids,
-        ))
-        is_sample_data_by_journal_id = {row[0]: not row[1] for row in self.env.cr.fetchall()}
-
+        curr_cache = {}
+        sale_purchase_journals._fill_dashboard_data_count(dashboard_data, 'account.move', 'entries_count', [])
         for journal in sale_purchase_journals:
-            # User may have read access on the journal but not on the company
-            currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
-            (number_waiting, sum_waiting) = self._count_results_and_sum_amounts(query_results_to_pay[journal.id], currency)
-            (number_draft, sum_draft) = self._count_results_and_sum_amounts(query_results_drafts[journal.id], currency)
-            (number_late, sum_late) = self._count_results_and_sum_amounts(late_query_results[journal.id], currency)
-            amount_total_signed_sum, count = to_check_vals.get(journal.id, (0, 0))
+            currency = journal.currency_id or journal.company_id.currency_id
+            (number_waiting, sum_waiting) = self._count_results_and_sum_amounts(query_results_to_pay[journal.id], currency, curr_cache=curr_cache)
+            (number_draft, sum_draft) = self._count_results_and_sum_amounts(query_results_drafts[journal.id], currency, curr_cache=curr_cache)
+            (number_late, sum_late) = self._count_results_and_sum_amounts(late_query_results[journal.id], currency, curr_cache=curr_cache)
+            to_check = to_check_vals.get(journal.id, {})
             dashboard_data[journal.id].update({
-                'number_to_check': count,
-                'to_check_balance': currency.format(amount_total_signed_sum),
+                'number_to_check': to_check.get('journal_id_count', 0),
+                'to_check_balance': currency.format(to_check.get('amount_total_signed', 0)),
                 'title': _('Bills to pay') if journal.type == 'purchase' else _('Invoices owed to you'),
                 'number_draft': number_draft,
                 'number_waiting': number_waiting,
@@ -549,10 +452,7 @@ class account_journal(models.Model):
                 'sum_waiting': currency.format(sum_waiting),
                 'sum_late': currency.format(sum_late),
                 'has_sequence_holes': journal.has_sequence_holes,
-                'is_sample_data': is_sample_data_by_journal_id[journal.id],
-                # 'entries_count' is kept here to maintain compatibility with a view for the stable version.
-                # The name will be changed in master
-                'entries_count': not is_sample_data_by_journal_id[journal.id],
+                'is_sample_data': dashboard_data[journal.id]['entries_count'],
             })
 
     def _fill_general_dashboard_data(self, dashboard_data):
@@ -561,28 +461,24 @@ class account_journal(models.Model):
         if not general_journals:
             return
         to_check_vals = {
-            journal.id: (amount_total_signed_sum, count)
-            for journal, amount_total_signed_sum, count in self.env['account.move']._read_group(
-                domain=[
-                    *self.env['account.move']._check_company_domain(self.env.companies),
-                    ('journal_id', 'in', general_journals.ids),
-                    ('to_check', '=', True),
-                ],
-                groupby=['journal_id'],
-                aggregates=['amount_total_signed:sum', '__count'],
+            vals['journal_id'][0]: vals
+            for vals in self.env['account.move'].read_group(
+                domain=[('journal_id', 'in', general_journals.ids), ('to_check', '=', True)],
+                fields=['amount_total_signed'],
+                groupby='journal_id',
+                lazy=False,
             )
         }
         for journal in general_journals:
-            currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
-            amount_total_signed_sum, count = to_check_vals.get(journal.id, (0, 0))
+            currency = journal.currency_id or journal.company_id.currency_id
+            vals = to_check_vals.get(journal.id, {})
             dashboard_data[journal.id].update({
-                'number_to_check': count,
-                'to_check_balance': currency.format(amount_total_signed_sum),
+                'number_to_check': vals.get('__count', 0),
+                'to_check_balance': currency.format(vals.get('amount_total_signed', 0)),
             })
 
     def _get_open_bills_to_pay_query(self):
         return self.env['account.move']._where_calc([
-            *self.env['account.move']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
             ('state', '=', 'posted'),
             ('payment_state', 'in', ('not_paid', 'partial')),
@@ -591,7 +487,6 @@ class account_journal(models.Model):
 
     def _get_draft_bills_query(self):
         return self.env['account.move']._where_calc([
-            *self.env['account.move']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
             ('state', '=', 'draft'),
             ('payment_state', 'in', ('not_paid', 'partial')),
@@ -600,7 +495,6 @@ class account_journal(models.Model):
 
     def _get_late_bills_query(self):
         return self.env['account.move']._where_calc([
-            *self.env['account.move']._check_company_domain(self.env.companies),
             ('journal_id', 'in', self.ids),
             ('invoice_date_due', '<', fields.Date.context_today(self)),
             ('state', '=', 'posted'),
@@ -608,46 +502,30 @@ class account_journal(models.Model):
             ('move_type', 'in', self.env['account.move'].get_invoice_types(include_receipts=True)),
         ])
 
-    def _get_open_payments_query(self):
-        return self.env['account.move.line']._where_calc([
-            *self.env['account.move.line']._check_company_domain(self.env.companies),
-            ('journal_id', 'in', self.ids),
-            ('move_id.payment_state', 'in', ('not_paid', 'partial')),
-            ('date_maturity', '!=', False),
-            ('amount_residual', '<', 0),
-            ('parent_state', '=', 'posted'),
-            ('journal_id.type', '=', 'purchase'),
-        ])
-
-    def _get_late_payment_query(self):
-        return self.env['account.move.line']._where_calc([
-            *self.env['account.move.line']._check_company_domain(self.env.companies),
-            ('journal_id', 'in', self.ids),
-            ('move_id.payment_state', 'in', ('not_paid', 'partial')),
-            ('date_maturity', '<', fields.Date.context_today(self)),
-            ('amount_residual', '<', 0),
-            ('parent_state', '=', 'posted'),
-            ('journal_id.type', '=', 'purchase'),
-        ])
-
-    def _count_results_and_sum_amounts(self, results_dict, target_currency):
+    def _count_results_and_sum_amounts(self, results_dict, target_currency, curr_cache=None):
         """ Loops on a query result to count the total number of invoices and sum
         their amount_total field (expressed in the given target currency).
-        amount_total must be signed!
+        amount_total must be signed !
         """
         # Create a cache with currency rates to avoid unnecessary SQL requests. Do not copy
         # curr_cache on purpose, so the dictionary is modified and can be re-used for subsequent
         # calls of the method.
+        curr_cache = {} if curr_cache is None else curr_cache
         total_amount = 0
         for result in results_dict:
             document_currency = self.env['res.currency'].browse(result.get('currency'))
             company = self.env['res.company'].browse(result.get('company_id')) or self.env.company
             date = result.get('invoice_date') or fields.Date.context_today(self)
 
-            if company.currency_id == target_currency:
+            if document_currency == target_currency:
+                total_amount += result.get('amount_total') or 0
+            elif company.currency_id == target_currency:
                 total_amount += result.get('amount_total_company') or 0
             else:
-                total_amount += document_currency._convert(result.get('amount_total'), target_currency, company, date)
+                key = (document_currency, target_currency, company, date)
+                if key not in curr_cache:
+                    curr_cache[key] = self.env['res.currency']._get_conversion_rate(*key)
+                total_amount += (result.get('amount_total') or 0) * curr_cache[key]
         return (len(results_dict), target_currency.round(total_amount))
 
     def _get_journal_dashboard_bank_running_balance(self):
@@ -666,7 +544,6 @@ class account_journal(models.Model):
                                   balance_end_real
                              FROM account_bank_statement
                             WHERE journal_id = journal.id
-                              AND company_id = ANY(%s)
                          ORDER BY date DESC, id DESC
                             LIMIT 1
                    ) statement ON TRUE
@@ -678,12 +555,11 @@ class account_journal(models.Model):
                             WHERE stl.statement_id IS NULL
                               AND move.state != 'cancel'
                               AND move.journal_id = journal.id
-                              AND move.company_id = ANY(%s)
                               AND stl.internal_index >= COALESCE(statement.first_line_index, '')
                             LIMIT 1
                    ) without_statement ON TRUE
              WHERE journal.id = ANY(%s)
-        """, [self.env.companies.ids, self.env.companies.ids, self.ids])
+        """, [(self.ids)])
         query_res = {res['journal_id']: res for res in self.env.cr.dictfetchall()}
         result = {}
         for journal in self:
@@ -709,15 +585,14 @@ class account_journal(models.Model):
              WHERE payment.is_matched IS NOT TRUE
                AND move.state = 'posted'
                AND move.journal_id = ANY(%s)
-               AND move.company_id = ANY(%s)
           GROUP BY move.company_id, move.journal_id, move.currency_id
-        """, [self.ids, self.env.companies.ids])
+        """, [self.ids])
         query_result = group_by_journal(self.env.cr.dictfetchall())
         result = {}
+        curr_cache = {}
         for journal in self:
-            # User may have read access on the journal but not on the company
-            currency = journal.currency_id or self.env['res.currency'].browse(journal.company_id.sudo().currency_id.id)
-            result[journal.id] = self._count_results_and_sum_amounts(query_result[journal.id], currency)
+            currency = journal.currency_id or journal.company_id.currency_id
+            result[journal.id] = self._count_results_and_sum_amounts(query_result[journal.id], currency, curr_cache)
         return result
 
     def _get_move_action_context(self):
@@ -742,11 +617,14 @@ class account_journal(models.Model):
             'context': self._get_move_action_context(),
         }
 
+    def create_cash_statement(self):
+        raise UserError(_('Please install Accounting for this feature'))
+
     def action_create_vendor_bill(self):
         """ This function is called by the "Import" button of Vendor Bills,
         visible on dashboard if no bill has been created yet.
         """
-        self.env['onboarding.onboarding.step'].sudo().action_validate_step('account.onboarding_onboarding_step_setup_bill')
+        self.env.company.sudo().set_onboarding_step_done('account_setup_bill_state')
 
         new_wizard = self.env['account.tour.upload.bill'].create({})
         view_id = self.env.ref('account.account_tour_upload_bill').id
@@ -765,7 +643,6 @@ class account_journal(models.Model):
         self.ensure_one()
         return self.env['account.bank.statement.line'].search([
             ('journal_id', '=', self.id),
-            ('move_id.company_id', 'in', self.env.companies.ids),
             ('move_id.to_check', '=', True),
             ('move_id.state', '=', 'posted'),
         ])
@@ -820,15 +697,22 @@ class account_journal(models.Model):
         action['domain'] = (action['domain'] or []) + [('journal_id', '=', self.id)]
         return action
 
-    def open_payments_action(self, payment_type=False, mode='tree'):
+    def open_spend_money(self):
+        return self.open_payments_action('outbound')
+
+    def open_collect_money(self):
+        return self.open_payments_action('inbound')
+
+    def open_transfer_money(self):
+        return self.open_payments_action('transfer')
+
+    def open_payments_action(self, payment_type, mode='tree'):
         if payment_type == 'outbound':
             action_ref = 'account.action_account_payments_payable'
         elif payment_type == 'transfer':
             action_ref = 'account.action_account_payments_transfer'
-        elif payment_type == 'inbound':
-            action_ref = 'account.action_account_payments'
         else:
-            action_ref = 'account.action_account_all_payments'
+            action_ref = 'account.action_account_payments'
         action = self.env['ir.actions.act_window']._for_xml_id(action_ref)
         action['context'] = dict(ast.literal_eval(action.get('context')), default_journal_id=self.id, search_default_journal_id=self.id)
         if payment_type == 'transfer':
@@ -860,24 +744,6 @@ class account_journal(models.Model):
             )
         return action
 
-    def open_bank_difference_action(self):
-        self.ensure_one()
-        action = self.env["ir.actions.act_window"]._for_xml_id("account.action_account_moves_all_a")
-        action['context'] = {
-            'search_default_account_id': self.default_account_id.id,
-            'search_default_group_by_move': False,
-            'search_default_no_st_line_id': True,
-            'search_default_posted': False,
-        }
-        date_from = self.last_statement_id.date or self.company_id.fiscalyear_lock_date
-        if date_from:
-            action['context'] |= {
-                'date_from': date_from,
-                'date_to': fields.Date.context_today(self),
-                'search_default_date_between': True
-            }
-        return action
-
     def show_sequence_holes(self):
         has_sequence_holes = self._query_has_sequence_holes()
         return {
@@ -886,11 +752,7 @@ class account_journal(models.Model):
             'res_model': 'account.move',
             'view_mode': 'list,form',
             'domain': expression.OR(
-                [
-                    *self.env['account.move']._check_company_domain(self.env.companies),
-                    ('journal_id', '=', journal_id),
-                    ('sequence_prefix', '=', prefix),
-                ]
+                [('journal_id', '=', journal_id), ('sequence_prefix', '=', prefix)]
                 for journal_id, prefix in has_sequence_holes
             ),
             'context': {
@@ -916,3 +778,18 @@ class account_journal(models.Model):
     def create_supplier_payment(self):
         """return action to create a supplier payment"""
         return self.open_payments_action('outbound', mode='form')
+
+    def create_internal_transfer(self):
+        """return action to create a internal transfer"""
+        return self.open_payments_action('transfer', mode='form')
+
+    #####################
+    # Setup Steps Stuff #
+    #####################
+    def mark_bank_setup_as_done_action(self):
+        """ Marks the 'bank setup' step as done in the setup bar and in the company."""
+        self.company_id.sudo().set_onboarding_step_done('account_setup_bank_data_state')
+
+    def unmark_bank_setup_as_done_action(self):
+        """ Marks the 'bank setup' step as not done in the setup bar and in the company."""
+        self.company_id.account_setup_bank_data_state = 'not_done'

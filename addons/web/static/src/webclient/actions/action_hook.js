@@ -2,7 +2,7 @@
 
 import { onMounted, useComponent, useEffect, useExternalListener } from "@odoo/owl";
 
-export const scrollSymbol = Symbol("scroll");
+const scrollSymbol = Symbol("scroll");
 
 export class CallbackRecorder {
     constructor() {

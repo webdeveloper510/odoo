@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { registry } from '@web/core/registry';
-import { loadBundle } from "@web/core/assets";
+import { getWysiwygClass } from 'web_editor.loader';
 
 import { FullscreenIndication } from '../components/fullscreen_indication/fullscreen_indication';
 import { WebsiteLoader } from '../components/website_loader/website_loader';
-import { reactive, EventBus } from "@odoo/owl";
+
+const { reactive, EventBus } = owl;
 
 const websiteSystrayRegistry = registry.category('website_systray');
 
@@ -34,6 +34,7 @@ export const websiteService = {
         let contentWindow;
         let lastUrl;
         let websiteRootInstance;
+        let Wysiwyg;
         let isRestrictedEditor;
         let isDesigner;
         let hasMultiWebsites;
@@ -46,7 +47,7 @@ export const websiteService = {
 
         const context = reactive({
             showNewContentModal: false,
-            showResourceEditor: false,
+            showAceEditor: false,
             edition: false,
             isPublicRootReady: false,
             snippetsLoaded: false,
@@ -139,7 +140,9 @@ export const websiteService = {
                         mainObject: unslugHtmlDataObject(mainObject),
                         seoObject: unslugHtmlDataObject(seoObject),
                         isPublished: isPublished === 'True',
-                        canOptimizeSeo: canOptimizeSeo === 'True',
+                        // TODO (master): Remove `undefined` check and replace
+                        // `'1'` by `'True'`. See comment on `website.layout`.
+                        canOptimizeSeo: canOptimizeSeo === undefined ? mainObject : canOptimizeSeo === '1',
                         canPublish: canPublish === 'True',
                         editableInBackend: editableInBackend === 'True',
                         title: document.title,
@@ -229,7 +232,13 @@ export const websiteService = {
                 websites = [...(await orm.searchRead('website', [], ['domain', 'id', 'name']))];
             },
             async loadWysiwyg() {
-                await loadBundle('website.backend_assets_all_wysiwyg');
+                if (!Wysiwyg) {
+                    Wysiwyg = await getWysiwygClass({
+                        moduleName: 'website.wysiwyg',
+                        additionnalAssets: ['website.assets_wysiwyg']
+                    });
+                }
+                return Wysiwyg;
             },
             blockPreview(showLoader, processId) {
                 if (!blockingProcesses.length) {
@@ -251,9 +260,6 @@ export const websiteService = {
             },
             hideLoader() {
                 bus.trigger('HIDE-WEBSITE-LOADER');
-            },
-            prepareOutLoader() {
-                bus.trigger("PREPARE-OUT-WEBSITE-LOADER");
             },
             /**
              * Returns the (translated) "functional" name of a model
@@ -281,7 +287,7 @@ export const websiteService = {
                         .catch(() => {});
                 }
                 await modelNamesProm;
-                return modelNames[model] || _t("Data");
+                return modelNames[model] || env._t("Data");
             },
         };
     },

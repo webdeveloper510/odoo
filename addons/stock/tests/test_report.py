@@ -39,10 +39,10 @@ class TestReportsCommon(TransactionCase):
 
     def get_report_forecast(self, product_template_ids=False, product_variant_ids=False, context=False):
         if product_template_ids:
-            report = self.env['stock.forecasted_product_template']
+            report = self.env['report.stock.report_product_template_replenishment']
             product_ids = product_template_ids
         elif product_variant_ids:
-            report = self.env['stock.forecasted_product_product']
+            report = self.env['report.stock.report_product_product_replenishment']
             product_ids = product_template_ids
         if context:
             report = report.with_context(context)
@@ -126,18 +126,18 @@ class TestReports(TestReportsCommon):
             'inventory_quantity': 50
         }).action_apply_inventory()
         self.env.flush_all()
-        report_records_today = self.env['report.stock.quantity']._read_group(
+        report_records_today = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            [], ['product_qty:sum'])
-        report_records_tomorrow = self.env['report.stock.quantity']._read_group(
+            ['product_qty'], [], lazy=False)
+        report_records_tomorrow = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() + timedelta(days=1))],
-            [], ['product_qty:sum'])
-        report_records_yesterday = self.env['report.stock.quantity']._read_group(
+            ['product_qty'], [])
+        report_records_yesterday = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() - timedelta(days=1))],
-            [], ['product_qty:sum'])
-        self.assertEqual(report_records_today[0][0], 50.0)
-        self.assertEqual(report_records_tomorrow[0][0], 50.0)
-        self.assertEqual(report_records_yesterday[0][0], 0.0)
+            ['product_qty'], [])
+        self.assertEqual(sum([r['product_qty'] for r in report_records_today]), 50.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow]), 50.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_yesterday]), 0.0)
 
         # Delivery of 20.0 units tomorrow
         move_out = self.env['stock.move'].create({
@@ -150,21 +150,21 @@ class TestReports(TestReportsCommon):
             'product_uom_qty': 20.0,
         })
         self.env.flush_all()
-        report_records_tomorrow = self.env['report.stock.quantity']._read_group(
+        report_records_tomorrow = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() + timedelta(days=1))],
-            [], ['product_qty:sum'])
-        self.assertEqual(report_records_tomorrow[0][0], 50.0)
+            ['product_qty'], [])
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow]), 50.0)
         move_out._action_confirm()
         self.env.flush_all()
-        report_records_tomorrow = self.env['report.stock.quantity']._read_group(
+        report_records_tomorrow = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() + timedelta(days=1))],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'forecast'), 30.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'out'), -20.0)
-        report_records_today = self.env['report.stock.quantity']._read_group(
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'forecast']), 30.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'out']), -20.0)
+        report_records_today = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_today if state == 'forecast'), 50.0)
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_today if r['state'] == 'forecast']), 50.0)
 
         # Receipt of 10.0 units tomorrow
         move_in = self.env['stock.move'].create({
@@ -178,16 +178,16 @@ class TestReports(TestReportsCommon):
         })
         move_in._action_confirm()
         self.env.flush_all()
-        report_records_tomorrow = self.env['report.stock.quantity']._read_group(
+        report_records_tomorrow = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() + timedelta(days=1))],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'forecast'), 40.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'out'), -20.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'in'), 10.0)
-        report_records_today = self.env['report.stock.quantity']._read_group(
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'forecast']), 40.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'out']), -20.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'in']), 10.0)
+        report_records_today = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_today if state == 'forecast'), 50.0)
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_today if r['state'] == 'forecast']), 50.0)
 
         # Delivery of 20.0 units tomorrow
         move_out = self.env['stock.move'].create({
@@ -201,27 +201,27 @@ class TestReports(TestReportsCommon):
         })
         move_out._action_confirm()
         self.env.flush_all()
-        report_records_today = self.env['report.stock.quantity']._read_group(
+        report_records_today = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            ['state'], ['product_qty:sum'])
-        report_records_tomorrow = self.env['report.stock.quantity']._read_group(
+            ['product_qty', 'state'], ['state'], lazy=False)
+        report_records_tomorrow = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() + timedelta(days=1))],
-            ['state'], ['product_qty:sum'])
-        report_records_yesterday = self.env['report.stock.quantity']._read_group(
+            ['product_qty', 'state'], ['state'], lazy=False)
+        report_records_yesterday = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today() - timedelta(days=1))],
-            ['state'], ['product_qty:sum'])
+            ['product_qty', 'state'], ['state'], lazy=False)
 
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_yesterday if state == 'forecast'), -30.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_yesterday if state == 'out'), -30.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_yesterday if state == 'in'), 0.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_yesterday if r['state'] == 'forecast']), -30.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_yesterday if r['state'] == 'out']), -30.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_yesterday if r['state'] == 'in']), 0.0)
 
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_today if state == 'forecast'), 20.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_today if state == 'out'), 0.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_today if state == 'in'), 0.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_today if r['state'] == 'forecast']), 20.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_today if r['state'] == 'out']), 0.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_today if r['state'] == 'in']), 0.0)
 
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'forecast'), 10.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'out'), -20.0)
-        self.assertEqual(sum(product_qty for state, product_qty in report_records_tomorrow if state == 'in'), 10.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'forecast']), 10.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'out']), -20.0)
+        self.assertEqual(sum([r['product_qty'] for r in report_records_tomorrow if r['state'] == 'in']), 10.0)
 
     def test_report_quantity_2(self):
         """ Not supported case.
@@ -262,14 +262,14 @@ class TestReports(TestReportsCommon):
         })
         move._action_confirm()
         self.env.flush_all()
-        report_records = self.env['report.stock.quantity']._read_group(
+        report_records = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today()), ('warehouse_id', '!=', False)],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records if state == 'forecast'), 40.0)
-        report_records = self.env['report.stock.quantity']._read_group(
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records if r['state'] == 'forecast']), 40.0)
+        report_records = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records if state == 'forecast'), 40.0)
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records if r['state'] == 'forecast']), 40.0)
         move = self.env['stock.move'].create({
             'name': 'Move outside warehouse',
             'location_id': stock_without_wh.id,
@@ -280,10 +280,10 @@ class TestReports(TestReportsCommon):
         })
         move._action_confirm()
         self.env.flush_all()
-        report_records = self.env['report.stock.quantity']._read_group(
+        report_records = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            ['state'], ['product_qty:sum'])
-        self.assertEqual(sum(product_qty for state, product_qty in report_records if state == 'forecast'), 40.0)
+            ['product_qty', 'state'], ['state'], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records if r['state'] == 'forecast']), 40.0)
 
     def test_report_quantity_3(self):
         product_form = Form(self.env['product.product'])
@@ -304,10 +304,10 @@ class TestReports(TestReportsCommon):
         })
 
         self.env.flush_all()
-        report_records = self.env['report.stock.quantity']._read_group(
+        report_records = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            [], ['product_qty:sum'])
-        self.assertEqual(report_records[0][0], 0.0)
+            ['product_qty'], [], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records if r['product_qty']]), 0.0)
 
         # Receipt of 20.0 units tomorrow
         move_in = self.env['stock.move'].create({
@@ -320,14 +320,13 @@ class TestReports(TestReportsCommon):
         })
         move_in._action_confirm()
         move_in.move_line_ids.location_dest_id = stock_real_loc.id
-        move_in.move_line_ids.quantity = 20.0
-        move_in.picked = True
+        move_in.move_line_ids.qty_done = 20.0
         move_in._action_done()
         self.env.flush_all()
-        report_records = self.env['report.stock.quantity']._read_group(
+        report_records = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            [], ['product_qty:sum'])
-        self.assertEqual(report_records[0][0], 20.0)
+            ['product_qty'], [], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records]), 20.0)
 
         # Delivery of 10.0 units tomorrow
         move_out = self.env['stock.move'].create({
@@ -340,14 +339,13 @@ class TestReports(TestReportsCommon):
         })
         move_out._action_confirm()
         move_out._action_assign()
-        move_out.move_line_ids.quantity = 10.0
-        move_out.picked = True
+        move_out.move_line_ids.qty_done = 10.0
         move_out._action_done()
         self.env.flush_all()
-        report_records = self.env['report.stock.quantity']._read_group(
+        report_records = self.env['report.stock.quantity'].read_group(
             [('product_id', '=', product.id), ('date', '=', date.today())],
-            [], ['product_qty:sum'])
-        self.assertEqual(report_records[0][0], 10.0)
+            ['product_qty'], [], lazy=False)
+        self.assertEqual(sum([r['product_qty'] for r in report_records]), 10.0)
 
     def test_report_forecast_1(self):
         """ Checks report data for product is empty. Then creates and process
@@ -360,7 +358,9 @@ class TestReports(TestReportsCommon):
         self.assertEqual(draft_picking_qty['out'], 0)
 
         # Creates a receipt then checks draft picking quantities.
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         receipt = receipt_form.save()
@@ -376,7 +376,9 @@ class TestReports(TestReportsCommon):
         self.assertEqual(draft_picking_qty['out'], 0)
 
         # Creates a delivery then checks draft picking quantities.
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery = delivery_form.save()
@@ -401,7 +403,7 @@ class TestReports(TestReportsCommon):
         delivery_line = lines[0]
         self.assertEqual(delivery_line['quantity'], 5)
         self.assertEqual(delivery_line['replenishment_filled'], False)
-        self.assertEqual(delivery_line['document_out']['id'], delivery.id)
+        self.assertEqual(delivery_line['document_out'].id, delivery.id)
 
         # Confirms the receipt, must have two report lines now:
         #   - line with 2 qty (from the receipt to the delivery)
@@ -416,14 +418,16 @@ class TestReports(TestReportsCommon):
         unavailable_line = lines[1]
         self.assertEqual(fulfilled_line['replenishment_filled'], True)
         self.assertEqual(fulfilled_line['quantity'], 2)
-        self.assertEqual(fulfilled_line['document_in']['id'], receipt.id)
-        self.assertEqual(fulfilled_line['document_out']['id'], delivery.id)
+        self.assertEqual(fulfilled_line['document_in'].id, receipt.id)
+        self.assertEqual(fulfilled_line['document_out'].id, delivery.id)
         self.assertEqual(unavailable_line['replenishment_filled'], False)
         self.assertEqual(unavailable_line['quantity'], 3)
-        self.assertEqual(unavailable_line['document_out']['id'], delivery.id)
+        self.assertEqual(unavailable_line['document_out'].id, delivery.id)
 
         # Creates a new receipt for the remaining quantity, confirm it...
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -435,9 +439,8 @@ class TestReports(TestReportsCommon):
         # ... and valid the first one.
         receipt_form = Form(receipt)
         with receipt_form.move_ids_without_package.edit(0) as move_line:
-            move_line.quantity = 2
+            move_line.quantity_done = 2
         receipt = receipt_form.save()
-        receipt.move_ids.picked = True
         receipt.button_validate()
 
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
@@ -451,19 +454,21 @@ class TestReports(TestReportsCommon):
         self.assertEqual(line1['quantity'], 2)
         self.assertEqual(line1['replenishment_filled'], True)
         self.assertEqual(line1['document_in'], False)
-        self.assertEqual(line1['document_out']['id'], delivery.id)
+        self.assertEqual(line1['document_out'].id, delivery.id)
         # Second line must be linked to the second receipt.
         self.assertEqual(line2['quantity'], 3)
         self.assertEqual(line2['replenishment_filled'], True)
-        self.assertEqual(line2['document_in']['id'], receipt2.id)
-        self.assertEqual(line2['document_out']['id'], delivery.id)
+        self.assertEqual(line2['document_in'].id, receipt2.id)
+        self.assertEqual(line2['document_out'].id, delivery.id)
 
     def test_report_forecast_2_replenishments_order(self):
         """ Creates a receipt then creates a delivery using half of the receipt quantity.
         Checks replenishment lines are correctly sorted (assigned first, unassigned at the end).
         """
         # Creates a receipt then checks draft picking quantities.
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -473,7 +478,9 @@ class TestReports(TestReportsCommon):
         receipt.action_confirm()
 
         # Creates a delivery then checks draft picking quantities.
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -486,9 +493,9 @@ class TestReports(TestReportsCommon):
         self.assertEqual(len(lines), 2, "Must have 2 line.")
         line_1 = lines[0]
         line_2 = lines[1]
-        self.assertEqual(line_1['document_in']['id'], receipt.id)
-        self.assertEqual(line_1['document_out']['id'], delivery.id)
-        self.assertEqual(line_2['document_in']['id'], receipt.id)
+        self.assertEqual(line_1['document_in'].id, receipt.id)
+        self.assertEqual(line_1['document_out'].id, delivery.id)
+        self.assertEqual(line_2['document_in'].id, receipt.id)
         self.assertEqual(line_2['document_out'], False)
 
     def test_report_forecast_3_sort_by_date(self):
@@ -501,7 +508,9 @@ class TestReports(TestReportsCommon):
         one_day = timedelta(days=1)
         one_month = timedelta(days=30)
         # Creates a bunch of deliveries with different date.
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today
@@ -511,7 +520,9 @@ class TestReports(TestReportsCommon):
         delivery_1 = delivery_form.save()
         delivery_1.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today + one_hours
@@ -521,7 +532,9 @@ class TestReports(TestReportsCommon):
         delivery_2 = delivery_form.save()
         delivery_2.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today - one_hours
@@ -531,7 +544,9 @@ class TestReports(TestReportsCommon):
         delivery_3 = delivery_form.save()
         delivery_3.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today + one_day
@@ -541,7 +556,9 @@ class TestReports(TestReportsCommon):
         delivery_4 = delivery_form.save()
         delivery_4.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today - one_day
@@ -551,7 +568,9 @@ class TestReports(TestReportsCommon):
         delivery_5 = delivery_form.save()
         delivery_5.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today + one_month
@@ -561,7 +580,9 @@ class TestReports(TestReportsCommon):
         delivery_6 = delivery_form.save()
         delivery_6.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery_form.scheduled_date = today - one_month
@@ -577,16 +598,18 @@ class TestReports(TestReportsCommon):
         self.assertEqual(len(lines), 7, "The report must have 7 line.")
         self.assertEqual(draft_picking_qty['in'], 0)
         self.assertEqual(draft_picking_qty['out'], 0)
-        self.assertEqual(lines[0]['document_out']['id'], delivery_7.id)
-        self.assertEqual(lines[1]['document_out']['id'], delivery_5.id)
-        self.assertEqual(lines[2]['document_out']['id'], delivery_3.id)
-        self.assertEqual(lines[3]['document_out']['id'], delivery_1.id)
-        self.assertEqual(lines[4]['document_out']['id'], delivery_2.id)
-        self.assertEqual(lines[5]['document_out']['id'], delivery_4.id)
-        self.assertEqual(lines[6]['document_out']['id'], delivery_6.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery_7.id)
+        self.assertEqual(lines[1]['document_out'].id, delivery_5.id)
+        self.assertEqual(lines[2]['document_out'].id, delivery_3.id)
+        self.assertEqual(lines[3]['document_out'].id, delivery_1.id)
+        self.assertEqual(lines[4]['document_out'].id, delivery_2.id)
+        self.assertEqual(lines[5]['document_out'].id, delivery_4.id)
+        self.assertEqual(lines[6]['document_out'].id, delivery_6.id)
 
         # Creates 3 receipts for 20 units.
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         receipt_form.scheduled_date = today + one_month
@@ -596,7 +619,9 @@ class TestReports(TestReportsCommon):
         receipt_1 = receipt_form.save()
         receipt_1.action_confirm()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         receipt_form.scheduled_date = today - one_month
@@ -606,7 +631,9 @@ class TestReports(TestReportsCommon):
         receipt_2 = receipt_form.save()
         receipt_2.action_confirm()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         receipt_form.scheduled_date = today - one_hours
@@ -622,23 +649,23 @@ class TestReports(TestReportsCommon):
         self.assertEqual(len(lines), 7, "The report must have 7 line.")
         self.assertEqual(draft_picking_qty['in'], 0)
         self.assertEqual(draft_picking_qty['out'], 0)
-        self.assertEqual(lines[0]['document_out']['id'], delivery_7.id)
-        self.assertEqual(lines[0]['document_in']['id'], receipt_2.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery_7.id)
+        self.assertEqual(lines[0]['document_in'].id, receipt_2.id)
         self.assertEqual(lines[0]['is_late'], False)
-        self.assertEqual(lines[1]['document_out']['id'], delivery_5.id)
-        self.assertEqual(lines[1]['document_in']['id'], receipt_3.id)
+        self.assertEqual(lines[1]['document_out'].id, delivery_5.id)
+        self.assertEqual(lines[1]['document_in'].id, receipt_3.id)
         self.assertEqual(lines[1]['is_late'], True)
-        self.assertEqual(lines[2]['document_out']['id'], delivery_3.id)
-        self.assertEqual(lines[2]['document_in']['id'], receipt_3.id)
+        self.assertEqual(lines[2]['document_out'].id, delivery_3.id)
+        self.assertEqual(lines[2]['document_in'].id, receipt_3.id)
         self.assertEqual(lines[2]['is_late'], False)
-        self.assertEqual(lines[3]['document_out']['id'], delivery_1.id)
-        self.assertEqual(lines[3]['document_in']['id'], receipt_1.id)
+        self.assertEqual(lines[3]['document_out'].id, delivery_1.id)
+        self.assertEqual(lines[3]['document_in'].id, receipt_1.id)
         self.assertEqual(lines[3]['is_late'], True)
-        self.assertEqual(lines[4]['document_out']['id'], delivery_2.id)
+        self.assertEqual(lines[4]['document_out'].id, delivery_2.id)
         self.assertEqual(lines[4]['document_in'], False)
-        self.assertEqual(lines[5]['document_out']['id'], delivery_4.id)
+        self.assertEqual(lines[5]['document_out'].id, delivery_4.id)
         self.assertEqual(lines[5]['document_in'], False)
-        self.assertEqual(lines[6]['document_out']['id'], delivery_6.id)
+        self.assertEqual(lines[6]['document_out'].id, delivery_6.id)
         self.assertEqual(lines[6]['document_in'], False)
 
     def test_report_forecast_4_intermediate_transfers(self):
@@ -670,7 +697,7 @@ class TestReports(TestReportsCommon):
 
         # The Forecasted Report don't show intermediate moves, it must display only ingoing/outgoing documents.
         self.assertEqual(len(lines), 1, "The report must have only 1 line.")
-        self.assertEqual(lines[0]['document_in']['id'], receipt.id, "The report must only show the receipt.")
+        self.assertEqual(lines[0]['document_in'].id, receipt.id, "The report must only show the receipt.")
         self.assertEqual(lines[0]['document_out'], False)
         self.assertEqual(lines[0]['quantity'], reordering_rule.product_max_qty)
 
@@ -686,7 +713,9 @@ class TestReports(TestReportsCommon):
         ])
 
         # Creates a delivery then checks draft picking quantities.
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         delivery = delivery_form.save()
@@ -714,7 +743,7 @@ class TestReports(TestReportsCommon):
         draft_picking_qty = docs['draft_picking_qty']
         self.assertEqual(len(lines), 1)
         self.assertEqual(draft_picking_qty['out'], 0)
-        self.assertEqual(lines[0]['document_out']['id'], delivery.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery.id)
         self.assertEqual(lines[0]['quantity'], 5)
 
         report_values, docs, lines = self.get_report_forecast(
@@ -726,7 +755,9 @@ class TestReports(TestReportsCommon):
         self.assertEqual(draft_picking_qty['out'], 0)
 
         # Creates a delivery for the second warehouse.
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = picking_type_out_2
         delivery_2 = delivery_form.save()
@@ -739,7 +770,7 @@ class TestReports(TestReportsCommon):
         draft_picking_qty = docs['draft_picking_qty']
         self.assertEqual(len(lines), 1)
         self.assertEqual(draft_picking_qty['out'], 0)
-        self.assertEqual(lines[0]['document_out']['id'], delivery.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery.id)
         self.assertEqual(lines[0]['quantity'], 5)
 
         report_values, docs, lines = self.get_report_forecast(
@@ -755,7 +786,7 @@ class TestReports(TestReportsCommon):
         draft_picking_qty = docs['draft_picking_qty']
         self.assertEqual(len(lines), 1)
         self.assertEqual(draft_picking_qty['out'], 0)
-        self.assertEqual(lines[0]['document_out']['id'], delivery.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery.id)
         self.assertEqual(lines[0]['quantity'], 5)
 
         report_values, docs, lines = self.get_report_forecast(
@@ -765,7 +796,7 @@ class TestReports(TestReportsCommon):
         draft_picking_qty = docs['draft_picking_qty']
         self.assertEqual(len(lines), 1)
         self.assertEqual(draft_picking_qty['out'], 0)
-        self.assertEqual(lines[0]['document_out']['id'], delivery_2.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery_2.id)
         self.assertEqual(lines[0]['quantity'], 8)
 
     def test_report_forecast_5_multi_warehouse_chain(self):
@@ -819,8 +850,8 @@ class TestReports(TestReportsCommon):
         )
         # The forecast should show 1 line linking the delivery with the replenish
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0]['document_out']['id'], delivery.id)
-        self.assertEqual(lines[0]['document_in']['id'], inter_wh_delivery.picking_id.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery.id)
+        self.assertEqual(lines[0]['document_in'].id, inter_wh_delivery.picking_id.id)
 
     def test_report_forecast_6_multi_company(self):
         """ Create transfers for two different companies and check report
@@ -832,7 +863,9 @@ class TestReports(TestReportsCommon):
         wh_2_picking_type_in = wh_2.in_type_id
 
         # Creates a receipt then checks draft picking quantities.
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         wh_1_receipt = receipt_form.save()
@@ -842,7 +875,9 @@ class TestReports(TestReportsCommon):
         wh_1_receipt = receipt_form.save()
 
         # Creates a receipt then checks draft picking quantities.
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = wh_2_picking_type_in
         wh_2_receipt = receipt_form.save()
@@ -872,7 +907,7 @@ class TestReports(TestReportsCommon):
 
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         self.assertEqual(len(lines), 1, "Must have 1 line.")
-        self.assertEqual(lines[0]['document_in']['id'], wh_1_receipt.id)
+        self.assertEqual(lines[0]['document_in'].id, wh_1_receipt.id)
         self.assertEqual(lines[0]['quantity'], 2)
 
         report_values, docs, lines = self.get_report_forecast(
@@ -880,7 +915,7 @@ class TestReports(TestReportsCommon):
             context={'warehouse': wh_2.id},
         )
         self.assertEqual(len(lines), 1, "Must have 1 line.")
-        self.assertEqual(lines[0]['document_in']['id'], wh_2_receipt.id)
+        self.assertEqual(lines[0]['document_in'].id, wh_2_receipt.id)
         self.assertEqual(lines[0]['quantity'], 5)
 
     def test_report_forecast_7_multiple_variants(self):
@@ -929,7 +964,9 @@ class TestReports(TestReportsCommon):
         gamejoy_xl_blue = product_template.product_variant_ids[3]
 
         # Create two receipts.
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -941,7 +978,9 @@ class TestReports(TestReportsCommon):
         receipt_1 = receipt_form.save()
         receipt_1.action_confirm()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -958,11 +997,13 @@ class TestReports(TestReportsCommon):
 
         report_values, docs, lines = self.get_report_forecast(product_template_ids=product_template.ids)
         self.assertEqual(len(lines), 5, "Must have 5 lines.")
-        self.assertTrue(all(product_variant['id'] in product_template.product_variant_ids.ids for product_variant in docs['product_variants']))
+        self.assertEqual(docs['product_variants'].ids, product_template.product_variant_ids.ids)
 
         # Create a delivery for one of these products and check the report lines
         # are correctly linked to the good receipts.
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -973,7 +1014,7 @@ class TestReports(TestReportsCommon):
 
         report_values, docs, lines = self.get_report_forecast(product_template_ids=product_template.ids)
         self.assertEqual(len(lines), 5, "Still must have 5 lines.")
-        self.assertEqual(docs['product_variants_ids'], product_template.product_variant_ids.ids)
+        self.assertEqual(docs['product_variants'].ids, product_template.product_variant_ids.ids)
         # First and second lines should be about the "Game Joy Pocket (gray)"
         # and must link the delivery with the two receipt lines.
         line_1 = lines[0]
@@ -981,13 +1022,13 @@ class TestReports(TestReportsCommon):
         self.assertEqual(line_1['product']['id'], gamejoy_pocket_gray.id)
         self.assertEqual(line_1['quantity'], 8)
         self.assertTrue(line_1['replenishment_filled'])
-        self.assertEqual(line_1['document_in']['id'], receipt_1.id)
-        self.assertEqual(line_1['document_out']['id'], delivery.id)
+        self.assertEqual(line_1['document_in'].id, receipt_1.id)
+        self.assertEqual(line_1['document_out'].id, delivery.id)
         self.assertEqual(line_2['product']['id'], gamejoy_pocket_gray.id)
         self.assertEqual(line_2['quantity'], 2)
         self.assertTrue(line_2['replenishment_filled'])
-        self.assertEqual(line_2['document_in']['id'], receipt_2.id)
-        self.assertEqual(line_2['document_out']['id'], delivery.id)
+        self.assertEqual(line_2['document_in'].id, receipt_2.id)
+        self.assertEqual(line_2['document_out'].id, delivery.id)
 
     def test_report_forecast_8_delivery_to_receipt_link(self):
         """
@@ -995,7 +1036,9 @@ class TestReports(TestReportsCommon):
         The report should show the source document as the 2nd delivery, and show the first
         delivery completely unfilled.
         """
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1004,7 +1047,9 @@ class TestReports(TestReportsCommon):
         delivery = delivery_form.save()
         delivery.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1013,7 +1058,9 @@ class TestReports(TestReportsCommon):
         delivery2 = delivery_form.save()
         delivery2.action_confirm()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         receipt = receipt_form.save()
@@ -1035,10 +1082,10 @@ class TestReports(TestReportsCommon):
         _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
 
         self.assertEqual(len(lines), 2, 'Only 2 lines')
-        delivery_line = [l for l in lines if l['document_out']['id'] == delivery.id][0]
+        delivery_line = [l for l in lines if l['document_out'].id == delivery.id][0]
         self.assertTrue(delivery_line, 'No line for delivery 1')
         self.assertFalse(delivery_line['replenishment_filled'])
-        delivery2_line = [l for l in lines if l['document_out']['id'] == delivery2.id][0]
+        delivery2_line = [l for l in lines if l['document_out'].id == delivery2.id][0]
         self.assertTrue(delivery2_line, 'No line for delivery 2')
         self.assertTrue(delivery2_line['replenishment_filled'])
 
@@ -1049,7 +1096,9 @@ class TestReports(TestReportsCommon):
         For example, this can happen if they have manually increased the quantity on the generated PO.
         The report should show both deliveries fulfilled.
         """
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1058,7 +1107,9 @@ class TestReports(TestReportsCommon):
         delivery = delivery_form.save()
         delivery.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1067,7 +1118,9 @@ class TestReports(TestReportsCommon):
         delivery2 = delivery_form.save()
         delivery2.action_confirm()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         receipt = receipt_form.save()
@@ -1089,10 +1142,10 @@ class TestReports(TestReportsCommon):
         _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
 
         self.assertEqual(len(lines), 2, 'Only 2 lines')
-        delivery_line = [l for l in lines if l['document_out']['id'] == delivery.id][0]
+        delivery_line = [l for l in lines if l['document_out'].id == delivery.id][0]
         self.assertTrue(delivery_line, 'No line for delivery 1')
         self.assertTrue(delivery_line['replenishment_filled'])
-        delivery2_line = [l for l in lines if l['document_out']['id'] == delivery2.id][0]
+        delivery2_line = [l for l in lines if l['document_out'].id == delivery2.id][0]
         self.assertTrue(delivery2_line, 'No line for delivery 2')
         self.assertTrue(delivery2_line['replenishment_filled'])
 
@@ -1122,7 +1175,9 @@ class TestReports(TestReportsCommon):
             move.product_uom_qty = 150
         receipt1 = receipt_form.save()
         receipt1.action_confirm()
-        self.assertEqual(delivery1.move_ids.forecast_availability, -50.0)
+        self.assertEqual(receipt1.move_ids.forecast_availability, -50.0)
+        self.assertEqual(delivery1.move_ids.forecast_availability, 150)
+        self.assertEqual(delivery1.move_ids.forecast_expected_date, scheduled_date1)
 
         # Creation of an identical receipt which should lead to a positive forecast availability
         scheduled_date2 = datetime.now() + timedelta(days=3)
@@ -1132,18 +1187,20 @@ class TestReports(TestReportsCommon):
         receipt_form.scheduled_date = scheduled_date2
         with receipt_form.move_ids_without_package.new() as move:
             move.product_id = self.product
-            move.product_uom_qty = 50
+            move.product_uom_qty = 150
         receipt2 = receipt_form.save()
         receipt2.action_confirm()
+        for move in receipt2.move_ids:
+            move.quantity_done = 150
 
         # Check forecast_information of delivery1
         delivery1.move_ids._compute_forecast_information()  # Because depends not "complete"
         self.assertEqual(delivery1.move_ids.forecast_availability, 200)
         self.assertEqual(delivery1.move_ids.forecast_expected_date, scheduled_date2)
 
-        receipt2.move_ids.quantity = receipt2.move_ids.product_uom_qty
-        receipt2.move_ids.picked = True
         receipt2.button_validate()
+        self.assertEqual(receipt1.move_ids.forecast_availability, 100.0)
+
         # Check forecast_information of delivery1, because the receipt2 as been validate the forecast_expected_date == receipt1.scheduled_date
         delivery1.move_ids._compute_forecast_information()
         self.assertEqual(delivery1.move_ids.forecast_availability, 200)
@@ -1154,27 +1211,21 @@ class TestReports(TestReportsCommon):
         delivery2_form.scheduled_date = datetime.now() + timedelta(days=1)
         delivery2 = delivery2_form.save()
         delivery2.action_confirm()
-        delivery2.move_ids.quantity = delivery1.move_ids.quantity
-        # Unreserve to avoid stealing the 50 unit in stock
-        delivery2.do_unreserve()
-        # Still needs 200 qty to fulfill delivery2's need
-        self.assertEqual(delivery2.move_ids.forecast_availability, -200)
+        self.assertEqual(delivery2.move_ids.forecast_availability, 100)
 
         # Check for both deliveries and receipts if the highlight (is_matched) corresponds to the correct picking
         for picking in [delivery1, delivery2, receipt1, receipt2]:
             context = picking.move_ids[0].action_product_forecast_report()['context']
             _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids, context=context)
             for line in lines:
-                if (line['document_in'] and picking.id == line['document_in']['id']) or (line['document_out'] and picking.id == line['document_out']['id']): #document_in is False
+                if picking in [line['document_in'], line['document_out']]:
                     self.assertTrue(line['is_matched'], "The corresponding picking should be matched in the forecast report.")
                 else:
                     self.assertFalse(line['is_matched'], "A line of the forecast report not linked to the picking shoud not be matched.")
 
     def test_report_forecast_11_non_reserved_order(self):
         """ Creates deliveries with different operation type reservation methods.
-        Checks replenishment lines are correctly sorted by the flollowing criteria:
-            - If the reservation date is in the past at any time T, use the priority and scheduled date
-            - If the reservation date is in the future, use reservation date, priority and scheduled date
+        Checks replenishment lines are correctly sorted by reservation_date:
             'manual': always last (no reservation_date)
             'at_confirm': reservation_date = time of creation
             'by_date': reservation_date = scheduled_date - reservation_days_before(_priority)
@@ -1195,7 +1246,9 @@ class TestReports(TestReportsCommon):
         picking_type_at_confirm.sequence_code = 'confirm'
 
         # 'manual' reservation => no reservation_date
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = picking_type_manual
         delivery_form.scheduled_date = datetime.now() - timedelta(days=10)
@@ -1206,7 +1259,9 @@ class TestReports(TestReportsCommon):
         delivery_manual.action_confirm()
 
         # 'by_date' reservation => reservation_date = 1 day before today
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = picking_type_by_date
         delivery_form.scheduled_date = datetime.now() + timedelta(days=5)
@@ -1217,7 +1272,9 @@ class TestReports(TestReportsCommon):
         delivery_by_date.action_confirm()
 
         # 'by_date' reservation (priority) => reservation_date = 1 day after today
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = picking_type_by_date
         delivery_form.scheduled_date = datetime.now() + timedelta(days=5)
@@ -1225,7 +1282,7 @@ class TestReports(TestReportsCommon):
             move_line.product_id = self.product
             move_line.product_uom_qty = 3
         delivery_by_date_priority = delivery_form.save()
-        # <field name="priority" invisible="name == '/'"/>
+        # <field name="priority" attrs="{'invisible': [('name','=','/')]}"/>
         # The priority field is not visible until the name is set,
         # which is done after a first save / the `create`
         delivery_form.priority = '1'
@@ -1233,7 +1290,9 @@ class TestReports(TestReportsCommon):
         delivery_by_date_priority.action_confirm()
 
         # 'at_confirm' reservation => reservation_date = today
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = picking_type_at_confirm
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1242,13 +1301,13 @@ class TestReports(TestReportsCommon):
         delivery_at_confirm = delivery_form.save()
         delivery_at_confirm.action_confirm()
 
-        # Order should be: delivery_at_confirm, delivery_by_date, delivery_by_date_priority, delivery_manual
+        # Order should be: delivery_by_date, delivery_at_confirm, delivery_by_date_priority, delivery_manual
         _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
         self.assertEqual(len(lines), 4, "The report must have 4 lines.")
-        self.assertEqual(lines[0]['document_out']['id'], delivery_at_confirm.id)
-        self.assertEqual(lines[1]['document_out']['id'], delivery_by_date.id)
-        self.assertEqual(lines[2]['document_out']['id'], delivery_by_date_priority.id)
-        self.assertEqual(lines[3]['document_out']['id'], delivery_manual.id)
+        self.assertEqual(lines[0]['document_out'].id, delivery_by_date.id)
+        self.assertEqual(lines[1]['document_out'].id, delivery_at_confirm.id)
+        self.assertEqual(lines[2]['document_out'].id, delivery_by_date_priority.id)
+        self.assertEqual(lines[3]['document_out'].id, delivery_manual.id)
 
         all_delivery = delivery_by_date | delivery_at_confirm | delivery_by_date_priority | delivery_manual
         self.assertEqual(all_delivery.move_ids.mapped("forecast_availability"), [-3.0, -3.0, -3.0, -3.0])
@@ -1265,39 +1324,6 @@ class TestReports(TestReportsCommon):
         receipt1.action_confirm()
 
         self.assertEqual(all_delivery.move_ids.mapped("forecast_availability"), [3, 3, -3.0, -3.0])
-
-    def test_report_forecast_12_reserved_transit(self):
-        """ Tests the transit feature, in 2 step incoming shipment warehouse, create
-            incoming transfer, validate it, create outgoing transfer and check report to show
-            quantities needed are in transit
-        """
-        grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
-        grp_multi_routes = self.env.ref('stock.group_adv_location')
-        self.env.user.write({'groups_id': [(4, grp_multi_loc.id)]})
-        self.env.user.write({'groups_id': [(4, grp_multi_routes.id)]})
-        # Warehouse config.
-        warehouse = self.env.ref('stock.warehouse0')
-        warehouse.reception_steps = 'two_steps'
-        outgoing = Form(self.env['stock.picking'])
-        outgoing.picking_type_id = self.picking_type_out
-        with outgoing.move_ids_without_package.new() as move:
-            move.product_id = self.product
-            move.product_uom_qty = 2
-        outgoing = outgoing.save()
-        outgoing.action_confirm()
-        incoming = Form(self.env['stock.picking'])
-        incoming.picking_type_id = self.picking_type_in
-        with incoming.move_ids_without_package.new() as move:
-            move.product_id = self.product
-            move.product_uom_qty = 2
-        incoming = incoming.save()
-        incoming.action_confirm()
-        incoming.move_ids.picked = True
-        incoming.button_validate()
-        _, _, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        self.assertEqual(len(lines), 1)
-        self.assertEqual(bool(lines[0]['move_out']), True)
-        self.assertEqual(lines[0]['in_transit'], True)
 
     def test_report_reception_1_one_receipt(self):
         """ Create 2 deliveries and 1 receipt where some of the products being received
@@ -1318,7 +1344,9 @@ class TestReports(TestReportsCommon):
         })
 
         # Creates some deliveries for reception report to match against
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1330,7 +1358,9 @@ class TestReports(TestReportsCommon):
         delivery1 = delivery_form.save()
         delivery1.action_confirm()
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1340,7 +1370,9 @@ class TestReports(TestReportsCommon):
         delivery2.action_confirm()
 
         # Create a receipt
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -1380,8 +1412,7 @@ class TestReports(TestReportsCommon):
         # check that report correctly realizes outgoing moves can be linked when receipt is done
         receipt.action_confirm()
         for move in receipt.move_ids:
-            move.quantity = move.product_uom_qty
-            move.picked = True
+            move.quantity_done = move.product_uom_qty
         receipt.button_validate()
         report_values = report._get_report_values(docids=[receipt.id])
 
@@ -1419,37 +1450,39 @@ class TestReports(TestReportsCommon):
         shows corresponding potential allocations when receipts have differing states.
         """
         # Creates delivery for reception report to match against
-        outgoing_qty = 100
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.product
-            move_line.product_uom_qty = outgoing_qty
+            move_line.product_uom_qty = 100
         delivery = delivery_form.save()
         delivery.action_confirm()
 
         # Create 2 receipts and check its reception report values
-        receipt1_qty = 5
-        receipt2_qty = 3
-        incoming_qty = receipt1_qty + receipt2_qty
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.product
-            move_line.product_uom_qty = receipt1_qty
+            move_line.product_uom_qty = 5
         receipt1 = receipt_form.save()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.product
-            move_line.product_uom_qty = receipt2_qty
+            move_line.product_uom_qty = 3
         receipt2 = receipt_form.save()
 
-        # check that report correctly merges draft incoming quantities
+        # check that report correctly merges not draft incoming quantities
         report = self.env['report.stock.report_reception']
         report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
         self.assertEqual(len(report_values['docs']), 2, "There should be 2 receipts to assign from in this report")
@@ -1463,80 +1496,22 @@ class TestReports(TestReportsCommon):
         # check that report splits assignable and non-assignable quantities when 1 receipt is draft and other is confirmed
         receipt1.action_confirm()
         for move in receipt1.move_ids:
-            move.quantity = move.product_uom_qty
-            move.picked = True
+            move.quantity_done = move.product_uom_qty
         report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
 
         sources_to_lines = report_values['sources_to_lines']
         all_lines = list(sources_to_lines.values())[0]
         # line quantities depends on done vs not done incoming quantities => should be 2 lines now
         self.assertEqual(len(all_lines), 2, "The report has wrong number of lines (1 assignable + 1 not).")
-        self.assertEqual(all_lines[0]['quantity'], receipt1_qty, "The first move has wrong incoming qty to assign.")
-        self.assertTrue(all_lines[0]['is_qty_assignable'], "1 receipt is confirmed => should have 1 reservable move.")
-        self.assertEqual(all_lines[1]['quantity'], receipt2_qty, "The second move has wrong (expected) incoming qty.")
+        self.assertEqual(all_lines[0]['quantity'], 5, "The first move has wrong incoming qty to assign.")
+        self.assertTrue(all_lines[0]['is_qty_assignable'], "1 receipt is done => should have 1 reservable move.")
+        self.assertEqual(all_lines[1]['quantity'], 3, "The second move has wrong (expected) incoming qty.")
         self.assertFalse(all_lines[1]['is_qty_assignable'], "1 receipt is draft => should have 1 non-assignable move.")
-
-        # check that we can assign incoming quantities from 2 different CONFIRMED receipts and then unassign just 1 of them afterwards
-        receipt2.action_confirm()
-        report_values = report._get_report_values(docids=[receipt1.id, receipt2.id])
-        sources_to_lines = report_values['sources_to_lines']
-        all_lines = list(sources_to_lines.values())[0]
-        self.assertEqual(len(all_lines), 1, "The report has wrong number of lines (1 outgoing move they are assignable to).")
-        self.assertEqual(all_lines[0]['quantity'], incoming_qty, "The total amount of incoming qty to assign should be receipt1 + receipt2's qties.")
-        self.assertTrue(all_lines[0]['is_qty_assignable'], "receipts are confirmed, incoming moves should be assignable.")
-        report.action_assign(delivery.move_ids_without_package.ids, [incoming_qty], (receipt1 | receipt2).move_ids_without_package.ids)
-        mto_move = delivery.move_ids_without_package.filtered(lambda m: m.procure_method == 'make_to_order')
-        non_mto_move = delivery.move_ids_without_package - mto_move
-        # check that assigned (MTO) move is correctly created
-        self.assertEqual(len(mto_move), 1, "Only 1 delivery move should be MTO")
-        self.assertEqual(len(non_mto_move), 1, "Remaining not-assigned outgoing qty should have split into separate move")
-        self.assertEqual(mto_move.product_uom_qty, incoming_qty, "Incorrect quantity split for MTO move")
-        self.assertEqual(mto_move.state, 'waiting', "MTO move state not correctly set")
-        # unassign only 1 of the incoming moves
-        report.action_unassign([mto_move.id], receipt2_qty, receipt2.move_ids_without_package.ids)
-        mto_move = delivery.move_ids_without_package.filtered(lambda m: m.procure_method == 'make_to_order')
-        non_mto_moves = delivery.move_ids_without_package - mto_move
-        self.assertEqual(len(mto_move), 1, "Only 1 delivery move should be MTO")
-        self.assertEqual(len(non_mto_moves), 2, "Original split not-assigned outgoing qty should still exist + new move of unassigned qty")
-        self.assertEqual(mto_move.product_uom_qty, receipt1_qty, "Incorrect quantity split for remaining MTO move qty")
-        self.assertEqual(mto_move.state, 'waiting', "MTO move state shouldn't have changed")
 
         # check that report doesn't allow done and non-done moves at same time
         receipt1.button_validate()
         reason = report._get_report_values(docids=[receipt1.id, receipt2.id])['reason']
         self.assertEqual(reason, "This report cannot be used for done and not done %s at the same time" % report._get_doc_types(), "empty report reason not shown")
-
-        # check that we can assign incoming quantities from 2 different DONE receipts and then unassign just 1 of them afterwards when reserved amounts in delivery
-        receipt2.button_validate()
-        # create clean delivery since moves are split in original delivery + new delivery will auto merge the moves
-        delivery.action_cancel()
-        delivery2 = delivery.copy()
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
-            'product_id': self.product.id,
-            'location_id': self.stock_location.id,
-            'inventory_quantity': outgoing_qty
-        }).action_apply_inventory()
-        delivery2.action_confirm()
-        self.assertEqual(delivery2.move_ids_without_package.quantity, outgoing_qty, "Delivery move should already be reserved")
-        report.action_assign(delivery2.move_ids_without_package.ids, [incoming_qty], (receipt1 | receipt2).move_ids_without_package.ids)
-        mto_move = delivery2.move_ids_without_package.filtered(lambda m: m.procure_method == 'make_to_order')
-        non_mto_move = delivery2.move_ids_without_package - mto_move
-        # check that assigned (MTO) move is correctly created
-        self.assertEqual(len(mto_move), 1, "Only 1 delivery move should be MTO")
-        self.assertEqual(len(non_mto_move), 1, "Remaining not-assigned outgoing qty should have split into separate move")
-        self.assertEqual(mto_move.product_uom_qty, incoming_qty, "Incorrect quantity split for MTO move")
-        self.assertEqual(mto_move.state, 'assigned', "MTO move should still be reserved")
-        # unassign only 1 of the incoming moves
-        report.action_unassign([mto_move.id], receipt2_qty, receipt2.move_ids_without_package.ids)
-        mto_move = delivery2.move_ids_without_package.filtered(lambda m: m.procure_method == 'make_to_order')
-        non_mto_moves = delivery2.move_ids_without_package - mto_move
-        self.assertEqual(len(mto_move), 1, "Only 1 delivery move should be MTO")
-        self.assertEqual(len(non_mto_moves), 2, "Original split not-assigned outgoing qty should still exist + new move of unassigned qty")
-        self.assertEqual(mto_move.product_uom_qty, receipt1_qty, "Incorrect quantity split for remaining MTO move qty")
-        self.assertEqual(mto_move.quantity, receipt1_qty, "Incorrect reserved amount split for remaining MTO move qty")
-        self.assertEqual(mto_move.state, 'assigned', "MTO move state shouldn't have changed")
-        for move in non_mto_moves:
-            self.assertEqual(move.quantity, move.product_uom_qty, "Incorrect reserved amount split for remaining MTO move qty")
 
     def test_report_reception_3_multiwarehouse(self):
         """ Check that reception report respects same warehouse for
@@ -1553,7 +1528,9 @@ class TestReports(TestReportsCommon):
         ])
 
         # Creates delivery in warehouse2
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = picking_type_out_2
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1563,12 +1540,14 @@ class TestReports(TestReportsCommon):
         delivery.action_confirm()
 
         # Create a receipt in warehouse1
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.product
-            move_line.quantity = 15
+            move_line.product_uom_qty = 15
         receipt = receipt_form.save()
 
         report = self.env['report.stock.report_reception']
@@ -1604,7 +1583,9 @@ class TestReports(TestReportsCommon):
         self.assertEqual(pack_move.state, 'waiting', "Pack move wasn't created...")
         self.assertEqual(pick_move.state, 'confirmed', "Pick move wasn't created...")
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -1620,7 +1601,6 @@ class TestReports(TestReportsCommon):
         """ Check the complicated use cases of correct move splitting when assigning/unassigning when:
         1. Qty to assign is less than delivery qty demand
         2. Delivery already has some reserved quants
-        3. Receipt and delivery are not yet 'done' at time of assign/unassign
         """
         incoming_qty = 4
         outgoing_qty = 10
@@ -1632,7 +1612,9 @@ class TestReports(TestReportsCommon):
         }).action_apply_inventory()
 
         # create delivery + receipt
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
             move_line.product_id = self.product
@@ -1640,7 +1622,9 @@ class TestReports(TestReportsCommon):
         delivery = delivery_form.save()
         delivery.action_confirm()
 
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -1667,12 +1651,12 @@ class TestReports(TestReportsCommon):
         # check that assigned (MTO) move is correctly created
         self.assertEqual(len(mto_move), 1, "Only 1 delivery move should be MTO")
         self.assertEqual(mto_move.product_uom_qty, incoming_qty, "Incorrect quantity split for MTO move")
-        self.assertEqual(mto_move.quantity, 0, "Receipt is not done => assigned move can't have a reserved qty")
+        self.assertEqual(mto_move.reserved_availability, 0, "Receipt is not done => assigned move can't have a reserved qty")
         self.assertEqual(mto_move.state, 'waiting', "MTO move state not correctly set")
 
         # check that non-assigned move has correct values
         self.assertEqual(non_mto_move.product_uom_qty, outgoing_qty - incoming_qty, "Incorrect quantity split for non-MTO move")
-        self.assertEqual(non_mto_move.quantity, qty_in_stock, "Reserved qty not correctly linked to non-MTO move")
+        self.assertEqual(non_mto_move.reserved_availability, qty_in_stock, "Reserved qty not correctly linked to non-MTO move")
         self.assertEqual(non_mto_move.state, 'assigned', "Fully reserved move has not correctly set state")
 
         # ---------------------
@@ -1691,9 +1675,11 @@ class TestReports(TestReportsCommon):
         """
         incoming_qty = 10
         outgoing_qty = 8
-        orig_incoming_quantity = 4
+        orig_incoming_qty_done = 4
 
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        delivery_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         delivery_form.partner_id = self.partner
         delivery_form.picking_type_id = self.picking_type_out
         with delivery_form.move_ids_without_package.new() as move_line:
@@ -1703,7 +1689,9 @@ class TestReports(TestReportsCommon):
         delivery.action_confirm()
 
         # Create receipt w/greater qty than needed delivery qty
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
+        receipt_form = Form(self.env['stock.picking'].with_context(
+            force_detailed_view=True
+        ), view='stock.view_picking_form')
         receipt_form.partner_id = self.partner
         receipt_form.picking_type_id = self.picking_type_in
         with receipt_form.move_ids_without_package.new() as move_line:
@@ -1717,8 +1705,7 @@ class TestReports(TestReportsCommon):
         self.assertEqual(receipt.move_ids_without_package.move_dest_ids.ids, delivery.move_ids_without_package.ids, "Link between receipt and delivery moves should have been made")
 
         for move in receipt.move_ids:
-            move.quantity = orig_incoming_quantity
-        receipt.move_ids.picked = True
+            move.quantity_done = orig_incoming_qty_done
         res_dict = receipt.button_validate()
         backorder_wizard = Form(self.env[res_dict['res_model']].with_context(res_dict['context'])).save()
         backorder_wizard.process()
@@ -1732,7 +1719,7 @@ class TestReports(TestReportsCommon):
         self.assertEqual(len(all_lines), 1, "The report has wrong number of outgoing moves.")
         # we expect that the report won't know about original receipt done amount, so it will show outgoing_qty as assigned
         # (rather than the remaining amount that isn't reserved). This can change if the report becomes more sophisticated
-        self.assertEqual(all_lines[0]['quantity'], incoming_qty - orig_incoming_quantity, "The report doesn't have the correct qty assigned.")
+        self.assertEqual(all_lines[0]['quantity'], incoming_qty - orig_incoming_qty_done, "The report doesn't have the correct qty assigned.")
 
         # Unassign the amount we expect to see in the report + check split correctly happens
         report.action_unassign(delivery.move_ids_without_package.ids, outgoing_qty, backorder.move_ids_without_package.ids)
@@ -1740,86 +1727,17 @@ class TestReports(TestReportsCommon):
         reserved_move = receipt.move_ids_without_package.move_dest_ids
         self.assertEqual(len(reserved_move), 1, "Move w/reserved qty should have full demand reserved")
         self.assertEqual(reserved_move.state, 'assigned', "Move w/reserved qty should have full demand reserved")
-        self.assertEqual(reserved_move.product_uom_qty, orig_incoming_quantity, "Done amount in original receipt should be amount demanded/reserved in delivery still with a link")
+        self.assertEqual(reserved_move.product_uom_qty, orig_incoming_qty_done, "Done amount in original receipt should be amount demanded/reserved in delivery still with a link")
         report_values = report._get_report_values(docids=[backorder.id])
         sources_to_lines = report_values['sources_to_lines']
         all_lines = list(sources_to_lines.values())[0]
         self.assertEqual(len(all_lines), 1, "The report should only contain the remaining non-reserved move")
-        self.assertEqual(all_lines[0]['quantity'], outgoing_qty - orig_incoming_quantity, "The report doesn't have the correct qty to assign")
+        self.assertEqual(all_lines[0]['quantity'], outgoing_qty - orig_incoming_qty_done, "The report doesn't have the correct qty to assign")
 
         # Re-assign the remaining delivery amount and check that everything reserves correctly in the end
-        report.action_assign((delivery.move_ids_without_package - reserved_move).ids, [outgoing_qty - orig_incoming_quantity], backorder.move_ids_without_package.ids)
+        report.action_assign((delivery.move_ids_without_package - reserved_move).ids, [outgoing_qty - orig_incoming_qty_done], backorder.move_ids_without_package.ids)
         for move in backorder.move_ids:
-            move.quantity = incoming_qty - orig_incoming_quantity
-        backorder.move_ids.picked = True
+            move.quantity_done = incoming_qty - orig_incoming_qty_done
         backorder.button_validate()
         for move in delivery.move_ids_without_package:
             self.assertEqual(move.state, 'assigned', "All delivery moves should be fully reserved now")
-
-    def test_report_reception_7_done_receipt(self):
-        """ Check the complicated use cases of correct move splitting when assigning when:
-        1. Outgoing qty is greater than incoming qty + total outgoing qty is already reserved
-        2. Receipt is already done and then assigned
-        """
-
-        incoming_qty = 4
-        outgoing_qty = 10
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
-            'product_id': self.product.id,
-            'location_id': self.stock_location.id,
-            'inventory_quantity': outgoing_qty
-        }).action_apply_inventory()
-
-        # create delivery + receipt
-        delivery_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
-        delivery_form.picking_type_id = self.picking_type_out
-        with delivery_form.move_ids_without_package.new() as move_line:
-            move_line.product_id = self.product
-            move_line.product_uom_qty = outgoing_qty
-        delivery = delivery_form.save()
-        delivery.action_confirm()
-
-        receipt_form = Form(self.env['stock.picking'], view='stock.view_picking_form')
-        receipt_form.partner_id = self.partner
-        receipt_form.picking_type_id = self.picking_type_in
-        with receipt_form.move_ids_without_package.new() as move_line:
-            move_line.product_id = self.product
-            move_line.product_uom_qty = incoming_qty
-        receipt = receipt_form.save()
-        receipt.action_confirm()
-        receipt.button_validate()
-
-        self.assertEqual(len(delivery.move_ids_without_package), 1)
-        self.assertEqual(delivery.move_ids_without_package.quantity, outgoing_qty, "Delivery move should already be reserved")
-        report = self.env['report.stock.report_reception']
-
-        # -------------------
-        # check report assign
-        # -------------------
-        report.action_assign(delivery.move_ids_without_package.ids, [incoming_qty], receipt.move_ids_without_package.ids)
-        mto_move = delivery.move_ids_without_package.filtered(lambda m: m.procure_method == 'make_to_order')
-        non_mto_move = delivery.move_ids_without_package - mto_move
-
-        # check that delivery move splits correctly when receipt move is assigned to it, done receipt = can be assigned to reserved outs
-        self.assertEqual(len(delivery.move_ids_without_package), 2, "Delivery moves should have split into assigned + not assigned")
-        self.assertEqual(len(delivery.move_ids_without_package.move_orig_ids), 1, "Only 1 delivery + 1 receipt move should be assigned")
-        self.assertEqual(len(receipt.move_ids_without_package.move_dest_ids), 1, "Receipt move should remain unsplit")
-
-        # check that assigned (MTO) move is correctly created
-        self.assertEqual(len(mto_move), 1, "Only 1 delivery move should be MTO")
-        self.assertEqual(mto_move.product_uom_qty, incoming_qty, "Incorrect quantity split for MTO move")
-        self.assertEqual(mto_move.quantity, incoming_qty, "Receipt IS done => assigned pre-reserved move reserved_qty = assigned receipt move qty")
-        self.assertEqual(mto_move.state, 'assigned', "MTO move state not correctly set")
-
-        # check that non-assigned move has correct values
-        self.assertEqual(non_mto_move.product_uom_qty, outgoing_qty - incoming_qty, "Incorrect quantity split for non-MTO move")
-        self.assertEqual(non_mto_move.quantity, outgoing_qty - incoming_qty, "Remaining reserved qty not correctly linked to non-MTO move")
-        self.assertEqual(non_mto_move.state, 'assigned', "Remaining non-MTO reserved move should stay reserved")
-
-        # ---------------------
-        # check report unassign
-        # ---------------------
-        report.action_unassign([mto_move.id], incoming_qty, receipt.move_ids_without_package.ids)
-        self.assertEqual(mto_move.product_uom_qty, incoming_qty, "Move quantities should be unchanged")
-        self.assertEqual(mto_move.procure_method, 'make_to_stock', "Procure method not correctly reset")
-        self.assertEqual(mto_move.state, 'assigned', "Unassigning receipt move shouldn't affect the out move reservation")

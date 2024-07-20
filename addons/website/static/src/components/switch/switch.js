@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, xml } from "@odoo/owl";
+const { Component, xml } = owl;
 
 const NO_OP = () => {};
 

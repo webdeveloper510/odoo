@@ -1,8 +1,7 @@
+# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from werkzeug.urls import url_join
-
-from odoo import _, api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
@@ -14,7 +13,6 @@ class Product(models.Model):
     product_variant_image_ids = fields.One2many('product.image', 'product_variant_id', string="Extra Variant Images")
 
     website_url = fields.Char('Website URL', compute='_compute_product_website_url', help='The full URL to access the document through the website.')
-    ribbon_id = fields.Many2one(string="Variant Ribbon", comodel_name='product.ribbon')
 
     base_unit_count = fields.Float('Base Unit Count', required=True, default=1, help="Display base unit price on your eCommerce pages. Set to 0 to hide it for this product.")
     base_unit_id = fields.Many2one('website.base.unit', string='Custom Unit of Measure', help="Define a custom unit to display in the price per unit of measure field.")
@@ -48,10 +46,7 @@ class Product(models.Model):
     def _compute_product_website_url(self):
         for product in self:
             attributes = ','.join(str(x) for x in product.product_template_attribute_value_ids.ids)
-            url = product.product_tmpl_id.website_url
-            if attributes:
-                url = url_join(url, f"#attr={attributes}")
-            product.website_url = url
+            product.website_url = "%s#attr=%s" % (product.product_tmpl_id.website_url, attributes)
 
     def _prepare_variant_values(self, combination):
         variant_dict = super()._prepare_variant_values(combination)
@@ -83,15 +78,6 @@ class Product(models.Model):
         template_images = list(self.product_tmpl_id.product_template_image_ids)
         return [self] + variant_images + template_images
 
-    def _get_combination_info_variant(self, **kwargs):
-        """Return the variant info based on its combination.
-        See `_get_combination_info` for more information.
-        """
-        self.ensure_one()
-        return self.product_tmpl_id._get_combination_info(
-            combination=self.product_template_attribute_value_ids,
-            product_id=self.id,
-            **kwargs)
 
     def _website_show_quick_add(self):
         website = self.env['website'].get_current_website()
@@ -103,13 +89,15 @@ class Product(models.Model):
 
     def _get_contextual_price_tax_selection(self):
         self.ensure_one()
-        website = self.env['website'].get_current_website()
-        fiscal_position_sudo = website.sudo().fiscal_position_id
-        product_taxes = self.sudo().taxes_id._filter_taxes_by_company(self.env.company)
-        return self.env['product.template']._apply_taxes_to_price(
+        fpos_id = self.env['website'].sudo()._get_current_fiscal_position_id(self.env.user.partner_id)
+        fiscal_position_sudo = self.env['account.fiscal.position'].sudo().browse(fpos_id)
+        product_taxes = self.sudo().taxes_id.filtered(lambda x: x.company_id == self.env.company)
+        return self.env['product.template']._price_with_tax_computed(
             self._get_contextual_price(),
-            website.currency_id,
             product_taxes,
             fiscal_position_sudo.map_tax(product_taxes),
+            self.env.company.id,
+            self.env['product.template']._get_contextual_pricelist(),
             self,
+            self.env.user.partner_id,
         )

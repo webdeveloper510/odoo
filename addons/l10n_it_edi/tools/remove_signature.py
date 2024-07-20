@@ -39,7 +39,7 @@ def remove_signature(content):
         try:
             loaded_data = ssl_crypto.load_pkcs7_data(ssl_crypto.FILETYPE_ASN1, content)
         except ssl_crypto.Error:
-            _logger.debug("PKCS#7 signature missing or invalid. Content will be tentatively used as plain text.")
+            _logger.warning("Error reading the content, PKCS#7 signature missing or invalid. Content will be tentatively used as it is.")
             return content
 
     # Verify the signature

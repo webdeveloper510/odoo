@@ -14,9 +14,6 @@ It defines a base Wire Transfer payment provider that allows making payments by 
 
 ## Module history
 
-- `16.1`
-  - The default payment instructions message of Wire Transfer can be recomputed at any time after
-    installation of the module. odoo/odoo#103903
 - `16.0`
   - The `custom_mode` field is added to distinguish custom payment modes from other payment
     providers and to allow duplicating the base Wire Transfer provider in multi-company databases.

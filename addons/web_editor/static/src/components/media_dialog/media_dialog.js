@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
-import { useService, useChildRef } from '@web/core/utils/hooks';
+import { useService } from '@web/core/utils/hooks';
 import { Mutex } from "@web/core/utils/concurrency";
+import { useWowlService } from '@web/legacy/utils';
 import { Dialog } from '@web/core/dialog/dialog';
 import { Notebook } from '@web/core/notebook/notebook';
 import { ImageSelector } from './image_selector';
@@ -10,7 +10,7 @@ import { DocumentSelector } from './document_selector';
 import { IconSelector } from './icon_selector';
 import { VideoSelector } from './video_selector';
 
-import { Component, useState, useRef, useEffect } from "@odoo/owl";
+import { Component, useState, onRendered, xml } from "@odoo/owl";
 
 export const TABS = {
     IMAGES: {
@@ -38,9 +38,8 @@ export const TABS = {
 export class MediaDialog extends Component {
     setup() {
         this.size = 'xl';
-        this.contentClass = 'o_select_media_dialog h-100';
-        this.title = _t("Select a media");
-        this.modalRef = useChildRef();
+        this.contentClass = 'o_select_media_dialog';
+        this.title = this.env._t("Select a media");
 
         this.rpc = useService('rpc');
         this.orm = useService('orm');
@@ -50,8 +49,6 @@ export class MediaDialog extends Component {
         this.tabs = [];
         this.selectedMedia = useState({});
 
-        this.addButtonRef = useRef('add-button');
-
         this.initialIconClasses = [];
 
         this.addTabs();
@@ -60,15 +57,6 @@ export class MediaDialog extends Component {
         this.state = useState({
             activeTab: this.initialActiveTab,
         });
-
-        useEffect(
-            (nbSelectedAttachments) => {
-                // Disable/enable the add button depending on whether some media
-                // are selected or not.
-                this.addButtonRef.el.toggleAttribute("disabled", !nbSelectedAttachments);
-            },
-            () => [this.selectedMedia[this.state.activeTab].length]
-        );
     }
 
     get initialActiveTab() {
@@ -101,7 +89,6 @@ export class MediaDialog extends Component {
                 save: this.save.bind(this),
                 onAttachmentChange: this.props.onAttachmentChange,
                 errorMessages: (errorMessage) => this.errorMessages[tab.id] = errorMessage,
-                modalRef: this.modalRef,
             },
         });
     }
@@ -147,98 +134,6 @@ export class MediaDialog extends Component {
         }
     }
 
-    /**
-     * Render the selected media for insertion in the editor
-     *
-     * @param {Array<Object>} selectedMedia
-     * @returns {Array<HTMLElement>}
-     */
-    async renderMedia(selectedMedia) {
-        // Calling a mutex to make sure RPC calls inside `createElements` are
-        // properly awaited (e.g. avoid creating multiple attachments when
-        // clicking multiple times on the same media). As `createElements` is
-        // static, the mutex has to be set on the media dialog itself to be
-        // destroyed with its instance.
-        const elements = await this.mutex.exec(async() =>
-            await TABS[this.state.activeTab].Component.createElements(selectedMedia, { rpc: this.rpc, orm: this.orm })
-        );
-        elements.forEach(element => {
-            if (this.props.media) {
-                element.classList.add(...this.props.media.classList);
-                const style = this.props.media.getAttribute('style');
-                if (style) {
-                    element.setAttribute('style', style);
-                }
-                if (this.state.activeTab === TABS.IMAGES.id) {
-                    if (this.props.media.dataset.shape) {
-                        element.dataset.shape = this.props.media.dataset.shape;
-                    }
-                    if (this.props.media.dataset.shapeColors) {
-                        element.dataset.shapeColors = this.props.media.dataset.shapeColors;
-                    }
-                    if (this.props.media.dataset.shapeFlip) {
-                        element.dataset.shapeFlip = this.props.media.dataset.shapeFlip;
-                    }
-                    if (this.props.media.dataset.shapeRotate) {
-                        element.dataset.shapeRotate = this.props.media.dataset.shapeRotate;
-                    }
-                    if (this.props.media.dataset.hoverEffect) {
-                        element.dataset.hoverEffect = this.props.media.dataset.hoverEffect;
-                    }
-                    if (this.props.media.dataset.hoverEffectColor) {
-                        element.dataset.hoverEffectColor = this.props.media.dataset.hoverEffectColor;
-                    }
-                    if (this.props.media.dataset.hoverEffectStrokeWidth) {
-                        element.dataset.hoverEffectStrokeWidth = this.props.media.dataset.hoverEffectStrokeWidth;
-                    }
-                    if (this.props.media.dataset.hoverEffectIntensity) {
-                        element.dataset.hoverEffectIntensity = this.props.media.dataset.hoverEffectIntensity;
-                    }
-                }
-            }
-            for (const otherTab of Object.keys(TABS).filter(key => key !== this.state.activeTab)) {
-                for (const property of TABS[otherTab].Component.mediaSpecificStyles) {
-                    element.style.removeProperty(property);
-                }
-                element.classList.remove(...TABS[otherTab].Component.mediaSpecificClasses);
-                const extraClassesToRemove = [];
-                for (const name of TABS[otherTab].Component.mediaExtraClasses) {
-                    if (typeof(name) === 'string') {
-                        extraClassesToRemove.push(name);
-                    } else { // Regex
-                        for (const className of element.classList) {
-                            if (className.match(name)) {
-                                extraClassesToRemove.push(className);
-                            }
-                        }
-                    }
-                }
-                // Remove classes that do not also exist in the target type.
-                element.classList.remove(...extraClassesToRemove.filter(candidateName => {
-                    for (const name of TABS[this.state.activeTab].Component.mediaExtraClasses) {
-                        if (typeof(name) === 'string') {
-                            if (candidateName === name) {
-                                return false;
-                            }
-                        } else { // Regex
-                            for (const className of element.classList) {
-                                if (className.match(candidateName)) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    return true;
-                }));
-            }
-            element.classList.remove(...this.initialIconClasses);
-            element.classList.remove('o_modified_image_to_save');
-            element.classList.remove('oe_edited_link');
-            element.classList.add(...TABS[this.state.activeTab].Component.mediaSpecificClasses);
-        });
-        return elements;
-    }
-
     selectMedia(media, tabId, multiSelect) {
         if (multiSelect) {
             const isMediaSelected = this.selectedMedia[tabId].map(({ id }) => id).includes(media.id);
@@ -266,7 +161,70 @@ export class MediaDialog extends Component {
         const saveSelectedMedia = selectedMedia.length
             && (this.state.activeTab !== TABS.ICONS.id || selectedMedia[0].initialIconChanged || !this.props.media);
         if (saveSelectedMedia) {
-            const elements = await this.renderMedia(selectedMedia);
+            // Calling a mutex to make sure RPC calls inside `createElements`
+            // are properly awaited (e.g. avoid creating multiple attachments
+            // when clicking multiple times on the same media). As
+            // `createElements` is static, the mutex has to be set on the media
+            // dialog itself to be destroyed with its instance.
+            const elements = await this.mutex.exec(async() =>
+                await TABS[this.state.activeTab].Component.createElements(selectedMedia, { rpc: this.rpc, orm: this.orm })
+            );
+            elements.forEach(element => {
+                if (this.props.media) {
+                    element.classList.add(...this.props.media.classList);
+                    const style = this.props.media.getAttribute('style');
+                    if (style) {
+                        element.setAttribute('style', style);
+                    }
+                    if (this.state.activeTab === TABS.IMAGES.id) {
+                        if (this.props.media.dataset.shape) {
+                            element.dataset.shape = this.props.media.dataset.shape;
+                        }
+                        if (this.props.media.dataset.shapeColors) {
+                            element.dataset.shapeColors = this.props.media.dataset.shapeColors;
+                        }
+                    }
+                }
+                for (const otherTab of Object.keys(TABS).filter(key => key !== this.state.activeTab)) {
+                    for (const property of TABS[otherTab].Component.mediaSpecificStyles) {
+                        element.style.removeProperty(property);
+                    }
+                    element.classList.remove(...TABS[otherTab].Component.mediaSpecificClasses);
+                    const extraClassesToRemove = [];
+                    for (const name of TABS[otherTab].Component.mediaExtraClasses) {
+                        if (typeof(name) === 'string') {
+                            extraClassesToRemove.push(name);
+                        } else { // Regex
+                            for (const className of element.classList) {
+                                if (className.match(name)) {
+                                    extraClassesToRemove.push(className);
+                                }
+                            }
+                        }
+                    }
+                    // Remove classes that do not also exist in the target type.
+                    element.classList.remove(...extraClassesToRemove.filter(candidateName => {
+                        for (const name of TABS[this.state.activeTab].Component.mediaExtraClasses) {
+                            if (typeof(name) === 'string') {
+                                if (candidateName === name) {
+                                    return false;
+                                }
+                            } else { // Regex
+                                for (const className of element.classList) {
+                                    if (className.match(candidateName)) {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                        return true;
+                    }));
+                }
+                element.classList.remove(...this.initialIconClasses);
+                element.classList.remove('o_modified_image_to_save');
+                element.classList.remove('oe_edited_link');
+                element.classList.add(...TABS[this.state.activeTab].Component.mediaSpecificClasses);
+            });
             if (this.props.multiImages) {
                 this.props.save(elements);
             } else {
@@ -289,3 +247,14 @@ MediaDialog.components = {
     Dialog,
     Notebook,
 };
+
+export class MediaDialogWrapper extends Component {
+    setup() {
+        this.dialogs = useWowlService('dialog');
+
+        onRendered(() => {
+            this.dialogs.add(MediaDialog, this.props);
+        });
+    }
+}
+MediaDialogWrapper.template = xml``;

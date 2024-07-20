@@ -40,4 +40,3 @@ MainComponentsContainer.template = xml`
 </div>
 `;
 MainComponentsContainer.components = { ErrorHandler };
-MainComponentsContainer.props = {};

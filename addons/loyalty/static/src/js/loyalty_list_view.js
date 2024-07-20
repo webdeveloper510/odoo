@@ -4,7 +4,8 @@ import { registry } from "@web/core/registry";
 import { listView } from "@web/views/list/list_view";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart } from "@odoo/owl";
+
+const { Component, onWillStart } = owl;
 
 export class LoyaltyActionHelper extends Component {
     setup() {

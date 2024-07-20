@@ -1,17 +1,28 @@
-/** @odoo-module **/
+odoo.define('website_sale.tour_shop_mail', function (require) {
+'use strict';
 
-import { registry } from "@web/core/registry";
-import tourUtils from "@website_sale/js/tours/tour_utils";
+var tour = require('web_tour.tour');
+const tourUtils = require('website_sale.tour_utils');
 
-registry.category("web_tour.tours").add('shop_mail', {
+require('web.dom_ready');
+
+tour.register('shop_mail', {
     test: true,
     url: '/shop?search=Acoustic Bloc Screens',
-    steps: () => [
-        ...tourUtils.addToCart({productName: 'Acoustic Bloc Screens', search: false}),
+},
+[
+    {
+        content: "select Acoustic Bloc Screens",
+        trigger: '.oe_product_cart a:containsExact("Acoustic Bloc Screens")',
+    },
+    {
+        content: "click add to cart",
+        trigger: '#product_details #add_to_cart',
+    },
         tourUtils.goToCart(),
     {
         content: "check product is in cart, get cart id, go to backend",
-        trigger: 'div:has(a>h6:contains("Acoustic Bloc Screens"))',
+        trigger: 'td.td-product_name:contains("Acoustic Bloc Screens")',
         run: function () {
             var orderId = $('.my_cart_quantity').data('order-id');
             window.location.href = "/web#action=sale.action_orders&view_type=form&id=" + orderId;
@@ -43,7 +54,7 @@ registry.category("web_tour.tours").add('shop_mail', {
     },
     {
         content: "wait mail to be sent, and go see it",
-        trigger: '.o-mail-Message-body:contains("Your"):contains("order")',
-        isCheck: true,
+        trigger: '.o_Message_content:contains("Your"):contains("order")',
     },
-]});
+]);
+});

@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { registry } from "@web/core/registry";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
-import { Component, useState } from "@odoo/owl";
+import { sprintf } from "@web/core/utils/strings";
 
-const cogMenuRegistry = registry.category("cogMenu");
+const { Component, useState } = owl;
+const favoriteMenuRegistry = registry.category("favoriteMenu");
 
 /**
  * 'Add to board' menu
@@ -63,15 +63,15 @@ export class AddToBoard extends Component {
 
         if (result) {
             this.notification.add(
-                _t("Please refresh your browser for the changes to take effect."),
+                this.env._t("Please refresh your browser for the changes to take effect."),
                 {
-                    title: _t("“%s” added to dashboard", this.state.name),
+                    title: sprintf(this.env._t(`"%s" added to dashboard`), this.state.name),
                     type: "warning",
                 }
             );
             this.state.name = this.env.config.getDisplayName();
         } else {
-            this.notification.add(_t("Could not add filter to dashboard"), {
+            this.notification.add(this.env._t("Could not add filter to dashboard"), {
                 type: "danger",
             });
         }
@@ -97,11 +97,8 @@ AddToBoard.components = { Dropdown };
 
 export const addToBoardItem = {
     Component: AddToBoard,
-    groupNumber: 20,
-    isDisplayed: ({ config }) => {
-        const { actionType, actionId, viewType } = config;
-        return actionType === "ir.actions.act_window" && actionId && viewType !== "form";
-    },
+    groupNumber: 4,
+    isDisplayed: ({ config }) => config.actionType === "ir.actions.act_window" && config.actionId,
 };
 
-cogMenuRegistry.add("add-to-board", addToBoardItem, { sequence: 10 });
+favoriteMenuRegistry.add("add-to-board", addToBoardItem, { sequence: 10 });

@@ -398,7 +398,7 @@ class IrFieldsConverter(models.AbstractModel):
         :param model: model to which the field belongs
         :param field: relational field for which references are provided
         :param subfield: a relational subfield allowing building of refs to
-                         existing records: ``None`` for a name_search,
+                         existing records: ``None`` for a name_get/name_search,
                          ``id`` for an external id and ``.id`` for a database
                          id
         :param value: value of the reference to match to an actual record
@@ -432,16 +432,18 @@ class IrFieldsConverter(models.AbstractModel):
             field_type = _(u"database id")
             if isinstance(value, str) and not self._str_to_boolean(model, field, value)[0]:
                 return False, field_type, warnings
+            try: tentative_id = int(value)
+            except ValueError: tentative_id = value
             try:
-                tentative_id = int(value)
-            except ValueError:
+                if RelatedModel.search([('id', '=', tentative_id)]):
+                    id = tentative_id
+            except psycopg2.DataError:
+                # type error
                 raise self._format_import_error(
                     ValueError,
                     _(u"Invalid database id '%s' for the field '%%(field)s'"),
                     value,
                     {'moreinfo': action})
-            if RelatedModel.browse(tentative_id).exists():
-                id = tentative_id
         elif subfield == 'id':
             field_type = _(u"external id")
             if not self._str_to_boolean(model, field, value)[0]:
@@ -460,11 +462,9 @@ class IrFieldsConverter(models.AbstractModel):
             ids = RelatedModel.name_search(name=value, operator='=')
             if ids:
                 if len(ids) > 1:
-                    warnings.append(ImportWarning(_(
-                        "Found multiple matches for value %r in field %%(field)r (%d matches)",
-                        str(value).replace('%', '%%'),
-                        len(ids),
-                    )))
+                    warnings.append(ImportWarning(
+                        _(u"Found multiple matches for value '%s' in field '%%(field)s' (%d matches)")
+                        %(str(value).replace('%', '%%'), len(ids))))
                 id, _name = ids[0]
             else:
                 name_create_enabled_fields = self.env.context.get('name_create_enabled_fields') or {}
@@ -473,11 +473,12 @@ class IrFieldsConverter(models.AbstractModel):
                         with self.env.cr.savepoint():
                             id, _name = RelatedModel.name_create(name=value)
                     except (Exception, psycopg2.IntegrityError):
-                        error_msg = _("Cannot create new '%s' records from their name alone. Please create those records manually and try importing again.", RelatedModel._description)
+                        error_msg = _(u"Cannot create new '%s' records from their name alone. Please create those records manually and try importing again.", RelatedModel._description)
         else:
             raise self._format_import_error(
                 Exception,
-                _("Unknown sub-field %r", subfield)
+                _(u"Unknown sub-field '%s'"),
+                subfield
             )
 
         set_empty = False
@@ -542,7 +543,7 @@ class IrFieldsConverter(models.AbstractModel):
         :return: the record subfield to use for referencing and a list of warnings
         :rtype: str, list
         """
-        # Can import by display_name, external id or database id
+        # Can import by name_get, external id or database id
         fieldset = set(record)
         if fieldset - REFERENCING_FIELDS:
             raise ValueError(
@@ -652,3 +653,37 @@ class IrFieldsConverter(models.AbstractModel):
                 commands.append(Command.create(writable))
 
         return commands, warnings
+
+class O2MIdMapper(models.AbstractModel):
+    """
+    Updates the base class to support setting xids directly in create by
+    providing an "id" key (otherwise stripped by create) during an import
+    (which should strip 'id' from the input data anyway)
+    """
+    _inherit = 'base'
+
+    # sadly _load_records_create is only called for the toplevel record so we
+    # can't hook into that
+    @api.model_create_multi
+    @api.returns('self', lambda value: value.id)
+    def create(self, vals_list):
+        recs = super().create(vals_list)
+
+        import_module = self.env.context.get('_import_current_module')
+        if not import_module: # not an import -> bail
+            return recs
+        noupdate = self.env.context.get('noupdate', False)
+
+        xids = (v.get('id') for v in vals_list)
+        self.env['ir.model.data']._update_xmlids([
+            {
+                'xml_id': xid if '.' in xid else ('%s.%s' % (import_module, xid)),
+                'record': rec,
+                # note: this is not used when updating o2ms above...
+                'noupdate': noupdate,
+            }
+            for rec, xid in zip(recs, xids)
+            if xid and isinstance(xid, str)
+        ])
+
+        return recs

@@ -3,15 +3,16 @@
 # 	* hr_holidays_attendance
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Wil Odoo, 2024
 # Thi Huong Nguyen, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"PO-Revision-Date: 2022-09-22 05:46+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2024\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -28,31 +29,16 @@ msgid "%s hours available"
 msgstr "%s giờ còn lại"
 
 #. module: hr_holidays_attendance
-#: model:ir.model,name:hr_holidays_attendance.model_hr_leave_accrual_level
-msgid "Accrual Plan Level"
-msgstr "Mức độ phương pháp tích lũy"
-
-#. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_hr_attendance
 msgid "Attendance"
 msgstr "Chuyên cần"
-
-#. module: hr_holidays_attendance
-#: model:ir.model.fields.selection,name:hr_holidays_attendance.selection__hr_leave_accrual_level__frequency_hourly_source__attendance
-msgid "Attendances"
-msgstr "Chấm công"
 
 #. module: hr_holidays_attendance
 #. odoo-javascript
 #: code:addons/hr_holidays_attendance/static/src/xml/time_off_calendar.xml:0
 #, python-format
 msgid "Available"
-msgstr "Có hàng"
-
-#. module: hr_holidays_attendance
-#: model:ir.model.fields.selection,name:hr_holidays_attendance.selection__hr_leave_accrual_level__frequency_hourly_source__calendar
-msgid "Calendar"
-msgstr "Lịch"
+msgstr "Khả dụng"
 
 #. module: hr_holidays_attendance
 #: model:ir.model,name:hr_holidays_attendance.model_res_company
@@ -98,11 +84,6 @@ msgid "Extra Hours Available"
 msgstr "Có giờ làm thêm"
 
 #. module: hr_holidays_attendance
-#: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave_accrual_level__frequency_hourly_source
-msgid "Frequency Hourly Source"
-msgstr "Frequency Hourly Source"
-
-#. module: hr_holidays_attendance
 #. odoo-javascript
 #: code:addons/hr_holidays_attendance/static/src/xml/time_off_calendar.xml:0
 #, python-format
@@ -113,18 +94,6 @@ msgstr "Giờ"
 #: model:ir.model.fields,field_description:hr_holidays_attendance.field_hr_leave_type__hr_attendance_overtime
 msgid "Hr Attendance Overtime"
 msgstr "Nhân sự có mặt quá giờ "
-
-#. module: hr_holidays_attendance
-#: model:ir.model.fields,help:hr_holidays_attendance.field_hr_leave_accrual_level__frequency_hourly_source
-msgid ""
-"If the source is set to Calendar, the amount of worked hours will be "
-"computed from employee calendar and time off (if the plan is based on worked"
-" time). Otherwise, the amount of worked hours will be based on Attendance "
-"records."
-msgstr ""
-"Nếu nguồn được đặt thành Lịch, số giờ làm việc sẽ được tính từ lịch của nhân"
-" viên và thời gian nghỉ phép (nếu kế hoạch dựa trên thời gian làm việc). Nếu"
-" không, số giờ làm việc sẽ dựa trên dữ liệu Chấm công."
 
 #. module: hr_holidays_attendance
 #: model:ir.actions.act_window,name:hr_holidays_attendance.hr_leave_allocation_overtime_action
@@ -158,11 +127,6 @@ msgid "Save"
 msgstr "Lưu"
 
 #. module: hr_holidays_attendance
-#: model_terms:ir.ui.view,arch_db:hr_holidays_attendance.hr_leave_accrual_level_view_form
-msgid "Source"
-msgstr "Nguồn"
-
-#. module: hr_holidays_attendance
 #. odoo-python
 #: code:addons/hr_holidays_attendance/models/hr_leave_allocation.py:0
 #, python-format
@@ -176,6 +140,14 @@ msgstr "Nhân viên không có đủ số giờ làm thêm để kéo dài phân
 #, python-format
 msgid "The employee does not have enough extra hours to extend this leave."
 msgstr "Nhân viên không có đủ số giờ làm thêm để kéo dài nghỉ phép này."
+
+#. module: hr_holidays_attendance
+#. odoo-python
+#: code:addons/hr_holidays_attendance/models/hr_leave_allocation.py:0
+#, python-format
+msgid ""
+"The employee does not have enough extra hours to request this allocation."
+msgstr "Nhân viên không có đủ số giờ làm thêm để yêu cầu phân bổ này."
 
 #. module: hr_holidays_attendance
 #. odoo-python

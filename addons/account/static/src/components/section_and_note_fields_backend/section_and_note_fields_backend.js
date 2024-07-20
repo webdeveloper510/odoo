@@ -2,11 +2,11 @@
 
 import { registry } from "@web/core/registry";
 import { ListRenderer } from "@web/views/list/list_renderer";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { TextField, ListTextField } from "@web/views/fields/text/text_field";
 import { CharField } from "@web/views/fields/char/char_field";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, useEffect } from "@odoo/owl";
+
+const { Component, useEffect } = owl;
 
 export class SectionAndNoteListRenderer extends ListRenderer {
     /**
@@ -25,7 +25,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     }
 
     focusToName(editRec) {
-        if (editRec && editRec.isNew && this.isSectionOrNote(editRec)) {
+        if (editRec && editRec.isVirtual && this.isSectionOrNote(editRec)) {
             const col = this.state.columns.find((c) => c.name === this.titleField);
             this.focusCell(col, null);
         }
@@ -71,19 +71,19 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 SectionAndNoteListRenderer.template = "account.sectionAndNoteListRenderer";
 
 export class SectionAndNoteFieldOne2Many extends X2ManyField {}
+SectionAndNoteFieldOne2Many.additionalClasses = ['o_field_one2many'];
 SectionAndNoteFieldOne2Many.components = {
     ...X2ManyField.components,
     ListRenderer: SectionAndNoteListRenderer,
 };
 
 export class SectionAndNoteText extends Component {
-    static props = { ...standardFieldProps };
-
     get componentToUse() {
         return this.props.record.data.display_type === 'line_section' ? CharField : TextField;
     }
 }
 SectionAndNoteText.template = "account.SectionAndNoteText";
+SectionAndNoteText.additionalClasses = ["o_field_text"];
 
 export class ListSectionAndNoteText extends SectionAndNoteText {
     get componentToUse() {
@@ -93,22 +93,6 @@ export class ListSectionAndNoteText extends SectionAndNoteText {
     }
 }
 
-export const sectionAndNoteFieldOne2Many = {
-    ...x2ManyField,
-    component: SectionAndNoteFieldOne2Many,
-    additionalClasses: [...x2ManyField.additionalClasses || [], "o_field_one2many"],
-};
-
-export const sectionAndNoteText = {
-    component: SectionAndNoteText,
-    additionalClasses: ["o_field_text"],
-};
-
-export const listSectionAndNoteText = {
-    ...sectionAndNoteText,
-    component: ListSectionAndNoteText,
-};
-
-registry.category("fields").add("section_and_note_one2many", sectionAndNoteFieldOne2Many);
-registry.category("fields").add("section_and_note_text", sectionAndNoteText);
-registry.category("fields").add("list.section_and_note_text", listSectionAndNoteText);
+registry.category("fields").add("section_and_note_one2many", SectionAndNoteFieldOne2Many);
+registry.category("fields").add("section_and_note_text", SectionAndNoteText);
+registry.category("fields").add("list.section_and_note_text", ListSectionAndNoteText);

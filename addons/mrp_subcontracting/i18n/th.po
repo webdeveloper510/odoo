@@ -3,15 +3,21 @@
 # 	* mrp_subcontracting
 # 
 # Translators:
+# Pornvibool Tippayawat <pornvibool.t@gmail.com>, 2022
+# Seksan Poltree <seksan.poltree@gmail.com>, 2022
+# Krisa C, 2022
+# Martin Trigaux, 2022
+# Odoo Thaidev <odoothaidev@gmail.com>, 2022
+# Wichanon Jamwutthipreecha, 2022
 # Wil Odoo, 2024
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:53+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -19,11 +25,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: mrp_subcontracting
-#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.subcontracting_portal
-msgid "/my/productions"
-msgstr "/my/productions"
 
 #. module: mrp_subcontracting
 #. odoo-python
@@ -88,7 +89,7 @@ msgstr ""
 #. module: mrp_subcontracting
 #: model:ir.model,name:mrp_subcontracting.model_res_company
 msgid "Companies"
-msgstr "บริษัท"
+msgstr "หลายบริษัท"
 
 #. module: mrp_subcontracting
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.mrp_subcontracting_move_tree_view
@@ -152,11 +153,6 @@ msgstr "เสร็จสิ้น"
 #: model:ir.model.fields.selection,name:mrp_subcontracting.selection__stock_picking__display_action_record_components__facultative
 msgid "Facultative"
 msgstr "เกี่ยวกับสิทธิ์"
-
-#. module: mrp_subcontracting
-#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.portal_my_home_productions
-msgid "Follow manufacturing orders you have to fulfill"
-msgstr "ติดตามใบสั่งผลิตที่คุณต้องปฏิบัติตาม"
 
 #. module: mrp_subcontracting
 #: model:ir.model.fields,field_description:mrp_subcontracting.field_mrp_production__subcontracting_has_been_recorded
@@ -223,6 +219,13 @@ msgstr "MRP การผลิตที่พาร์ทเนอร์เป�
 
 #. module: mrp_subcontracting
 #. odoo-python
+#: code:addons/mrp_subcontracting/models/stock_warehouse.py:0
+#, python-format
+msgid "Make To Order"
+msgstr "ทำตามคำสั่ง"
+
+#. module: mrp_subcontracting
+#. odoo-python
 #: code:addons/mrp_subcontracting/models/stock_move_line.py:0
 #, python-format
 msgid ""
@@ -238,7 +241,6 @@ msgid "Mandatory"
 msgstr "จำเป็น"
 
 #. module: mrp_subcontracting
-#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.portal_my_home_productions
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.subcontracting_portal_production_form_view
 msgid "Manufacturing Orders"
 msgstr "ใบสั่งผลิต"
@@ -247,6 +249,11 @@ msgstr "ใบสั่งผลิต"
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.subcontracting_portal_production_form_view
 msgid "Manufacturing Reference"
 msgstr "ข้อมูลอ้างอิงการผลิต"
+
+#. module: mrp_subcontracting
+#: model:ir.model.fields,field_description:mrp_subcontracting.field_stock_picking__move_line_nosuggest_ids
+msgid "Move Line Nosuggest"
+msgstr "ไม่แนะนำการย้ายรายการ"
 
 #. module: mrp_subcontracting
 #. odoo-python
@@ -305,12 +312,7 @@ msgstr ""
 #. module: mrp_subcontracting
 #: model:ir.model,name:mrp_subcontracting.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
-msgstr "ย้ายสินค้า (รายการเคลื่อนย้ายสต็อก)"
-
-#. module: mrp_subcontracting
-#: model:ir.model,name:mrp_subcontracting.model_product_replenish
-msgid "Product Replenish"
-msgstr "เติมสินค้า"
+msgstr "ย้ายสินค้า ( ไลน์เคลื่อนย้ายสต๊อก )"
 
 #. module: mrp_subcontracting
 #: model:ir.model,name:mrp_subcontracting.model_product_product
@@ -324,6 +326,7 @@ msgstr "คำสั่งผลิต"
 
 #. module: mrp_subcontracting
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.portal_my_home_menu_production
+#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.portal_my_home_productions
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.portal_my_productions
 msgid "Productions"
 msgstr "การผลิต"
@@ -358,16 +361,15 @@ msgid "Record components"
 msgstr "บันทึกส่วนประกอบ"
 
 #. module: mrp_subcontracting
+#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.stock_picking_form_view
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.subcontracting_portal_production_form_view
 msgid "Register components for subcontracted product"
 msgstr "ลงทะเบียนส่วนประกอบสำหรับสินค้ารับเหมาช่วง"
 
 #. module: mrp_subcontracting
-#. odoo-python
-#: code:addons/mrp_subcontracting/models/stock_warehouse.py:0
-#, python-format
-msgid "Replenish on Order (MTO)"
-msgstr "เติมสินค้าตามคำสั่งขาย (MTO)"
+#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.mrp_subcontracting_move_tree_view
+msgid "Reserved"
+msgstr "สำรองแล้ว"
 
 #. module: mrp_subcontracting
 #. odoo-python
@@ -445,7 +447,7 @@ msgstr "การเบิกสต็อกสินค้าโดยพาร
 #. module: mrp_subcontracting
 #: model:ir.model,name:mrp_subcontracting.model_stock_rule
 msgid "Stock Rule"
-msgstr "กฎสต็อก"
+msgstr "กฎสต๊อก"
 
 #. module: mrp_subcontracting
 #. odoo-python
@@ -475,7 +477,6 @@ msgstr "ไม่สามารถรวมใบสั่งผลิตที
 #. odoo-python
 #: code:addons/mrp_subcontracting/models/stock_warehouse.py:0
 #: model:ir.model.fields.selection,name:mrp_subcontracting.selection__mrp_bom__type__subcontract
-#: model_terms:ir.ui.view,arch_db:mrp_subcontracting.stock_picking_form_view
 #, python-format
 msgid "Subcontracting"
 msgstr "สัญญาช่วง"
@@ -569,7 +570,7 @@ msgid ""
 "The stock location used as source and destination when sending        goods "
 "to this contact during a subcontracting process."
 msgstr ""
-"ตำแหน่งสต็อกที่ใช้เป็นแหล่งที่มาและปลายทางเมื่อส่งสินค้าไปยังผู้ติดต่อรายนี้ในระหว่างกระบวนการรับเหมาช่วง"
+"ตำแหน่งสต๊อกที่ใช้เป็นแหล่งที่มาและปลายทางเมื่อส่งสินค้าไปยังผู้ติดต่อรายนี้ในระหว่างกระบวนการรับเหมาช่วง"
 
 #. module: mrp_subcontracting
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.portal_my_productions
@@ -594,6 +595,13 @@ msgid "This MO isn't related to a subcontracted move"
 msgstr "MO นี้ไม่เกี่ยวข้องกับการย้ายผู้รับเหมาช่วง"
 
 #. module: mrp_subcontracting
+#. odoo-python
+#: code:addons/mrp_subcontracting/models/stock_move.py:0
+#, python-format
+msgid "To subcontract, use a planned transfer."
+msgstr "ในการทำสัญญาช่วง ใช้การโอนที่วางแผนไว้"
+
+#. module: mrp_subcontracting
 #: model_terms:ir.ui.view,arch_db:mrp_subcontracting.mrp_subcontracting_move_form_view
 msgid "Total Consumed"
 msgstr "การบริโภครวม"
@@ -612,7 +620,7 @@ msgstr "ใช้เพื่อจำกัดการเข้าถึงผ
 #. module: mrp_subcontracting
 #: model:ir.model,name:mrp_subcontracting.model_stock_warehouse
 msgid "Warehouse"
-msgstr "คลังสินค้า"
+msgstr "โกดังสินค้า"
 
 #. module: mrp_subcontracting
 #: model:ir.model,name:mrp_subcontracting.model_mrp_consumption_warning
@@ -620,7 +628,7 @@ msgid ""
 "Wizard in case of consumption in warning/strict and more component has been "
 "used for a MO (related to the bom)"
 msgstr ""
-"ตัวช่วยในกรณีการบริโภคสำหรับการเตือน / จำกัดและส่วนประกอบอื่นๆ "
+"ตัวช่วยในกรณีการบริโภคสำหรับการเตือน / จำกัดและส่วนประกอบอื่น ๆ "
 "จะถูกนำมาใช้สำหรับ MO (ที่เกี่ยวข้องกับ bom)"
 
 #. module: mrp_subcontracting

@@ -40,12 +40,6 @@ QUnit.module("Fields", (hooks) => {
                 },
                 'sale.order.line': {
                     fields: {
-                        order_id: {
-                            string: "Order Reference",
-                            type: "many2one",
-                            relation: "sale.order",
-                            relation_field: "order_line",
-                        },
                         product_template_id: {
                             string: "Product",
                             type: "many2one",

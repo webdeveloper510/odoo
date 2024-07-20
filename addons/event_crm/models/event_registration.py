@@ -208,39 +208,39 @@ class EventRegistration(models.Model):
 
             # compare phone, taking into account formatting
             if valid_partner and self.phone and valid_partner.phone:
-                phone_formatted = self._phone_format(fname='phone', country=valid_partner.country_id)
-                partner_phone_formatted = valid_partner._phone_format(fname='phone')
+                phone_formatted = phone_validation.phone_format(
+                    self.phone,
+                    valid_partner.country_id.code or None,
+                    valid_partner.country_id.phone_code or None,
+                    force_format='E164',
+                    raise_exception=False
+                )
+                partner_phone_formatted = valid_partner._phone_format(valid_partner.phone)
                 if phone_formatted and partner_phone_formatted and phone_formatted != partner_phone_formatted:
                     valid_partner = self.env['res.partner']
                 if (not phone_formatted or not partner_phone_formatted) and self.phone != valid_partner.phone:
                     valid_partner = self.env['res.partner']
 
-        registration_phone = self._find_first_notnull('phone')
         if valid_partner:
             contact_vals = self.env['crm.lead']._prepare_values_from_partner(valid_partner)
             # force email_from / phone only if not set on partner because those fields are now synchronized automatically
             if not valid_partner.email:
                 contact_vals['email_from'] = self._find_first_notnull('email')
             if not valid_partner.phone:
-                contact_vals['phone'] = registration_phone
+                contact_vals['phone'] = self._find_first_notnull('phone')
         else:
             # don't force email_from + partner_id because those fields are now synchronized automatically
             contact_vals = {
                 'contact_name': self._find_first_notnull('name'),
                 'email_from': self._find_first_notnull('email'),
-                'phone': registration_phone,
+                'phone': self._find_first_notnull('phone'),
                 'lang_id': False,
             }
         contact_vals.update({
             'name': "%s - %s" % (self.event_id.name, valid_partner.name or self._find_first_notnull('name') or self._find_first_notnull('email')),
             'partner_id': valid_partner.id,
+            'mobile': valid_partner.mobile or self._find_first_notnull('mobile'),
         })
-        # try to avoid copying registration_phone on both phone and mobile fields
-        # as would be noise; pay attention partner.hone is propagated through compute
-        mobile = valid_partner.mobile or registration_phone
-        if mobile != contact_vals.get('phone', valid_partner.phone):
-            contact_vals['mobile'] = valid_partner.mobile or registration_phone
-
         return contact_vals
 
     def _get_lead_description(self, prefix='', line_counter=True, line_suffix=''):
@@ -334,12 +334,12 @@ class EventRegistration(models.Model):
         """ Get registration fields linked to lead contact. Those are used notably
         to see if an update of lead is necessary or to fill contact values
         in ``_get_lead_contact_values())`` """
-        return ['name', 'email', 'phone', 'partner_id']
+        return ['name', 'email', 'phone', 'mobile', 'partner_id']
 
     @api.model
     def _get_lead_description_fields(self):
         """ Get registration fields linked to lead description. Those are used
-        notably to see if an update of lead is necessary or to fill description
+        notablyto see if an update of lead is necessary or to fill description
         in ``_get_lead_description())`` """
         return ['name', 'email', 'phone']
 

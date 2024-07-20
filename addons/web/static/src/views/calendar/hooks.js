@@ -10,7 +10,6 @@ import {
     onPatched,
     onWillStart,
     onWillUnmount,
-    onWillUpdateProps,
     useComponent,
     useExternalListener,
     useRef,
@@ -18,12 +17,9 @@ import {
 
 export function useCalendarPopover(component) {
     const owner = useComponent();
-    let popoverClass = "";
-    const popoverOptions = { position: "right", onClose: cleanup };
-    Object.defineProperty(popoverOptions, "popoverClass", { get: () => popoverClass });
-    const popover = usePopover(component, popoverOptions);
+    const popover = usePopover();
     const dialog = useService("dialog");
-    let removeDialog = null;
+    let remove = null;
     let fcPopover;
     useExternalListener(
         window,
@@ -38,23 +34,27 @@ export function useCalendarPopover(component) {
     );
     function cleanup() {
         fcPopover = null;
-        removeDialog = null;
+        remove = null;
     }
     function close() {
-        removeDialog?.();
-        popover.close();
+        if (remove) {
+            remove();
+        }
         cleanup();
     }
     return {
         close,
-        open(target, props, popoverClassToUse) {
+        open(target, props, popoverClass) {
+            close();
             fcPopover = target.closest(".fc-popover");
             if (owner.env.isSmall) {
-                close();
-                removeDialog = dialog.add(component, props, { onClose: cleanup });
+                remove = dialog.add(component, props, { onClose: cleanup });
             } else {
-                popoverClass = popoverClassToUse;
-                popover.open(target, props);
+                remove = popover.add(target, component, props, {
+                    popoverClass,
+                    position: "right",
+                    onClose: cleanup,
+                });
             }
         },
     };
@@ -125,14 +125,8 @@ export function useFullCalendar(refName, params) {
             throw new Error(`Cannot instantiate FullCalendar\n${e.message}`);
         }
     });
-
-    let isWeekendVisible = params.isWeekendVisible;
-    onWillUpdateProps((np) => {
-        isWeekendVisible = np.isWeekendVisible;
-    });
     onPatched(() => {
         instance.refetchEvents();
-        instance.setOption("weekends", isWeekendVisible);
     });
     onWillUnmount(() => {
         instance.destroy();

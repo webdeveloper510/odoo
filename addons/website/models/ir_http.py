@@ -12,7 +12,7 @@ import werkzeug.routing
 import werkzeug.utils
 
 import odoo
-from odoo import api, models, tools
+from odoo import api, models
 from odoo import SUPERUSER_ID
 from odoo.exceptions import AccessError
 from odoo.http import request
@@ -61,10 +61,16 @@ def get_request_website():
 class Http(models.AbstractModel):
     _inherit = 'ir.http'
 
-    def routing_map(self, key=None):
+    @classmethod
+    def routing_map(cls, key=None):
         if not key and request:
             key = request.website_routing
-        return super().routing_map(key=key)
+        return super(Http, cls).routing_map(key=key)
+
+    @classmethod
+    def clear_caches(cls):
+        super()._clear_routing_map()
+        return super().clear_caches()
 
     @classmethod
     def _slug_matching(cls, adapter, endpoint, **kw):
@@ -74,23 +80,18 @@ class Http(models.AbstractModel):
         qs = request.httprequest.query_string.decode('utf-8')
         return adapter.build(endpoint, kw) + (qs and '?%s' % qs or '')
 
-    @tools.ormcache('website_id', cache='routing')
-    def _rewrite_len(self, website_id):
-        rewrites = self._get_rewrites(website_id)
-        return len(rewrites)
-
-    def _get_rewrites(self, website_id):
-        domain = [('redirect_type', 'in', ('308', '404')), '|', ('website_id', '=', False), ('website_id', '=', website_id)]
-        return  {x.url_from: x for x in self.env['website.rewrite'].sudo().search(domain)}
-
-    def _generate_routing_rules(self, modules, converters):
+    @classmethod
+    def _generate_routing_rules(cls, modules, converters):
         if not request:
             yield from super()._generate_routing_rules(modules, converters)
             return
+
         website_id = request.website_routing
         logger.debug("_generate_routing_rules for website: %s", website_id)
-        rewrites = self._get_rewrites(website_id)
-        self._rewrite_len.__cache__.add_value(self, website_id, cache_value=len(rewrites))
+        domain = [('redirect_type', 'in', ('308', '404')), '|', ('website_id', '=', False), ('website_id', '=', website_id)]
+
+        rewrites = dict([(x.url_from, x) for x in request.env['website.rewrite'].sudo().search(domain)])
+        cls._rewrite_len[website_id] = len(rewrites)
 
         for url, endpoint in super()._generate_routing_rules(modules, converters):
             if url in rewrites:
@@ -105,7 +106,7 @@ class Http(models.AbstractModel):
                         # duplicate the endpoint to only register the redirect_to for this specific url
                         redirect_endpoint = functools.partial(endpoint)
                         functools.update_wrapper(redirect_endpoint, endpoint)
-                        _slug_matching = functools.partial(self._slug_matching, endpoint=endpoint)
+                        _slug_matching = functools.partial(cls._slug_matching, endpoint=endpoint)
                         redirect_endpoint.routing = dict(endpoint.routing, redirect_to=_slug_matching)
                         yield url, redirect_endpoint  # yield original redirected to new url
                 elif rewrite.redirect_type == '404':
@@ -203,7 +204,8 @@ class Http(models.AbstractModel):
 
         if not request.context.get('tz'):
             with contextlib.suppress(pytz.UnknownTimeZoneError):
-                request.update_context(tz=pytz.timezone(request.geoip.location.time_zone).zone)
+                tz = request.geoip.get('time_zone', '')
+                request.update_context(tz=pytz.timezone(tz).zone)
 
         website = request.env['website'].get_current_website()
         user = request.env.user
@@ -291,17 +293,7 @@ class Http(models.AbstractModel):
                 path += '?' + request.httprequest.query_string.decode('utf-8')
             return request.redirect(path, code=301)
 
-        if (
-            page
-            and (request.env.user.has_group('website.group_website_designer') or page.is_visible)
-            and (
-                # If a generic page (niche case) has been COWed and that COWed
-                # page received a URL change, it should not let you access the
-                # generic page anymore, despite having a different URL.
-                page.website_id
-                or not page.view_id._get_specific_views().filtered(lambda view: view.website_id == request.website)
-            )
-        ):
+        if page and (request.env.user.has_group('website.group_website_designer') or page.is_visible):
             _, ext = os.path.splitext(req_page)
             response = request.render(page.view_id.id, {
                 'main_object': page,
@@ -398,7 +390,7 @@ class Http(models.AbstractModel):
     @api.model
     def get_frontend_session_info(self):
         session_info = super(Http, self).get_frontend_session_info()
-        geoip_country_code = request.geoip.country_code
+        geoip_country_code = request.geoip.get('country_code')
         geoip_phone_code = request.env['res.country']._phone_code_for(geoip_country_code) if geoip_country_code else None
         session_info.update({
             'is_website_user': request.env.user.id == request.website.user_id.id,
@@ -426,7 +418,7 @@ class Http(models.AbstractModel):
             # pre-16.0 compatibility, `website_cookies_bar` was `"true"`.
             # In that case we delete that cookie and let the user choose again.
             if not isinstance(accepted_cookie_types, dict):
-                request.future_response.set_cookie('website_cookies_bar', max_age=0)
+                request.future_response.set_cookie('website_cookies_bar', expires=0, max_age=0)
                 return False
 
             if 'optional' in accepted_cookie_types:

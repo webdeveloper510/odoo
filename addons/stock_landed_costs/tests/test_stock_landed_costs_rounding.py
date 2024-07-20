@@ -190,7 +190,9 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         })
         po.button_confirm()
 
-        po.picking_ids.button_validate()
+        res_dict = po.picking_ids.button_validate()
+        validate_wizard = Form(self.env[(res_dict.get('res_model'))].with_context(res_dict.get('context'))).save()
+        validate_wizard.process()
 
         lc_form = Form(self.LandedCost)
         lc_form.picking_ids.add(po.picking_ids)
@@ -245,7 +247,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
 
         receipts.action_confirm()
         for m in receipts.move_ids:
-            m.quantity = m.product_uom_qty
+            m.quantity_done = m.product_uom_qty
         receipts.button_validate()
 
         landed_costs = self.env['stock.landed.cost'].create([{
@@ -279,7 +281,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
 
         deliveries.action_confirm()
         for m in deliveries.move_ids:
-            m.quantity = m.product_uom_qty
+            m.quantity_done = m.product_uom_qty
         deliveries.button_validate()
 
         self.assertEqual(self.product_a.value_svl, 0)

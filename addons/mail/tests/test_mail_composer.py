@@ -3,7 +3,7 @@
 
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.exceptions import AccessError
-from odoo.tests import Form, HttpCase, tagged, users
+from odoo.tests import Form, tagged, users
 from odoo.tools import mute_logger
 
 
@@ -40,6 +40,7 @@ class TestMailComposer(MailCommon):
             'name': 'Test template with mso conditionals',
         })
 
+
 @tagged('mail_composer')
 class TestMailComposerForm(TestMailComposer):
     """ Test mail composer form view usage. """
@@ -47,23 +48,23 @@ class TestMailComposerForm(TestMailComposer):
     @classmethod
     def setUpClass(cls):
         super(TestMailComposerForm, cls).setUpClass()
-        cls.other_company = cls.env['res.company'].create({'name': 'Other Company'})
-        cls.user_employee.write({
-            'groups_id': [(4, cls.env.ref('base.group_partner_manager').id)],
-            'company_ids': [(4, cls.other_company.id)]
-        })
+
+        cls.user_employee.write({'groups_id': [
+            (4, cls.env.ref('base.group_private_addresses').id),
+            (4, cls.env.ref('base.group_partner_manager').id),
+        ]})
         cls.partner_private, cls.partner_private_2, cls.partner_classic = cls.env['res.partner'].create([
             {
                 'email': 'private.customer@text.example.com',
                 'phone': '0032455112233',
                 'name': 'Private Customer',
-                'company_id': cls.other_company.id,
+                'type': 'private',
             },
             {
                 'email': 'private.customer.2@test.example.com',
                 'phone': '0032455445566',
                 'name': 'Private Customer 2',
-                'company_id': cls.other_company.id,
+                'type': 'private',
             },
             {
                 'email': 'not.private@test.example.com',
@@ -83,11 +84,11 @@ class TestMailComposerForm(TestMailComposer):
         form = Form(self.env['mail.compose.message'].with_context({
             'default_partner_ids': partner_classic.ids,
             'default_model': test_record._name,
-            'default_res_ids': test_record.ids,
+            'default_res_id': test_record.id,
         }))
         form.body = '<p>Hello</p>'
         self.assertEqual(
-            form.partner_ids.ids, partner_classic.ids,
+            form.partner_ids._get_ids(), partner_classic.ids,
             'Default populates the field'
         )
         saved_form = form.save()
@@ -102,7 +103,7 @@ class TestMailComposerForm(TestMailComposer):
         message = self.test_record.message_ids[0]
         self.assertEqual(message.body, '<p>Hello</p>')
         self.assertEqual(message.partner_ids, partner_classic)
-        self.assertEqual(message.subject, f'{test_record.name}')
+        self.assertEqual(message.subject, f'Re: {test_record.name}')
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     @users('employee')
@@ -115,11 +116,11 @@ class TestMailComposerForm(TestMailComposer):
         form = Form(self.env['mail.compose.message'].with_context({
             'default_partner_ids': (partner_private + partner_classic).ids,
             'default_model': test_record._name,
-            'default_res_ids': test_record.ids,
+            'default_res_id': test_record.id,
         }))
         form.body = '<p>Hello</p>'
         self.assertEqual(
-            sorted(form.partner_ids.ids),
+            sorted(form.partner_ids._get_ids()),
             sorted((partner_private + partner_classic).ids),
             'Default populates the field'
         )
@@ -135,15 +136,15 @@ class TestMailComposerForm(TestMailComposer):
         message = self.test_record.message_ids[0]
         self.assertEqual(message.body, '<p>Hello</p>')
         self.assertEqual(message.partner_ids, partner_private + partner_classic)
-        self.assertEqual(message.subject, f'{test_record.name}')
+        self.assertEqual(message.subject, f'Re: {test_record.name}')
 
     @mute_logger('odoo.addons.base.models.ir_rule', 'odoo.addons.mail.models.mail_mail')
     @users('employee')
     def test_composer_default_recipients_private_norights(self):
         """ Test usage of a private partner in composer when not having the
         rights to see them, as default value """
-        self.user_employee.write({'company_ids': [
-            (3, self.other_company.id),
+        self.user_employee.write({'groups_id': [
+            (3, self.env.ref('base.group_private_addresses').id),
         ]})
         with self.assertRaises(AccessError):
             _name = self.partner_private.with_env(self.env).name
@@ -155,13 +156,13 @@ class TestMailComposerForm(TestMailComposer):
             _form = Form(self.env['mail.compose.message'].with_context({
                 'default_partner_ids': (self.partner_private + partner_classic).ids,
                 'default_model': test_record._name,
-                'default_res_ids': test_record.ids,
+                'default_res_id': test_record.id,
             }))
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     @users('employee')
     def test_composer_template_recipients_private(self):
-        """ Test usage of a private partner in composer, coming from template
+        """ Test usage of a private partner in composer, comint from template
         value """
         email_to_new = 'new.customer@test.example.com'
         self.mail_template.write({
@@ -176,7 +177,7 @@ class TestMailComposerForm(TestMailComposer):
 
         form = Form(self.env['mail.compose.message'].with_context({
             'default_model': test_record._name,
-            'default_res_ids': test_record.ids,
+            'default_res_id': test_record.id,
             'default_template_id': template.id,
         }))
 
@@ -191,14 +192,15 @@ class TestMailComposerForm(TestMailComposer):
         self.assertEqual(new_partner.type, 'contact', 'Should create a new contact')
 
         self.assertEqual(
-            sorted(form.partner_ids.ids),
+            sorted(form.partner_ids._get_ids()),
             sorted((partner_private + partner_classic + partner_private_2 + new_partner).ids),
             'Template populates the field with both email_to and partner_to'
         )
         saved_form = form.save()
         self.assertEqual(
-            saved_form.partner_ids, partner_private + partner_classic + partner_private_2 + new_partner,
-            'Template value is kept at save'
+            # saved_form.partner_ids, partner_private + partner_classic + partner_private_2 + new_partner,
+            saved_form.partner_ids, partner_classic + new_partner,
+            'Template value is kept at save (FIXME: loosing private partner)'
         )
 
         with self.mock_mail_gateway():
@@ -208,8 +210,8 @@ class TestMailComposerForm(TestMailComposer):
         self.assertIn('<h1>Hello sir!</h1>', message.body)
         # self.assertEqual(message.partner_ids, partner_private + partner_classic + partner_private_2 + new_partner)
         self.assertEqual(
-            message.partner_ids, partner_private + partner_classic + partner_private_2 + new_partner,
-            'Should not loosing unreadable partners'
+            message.partner_ids, partner_classic + new_partner,
+            'FIXME: loosing private partner'
         )
         self.assertEqual(message.subject, 'MSO FTW')
 
@@ -227,7 +229,7 @@ class TestMailComposerRendering(TestMailComposer):
             'subject': 'MSO FTW',
         })
 
-        values = mail_compose_message._prepare_mail_values(self.partner_employee.ids)
+        values = mail_compose_message.get_mail_values(self.partner_employee.ids)
 
         self.assertIn(
             self.body_html,
@@ -252,37 +254,10 @@ class TestMailComposerRendering(TestMailComposer):
         with self.mock_mail_gateway(mail_unlink_sent=True):
             composer._action_send_mail()
 
-        values = composer._prepare_mail_values(self.partner_employee.ids)
+        values = composer.get_mail_values(self.partner_employee.ids)
 
         self.assertIn(
             self.body_html,
             values[self.partner_employee.id]['body_html'],
             'We must preserve (mso) comments in email html'
         )
-
-
-@tagged("mail_composer", "-at_install", "post_install")
-class TestMailComposerUI(MailCommon, HttpCase):
-
-    def test_mail_composer_test_tour(self):
-        self.env['mail.template'].create({
-            'auto_delete': True,
-            'lang': '{{ object.lang }}',
-            'model_id': self.env['ir.model']._get_id('res.partner'),
-            'name': 'Test template',
-            'partner_to': '{{ object.id }}',
-        })
-        self.user_employee.write({
-            'groups_id': [(4, self.env.ref('base.group_partner_manager').id)],
-        })
-        partner = self.env["res.partner"].create({"name": "Jane", "email": "jane@example.com"})
-        user = self.env["res.users"].create({"name": "Not A Demo User", "login": "nadu"})
-        with self.mock_mail_app():
-            self.start_tour(
-                f"/web#id={partner.id}&model=res.partner",
-                "mail/static/tests/tours/mail_composer_test_tour.js",
-                login=self.user_employee.login
-            )
-        message = self._new_msgs.filtered(lambda message: message.author_id == self.user_employee.partner_id)
-        self.assertEqual(len(message), 1)
-        self.assertIn(user.partner_id, message.partner_ids)
