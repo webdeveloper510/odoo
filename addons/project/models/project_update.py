@@ -11,9 +11,10 @@ from odoo.tools import formatLang
 
 STATUS_COLOR = {
     'on_track': 20,  # green / success
-    'at_risk': 2,  # orange
+    'at_risk': 22,  # orange
     'off_track': 23,  # red / danger
-    'on_hold': 4,  # light blue
+    'on_hold': 21,  # light blue
+    'done': 24,  # purple
     False: 0,  # default grey -- for studio
     # Only used in project.task
     'to_define': 0,
@@ -22,7 +23,7 @@ STATUS_COLOR = {
 class ProjectUpdate(models.Model):
     _name = 'project.update'
     _description = 'Project Update'
-    _order = 'date desc'
+    _order = 'id desc'
     _inherit = ['mail.thread.cc', 'mail.activity.mixin']
 
     def default_get(self, fields):
@@ -46,7 +47,8 @@ class ProjectUpdate(models.Model):
         ('on_track', 'On Track'),
         ('at_risk', 'At Risk'),
         ('off_track', 'Off Track'),
-        ('on_hold', 'On Hold')
+        ('on_hold', 'On Hold'),
+        ('done', 'Done'),
     ], required=True, tracking=True)
     color = fields.Integer(compute='_compute_color')
     progress = fields.Integer(tracking=True)
@@ -56,6 +58,9 @@ class ProjectUpdate(models.Model):
     date = fields.Date(default=fields.Date.context_today, tracking=True)
     project_id = fields.Many2one('project.project', required=True)
     name_cropped = fields.Char(compute="_compute_name_cropped")
+    task_count = fields.Integer("Task Count", readonly=True)
+    closed_task_count = fields.Integer("Closed Task Count", readonly=True)
+    closed_task_percentage = fields.Integer("Closed Task Percentage", compute="_compute_closed_task_percentage")
 
     @api.depends('status')
     def _compute_color(self):
@@ -64,13 +69,17 @@ class ProjectUpdate(models.Model):
 
     @api.depends('progress')
     def _compute_progress_percentage(self):
-        for u in self:
-            u.progress_percentage = u.progress / 100
+        for update in self:
+            update.progress_percentage = update.progress / 100
 
     @api.depends('name')
     def _compute_name_cropped(self):
-        for u in self:
-            u.name_cropped = (u.name[:57] + '...') if len(u.name) > 60 else u.name
+        for update in self:
+            update.name_cropped = (update.name[:57] + '...') if len(update.name) > 60 else update.name
+
+    def _compute_closed_task_percentage(self):
+        for update in self:
+            update.closed_task_percentage = update.task_count and round(update.closed_task_count * 100 / update.task_count)
 
     # ---------------------------------
     # ORM Override
@@ -79,7 +88,12 @@ class ProjectUpdate(models.Model):
     def create(self, vals_list):
         updates = super().create(vals_list)
         for update in updates:
-            update.project_id.sudo().last_update_id = update
+            project = update.project_id
+            project.sudo().last_update_id = update
+            update.write({
+                "task_count": project.task_count,
+                "closed_task_count": project.closed_task_count,
+            })
         return updates
 
     def unlink(self):
@@ -145,7 +159,7 @@ class ProjectUpdate(models.Model):
                  INNER JOIN mail_tracking_value mtv
                          ON mm.id = mtv.mail_message_id
                  INNER JOIN ir_model_fields imf
-                         ON mtv.field = imf.id
+                         ON mtv.field_id = imf.id
                         AND imf.model = 'project.milestone'
                         AND imf.name = 'deadline'
                  INNER JOIN project_milestone pm

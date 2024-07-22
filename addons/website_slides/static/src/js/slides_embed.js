@@ -1,4 +1,5 @@
 /* global PDFSlidesViewer */
+
 /**
  * This is a minimal version of the PDFViewer widget.
  * It is NOT use in the website_slides module, but it is called when embedding
@@ -6,6 +7,14 @@
  * (see website_slides.slide_embed_assets bundle, in website_slides_embed.xml)
  */
 $(function () {
+
+    function debounce(func, timeout = 300){
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
 
     if ($('#PDFViewer') && $('#PDFViewerCanvas')) { // check if presentation only
         var MIN_ZOOM=1, MAX_ZOOM=10, ZOOM_INCREMENT=.5;
@@ -19,7 +28,7 @@ $(function () {
             this.defaultpage = parseInt($viewer.find('#PDFSlideViewer').data('defaultpage'));
             this.canvas = $viewer.find('canvas')[0];
 
-            this.pdf_viewer = new PDFSlidesViewer(this.slide_url, this.canvas, true);
+            this.pdf_viewer = new PDFSlidesViewer(this.slide_url, this.canvas);
             this.hasSuggestions = !!this.$(".oe_slides_suggestion_media").length;
             this.pdf_viewer.loadDocument().then(function () {
                 self.on_loaded_file();
@@ -198,16 +207,16 @@ $(function () {
                 return false;
             }
         });
-        $(window).on('resize', _.debounce(function() {
+        $(window).on("resize", debounce(() => {
             embeddedViewer.on_resize();
         }, 500));
 
         // switching slide with keyboard
         $(document).keydown(function (ev) {
-            if (ev.keyCode === 37 || ev.keyCode === 38) {
+            if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") {
                 embeddedViewer.previous();
             }
-            if (ev.keyCode === 39 || ev.keyCode === 40) {
+            if (ev.key === "ArrowRight" || ev.key === "ArrowDown") {
                 embeddedViewer.next();
             }
         });

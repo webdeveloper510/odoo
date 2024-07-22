@@ -1,22 +1,23 @@
-odoo.define("website.tour.snippets_all_drag_and_drop", async function (require) {
-"use strict";
+/** @odoo-module **/
 
-const { WysiwygAdapterComponent } = require('@website/components/wysiwyg_adapter/wysiwyg_adapter');
-const websiteTourUtils = require('website.tour_utils');
-const { patch, unpatch } = require('web.utils');
+import websiteTourUtils from "@website/js/tours/tour_utils";
+import { patch } from "@web/core/utils/patch";
 
-const patchWysiwygAdapter = () => patch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter', {
-    _trigger_up(ev) {
-        this._super(...arguments);
-        if (ev.name === 'snippet_removed') {
-            $('body').attr('test-dd-snippet-removed', true);
+const patchWysiwygAdapter = () => {
+    const { WysiwygAdapterComponent } = odoo.loader.modules.get("@website/components/wysiwyg_adapter/wysiwyg_adapter");
+    return patch(WysiwygAdapterComponent.prototype, {
+        _trigger_up(ev) {
+            super._trigger_up(...arguments);
+            if (ev.name === 'snippet_removed') {
+                $('body').attr('test-dd-snippet-removed', true);
+            }
         }
-    }
-});
+    });
+};
 
-const unpatchWysiwygAdapter = () => unpatch(WysiwygAdapterComponent.prototype, 'snippets_all_drag_and_drop.wysiwyg_adapter');
+let unpatchWysiwygAdapter = null;
 
-const tour = require("web_tour.tour");
+import { registry } from "@web/core/registry";
 
 let snippetsNames = (new URL(document.location.href)).searchParams.get('snippets_names') || '';
 // When this test is loaded in the backend, the search params aren't as easy to
@@ -26,17 +27,24 @@ if (searchParams) {
     snippetsNames = new URLSearchParams(searchParams.split('/')[1]).get('snippets_names') || '';
     snippetsNames = snippetsNames.split(',');
 }
+const dropInOnlySnippets = {
+    's_button': '.btn',
+    's_image': '.img',
+    's_video': '.media_iframe_video',
+};
 let steps = [];
 let n = 0;
 for (const snippet of snippetsNames) {
     n++;
+    const isModal = ['s_popup', 's_newsletter_subscribe_popup'].includes(snippet);
+    const isDropInOnlySnippet = Object.keys(dropInOnlySnippets).includes(snippet);
     const snippetSteps = [{
         content: `Drop ${snippet} snippet [${n}/${snippetsNames.length}]`,
         trigger: `#oe_snippets .oe_snippet:has( > [data-snippet='${snippet}']) .oe_snippet_thumbnail`,
-        run: "drag_and_drop iframe #wrap",
+        run: "drag_and_drop_native iframe #wrap",
     }, {
         content: `Edit ${snippet} snippet`,
-        trigger: `iframe #wrap.o_editable [data-snippet='${snippet}']`,
+        trigger: `iframe #wrap.o_editable [data-snippet='${snippet}']${isModal ? ' .modal.show' : ''}`,
     }, {
         content: `check ${snippet} setting are loaded, wait panel is visible`,
         trigger: ".o_we_customize_panel",
@@ -59,25 +67,29 @@ for (const snippet of snippetsNames) {
             content: 'Close API Key popup',
             trigger: "iframe .modal-footer .btn-secondary",
         });
-    } else if (['s_popup', 's_newsletter_subscribe_popup'].includes(snippet)) {
+    } else if (isModal) {
         snippetSteps[2]['in_modal'] = false;
         snippetSteps.splice(3, 2, {
             content: `Hide the ${snippet} popup`,
-            trigger: "iframe .s_popup_close",
+            trigger: `iframe [data-snippet='${snippet}'] .s_popup_close`,
         }, {
             content: `Make sure ${snippet} is hidden`,
             trigger: "iframe body:not(.modal-open)",
         });
+    } else if (isDropInOnlySnippet) {
+        // The 'drop in only' snippets have their 'data-snippet' attribute
+        // removed once they are dropped, so we need to use a different selector.
+        snippetSteps[1]['trigger'] = `iframe #wrap.o_editable ${dropInOnlySnippets[snippet]}`;
     }
     steps = steps.concat(snippetSteps);
 }
 
-tour.register("snippets_all_drag_and_drop", {
+registry.category("web_tour.tours").add("snippets_all_drag_and_drop", {
     test: true,
     // To run the tour locally, you need to insert the URL sent by the python
     // tour here. There is currently an issue with tours which don't have an URL
     // url: '/?enable_editor=1&snippets_names=s_showcase,s_numbers,s_...',
-}, [
+    steps: () => [
     ...websiteTourUtils.clickOnEditAndWaitEditMode(),
     {
         content: "Ensure snippets are actually passed at the test.",
@@ -89,17 +101,16 @@ tour.register("snippets_all_drag_and_drop", {
             if (steps.length < 220) {
                 console.error(`This test is not behaving as it should, got only ${steps.length} steps.`);
             }
-            patchWysiwygAdapter();
+            unpatchWysiwygAdapter = patchWysiwygAdapter();
         },
     },
     // This first step is needed as it will be used later for inner snippets
     // Without this, it will dropped inside the footer and will need an extra
     // selector.
-    {
-        content: "Drop s_text_image snippet",
-        trigger: "#oe_snippets .oe_snippet:has( > [data-snippet='s_text_image']) .oe_snippet_thumbnail",
-        run: "drag_and_drop iframe #wrap"
-    },
+    websiteTourUtils.dragNDrop({
+        id: "s_text_image",
+        name: "Text - Image"
+    }),
     {
         content: "Edit s_text_image snippet",
         trigger: "iframe #wrap.o_editable [data-snippet='s_text_image']"
@@ -108,10 +119,7 @@ tour.register("snippets_all_drag_and_drop", {
         content: "check setting are loaded, wait panel is visible",
         trigger: ".o_we_customize_panel"
     },
-    {
-        content: "click on 'BLOCKS' tab",
-        trigger: ".o_we_add_snippet_btn"
-    },
+    websiteTourUtils.goBackToBlocks(),
 ].concat(steps).concat([
     {
         content: "Remove wysiwyg patch",
@@ -119,5 +127,4 @@ tour.register("snippets_all_drag_and_drop", {
         run: () => unpatchWysiwygAdapter(),
     }
 ]),
-);
 });

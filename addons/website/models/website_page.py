@@ -22,7 +22,7 @@ class Page(models.Model):
     _description = 'Page'
     _order = 'website_id'
 
-    url = fields.Char('Page URL')
+    url = fields.Char('Page URL', required=True)
     view_id = fields.Many2one('ir.ui.view', string='View', required=True, ondelete="cascade")
     website_indexed = fields.Boolean('Is Indexed', default=True)
     date_publish = fields.Datetime('Publishing Date')
@@ -36,6 +36,7 @@ class Page(models.Model):
     # Page options
     header_overlay = fields.Boolean()
     header_color = fields.Char()
+    header_text_color = fields.Char()
     header_visible = fields.Boolean(default=True)
     footer_visible = fields.Boolean(default=True)
 
@@ -95,12 +96,21 @@ class Page(models.Model):
         ''' Returns the most specific pages in self. '''
         ids = []
         previous_page = None
+        page_keys = self.sudo().search(
+            self.env['website'].website_domain(website_id=self._context.get('website_id'))
+        ).mapped('key')
         # Iterate a single time on the whole list sorted on specific-website first.
-        for page in self.sorted(key=lambda p: (p.url or '', not p.website_id)):
-            if not previous_page or page.url != previous_page.url:
+        for page in self.sorted(key=lambda p: (p.url, not p.website_id)):
+            if (
+                (not previous_page or page.url != previous_page.url)
+                # If a generic page (niche case) has been COWed and that COWed
+                # page received a URL change, it should not let you access the
+                # generic page anymore, despite having a different URL.
+                and (page.website_id or page_keys.count(page.key) == 1)
+            ):
                 ids.append(page.id)
             previous_page = page
-        return self.filtered(lambda page: page.id in ids)
+        return self.browse(ids)
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -139,17 +149,16 @@ class Page(models.Model):
         # When a website_page is deleted, the ORM does not delete its
         # ir_ui_view. So we got to delete it ourself, but only if the
         # ir_ui_view is not used by another website_page.
-        for page in self:
-            # Other pages linked to the ir_ui_view of the page being deleted (will it even be possible?)
-            pages_linked_to_iruiview = self.search(
-                [('view_id', '=', page.view_id.id), ('id', '!=', page.id)]
-            )
-            if not pages_linked_to_iruiview and not page.view_id.inherit_children_ids:
-                # If there is no other pages linked to that ir_ui_view, we can delete the ir_ui_view
-                page.view_id.unlink()
+        views_to_delete = self.view_id.filtered(
+            lambda v: v.page_ids <= self and not v.inherit_children_ids
+        )
+        # Rebind self to avoid unlink already deleted records from `ondelete="cascade"`
+        self = self - views_to_delete.page_ids
+        views_to_delete.unlink()
+
         # Make sure website._get_menu_ids() will be recomputed
-        self.clear_caches()
-        return super(Page, self).unlink()
+        self.env.registry.clear_cache()
+        return super().unlink()
 
     def write(self, vals):
         for page in self:
@@ -192,7 +201,7 @@ class Page(models.Model):
             if 'visibility' in vals:
                 if vals['visibility'] != 'restricted_group':
                     vals['groups_id'] = False
-        self.clear_caches()  # write on page == write on view that invalid cache
+        self.env.registry.clear_cache()  # write on page == write on view that invalid cache
         return super(Page, self).write(vals)
 
     def get_website_meta(self):

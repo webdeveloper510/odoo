@@ -2,45 +2,70 @@
 
 import { registry } from "@web/core/registry";
 import { ListRenderer } from "@web/views/list/list_renderer";
-import { KanbanRecord } from "@web/views/kanban/kanban_record";
-import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
-import { X2ManyField } from "@web/views/fields/x2many/x2many_field";
-import { ViewButton } from "@web/views/view_button/view_button";
+import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { useEffect } from "@odoo/owl";
 
-class MoveViewButton extends ViewButton {
-    async onClick(ev) {
-        if (this.env.model.root.resModel == "stock.picking" && this.props.clickParams.name == "action_show_details") {
-            await this.props.record.saveAndOpenDetails();
-        } else {
-            super.onClick(ev);
-        }
+export class MovesListRenderer extends ListRenderer {
+    static recordRowTemplate = "stock.MovesListRenderer.RecordRow";
+
+    setup() {
+        super.setup();
+        useEffect(
+            () => {
+                this.keepColumnWidths = false;
+            },
+            () => [this.state.columns]
+        );
     }
 
-    get disabled() {
-        if (this.props.clickParams.name == "action_show_details") {
-            return false;
+    processAllColumn(allColumns, list) {
+        let cols = super.processAllColumn(...arguments);
+        if (list.resModel === "stock.move") {
+            cols.push({
+                type: 'opendetailsop',
+                id: `column_detailOp_${cols.length}`,
+                column_invisible: 'parent.state=="draft"',
+            });
         }
-        return super.disabled;
+        return cols;
     }
 }
 
-MoveViewButton.props = [...ViewButton.props];
-export class MovesListRenderer extends ListRenderer {}
-MovesListRenderer.components = { ...ListRenderer.components, ViewButton: MoveViewButton };
+MovesListRenderer.props = [ ...ListRenderer.props, 'stockMoveOpen?']
 
-// Kanban view is displayed on mobile
-export class MovesKanbanRecord extends KanbanRecord {}
-MovesKanbanRecord.components = { ...KanbanRecord.components, ViewButton: MoveViewButton };
+export class StockMoveX2ManyField extends X2ManyField {
+    setup() {
+        super.setup();
+        this.canOpenRecord = true;
+    }
 
-export class MovesKanbanRenderer extends KanbanRenderer {}
-MovesKanbanRenderer.components = { ...KanbanRenderer.components, KanbanRecord: MovesKanbanRecord };
+    get isMany2Many() {
+        return false;
+    }
 
-export class StockMoveX2ManyField extends X2ManyField {}
-StockMoveX2ManyField.components = {
-    ...X2ManyField.components,
-    ListRenderer: MovesListRenderer,
-    KanbanRenderer: MovesKanbanRenderer
+
+
+    async openRecord(record) {
+        if (this.canOpenRecord && !record.isNew) {
+            const dirty = await record.isDirty();
+            if (dirty && 'quantity' in record._changes) {
+                await record.model.root.save({ reload: true });
+                record = record.model.root.data[this.props.name].records.find(e => e.resId === record.resId);
+                if (!record) {
+                    return;
+                }
+            }
+        }
+        return super.openRecord(record);
+    }
+}
+
+StockMoveX2ManyField.components = { ...X2ManyField.components, ListRenderer: MovesListRenderer };
+
+export const stockMoveX2ManyField = {
+    ...x2ManyField,
+    component: StockMoveX2ManyField,
+    additionalClasses: [...x2ManyField.additionalClasses || [], "o_field_one2many"],
 };
-StockMoveX2ManyField.additionalClasses = ['o_field_one2many'];
 
-registry.category("fields").add("stock_move_one2many", StockMoveX2ManyField);
+registry.category("fields").add("stock_move_one2many", stockMoveX2ManyField);

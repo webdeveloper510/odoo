@@ -1,5 +1,6 @@
-/** @odoo-module */
+/** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { useService } from '@web/core/utils/hooks';
 import { ConfirmationDialog } from '@web/core/confirmation_dialog/confirmation_dialog';
 import { Dialog } from '@web/core/dialog/dialog';
@@ -7,16 +8,16 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { useDebounced } from "@web/core/utils/timing";
 import { SearchMedia } from './search_media';
 
-import { Component, xml, useState, useRef, onWillStart } from "@odoo/owl";
+import { Component, xml, useState, useRef, onWillStart, useEffect } from "@odoo/owl";
 
-export const IMAGE_MIMETYPES = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/svg+xml', 'image/gif'];
-export const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.jpe', '.png', '.svg', '.gif'];
+export const IMAGE_MIMETYPES = ['image/jpg', 'image/jpeg', 'image/jpe', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp'];
+export const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.jpe', '.png', '.svg', '.gif', '.webp'];
 
 class RemoveButton extends Component {
     setup() {
-        this.removeTitle = this.env._t("This file is attached to the current record.");
+        this.removeTitle = _t("This file is attached to the current record.");
         if (this.props.model === 'ir.ui.view') {
-            this.removeTitle = this.env._t("This file is a public view attachment.");
+            this.removeTitle = _t("This file is a public view attachment.");
         }
     }
 
@@ -29,7 +30,7 @@ RemoveButton.template = xml`<i class="fa fa-trash o_existing_attachment_remove p
 
 export class AttachmentError extends Component {
     setup() {
-        this.title = this.env._t("Alert");
+        this.title = _t("Alert");
     }
 }
 AttachmentError.components = { Dialog };
@@ -61,7 +62,7 @@ export class Attachment extends Component {
 
     remove() {
         this.dialogs.add(ConfirmationDialog, {
-            body: this.env._t("Are you sure you want to delete this file ?"),
+            body: _t("Are you sure you want to delete this file?"),
             confirm: async () => {
                 const prevented = await this.rpc('/web_editor/attachment/remove', {
                     ids: [this.props.id],
@@ -136,15 +137,18 @@ FileSelectorControlPanel.components = {
 
 export class FileSelector extends Component {
     setup() {
+        this.notificationService = useService("notification");
         this.orm = useService('orm');
         this.uploadService = useService('upload');
         this.keepLast = new KeepLast();
 
         this.loadMoreButtonRef = useRef('load-more-button');
+        this.existingAttachmentsRef = useRef("existing-attachments");
 
         this.state = useState({
             attachments: [],
-            canLoadMoreAttachments: true,
+            canScrollAttachments: false,
+            canLoadMoreAttachments: false,
             isFetchingAttachments: false,
             needle: '',
         });
@@ -155,7 +159,30 @@ export class FileSelector extends Component {
             this.state.attachments = await this.fetchAttachments(this.NUMBER_OF_ATTACHMENTS_TO_DISPLAY, 0);
         });
 
-        this.debouncedScroll = useDebounced(this.scrollToLoadMoreButton, 500);
+        this.debouncedOnScroll = useDebounced(this.updateScroll, 15);
+        this.debouncedScrollUpdate = useDebounced(this.updateScroll, 500);
+
+        useEffect(
+            (modalEl) => {
+                if (modalEl) {
+                    modalEl.addEventListener("scroll", this.debouncedOnScroll);
+                    return () => {
+                        modalEl.removeEventListener("scroll", this.debouncedOnScroll);
+                    };
+                }
+            },
+            () => [this.props.modalRef.el?.querySelector("main.modal-body")]
+        );
+
+        useEffect(
+            () => {
+                // Updating the scroll button each time the attachments change.
+                // Hiding the "Load more" button to prevent it from flickering.
+                this.loadMoreButtonRef.el.classList.add("o_hide_loading");
+                this.state.canScrollAttachments = false;
+                this.debouncedScrollUpdate();
+            },
+            () => [this.allAttachments.length]);
     }
 
     get canLoadMore() {
@@ -183,6 +210,10 @@ export class FileSelector extends Component {
         domain.unshift('|', ['public', '=', true]);
         domain.push(['name', 'ilike', this.state.needle]);
         return domain;
+    }
+
+    get allAttachments() {
+        return this.state.attachments;
     }
 
     validateUrl(url) {
@@ -225,7 +256,6 @@ export class FileSelector extends Component {
 
     async handleLoadMore() {
         await this.loadMore();
-        this.debouncedScroll();
     }
 
     async loadMore() {
@@ -237,7 +267,6 @@ export class FileSelector extends Component {
 
     async handleSearch(needle) {
         await this.search(needle);
-        this.debouncedScroll();
     }
 
     async search(needle) {
@@ -256,7 +285,10 @@ export class FileSelector extends Component {
     }
 
     async uploadUrl(url) {
-        await this.uploadService.uploadUrl(url, { resModel: this.props.resModel, resId: this.props.resId }, attachment => this.onUploaded(attachment));
+        await this.uploadService.uploadUrl(url, {
+            resModel: this.props.resModel,
+            resId: this.props.resId,
+        }, attachment => this.onUploaded(attachment));
     }
 
     async onUploaded(attachment) {
@@ -285,13 +317,47 @@ export class FileSelector extends Component {
     }
 
     /**
-     * This is used (debounced) to be called after loading an attachment.
-     * This way, the user can always see the "load more" button.
+     * Updates the scroll button, depending on whether the "Load more" button is
+     * fully visible or not.
      */
-    scrollToLoadMoreButton() {
-        if (this.state.needle || this.state.attachments.length > this.NUMBER_OF_ATTACHMENTS_TO_DISPLAY) {
-            this.loadMoreButtonRef.el.scrollIntoView({ block: 'end', inline: 'nearest', behavior: 'smooth' });
+    updateScroll() {
+        const loadMoreTop = this.loadMoreButtonRef.el.getBoundingClientRect().top;
+        const modalEl = this.props.modalRef.el.querySelector("main.modal-body");
+        const modalBottom = modalEl.getBoundingClientRect().bottom;
+        this.state.canScrollAttachments = loadMoreTop >= modalBottom;
+        this.loadMoreButtonRef.el.classList.remove("o_hide_loading");
+    }
+
+    /**
+     * Checks if the attachment is (partially) hidden.
+     *
+     * @param {Element} attachmentEl the attachment "container"
+     * @returns {Boolean} true if the attachment is hidden, false otherwise.
+     */
+    isAttachmentHidden(attachmentEl) {
+        const attachmentBottom = Math.round(attachmentEl.getBoundingClientRect().bottom);
+        const modalEl = this.props.modalRef.el.querySelector("main.modal-body");
+        const modalBottom = modalEl.getBoundingClientRect().bottom;
+        return attachmentBottom > modalBottom;
+    }
+
+    /**
+     * Scrolls two attachments rows at a time. If there are not enough rows,
+     * scrolls to the "Load more" button.
+     */
+    handleScrollAttachments() {
+        let scrollToEl = this.loadMoreButtonRef.el;
+        const attachmentEls = [...this.existingAttachmentsRef.el.querySelectorAll(".o_existing_attachment_cell")];
+        const firstHiddenAttachmentEl = attachmentEls.find(el => this.isAttachmentHidden(el));
+        if (firstHiddenAttachmentEl) {
+            const attachmentBottom = firstHiddenAttachmentEl.getBoundingClientRect().bottom;
+            const attachmentIndex = attachmentEls.indexOf(firstHiddenAttachmentEl);
+            const firstNextRowAttachmentEl = attachmentEls.slice(attachmentIndex).find(el => {
+                return el.getBoundingClientRect().bottom > attachmentBottom;
+            })
+            scrollToEl = firstNextRowAttachmentEl || scrollToEl;
         }
+        scrollToEl.scrollIntoView({ block: "end", inline: "nearest", behavior: "smooth" });
     }
 }
 FileSelector.template = 'web_editor.FileSelector';

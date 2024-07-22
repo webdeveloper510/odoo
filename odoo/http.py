@@ -129,7 +129,7 @@ import traceback
 import warnings
 import zlib
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from os.path import join as opj
 from pathlib import Path
@@ -137,6 +137,19 @@ from urllib.parse import urlparse
 from zlib import adler32
 
 import babel.core
+
+try:
+    import geoip2.database
+    import geoip2.models
+    import geoip2.errors
+except ImportError:
+    geoip2 = None
+
+try:
+    import maxminddb
+except ImportError:
+    maxminddb = None
+
 import psycopg2
 import werkzeug.datastructures
 import werkzeug.exceptions
@@ -166,7 +179,6 @@ from .modules.registry import Registry
 from .service import security, model as service_model
 from .tools import (config, consteq, date_utils, file_path, parse_version,
                     profiler, submap, unique, ustr,)
-from .tools.geoipresolver import GeoIPResolver
 from .tools.func import filter_kwargs, lazy_property
 from .tools.mimetypes import guess_mimetype
 from .tools.misc import pickle
@@ -185,6 +197,7 @@ _logger = logging.getLogger(__name__)
 mimetypes.add_type('application/font-woff', '.woff')
 mimetypes.add_type('application/vnd.ms-fontobject', '.eot')
 mimetypes.add_type('application/x-font-ttf', '.ttf')
+mimetypes.add_type('image/webp', '.webp')
 # Add potentially wrong (detected on windows) svg mime types
 mimetypes.add_type('image/svg+xml', '.svg')
 # this one can be present on windows with the value 'text/plain' which
@@ -222,6 +235,15 @@ def get_default_session():
         'session_token': None,
     }
 
+DEFAULT_MAX_CONTENT_LENGTH = 128 * 1024 * 1024  # 128MiB
+
+# Two empty objects used when the geolocalization failed. They have the
+# sames attributes as real countries/cities except that accessing them
+# evaluates to None.
+if geoip2:
+    GEOIP_EMPTY_COUNTRY = geoip2.models.Country({})
+    GEOIP_EMPTY_CITY = geoip2.models.City({})
+
 # The request mimetypes that transport JSON in their body.
 JSON_MIMETYPES = ('application/json', 'application/json-rpc')
 
@@ -230,7 +252,7 @@ No CSRF validation token provided for path %r
 
 Odoo URLs are CSRF-protected by default (when accessed with unsafe
 HTTP methods). See
-https://www.odoo.com/documentation/16.0/developer/reference/addons/http.html#csrf
+https://www.odoo.com/documentation/17.0/developer/reference/addons/http.html#csrf
 for more details.
 
 * if this endpoint is accessed through Odoo via py-QWeb form, embed a CSRF
@@ -490,7 +512,7 @@ class Stream:
         elif attachment.db_datas:
             self.type = 'data'
             self.data = attachment.raw
-            self.last_modified = attachment['__last_update']
+            self.last_modified = attachment.write_date
             self.size = len(self.data)
 
         elif attachment.url:
@@ -523,7 +545,7 @@ class Stream:
             type='data',
             data=data,
             etag=request.env['ir.attachment']._compute_checksum(data),
-            last_modified=record['__last_update'] if record._log_access else None,
+            last_modified=record.write_date if record._log_access else None,
             size=len(data),
             public=record.env.user._is_public()  # good enough
         )
@@ -693,6 +715,9 @@ def route(route=None, **routing):
     :param bool csrf: Whether CSRF protection should be enabled for the
         route. Enabled by default for ``'http'``-type requests, disabled
         by default for ``'json'``-type requests.
+    :param Callable[[Exception], Response] handle_params_access_error:
+        Implement a custom behavior if an error occurred when retrieving the record
+        from the URL parameters (access error or missing error).
     """
     def decorator(endpoint):
         fname = f"<function {endpoint.__module__}.{endpoint.__name__}>"
@@ -806,13 +831,7 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
                     _logger.warning("The endpoint %s is not decorated by @route(), decorating it myself.", f'{cls.__module__}.{cls.__name__}.{method_name}')
                     submethod = route()(submethod)
 
-                # Ensure "type" is defined on each method's own routing,
-                # also ensure overrides don't change the routing type.
-                default_type = submethod.original_routing.get('type', 'http')
-                routing_type = merged_routing.setdefault('type', default_type)
-                if submethod.original_routing.get('type') not in (None, routing_type):
-                    _logger.warning("The endpoint %s changes the route type, using the original type: %r.", f'{cls.__module__}.{cls.__name__}.{method_name}', routing_type)
-                submethod.original_routing['type'] = routing_type
+                _check_and_complete_route_definition(cls, submethod, merged_routing)
 
                 merged_routing.update(submethod.original_routing)
 
@@ -835,6 +854,24 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
 
                 yield (url, endpoint)
 
+
+def _check_and_complete_route_definition(controller_cls, submethod, merged_routing):
+    """Verify and complete the route definition.
+
+    * Ensure 'type' is defined on each method's own routing.
+    * also ensure overrides don't change the routing type.
+
+    :param submethod: route method
+    :param dict merged_routing: accumulated routing values (defaults + submethod ancestor methods)
+    """
+    default_type = submethod.original_routing.get('type', 'http')
+    routing_type = merged_routing.setdefault('type', default_type)
+    if submethod.original_routing.get('type') not in (None, routing_type):
+        _logger.warning(
+            "The endpoint %s changes the route type, using the original type: %r.",
+            f'{controller_cls.__module__}.{controller_cls.__name__}.{submethod.__name__}',
+            routing_type)
+    submethod.original_routing['type'] = routing_type
 
 # =========================================================
 # Session
@@ -1017,9 +1054,120 @@ class Session(collections.abc.MutableMapping):
         self.context['lang'] = request.default_lang() if request else DEFAULT_LANG
         self.should_rotate = True
 
+        if request and request.env:
+            request.env['ir.http']._post_logout()
+
     def touch(self):
         self.is_dirty = True
 
+
+
+# =========================================================
+# GeoIP
+# =========================================================
+
+class GeoIP(collections.abc.Mapping):
+    """
+    Ip Geolocalization utility, determine information such as the
+    country or the timezone of the user based on their IP Address.
+
+    The instances share the same API as `:class:`geoip2.models.City`
+    <https://geoip2.readthedocs.io/en/latest/#geoip2.models.City>`_.
+
+    When the IP couldn't be geolocalized (missing database, bad address)
+    then an empty object is returned. This empty object can be used like
+    a regular one with the exception that all info are set None.
+
+    :param str ip: The IP Address to geo-localize
+
+    .. note:
+
+        The geoip info the the current request are available at
+        :attr:`~odoo.http.request.geoip`.
+
+    .. code-block:
+
+        >>> GeoIP('127.0.0.1').country.iso_code
+        >>> odoo_ip = socket.gethostbyname('odoo.com')
+        >>> GeoIP(odoo_ip).country.iso_code
+        'FR'
+    """
+
+    def __init__(self, ip):
+        self.ip = ip
+
+    @lazy_property
+    def _city_record(self):
+        try:
+            return root.geoip_city_db.city(self.ip)
+        except (OSError, maxminddb.InvalidDatabaseError):
+            return GEOIP_EMPTY_CITY
+        except geoip2.errors.AddressNotFoundError:
+            return GEOIP_EMPTY_CITY
+
+    @lazy_property
+    def _country_record(self):
+        if '_city_record' in vars(self):
+            # the City class inherits from the Country class and the
+            # city record is in cache already, save a geolocalization
+            return self._city_record
+        try:
+            return root.geoip_country_db.country(self.ip)
+        except (OSError, maxminddb.InvalidDatabaseError):
+            return self._city_record
+        except geoip2.errors.AddressNotFoundError:
+            return GEOIP_EMPTY_COUNTRY
+
+    @property
+    def country_name(self):
+        return self.country.name or self.continent.name
+
+    @property
+    def country_code(self):
+        return self.country.iso_code or self.continent.code
+
+    def __getattr__(self, attr):
+        # Be smart and determine whether the attribute exists on the
+        # country object or on the city object.
+        if hasattr(GEOIP_EMPTY_COUNTRY, attr):
+            return getattr(self._country_record, attr)
+        if hasattr(GEOIP_EMPTY_CITY, attr):
+            return getattr(self._city_record, attr)
+        raise AttributeError(f"{self} has no attribute {attr!r}")
+
+    def __bool__(self):
+        return self.country_name is not None
+
+    # Old dict API, undocumented for now, will be deprecated some day
+    def __getitem__(self, item):
+        if item == 'country_name':
+            return self.country_name
+
+        if item == 'country_code':
+            return self.country_code
+
+        if item == 'city':
+            return self.city.name
+
+        if item == 'latitude':
+            return self.location.latitude
+
+        if item == 'longitude':
+            return self.location.longitude
+
+        if item == 'region':
+            return self.subdivisions[0].iso_code if self.subdivisions else None
+
+        if item == 'time_zone':
+            return self.location.time_zone
+
+        raise KeyError(item)
+
+    def __iter__(self):
+        raise NotImplementedError("The dictionnary GeoIP API is deprecated.")
+
+    def __len__(self):
+        raise NotImplementedError("The dictionnary GeoIP API is deprecated.")
 
 # =========================================================
 # Request and Response
@@ -1054,6 +1202,7 @@ class HTTPRequest:
         httprequest = werkzeug.wrappers.Request(environ)
         httprequest.user_agent_class = UserAgent  # use vendored userAgent since it will be removed in 2.1
         httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
+        httprequest.max_content_length = DEFAULT_MAX_CONTENT_LENGTH
 
         self.__wrapped = httprequest
         self.__environ = self.__wrapped.environ
@@ -1072,10 +1221,10 @@ HTTPREQUEST_ATTRIBUTES = [
     'accept_charsets', 'accept_languages', 'accept_mimetypes', 'access_route', 'args', 'authorization', 'base_url',
     'charset', 'content_encoding', 'content_length', 'content_md5', 'content_type', 'cookies', 'data', 'date',
     'encoding_errors', 'files', 'form', 'full_path', 'get_data', 'get_json', 'headers', 'host', 'host_url', 'if_match',
-    'if_modified_since', 'if_none_match', 'if_range', 'if_unmodified_since', 'is_json', 'is_secure', 'json', 'method',
-    'mimetype', 'mimetype_params', 'origin', 'path', 'pragma', 'query_string', 'range', 'referrer', 'remote_addr',
-    'remote_user', 'root_path', 'root_url', 'scheme', 'script_root', 'server', 'session', 'trusted_hosts', 'url',
-    'url_charset', 'url_root', 'user_agent', 'values',
+    'if_modified_since', 'if_none_match', 'if_range', 'if_unmodified_since', 'is_json', 'is_secure', 'json',
+    'max_content_length', 'method', 'mimetype', 'mimetype_params', 'origin', 'path', 'pragma', 'query_string', 'range',
+    'referrer', 'remote_addr', 'remote_user', 'root_path', 'root_url', 'scheme', 'script_root', 'server', 'session',
+    'trusted_hosts', 'url', 'url_charset', 'url_root', 'user_agent', 'values',
 ]
 for attr in HTTPREQUEST_ATTRIBUTES:
     setattr(HTTPRequest, attr, property(*make_request_wrap_methods(attr)))
@@ -1164,9 +1313,17 @@ class Response(werkzeug.wrappers.Response):
             self.response.append(self.render())
             self.template = None
 
-    def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required'):
+    def set_cookie(self, key, value='', max_age=None, expires=-1, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required'):
+        """
+        The default expires in Werkzeug is None, which means a session cookie.
+        We want to continue to support the session cookie, but not by default.
+        Now the default is arbitrary 1 year.
+        So if you want a cookie of session, you have to explicitly pass expires=None.
+        """
+        if expires == -1:  # not provided value -> default value -> 1 year
+            expires = datetime.now() + timedelta(days=365)
+
         if request.db and not request.env['ir.http']._is_allowed_cookie(cookie_type):
-            expires = 0
             max_age = 0
         super().set_cookie(key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
 
@@ -1188,9 +1345,11 @@ class FutureResponse:
         return self.charset
 
     @functools.wraps(werkzeug.Response.set_cookie)
-    def set_cookie(self, key, value='', max_age=None, expires=None, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required'):
+    def set_cookie(self, key, value='', max_age=None, expires=-1, path='/', domain=None, secure=False, httponly=False, samesite=None, cookie_type='required'):
+        if expires == -1:  # not forced value -> default value -> 1 year
+            expires = datetime.now() + timedelta(days=365)
+
         if request.db and not request.env['ir.http']._is_allowed_cookie(cookie_type):
-            expires = 0
             max_age = 0
         werkzeug.Response.set_cookie(self, key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
 
@@ -1207,6 +1366,7 @@ class Request:
         self.dispatcher = _dispatchers['http'](self)  # until we match
         #self.params = {}  # set by the Dispatcher
 
+        self.geoip = GeoIP(httprequest.remote_addr)
         self.registry = None
         self.env = None
 
@@ -1295,27 +1455,6 @@ class Request:
 
     _cr = cr
 
-    @property
-    def geoip(self):
-        """
-        Get the remote address geolocalisation.
-
-        When geolocalization is successful, the return value is a
-        dictionary whose format is:
-
-            {'city': str, 'country_code': str, 'country_name': str,
-             'latitude': float, 'longitude': float, 'region': str,
-             'time_zone': str}
-
-        When geolocalization fails, an empty dict is returned.
-        """
-        if '_geoip' not in self.session:
-            was_dirty = self.session.is_dirty
-            self.session._geoip = (self.registry['ir.http']._geoip_resolve()
-                                   if self.db else self._geoip_resolve())
-            self.session.is_dirty = was_dirty
-        return self.session._geoip
-
     @lazy_property
     def best_lang(self):
         lang = self.httprequest.accept_languages.best
@@ -1395,11 +1534,6 @@ class Request:
         :rtype: str
         """
         return self.best_lang or DEFAULT_LANG
-
-    def _geoip_resolve(self):
-        if not (root.geoip_resolver and self.httprequest.remote_addr):
-            return {}
-        return root.geoip_resolver.resolve(self.httprequest.remote_addr) or {}
 
     def get_http_params(self):
         """
@@ -1547,10 +1681,8 @@ class Request:
             return
 
         if sess.should_rotate:
-            sess['_geoip'] = self.geoip
             root.session_store.rotate(sess, self.env)  # it saves
         elif sess.is_dirty:
-            sess['_geoip'] = self.geoip
             root.session_store.save(sess)
 
         cookie_sid = self.httprequest.cookies.get('session_id')
@@ -1712,6 +1844,9 @@ class Dispatcher(ABC):
                        'Origin, X-Requested-With, Content-Type, Accept, Authorization')
             werkzeug.exceptions.abort(Response(status=204))
 
+        if 'max_content_length' in routing:
+            self.request.httprequest.max_content_length = routing['max_content_length']
+
     @abstractmethod
     def dispatch(self, endpoint, args):
         """
@@ -1833,13 +1968,13 @@ class JsonRPCDispatcher(Dispatcher):
 
         Successful request::
 
-          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
+          --> {"jsonrpc": "2.0", "method": "call", "params": {"arg1": "val1" }, "id": null}
 
           <-- {"jsonrpc": "2.0", "result": { "res1": "val1" }, "id": null}
 
         Request producing a error::
 
-          --> {"jsonrpc": "2.0", "method": "call", "params": {"context": {}, "arg1": "val1" }, "id": null}
+          --> {"jsonrpc": "2.0", "method": "call", "params": {"arg1": "val1" }, "id": null}
 
           <-- {"jsonrpc": "2.0", "error": {"code": 1, "message": "End user error message.", "data": {"code": "codestring", "debug": "traceback" } }, "id": null}
 
@@ -1855,9 +1990,6 @@ class JsonRPCDispatcher(Dispatcher):
             werkzeug.exceptions.abort(Response("Invalid JSON-RPC data", status=400))
 
         self.request.params = dict(self.jsonrequest.get('params', {}), **args)
-        ctx = self.request.params.pop('context', None)
-        if ctx is not None and self.request.db:
-            self.request.update_context(**ctx)
 
         if self.request.db:
             result = self.request.registry['ir.http']._dispatch(endpoint)
@@ -1976,20 +2108,34 @@ class Application:
         _logger.debug('HTTP sessions stored in: %s', path)
         return FilesystemSessionStore(path, session_class=Session, renew_missing=True)
 
-    @lazy_property
-    def geoip_resolver(self):
-        try:
-            return GeoIPResolver.open(config.get('geoip_database'))
-        except Exception as e:
-            _logger.warning('Cannot load GeoIP: %s', e)
-
     def get_db_router(self, db):
         if not db:
             return self.nodb_routing_map
-        return request.registry['ir.http'].routing_map()
+        return request.env['ir.http'].routing_map()
+
+    @lazy_property
+    def geoip_city_db(self):
+        try:
+            return geoip2.database.Reader(config['geoip_city_db'])
+        except (OSError, maxminddb.InvalidDatabaseError):
+            _logger.debug(
+                "Couldn't load Geoip City file at %s. IP Resolver disabled.",
+                config['geoip_city_db'], exc_info=True
+            )
+            raise
+
+    @lazy_property
+    def geoip_country_db(self):
+        try:
+            return geoip2.database.Reader(config['geoip_country_db'])
+        except (OSError, maxminddb.InvalidDatabaseError) as exc:
+            _logger.debug("Couldn't load Geoip Country file (%s). Fallbacks on Geoip City.", exc,)
+            raise
 
     def set_csp(self, response):
         headers = response.headers
+        headers['X-Content-Type-Options'] = 'nosniff'
+
         if 'Content-Security-Policy' in headers:
             return
 
@@ -1998,7 +2144,6 @@ class Application:
             return
 
         headers['Content-Security-Policy'] = "default-src 'none'"
-        headers['X-Content-Type-Options'] = 'nosniff'
 
     def __call__(self, environ, start_response):
         """

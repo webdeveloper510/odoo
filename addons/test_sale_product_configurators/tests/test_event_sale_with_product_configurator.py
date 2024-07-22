@@ -84,7 +84,6 @@ class TestEventProductConfiguratorUi(AccountTestInvoicingCommon, HttpCase):
         # Create the event and link it to the product variants as event tickets
         cls.event = cls.env['event.event'].create({
             'name': 'TestEvent',
-            'auto_confirm': True,
             'date_begin': fields.Datetime.to_string(datetime.today() + timedelta(days=1)),
             'date_end': fields.Datetime.to_string(datetime.today() + timedelta(days=15)),
             'date_tz': 'Europe/Brussels',
@@ -113,13 +112,6 @@ class TestEventProductConfiguratorUi(AccountTestInvoicingCommon, HttpCase):
             cls.event_product_template.optional_product_ids = [cls.product_product_memorabilia.id,]
 
     def test_event_using_product_configurator(self):
-        # Disable noisy pricelist (aka demo data Benelux)
-        pricelist = self.env.ref('product.list0')
-        self.env.user.partner_id.write({
-            'property_product_pricelist': pricelist.id,
-        })
-        (self.env['product.pricelist'].search([]) - pricelist).write({'active': False})
-
         self.start_tour("/web", 'event_sale_with_product_configurator_tour', login='salesman')
 
         sale_order = self.env['sale.order'].search([('create_uid', "=", self.salesman.id)])

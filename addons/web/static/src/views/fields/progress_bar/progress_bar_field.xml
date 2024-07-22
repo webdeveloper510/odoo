@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.ProgressBarField" owl="1">
+    <t t-name="web.ProgressBarField">
         <div class="o_progressbar w-100 d-flex align-items-center" t-ref="numpadDecimal">
             <div t-if="props.title" class="o_progressbar_title text-nowrap pe-1"><t t-esc="props.title"/></div>
-            <div class="o_progress align-middle overflow-hidden" aria-valuemin="0" t-att-aria-valuemax="state.maxValue" t-att-aria-valuenow="state.currentValue">
-                <div t-attf-class="{{ state.currentValue > state.maxValue ? 'o_progress_exceed' : '' }} h-100" t-att-style="'width: min(' + 100 * state.currentValue / state.maxValue + '%, 100%)'"></div>
+            <div class="o_progress align-middle overflow-hidden" aria-valuemin="0" t-att-aria-valuemax="this.maxValue" t-att-aria-valuenow="this.currentValue">
+                <div t-attf-class="{{ progressBarColorClass }} h-100" t-att-style="'width: min(' + 100 * this.currentValue / this.maxValue + '%, 100%)'"></div>
             </div>
             <div class="o_progressbar_value d-flex">
                 <t t-if="isPercentage">
@@ -19,7 +19,6 @@
                         t-att-value="formatCurrentValue() or ''"
                         t-att-required="props.required"
                         t-on-change="onCurrentValueChange"
-                        t-on-input="onCurrentValueInput"
                         t-on-focus="onInputFocus"
                         t-on-blur="onInputBlur"
                     />
@@ -36,7 +35,6 @@
                         autocomplete="off"
                         t-att-value="formatCurrentValue()"
                         t-on-change="onCurrentValueChange"
-                        t-on-input="onCurrentValueInput"
                         t-on-focus="onInputFocus"
                         t-on-blur="onInputBlur"
                     />
@@ -51,7 +49,6 @@
                         autocomplete="off"
                         t-att-value="formatMaxValue()"
                         t-on-change="onMaxValueChange"
-                        t-on-input="onMaxValueInput"
                         t-on-focus="onInputFocus"
                         t-on-blur="onInputBlur"
                     />

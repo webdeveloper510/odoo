@@ -4,12 +4,18 @@ from collections import defaultdict
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools.sql import column_exists, create_column
+from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
 
 
 class AccountMove(models.Model):
 
     _inherit = "account.move"
+
+    _sql_constraints = [(
+        'unique_name', "", "Another entry with the same name already exists.",
+    ), (
+        'unique_name_latam', "", "Another entry with the same name already exists.",
+    )]
 
     def _auto_init(self):
         # Skip the computation of the field `l10n_latam_document_type_id` at the module installation
@@ -41,15 +47,27 @@ class AccountMove(models.Model):
         # for a Chilian or Argentian company (`res.company`) before installing `l10n_cl` or `l10n_ar`.
         if not column_exists(self.env.cr, "account_move", "l10n_latam_document_type_id"):
             create_column(self.env.cr, "account_move", "l10n_latam_document_type_id", "int4")
+
+        if not index_exists(self.env.cr, "account_move_unique_name_latam"):
+            drop_index(self.env.cr, "account_move_unique_name", self._table)
+            self.env.cr.execute("""
+                CREATE UNIQUE INDEX account_move_unique_name
+                                 ON account_move(name, journal_id)
+                              WHERE (state = 'posted' AND name != '/'
+                                AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt')));
+                CREATE UNIQUE INDEX account_move_unique_name_latam
+                                 ON account_move(name, commercial_partner_id, l10n_latam_document_type_id, company_id)
+                              WHERE (state = 'posted' AND name != '/'
+                                AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt')));
+            """)
         return super()._auto_init()
 
     l10n_latam_available_document_type_ids = fields.Many2many('l10n_latam.document.type', compute='_compute_l10n_latam_available_document_types')
     l10n_latam_document_type_id = fields.Many2one(
-        'l10n_latam.document.type', string='Document Type', readonly=False, auto_join=True, index='btree_not_null',
-        states={'posted': [('readonly', True)]}, compute='_compute_l10n_latam_document_type', store=True)
+        'l10n_latam.document.type', string='Document Type', readonly=False, auto_join=True, index='btree_not_null', compute='_compute_l10n_latam_document_type', store=True)
     l10n_latam_document_number = fields.Char(
         compute='_compute_l10n_latam_document_number', inverse='_inverse_l10n_latam_document_number',
-        string='Document Number', readonly=True, states={'draft': [('readonly', False)]})
+        string='Document Number', readonly=False)
     l10n_latam_use_documents = fields.Boolean(related='journal_id.l10n_latam_use_documents')
     l10n_latam_manual_document_number = fields.Boolean(compute='_compute_l10n_latam_manual_document_number', string='Manual Number')
     l10n_latam_document_type_id_code = fields.Char(related='l10n_latam_document_type_id.code', string='Doc Type')
@@ -142,13 +160,6 @@ class AccountMove(models.Model):
                 raise UserError(_('We do not accept the usage of document types on receipts yet. '))
         return super()._post(soft)
 
-    @api.constrains('name', 'journal_id', 'state')
-    def _check_unique_sequence_number(self):
-        """ This uniqueness verification is only valid for customer invoices, and vendor bills that does not use
-        documents. A new constraint method _check_unique_vendor_number has been created just for validate for this purpose """
-        vendor = self.filtered(lambda x: x.is_purchase_document() and x.l10n_latam_use_documents)
-        return super(AccountMove, self - vendor)._check_unique_sequence_number()
-
     @api.constrains('state', 'l10n_latam_document_type_id')
     def _check_l10n_latam_documents(self):
         """ This constraint checks that if a invoice is posted and does not have a document type configured will raise
@@ -182,52 +193,31 @@ class AccountMove(models.Model):
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
-        if self.move_type in ['out_refund', 'in_refund']:
+        internal_types = []
+        invoice_type = self.move_type
+        if invoice_type in ['out_refund', 'in_refund']:
             internal_types = ['credit_note']
-        else:
+        elif invoice_type in ['out_invoice', 'in_invoice']:
             internal_types = ['invoice', 'debit_note']
+        if self.debit_origin_id:
+            internal_types = ['debit_note']
+        internal_types += ['all']
         return [('internal_type', 'in', internal_types), ('country_id', '=', self.company_id.account_fiscal_country_id.id)]
 
-    @api.depends('journal_id', 'partner_id', 'company_id', 'move_type')
+    @api.depends('journal_id', 'partner_id', 'company_id', 'move_type', 'debit_origin_id')
     def _compute_l10n_latam_available_document_types(self):
         self.l10n_latam_available_document_type_ids = False
         for rec in self.filtered(lambda x: x.journal_id and x.l10n_latam_use_documents and x.partner_id):
             rec.l10n_latam_available_document_type_ids = self.env['l10n_latam.document.type'].search(rec._get_l10n_latam_documents_domain())
 
-    @api.depends('l10n_latam_available_document_type_ids', 'debit_origin_id')
+    @api.depends('l10n_latam_available_document_type_ids')
     def _compute_l10n_latam_document_type(self):
         for rec in self.filtered(lambda x: x.state == 'draft'):
             document_types = rec.l10n_latam_available_document_type_ids._origin
-            invoice_type = rec.move_type
-            if invoice_type in ['out_refund', 'in_refund']:
-                document_types = document_types.filtered(lambda x: x.internal_type not in ['debit_note', 'invoice'])
-            elif invoice_type in ['out_invoice', 'in_invoice']:
-                document_types = document_types.filtered(lambda x: x.internal_type not in ['credit_note'])
-            if rec.debit_origin_id:
-                document_types = document_types.filtered(lambda x: x.internal_type == 'debit_note')
             rec.l10n_latam_document_type_id = document_types and document_types[0].id
 
-    @api.constrains('name', 'partner_id', 'company_id', 'posted_before')
-    def _check_unique_vendor_number(self):
-        """ The constraint _check_unique_sequence_number is valid for customer bills but not valid for us on vendor
-        bills because the uniqueness must be per partner """
-        for rec in self.filtered(
-                lambda x: x.name and x.name != '/' and x.is_purchase_document() and x.l10n_latam_use_documents
-                            and x.commercial_partner_id):
-            domain = [
-                ('move_type', '=', rec.move_type),
-                # by validating name we validate l10n_latam_document_type_id
-                ('name', '=', rec.name),
-                ('company_id', '=', rec.company_id.id),
-                ('id', '!=', rec.id),
-                ('commercial_partner_id', '=', rec.commercial_partner_id.id),
-                # allow to have to equal if they are cancelled
-                ('state', '!=', 'cancel'),
-            ]
-            if rec.search(domain):
-                raise ValidationError(_('Vendor bill number must be unique per vendor and company.'))
-
     def _compute_made_sequence_hole(self):
-        manual_documents = self.filtered(lambda x: x.journal_id.l10n_latam_use_documents and x.l10n_latam_manual_document_number)
-        manual_documents.made_sequence_hole = False
-        super(AccountMove, self - manual_documents)._compute_made_sequence_hole()
+        use_documents_moves = self.filtered(lambda m: m.journal_id.l10n_latam_use_documents)
+        use_documents_moves.made_sequence_hole = False
+        if other_moves := self - use_documents_moves:
+            super(AccountMove, other_moves)._compute_made_sequence_hole()

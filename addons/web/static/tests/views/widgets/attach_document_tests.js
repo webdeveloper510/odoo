@@ -45,7 +45,7 @@ QUnit.module("Widgets", (hooks) => {
         let fileInput;
         patchWithCleanup(AttachDocumentWidget.prototype, {
             setup() {
-                this._super();
+                super.setup();
                 fileInput = this.fileInput;
             },
         });
@@ -75,10 +75,10 @@ QUnit.module("Widgets", (hooks) => {
                     assert.deepEqual(args.kwargs.attachment_ids, [5, 2]);
                     return true;
                 }
-                if (args.method === "write") {
+                if (args.method === "web_save") {
                     assert.deepEqual(args.args[1], { display_name: "yop" });
                 }
-                if (args.method === "read") {
+                if (args.method === "web_read") {
                     assert.deepEqual(args.args[0], [1]);
                 }
             },
@@ -88,13 +88,13 @@ QUnit.module("Widgets", (hooks) => {
                     <field name="display_name" required="1"/>
                 </form>`,
         });
-        assert.verifySteps(["get_views", "read"]);
+        assert.verifySteps(["get_views", "web_read"]);
 
         await editInput(target, "[name='display_name'] input", "yop");
         await click(target, ".o_attach_document");
         fileInput.dispatchEvent(new Event("change"));
         await nextTick();
-        assert.verifySteps(["write", "read", "post", "my_action", "read"]);
+        assert.verifySteps(["web_save", "post", "my_action", "web_read"]);
     });
 
     QUnit.test(
@@ -103,7 +103,7 @@ QUnit.module("Widgets", (hooks) => {
             let fileInput;
             patchWithCleanup(AttachDocumentWidget.prototype, {
                 setup() {
-                    this._super();
+                    super.setup();
                     fileInput = this.fileInput;
                 },
             });
@@ -132,10 +132,10 @@ QUnit.module("Widgets", (hooks) => {
                         assert.deepEqual(args.kwargs.attachment_ids, [5, 2]);
                         return true;
                     }
-                    if (args.method === "create") {
-                        assert.deepEqual(args.args[0], { display_name: "yop" });
+                    if (args.method === "web_save") {
+                        assert.deepEqual(args.args[1], { display_name: "yop" });
                     }
-                    if (args.method === "read") {
+                    if (args.method === "web_read") {
                         assert.deepEqual(args.args[0], [2]);
                     }
                 },
@@ -151,7 +151,7 @@ QUnit.module("Widgets", (hooks) => {
             await click(target, ".o_attach_document");
             fileInput.dispatchEvent(new Event("change"));
             await nextTick();
-            assert.verifySteps(["create", "read", "post", "my_action", "read"]);
+            assert.verifySteps(["web_save", "post", "my_action", "web_read"]);
         }
     );
 });

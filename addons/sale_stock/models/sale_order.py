@@ -20,14 +20,12 @@ class SaleOrder(models.Model):
     picking_policy = fields.Selection([
         ('direct', 'As soon as possible'),
         ('one', 'When all products are ready')],
-        string='Shipping Policy', required=True, readonly=True, default='direct',
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        string='Shipping Policy', required=True, default='direct',
         help="If you deliver all products at once, the delivery order will be scheduled based on the greatest "
         "product lead time. Otherwise, it will be based on the shortest.")
     warehouse_id = fields.Many2one(
         'stock.warehouse', string='Warehouse', required=True,
         compute='_compute_warehouse_id', store=True, readonly=False, precompute=True,
-        states={'sale': [('readonly', True)], 'done': [('readonly', True)], 'cancel': [('readonly', False)]},
         check_company=True)
     picking_ids = fields.One2many('stock.picking', 'sale_id', string='Transfers')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
@@ -102,10 +100,10 @@ class SaleOrder(models.Model):
             new_partner = self.env['res.partner'].browse(values.get('partner_shipping_id'))
             for record in self:
                 picking = record.mapped('picking_ids').filtered(lambda x: x.state not in ('done', 'cancel'))
-                addresses = (record.partner_shipping_id.display_name, new_partner.display_name)
                 message = _("""The delivery address has been changed on the Sales Order<br/>
                         From <strong>"%s"</strong> To <strong>"%s"</strong>,
-                        You should probably update the partner on this document.""") % addresses
+                        You should probably update the partner on this document.""",
+                            record.partner_shipping_id.display_name, new_partner.display_name)
                 picking.activity_schedule('mail.mail_activity_data_warning', note=message, user_id=self.env.user.id)
 
         if 'commitment_date' in values:
@@ -158,7 +156,7 @@ class SaleOrder(models.Model):
     def _compute_warehouse_id(self):
         for order in self:
             default_warehouse_id = self.env['ir.default'].with_company(
-                order.company_id.id).get_model_defaults('sale.order').get('warehouse_id')
+                order.company_id.id)._get_model_defaults('sale.order').get('warehouse_id')
             if order.state in ['draft', 'sent'] or not order.ids:
                 # Should expect empty
                 if default_warehouse_id is not None:
@@ -176,8 +174,8 @@ class SaleOrder(models.Model):
             res['warning'] = {
                 'title': _('Warning!'),
                 'message': _(
-                    'Do not forget to change the partner on the following delivery orders: %s'
-                ) % (','.join(pickings.mapped('name')))
+                    'Do not forget to change the partner on the following delivery orders: %s',
+                    ','.join(pickings.mapped('name')))
             }
         return res
 
@@ -224,7 +222,9 @@ class SaleOrder(models.Model):
             picking_id = picking_id[0]
         else:
             picking_id = pickings[0]
-        action['context'] = dict(self._context, default_partner_id=self.partner_id.id, default_picking_type_id=picking_id.picking_type_id.id, default_origin=self.name, default_group_id=picking_id.group_id.id)
+        # View context from sale_renting `rental_schedule_view_form`
+        cleaned_context = {k: v for k, v in self._context.items() if k != 'form_view_ref'}
+        action['context'] = dict(cleaned_context, default_partner_id=self.partner_id.id, default_picking_type_id=picking_id.picking_type_id.id, default_origin=self.name, default_group_id=picking_id.group_id.id)
         return action
 
     def _prepare_invoice(self):

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { listView } from "@web/views/list/list_view";
@@ -26,7 +26,7 @@ export class AccountFileUploader extends Component {
         this.extraContext = rec ? {
             default_journal_id: rec.id,
             default_move_type: (rec.type === 'sale' && 'out_invoice') || (rec.type === 'purchase' && 'in_invoice') || 'entry',
-        } : this.props.extraContext || {}; //TODO remove this.props.extraContext
+        } : {};
     }
 
     async onFileUploaded(file) {
@@ -35,7 +35,7 @@ export class AccountFileUploader extends Component {
             mimetype: file.type,
             datas: file.data,
         };
-        const att_id = await this.orm.create("ir.attachment", [att_data], {
+        const [att_id] = await this.orm.create("ir.attachment", [att_data], {
             context: { ...this.extraContext, ...this.env.searchModel.context },
         });
         this.attachmentIdsToProcess.push(att_id);
@@ -65,11 +65,6 @@ AccountFileUploader.components = {
     FileUploader,
 };
 AccountFileUploader.template = "account.AccountFileUploader";
-AccountFileUploader.extractProps = ({ attrs }) => ({
-    togglerTemplate: attrs.template || "account.JournalUploadLink",
-    btnClass: attrs.btnClass || "",
-    linkText: attrs.linkText || attrs.title || _lt("Upload"), //TODO: remove linkText attr in master (not translatable)
-});
 AccountFileUploader.props = {
     ...standardWidgetProps,
     record: { type: Object, optional: true},
@@ -77,15 +72,23 @@ AccountFileUploader.props = {
     btnClass: { type: String, optional: true },
     linkText: { type: String, optional: true },
     slots: { type: Object, optional: true },
-    extraContext: { type: Object, optional: true }, //this prop is only for stable databases with the old journal dashboard view, it should be deleted in master as it is not used
-}
+};
 //when file uploader is used on account.journal (with a record)
-AccountFileUploader.fieldDependencies = {
-    id: { type: "integer" },
-    type: { type: "selection" },
+
+export const accountFileUploader = {
+    component: AccountFileUploader,
+    extractProps: ({ attrs }) => ({
+        togglerTemplate: attrs.template || "account.JournalUploadLink",
+        btnClass: attrs.btnClass || "",
+        linkText: attrs.linkText || attrs.title || _t("Upload"), //TODO: remove linkText attr in master (not translatable)
+    }),
+    fieldDependencies: [
+        { name: "id", type: "integer" },
+        { name: "type", type: "selection" },
+    ],
 };
 
-registry.category("view_widgets").add("account_file_uploader", AccountFileUploader);
+registry.category("view_widgets").add("account_file_uploader", accountFileUploader);
 
 export class AccountDropZone extends Component {
     setup() {
@@ -93,7 +96,7 @@ export class AccountDropZone extends Component {
     }
 
     onDrop(ev) {
-        const selector = '.account_file_uploader.o_input_file.o_hidden';
+        const selector = '.account_file_uploader.o_input_file';
         // look for the closest uploader Input as it may have a context
         let uploadInput = ev.target.closest('.o_drop_area').parentElement.querySelector(selector) || document.querySelector(selector);
         let files = ev.dataTransfer ? ev.dataTransfer.files : false;
@@ -102,13 +105,17 @@ export class AccountDropZone extends Component {
             uploadInput.dispatchEvent(new Event("change"));
         } else {
             this.notificationService.add(
-                this.env._t("Could not upload files"),
+                _t("Could not upload files"),
                 {
                     type: "danger",
                 });
         }
         this.props.hideZone();
     }
+}
+AccountDropZone.props = {
+    visible: { type: Boolean, optional: true },
+    hideZone: { type: Function, optional: true },
 }
 AccountDropZone.defaultProps = {
     hideZone: () => {},

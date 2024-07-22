@@ -9,8 +9,5 @@ def migrate(cr, version):
         WHERE d.res_id = r.id
           AND d.model = 'ir.rule'
           AND d.module = 'hr_holidays'
-          AND (
-            d.name = 'hr_leave_rule_multicompany'
-            OR d.name = 'hr_leave_allocation_rule_multicompany'
-          )
+          AND d.name = 'hr_leave_allocation_rule_multicompany'
     """)

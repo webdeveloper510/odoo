@@ -3,23 +3,24 @@
 # 	* barcodes
 # 
 # Translators:
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2022
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2022
-# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2022
-# Simon S, 2022
-# Martin Trigaux, 2022
-# Kristoffer Grundström <lovaren@gmail.com>, 2022
-# Kim Asplund <kim.asplund@gmail.com>, 2022
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2023
+# Simon S, 2023
+# Robin Calvin, 2023
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2023
+# Kristoffer Grundström <lovaren@gmail.com>, 2023
+# Martin Trigaux, 2023
+# Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023
+# Kim Asplund <kim.asplund@gmail.com>, 2023
 # Lasse L, 2023
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Lasse L, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,8 +32,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
-msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*' ?"
-msgstr " '*' Är inte ett giltigt Regex streckkodsmönster. Menade du '.*'?"
+msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*'?"
+msgstr " '*' är inte ett giltigt regex streckkodsmönster. Menade du '.*'?"
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -86,6 +87,13 @@ msgstr "En intern identifiering av streckkodsnomenklaturen"
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_rule__encoding__any
 msgid "Any"
 msgstr "Någon"
+
+#. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
+#, python-format
+msgid "Barcode"
+msgstr "Streckkod"
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
@@ -144,7 +152,7 @@ msgstr "Skapad av"
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__create_date
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__create_date
 msgid "Created on"
-msgstr "Skapad"
+msgstr "Skapad den"
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__display_name
@@ -184,12 +192,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: barcodes
-#: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature____last_update
-#: model:ir.model.fields,field_description:barcodes.field_barcode_rule____last_update
-msgid "Last Modified on"
-msgstr "Senast redigerad den"
-
-#. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_uid
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__write_uid
 msgid "Last Updated by"
@@ -199,7 +201,7 @@ msgstr "Senast uppdaterad av"
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_date
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__write_date
 msgid "Last Updated on"
-msgstr "Senast uppdaterad på"
+msgstr "Senast uppdaterad den"
 
 #. module: barcodes
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_nomenclature__upc_ean_conv__none
@@ -216,17 +218,24 @@ msgstr "Nomenklatur"
 msgid ""
 "Patterns can also define how numerical values, such as weight or price, can be\n"
 "                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n"
-"                                define where the number's digits are encoded. Floats are also supported with the \n"
-"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases, \n"
-"                                the barcode field on the associated records <i>must</i> show these digits as \n"
+"                                define where the number's digits are encoded. Floats are also supported with the\n"
+"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n"
+"                                the barcode field on the associated records <i>must</i> show these digits as\n"
 "                                zeroes."
 msgstr ""
-"Mönster kan också definiera hur numeriska värden, t.ex. vikt eller pris, kan kodas\n"
-"                                kodas in i streckkoden. De indikeras av <code>{NNN}</code> där N:et\n"
-"                                definierar var siffrans siffror kodas. Flyttal stöds också med \n"
-"                                decimalerna anges med D, t.ex <code>{NNNDD}</code>. I dessa fall måste \n"
-"                                streckkodsfältet på de tillhörande posterna visa dessa siffror som \n"
+"Mönster kan också definiera hur numeriska värden, som vikt eller pris, kan vara\n"
+"                                kodad i streckkoden. De indikeras av  <code>{NNN}</code> när versala N\n"
+"                                definiera var numrets siffror är kodade. Decimalnummer stöds också med\n"
+"                                decimaler angivna med D, som t.ex <code>{NNNDD}</code>. I dessa fall,\n"
+"                                streckkodsfältet på tillhörande poster <i></i> visa dessa siffror som\n"
 "                                nollor."
+
+#. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/barcode_scanner.js:0
+#, python-format
+msgid "Please, Scan again!"
+msgstr "Vänligen skanna igen!"
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__name
@@ -247,6 +256,13 @@ msgstr "Sekvens"
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid "Tables"
 msgstr "Tabeller"
+
+#. module: barcodes
+#. odoo-javascript
+#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
+#, python-format
+msgid "Tap to scan"
+msgstr "Klicka för att scanna"
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern

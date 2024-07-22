@@ -1,25 +1,20 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
-import wTourUtils from 'website.tour_utils';
+import wTourUtils from '@website/js/tours/tour_utils';
+import { registry } from "@web/core/registry";
 
 // TODO: This part should be moved in a QUnit test
 const checkKanbanGroupBy = [{
     content: "Click on Kanban View",
     trigger: '.o_cp_switch_buttons .o_kanban',
 }, {
-    content: "Click on Group By",
+    content: "Open search panel menu",
     extra_trigger: '.o_kanban_renderer',
-    trigger: '.o_search_options .o_group_by_menu button',
+    trigger: '.o_control_panel .o_searchview_dropdown_toggler',
 }, {
-    content: "Click on Add Custom Group",
-    trigger: '.o_search_options .o_add_custom_group_menu button',
-    run: function (actions) {
-        this.$anchor[0].dispatchEvent(new MouseEvent('mouseenter'));
-    },
-}, {
-    content: "Click on Apply", // Active is selected by default
-    trigger: '.o_add_custom_group_menu .dropdown-menu .btn-primary',
+    content: "Select 'Active' in the select of Add Custom Group",
+    trigger: ".o_add_custom_group_menu",
+    run: "text active",
 }, {
     content: "Click on List View",
     extra_trigger: '.o_kanban_renderer .o_kanban_header',
@@ -31,27 +26,28 @@ const checkKanbanGroupBy = [{
 }];
 
 const checkWebsiteFilter = [{
-    content: "Click on My Website",
-    trigger: "button.dropdown-toggle:contains('My Website')",
+	content: "Click on the search options",
+	trigger: ".o_searchview_dropdown_toggler",
 }, {
-    content: "Select My Website 2",
-    trigger: ".dropdown-menu.show > .dropdown-item:contains('My Website 2')",
+	content: "Select My Website 2",
+	trigger: ".o_dropdown_container.o_website_menu > .dropdown-item:contains('My Website 2')",
 }, {
-    content: "Check that the homepage is now the one of My Website 2",
-    trigger: ".o_list_table .o_data_row .o_data_cell[name=name]:contains('Home') " +
-             "~ .o_data_cell[name=website_id]:contains('My Website 2')",
-    run: () => null, // it's a check
+	content: "Check that the homepage is now the one of My Website 2",
+	trigger: ".o_list_table .o_data_row .o_data_cell[name=name]:contains('Home') " +
+			 "~ .o_data_cell[name=website_id]:contains('My Website 2')",
+	run: () => null, // it's a check
 }, {
-    content: "Click on My Website 2",
-    trigger: "button.dropdown-toggle:contains('My Website 2')",
+	content: "Check that the search options are still open",
+	trigger: ".o_search_bar_menu",
+	run: () => null, // it's a check
 }, {
-    content: "Go back to My Website",
-    trigger: ".dropdown-menu.show > .dropdown-item:contains('My Website')",
+	content: "Go back to My Website",
+	trigger: ".o_dropdown_container.o_website_menu > .dropdown-item:contains('My Website')",
 }, {
-    content: "Check that the homepage is now the one of My Website",
-    trigger: ".o_list_table .o_data_row .o_data_cell[name=name]:contains('Home') " +
-             "~ .o_data_cell[name=website_id]:contains('My Website'):not(:contains('2'))",
-    run: () => null, // it's a check
+	content: "Check that the homepage is now the one of My Website",
+	trigger: ".o_list_table .o_data_row .o_data_cell[name=name]:contains('Home') " +
+			 "~ .o_data_cell[name=website_id]:contains('My Website'):not(:contains('2'))",
+	run: () => null, // it's a check
 }];
 
 const deleteSelectedPage = [
@@ -80,10 +76,10 @@ const homePage = 'tr:contains("Home")';
 wTourUtils.registerWebsitePreviewTour('website_page_manager', {
     test: true,
     url: '/',
-}, [
+}, () => [
     {
         content: "Click on Site",
-        trigger: 'button.dropdown-toggle[title="Site"]',
+        trigger: 'button.dropdown-toggle[data-menu-xmlid="website.menu_site"]',
     },
     {
         content: "Click on Pages",
@@ -116,7 +112,7 @@ wTourUtils.registerWebsitePreviewTour('website_page_manager', {
 wTourUtils.registerWebsitePreviewTour('website_page_manager_session_forced', {
     test: true,
     url: '/',
-}, [...wTourUtils.switchWebsite(2, 'My Website 2'), {
+}, () => [...wTourUtils.switchWebsite(2, 'My Website 2'), {
     content: "Click on Site",
     trigger: 'button.dropdown-toggle[data-menu-xmlid="website.menu_site"]',
 }, {
@@ -128,21 +124,27 @@ wTourUtils.registerWebsitePreviewTour('website_page_manager_session_forced', {
              "~ .o_data_cell[name=website_id]:contains('My Website 2')",
     run: () => null, // it's a check
 }, {
-    content: "Check that the selected website is My Website 2",
-    trigger: ".o_search_options .dropdown-toggle:contains('My Website 2')",
+	content: "Click on the search options",
+	trigger: ".o_searchview_dropdown_toggler",
+}, {
+	content: "Check that the selected website is My Website 2",
+	trigger: ".o_dropdown_container.o_website_menu > .dropdown-item:contains('My Website 2')",
     run: () => null, // it's a check
 }]);
 
-tour.register('website_page_manager_direct_access', {
+registry.category("web_tour.tours").add('website_page_manager_direct_access', {
     test: true,
     url: '/web#action=website.action_website_pages_list',
-}, [{
+    steps: () => [{
     content: "Check that the homepage is the one of My Website 2",
     trigger: ".o_list_table .o_data_row .o_data_cell[name=name]:contains('Home') " +
              "~ .o_data_cell[name=website_id]:contains('My Website 2')",
     run: () => null, // it's a check
 }, {
-    content: "Check that the selected website is My Website 2",
-    trigger: ".o_search_options .dropdown-toggle:contains('My Website 2')",
+	content: "Click on the search options",
+	trigger: ".o_searchview_dropdown_toggler",
+}, {
+	content: "Check that the selected website is My Website 2",
+	trigger: ".o_dropdown_container.o_website_menu > .dropdown-item:contains('My Website 2')",
     run: () => null, // it's a check
-}]);
+}]});

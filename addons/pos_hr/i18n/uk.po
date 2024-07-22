@@ -3,16 +3,17 @@
 # 	* pos_hr
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
+# Martin Trigaux, 2023
+# Wil Odoo, 2023
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0beta\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-23 08:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
-"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2024\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,8 +24,19 @@ msgstr ""
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
-msgid "Allowed Employees"
-msgstr "Дозволені співробітники"
+msgid "Advanced rights"
+msgstr "Розширені права"
+
+#. module: pos_hr
+#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
+msgid "All employees"
+msgstr "Усі співробітники"
+
+#. module: pos_hr
+#: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
+#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
+msgid "Basic rights"
+msgstr "Базові права"
 
 #. module: pos_hr
 #: model:ir.model.fields,field_description:pos_hr.field_pos_order__cashier
@@ -34,8 +46,8 @@ msgid "Cashier"
 msgstr "Касир"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/js/SelectCashierMixin.js:0
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
 #, python-format
 msgid "Change Cashier"
 msgstr "Змінити касира"
@@ -54,44 +66,70 @@ msgid "Employee"
 msgstr "Співробітник"
 
 #. module: pos_hr
+#. odoo-python
 #: code:addons/pos_hr/models/hr_employee.py:0
 #, python-format
 msgid "Employee: %s - PoS Config(s): %s \n"
 msgstr "Співробітник: %s - Налашт. точки продажу: %s \n"
 
 #. module: pos_hr
-#: model:ir.model.fields,field_description:pos_hr.field_pos_config__employee_ids
-#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_employee_ids
-msgid "Employees with access"
-msgstr "Співробітники з правом доступу"
+#: model:ir.model.fields,field_description:pos_hr.field_pos_config__basic_employee_ids
+#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_basic_employee_ids
+msgid "Employees with basic access"
+msgstr "Співробітники з базовими правами доступу"
 
 #. module: pos_hr
-#: model:ir.model.fields,help:pos_hr.field_pos_config__employee_ids
-#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_employee_ids
-msgid "If left empty, all employees can log in to the PoS session"
+#: model:ir.model.fields,field_description:pos_hr.field_pos_config__advanced_employee_ids
+#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_advanced_employee_ids
+msgid "Employees with manager access"
+msgstr "Співробітникик з паравами доступу менеджерів"
+
+#. module: pos_hr
+#: model:ir.model.fields,help:pos_hr.field_pos_config__basic_employee_ids
+#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_basic_employee_ids
+msgid "If left empty, all employees can log in to PoS"
 msgstr ""
-"Якщо залишити порожнім, всі співробітники можуть увійти до сесії точки "
-"продажу"
+"Якщо залишити пустим, усі співробітники зможуть увійти в точку продажу"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/js/SelectCashierMixin.js:0
+#: model:ir.model.fields,help:pos_hr.field_pos_config__advanced_employee_ids
+#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_advanced_employee_ids
+msgid "If left empty, only Odoo users have extended rights in PoS"
+msgstr ""
+"Якщо залишити пустим, лише користувачі Odoo мають розширені права в PoS"
+
+#. module: pos_hr
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
 #, python-format
 msgid "Incorrect Password"
 msgstr "Невірний пароль"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/header_lock_button/header_lock_button.xml:0
+#: code:addons/pos_hr/static/src/overrides/components/navbar/navbar.xml:0
+#, python-format
+msgid "Lock"
+msgstr "Заблокувати"
+
+#. module: pos_hr
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
 #, python-format
 msgid "Log in to"
 msgstr "Увійдіть в"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/js/SelectCashierMixin.js:0
+#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
+msgid "No employee"
+msgstr "Жодного співробітника"
+
+#. module: pos_hr
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
 #, python-format
-msgid "Password ?"
+msgid "Password?"
 msgstr "Пароль?"
 
 #. module: pos_hr
@@ -102,6 +140,13 @@ msgid ""
 msgstr ""
 "Особа, яка використовує касовий апарат. Це може бути стажер, студент або "
 "тимчасовий працівник."
+
+#. module: pos_hr
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#, python-format
+msgid "Please try again."
+msgstr "Будь ласка, спробуйте ще раз."
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_pos_config
@@ -124,20 +169,21 @@ msgid "Point of Sale Session"
 msgstr "Сесія точки продажу"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
 #, python-format
 msgid "Scan your badge"
 msgstr "Відскануйте ваш значок"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
 #, python-format
 msgid "Select Cashier"
 msgstr "Оберіть касира"
 
 #. module: pos_hr
+#. odoo-python
 #: code:addons/pos_hr/models/hr_employee.py:0
 #, python-format
 msgid ""
@@ -148,8 +194,8 @@ msgstr ""
 "сесії точки продажу, спершу закрийте сесію: \n"
 
 #. module: pos_hr
-#. openerp-web
-#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
+#. odoo-javascript
+#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
 #, python-format
 msgid "or"
 msgstr "або"

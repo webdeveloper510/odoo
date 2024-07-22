@@ -5,7 +5,7 @@ import base64
 
 from odoo import api, fields, models
 
-from odoo.modules.module import get_module_resource
+from odoo.tools.misc import file_open
 
 
 class LunchProductCategory(models.Model):
@@ -16,8 +16,7 @@ class LunchProductCategory(models.Model):
 
     @api.model
     def _default_image(self):
-        image_path = get_module_resource('lunch', 'static/img', 'lunch.png')
-        return base64.b64encode(open(image_path, 'rb').read())
+        return base64.b64encode(file_open('lunch/static/img/lunch.png', 'rb').read())
 
     name = fields.Char('Product Category', required=True, translate=True)
     company_id = fields.Many2one('res.company')
@@ -27,8 +26,8 @@ class LunchProductCategory(models.Model):
     image_1920 = fields.Image(default=_default_image)
 
     def _compute_product_count(self):
-        product_data = self.env['lunch.product']._read_group([('category_id', 'in', self.ids)], ['category_id'], ['category_id'])
-        data = {product['category_id'][0]: product['category_id_count'] for product in product_data}
+        product_data = self.env['lunch.product']._read_group([('category_id', 'in', self.ids)], ['category_id'], ['__count'])
+        data = {category.id: count for category, count in product_data}
         for category in self:
             category.product_count = data.get(category.id, 0)
 

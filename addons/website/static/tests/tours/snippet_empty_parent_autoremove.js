@@ -1,7 +1,6 @@
-odoo.define("website.tour.snippet_empty_parent_autoremove", function (require) {
-"use strict";
+/** @odoo-module **/
 
-const wTourUtils = require('website.tour_utils');
+import wTourUtils from "@website/js/tours/tour_utils";
 
 function removeSelectedBlock() {
     return {
@@ -14,7 +13,7 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
     test: true,
     url: '/',
     edition: true,
-}, [
+}, () => [
     // Base case: remove both columns from text - image
     wTourUtils.dragNDrop({
         id: 's_text_image',
@@ -35,29 +34,38 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
         trigger: 'iframe #wrap:empty',
     },
 
-    // Banner: test that parallax, bg-filter and shape are not treated as content
+    // Cover: test that parallax, bg-filter and shape are not treated as content
     wTourUtils.dragNDrop({
-        id: 's_banner',
-        name: 'Banner',
+        id: 's_cover',
+        name: 'Cover',
     }),
     wTourUtils.clickOnSnippet({
-        id: 's_banner',
-        name: 'Banner',
+        id: 's_cover',
+        name: 'Cover',
     }),
-    {
-        content: "Check that parallax is present",
-        trigger: 'iframe #wrap .s_banner .s_parallax_bg',
-        run: () => null,
-    },
+    // Add a shape
     wTourUtils.changeOption('ColoredLevelBackground', 'Shape'),
     {
-        content: "Check that shape is present",
-        trigger: 'iframe #wrap .s_banner .o_we_shape',
+        content: "Check that the parallax element is present",
+        trigger: 'iframe #wrap .s_cover .s_parallax_bg',
         run: () => null,
     },
     {
-        content: "Click on first column",
-        trigger: 'iframe #wrap .s_banner .row > :first-child',
+        content: "Check that the filter element is present",
+        trigger: 'iframe #wrap .s_cover .o_we_bg_filter',
+        run: () => null,
+    },
+    {
+        content: "Check that the shape element is present",
+        trigger: 'iframe #wrap .s_cover .o_we_shape',
+        run: () => null,
+    },
+    // Add a column
+    wTourUtils.changeOption('layout_column', 'we-toggler'),
+    wTourUtils.changeOption('layout_column', '[data-select-count="1"]'),
+    {
+        content: "Click on the created column",
+        trigger: 'iframe #wrap .s_cover .row > :first-child',
     },
     removeSelectedBlock(),
     {
@@ -66,4 +74,3 @@ wTourUtils.registerWebsitePreviewTour('snippet_empty_parent_autoremove', {
         run: () => null,
     },
 ]);
-});

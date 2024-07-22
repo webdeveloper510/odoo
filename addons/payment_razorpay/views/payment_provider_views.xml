@@ -8,20 +8,32 @@
         <field name="arch" type="xml">
             <group name="provider_credentials" position='inside'>
                 <group name="razorpay_credentials"
-                       attrs="{'invisible': [('code', '!=', 'razorpay')]}">
+                       invisible="code != 'razorpay'">
                     <field name="razorpay_key_id"
                            string="Key Id"
-                           attrs="{'required': [('code', '=', 'razorpay'), ('state', '!=', 'disabled')]}"/>
+                           required="code == 'razorpay' and state != 'disabled'"/>
                     <field name="razorpay_key_secret"
                            string="Key Secret"
-                           attrs="{'required': [('code', '=', 'razorpay'), ('state', '!=', 'disabled')]}"
+                           required="code == 'razorpay' and state != 'disabled'"
                            password="True"/>
                     <field name="razorpay_webhook_secret"
                            string="Webhook Secret"
-                           attrs="{'required': [('code', '=', 'razorpay'), ('state', '!=', 'disabled')]}"
+                           required="code == 'razorpay' and state != 'disabled'"
                            password="True"/>
                 </group>
             </group>
+            <field name="allow_tokenization" position="after">
+                <div invisible="code != 'razorpay' or not allow_tokenization" colspan="2">
+                    <a href="https://www.odoo.com/documentation/17.0/applications/finance/payment_providers/razorpay.html#payment-providers-razorpay-recurring-payments"
+                       class="btn btn-link"
+                       role="button"
+                       target="new"
+                    >
+                        <i class="oi oi-fw o_button_icon oi-arrow-right"/>
+                        Enable recurring payments on Razorpay
+                    </a>
+                </div>
+            </field>
         </field>
     </record>
 

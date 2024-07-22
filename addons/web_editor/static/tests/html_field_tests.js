@@ -1,18 +1,20 @@
 /** @odoo-module **/
 
 import { click, editInput, getFixture, makeDeferred, mockSendBeacon, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
+import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
-import { registry } from "@web/core/registry";
+import { FileSelectorControlPanel } from "@web_editor/components/media_dialog/file_selector";
 import { FormController } from '@web/views/form/form_controller';
 import { HtmlField } from "@web_editor/js/backend/html_field";
 import { MediaDialog } from "@web_editor/components/media_dialog/media_dialog";
 import { parseHTML, setSelection } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
-import { onRendered } from "@odoo/owl";
-import { wysiwygData } from "web_editor.test_utils";
-import { insertText } from '@web_editor/js/editor/odoo-editor/test/utils'
-
-// Legacy
-import legacyEnv from 'web.commonEnv';
+import { onRendered, useEffect } from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { COLOR_PICKER_TEMPLATE, wysiwygData } from "@web_editor/../tests/test_utils";
+import { OdooEditor } from '@web_editor/js/editor/odoo-editor/src/OdooEditor';
+import { uploadService } from "@web_editor/components/upload_progress_toast/upload_service";
+import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
+import { insertText } from '@web_editor/js/editor/odoo-editor/test/utils';
 
 async function iframeReady(iframe) {
     const iframeLoadPromise = makeDeferred();
@@ -43,9 +45,6 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         target = getFixture();
 
         setupViewRegistries();
-
-        // Explicitly removed by web_editor, we need to add it back
-        registry.category("fields").add("html", HtmlField, { force: true });
     });
 
     QUnit.module("Form view interactions with the HtmlField");
@@ -60,7 +59,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         const mediaDialogPromise = makeDeferred();
         patchWithCleanup(HtmlField.prototype, {
             async startWysiwyg() {
-                await this._super(...arguments);
+                await super.startWysiwyg(...arguments);
                 wysiwyg = this.wysiwyg;
                 wysiwygPromise.resolve();
             }
@@ -106,13 +105,72 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         assert.equal(mediaDialog.props.resId, 2);
     });
 
+    QUnit.test("QWeb plugin select t-field", async (assert) => {
+        serverData.models.partner.fields.m2o = { type: "many2one", relation: "partner" };
+        serverData.models.partner.records = [{
+            id: 1,
+            txt: `<span t-field='myfield'><span class="insideoftfield">demo</span></span>`
+        }];
+        await makeView({
+            type: "form",
+            resId: 1,
+            resIds: [1, 2],
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="m2o" />
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+
+        // Manually add a t-field in the form
+        // to be able to test that we don't trigger the same behavior
+        // as if we were inside the html field
+        const form = target.querySelector(".o_form_view");
+        const span = document.createElement("span");
+        span.setAttribute("t-field", "bogus");
+        span.innerHTML = `<span class="insidebogus">bogus</span>`;
+        form.appendChild(span);
+
+        const sel = document.getSelection();
+        sel.removeAllRanges();
+        let range = new Range();
+        range.setStart(target.querySelector(".insideoftfield"), 0);
+        sel.addRange(range);
+        await nextTick();
+        assert.strictEqual(sel.anchorNode, target.querySelector(".o_field_html p"));
+        sel.removeAllRanges();
+
+        range = new Range();
+        range.setStart(target.querySelector(".insidebogus"), 0);
+        sel.addRange(range);
+        await nextTick();
+        assert.strictEqual(sel.anchorNode, target.querySelector(".insidebogus"));
+
+        // Dispatch an invalid event to make sure nothing crashes
+        // It is hard to test this, but the issue was, in firefox, the target
+        // was used in the handler, and was the input which did not have some function
+        // In chrome, it worked fine, as selectionchange's target was always the document
+        const customEvent = new CustomEvent("selectionchange", { bubbles: true });
+        Object.defineProperties(customEvent, {
+            target: {
+                value: null,
+            },
+            currentTarget: {
+                value: null,
+            },
+        })
+        target.querySelector(".o_field_many2one input").dispatchEvent(customEvent);
+    })
+
     QUnit.test("discard html field changes in form", async (assert) => {
         serverData.models.partner.records = [{ id: 1, txt: "<p>first</p>" }];
         let wysiwyg;
         const wysiwygPromise = makeDeferred();
         patchWithCleanup(HtmlField.prototype, {
             async startWysiwyg() {
-                await this._super(...arguments);
+                await super.startWysiwyg(...arguments);
                 wysiwyg = this.wysiwyg;
                 wysiwygPromise.resolve();
             },
@@ -146,6 +204,50 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         await click(discardButton);
         assert.strictEqual(editable.innerHTML, `<p>first</p>`);
     });
+
+    QUnit.test("undo after discard html field changes in form", async (assert) => {
+        serverData.models.partner.records = [{ id: 1, txt: "<p>first</p>" }];
+        let wysiwyg;
+        const wysiwygPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                wysiwyg = this.wysiwyg;
+                wysiwygPromise.resolve();
+            },
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+        await wysiwygPromise;
+        const editor = wysiwyg.odooEditor;
+        const editable = editor.editable;
+        editor.testMode = true;
+        assert.strictEqual(editable.innerHTML, `<p>first</p>`);
+        const paragraph = editable.querySelector("p");
+        await setSelection(paragraph, 0);
+        await insertText(editor, "a");
+        assert.strictEqual(editable.innerHTML, `<p>afirst</p>`);
+        // For blur event here to call _onWysiwygBlur function in html_field
+        await editable.dispatchEvent(new Event("blur", { bubbles: true, cancelable: true }));
+        // Wait for the updates to be saved , if we don't wait the update of the value will
+        // be done after the call for discardChanges since it uses some async functions.
+        await new Promise((r) => setTimeout(r, 100));
+        const discardButton = target.querySelector(".o_form_button_cancel");
+        assert.ok(discardButton);
+        await click(discardButton);
+        assert.strictEqual(editable.innerHTML, `<p>first</p>`);
+        await editable.dispatchEvent(new KeyboardEvent('keydown', {key: 'z', ctrlKey: true, bubbles: true, cancelable: true}));
+        assert.strictEqual(editable.innerHTML, `<p>first</p>`);
+    });
+
 
     QUnit.module('Sandboxed Preview');
 
@@ -232,8 +334,8 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         let togglePromiseId = 0;
         const writePromise = makeDeferred();
         patchWithCleanup(HtmlField.prototype, {
-            setup: function () {
-                this._super(...arguments);
+            setup() {
+                super.setup(...arguments);
                 onRendered(() => {
                     if (codeViewState !== this.state.showCodeView) {
                         togglePromises[togglePromiseId].resolve();
@@ -276,7 +378,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
                     </sheet>
                 </form>`,
             mockRPC(route, args) {
-                if (args.method === "write" && args.model === 'partner') {
+                if (args.method === "web_save" && args.model === 'partner') {
                     assert.equal(args.args[1].txt, htmlDocumentTextTemplate('Hi', 'blue'));
                     writePromise.resolve();
                 }
@@ -402,7 +504,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
             blob.text().then((r) => {
                 const { params } = JSON.parse(r);
                 const { args, model } = params;
-                if (route === '/web/dataset/call_kw/partner/write' && model === 'partner') {
+                if (route === '/web/dataset/call_kw/partner/web_save' && model === 'partner') {
                     if (writeCount === 0) {
                         // Save normal value without image.
                         assert.equal(args[1].txt, `<p class="test_target"><br></p>`);
@@ -427,7 +529,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         // Patch to get the controller instance.
         patchWithCleanup(FormController.prototype, {
             setup() {
-                this._super(...arguments);
+                super.setup(...arguments);
                 formController = this;
             }
         });
@@ -436,7 +538,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         const htmlFieldPromise = makeDeferred();
         patchWithCleanup(HtmlField.prototype, {
             async startWysiwyg() {
-                await this._super(...arguments);
+                await super.startWysiwyg(...arguments);
                 await nextTick();
                 htmlFieldPromise.resolve(this);
             }
@@ -485,7 +587,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         const newImageSrc = "/web/image/1234/cropped_transparent.png";
         const mockRPC = async function (route, args) {
             if (
-                route === '/web/dataset/call_kw/partner/write' &&
+                route === '/web/dataset/call_kw/partner/web_save' &&
                 args.model === 'partner'
             ) {
                 assert.ok(false, "write should only be called through sendBeacon");
@@ -504,15 +606,6 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
                 modifyImageCount += 1;
             }
         };
-        // Add the ajax service (legacy), because wysiwyg RPCs use it.
-        patchWithCleanup(legacyEnv, {
-            services: {
-                ...legacyEnv.services,
-                ajax: {
-                    rpc: mockRPC,
-                },
-            }
-        });
         await makeView({
             type: "form",
             resId: 1,
@@ -535,7 +628,7 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
 
         // Replace the empty paragraph with a paragrah containing an unsaved
         // modified image
-        const imageContainerElement = parseHTML(imageContainerHTML).firstChild;
+        const imageContainerElement = parseHTML(editor.document, imageContainerHTML).firstChild;
         let paragraph = editor.editable.querySelector(".test_target");
         editor.editable.replaceChild(imageContainerElement, paragraph);
         editor.historyStep();
@@ -556,4 +649,649 @@ QUnit.module("WebEditor.HtmlField", ({ beforeEach }) => {
         await formController.beforeUnload();
         await sendBeaconDef;
     });
+
+    QUnit.test("Pasted/dropped images are converted to attachments on save", async (assert) => {
+        assert.expect(6);
+
+        // Patch to get a promise to get the htmlField component instance when
+        // the wysiwyg is instancied.
+        const htmlFieldPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                await nextTick();
+                htmlFieldPromise.resolve(this);
+            }
+        });
+        // Add a partner record
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: "<p class='test_target'><br></p>",
+        });
+
+        const mockRPC = async function (route, args) {
+            if (route === '/web_editor/attachment/add_data') {
+                // Check that the correct record model and id were sent.
+                assert.equal(args.res_model, 'partner');
+                assert.equal(args.res_id, 1);
+                return {
+                    image_src: '/test_image_url.png',
+                    access_token: '1234',
+                    public: false,
+                }
+            }
+        };
+
+        const pasteImage = async (editor) => {
+            // Create image file.
+            const base64ImageData = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII"
+            const binaryImageData = atob(base64ImageData);
+            const uint8Array = new Uint8Array(binaryImageData.length);
+            for (let i = 0; i < binaryImageData.length; i++) {
+                uint8Array[i] = binaryImageData.charCodeAt(i);
+            }
+            const file = new File([uint8Array], "test_image.png", { type: 'image/png' });
+
+            // Create a promise to get the created img elements
+            const pasteImagePromise = makeDeferred();
+            const observer = new MutationObserver(mutations => {
+                mutations
+                    .filter(mutation => mutation.type === 'childList')
+                    .forEach(mutation => {
+                        mutation.addedNodes.forEach(node => {
+                            if (node instanceof HTMLElement) {
+                                pasteImagePromise.resolve(node);
+                            }
+                        });
+                    });
+            });
+            observer.observe(editor.editable, { subtree: true, childList: true });
+
+            // Simulate paste.
+            editor._onPaste({
+                preventDefault() {},
+                clipboardData: {
+                    getData() {},
+                    items: [{
+                        kind: 'file',
+                        type: 'image/png',
+                        getAsFile: () => file,
+                    }],
+                },
+            });
+
+            const img = await pasteImagePromise;
+            observer.disconnect();
+            return img;
+        }
+
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+            mockRPC: mockRPC,
+        });
+        // Let the htmlField be mounted and recover the Component instance.
+        const htmlField = await htmlFieldPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+
+        const paragraph = editor.editable.querySelector(".test_target");
+        Wysiwyg.setRange(paragraph);
+
+        // Paste image.
+        const img = await pasteImage(editor);
+        // Test environment replaces 'src' by 'data-src'.
+        assert.ok(/^data:image\/png;base64,/.test(img.dataset['src']));
+        assert.ok(img.classList.contains('o_b64_image_to_save'));
+
+        // Save changes.
+        // Restore 'src' attribute so that SavePendingImages can do its job.
+        img.src = img.dataset['src'];
+        await htmlField.commitChanges();
+        assert.equal(img.dataset['src'], '/test_image_url.png?access_token=1234');
+        assert.ok(!img.classList.contains('o_b64_image_to_save'));
+    });
+
+    QUnit.module('Odoo fields synchronisation');
+
+    QUnit.test("Synchronise fields when editing.", async (assert) => {
+        serverData.models.partner.records = [{
+            id: 1,
+            txt: `
+            <div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <p>a</p>
+                </div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <p>a</p>
+                </div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <p>a</p>
+                </div>
+            </div>
+            `,
+        }];
+
+        // Patch to get a promise to get the htmlField component instance when
+        // the wysiwyg is instancied.
+        const htmlFieldPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                await nextTick();
+                htmlFieldPromise.resolve(this);
+            }
+        });
+        let historyStepPromise;
+        const newHistoryStepPromise = () => {
+            historyStepPromise = makeDeferred();
+        };
+        patchWithCleanup(OdooEditor.prototype, {
+            historyStep() {
+                super.historyStep(...arguments);
+                if (historyStepPromise) {
+                    historyStepPromise.resolve();
+                }
+            }
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+
+        // Let the htmlField be mounted and recover the Component instance.
+        const htmlField = await htmlFieldPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+        const node = editor.editable.querySelector('p').childNodes[0];
+        newHistoryStepPromise();
+        node.textContent = 'b';
+        await historyStepPromise;
+
+        assert.equal(editor.editable.children[0].children[0].innerHTML.trim(), '<p>b</p>');
+        assert.equal(editor.editable.children[0].children[1].innerHTML.trim(), '<p>b</p>');
+        assert.equal(editor.editable.children[0].children[2].innerHTML.trim(), '<p>b</p>');
+    });
+    QUnit.test("Synchronise fields when editing containing unremovable.", async (assert) => {
+        serverData.models.partner.records = [{
+            id: 1,
+            txt: `
+            <div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <p class="oe_unremovable">a</p>
+                </div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <p class="oe_unremovable">a</p>
+                </div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <p class="oe_unremovable">a</p>
+                </div>
+            </div>
+            `,
+        }];
+
+        // Patch to get a promise to get the htmlField component instance when
+        // the wysiwyg is instancied.
+        const htmlFieldPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                await nextTick();
+                htmlFieldPromise.resolve(this);
+            }
+        });
+        let historyStepPromise;
+        const newHistoryStepPromise = () => {
+            historyStepPromise = makeDeferred();
+        };
+        patchWithCleanup(OdooEditor.prototype, {
+            historyStep() {
+                super.historyStep(...arguments);
+                if (historyStepPromise) {
+                    historyStepPromise.resolve();
+                }
+            }
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+
+        // Let the htmlField be mounted and recover the Component instance.
+        const htmlField = await htmlFieldPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+        const node = editor.editable.querySelector('p').childNodes[0];
+        newHistoryStepPromise();
+        node.textContent = 'b';
+        await historyStepPromise;
+
+        assert.equal(editor.editable.children[0].children[0].innerHTML.trim(), '<p class="oe_unremovable">b</p>');
+        assert.equal(editor.editable.children[0].children[1].innerHTML.trim(), '<p class="oe_unremovable">b</p>');
+        assert.equal(editor.editable.children[0].children[2].innerHTML.trim(), '<p class="oe_unremovable">b</p>');
+    });
+    QUnit.test("Synchronise fields removing an unremovable within a t-field should rollback", async (assert) => {
+        serverData.models.partner.records = [{
+            id: 1,
+            txt: `
+            <div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <div class="oe_unremovable"><p class="oe_unremovable">a</p></div>
+                </div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <div class="oe_unremovable"><p class="oe_unremovable">a</p></div>
+                </div>
+                <div data-oe-model="partner" data-oe-field="txt" data-oe-id="1" data-oe-xpath="/div[1]/div[1]">
+                    <div class="oe_unremovable"><p class="oe_unremovable">a</p></div>
+                </div>
+            </div>
+            `,
+        }];
+
+        // Patch to get a promise to get the htmlField component instance when
+        // the wysiwyg is instancied.
+        const htmlFieldPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                await nextTick();
+                htmlFieldPromise.resolve(this);
+            }
+        });
+        let historyStepPromise;
+        const newHistoryStepPromise = () => {
+            historyStepPromise = makeDeferred();
+        };
+        patchWithCleanup(OdooEditor.prototype, {
+            historyStep() {
+                super.historyStep(...arguments);
+                if (historyStepPromise) {
+                    historyStepPromise.resolve();
+                }
+            }
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+
+        // Let the htmlField be mounted and recover the Component instance.
+        const htmlField = await htmlFieldPromise;
+        const editor = htmlField.wysiwyg.odooEditor;
+        const node = editor.editable.querySelector('div.oe_unremovable');
+        newHistoryStepPromise();
+        node.textContent = 'b';
+        await historyStepPromise;
+
+        assert.equal(editor.editable.children[0].children[0].innerHTML.trim(), '<div class="oe_unremovable"><p class="oe_unremovable">a</p></div>');
+        assert.equal(editor.editable.children[0].children[1].innerHTML.trim(), '<div class="oe_unremovable"><p class="oe_unremovable">a</p></div>');
+        assert.equal(editor.editable.children[0].children[2].innerHTML.trim(), '<div class="oe_unremovable"><p class="oe_unremovable">a</p></div>');
+    });
+
+    QUnit.module('Paste');
+
+    QUnit.test("Embed video by pasting video URL", async (assert) => {
+        assert.expect(4);
+
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: "<p><br></p>",
+        });
+
+        const mockRPC = async function (route, args) {
+            if (route === '/web_editor/video_url/data') {
+                return Promise.resolve({
+                    platform: "youtube",
+                    embed_url: "//www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0",
+                });
+            }
+        };
+
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html" options="{'allowCommandVideo': true}"/>
+                </form>`,
+            mockRPC: mockRPC,
+        });
+
+        const editable = document.querySelector(".odoo-editor-editable");
+        const p = editable.firstElementChild;
+        Wysiwyg.setRange(p);
+
+        // Paste a video URL.
+        const clipboardData = new DataTransfer();
+        clipboardData.setData('text/plain', 'https://www.youtube.com/watch?v=qxb74CMR748');
+        p.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true }));
+        assert.strictEqual(p.outerHTML, '<p>https://www.youtube.com/watch?v=qxb74CMR748<br></p>',
+            "The URL should be inserted as text");
+        assert.isVisible($('.oe-powerbox-wrapper:contains("Embed Youtube Video")'),
+            "The powerbox should be opened");
+
+        // Press Enter to select first option in the powerbox ("Embed Youtube Video").
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+        await nextTick();
+        assert.strictEqual(p.outerHTML, '<p></p>', "URL insertion should be reverted");
+        assert.containsOnce(
+            editable,
+            'div.media_iframe_video iframe[data-src="//www.youtube.com/embed/qxb74CMR748?rel=0&autoplay=0"]',
+            "The video should be embedded as an iframe"
+        );
+    });
+
+    QUnit.module("Link");
+
+    QUnit.test("link preview in Link Dialog", async (assert) => {
+        assert.expect(6);
+
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: "<p class='test_target'><a href='/test'>This website</a></p>",
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+
+        // Test the popover option to edit the link
+        const a = document.querySelector(".test_target a");
+        // Wait for the popover to appear
+        await nextTick();
+        a.click();
+        await nextTick();
+        // Click on the edit link icon
+        document.querySelector("a.mx-1.o_we_edit_link.text-dark").click();
+        // Make sure popover is closed
+        await new Promise(resolve => $(a).on('hidden.bs.popover.link_popover', resolve));
+        let labelInputField = document.querySelector(".modal input#o_link_dialog_label_input");
+        let linkPreview = document.querySelector(".modal a#link-preview");
+        assert.strictEqual(labelInputField.value, 'This website',
+            "The label input field should match the link's content");
+        assert.strictEqual(linkPreview.innerText.replaceAll("\ufeff", ""), "This website",
+            "Link label in preview should match label input field");
+
+        // Click on discard
+        await click(document, ".modal .modal-footer button.btn-secondary");
+
+        const p = document.querySelector(".test_target");
+        // Select link label to open the floating toolbar.
+        setSelection(p, 1, p, 2);
+        await nextTick();
+        // Click on create-link button to open the Link Dialog.
+        document.querySelector("#toolbar #create-link").click();
+        await nextTick();
+
+        labelInputField = document.querySelector(".modal input#o_link_dialog_label_input");
+        linkPreview = document.querySelector(".modal a#link-preview");
+        assert.strictEqual(labelInputField.value, 'This website',
+            "The label input field should match the link's content");
+        assert.strictEqual(linkPreview.innerText, 'This website',
+            "Link label in preview should match label input field");
+
+        // Edit link label.
+        await editInput(labelInputField, null, "New label");
+        assert.strictEqual(linkPreview.innerText, "New label",
+            "Preview should be updated on label input field change");
+        // Click "Save".
+        await click(document, ".modal .modal-footer button.btn-primary");
+        assert.strictEqual(p.innerText.replaceAll('\ufeff', ''), 'New label',
+            "The link's label should be updated");
+    });
+
+    QUnit.module("isDirty");
+
+    QUnit.test("isDirty should be false when the content is being transformed by the wysiwyg", async (assert) => {
+        assert.expect(2);
+
+        serverData.models.partner.records.push({
+            id: 1,
+            txt: "<p>a<span>b</span>c</p>",
+        });
+        let htmlField;
+        const wysiwygPromise = makeDeferred();
+        patchWithCleanup(HtmlField.prototype, {
+            async startWysiwyg() {
+                await super.startWysiwyg(...arguments);
+                htmlField = this;
+                wysiwygPromise.resolve();
+            }
+        });
+        await makeView({
+            type: "form",
+            resId: 1,
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="txt" widget="html"/>
+                </form>`,
+        });
+        await wysiwygPromise;
+
+        assert.strictEqual(htmlField.wysiwyg.getValue(), '<p>abc</p>', 'the value should be sanitized by the wysiwyg');
+        assert.strictEqual(htmlField._isDirty(), false, 'should not be dirty as the content has not changed');
+
+    });
 });
+
+export const mediaDialogServices = {
+    upload: uploadService,
+};
+
+export const uploadTestModule = QUnit.module(
+    "WebEditor.HtmlField.upload",
+    {
+        beforeEach: function () {
+            this.data = wysiwygData({
+                "mail.compose.message": {
+                    fields: {
+                        display_name: {
+                            string: "Displayed name",
+                            type: "char",
+                        },
+                        body: {
+                            string: "Message Body inline (to send)",
+                            type: "html",
+                        },
+                        attachment_ids: {
+                            string: "Attachments",
+                            type: "many2many",
+                            relation: "ir.attachment",
+                        },
+                    },
+                    records: [
+                        {
+                            id: 1,
+                            display_name: "Some Composer",
+                            body: "Hello",
+                            attachment_ids: [],
+                        },
+                    ],
+                },
+            });
+        },
+    },
+    function () {
+        QUnit.test("media dialog: upload", async function (assert) {
+            assert.expect(7);
+            const onAttachmentChangeTriggered = makeDeferred();
+            patchWithCleanup(HtmlField.prototype, {
+                _onAttachmentChange(event) {
+                    super._onAttachmentChange(event);
+                    onAttachmentChangeTriggered.resolve(true);
+                },
+            });
+            const defFileSelector = makeDeferred();
+            const onChangeTriggered = makeDeferred();
+            const webSaveTriggered = makeDeferred();
+            patchWithCleanup(FileSelectorControlPanel.prototype, {
+                setup() {
+                    super.setup();
+                    useEffect(
+                        () => {
+                            defFileSelector.resolve(true);
+                        },
+                        () => [],
+                    );
+                },
+                async onChangeFileInput() {
+                    super.onChangeFileInput();
+                    onChangeTriggered.resolve(true);
+                },
+            });
+            patchWithCleanup(Wysiwyg.prototype, {
+                async _getColorpickerTemplate() {
+                    return COLOR_PICKER_TEMPLATE;
+                },
+            });
+            // create and load form view
+            const serviceRegistry = registry.category("services");
+            for (const [serviceName, serviceDefinition] of Object.entries(mediaDialogServices)) {
+                serviceRegistry.add(serviceName, serviceDefinition);
+            }
+            const serverData = {
+                models: this.data,
+            };
+            serverData.actions = {
+                1: {
+                    id: 1,
+                    name: "test",
+                    res_model: "mail.compose.message",
+                    type: "ir.actions.act_window",
+                    views: [[false, "form"]],
+                },
+            };
+            serverData.views = {
+                "mail.compose.message,false,search": "<search></search>",
+                "mail.compose.message,false,form": `
+                    <form>
+                        <field name="body" type="html"/>
+                        <field name="attachment_ids" widget="many2many_binary"/>
+                    </form>`,
+            };
+            const mockRPC = (route, args) => {
+                if (args.method === "web_save") {
+                    const createVals = args.args[1];
+                    assert.ok(createVals && createVals.attachment_ids);
+                    assert.equal(createVals.attachment_ids[0][0], 4); // link command
+                    assert.equal(createVals.attachment_ids[0][1], 5); // on attachment id "5"
+                    webSaveTriggered.resolve();
+                }
+                if (route === "/web_editor/attachment/add_data") {
+                    const attachment = {
+                        id: 5,
+                        name: "test.jpg",
+                        description: false,
+                        mimetype: "image/jpeg",
+                        checksum: "7951a43bbfb08fd742224ada280913d1897b89ab",
+                        url: false,
+                        type: "binary",
+                        res_id: 0,
+                        res_model: "mail.compose.message",
+                        public: false,
+                        access_token: false,
+                        image_src: "/web/image/1-a0e63e61/test.jpg",
+                        image_width: 1,
+                        image_height: 1,
+                        original_id: false,
+                    };
+                    serverData.models["ir.attachment"].records.push({ ...attachment });
+                    return Promise.resolve(attachment);
+                } else if (route === "/web/dataset/call_kw/ir.attachment/generate_access_token") {
+                    return Promise.resolve(["129a52e1-6bf2-470a-830e-8e368b022e13"]);
+                }
+            };
+            const webClient = await createWebClient({ serverData, mockRPC });
+            await doAction(webClient, 1);
+            //trigger wysiwyg mediadialog
+            const fixture = getFixture();
+            const formField = fixture.querySelector('.o_field_html[name="body"]');
+            const textInput = formField.querySelector(".note-editable p");
+            textInput.innerText = "test";
+            const pText = $(textInput).contents()[0];
+            Wysiwyg.setRange(pText, 1, pText, 2);
+            await new Promise((resolve) => setTimeout(resolve)); //ensure fully set up
+            const wysiwyg = $(textInput.parentElement).data("wysiwyg");
+            wysiwyg.openMediaDialog();
+            assert.ok(
+                await Promise.race([
+                    defFileSelector,
+                    new Promise((res, _) => setTimeout(() => res(false), 400)),
+                ]),
+                "File Selector did not mount",
+            );
+            // upload test
+            const fileInputs = document.querySelectorAll(
+                ".o_select_media_dialog input.d-none.o_file_input",
+            );
+            const fileB64 =
+                "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==";
+            const fileBytes = new Uint8Array(
+                atob(fileB64)
+                    .split("")
+                    .map((char) => char.charCodeAt(0)),
+            );
+            // redefine 'files' so we can put mock data in through js
+            fileInputs.forEach((input) =>
+                Object.defineProperty(input, "files", {
+                    value: [new File(fileBytes, "test.jpg", { type: "image/jpeg" })],
+                }),
+            );
+            fileInputs.forEach((input) => {
+                input.dispatchEvent(new Event("change", {}));
+            });
+
+            assert.ok(
+                await Promise.race([
+                    onChangeTriggered,
+                    new Promise((res, _) => setTimeout(() => res(false), 400)),
+                ]),
+                "File change event was not triggered",
+            );
+            assert.ok(
+                await Promise.race([
+                    onAttachmentChangeTriggered,
+                    new Promise((res, _) => setTimeout(() => res(false), 400)),
+                ]),
+                "_onAttachmentChange was not called with the new attachment, necessary for unsused upload cleanup on backend"
+            );
+            // wait to check that dom is properly updated
+            await new Promise((res, _) => setTimeout(() => res(false), 400));
+            assert.ok(fixture.querySelector('.o_attachment[title="test.jpg"]'));
+
+            await click(fixture.querySelector(".o_form_button_save"));
+            await webSaveTriggered;
+        });
+    },
+);

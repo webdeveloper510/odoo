@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from 'website.tour_utils';
+import wTourUtils from '@website/js/tours/tour_utils';
 
 /**
  * Global use case:
@@ -15,7 +15,7 @@ import wTourUtils from 'website.tour_utils';
  wTourUtils.registerWebsitePreviewTour('full_screen_web_editor', {
     url: '/slides',
     test: true,
-}, [{
+}, () => [{
     // open to the course
     trigger: 'iframe a:contains("Basics of Gardening")'
 }, {

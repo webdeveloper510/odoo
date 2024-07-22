@@ -2,8 +2,7 @@
 
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { useBus, useService } from "@web/core/utils/hooks";
-
-const { useRef } = owl;
+import { useRef } from "@odoo/owl";
 
 export class MrpDocumentsKanbanController extends KanbanController {
     setup() {
@@ -15,7 +14,6 @@ export class MrpDocumentsKanbanController extends KanbanController {
             "FILE_UPLOAD_LOADED",
             async () => {
                 await this.model.root.load();
-                this.model.notify();
             },
         );
     }

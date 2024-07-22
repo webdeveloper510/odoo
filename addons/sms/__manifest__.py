@@ -3,7 +3,7 @@
 
 {
     'name': 'SMS gateway',
-    'version': '2.4',
+    'version': '3.0',
     'category': 'Hidden/Tools',
     'summary': 'SMS Text Messaging',
     'description': """
@@ -40,19 +40,11 @@ The service is provided by the In App Purchase Odoo platform.
     'installable': True,
     'auto_install': True,
     'assets': {
-        'mail.assets_messaging': [
-            'sms/static/src/models/*.js',
-        ],
-        'mail.assets_discuss_public': [
-            'sms/static/src/components/sms_button/*',
-        ],
         'web.assets_backend': [
-            'sms/static/src/js/fields_phone_widget.js',
-            'sms/static/src/components/*/*',
+            'sms/static/src/**/*',
         ],
         'web.qunit_suite_tests': [
-            'sms/static/tests/sms_widget_test.js',
-            'sms/static/tests/qunit_suite_tests/**/*.js',
+            'sms/static/tests/**/*',
         ],
     },
     'license': 'LGPL-3',

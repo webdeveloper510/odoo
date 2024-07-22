@@ -1,14 +1,13 @@
-odoo.define('website_sale_wishlist.tour', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var rpc = require('web.rpc');
-var tour = require("web_tour.tour");
+import { registry } from "@web/core/registry";
+import { jsonrpc } from "@web/core/network/rpc_service";
 
-tour.register('shop_wishlist', {
+registry.category("web_tour.tours").add('shop_wishlist', {
     test: true,
+    checkDelay: 250,
     url: '/shop?search=Customizable Desk',
-},
-    [
+    steps: () => [
         {
             content: "click on add to wishlist",
             trigger: '.o_add_wishlist',
@@ -48,7 +47,7 @@ tour.register('shop_wishlist', {
         {
             content: "check that logged in",
             trigger: "li span:contains('Mitchell Admin')",
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "click on Customizable Desk (TEST)",
@@ -57,7 +56,7 @@ tour.register('shop_wishlist', {
         {
             content: "check the first variant is already in wishlist",
             trigger: '#product_detail .o_add_wishlist_dyn:disabled',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "change variant",
@@ -129,7 +128,7 @@ tour.register('shop_wishlist', {
             content: "Create a product with dynamic attribute and its values.",
             trigger: 'body',
             run: function () {
-                rpc.query({
+                jsonrpc("/web/dataset/call_kw/product.attribute/create", {
                     model: 'product.attribute',
                     method: 'create',
                     args: [{
@@ -137,8 +136,9 @@ tour.register('shop_wishlist', {
                         'display_type': 'color',
                         'create_variant': 'dynamic'
                     }],
+                    kwargs: {},
                 }).then(function (attributeId) {
-                    return rpc.query({
+                    return jsonrpc("/web/dataset/call_kw/product.template/create", {
                         model: 'product.template',
                         method: 'create',
                         args: [{
@@ -162,6 +162,7 @@ tour.register('shop_wishlist', {
                                 ]
                             }]],
                         }],
+                        kwargs: {},
                     });
                 }).then(function () {
                     window.location.href = '/web/session/logout?redirect=/shop?search=Bottle';
@@ -176,7 +177,7 @@ tour.register('shop_wishlist', {
         {
             content: "Check that wishlist contains 1 item",
             trigger: '.my_wish_quantity:contains(1)',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Click on product",
@@ -211,12 +212,12 @@ tour.register('shop_wishlist', {
         {
             content: "Check wishlist contains first variant",
             trigger: '#o_comparelist_table tr:contains("red")',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Check wishlist contains second variant",
             trigger: '#o_comparelist_table tr:contains("blue")',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Check wishlist contains third variant, then go to login",
@@ -238,18 +239,20 @@ tour.register('shop_wishlist', {
         // Test one impossible combination while other combinations are possible
         {
             content: "Archive the first variant",
-            trigger: '#top_menu:contains("Mitchell Admin")',
+            trigger: 'header#top:contains("Mitchell Admin")',
             run: function () {
-                rpc.query({
+                jsonrpc("/web/dataset/call_kw/product.product/search", {
                     model: 'product.product',
                     method: 'search',
                     args: [[['name', '=', "Bottle"]]],
+                    kwargs: {},
                 })
                 .then(function (productIds) {
-                    return rpc.query({
+                    return jsonrpc("/web/dataset/call_kw/product.product/write", {
                         model: 'product.product',
                         method: 'write',
                         args: [productIds[0], {active: false}],
+                        kwargs: {},
                     });
                 })
                 .then(function () {
@@ -261,7 +264,7 @@ tour.register('shop_wishlist', {
             content: "Check there is wishlist button on product from /shop",
             extra_trigger: '.js_sale',
             trigger: '.oe_product_cart:contains("Bottle") .o_add_wishlist',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Click on product",
@@ -274,7 +277,7 @@ tour.register('shop_wishlist', {
         {
             content: "Check there is no wishlist button when selecting impossible variant",
             trigger: '#product_detail:not(:has(.o_add_wishlist))',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Select Bottle with second variant (blue) from /product",
@@ -304,18 +307,20 @@ tour.register('shop_wishlist', {
         // test when all combinations are impossible
         {
             content: "Archive all variants",
-            trigger: '#top_menu:contains("Mitchell Admin")',
+            trigger: 'header#top:contains("Mitchell Admin")',
             run: function () {
-                rpc.query({
+                jsonrpc("/web/dataset/call_kw/product.product/search", {
                     model: 'product.product',
                     method: 'search',
                     args: [[['name', '=', "Bottle"]]],
+                    kwargs: {},
                 })
                 .then(function (productIds) {
-                    return rpc.query({
+                    return jsonrpc("/web/dataset/call_kw/product.product/write", {
                         model: 'product.product',
                         method: 'write',
                         args: [productIds, {active: false}],
+                        kwargs: {},
                     });
                 })
                 .then(function () {
@@ -327,7 +332,7 @@ tour.register('shop_wishlist', {
             content: "Check that there is no wishlist button from /shop",
             extra_trigger: '.js_sale',
             trigger: '.oe_product_cart:contains("Bottle"):not(:has(.o_add_wishlist))',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Click on product",
@@ -336,7 +341,7 @@ tour.register('shop_wishlist', {
         {
             content: "Check that there is no wishlist button from /product",
             trigger: '#product_detail:not(:has(.o_add_wishlist_dyn))',
-            run: function () {},
+            isCheck: true,
         },
         // Test if the wishlist button is active or not in /shop
         {
@@ -357,11 +362,11 @@ tour.register('shop_wishlist', {
         {
             content: "Added into the wishlist",
             trigger: '.my_wish_quantity.text-bg-primary:contains(1)',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Go to '/shop",
-            trigger: '#top_menu_collapse a[href="/shop"]',
+            trigger: 'header#top a[href="/shop"]',
         },
         {
             content: "Search the product Customizable Desk'",
@@ -374,7 +379,7 @@ tour.register('shop_wishlist', {
         {
             content: "The product is in the wishlist",
             trigger: '.oe_product_cart .o_wsale_product_information:has(.o_add_wishlist[disabled])',
-            run: function () {},
+            isCheck: true,
         },
         {
             content: "Go to the wishlist",
@@ -386,7 +391,7 @@ tour.register('shop_wishlist', {
         },
         {
             content: "Go to '/shop",
-            trigger: '#top_menu_collapse a[href="/shop"]',
+            trigger: 'header#top a[href="/shop"]',
         },
         {
             content: "Search the product Customizable Desk'",
@@ -399,9 +404,7 @@ tour.register('shop_wishlist', {
         {
             content: "The product is not in the wishlist",
             trigger: '.oe_product_cart .o_wsale_product_information:not(:has(.o_add_wishlist[disabled]))',
-            run: function () {},
+            isCheck: true,
         },
     ]
-);
-
 });

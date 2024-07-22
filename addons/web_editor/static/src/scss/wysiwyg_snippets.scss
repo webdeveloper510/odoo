@@ -25,7 +25,7 @@
     width: 77px;
     background-color: $o-we-sidebar-blocks-content-snippet-bg;
 
-    &.ui-draggable-dragging {
+    &.o_draggable_dragging {
         transform: rotate(-3deg) scale(1.2);
         box-shadow: 0 5px 25px -10px black;
         transition: transform 0.3s, box-shadow 0.3s;
@@ -142,12 +142,13 @@
     border-radius: $o-we-sidebar-content-field-border-radius;
     background-color: $o-we-sidebar-content-field-clickable-bg;
     color: $o-we-sidebar-content-field-clickable-color;
+    text-align: center;
 
     &:not([disabled]):hover, &.active:not(.o_we_no_toggle) {
         @include we-svg-icon($o-we-sidebar-content-field-pressed-color, $subdle-opacity: .75);
     }
 
-    &.active:not(.o_we_no_toggle) {
+    &.active:not(.o_we_no_toggle, .o_we_collapse_toggler) {
         background-color: $o-we-sidebar-content-field-pressed-bg;
     }
 }
@@ -203,6 +204,7 @@
 
 // SNIPPET PANEL
 #oe_snippets {
+    @include o-input-number-no-arrows();
     @include o-position-absolute(var(--o-we-toolbar-height), 0, 0, auto);
     position: fixed;
     z-index: $o-we-zindex;
@@ -293,13 +295,19 @@
     #snippets_menu {
         flex: 0 0 auto;
         display: flex;
+        align-items: end;
         background-color: $o-we-sidebar-tabs-bg;
         box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2);
         color: $o-we-sidebar-tabs-color;
+        height: $o-we-sidebar-tabs-height;
 
         > button {
             @extend %we-generic-tab-button;
         }
+    }
+
+    .tooltip {
+        pointer-events: none !important;
     }
 
     // Snippet filter input
@@ -484,7 +492,7 @@
             @extend %we-generic-button;
         }
 
-        #removeFormat, #oe-table-delete-table, .o_we_highlight_animated_text {
+        #removeFormat, #oe-table-delete-table {
             @extend %we-generic-link;
         }
 
@@ -493,9 +501,21 @@
             background: transparent;
             margin-top: $o-we-sidebar-content-field-spacing;
             padding: 0 $o-we-sidebar-content-padding-base 0 $o-we-sidebar-content-indent;
-            grid-template-areas: "typo typo style colors" "size align list link" "options options options options" "options2 options2 options2 options2";
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            grid-template-rows: minmax($o-we-sidebar-content-field-height, auto) minmax($o-we-sidebar-content-field-height, auto) auto auto ;
+            grid-template-areas:
+                "typo typo style style colors"
+                "size align list list link"
+                "ai animate animate hilight hilight"
+                "options options options options options"
+                "options2 options2 options2 options2 options2"
+                "options3 options3 options3 options3 options3";
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            grid-template-rows:
+                minmax($o-we-sidebar-content-field-height, auto)
+                minmax($o-we-sidebar-content-field-height, auto)
+                minmax($o-we-sidebar-content-field-height, auto)
+                auto
+                auto
+                auto;
             row-gap: $o-we-sidebar-content-field-spacing;
             column-gap: $o-we-sidebar-content-field-multi-spacing;
             width: 100%;
@@ -504,10 +524,67 @@
                 display: none; // remove ballon
             }
 
+            .fa {
+                font-size: $o-we-sidebar-font-size;
+            }
+
             .btn {
                 @extend %we-generic-button;
                 display: flex;
-                padding: ($o-we-sidebar-content-field-height * .12) ($o-we-sidebar-content-field-button-group-button-spacing - 2);
+                padding: ($o-we-sidebar-content-field-height * .12) ($o-we-sidebar-content-field-button-group-button-spacing - 2.5);
+            }
+
+            .dropdown-menu {
+                border-color: $o-we-sidebar-content-field-dropdown-border-color;
+                padding: 0;
+
+                > li ~ li {
+                    border-top: $o-we-sidebar-content-field-dropdown-item-spacing solid transparent;
+                }
+            }
+
+            .dropdown-item {
+                @include we-icon-button('', $align: left); // Always a padding on the left
+                background-color: $o-we-sidebar-content-field-dropdown-item-bg;
+                color: $o-we-sidebar-content-field-dropdown-item-color;
+                border-radius: 0;
+                padding-top: 5px;
+                padding-bottom: 5px;
+
+                &:hover, &:focus {
+                    background: $o-we-dropdown-item-bg-hover;
+                    color: $o-we-dropdown-item-hover-color;
+                }
+            }
+
+            .o_we_font_size_badge {
+                opacity: 0.6;
+            }
+
+            #font-size > button {
+                &:focus-within {
+                    @extend %we-generic-text-input;
+                    // Cancel the height of the border:
+                    margin-top: -1px;
+                    margin-bottom: -1px;
+
+                    input {
+                        padding: 0 !important;
+                        width: calc(2ch + #{$o-we-sidebar-content-field-clickable-spacing * 2} - #{$o-we-sidebar-content-field-border-width * 2});
+                    }
+                }
+                &.dropdown-toggle::after {
+                    display: none;
+                }
+
+                input {
+                    background-color: unset;
+                    border: none;
+                    color: unset;
+                    padding: 0;
+                    text-align: center;
+                    width: calc(2ch + #{$o-we-sidebar-content-field-clickable-spacing * 2});
+                }
             }
 
             we-customizeblock-option {
@@ -580,8 +657,12 @@
                     }
                 }
 
-                & + we-customizeblock-option {
+                & ~ we-customizeblock-option {
                     grid-area: options2;
+
+                    & ~ we-customizeblock-option {
+                        grid-area: options3;
+                    }
                 }
             }
 
@@ -677,6 +758,21 @@
                 }
             }
 
+            #chatgpt {
+                grid-area: ai;
+            }
+            #animate {
+                grid-area: animate;
+            }
+            #highlight {
+                grid-area: hilight;
+            }
+            #chatgpt, #animate, #highlight {
+                .fa {
+                    margin-right: $o-we-item-spacing * 0.25;
+                }
+            }
+
             .dropdown-menu.colorpicker-menu {
                 min-width: 0;
                 max-height: none;
@@ -732,6 +828,11 @@
 
         we-toggler {
             @include we-icon-button('\f0d7');
+
+            &.o_we_toggler_pager {
+                @include we-icon-button('\f105');
+            }
+
             text-align: left;
 
             > img, > svg {
@@ -739,7 +840,7 @@
             }
 
             + * {
-                display: none !important;
+                display: none;
                 border: $o-we-sidebar-content-field-dropdown-border-width solid $o-we-sidebar-content-field-dropdown-border-color;
                 border-radius: $o-we-item-border-radius;
                 background-color: $o-we-sidebar-content-field-dropdown-bg;
@@ -748,7 +849,12 @@
             &.active {
                 @include we-icon-button('\f0d8');
                 + * {
-                    display: block !important;
+                    display: block;
+                }
+
+                + .o_we_has_pager {
+                    display: flex;
+                    flex-direction: column;
                 }
             }
         }
@@ -766,6 +872,7 @@
 
         we-title {
             display: block;
+            text-align: left;
         }
 
         // TODO in master, remove the text-transform rule entirely and rely on
@@ -781,14 +888,12 @@
             display: block;
             padding: 0 0 ($o-we-sidebar-content-block-spacing * 1.5) 0;
             background-color: $o-we-bg-lighter;
-            box-shadow: $o-we-item-standup-bottom rgba($o-we-item-standup-color-dark, 0.8);
 
             > we-title {
                 display: flex;
                 align-items: center;
                 padding: $o-we-sidebar-content-block-spacing * .3 $o-we-sidebar-content-padding-base 0 $o-we-sidebar-content-indent;
                 background-color: $o-we-bg-light;
-                box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-light, .2), $o-we-item-standup-bottom rgba($o-we-item-standup-color-dark, .5);
                 font-size: $o-we-sidebar-content-main-title-font-size;
 
                 > span {
@@ -826,6 +931,22 @@
                             text-align: center;
                             justify-content: center;
                         }
+                    }
+                }
+            }
+
+            &.o_we_outdated_block_options {
+                // Outdated block options
+                padding: 0 !important;
+
+                > we-customizeblock-option {
+                    &:not(.snippet-option-VersionControl) {
+                        display: none !important;
+                    }
+
+                    &.snippet-option-VersionControl {
+                        // Outdated snippet alert
+                        padding: 0 !important;
                     }
                 }
             }
@@ -911,8 +1032,10 @@
                     margin-bottom: 2px; // Not sure why but not really centered otherwise
                 }
             }
-            &.fa > div {
-                display: none;
+            &.fa, &.oi {
+                > div {
+                    display: none;
+                }
             }
         }
 
@@ -922,7 +1045,7 @@
                 flex: 0 0 auto;
             }
             // Buttons being `fa-fw`, prevent font-awesome hardcoded width
-            &.fa-fw {
+            &.fa-fw, &.oi-fw {
                 padding: 0 .5em;
                 width: 2.29em; // .fa-fw = 1.28571429em (font-awesome.css)
                 justify-content: center;
@@ -962,7 +1085,6 @@
                     height: $o-we-sidebar-content-field-toggle-control-height;
                     border-radius: 10rem;
                     background-color: $o-we-sidebar-content-field-toggle-control-bg;
-                    box-shadow: $o-we-sidebar-content-field-toggle-control-shadow;
                 }
             }
             &.active we-checkbox {
@@ -978,6 +1100,7 @@
         we-selection-items {
             .o_we_user_value_widget {
                 margin-top: 0;
+                flex-grow: 1;
             }
         }
 
@@ -988,7 +1111,7 @@
             &:not(.o_we_icon_select) we-toggler {
                 @include large-component();
             }
-            &.o_we_widget_opened .o_we_dropdown_caret {
+            &:not(.o_we_select_pager).o_we_widget_opened .o_we_dropdown_caret {
                 position: relative;
                 display: block;
                 align-self: flex-end;
@@ -1010,24 +1133,70 @@
                     border-right-width: ($o-we-item-spacing - 1px);
                 }
             }
-            &:not(.o_we_so_color_palette) + we-button:not(:hover) {
+            // Special buttons (e.g. remove/position) next to the we-select
+            // should be toned down. Also makes sure that only one button is
+            // targeted, and that should be the last one.
+            &:not(.o_we_so_color_palette) ~ we-button:not(:hover):not(.o_we_image_shape_remove):last-child {
                 background: none;
             }
 
             we-toggler:empty::before {
-                content: '/';
+                content: attr(data-placeholder-text);
             }
             we-selection-items {
-                @include o-position-absolute(100%, 0, auto, 0);
-                z-index: $zindex-dropdown;
-                &:not(.dropdown-menu) {
-                    margin-top: $o-we-sidebar-content-field-dropdown-spacing !important;
-                }
-
-                &:not(.o_we_has_pager) {
+                &:not(.o_we_has_pager)  {
+                    @include o-position-absolute(100%, 0, auto, 0);
+                    z-index: $zindex-dropdown;
                     max-height: 600px;
                     overflow-y: auto;
                 }
+                &.o_we_has_pager {
+                    $o-offset-total-topbar: calc(#{$o-we-sidebar-top-height} + #{$o-we-sidebar-tabs-height});
+
+                    width: $o-we-sidebar-width;
+                    max-height: calc(100% - #{$o-offset-total-topbar});
+                    margin-top: $o-offset-total-topbar;
+
+                    we-title {
+                        padding: $o-we-sidebar-content-block-spacing * .3 $o-we-sidebar-content-padding-base 0 $o-we-sidebar-content-indent;
+                        background-color: $o-we-bg-light;
+                        line-height: $o-we-sidebar-content-main-title-height;
+                    }
+                    .o_pager_nav {
+                        background-color: $o-we-bg-light;
+
+                        > div:first-child {
+                            padding-left: $o-we-item-spacing * 1.5;
+                            padding-top: $o-we-item-spacing;
+                        }
+                    }
+                    .o_pager_nav_title {
+                        padding-left: $o-we-item-spacing * 1.5;
+                    }
+                    .o_pager_nav_angle {
+                        @extend %we-generic-clickable;
+                        @include button-variant($o-we-bg-light, $o-we-bg-light);
+                        padding: $o-we-item-spacing / 2;
+                        font-size: $o-we-sidebar-font-size * 1.4;
+                    }
+                    .o_pager_nav_btn {
+                        @extend %we-generic-tab-button;
+
+                        &:focus {
+                            box-shadow: none;
+                        }
+                    }
+                    .o_pager_container {
+                        overflow-y: scroll;
+                        scroll-behavior: smooth;
+                        background-color: $o-we-bg-lighter;
+                    }
+                }
+
+                &:not(.dropdown-menu):not(.o_we_has_pager) {
+                    margin-top: $o-we-sidebar-content-field-dropdown-spacing;
+                }
+
                 &:empty {
                     line-height: $o-we-sidebar-content-field-dropdown-item-height;
                     background-color: $o-we-sidebar-content-field-dropdown-item-bg;
@@ -1036,7 +1205,7 @@
                     padding-left: 2 * $o-we-sidebar-content-field-control-item-spacing + $o-we-sidebar-content-field-control-item-size;
 
                     &::before {
-                        content: '/';
+                        content: attr(data-placeholder-text);
                     }
                 }
                 > we-title {
@@ -1051,6 +1220,7 @@
                     background-color: $o-we-sidebar-content-field-dropdown-item-bg;
                     color: $o-we-sidebar-content-field-dropdown-item-color;
                     border-radius: 0;
+                    text-align: left;
 
                     > we-title {
                         flex-grow: 1;
@@ -1062,6 +1232,12 @@
                         img, svg {
                             max-width: 100%;
                         }
+                    }
+
+                    &.o_we_badge_at_end > div {
+                        display: flex;
+                        width: 100%;
+                        justify-content: space-between;
                     }
 
                     &:not(.d-none) ~ we-button {
@@ -1088,75 +1264,103 @@
                     }
                 }
             }
-            .o_we_pager_header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background-color: $o-we-sidebar-content-field-dropdown-item-bg;
-                margin-bottom: 1px;
 
-                & > b {
-                    padding: $o-we-sidebar-content-field-label-spacing;
-                    color: $o-we-fg-lighter;
+            // When the dropdown or the colorpicker is displayed above the
+            // selector.
+            &.o_we_select_dropdown_up {
+
+                we-selection-items {
+                    top: auto !important;
+                    bottom: 100% !important;
+                    margin-bottom: $o-we-sidebar-content-field-dropdown-spacing !important;
+                }
+                .o_we_dropdown_caret {
+                    align-self: flex-start !important;
+
+                    &::before, &::after {
+                        top: auto !important;
+                        bottom: 100% !important;
+                        margin-bottom: $o-we-dropdown-caret-spacing;
+                        transform: rotate(180deg) translateX(-50%) !important;
+                    }
+                }
+                &.o_we_so_color_palette .o_we_dropdown_caret {
+
+                    &::before, &::after {
+                        margin-bottom: $o-we-dropdown-caret-spacing / 2;
+                    }
                 }
             }
-            .o_we_pager_controls {
-                display: flex;
-                align-items: center;
 
-                > span {
-                    margin: 0 $o-we-sidebar-content-field-label-spacing;
-                }
-            }
-            .o_we_pager_next, .o_we_pager_prev {
-                margin: 0.3em;
-                padding: $o-we-sidebar-content-field-label-spacing;
-                cursor: pointer;
-                border: $o-we-item-border-width solid currentColor;
-                border-radius: $o-we-item-border-radius;
-            }
             we-select-page {
-                display: none;
-                width: 100%;
-                // Cut the last visible option in the list to understand that we can scroll.
-                max-height: 75px * 7.5;
-                overflow-y: auto;
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: $o-we-item-spacing / 2;
+                padding: $o-we-item-spacing;
+                background-color: $o-we-bg-lighter;
 
-                &.active {
-                    display: block;
+                we-button {
+                    @extend %o-preview-alpha-background;
+                    padding: $o-we-item-spacing;
+                    background-color: transparent;
+                }
+                // For background shapes
+                we-button[data-shape] {
+                    grid-column: span 4;
+                    padding: 0;
+
+                    div {
+                        width: 100%;
+                        height: 75px;
+                    }
+                }
+                we-button.active {
+                    outline: 4px solid $o-we-color-success;
+                    outline-offset: -4px;
+                    background-color: rgba($o-we-color-success, 0.2);
+                }
+                img {
+                    width: 100%;
+                    aspect-ratio: 1;
+                    object-fit: contain;
                 }
             }
-        }
-        we-select.o_we_user_value_widget.o_we_select_grid {
-            we-select-page {
-
-                we-button img {
-                    height: $o-we-sidebar-content-field-dropdown-grid-item-height;
-                    width: $o-we-sidebar-content-field-dropdown-grid-item-width;
-                }
-                &.active {
-                    display: flex;
-                    flex-wrap: wrap;
+            // A modifier applied on `<we-select/>` to give it a grid appearance.
+            &.o_we_select_grid {
+                we-selection-items {
                     we-button {
-                        width: percentage(1 / 3);
-                        padding: 0;
+                        padding: $o-we-sidebar-content-padding-base * 2 $o-we-sidebar-content-padding-base / 2;
+                        border: $o-we-item-border-width solid $o-we-bg-darkest;
+                        border-radius: 2px;
                         justify-content: center;
-                        img {
-                            padding: $o-we-sidebar-content-field-spacing;
+
+                        &.active {
+                            border: 2px solid $o-we-color-success !important;
+                        }
+                        // Text highlight related style.
+                        &[data-set-text-highlight] {
+                            --text-highlight-width: .15em;
+                            --text-highlight-color: #{$o-we-fg-light};
+
+                            > div {
+                                flex: none;
+                                position: relative;
+                                width: 60%;
+                                font-size: $o-we-sidebar-font-size * 1.3;
+                                font-weight: bold;
+                                overflow: visible;
+                                isolation: isolate;
+
+                                svg {
+                                    z-index: -1;
+                                }
+                            }
                         }
                     }
-                    we-button.active {
-                        border: 2px solid $o-we-color-success !important;
-                    }
-                }
-            }
-            &.o_we_fake_transparent_background {
-                we-button {
-                    background-image: url(/web/static/img/transparent.png);
-                    background-size: 10px auto;
                 }
             }
         }
+
         we-button.o_we_image_shape_remove {
             div {
                 display: flex;
@@ -1167,6 +1371,7 @@
         we-button-group.o_we_user_value_widget {
             we-selection-items {
                 display: flex;
+                flex-grow: 1;
                 max-width: 100%;
 
                 we-button {
@@ -1192,9 +1397,8 @@
             we-button {
                 display: flex;
                 justify-content: center;
-                flex: 0 1 percentage(1/4);
+                flex: 1 1 percentage(1/4);
                 padding: ($o-we-sidebar-content-field-button-group-button-spacing / 4) ($o-we-sidebar-content-field-button-group-button-spacing / 3);
-                text-align: center;
             }
         }
 
@@ -1226,14 +1430,13 @@
 
         // Color Pickers
         .o_we_so_color_palette.o_we_user_value_widget {
-
             .o_we_color_preview {
                 @extend %o-preview-alpha-background;
                 flex: 0 0 auto;
                 display: block;
                 width: $o-we-sidebar-content-field-colorpicker-size;
                 height: $o-we-sidebar-content-field-colorpicker-size;
-                border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+                border: $o-we-sidebar-content-field-border-width solid $o-we-bg-darkest;
                 border-radius: 10rem;
                 cursor: pointer;
 
@@ -1247,7 +1450,9 @@
                 .o_we_color_preview {
                     border: 2px solid $o-we-accent;
                 }
-                .o_we_dropdown_caret {
+
+                // "span" added to make the selector more specific
+                span.o_we_dropdown_caret {
                     &::before, &::after {
                         right: $o-we-sidebar-content-field-colorpicker-size / 2;
                     }
@@ -1444,13 +1649,15 @@
                 width: 100%;
                 max-height: 200px;
                 overflow-y: auto;
-                margin-bottom: $o-we-sidebar-content-field-spacing / 2;
 
                 table {
-                    @include o-input-number-no-arrows();
                     table-layout: auto;
                     width: 100%;
+                    margin-bottom: $o-we-sidebar-content-field-spacing / 2;
 
+                    &:empty {
+                        margin-bottom: 0;
+                    }
                     input {
                         width: 100%;
                         border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
@@ -1557,6 +1764,9 @@
                 margin-top: 0;
                 max-width: 100%;
             }
+            we-title {
+                align-self: flex-start;
+            }
         }
 
         //----------------------------------------------------------------------
@@ -1575,6 +1785,16 @@
             we-button, .o_we_so_color_palette, we-button-group {
                 &.o_we_user_value_widget {
                     min-width: auto; // ... except for these ones
+                }
+            }
+
+            &.o_we_header_font_row > div {
+                justify-content: space-between;
+
+                we-select {
+                    max-width: fit-content;
+                    min-width: fit-content;
+                    margin-right: 0px !important;
                 }
             }
 
@@ -1610,6 +1830,13 @@
                     font-weight: 600;
                 }
             }
+
+            // Add a margin between color pickers and button groups / widgets
+            // when next to another without impacting the margin of sibling
+            // color pickers
+            .o_we_so_color_palette.o_we_user_value_widget + .o_we_user_value_widget:not(.o_we_so_color_palette) {
+                margin-left: $o-we-sidebar-content-field-multi-spacing * 4 !important;
+            }
         }
 
         %o-we-inline {
@@ -1620,14 +1847,22 @@
                 width: 100%;
             }
             > div {
-                flex: 0 1 auto;
+                flex: 1 1 auto;
                 min-width: 0;
                 margin-top: $o-we-sidebar-content-field-spacing;
+
+                svg {
+                    margin: 0 auto;
+                }
             }
 
             &:not(.o_we_fw) {
                 flex-flow: row nowrap;
                 align-items: center;
+
+                &:not(we-input):not(.o_we_so_color_palette) {
+                    flex-grow: 1;
+                }
 
                 > we-title {
                     flex: 0 0 auto;
@@ -1692,7 +1927,6 @@
                 }
             }
             &.active {
-                box-shadow: $o-we-item-standup-top rgba($o-we-item-standup-color-dark, .5), $o-we-item-standup-bottom rgba($o-we-item-standup-color-light, .2);
                 we-collapse.active {
                     &, we-toggler.o_we_collapse_toggler {
                         background-color: $o-we-bg-lighter;
@@ -1709,6 +1943,10 @@
 
         .o_we_image_weight {
             margin-left: $o-we-sidebar-content-field-label-spacing * 2;
+        }
+
+        we-button + .o_we_image_weight {
+            margin-left: $o-we-sidebar-content-field-label-spacing;
         }
 
         .o_we_tag {
@@ -1820,6 +2058,9 @@
     border-width: 4px;
     border-bottom: none !important;
 }
+we-select.o_we_border_preview_aligned_select {
+    width: $o-we-sidebar-content-field-input-max-width;
+}
 #oe_snippets .colorpicker {
     $-wb-txt: $o-we-sidebar-content-field-colorpicker-dropdown-color;
 
@@ -1914,7 +2155,6 @@
 
                 input[type=range] {
                     pointer-events: none;
-                    focusable: false;
                     grid-column: 1/span 2;
                     grid-row: 3;
                     background: none;
@@ -1981,19 +2221,21 @@
 // DROPZONES
 @keyframes dropZoneInsert {
     to {
-        background-color: rgba($o-brand-odoo, 0.3);
+        box-shadow: inset 0 0 $o-we-dropzone-size 0 scale-color($o-we-dropzone-accent-color, $alpha: -50%);
     }
 }
 
 .oe_drop_zone {
-    background-color: rgba($o-brand-odoo, 0.15);
+    background: $o-we-dropzone-bg-color;
     animation: dropZoneInsert 1s linear 0s infinite alternate;
 
     &.oe_insert {
         position: relative;
-        z-index: $o-we-overlay-zindex;
         width: 100%;
-        border: 2px dashed $o-we-border-color;
+        border-radius: $border-radius-lg;
+        outline: $o-we-dropzone-border-width dashed $o-we-dropzone-accent-color;
+        outline-offset: -$o-we-dropzone-border-width;
+        z-index: $o-we-overlay-zindex;
     }
 }
 
@@ -2035,7 +2277,7 @@
         transition: opacity 400ms linear 0s;
 
         &.o_overlay_hidden {
-            opacity: 0;
+            opacity: 0 !important;
             transition: none;
         }
         &.oe_active {
@@ -2049,220 +2291,168 @@
             border-color: inherit;
             pointer-events: auto;
 
-            &:hover > .o_handle {
-                background-color: rgba($o-we-handles-accent-color, 0.05);
-            }
             > .o_handle {
-                position: relative;
-                border: 0 solid transparent;
-                border-color: inherit;
-                transition: background 300ms ease 0s;
+                position: absolute;
 
-                &.w {
-                    @include o-position-absolute($o-we-handles-offset-to-hide, auto, -$o-we-handles-offset-to-hide, 0);
+                &.o_side_y {
+                    height: $o-we-handle-edge-size;
+                }
+                &.o_side_x {
                     width: $o-we-handle-edge-size;
-                    border-width: $o-we-handle-border-width;
-                    border-right-width: 0;
-                    cursor: e-resize;
-
-                    &.o_grid_handle {
-                        cursor: ew-resize;
-                    }
-
-                    &:after {
-                        @include o-position-absolute($top: 50%, $left: 40%);
-                        margin-top: -$o-we-handles-btn-size/2;
-                    }
-
-                    &.o_grid_handle:after {
-                        display: none;
-                    }
+                }
+                &.w {
+                    inset: $o-we-handles-offset-to-hide auto $o-we-handles-offset-to-hide * -1 $o-we-handle-border-width * 0.5;
+                    transform: translateX(-50%);
+                    cursor: ew-resize;
                 }
                 &.e {
-                    @include o-position-absolute($o-we-handles-offset-to-hide, 0, -$o-we-handles-offset-to-hide, auto);
-                    width: $o-we-handle-edge-size;
-                    border-right-width: $o-we-handle-border-width;
-                    cursor: w-resize;
-
-                    &.o_grid_handle {
-                        cursor: ew-resize;
-                    }
-
-                    &:after {
-                        @include o-position-absolute($top: 50%, $right: 40%);
-                        margin-top: -$o-we-handles-btn-size/2;
-                    }
-
-                    &.o_grid_handle:after{
-                        display: none;
-                    }
+                    inset: $o-we-handles-offset-to-hide $o-we-handle-border-width * 0.5 $o-we-handles-offset-to-hide * -1 auto;
+                    transform: translateX(50%);
+                    cursor: ew-resize;
                 }
                 &.n {
-                    @include o-position-absolute($o-we-handles-offset-to-hide, 0, auto, 0);
-                    height: $o-we-handle-edge-size;
-                    border-top-width: $o-we-handle-border-width;
+                    inset: $o-we-handles-offset-to-hide 0 auto 0;
                     cursor: ns-resize;
 
-                    &:after {
-                        @include o-position-absolute($left: 50%, $top: 40%);
-                        margin-left: -$o-we-handles-btn-size/2;
-                    }
+                    &.o_grid_handle {
+                        transform: translateY(-50%);
 
-                    &.o_grid_handle:after{
-                        display: none;
+                        &:before {
+                            transform: translateY($o-we-handle-border-width * 0.5);
+                        }
                     }
                 }
                 &.s {
-                    @include o-position-absolute(auto, 0, -$o-we-handles-offset-to-hide, 0);
-                    height: $o-we-handle-edge-size;
-                    border-bottom-width: $o-we-handle-border-width;
+                    inset: auto 0 $o-we-handles-offset-to-hide * -1 0;
                     cursor: ns-resize;
 
-                    &:after {
-                        @include o-position-absolute($left: 50%, $bottom: 40%);
-                        margin-left: -$o-we-handles-btn-size/2;
-                    }
+                    &.o_grid_handle {
+                        transform: translateY(50%);
 
-                    &.o_grid_handle:after {
-                        display: none;
+                        &:before {
+                            transform: translateY($o-we-handle-border-width * -0.5);
+                        }
                     }
                 }
                 &.ne {
-                    @include o-position-absolute($o-we-handles-offset-to-hide + $o-we-handle-border-width, $o-we-handle-border-width, auto, auto);
-                    height: $o-we-handle-edge-size;
+                    inset: ($o-we-handles-offset-to-hide + $o-we-handle-border-width * 0.5) $o-we-handle-border-width * 0.5 auto auto;
+                    transform: translate(50%, -50%);
                     cursor: nesw-resize;
                 }
                 &.se {
-                    @include o-position-absolute(auto, $o-we-handle-border-width, -$o-we-handles-offset-to-hide - $o-we-handle-border-width, auto);
-                    height: $o-we-handle-edge-size;
+                    inset: auto $o-we-handle-border-width * 0.5 ($o-we-handles-offset-to-hide * -1 + $o-we-handle-border-width * 0.5) auto;
+                    transform: translate(50%, 50%);
                     cursor: nwse-resize;
-
-                    &:after {
-                        @include o-position-absolute($top: 50%, $right: 40%);
-                    }
                 }
                 &.sw {
-                    @include o-position-absolute(auto, auto, -$o-we-handles-offset-to-hide - $o-we-handle-border-width/2, $o-we-handle-border-width);
-                    height: $o-we-handle-edge-size;
+                    inset: auto auto ($o-we-handles-offset-to-hide * -1 + $o-we-handle-border-width * 0.5) $o-we-handle-border-width * 0.5;
+                    transform: translate(-50%, 50%);
                     cursor: nesw-resize;
-
-                    &:after {
-                        @include o-position-absolute($left: 40%, $bottom: 40%);
-                    }
                 }
                 &.nw {
-                    @include o-position-absolute($o-we-handles-offset-to-hide - $o-we-handle-border-width, auto, auto, $o-we-handle-border-width + 1);
-                    height: $o-we-handle-edge-size;
+                    inset: ($o-we-handles-offset-to-hide + $o-we-handle-border-width * 0.5) auto auto $o-we-handle-border-width * 0.5;
+                    transform: translate(-50%, -50%);
                     cursor: nwse-resize;
-
-                    &:after {
-                        @include o-position-absolute($left: 50%, $bottom: 40%);
-                    }
                 }
-
-                &.ne,
-                &.sw {
-                    content: "\f065";
-                }
-
-                &.nw,
-                &.se {
-                    content: "\f065";
-                    transform: rotate(90deg);
-                }
-
-                &::after {
-                    z-index: 1;
+                .o_handle_indicator {
+                    position: absolute;
+                    inset: $o-we-handles-btn-size * -0.5;
                     display: block;
                     width: $o-we-handles-btn-size;
                     height: $o-we-handles-btn-size;
-                    border: solid 1px darken($o-we-handles-accent-color, 20%);
-                    line-height: $o-we-handles-btn-size - 2;
-                    font-size: 14px;
-                    font-family: FontAwesome;
-                    background-color: darken($o-we-handles-accent-color, 10%);
-                    color: white;
+                    margin: auto;
+                    border: solid $o-we-handle-border-width $o-we-handles-accent-color;
+                    border-radius: $o-we-handles-btn-size;
+                    background: $o-we-fg-lighter;
+                    outline: $o-we-handle-inside-line-width solid $o-we-fg-lighter;
+                    outline-offset: -($o-we-handles-btn-size * 0.5);
+                    transition: $transition-base;
+
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        inset: -$o-we-handles-btn-size;
+                        display: block;
+                        border-radius: inherit;
+                    }
                 }
 
-                &.o_handle_start:after {
-                    background-color: rgba($o-we-sidebar-content-field-clickable-bg, .6);
-                    border-color: rgba($o-we-sidebar-content-field-border-color, .2);
-                }
-
-                &:hover,
-                &.o_active {
-                    background-color: rgba($o-we-handles-accent-color, 0.2);
+                &.o_column_handle.o_side_y {
+                    background-color: rgba($o-we-handles-accent-color, .1);
 
                     &::after {
-                        border-color: darken($o-we-handles-accent-color, 10%);
-                        background-color: darken($o-we-handles-accent-color, 20%);
+                        content: '';
+                        position: absolute;
+                        height: $o-we-handles-btn-size;
+                    }
+                    &.n {
+                        border-bottom: dashed $o-we-handle-border-width * 0.5 rgba($o-we-handles-accent-color, 0.5);
+
+                        &::after {
+                            inset: 0 0 auto 0;
+                            transform: translateY(-50%);
+                        }
+                    }
+                    &.s {
+                        border-top: dashed $o-we-handle-border-width * 0.5 rgba($o-we-handles-accent-color, 0.5);
+
+                        &::after {
+                            inset: auto 0 0 0;
+                            transform: translateY(50%);
+                        }
                     }
                 }
-
-                &.w:after,
-                &.e:after {
-                    content: "\f07e";
-                }
-
-                &.s:after,
-                &.n:after {
-                    content: "\f07d";
-                }
-
-                &.ne:after,
-                &.sw:after {
-                    content: "\f065";
-                }
-
-                &.nw:after,
-                &.se:after {
-                    content: "\f065";
-                    transform: rotate(180deg);
-                }
-
-                &.o_handle_start {
-
-                    &.w:after,
-                    &.e:after {
-                        content: '\f061';
+                &.o_side {
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        inset: 0;
+                        background: $o-we-handles-accent-color;
                     }
+                    &.o_side_x {
 
-                    &.n:after,
-                    &.s:after {
-                        content: '\f063';
+                        &::before {
+                            width: $o-we-handle-border-width;
+                            margin: 0 auto;
+                        }
                     }
-                }
+                    &.o_side_y {
 
-                &.o_handle_end {
-
-                    &.w:after,
-                    &.e:after {
-                        content: '\f060';
+                        &::before {
+                            height: $o-we-handle-border-width;
+                            margin: auto 0;
+                        }
                     }
+                    &.o_column_handle {
 
-                    &.n:after,
-                    &.s:after {
-                        content: '\f062';
+                        &.n::before {
+                            margin: 0 auto auto;
+                        }
+
+                        &.s::before {
+                            margin: auto auto 0;
+                        }
                     }
                 }
 
                 &.readonly {
-                    cursor: auto !important;
+                    cursor: default;
                     pointer-events: none;
 
-                    &:after {
-                        display: none !important;
+                    &.o_column_handle.o_side_y {
+                        border: none;
+                        background: none;
                     }
 
-                    &:hover {
-                        opacity: 0.5;
+                    &::after, .o_handle_indicator {
+                        display: none;
                     }
                 }
             }
 
             > .o_overlay_options_wrap {
                 @include o-position-absolute($o-we-handles-offset-to-hide, $left: 50%);
-                transform: translate(-50%, -110%);
+                transform: translate(-50%, -150%);
 
                 &.o_we_hidden_overlay_options {
                     display: none;
@@ -2270,26 +2460,20 @@
                 &, > .o_overlay_move_options, .o_overlay_edit_options {
                     display: flex;
                 }
-                .o_overlay_move_options > *, .o_overlay_edit_options > *, > we-button {
+                .o_overlay_move_options > *, .o_overlay_edit_options > *:not(span), .o_overlay_edit_options > span > *, > we-button {
                     @extend %we-generic-button;
                     margin: 0 1px 0;
                     min-width: 22px;
                     padding: 0 $o-we-sidebar-content-field-button-group-button-spacing * .5;
                     color: $o-we-fg-lighter;
-                    // TODO In master: restore `.oe_snippet_remove`.
-                    &.fa-trash {
+                    &.oe_snippet_remove {
                         background-color: mix($o-we-color-danger, $o-we-sidebar-content-field-clickable-bg);
-                        // TODO In master: use `.o_disabled`.
-                        &:not(.oe_snippet_remove) {
-                            opacity: 0.5;
-                        }
                     }
                 }
                 > .o_overlay_move_options > .o_move_handle {
                     cursor: move;
                     width: 30px;
                     height: 22px;
-                    background-image: url('/web_editor/static/src/img/snippets_options/o_overlay_move_drag.svg');
                     background-position: center;
                     background-repeat: no-repeat;
                 }
@@ -2308,23 +2492,8 @@
                     background-repeat: no-repeat;
                 }
                 &:hover {
-                    .o_overlay_move_options > *, .o_overlay_edit_options > *, > we-button {
+                    .o_overlay_move_options > *, .o_overlay_edit_options > *:not(span), > we-button {
                         @include o-hover-opacity(.6);
-
-                        &:hover {
-                            border-color: mix($o-we-handles-accent-color, $o-we-sidebar-content-field-pressed-bg, .4);
-                            background-color: $o-we-sidebar-content-field-pressed-bg;
-
-                            // TODO In master: restore `.oe_snippet_remove`.
-                            &.fa-trash {
-                                border-color: mix($o-we-color-danger, $o-we-sidebar-content-field-pressed-bg, .4);
-                                background-color: $o-we-color-danger;
-                                // TODO In master: use `.o_disabled`.
-                                &:not(.oe_snippet_remove) {
-                                    opacity: 0.5;
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -2381,34 +2550,67 @@
                 z-index: 0 !important;
             }
         }
+
+        // HANDLES - ACTIVE AND HOVER STATES
+        // By using `o_handlers_idle` class, we can avoid hovering another
+        // handle when we're already dragging another one.
+        &.o_handlers_idle .o_handle:hover, .o_handle:active {
+
+            .o_handle_indicator {
+                outline-color: $o-we-handles-accent-color;
+            }
+        }
+
+        &.o_handlers_idle .o_corner_handle:hover, .o_corner_handle:active {
+
+            .o_handle_indicator {
+                transform: scale(1.25);
+            }
+        }
+
+        &.o_handlers_idle .o_column_handle.o_side_y:hover, .o_column_handle.o_side_y:active {
+            background: repeating-linear-gradient(
+                            45deg,
+                            rgba($o-we-handles-accent-color, .1),
+                            rgba($o-we-handles-accent-color, .1) 5px,
+                            darken(rgba($o-we-handles-accent-color, .25), 5%) 5px,
+                            darken(rgba($o-we-handles-accent-color, .25), 5%) 10px
+                        );
+        }
+
+        &.o_handlers_idle .o_side_x:hover, .o_side_x:active {
+
+            &::before {
+                width: $o-we-handle-border-width * 2;
+            }
+            .o_handle_indicator {
+                height: $o-we-handles-btn-size * 2;
+            }
+        }
+
+        &.o_handlers_idle .o_side_y:hover, .o_side_y:active {
+
+            &::before {
+                height: $o-we-handle-border-width * 2;
+            }
+            .o_handle_indicator {
+                width: $o-we-handles-btn-size * 2;
+            }
+        }
     }
 
     .o_edit_menu_popover {
         pointer-events: auto;
     }
 }
-.oe_overlay.ui-draggable-dragging .o_handles {
+.oe_overlay.o_draggable_dragging .o_handles {
     display: none;
 }
 
-.s-resize-important * {
-    cursor: s-resize !important;
-}
-
-.n-resize-important * {
-    cursor: n-resize !important;
-}
-
-.e-resize-important * {
-    cursor: e-resize !important;
-}
-
-.w-resize-important * {
-    cursor: w-resize !important;
-}
-
-.move-important * {
-    cursor: move !important;
+@each $cursor in (nesw-resize, nwse-resize, ns-resize, ew-resize, move) {
+    .#{$cursor}-important * {
+        cursor: $cursor !important;
+    }
 }
 
 .dropdown-menu label .o_switch {
@@ -2509,26 +2711,9 @@
     outline: 2px dashed $o-we-handles-accent-color;
 }
 
-we-select.o_we_shape_menu {
-    we-button[data-shape] {
-        padding: 0 !important;
-
-        &.active {
-            border: 1px solid $o-we-color-success !important;
-        }
-        div {
-            width: 100%;
-        }
-        .o_we_shape_btn_content {
-            @extend %o-preview-alpha-background;
-            width: 100%;
-            height: 75px;
-        }
-    }
-}
 .o_we_shape_animated_label {
     @include o-position-absolute(0, 0);
-    padding: 0 6px;
+    padding: 0 4px;
     background: $o-we-color-success;
     color: white;
 
@@ -2538,35 +2723,15 @@ we-select.o_we_shape_menu {
     }
 }
 
-// Add average resolutions for the category "Devices" in image shapes.
-we-button[data-img-size] {
-    position: relative;
+we-button:hover .o_we_shape_animated_label {
+    i {
+        padding-right: $o-we-item-spacing / 2;
+    }
 
-    &::before, &::after {
-        padding: 0 6px;
-        background: $o-we-color-success;
-        color: white;
-        text-align: center;
+    > span {
+        max-width: $o-we-sidebar-width / 2;
+        transition: max-width 0.5s ease 0s;
     }
-    &::before {
-        font-family: "FontAwesome" !important;
-        content: "\f065";
-        @include o-position-absolute(0, 0, inherit, inherit);
-    }
-    &::after {
-        content: attr(data-img-size);
-        @include o-position-absolute(0, 0, inherit, 0);
-        transform: translateX(100%);
-        transition: 0.2s ease all;
-    }
-    &:hover::after {
-        transform: translateX(0%);
-    }
-}
-
-we-button:hover .o_we_shape_animated_label > span {
-    max-width: 150px;
-    transition: max-width 0.5s ease 0s;
 }
 
 .o_we_ui_loading {
@@ -2601,26 +2766,46 @@ we-select.o_grid we-toggler {
     width: fit-content !important;
 }
 
-we-button-group.o_grid we-selection-items {
-    width: fit-content !important;
-}
-
 // Background grid.
 .o_we_background_grid {
     padding: 0 !important;
 
     .o_we_cell {
-        fill: $o-brand-odoo;
-        fill-opacity: .2;
-        stroke: $o-we-border-color;
+        fill: $o-we-fg-lighter;
+        fill-opacity: .1;
+        stroke: $o-we-bg-darkest;
+        stroke-opacity: .2;
         stroke-width: 1px;
-        filter: drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.6));
+        filter: drop-shadow(-1px -1px 0px rgba(255, 255, 255, 0.3));
+    }
+
+    &.o_we_grid_preview {
+        @include media-breakpoint-down(lg) {
+            // Hiding the preview in mobile view (-> no grid in mobile view). We
+            // cannot use `display: none` because it would prevent the animation
+            // to be played and so its listener would not remove the preview.
+            height: 0;
+        }
+        pointer-events: none;
+
+        .o_we_cell {
+            animation: gridPreview 2s 0.5s;
+        }
+    }
+}
+
+// Grid preview.
+@keyframes gridPreview {
+    to {
+        fill-opacity: 0;
+        stroke-opacity: 0;
     }
 }
 
 .o_we_drag_helper {
     padding: 0;
-    border: $o-we-handle-border-width solid $o-we-accent;
+    border: $o-we-handle-border-width * 2 solid $o-we-accent;
+    border-radius: $o-we-item-border-radius;
 }
 
 // Highlight of the grid items padding.
@@ -2635,7 +2820,7 @@ we-button-group.o_grid we-selection-items {
     }
 }
 
-.o_we_padding_highlight > .o_grid_item {
+.o_we_padding_highlight.o_grid_item {
     position: relative;
 
     &::after {

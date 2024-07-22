@@ -16,20 +16,21 @@ class ResPartner(models.Model):
 
     def _compute_pos_order(self):
         # retrieve all children partners and prefetch 'parent_id' on them
-        all_partners = self.with_context(active_test=False).search([('id', 'child_of', self.ids)])
-        all_partners.read(['parent_id'])
-
+        all_partners = self.with_context(active_test=False).search_fetch(
+            [('id', 'child_of', self.ids)],
+            ['parent_id'],
+        )
         pos_order_data = self.env['pos.order']._read_group(
             domain=[('partner_id', 'in', all_partners.ids)],
-            fields=['partner_id'], groupby=['partner_id']
+            groupby=['partner_id'], aggregates=['__count']
         )
+        self_ids = set(self._ids)
 
         self.pos_order_count = 0
-        for group in pos_order_data:
-            partner = self.browse(group['partner_id'][0])
+        for partner, count in pos_order_data:
             while partner:
-                if partner in self:
-                    partner.pos_order_count += group['partner_id_count']
+                if partner.id in self_ids:
+                    partner.pos_order_count += count
                 partner = partner.parent_id
 
     def action_view_pos_order(self):
@@ -56,12 +57,3 @@ class ResPartner(models.Model):
         else:
             partner_id = self.create(partner).id
         return partner_id
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_active_pos_session(self):
-        running_sessions = self.env['pos.session'].sudo().search([('state', '!=', 'closed')])
-        if running_sessions:
-            raise UserError(
-                _("You cannot delete contacts while there are active PoS sessions. Close the session(s) %s first.")
-                % ", ".join(session.name for session in running_sessions)
-            )

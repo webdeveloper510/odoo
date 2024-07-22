@@ -1,10 +1,9 @@
 <templates id="template" xml:space="preserve">
 
     <!-- Widget PortalComposer (standalone)
-
         required many options: token, res_model, res_id, ...
     -->
-    <t t-name="project.ChatterComposer" owl="1">
+    <t t-name="project.ChatterComposer">
         <div t-if="props.allowComposer" class="o_portal_chatter_composer">
             <t t-if="props.displayComposer">
                 <div t-if="state.displayError" class="alert alert-danger mb8 o_portal_chatter_composer_error" role="alert">
@@ -20,11 +19,13 @@
                     <div class="flex-grow-1">
                         <div class="o_portal_chatter_composer_input">
                             <div class="o_portal_chatter_composer_body mb32">
-                                <TextField
-                                    rowCount="4"
-                                    placeholder="'Write a message...'"
+                                <textarea
+                                    class="o_input"
+                                    placeholder="Write a message..."
+                                    rows="4"
                                     value="state.message"
-                                    update.bind="update"
+                                    t-on-input="update"
+                                    t-ref="textarea"
                                 />
                                 <ChatterAttachmentsViewer
                                     attachments="state.attachments"

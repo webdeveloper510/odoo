@@ -2,11 +2,13 @@
 
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useChildRef, useOwnedDialogs, useService } from "@web/core/utils/hooks";
-import { escape, sprintf } from "@web/core/utils/strings";
+import { escape } from "@web/core/utils/strings";
 import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 import * as BarcodeScanner from "@web/webclient/barcode/barcode_scanner";
 import { standardFieldProps } from "../standard_field_props";
@@ -14,14 +16,17 @@ import { standardFieldProps } from "../standard_field_props";
 import { Component, onWillUpdateProps, useState, markup } from "@odoo/owl";
 
 class CreateConfirmationDialog extends Component {
+    static template = "web.Many2OneField.CreateConfirmationDialog";
+    static components = { Dialog };
+
     get title() {
-        return sprintf(this.env._t("New: %s"), this.props.name);
+        return _t("New: %s", this.props.name);
     }
 
     get dialogContent() {
         return markup(
-            sprintf(
-                this.env._t("Create <strong>%s</strong> as a new %s?"),
+            _t(
+                "Create <strong>%s</strong> as a new %s?",
                 escape(this.props.value),
                 escape(this.props.name)
             )
@@ -33,8 +38,6 @@ class CreateConfirmationDialog extends Component {
         this.props.close();
     }
 }
-CreateConfirmationDialog.components = { Dialog };
-CreateConfirmationDialog.template = "web.Many2OneField.CreateConfirmationDialog";
 
 export function m2oTupleFromData(data) {
     const id = data.id;
@@ -49,6 +52,45 @@ export function m2oTupleFromData(data) {
 }
 
 export class Many2OneField extends Component {
+    static template = "web.Many2OneField";
+    static components = {
+        Many2XAutocomplete,
+    };
+    static props = {
+        ...standardFieldProps,
+        placeholder: { type: String, optional: true },
+        canOpen: { type: Boolean, optional: true },
+        canCreate: { type: Boolean, optional: true },
+        canWrite: { type: Boolean, optional: true },
+        canQuickCreate: { type: Boolean, optional: true },
+        canCreateEdit: { type: Boolean, optional: true },
+        context: { type: String, optional: true },
+        domain: { type: [Array, Function], optional: true },
+        nameCreateField: { type: String, optional: true },
+        searchLimit: { type: Number, optional: true },
+        relation: { type: String, optional: true },
+        string: { type: String, optional: true },
+        canScanBarcode: { type: Boolean, optional: true },
+        update: { type: Function, optional: true },
+        value: { optional: true },
+        decorations: { type: Object, optional: true },
+    };
+    static defaultProps = {
+        canOpen: true,
+        canCreate: true,
+        canWrite: true,
+        canQuickCreate: true,
+        canCreateEdit: true,
+        nameCreateField: "name",
+        searchLimit: 7,
+        string: "",
+        canScanBarcode: false,
+        context: {},
+        decorations: {},
+    };
+
+    static SEARCH_MORE_LIMIT = 320;
+
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
@@ -62,7 +104,7 @@ export class Many2OneField extends Component {
         };
 
         this.state = useState({
-            isFloating: !this.props.value,
+            isFloating: false,
         });
         this.computeActiveActions(this.props);
 
@@ -71,14 +113,16 @@ export class Many2OneField extends Component {
             activeActions: this.state.activeActions,
             isToMany: false,
             onRecordSaved: async (record) => {
-                const resId = this.props.value[0];
+                const resId = this.value[0];
                 const fields = ["display_name"];
-                const context = this.props.record.getFieldContext(this.props.name);
-                const records = await this.orm.read(this.relation, [resId], fields, { context });
-                await this.props.update(m2oTupleFromData(records[0]));
+                // use unity read + relatedFields from Field Component
+                const records = await this.orm.read(this.relation, [resId], fields, {
+                    context: this.context,
+                });
+                await this.updateRecord(m2oTupleFromData(records[0]));
             },
             onClose: () => this.focusInput(),
-            fieldString: this.props.string,
+            fieldString: this.string,
         });
 
         this.update = (value, params = {}) => {
@@ -86,12 +130,13 @@ export class Many2OneField extends Component {
                 value = m2oTupleFromData(value[0]);
             }
             this.state.isFloating = false;
-            return this.props.update(value);
+            return this.updateRecord(value);
         };
 
         if (this.props.canQuickCreate) {
             this.quickCreate = (name) => {
-                return this.props.update([false, name]);
+                this.state.isFloating = false;
+                return this.updateRecord([false, name]);
             };
         }
 
@@ -100,48 +145,65 @@ export class Many2OneField extends Component {
         };
 
         onWillUpdateProps(async (nextProps) => {
-            this.state.isFloating = !nextProps.value;
             this.computeActiveActions(nextProps);
         });
+    }
+
+    updateRecord(value) {
+        const changes = { [this.props.name]: value };
+        if (this.props.update) {
+            return this.props.update(changes);
+        }
+        return this.props.record.update(changes);
     }
 
     get relation() {
         return this.props.relation || this.props.record.fields[this.props.name].relation;
     }
-
-    get context() {
-        return this.props.record.getFieldContext(this.props.name);
-    }
-    get domain() {
-        return this.props.record.getFieldDomain(this.props.name);
+    get string() {
+        return this.props.string || this.props.record.fields[this.props.name].string || "";
     }
     get hasExternalButton() {
-        return this.props.canOpen && !!this.props.value && !this.state.isFloating;
+        return this.props.canOpen && !!this.value && !this.state.isFloating;
+    }
+    get context() {
+        const { context, record } = this.props;
+        const evalContext = record.getEvalContext
+            ? record.getEvalContext(false)
+            : record.evalContext;
+        return makeContext([context], evalContext);
     }
     get classFromDecoration() {
+        const evalContext = this.props.record.evalContextWithVirtualIds;
         for (const decorationName in this.props.decorations) {
-            if (this.props.decorations[decorationName]) {
+            if (evaluateBooleanExpr(this.props.decorations[decorationName], evalContext)) {
                 return `text-${decorationName}`;
             }
         }
         return "";
     }
     get displayName() {
-        return this.props.value ? this.props.value[1].split("\n")[0] : "";
+        if (this.value && this.value[1]) {
+            return this.value[1].split("\n")[0];
+        } else if (this.value) {
+            return _t("Unnamed");
+        } else {
+            return "";
+        }
     }
     get extraLines() {
-        return this.props.value
-            ? this.props.value[1]
+        return this.value && this.value[1]
+            ? this.value[1]
                   .split("\n")
                   .map((line) => line.trim())
                   .slice(1)
             : [];
     }
     get resId() {
-        return this.props.value && this.props.value[0];
+        return this.value && this.value[0];
     }
     get value() {
-        return this.props.record.data[this.props.name];
+        return "value" in this.props ? this.props.value : this.props.record.data[this.props.name];
     }
     get Many2XAutocompleteProps() {
         return {
@@ -150,7 +212,7 @@ export class Many2OneField extends Component {
             placeholder: this.props.placeholder,
             resModel: this.relation,
             autoSelect: true,
-            fieldString: this.props.string,
+            fieldString: this.string,
             activeActions: this.state.activeActions,
             update: this.update,
             quickCreate: this.quickCreate,
@@ -159,7 +221,6 @@ export class Many2OneField extends Component {
             nameCreateField: this.props.nameCreateField,
             setInputFloats: this.setFloating,
             autocomplete_container: this.autocompleteContainerRef,
-            kanbanViewId: this.props.kanbanViewId,
         };
     }
     computeActiveActions(props) {
@@ -170,7 +231,11 @@ export class Many2OneField extends Component {
         };
     }
     getDomain() {
-        return this.domain.toList(this.context);
+        let domain = this.props.domain;
+        if (typeof domain === "function") {
+            domain = domain();
+        }
+        return domain;
     }
     async openAction() {
         const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]], {
@@ -186,7 +251,7 @@ export class Many2OneField extends Component {
         return new Promise((resolve, reject) => {
             this.addDialog(CreateConfirmationDialog, {
                 value: request,
-                name: this.props.string,
+                name: this.string,
                 create: async () => {
                     try {
                         await this.quickCreate(request);
@@ -206,21 +271,21 @@ export class Many2OneField extends Component {
         }
     }
     onExternalBtnClick() {
-        if (this.props.openTarget === "current" && !this.env.inDialog) {
-            this.openAction();
-        } else {
+        if (this.env.inDialog) {
             this.openDialog(this.resId);
+        } else {
+            this.openAction();
         }
     }
     async onBarcodeBtnClick() {
-        const barcode = await BarcodeScanner.scanBarcode();
+        const barcode = await BarcodeScanner.scanBarcode(this.env);
         if (barcode) {
             await this.onBarcodeScanned(barcode);
             if ("vibrate" in browser.navigator) {
                 browser.navigator.vibrate(100);
             }
         } else {
-            this.notification.add(this.env._t("Please, scan again !"), {
+            this.notification.add(_t("Please, scan again!"), {
                 type: "warning",
             });
         }
@@ -262,73 +327,63 @@ export class Many2OneField extends Component {
     }
 }
 
-Many2OneField.SEARCH_MORE_LIMIT = 320;
-
-Many2OneField.template = "web.Many2OneField";
-Many2OneField.components = {
-    Many2XAutocomplete,
-};
-Many2OneField.props = {
-    ...standardFieldProps,
-    placeholder: { type: String, optional: true },
-    canOpen: { type: Boolean, optional: true },
-    canCreate: { type: Boolean, optional: true },
-    canWrite: { type: Boolean, optional: true },
-    canQuickCreate: { type: Boolean, optional: true },
-    canCreateEdit: { type: Boolean, optional: true },
-    nameCreateField: { type: String, optional: true },
-    searchLimit: { type: Number, optional: true },
-    relation: { type: String, optional: true },
-    string: { type: String, optional: true },
-    canScanBarcode: { type: Boolean, optional: true },
-    openTarget: { type: String, validate: (v) => ["current", "new"].includes(v), optional: true },
-    kanbanViewId: { type: [Number, Boolean], optional: true },
-};
-Many2OneField.defaultProps = {
-    canOpen: true,
-    canCreate: true,
-    canWrite: true,
-    canQuickCreate: true,
-    canCreateEdit: true,
-    nameCreateField: "name",
-    searchLimit: 7,
-    string: "",
-    canScanBarcode: false,
-    openTarget: "current",
-};
-
-Many2OneField.displayName = _lt("Many2one");
-Many2OneField.supportedTypes = ["many2one"];
-
-Many2OneField.extractProps = ({ attrs, field }) => {
-    const hasCreatePermission = attrs.can_create ? Boolean(JSON.parse(attrs.can_create)) : true;
-    const hasWritePermission = attrs.can_write ? Boolean(JSON.parse(attrs.can_write)) : true;
-
-    const noOpen = Boolean(attrs.options.no_open);
-    const noCreate = Boolean(attrs.options.no_create);
-    const canCreate = hasCreatePermission && !noCreate;
-    const canWrite = hasWritePermission;
-    const noQuickCreate = Boolean(attrs.options.no_quick_create);
-    const noCreateEdit = Boolean(attrs.options.no_create_edit);
-    const canScanBarcode = Boolean(attrs.options.can_scan_barcode);
-
-    return {
-        placeholder: attrs.placeholder,
-        canOpen: !noOpen,
-        canCreate,
-        canWrite,
-        canQuickCreate: canCreate && !noQuickCreate,
-        canCreateEdit: canCreate && !noCreateEdit,
-        relation: field.relation,
-        string: attrs.string || field.string,
-        nameCreateField: attrs.options.create_name_field,
-        canScanBarcode: canScanBarcode,
-        openTarget: attrs.open_target,
-        kanbanViewId: attrs.kanban_view_ref ? JSON.parse(attrs.kanban_view_ref) : false,
-    };
+export const many2OneField = {
+    component: Many2OneField,
+    displayName: _t("Many2one"),
+    supportedOptions: [
+        {
+            label: _t("Disable opening"),
+            name: "no_open",
+            type: "boolean",
+        },
+        {
+            label: _t("Disable creation"),
+            name: "no_create",
+            type: "boolean",
+            help: _t(
+                "If checked, users won't be able to create records through the autocomplete dropdown at all."
+            ),
+        },
+        {
+            label: _t("Disable 'Create' option"),
+            name: "no_quick_create",
+            type: "boolean",
+            help: _t(
+                "If checked, users will not be able to create records based on the text input; they will still be able to create records via a popup form."
+            ),
+        },
+        {
+            label: _t("Disable 'Create and Edit' option"),
+            name: "no_create_edit",
+            type: "boolean",
+            help: _t(
+                "If checked, users will not be able to create records based through a popup form; they will still be able to create records based on the text input."
+            ),
+        },
+    ],
+    supportedTypes: ["many2one"],
+    extractProps({ attrs, context, decorations, options, string }, dynamicInfo) {
+        const hasCreatePermission = attrs.can_create ? evaluateBooleanExpr(attrs.can_create) : true;
+        const hasWritePermission = attrs.can_write ? evaluateBooleanExpr(attrs.can_write) : true;
+        const canCreate = options.no_create ? false : hasCreatePermission;
+        return {
+            placeholder: attrs.placeholder,
+            canOpen: !options.no_open,
+            canCreate,
+            canWrite: hasWritePermission,
+            canQuickCreate: canCreate && !options.no_quick_create,
+            canCreateEdit: canCreate && !options.no_create_edit,
+            context: context,
+            decorations,
+            domain: dynamicInfo.domain,
+            nameCreateField: options.create_name_field,
+            canScanBarcode: !!options.can_scan_barcode,
+            string,
+        };
+    },
 };
 
-registry.category("fields").add("many2one", Many2OneField);
+registry.category("fields").add("many2one", many2OneField);
 // the two following lines are there to prevent the fallback on legacy widgets
-registry.category("fields").add("list.many2one", Many2OneField);
-registry.category("fields").add("kanban.many2one", Many2OneField);
+registry.category("fields").add("list.many2one", many2OneField);
+registry.category("fields").add("kanban.many2one", many2OneField);

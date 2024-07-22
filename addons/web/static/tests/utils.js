@@ -226,6 +226,7 @@ if (window.QUnit) {
  *  Note: when using one of the scrollTop options, it is advised to ensure the height is not going
  *  to change soon, by checking with a preceding contains that all the expected elements are in DOM.
  * @property {boolean} [setFocus] if provided, focuses the first found element.
+ * @property {boolean} [shadowRoot] if provided, targets the shadowRoot of the found elements.
  * @property {number|"bottom"} [setScroll] if provided, sets the scrollTop on the first found
  *  element.
  * @property {HTMLElement} [target=getFixture()]
@@ -247,10 +248,9 @@ class Contains {
     constructor(selector, options = {}) {
         this.selector = selector;
         this.options = options;
-        this.options.count = this.options.count === undefined ? 1 : this.options.count;
+        this.options.count ??= 1;
         this.options.targetParam = this.options.target;
-        this.options.target =
-            this.options.target === undefined ? getFixture() : this.options.target;
+        this.options.target ??= getFixture();
         let selectorMessage = `${this.options.count} of "${this.selector}"`;
         if (this.options.visible !== undefined) {
             selectorMessage = `${selectorMessage} ${
@@ -327,7 +327,7 @@ class Contains {
                     this.def.reject(e); // prevents infinite loop in case of programming error
                 }
             });
-            this.observer.observe(document.body, {
+            this.observer.observe(this.options.target, {
                 attributes: true,
                 childList: true,
                 subtree: true,
@@ -355,18 +355,16 @@ class Contains {
      */
     runOnce(whenMessage, { crashOnFail = false, executeOnSuccess = true } = {}) {
         const res = this.select();
-        if ((res && res.length === this.options.count) || crashOnFail) {
+        if (res?.length === this.options.count || crashOnFail) {
             // clean before doing anything else to avoid infinite loop due to side effects
-            if (this.observer) {
-                this.observer.disconnect();
-            }
+            this.observer?.disconnect();
             clearTimeout(this.timer);
-            for (const el of this.scrollListeners || []) {
+            for (const el of this.scrollListeners ?? []) {
                 el.removeEventListener("scroll", this.onScroll);
             }
             this.done = true;
         }
-        if (res && res.length === this.options.count) {
+        if (res?.length === this.options.count) {
             this.successMessage = `Found ${this.selectorMessage} (${whenMessage})`;
             if (executeOnSuccess) {
                 this.executeAction(res[0]);
@@ -386,9 +384,7 @@ class Contains {
                     }
                 }
                 log(false, message);
-                if (this.def) {
-                    this.def.reject(new Error(message));
-                }
+                this.def?.reject(new Error(message));
                 for (const childContains of this.childrenContains || []) {
                     if (childContains.successMessage) {
                         log(true, childContains.successMessage);
@@ -404,11 +400,11 @@ class Contains {
     }
 
     /**
-         * Executes the action(s) given to this constructor on the found element,
-         * prints the success messages, and resolves the main deferred.
-         
-         * @param {HTMLElement} el
-         */
+     * Executes the action(s) given to this constructor on the found element,
+     * prints the success messages, and resolves the main deferred.
+
+     * @param {HTMLElement} el
+     */
     executeAction(el) {
         let message = this.successMessage;
         if (this.options.click) {
@@ -479,6 +475,7 @@ class Contains {
                 el.dispatchEvent(new window.KeyboardEvent("keyup", { key: char }));
                 el.dispatchEvent(new window.InputEvent("input"));
             }
+            el.dispatchEvent(new window.InputEvent("change"));
         }
         if (this.options.pasteFiles) {
             message = `${message} and pasted ${this.options.pasteFiles.length} file(s)`;
@@ -510,9 +507,7 @@ class Contains {
         for (const childContains of this.childrenContains) {
             log(true, childContains.successMessage);
         }
-        if (this.def) {
-            this.def.resolve();
-        }
+        this.def?.resolve();
     }
 
     /**
@@ -526,7 +521,9 @@ class Contains {
         if (!target) {
             return;
         }
-        const baseRes = [...target.querySelectorAll(this.selector)];
+        const baseRes = [...target.querySelectorAll(this.selector)]
+            .map((el) => (this.options.shadowRoot ? el.shadowRoot : el))
+            .filter((el) => el);
         /** @type {Contains[]} */
         this.childrenContains = [];
         const res = baseRes.filter((el, currentIndex) => {
@@ -550,10 +547,7 @@ class Contains {
             }
             if (condition && this.options.contains) {
                 for (const param of this.options.contains) {
-                    const childContains = new Contains(param[0], {
-                        ...param[1],
-                        target: el,
-                    });
+                    const childContains = new Contains(param[0], { ...param[1], target: el });
                     if (
                         !childContains.runOnce(`as child of el ${currentIndex + 1})`, {
                             executeOnSuccess: false,
@@ -576,11 +570,10 @@ class Contains {
                 });
                 const afterEl = afterContains.runOnce(`as "after"`, {
                     executeOnSuccess: false,
-                });
+                })?.[0];
                 if (
                     !afterEl ||
-                    !afterEl[0] ||
-                    !(el.compareDocumentPosition(afterEl[0]) & Node.DOCUMENT_POSITION_PRECEDING)
+                    !(el.compareDocumentPosition(afterEl) & Node.DOCUMENT_POSITION_PRECEDING)
                 ) {
                     condition = false;
                 }
@@ -593,11 +586,10 @@ class Contains {
                 });
                 const beforeEl = beforeContains.runOnce(`as "before"`, {
                     executeOnSuccess: false,
-                });
+                })?.[0];
                 if (
                     !beforeEl ||
-                    !beforeEl[0] ||
-                    !(el.compareDocumentPosition(beforeEl[0]) & Node.DOCUMENT_POSITION_FOLLOWING)
+                    !(el.compareDocumentPosition(beforeEl) & Node.DOCUMENT_POSITION_FOLLOWING)
                 ) {
                     condition = false;
                 }
@@ -634,10 +626,7 @@ class Contains {
                 ...this.options.parent[1],
                 target: this.options.target,
             });
-            const res = this.parentContains.runOnce(`as parent`, {
-                executeOnSuccess: false,
-            });
-            return res && res[0];
+            return this.parentContains.runOnce(`as parent`, { executeOnSuccess: false })?.[0];
         }
         return this.options.target;
     }
@@ -653,4 +642,77 @@ class Contains {
  */
 export async function contains(selector, options) {
     await new Contains(selector, options).run();
+}
+
+const stepState = {
+    expectedSteps: null,
+    deferred: null,
+    timeout: null,
+    currentSteps: [],
+
+    clear() {
+        clearTimeout(this.timeout);
+        this.timeout = null;
+        this.deferred = null;
+        this.currentSteps = [];
+        this.expectedSteps = null;
+    },
+
+    check({ crashOnFail = false } = {}) {
+        const success =
+            this.expectedSteps.length === this.currentSteps.length &&
+            this.expectedSteps.every((s, i) => s === this.currentSteps[i]);
+        if (!success && !crashOnFail) {
+            return;
+        }
+        QUnit.config.current.assert.verifySteps(this.expectedSteps);
+        if (success) {
+            this.deferred.resolve();
+        } else {
+            this.deferred.reject(new Error("Steps do not match."));
+        }
+        this.clear();
+    },
+};
+
+if (window.QUnit) {
+    QUnit.testStart(() =>
+        registerCleanup(() => {
+            if (stepState.expectedSteps) {
+                stepState.check({ crashOnFail: true });
+            } else {
+                stepState.clear();
+            }
+        })
+    );
+}
+
+/**
+ * Indicate the completion of a test step. This step must then be verified by
+ * calling `assertSteps`.
+ *
+ * @param {string} step
+ */
+export function step(step) {
+    stepState.currentSteps.push(step);
+    QUnit.config.current.assert.step(step);
+    if (stepState.expectedSteps) {
+        stepState.check();
+    }
+}
+
+/**
+ * Wait for the given steps to be executed or for the timeout to be reached.
+ *
+ * @param {string[]} steps
+ */
+export function assertSteps(steps) {
+    if (stepState.expectedSteps) {
+        stepState.check({ crashOnFail: true });
+    }
+    stepState.expectedSteps = steps;
+    stepState.deferred = makeDeferred();
+    stepState.timeout = setTimeout(() => stepState.check({ crashOnFail: true }), 2000);
+    stepState.check();
+    return stepState.deferred;
 }

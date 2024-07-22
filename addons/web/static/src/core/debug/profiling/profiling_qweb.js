@@ -8,8 +8,9 @@ import { useDebounced } from "@web/core/utils/timing";
 
 import { Component, useState, useRef, onWillStart, onMounted, onWillUnmount } from "@odoo/owl";
 
-class MenuItem extends Component {}
-MenuItem.template = "web.ProfilingQwebView.menuitem";
+class MenuItem extends Component {
+    static template = "web.ProfilingQwebView.menuitem";
+}
 
 function processValue(value) {
     const data = JSON.parse(value);
@@ -24,6 +25,9 @@ function processValue(value) {
  * for display XML and Python profiling.
  */
 export class ProfilingQwebView extends Component {
+    static template = "web.ProfilingQwebView";
+    static components = { MenuItem };
+
     setup() {
         super.setup();
 
@@ -31,7 +35,7 @@ export class ProfilingQwebView extends Component {
         this.ace = useRef("ace");
         this.selector = useRef("selector");
 
-        this.value = processValue(this.props.value);
+        this.value = processValue(this.props.record.data[this.props.name]);
         this.state = useState({
             viewID: this.profile.data.length ? this.profile.data[0].view_id : 0,
             view: null,
@@ -115,7 +119,7 @@ export class ProfilingQwebView extends Component {
      * @returns {string}
      */
     _formatDelay(delay) {
-        return delay ? _.str.sprintf("%.1f", Math.ceil(delay * 10) / 10) : ".";
+        return delay ? (Math.ceil(delay * 10) / 10).toFixed(1) : ".";
     }
 
     /**
@@ -330,7 +334,9 @@ export class ProfilingQwebView extends Component {
         this._renderView();
     }
 }
-ProfilingQwebView.template = "web.ProfilingQwebView";
-ProfilingQwebView.components = { MenuItem };
 
-registry.category("fields").add("profiling_qweb_view", ProfilingQwebView);
+export const profilingQwebView = {
+    component: ProfilingQwebView,
+};
+
+registry.category("fields").add("profiling_qweb_view", profilingQwebView);

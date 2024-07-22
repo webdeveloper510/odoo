@@ -1,39 +1,29 @@
-odoo.define('point_of_sale.tour.SelectionPopupTourMethods', function (require) {
-    'use strict';
+/** @odoo-module */
 
-    const { createTourMethods } = require('point_of_sale.tour.utils');
+export function clickItem(name) {
+    return [
+        {
+            content: `click selection '${name}'`,
+            trigger: `.selection-item:contains("${name}")`,
+        },
+    ];
+}
 
-    class Do {
-        clickItem(name) {
-            return [
-                {
-                    content: `click selection '${name}'`,
-                    trigger: `.selection-item:contains("${name}")`,
-                },
-            ];
-        }
-    }
-
-    class Check {
-        hasSelectionItem(name) {
-            return [
-                {
-                    content: `selection popup has '${name}'`,
-                    trigger: `.selection-item:contains("${name}")`,
-                    run: () => {},
-                },
-            ];
-        }
-        isShown() {
-            return [
-                {
-                    content: 'selection popup is shown',
-                    trigger: '.modal-dialog .popup-selection',
-                    run: () => {},
-                },
-            ];
-        }
-    }
-
-    return createTourMethods('SelectionPopup', Do, Check);
-});
+export function hasSelectionItem(name) {
+    return [
+        {
+            content: `selection popup has '${name}'`,
+            trigger: `.selection-item:contains("${name}")`,
+            run: () => {},
+        },
+    ];
+}
+export function isShown() {
+    return [
+        {
+            content: "selection popup is shown",
+            trigger: ".modal-dialog .popup-selection",
+            run: () => {},
+        },
+    ];
+}

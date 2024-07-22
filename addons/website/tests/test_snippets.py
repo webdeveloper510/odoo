@@ -27,6 +27,7 @@ class TestSnippets(HttpCase):
         blacklist = [
             's_facebook_page',  # avoid call to external services (facebook.com)
             's_map',  # avoid call to maps.google.com
+            's_instagram_page',  # avoid call to instagram.com
         ]
         snippets_names = ','.join(set(el.attrib['data-snippet'] for el in data_snippet_els if el.attrib['data-snippet'] not in blacklist))
         snippets_names_encoded = url_encode({'snippets_names': snippets_names})
@@ -51,6 +52,7 @@ class TestSnippets(HttpCase):
             'social_youtube': 'https://www.youtube.com/user/OpenERPonline',
             'social_github': 'https://github.com/odoo',
             'social_instagram': 'https://www.instagram.com/explore/tags/odoo/',
+            'social_tiktok': 'https://www.tiktok.com/@odoo',
         })
         IrAttachment = self.env['ir.attachment']
         base = "http://%s:%s" % (HOST, config['http_port'])
@@ -96,7 +98,10 @@ class TestSnippets(HttpCase):
     def test_10_parallax(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'test_parallax', login='admin')
 
-    def test_11_snippet_images_wall(self):
+    def test_11_snippet_popup_display_on_click(self):
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_popup_display_on_click', login='admin')
+
+    def test_12_snippet_images_wall(self):
         self.start_tour('/', 'snippet_images_wall', login='admin')
 
     def test_snippet_popup_with_scrollbar_and_animations(self):
@@ -106,10 +111,10 @@ class TestSnippets(HttpCase):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_popup_and_animations', login='admin')
 
     def test_drag_and_drop_on_non_editable(self):
-        self.start_tour('/', 'test_drag_and_drop_on_non_editable', login='admin')
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'test_drag_and_drop_on_non_editable', login='admin')
 
     def test_snippet_image_gallery_reorder(self):
-        self.start_tour("/", "snippet_image_gallery_reorder", login='admin')
+        self.start_tour(self.env['website'].get_client_action_url('/'), "snippet_image_gallery_reorder", login='admin')
 
     def test_snippet_image_gallery_thumbnail_update(self):
         IrAttachment = self.env['ir.attachment']
@@ -120,4 +125,7 @@ class TestSnippets(HttpCase):
             'type': 'url',
             'url': base + '/web/image/website.s_banner_default_image',
         })
-        self.start_tour('/', 'snippet_image_gallery_thumbnail_update', login='admin')
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_image_gallery_thumbnail_update', login='admin')
+
+    def test_dropdowns_and_header_hide_on_scroll(self):
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'dropdowns_and_header_hide_on_scroll', login='admin')

@@ -23,6 +23,8 @@ class HrWorkEntry(models.Model):
     date_stop = fields.Datetime(compute='_compute_date_stop', store=True, readonly=False, string='To')
     duration = fields.Float(compute='_compute_duration', store=True, string="Duration", readonly=False)
     work_entry_type_id = fields.Many2one('hr.work.entry.type', index=True, default=lambda self: self.env['hr.work.entry.type'].search([], limit=1))
+    code = fields.Char(related='work_entry_type_id.code')
+    external_code = fields.Char(related='work_entry_type_id.external_code')
     color = fields.Integer(related='work_entry_type_id.color', readonly=True)
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -105,10 +107,6 @@ class HrWorkEntry(models.Model):
                 cached_periods[(date_start, date_stop)] = duration
                 result[work_entry.id] = duration
         return result
-
-    # YTI TODO: Remove me in master: Deprecated, use _get_duration_batch instead
-    def _get_duration(self, date_start, date_stop):
-        return self._get_duration_batch()[self.id]
 
     def action_validate(self):
         """
@@ -241,7 +239,8 @@ class HrWorkEntryType(models.Model):
     _description = 'HR Work Entry Type'
 
     name = fields.Char(required=True, translate=True)
-    code = fields.Char(required=True, help="Careful, the Code is used in many references, changing it could lead to unwanted changes.")
+    code = fields.Char(string="Payroll Code", required=True, help="Careful, the Code is used in many references, changing it could lead to unwanted changes.")
+    external_code = fields.Char(help="Use this code to export your data to a third party")
     color = fields.Integer(default=0)
     sequence = fields.Integer(default=25)
     active = fields.Boolean(
@@ -259,7 +258,7 @@ class Contacts(models.Model):
     _name = 'hr.user.work.entry.employee'
     _description = 'Work Entries Employees'
 
-    user_id = fields.Many2one('res.users', 'Me', required=True, default=lambda self: self.env.user)
+    user_id = fields.Many2one('res.users', 'Me', required=True, default=lambda self: self.env.user, ondelete='cascade')
     employee_id = fields.Many2one('hr.employee', 'Employee', required=True)
     active = fields.Boolean('Active', default=True)
 

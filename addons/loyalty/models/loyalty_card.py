@@ -21,8 +21,10 @@ class LoyaltyCard(models.Model):
         """
         return '044' + str(uuid4())[7:-18]
 
-    def name_get(self):
-        return [(card.id, f'{card.program_id.name}: {card.code}') for card in self]
+    @api.depends('program_id', 'code')
+    def _compute_display_name(self):
+        for card in self:
+            card.display_name = f'{card.program_id.name}: {card.code}'
 
     program_id = fields.Many2one('loyalty.program', ondelete='restrict', default=lambda self: self.env.context.get('active_id', None))
     program_type = fields.Selection(related='program_id.program_type')
@@ -91,12 +93,10 @@ class LoyaltyCard(models.Model):
         compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
         ctx = dict(
             default_model='loyalty.card',
-            default_res_id=self.id,
-            default_use_template=bool(default_template),
+            default_res_ids=self.ids,
             default_template_id=default_template and default_template.id,
             default_composition_mode='comment',
             default_email_layout_xmlid='mail.mail_notification_light',
-            mark_coupon_as_sent=True,
             force_email=True,
         )
         return {

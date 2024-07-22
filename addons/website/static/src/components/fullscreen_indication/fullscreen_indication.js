@@ -1,14 +1,15 @@
 /** @odoo-module **/
 
-import { Component, useState, markup } from "@odoo/owl";
+import { useBus } from "@web/core/utils/hooks";
+import { EventBus, Component, useState, markup } from "@odoo/owl";
 import { escape, sprintf } from "@web/core/utils/strings";
 import { _t } from "@web/core/l10n/translation";
 
 export class FullscreenIndication extends Component {
     setup() {
         this.state = useState({ isVisible: false });
-        this.props.bus.on('FULLSCREEN-INDICATION-SHOW', this, this.show);
-        this.props.bus.on('FULLSCREEN-INDICATION-HIDE', this, this.hide);
+        useBus(this.props.bus, "FULLSCREEN-INDICATION-SHOW", this.show.bind(this));
+        useBus(this.props.bus, "FULLSCREEN-INDICATION-HIDE", this.hide.bind(this));
     }
 
     show() {
@@ -27,4 +28,7 @@ export class FullscreenIndication extends Component {
         return markup(sprintf(escape(_t("Press %(key)s to exit full screen")), {key: "<span>esc</span>"}));
     }
 }
+FullscreenIndication.props = {
+    bus: EventBus,
+};
 FullscreenIndication.template = "website.FullscreenIndication";

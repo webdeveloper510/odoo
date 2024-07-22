@@ -6,8 +6,8 @@ import {useInputField} from '@web/views/fields/input_field_hook';
 import {useService} from '@web/core/utils/hooks';
 import {Switch} from '@website/components/switch/switch';
 import {registry} from '@web/core/registry';
-
-const {Component, useState} = owl;
+import { _t } from '@web/core/l10n/translation';
+import { Component, useState } from "@odoo/owl";
 
 /**
  * Displays website page dependencies and URL redirect options when the page URL
@@ -38,30 +38,33 @@ class PageUrlField extends Component {
     }
 
     get fieldURL() {
-        const value = this.props.value;
+        const value = this.props.record.data[this.props.name];
         return (value.url !== undefined ? value.url : value).replace(/^\//g, '');
     }
 
     updateValues() {
         // HACK: update redirect data from the URL field.
         // TODO: remove this and use a transient model with redirect fields.
-        this.props.update(this.state);
+        this.props.record.update({ [this.props.name]: this.state });
     }
 }
+
 PageUrlField.components = {Switch, PageDependencies};
 PageUrlField.template = 'website.PageUrlField';
 PageUrlField.props = {
     ...standardFieldProps,
     placeholder: {type: String, optional: true},
 };
-PageUrlField.extractProps = ({attrs}) => {
-    return {
-        placeholder: attrs.placeholder,
-    };
-};
-PageUrlField.supportedTypes = ['char'];
 
-registry.category("fields").add("page_url", PageUrlField);
+const pageUrlField = {
+    component: PageUrlField,
+    supportedTypes: ['char'],
+    extractProps: ({ attrs }) => ({
+        placeholder: attrs.placeholder,
+    }),
+};
+
+registry.category("fields").add("page_url", pageUrlField);
 
 /**
  * Displays 'Selection' field's values as images to select.
@@ -83,19 +86,30 @@ export class ImageRadioField extends Component {
      * @param {String} value
      */
     onSelectValue(value) {
-        this.props.update(value);
+        this.props.record.update({ [this.props.name]: value });
     }
 }
-ImageRadioField.supportedTypes = ['selection'];
+
 ImageRadioField.template = 'website.FieldImageRadio';
 ImageRadioField.props = {
     ...standardFieldProps,
     images: {type: Array, element: String},
 };
-ImageRadioField.extractProps = ({attrs}) => {
-    return {
-        images: attrs.options.images,
-    };
+
+export const imageRadioField = {
+    component: ImageRadioField,
+    supportedOptions: [
+        {
+            label: _t("Images"),
+            name: "images",
+            type: "string",
+            help: _t("Use an array to list the images to use in the radio selection.")
+        }
+    ],
+    supportedTypes: ['selection'],
+    extractProps: ({ options }) => ({
+        images: options.images,
+    }),
 };
 
-registry.category("fields").add("image_radio", ImageRadioField);
+registry.category("fields").add("image_radio", imageRadioField);

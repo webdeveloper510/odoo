@@ -37,16 +37,15 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(target, ".o_cp_top");
-        assert.containsOnce(target, ".o_cp_top_left");
-        assert.strictEqual(target.querySelector(".o_cp_top_right").innerHTML, "");
-        assert.containsOnce(target, ".o_cp_bottom");
-        assert.containsOnce(target, ".o_cp_bottom_left");
-        assert.containsOnce(target, ".o_cp_bottom_right");
+        assert.containsOnce(target, ".o_control_panel_breadcrumbs");
+        assert.containsOnce(target, ".o_control_panel_actions");
+        assert.strictEqual(target.querySelector(".o_control_panel_actions").innerHTML, "");
+        assert.containsOnce(target, ".o_control_panel_navigation");
+        assert.strictEqual(target.querySelector(".o_control_panel_navigation").innerHTML, "");
 
         assert.containsNone(target, ".o_cp_switch_buttons");
 
-        assert.containsOnce(target, ".breadcrumb");
+        assert.containsOnce(target, ".o_breadcrumb");
     });
 
     QUnit.test("breadcrumbs", async (assert) => {
@@ -63,8 +62,9 @@ QUnit.module("Search", (hooks) => {
             searchMenuTypes: [],
         });
 
-        assert.containsN(target, ".breadcrumb li.breadcrumb-item", 2);
-        const breadcrumbItems = target.querySelectorAll("li.breadcrumb-item");
+        const breadcrumbsSelector = ".o_breadcrumb li.breadcrumb-item, .o_breadcrumb .active";
+        assert.containsN(target, breadcrumbsSelector, 2);
+        const breadcrumbItems = target.querySelectorAll(breadcrumbsSelector);
         assert.strictEqual(breadcrumbItems[0].innerText, "Previous");
         assert.hasClass(breadcrumbItems[1], "active");
         assert.strictEqual(breadcrumbItems[1].innerText, "Current");
@@ -84,29 +84,25 @@ QUnit.module("Search", (hooks) => {
             Component: ControlPanel,
             config: {
                 viewSwitcherEntries: [
-                    {
-                        type: "list",
-                        active: true,
-                        icon: "oi-view-list",
-                        name: "List",
-                        accessKey: "l",
-                    },
-                    { type: "kanban", icon: "oi-view-kanban", name: "Kanban", accessKey: "k" },
+                    { type: "list", active: true, icon: "oi-view-list", name: "List" },
+                    { type: "kanban", icon: "oi-view-kanban", name: "Kanban" },
                 ],
             },
             searchMenuTypes: [],
         });
 
-        assert.containsOnce(target, ".o_cp_switch_buttons");
+        assert.containsOnce(
+            target,
+            ".o_control_panel_navigation .d-xl-inline-flex.o_cp_switch_buttons"
+        );
         assert.containsN(target, ".o_switch_view", 2);
         const views = target.querySelectorAll(".o_switch_view");
 
         assert.strictEqual(views[0].getAttribute("data-tooltip"), "List");
-        assert.strictEqual(views[0].getAttribute("data-hotkey"), "l");
         assert.hasClass(views[0], "active");
+        assert.containsOnce(views[0], ".oi-view-list");
         assert.strictEqual(views[1].getAttribute("data-tooltip"), "Kanban");
-        assert.strictEqual(views[1].getAttribute("data-hotkey"), "k");
-        assert.hasClass(views[1], "oi-view-kanban");
+        assert.containsOnce(views[1], ".oi-view-kanban");
 
         controlPanel.env.services.action.switchView = (viewType) => {
             assert.step(viewType);

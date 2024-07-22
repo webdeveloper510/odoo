@@ -1,57 +1,77 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
+import { useService } from "@web/core/utils/hooks";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { getNextTabableElement, getPreviousTabableElement } from "@web/core/utils/ui";
 import { usePosition } from "@web/core/position_hook";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { shallowEqual } from "@web/core/utils/arrays";
-import { sprintf } from "@web/core/utils/strings";
-import { _lt } from "@web/core/l10n/translation";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { roundDecimals } from "@web/core/utils/numbers";
+import { _t } from "@web/core/l10n/translation";
+import { useRecordObserver } from "@web/model/relational_model/utils";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { TagsList } from "@web/views/fields/many2many_tags/tags_list";
+import { TagsList } from "@web/core/tags_list/tags_list";
 import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
-import { parseFloat as oParseFloat } from "@web/views/fields/parsers";
 import { formatPercentage } from "@web/views/fields/formatters";
-import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
-const { Component, useState, useRef, useExternalListener, onWillUpdateProps, onWillStart, onPatched } = owl;
+import { Record } from "@web/model/record";
+import { Field } from "@web/views/fields/field";
+import {
+    Component,
+    useState,
+    useRef,
+    useExternalListener,
+    onWillStart,
+    onPatched,
+} from "@odoo/owl";
 
-const PLAN_APPLICABILITY = {
-    mandatory: _lt("Mandatory"),
-    optional: _lt("Optional"),
-}
-const PLAN_STATUS = {
-    invalid: _lt("Invalid"),
-    ok: _lt("OK"),
-}
 export class AnalyticDistribution extends Component {
+    static template = "analytic.AnalyticDistribution";
+    static components = {
+        TagsList,
+        Record,
+        Field,
+    }
+
+    static props = {
+        ...standardFieldProps,
+        business_domain: { type: String, optional: true },
+        account_field: { type: String, optional: true },
+        product_field: { type: String, optional: true },
+        amount_field: { type: String, optional: true },
+        business_domain_compute: { type: String, optional: true },
+        force_applicability: { type: String, optional: true },
+        allow_save: { type: Boolean, optional: true },
+    }
+
     setup(){
         this.orm = useService("orm");
+        this.batchedOrm = useService("batchedOrm");
 
         this.state = useState({
             showDropdown: false,
-            list: {},
+            formattedData: [],
         });
 
         this.widgetRef = useRef("analyticDistribution");
         this.dropdownRef = useRef("analyticDropdown");
         this.mainRef = useRef("mainElement");
-        usePosition(() => this.widgetRef.el, {
-            popper: "analyticDropdown",
-        });
+        this.addLineButton = useRef("addLineButton");
+        usePosition("analyticDropdown", () => this.widgetRef.el);
 
         this.nextId = 1;
         this.focusSelector = false;
 
+        this.currentValue = this.props.record.data[this.props.name];
+
         onWillStart(this.willStart);
-        onWillUpdateProps(this.willUpdate);
+        useRecordObserver(this.willUpdateRecord.bind(this));
         onPatched(this.patched);
 
         useExternalListener(window, "click", this.onWindowClick, true);
+        useExternalListener(window, "resize", this.onWindowResized);
 
         this.openTemplate = useOpenMany2XRecord({
             resModel: "account.analytic.distribution.model",
@@ -71,351 +91,318 @@ export class AnalyticDistribution extends Component {
                     this.mainRef.el.focus();
                 }
             },
-            fieldString: this.env._t("Analytic Distribution Template"),
+            fieldString: _t("Analytic Distribution Model"),
         });
         this.allPlans = [];
         this.lastAccount = this.props.account_field && this.props.record.data[this.props.account_field] || false;
         this.lastProduct = this.props.product_field && this.props.record.data[this.props.product_field] || false;
-
-        this.selectCreateIsOpen = false;
-        this.addDialog = useOwnedDialogs();
-        this.onSearchMore = this._onSearchMore.bind(this);
     }
 
     // Lifecycle
     async willStart() {
         if (this.editingRecord) {
+            // for performance in list views, plans are not retrieved until they are required.
             await this.fetchAllPlans(this.props);
         }
-        await this.formatData(this.props);
+        await this.jsonToData(this.props.record.data[this.props.name]);
     }
 
-    async willUpdate(nextProps) {
+    async willUpdateRecord(record) {
         // Unless force_applicability, Plans need to be retrieved again as the product or account might have changed
         // and thus different applicabilities apply
         // or a model applies that contains unavailable plans
         // This should only execute when these fields have changed, therefore we use the `_field` props.
-        const valueChanged = JSON.stringify(this.props.value) !== JSON.stringify(nextProps.value);
-        const currentAccount = this.props.account_field && this.props.record.data[this.props.account_field] || false;
-        const currentProduct = this.props.product_field && this.props.record.data[this.props.product_field] || false;
+        const valueChanged =
+            JSON.stringify(this.currentValue) !==
+            JSON.stringify(record.data[this.props.name]);
+        const currentAccount = this.props.account_field && record.data[this.props.account_field] || false;
+        const currentProduct = this.props.product_field && record.data[this.props.product_field] || false;
         const accountChanged = !shallowEqual(this.lastAccount, currentAccount);
         const productChanged = !shallowEqual(this.lastProduct, currentProduct);
         if (valueChanged || accountChanged || productChanged) {
             if (!this.props.force_applicability) {
-                await this.fetchAllPlans(nextProps);
+                await this.fetchAllPlans({ record });
             }
             this.lastAccount = accountChanged && currentAccount || this.lastAccount;
             this.lastProduct = productChanged && currentProduct || this.lastProduct;
-            await this.formatData(nextProps);
+            await this.jsonToData(record.data[this.props.name]);
         }
+        this.currentValue = record.data[this.props.name];
     }
 
     patched() {
         this.focusToSelector();
     }
 
-    async formatData(nextProps) {
-        const data = nextProps.value;
-        const analytic_account_ids = Object.keys(data).map((id) => parseInt(id));
-        const records = analytic_account_ids.length ? await this.fetchAnalyticAccounts([["id", "in", analytic_account_ids]]) : [];
-        let widgetData = Object.assign({}, ...this.allPlans.map((plan) => ({[plan.id]: {...plan, distribution: []}})));
-        records.map((record) => {
-            if (!widgetData[record.root_plan_id[0]]) {
-                // plans might not have been retrieved
-                widgetData[record.root_plan_id[0]] = { distribution: [] }
-            }
-            widgetData[record.root_plan_id[0]].distribution.push({
-                analytic_account_id: record.id,
-                percentage: data[record.id],
-                id: this.nextId++,
-                group_id: record.root_plan_id[0],
-                analytic_account_name: record.display_name,
-                color: record.color,
-            });
-        });
+    /**
+     * Computes the totals for each account, grouped by plan (primarily used in tags)
+     * @returns {Object}
+     */
+    accountTotalsByPlan() {
+        const accountTotals = {};
+        this.state.formattedData.map((line) => {
+            line.analyticAccounts.map((column) => {
+                if (column.accountId) {
+                    let {
+                        accId = column.accountId,
+                        accName = column.accountDisplayName,
+                        total = 0.0,
+                        planId = column.accountRootPlanId,
+                        planColor = column.accountColor,
+                    } = accountTotals[column.accountRootPlanId]?.[column.accountId] || {};
 
-        this.state.list = widgetData;
-        if (records.length < Object.keys(data).length) {
-            // analytic accounts were not found for some keys in the json data, they may have been deleted
-            // save the json without them
-            this.save();
+                    total += roundDecimals(line.percentage, this.decimalPrecision.digits[1] + 2);
+
+                    accountTotals[planId] = accountTotals[planId] || {};
+                    accountTotals[planId][accId] = { accId, accName, planId, total, planColor};
+                }
+            })
+        });
+        return accountTotals;
+    }
+
+    /**
+     * Computes the totals for each plan (used in the table headers)
+     * @returns {Object}
+     */
+    planTotals() {
+        const summary = this.accountTotalsByPlan();
+        this.allPlans.map((plan) => {
+            const planTotal = (summary[plan.id] && Object.values(summary[plan.id]) || []).reduce((prev, next) => prev + next.total, 0.0);
+            const className = plan.applicability === "mandatory" && !this.planIsComplete(planTotal) ? 'text-danger' : plan.applicability === "mandatory" ? 'text-success' : '';
+            summary[plan.id] = {
+                value: planTotal,
+                formattedValue: formatPercentage(planTotal, this.decimalPrecision),
+                class: className,
+                applicability: plan.applicability,
+            }
+        });
+        return summary;
+    }
+
+    planIsComplete(total) {
+        return roundDecimals(total, this.decimalPrecision.digits[1] + 2) === 1;
+    }
+
+    /**
+     * Converts the account Totals to a list of tags
+     * PlanA  PlanB  PlanC  Percentage
+     * A1                   100
+     *        B1            80.123     => ["A1", "80.12% B1", "C1"]
+     *               C1     100
+     *
+     * PlanA  PlanB  PlanC  Percentage
+     * A1     B1     C1     50
+     * A2     B1     C1     50         => ["50% A1 | 50% A2 | 50% A3", "150% B1", "C1 | 50% C2"]
+     * A3     B1     C2     50
+     * @returns [List] of tag objects
+     */
+    planSummaryTags() {
+        const accountTotals = this.accountTotalsByPlan();
+        return Object.values(accountTotals).map((planSummary) => {
+            const accs = Object.values(planSummary);
+            return {
+                id: accs[0].planId,
+                text: accs.reduce((p, n) => p + (p.length ? " | " : "") + (this.planIsComplete(n.total) ? n.accName : `${formatPercentage(n.total)} ${n.accName}`) , ""),
+                colorIndex: accs[0].planColor,
+                onClick: (ev) => this.tagClicked(ev),
+            };
+        });
+    }
+
+    plansToArray() {
+        return this.allPlans.map((plan) => ({
+            planId: plan.id,
+            planName: plan.name,
+            planColor: plan.color,
+        }));
+    }
+
+    async jsonToData(jsonFieldValue) {
+        const analyticAccountIds = jsonFieldValue ? Object.keys(jsonFieldValue).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
+        const analyticAccountDict = analyticAccountIds.length ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]]) : [];
+
+        let distribution = [];
+        let accountNotFound = false;
+
+        for (const [accountIds, percentage] of Object.entries(jsonFieldValue)) {
+            const defaultVals = this.plansToArray(); // empty if the popup was not opened
+            const ids = accountIds.split(',');
+
+            for (const id of ids) {
+                const account = analyticAccountDict[parseInt(id)];
+                if (account) {
+                    // since tags are displayed even though plans might not be retrieved (ie defaultVals is empty)
+                    // push the accounts anyway, as order doesn't matter
+                    // once the popup is opened, plans are fetched and the analyticAccounts list will be ordered
+                    Object.assign(defaultVals.find((plan) => plan.planId == account.root_plan_id[0]) || defaultVals.push({}) && defaultVals[defaultVals.length-1],
+                    {
+                        accountId: parseInt(id),
+                        accountDisplayName: account.display_name,
+                        accountColor: account.color,
+                        accountRootPlanId: account.root_plan_id[0],
+                    });
+                } else {
+                    accountNotFound = true;
+                }
+            }
+            distribution.push({
+                analyticAccounts: defaultVals,
+                percentage: percentage / 100,
+                id: this.nextId++,
+            })
+        }
+        this.state.formattedData = distribution;
+        if (accountNotFound) {
+            // Analytic accounts in the json were not found, save the json without them
+            await this.save();
         }
     }
 
+    recordProps(line) {
+        const analyticAccountFields = {
+            id: { type: "int" },
+            display_name: { type: "char" },
+            color: { type: "int" },
+            plan_id: { type: "many2one" },
+            root_plan_id: { type: "many2one" },
+        };
+        let recordFields = {};
+        const values = {};
+        // Analytic Account fields
+        line.analyticAccounts.map((account) => {
+            const fieldName = `x_plan${account.planId}_id`;
+            recordFields[fieldName] = {
+                string: account.planName,
+                relation: "account.analytic.account",
+                type: "many2one",
+                related: {
+                    fields: analyticAccountFields,
+                    activeFields: analyticAccountFields,
+                },
+                // company domain might be required here
+                domain: [["root_plan_id", "=", account.planId]],
+            };
+            values[fieldName] =  account?.accountId || false;
+        });
+        // Percentage field
+        recordFields['percentage'] = {
+            string: _t("Percentage"),
+            type: "percentage",
+            cellClass: "numeric_column_width",
+            ...this.decimalPrecision,
+        };
+        values['percentage'] = line.percentage;
+        // Value field copied from original
+        if (this.props.amount_field) {
+            const { string, name, type, currency_field } = this.props.record.fields[this.props.amount_field];
+            recordFields[name] = { string, name, type, currency_field, cellClass: "numeric_column_width" };
+            values[name] = this.props.record.data[name] * values['percentage'];
+            // Currency field
+            if (currency_field) {
+                // TODO: check web_read network request
+                const { string, name, type, relation } = this.props.record.fields[currency_field];
+                recordFields[currency_field] = { name, string, type, relation, invisible: true };
+                values[currency_field] = this.props.record.data[currency_field][0];
+            }
+        }
+        return {
+            fields: recordFields,
+            values: values,
+            activeFields: recordFields,
+            onRecordChanged: async (record, changes) => await this.lineChanged(record, changes, line),
+        }
+    }
+
+    accountCount(line) {
+        return line.analyticAccounts.map((acc) => acc.accountId).filter(Boolean).length;
+    }
+
+    lineIsValid(line) {
+        return this.accountCount(line) && line.percentage;
+    }
+
     // ORM
-    fetchPlansArgs(nextProps) {
+    fetchPlansArgs({ record }) {
         let args = {};
         if (this.props.business_domain_compute) {
-            args['business_domain'] = evaluateExpr(this.props.business_domain_compute, this.props.record.evalContext);
+            args['business_domain'] = evaluateExpr(this.props.business_domain_compute, record.evalContext);
         }
         if (this.props.business_domain) {
             args['business_domain'] = this.props.business_domain;
         }
-        if (this.props.product_field && this.props.record.data[this.props.product_field]) {
-            args['product'] = this.props.record.data[this.props.product_field][0];
+        if (this.props.product_field && record.data[this.props.product_field]) {
+            args['product'] = record.data[this.props.product_field][0];
         }
-        if (this.props.account_field && this.props.record.data[this.props.account_field]) {
-            args['account'] = this.props.record.data[this.props.account_field][0];
+        if (this.props.account_field && record.data[this.props.account_field]) {
+            args['account'] = record.data[this.props.account_field][0];
         }
         if (this.props.force_applicability) {
             args['applicability'] = this.props.force_applicability;
         }
-        const existing_account_ids = Object.keys(nextProps.value).map((i) => parseInt(i));
+        const existing_account_ids = Object.keys(record.data[this.props.name]).map((k) => k.split(",")).flat().map((i) => parseInt(i));
         if (existing_account_ids.length) {
             args['existing_account_ids'] = existing_account_ids;
         }
-        if (this.props.record.data.company_id) {
-            args['company_id'] = this.props.record.data.company_id[0];
+        if (record.data.company_id) {
+            args['company_id'] = record.data.company_id[0];
         }
         return args;
     }
 
-    async fetchAllPlans(nextProps) {
-        // TODO: Optimize to execute once for all records when `force_applicability` is set
-        const argsPlan =  this.fetchPlansArgs(nextProps);
+    async fetchAllPlans(props) {
+        const argsPlan = this.fetchPlansArgs(props);
         this.allPlans = await this.orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
     }
 
-    async fetchAnalyticAccounts(domain, limit=null) {
+    async fetchAnalyticAccounts(domain) {
         const args = {
             domain: domain,
             fields: ["id", "display_name", "root_plan_id", "color"],
             context: [],
         }
-        if (limit) {
-            args['limit'] = limit;
-        }
-        if (domain.length === 1 && domain[0][0] === "id") {
-            //batch these orm calls
-            return await this.props.record.model.orm.read("account.analytic.account", domain[0][2], args.fields, {});
-        }
-        return await this.orm.call("account.analytic.account", "search_read", [], args);
-    }
-
-    // Autocomplete
-    sourcesAnalyticAccount(groupId) {
-        return [this.optionsSourceAnalytic(groupId)];
-    }
-
-    optionsSourceAnalytic(groupId) {
-        return {
-            placeholder: this.env._t("Loading..."),
-            options:(searchTerm) => this.loadOptionsSourceAnalytic(groupId, searchTerm),
-        };
-    }
-
-    analyticAccountDomain(groupId=null) {
-        let domain = [['id', 'not in', this.existingAnalyticAccountIDs]];
-        if (this.props.record.data.company_id){
-            domain.push(
-                '|',
-                ['company_id', '=', this.props.record.data.company_id[0]],
-                ['company_id', '=', false]
-            );
-        }
-
-        if (groupId) {
-            domain.push(['root_plan_id', '=', groupId]);
-        }
-        return domain;
-    }
-
-    searchAnalyticDomain(searchTerm) {
-        return [
-            '|',
-            ["name", "ilike", searchTerm],
-            '|',
-            ['code', 'ilike', searchTerm],
-            ['partner_id', 'ilike', searchTerm],
-        ];
-    }
-
-    async loadOptionsSourceAnalytic(groupId, searchTerm) {
-        const searchLimit = 6;
-
-        const records = await this.fetchAnalyticAccounts([
-            ...this.analyticAccountDomain(groupId),
-            ...this.searchAnalyticDomain(searchTerm)], searchLimit + 1);
-
-        let options = records.map((result) => ({
-            value: result.id,
-            label: result.display_name,
-            group_id: result.root_plan_id[0],
-            color: result.color,
+        // batched call
+        const records = await this.batchedOrm.read("account.analytic.account", domain[0][2], args.fields, {});
+        return Object.assign({}, ...records.map((r) => {
+            const {id, ...rest} = r;
+            return {[id]: rest};
         }));
-
-        if (searchLimit < records.length) {
-            options.push({
-                label: this.env._t("Search More..."),
-                action: (editedTag) => this.onSearchMore(searchTerm, editedTag),
-                classList: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-            });
-        }
-
-        if (!options.length) {
-            options.push({
-                label: this.env._t("No Analytic Accounts for this plan"),
-                classList: "o_m2o_no_result",
-                unselectable: true,
-            });
-        }
-
-        return options;
-    }
-
-    async _onSearchMore(searchTerm, editedTag) {
-        let dynamicFilters = [];
-        if (searchTerm.length) {
-            dynamicFilters = [
-                {
-                    description: sprintf(this.env._t("Quick search: %s"), searchTerm),
-                    domain: this.searchAnalyticDomain(searchTerm),
-                },
-            ];
-        }
-        this.selectCreateIsOpen = true;
-        this.addDialog(SelectCreateDialog, {
-            title: this.env._t("Search: Analytic Account"),
-            noCreate: true,
-            multiSelect: true,
-            resModel: 'account.analytic.account',
-            context: {
-                tree_view_ref: "analytic.view_account_analytic_account_list_select",
-            },
-            domain: this.analyticAccountDomain(editedTag.group_id),
-            dynamicFilters: dynamicFilters,
-            onSelected: async (resIds) => {
-                const analytic_accounts = await this.fetchAnalyticAccounts([["id", "in", resIds]]);
-                // modify the edited tag
-                editedTag.analytic_account_id = analytic_accounts[0].id;
-                editedTag.analytic_account_name = analytic_accounts[0].display_name;
-                this.setFocusSelector(`.tag_${editedTag.id} .o_analytic_percentage`);
-                if (analytic_accounts.length > 1) {
-                    const planId = editedTag.group_id;
-                    // remove the autofill line
-                    this.list[planId].distribution = this.list[planId].distribution.filter((t) => !!t.analytic_account_id);
-                    for (const account of analytic_accounts.slice(1)) {
-                        // add new tags
-                        const tag = this.newTag(planId);
-                        tag.analytic_account_id = account.id;
-                        tag.analytic_account_name = account.display_name;
-                        this.list[planId].distribution.push(tag);
-                    }
-                }
-                this.autoFill();
-            },
-            onCreateEdit: () => {},
-        }, {
-            onClose: () => {
-                if (!editedTag.analytic_account_id) {
-                    this.setFocusSelector(`.tag_${editedTag.id} .o_analytic_account_name`);
-                    this.focusToSelector();
-                }
-                this.selectCreateIsOpen = false;
-            },
-        });
-    }
-
-    autoCompleteInputChanged(distTag, inputValue) {
-        if (inputValue === "" && distTag.analytic_account_id) {
-            this.deleteTag(distTag.id, distTag.group_id);
-        }
     }
 
     // Editing Distributions
-    async onSelect(option, params, tag) {
-        if (option.action) {
-            return option.action(tag);
+    async lineChanged(record, changes, line) {
+        // record analytic account changes to the state
+        for (const account of line.analyticAccounts) {
+            const selected = record.data[`x_plan${account.planId}_id`];
+            account.accountId = selected[0];
+            account.accountDisplayName = selected[1];
+            account.accountColor = account.planColor;
+            account.accountRootPlanId = account.planId;
         }
-        const selected_option = Object.getPrototypeOf(option);
-        tag.analytic_account_id = parseInt(selected_option.value);
-        tag.analytic_account_name = selected_option.label;
-        tag.color = selected_option.color;
-        this.setFocusSelector(`.tag_${tag.id} .o_analytic_percentage`);
-        this.autoFill();
-    }
-
-    async percentageChanged(dist_tag, ev) {
-        dist_tag.percentage = this.parse(ev.target.value);
-        if (dist_tag.percentage == 0) {
-            this.deleteTag(dist_tag.id, dist_tag.group_id);
-        }
-        this.autoFill();
-    }
-
-    deleteTag(id, fromGroup) {
-        // find the next tag to focus to before deleting the tag
-        const allTags = this.listFlat;
-        const currentTagIndex = allTags.findIndex((t) => t.id === id);
-        const nextTag = allTags[(currentTagIndex + 1) % allTags.length];
-        // remove the tag from the groups distribution
-        this.list[fromGroup].distribution = this.list[fromGroup].distribution.filter((dist_tag) => dist_tag.id != id);
-        if (!this.isDropdownOpen){
-            this.save();
-        } else {
-            this.setFocusSelector(`.tag_${nextTag.id} .o_analytic_account_name`);
-            this.autoFill();
+        // record percentage or value changes
+        if (changes.percentage != line.percentage) {
+            roundDecimals(line.percentage = record.data.percentage, this.decimalPrecision.digits[1] + 2);
+        } else if (
+            this.valueColumnEnabled &&
+            changes[this.props.amount_field] != line[this.props.amount_field]
+        ) {
+            line.percentage = roundDecimals(
+                record.data[this.props.amount_field] / this.props.record.data[this.props.amount_field],
+                this.decimalPrecision.digits[1] + 2);
         }
     }
 
     // Getters
-    get tags() {
-        return this.listReady.map((dist_tag) => ({
-            id: dist_tag.id,
-            text: `${dist_tag.analytic_account_name}${dist_tag.percentage > 99.99 && dist_tag.percentage < 100.01 ? "" : " " + this.formatPercentage(dist_tag.percentage)}`,
-            colorIndex: dist_tag.color,
-            group_id: dist_tag.group_id,
-            onClick: (ev) => this.tagClicked(ev, dist_tag.id),
-            onDelete: this.editingRecord ? () => this.deleteTag(dist_tag.id, dist_tag.group_id) : undefined
-        }));
+    get valueColumnEnabled() {
+        return Boolean(this.props.amount_field && this.props.record.data[this.props.amount_field]);
     }
 
-    get listForJson() {
-        let res = {};
-        this.listReady.map(({analytic_account_id, percentage}) => {
-            res[parseInt(analytic_account_id)] = percentage;
-        });
-        return res;
-    }
-
-    get firstIncompletePlanId() {
-        for (const group_id in this.list) {
-            if (this.groupStatus(group_id) == "invalid") {
-                return group_id;
-            }
-        }
-        return 0;
-    }
-
-    get existingAnalyticAccountIDs() {
-        return this.listFlat.filter((i) => !!i.analytic_account_id).map((i) => i.analytic_account_id);
-    }
-
-    get listReady() {
-        return this.listFlat.filter((dist_tag) => this.tagIsReady(dist_tag));
-    }
-
-    get listFlat() {
-        return Object.values(this.list).flatMap((g) => g.distribution);
-    }
-
-    get list() {
-        return this.state.list;
-    }
-
-    get sortedList() {
-        return Object.values(this.list).sort((a, b) => {
-            const aApp = a.applicability,
-                  bApp = b.applicability;
-            return aApp > bApp ? 1 : aApp < bApp ? -1 : 0;
-        });
+    get decimalPrecision() {
+        return { digits: [12, this.props.record.data.analytic_precision || 2] };
     }
 
     get allowSave() {
-        if (this.firstIncompletePlanId > 0) {
-            return false;
-        }
-        return this.props.allow_save;
+        return this.props.allow_save && this.state.formattedData.some((line) => this.lineIsValid(line));
     }
 
     get editingRecord() {
@@ -426,99 +413,59 @@ export class AnalyticDistribution extends Component {
         return this.state.showDropdown && !!this.dropdownRef.el;
     }
 
-    statusDescription(group_id) {
-        const group = this.list[group_id];
-        const applicability = PLAN_APPLICABILITY[group.applicability];
-        const status = PLAN_STATUS[this.groupStatus(group_id)];
-        return `${applicability} - ${status} ${this.formatPercentage(this.sumByGroup(group_id))}`;
-    }
-
-    groupStatus(id) {
-        const group = this.list[id];
-        if (group.applicability === 'mandatory') {
-            const sum = this.sumByGroup(id);
-            if (sum < 99.99 || sum >= 100.01) {
-                return 'invalid';
-            }
-        }
-        return 'ok';
-    }
-
-    listReadyByGroup(id) {
-        return this.list[id].distribution.filter((tag) => this.tagIsReady(tag));
-    }
-
-    tagIsReady({analytic_account_id, percentage}) {
-        return !!analytic_account_id && !!percentage;
-    }
-
-    sumByGroup(id) {
-        return this.listReadyByGroup(id).reduce((prev, next) => prev + (parseFloat(next.percentage) || 0), 0);
-    }
-
-    remainderByGroup(id) {
-        return 100 - Math.min(this.sumByGroup(id), 100);
-    }
-
     // actions
-    newTag(group_id) {
-        return {
-            id: this.nextId++,
-            group_id: group_id,
-            analytic_account_id: null,
-            analytic_account_name: "",
-            percentage: this.remainderByGroup(group_id),
-            color: this.list[group_id].color,
-        }
-    }
+    addLine() {
+        let maxMandatory = 0, maxOptional = 0, hasMandatory = false;
 
-    /**
-     * This method is typically called when opening the popup and after any change to the distribution.
-     * The remainder, will be placed in the first tag with 0%.
-     * It adds an empty tag allowing users to continue the distribution (replaced 'Add a Line').
-     * Where an empty tag exists, the percentage is updated.
-     */
-    autoFill() {
-        for (const group of this.allPlans.filter((p) => p.all_account_count > 0)) {
-            // update the first unmodified tag containing 0%
-            const tagToUpdate = this.list[group.id].distribution.find((t) => t.percentage == 0);
-            if (tagToUpdate) {
-                tagToUpdate.percentage = this.remainderByGroup(group.id);
-            }
-            // a tag with no analytic account must always be added / updated
-            const emptyTag = this.list[group.id].distribution.find((t) => !t.analytic_account_id);
-            if (emptyTag) {
-                emptyTag.percentage = this.remainderByGroup(group.id);
+        Object.values(this.planTotals()).filter((plan) => plan.value < 1).map((plan) => {
+            if (plan.applicability == "mandatory"){
+                maxMandatory = Math.max(plan.value, maxMandatory);
+                hasMandatory = true;
             } else {
-                this.list[group.id].distribution.push(this.newTag(group.id));
+                maxOptional = Math.max(plan.value, maxOptional);
             }
+        });
+        let noPlanTotal = this.state.formattedData.filter((line) => !this.accountCount(line)).reduce((p, n) => p + n.percentage, 0);
+        const remainder = roundDecimals(1 - (hasMandatory ? maxMandatory : (maxOptional || noPlanTotal)), this.decimalPrecision.digits[1] + 2);
+        const lineToAdd = {
+            id: this.nextId++,
+            analyticAccounts: this.plansToArray(),
+            percentage: Math.max(remainder, 0) || 1,
+        }
+        this.state.formattedData.push(lineToAdd);
+        this.setFocusSelector(`[name=line_${this.state.formattedData.length - 1}] td:first-of-type`);
+    }
+
+    deleteLine(index) {
+        this.state.formattedData.splice(index, 1);
+        if (!this.state.formattedData.length) {
+            this.addLine();
         }
     }
 
-    cleanUp() {
-        for (const group_id in this.list){
-            this.list[group_id].distribution = this.listReadyByGroup(group_id);
-        }
+    dataToJson() {
+        const result = {};
+        this.state.formattedData = this.state.formattedData.filter((line) => this.accountCount(line));
+        this.state.formattedData.map((line) => {
+            const key = line.analyticAccounts.reduce((p, n) => p.concat(n.accountId ? n.accountId : []), []);
+            result[key] = (result[key] || 0) + line.percentage * 100;
+        });
+        return result;
     }
 
     async save() {
-        const currentDistribution = this.listForJson;
-        await this.props.update(currentDistribution);
+        await this.props.record.update({ [this.props.name]: this.dataToJson() });
     }
 
     onSaveNew() {
-        const { record, product_field, account_field } = this.props;
-        this.openTemplate({
-            resId: false,
-            context: {
-                default_analytic_distribution: this.listForJson,
-                default_partner_id: record.data['partner_id'] ? record.data['partner_id'][0] : undefined,
-                default_product_id: product_field ? record.data[product_field][0] : undefined,
-                default_account_prefix: account_field ? record.data[account_field][1].substr(0, 3) : undefined,
-            },
-        });
-
         this.closeAnalyticEditor();
+        const { record, product_field, account_field } = this.props;
+        this.openTemplate({ resId: false, context: {
+            'default_analytic_distribution': this.dataToJson(),
+            'default_partner_id': record.data['partner_id'] ? record.data['partner_id'][0] : undefined,
+            'default_product_id': product_field ? record.data[product_field][0] : undefined,
+            'default_account_prefix': account_field ? record.data[account_field][1].substr(0, 3) : undefined,
+        }});
     }
 
     forceCloseEditor() {
@@ -530,7 +477,6 @@ export class AnalyticDistribution extends Component {
     }
 
     closeAnalyticEditor() {
-        this.cleanUp();
         this.save();
         this.state.showDropdown = false;
     }
@@ -538,20 +484,22 @@ export class AnalyticDistribution extends Component {
     async openAnalyticEditor() {
         if (!this.allPlans.length) {
             await this.fetchAllPlans(this.props);
-            await this.formatData(this.props);
+            await this.jsonToData(this.props.record.data[this.props.name]);
         }
-        this.autoFill();
-        const incompletePlan = this.firstIncompletePlanId;
-        this.setFocusSelector(incompletePlan ? `#plan_${incompletePlan} .incomplete`: ".analytic_json_popup");
+        if (!this.state.formattedData.length) {
+            await this.addLine();
+        }
+        this.setFocusSelector("[name='line_0'] td:first-of-type");
         this.state.showDropdown = true;
     }
 
-    tagClicked(ev, id) {
+    async tagClicked(ev) {
         if (this.editingRecord && !this.isDropdownOpen) {
-            this.openAnalyticEditor();
+            // TODO: focus is not working when tag is clicked while on an editable line
+            await this.openAnalyticEditor();
         }
         if (this.isDropdownOpen) {
-            this.setFocusSelector(`.tag_${id} .o_analytic_percentage`);
+            this.setFocusSelector("[name='line_0'] td:first-of-type");
             this.focusToSelector();
             ev.stopPropagation();
         }
@@ -565,7 +513,7 @@ export class AnalyticDistribution extends Component {
     }
 
     focusToSelector() {
-        if (!!this.focusSelector && this.isDropdownOpen) {
+        if (this.focusSelector && this.isDropdownOpen) {
             this.focus(this.adjacentElementToFocus("next", this.dropdownRef.el.querySelector(this.focusSelector)));
         }
         this.focusSelector = false;
@@ -607,7 +555,7 @@ export class AnalyticDistribution extends Component {
     }
 
     // Keys and Clicks
-    onWidgetKeydown(ev) {
+    async onWidgetKeydown(ev) {
         if (!this.editingRecord) {
             return;
         }
@@ -616,6 +564,13 @@ export class AnalyticDistribution extends Component {
             case "enter":
             case "tab": {
                 if (this.isDropdownOpen) {
+                    const closestCell = ev.target.closest("td, th");
+                    const row = closestCell.parentElement;
+                    const line = this.state.formattedData[parseInt(row.id)];
+                    if (this.adjacentElementToFocus("next") == this.addLineButton.el && line && this.lineIsValid(line)) {
+                        this.addLine();
+                        break;
+                    }
                     this.focusAdjacent("next") || this.forceCloseEditor();
                     break;
                 };
@@ -650,55 +605,75 @@ export class AnalyticDistribution extends Component {
     }
 
     onWindowClick(ev) {
+        //TODO: dragging the search more dialog should not close the popup either
+        const modal = document.querySelector('.modal:not(.o_inactive_modal)');
+        const clickedInSearchMoreDialog = modal && modal.querySelector('.o_list_view') && modal.contains(ev.target);
+        const clickedInKanbanSelectorDialog = modal && modal.querySelector('.o_kanban_view') && modal.contains(ev.target);
         if (this.isDropdownOpen
-            && this.dropdownRef.el && !this.dropdownRef.el.contains(ev.target)
             && !this.widgetRef.el.contains(ev.target)
-            && !this.selectCreateIsOpen) {
+            && !clickedInSearchMoreDialog
+            && !clickedInKanbanSelectorDialog
+           ) {
             this.forceCloseEditor();
         }
     }
 
-    // formatters and parsers
-    parse(value) {
-        try {
-            return typeof value === 'string' || value instanceof String ? oParseFloat(value.replace('%', '')) : value;
-        } catch (_error) {
-            return 0;
+    onWindowResized() {
+        // popup ui is ugly when window is resized, so close it
+        if (this.isDropdownOpen) {
+            this.forceCloseEditor();
         }
     }
-
-    formatPercentage(value) {
-        return formatPercentage(value / 100, { digits: [false, this.props.record.data.analytic_precision || 2] });
-    }
-}
-AnalyticDistribution.template = "analytic.AnalyticDistribution";
-AnalyticDistribution.supportedTypes = ["char", "text"];
-AnalyticDistribution.components = {
-    AutoComplete,
-    TagsList,
 }
 
-AnalyticDistribution.fieldDependencies = {
-    analytic_precision: { type: 'integer' },
-}
-AnalyticDistribution.props = {
-    ...standardFieldProps,
-    business_domain: { type: String, optional: true },
-    account_field: { type: String, optional: true },
-    product_field: { type: String, optional: true },
-    business_domain_compute: { type: String, optional: true },
-    force_applicability: { type: String, optional: true },
-    allow_save: { type: Boolean },
-}
-AnalyticDistribution.extractProps = ({ field, attrs }) => {
-    return {
-        business_domain: attrs.options.business_domain,
-        account_field: attrs.options.account_field,
-        product_field: attrs.options.product_field,
+export const analyticDistribution = {
+    component: AnalyticDistribution,
+    supportedTypes: ["char", "text"],
+    fieldDependencies: [{ name:"analytic_precision", type: "integer" }],
+    supportedOptions: [
+        {
+            label: _t("Disable save"),
+            name: "disable_save",
+            type: "boolean",
+        },
+        {
+            label: _t("Force applicability"),
+            name: "force_applicability",
+            type: "boolean",
+        },
+        {
+            label: _t("Business domain"),
+            name: "business_domain",
+            type: "string",
+        },
+        {
+            label: _t("Product field"),
+            name: "product_field",
+            type: "field",
+            availableTypes: ["many2one"],
+        },
+        {
+            label: _t("Amount field"),
+            name: "amount_field",
+            type: "field",
+            availableTypes: ["monetary"],
+        },
+        {
+            label: _t("Account field"),
+            name: "account_field",
+            type: "field",
+            availableTypes: ["many2one"],
+        }
+    ],
+    extractProps: ({ attrs, options }) => ({
+        business_domain: options.business_domain,
+        account_field: options.account_field,
+        product_field: options.product_field,
+        amount_field: options.amount_field,
         business_domain_compute: attrs.business_domain_compute,
-        force_applicability: attrs.options.force_applicability,
-        allow_save: !Boolean(attrs.options.disable_save),
-    };
+        force_applicability: options.force_applicability,
+        allow_save: !options.disable_save,
+    }),
 };
 
-registry.category("fields").add("analytic_distribution", AnalyticDistribution);
+registry.category("fields").add("analytic_distribution", analyticDistribution);

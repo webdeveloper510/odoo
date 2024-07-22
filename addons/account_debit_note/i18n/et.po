@@ -3,21 +3,24 @@
 # 	* account_debit_note
 # 
 # Translators:
-# Rivo Zängov <eraser@eraser.ee>, 2022
-# Aveli Kannel <aveli@avalah.ee>, 2022
-# Eneli Õigus <enelioigus@gmail.com>, 2022
-# Andre Roomet <andreroomet@gmail.com>, 2022
-# Triine Aavik <triine@avalah.ee>, 2022
+# JanaAvalah, 2023
+# Aveli Kannel <aveli@avalah.ee>, 2023
+# Andre Roomet <andreroomet@gmail.com>, 2023
+# Triine Aavik <triine@avalah.ee>, 2023
+# Leaanika Randmets, 2023
+# Eneli Õigus <enelioigus@gmail.com>, 2023
+# Patrick-Jordan Kiudorv, 2023
+# Rivo Zängov <eraser@eraser.ee>, 2023
 # Anna, 2023
 # Kärt Villako, 2024
 # Birgit Vijar, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~15.3\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-19 13:57+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Birgit Vijar, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
@@ -30,11 +33,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
 msgid "<span class=\"o_stat_text\">Debit Notes</span>"
 msgstr "<span class=\"o_stat_text\">Deebet</span>"
-
-#. module: account_debit_note
-#: model_terms:ir.ui.view,arch_db:account_debit_note.view_move_form_debit
-msgid "Add Debit Note"
-msgstr ""
 
 #. module: account_debit_note
 #: model:ir.model,name:account_debit_note.model_account_debit_note
@@ -65,12 +63,17 @@ msgstr "Loo kreeditarve"
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__create_uid
 msgid "Created by"
-msgstr "Loonud"
+msgstr "Loodud (kelle poolt?)"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__create_date
 msgid "Created on"
-msgstr "Loomise kuupäev"
+msgstr "Loodud"
+
+#. module: account_debit_note
+#: model:ir.actions.server,name:account_debit_note.action_move_debit_note
+msgid "Debit Note"
+msgstr "Deebet"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__date
@@ -79,6 +82,7 @@ msgid "Debit Note Date"
 msgstr "Arve kuupäev"
 
 #. module: account_debit_note
+#. odoo-python
 #: code:addons/account_debit_note/models/account_move.py:0
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #: model:ir.model.fields,field_description:account_debit_note.field_account_bank_statement_line__debit_note_ids
@@ -91,7 +95,7 @@ msgstr "Deebet"
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__display_name
 msgid "Display Name"
-msgstr "Näidatav nimi"
+msgstr "Kuvatav nimi"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__id
@@ -121,14 +125,9 @@ msgid "Journal Type"
 msgstr "Andmiku tüüp"
 
 #. module: account_debit_note
-#: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note____last_update
-msgid "Last Modified on"
-msgstr "Viimati muudetud"
-
-#. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendas"
+msgstr "Viimati uuendatud"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__write_date
@@ -138,7 +137,7 @@ msgstr "Viimati uuendatud"
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__move_ids
 msgid "Move"
-msgstr "Kanne"
+msgstr "Suuna"
 
 #. module: account_debit_note
 #: model:ir.model.fields,field_description:account_debit_note.field_account_debit_note__move_type
@@ -171,7 +170,7 @@ msgid ""
 "You can use this field for quick search."
 msgstr ""
 "ISO riigi kood kahe tähega. \n"
-"Saad kasutada seda välja kiirotsinguks"
+"Saad kasutada seda välja kiirotsinguks."
 
 #. module: account_debit_note
 #: model:ir.model.fields,help:account_debit_note.field_account_bank_statement_line__debit_note_ids
@@ -181,6 +180,7 @@ msgid "The debit notes created for this invoice"
 msgstr ""
 
 #. module: account_debit_note
+#. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #, python-format
 msgid "This debit note was created from: %s"
@@ -192,7 +192,26 @@ msgid "Use Specific Journal"
 msgstr "Kasuta kindlat andmikku"
 
 #. module: account_debit_note
+#. odoo-python
+#: code:addons/account_debit_note/wizard/account_debit_note.py:0
+#, python-format
+msgid ""
+"You can make a debit note only for a Customer Invoice, a Customer Credit "
+"Note, a Vendor Bill or a Vendor Credit Note."
+msgstr ""
+
+#. module: account_debit_note
+#. odoo-python
 #: code:addons/account_debit_note/wizard/account_debit_note.py:0
 #, python-format
 msgid "You can only debit posted moves."
+msgstr ""
+
+#. module: account_debit_note
+#. odoo-python
+#: code:addons/account_debit_note/wizard/account_debit_note.py:0
+#, python-format
+msgid ""
+"You can't make a debit note for an invoice that is already linked to a debit"
+" note."
 msgstr ""

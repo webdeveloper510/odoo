@@ -49,6 +49,12 @@ QUnit.module("Search", (hooks) => {
                         date_field: { string: "Date", type: "date", store: true, sortable: true },
                         float_field: { string: "Float", type: "float" },
                         bar: { string: "Bar", type: "many2one", relation: "partner" },
+                        properties: {
+                            string: "Properties",
+                            type: "properties",
+                            definition_record: "bar",
+                            definition_record_field: "child_properties",
+                        },
                     },
                     records: [],
                 },
@@ -959,6 +965,44 @@ QUnit.module("Search", (hooks) => {
         assert.deepEqual(model.domain, [["date_deadline", "<", "2021-09-17"]]);
     });
 
+    QUnit.test("field tags with invisible attribute", async function (assert) {
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
+                    <search>
+                        <field name="foo" invisible="context.get('abc')"/>
+                        <field name="bar" invisible="context.get('def')"/>
+                        <field name="float_field" invisible="1"/>
+                    </search>
+                `,
+            context: { abc: true },
+        });
+        assert.deepEqual(
+            model.getSearchItems((f) => f.type === "field").map((item) => item.fieldName),
+            ["bar"]
+        );
+    });
+
+    QUnit.test("filter tags with invisible attribute", async function (assert) {
+        const model = await makeSearchModel({
+            serverData,
+            searchViewArch: `
+                    <search>
+                        <filter name="filter1" string="Invisible ABC" domain="[]" invisible="context.get('abc')"/>
+                        <filter name="filter2" string="Invisible DEF" domain="[]" invisible="context.get('def')"/>
+                        <filter name="filter3" string="Always invisible" domain="[]" invisible="1"/>
+                    </search>
+                `,
+            context: { abc: true },
+        });
+        assert.deepEqual(
+            model
+                .getSearchItems((item) => ["filter", "dateFilter"].includes(item.type))
+                .map((item) => item.name),
+            ["filter2"]
+        );
+    });
+
     QUnit.test("no search items created for search panel sections", async function (assert) {
         const model = await makeSearchModel({
             serverData,
@@ -977,4 +1021,31 @@ QUnit.module("Search", (hooks) => {
         assert.strictEqual(sections.length, 2);
         assert.deepEqual(sanitizeSearchItems(model), []);
     });
+
+    QUnit.test(
+        "a field of type 'properties' should not be accepted as a search_default",
+        async function (assert) {
+            const searchViewArch = `
+                <search>
+                    <field name="properties"/>
+                </search>
+            `;
+
+            const model = await makeSearchModel({
+                serverData,
+                searchViewArch,
+                context: {
+                    search_default_properties: true,
+                },
+            });
+            assert.deepEqual(sanitizeSearchItems(model), [
+                {
+                    description: "Properties",
+                    fieldName: "properties",
+                    fieldType: "properties",
+                    type: "field",
+                },
+            ]);
+        }
+    );
 });

@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
 import { evaluateExpr } from "@web/core/py_js/py";
-import { XMLParser } from "@web/core/utils/xml";
+import { visitXML } from "@web/core/utils/xml";
 import { Field } from "@web/views/fields/field";
 import { archParseBoolean } from "@web/views/utils";
 
@@ -18,7 +19,7 @@ const SCALES = ["day", "week", "month", "year"];
 
 export class CalendarParseArchError extends Error {}
 
-export class CalendarArchParser extends XMLParser {
+export class CalendarArchParser {
     parse(arch, models, modelName) {
         const fields = models[modelName];
         const fieldNames = new Set(fields.display_name ? ["display_name"] : []);
@@ -26,19 +27,21 @@ export class CalendarArchParser extends XMLParser {
         let jsClass = null;
         let eventLimit = 5;
         let scales = [...SCALES];
-        let scale = "week";
+        const sessionScale = browser.sessionStorage.getItem("calendar-scale");
+        let scale = sessionScale || "week";
         let canCreate = true;
         let canDelete = true;
-        let hasQuickCreate = true;
+        let quickCreate = true;
+        let quickCreateViewId = null;
         let hasEditDialog = false;
         let showUnusualDays = false;
         let isDateHidden = false;
         let isTimeHidden = false;
         let formViewId = false;
-        const popoverFields = {};
+        const popoverFieldNodes = {};
         const filtersInfo = {};
 
-        this.visitXML(arch, (node) => {
+        visitXML(arch, (node) => {
             switch (node.tagName) {
                 case "calendar": {
                     if (!node.hasAttribute("date_start")) {
@@ -83,9 +86,14 @@ export class CalendarArchParser extends XMLParser {
                     if (node.hasAttribute("delete")) {
                         canDelete = archParseBoolean(node.getAttribute("delete"), true);
                     }
-                    if (node.hasAttribute("quick_add")) {
-                        // Don't use archParseBoolean from `utils.js` because it does not interpret integers
-                        hasQuickCreate =  !/^(false|0)$/i.test(node.getAttribute("quick_add"));
+                    if (node.hasAttribute("quick_create")) {
+                        quickCreate = archParseBoolean(node.getAttribute("quick_create"), true);
+                        if (quickCreate && node.hasAttribute("quick_create_view_id")) {
+                            quickCreateViewId = parseInt(
+                                node.getAttribute("quick_create_view_id"),
+                                10
+                            );
+                        }
                     }
                     if (node.hasAttribute("event_open_popup")) {
                         hasEditDialog = archParseBoolean(node.getAttribute("event_open_popup"));
@@ -116,7 +124,7 @@ export class CalendarArchParser extends XMLParser {
                         "calendar",
                         jsClass
                     );
-                    popoverFields[fieldName] = fieldInfo;
+                    popoverFieldNodes[fieldName] = fieldInfo;
 
                     const field = fields[fieldName];
                     if (!node.hasAttribute("invisible") || node.hasAttribute("filters")) {
@@ -184,10 +192,11 @@ export class CalendarArchParser extends XMLParser {
             filtersInfo,
             formViewId,
             hasEditDialog,
-            hasQuickCreate,
+            quickCreate,
+            quickCreateViewId,
             isDateHidden,
             isTimeHidden,
-            popoverFields,
+            popoverFieldNodes,
             scale,
             scales,
             showUnusualDays,

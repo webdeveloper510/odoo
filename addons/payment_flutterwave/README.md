@@ -17,7 +17,7 @@ submission provided by the `payment` module.
 ## Not implemented features
 
 - Manual capture
-- Full and partial refunds
+- Refunds
 
 ## Module history
 

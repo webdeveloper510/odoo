@@ -1,32 +1,22 @@
 /** @odoo-module */
 
-import tour from 'web_tour.tour';
-import tourUtils from 'website_sale.tour_utils';
+import { registry } from "@web/core/registry";
+import { TourError } from "@web_tour/tour_service/tour_utils";
+import tourUtils from '@website_sale/js/tours/tour_utils';
 
 
 function fail (errorMessage) {
-    tour._consume_tour(tour.running_tour, errorMessage);
+    throw new TourError(errorMessage);
 }
 
-tour.register('autocomplete_tour', {
+registry.category("web_tour.tours").add('autocomplete_tour', {
     test: true,
     url: '/shop', // /shop/address is redirected if no sales order
-}, [{
-    content: "search test product",
-    trigger: 'form input[name="search"]',
-    run: "text A test product",
-},{
-    content: 'Go to the product page',
-    trigger: '.dropdown-item:contains("A test product")'
-}, {
-    content: 'Add to cart',
-    trigger: '#add_to_cart'
-},
+    steps: () => [
+    ...tourUtils.addToCart({productName: "A test product"}),
     tourUtils.goToCart(),
-{
-    content: 'Go to process checkout',
-    trigger: 'a:contains("Process Checkout")'
-}, { // Actual test
+    tourUtils.goToCheckout(),
+{ // Actual test
     content: 'Input in Street & Number field',
     trigger: 'input[name="street"]',
     run: 'text This is a test'
@@ -68,4 +58,4 @@ tour.register('autocomplete_tour', {
             fail('Street value is not correct : ' + this.$anchor.val())
         }
     }
-}]);
+}]});

@@ -28,6 +28,7 @@ setup(
         'cryptography',
         'decorator',
         'docutils',
+        'geoip2',
         'gevent',
         'greenlet',
         'idna',
@@ -52,6 +53,7 @@ setup(
         'pyusb >= 1.0.0b1',
         'qrcode',
         'reportlab',  # windows binary pypi.python.org/pypi/reportlab
+        'rjsmin',
         'requests',
         'urllib3',
         'vobject',
@@ -61,7 +63,7 @@ setup(
         'xlwt',
         'zeep',
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.10',
     extras_require={
         'ldap': ['python-ldap'],
     },

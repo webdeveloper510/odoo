@@ -21,7 +21,7 @@ class SlidesPortalChatter(PortalChatter):
             return True
         return super()._portal_post_has_content(res_model, res_id, message, attachment_ids=attachment_ids, **kw)
 
-    @http.route(['/mail/chatter_post'], type='json', methods=['POST'], auth='public', website=True)
+    @http.route()
     def portal_chatter_post(self, res_model, res_id, message, **kw):
         previous_post = request.env['mail.message'].search([('res_id', '=', res_id),
                                                             ('author_id', '=', request.env.user.partner_id.id),
@@ -35,7 +35,7 @@ class SlidesPortalChatter(PortalChatter):
             rating_value = kw.get('rating_value', False)
             slide_channel = request.env[res_model].sudo().browse(int(res_id))
             if rating_value and slide_channel and request.env.user.partner_id.id == int(kw.get('pid')):
-                request.env.user.add_karma(slide_channel.karma_gen_channel_rank)
+                request.env.user._add_karma(slide_channel.karma_gen_channel_rank, slide_channel, _('Course Ranked'))
             result.update({
                 'default_rating_value': rating_value,
                 'rating_avg': slide_channel.rating_avg,

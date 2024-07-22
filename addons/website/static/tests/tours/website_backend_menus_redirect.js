@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
+import { registry } from "@web/core/registry";
 
-tour.register('website_backend_menus_redirect', {
+registry.category("web_tour.tours").add('website_backend_menus_redirect', {
     test: true,
     url: '/',
-},
-[{
+    steps: () => [
+{
     content: 'Need at least a step so the tour is not failing in enterprise',
     trigger: 'body',
     edition: 'enterprise',
@@ -26,5 +26,5 @@ tour.register('website_backend_menus_redirect', {
     content: 'Check that we landed on the apps page (Apps), and not the Home Action page (Settings)',
     trigger: '.oe_module_vignette',
     edition: 'community',
-},
-]);
+}
+]});

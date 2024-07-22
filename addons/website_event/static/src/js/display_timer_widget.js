@@ -1,7 +1,6 @@
-odoo.define('website_event.display_timer_widget', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var publicWidget = require('web.public.widget');
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.displayTimerWidget = publicWidget.Widget.extend({
     selector: '.o_display_timer',
@@ -18,7 +17,7 @@ publicWidget.registry.displayTimerWidget = publicWidget.Widget.extend({
     start: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            self.options = self.$target.data();
+            self.options = self.$el.data();
             self.preCountdownDisplay = self.options["preCountdownDisplay"];
             self.preCountdownTime = self.options["preCountdownTime"];
             self.preCountdownText = self.options["preCountdownText"];
@@ -104,6 +103,4 @@ publicWidget.registry.displayTimerWidget = publicWidget.Widget.extend({
 
 });
 
-return publicWidget.registry.countdownWidget;
-
-});
+export default publicWidget.registry.countdownWidget;

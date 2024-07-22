@@ -6,12 +6,20 @@ import { session } from "@web/session";
 import { ReportAction } from "@web/webclient/actions/reports/report_action";
 import { clearRegistryWithCleanup } from "@web/../tests/helpers/mock_env";
 import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
-import { mockDownload, patchWithCleanup, getFixture, click } from "@web/../tests/helpers/utils";
+import {
+    mockDownload,
+    nextTick,
+    patchWithCleanup,
+    getFixture,
+    click,
+} from "@web/../tests/helpers/utils";
 import {
     createWebClient,
     doAction,
     getActionManagerServerData,
 } from "@web/../tests/webclient/helpers";
+import { downloadReport } from "@web/webclient/actions/reports/utils";
+import { registerCleanup } from "../../../helpers/cleanup";
 
 let serverData;
 let target;
@@ -23,6 +31,9 @@ QUnit.module("ActionManager", (hooks) => {
         serverData = getActionManagerServerData();
         target = getFixture();
         clearRegistryWithCleanup(registry.category("main_components"));
+        registerCleanup(() => {
+            delete downloadReport.wkhtmltopdfStatusProm;
+        });
     });
 
     QUnit.module("Report actions");
@@ -111,8 +122,8 @@ QUnit.module("ActionManager", (hooks) => {
                 "/web/webclient/load_menus",
                 "/web/action/load",
                 "/report/check_wkhtmltopdf",
-                "notify",
                 "/report/download",
+                "notify",
             ]);
         }
     );
@@ -149,7 +160,7 @@ QUnit.module("ActionManager", (hooks) => {
             // attribute is removed right after)
             patchWithCleanup(ReportAction.prototype, {
                 setup() {
-                    this._super(...arguments);
+                    super.setup(...arguments);
                     this.env.services.rpc(this.reportUrl);
                     this.reportUrl = "about:blank";
                 },
@@ -161,7 +172,12 @@ QUnit.module("ActionManager", (hooks) => {
                 ".o_content iframe",
                 "should have opened the report client action"
             );
-            assert.containsOnce(target, "button[title='Print']", "should have a print button");
+            // the control panel has the content twice and a d-none class is toggled depending the screen size
+            assert.containsOnce(
+                target,
+                ":not(.d-none) > button[title='Print']",
+                "should have a print button"
+            );
             assert.verifySteps([
                 "/web/webclient/load_menus",
                 "/web/action/load",
@@ -202,7 +218,7 @@ QUnit.module("ActionManager", (hooks) => {
         // attribute is removed right after)
         patchWithCleanup(ReportAction.prototype, {
             setup() {
-                this._super(...arguments);
+                super.setup(...arguments);
                 this.env.services.rpc(this.reportUrl);
                 this.reportUrl = "about:blank";
             },
@@ -253,7 +269,7 @@ QUnit.module("ActionManager", (hooks) => {
             await doAction(webClient, 7);
             try {
                 await doAction(webClient, 7);
-            } catch (_e) {
+            } catch {
                 assert.step("error caught");
             }
             assert.verifySteps([
@@ -308,10 +324,14 @@ QUnit.module("ActionManager", (hooks) => {
     });
 
     QUnit.test("context is correctly passed to the client action report", async (assert) => {
-        assert.expect(8);
+        assert.expect(9);
 
         mockDownload((options) => {
             assert.step(options.url);
+            assert.deepEqual(
+                options.data.context,
+                `{"lang":"en","uid":7,"tz":"taht","rabbia":"E Tarantella","active_ids":[99]}`
+            );
             assert.deepEqual(JSON.parse(options.data.data), [
                 "/report/pdf/ennio.morricone/99",
                 "qweb-pdf",
@@ -330,7 +350,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         patchWithCleanup(ReportAction.prototype, {
             setup() {
-                this._super(...arguments);
+                super.setup(...arguments);
                 this.env.services.rpc(this.reportUrl);
                 this.reportUrl = "about:blank";
             },
@@ -354,7 +374,11 @@ QUnit.module("ActionManager", (hooks) => {
         assert.verifySteps([
             "/report/html/ennio.morricone/99?context=%7B%22lang%22%3A%22en%22%2C%22uid%22%3A7%2C%22tz%22%3A%22taht%22%7D",
         ]);
-        await click(target.querySelector("button[title='Print']"));
+        await click(
+            target.querySelector(
+                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex button[title='Print']"
+            )
+        );
         assert.verifySteps(["/report/check_wkhtmltopdf", "/report/download"]);
     });
 
@@ -363,7 +387,7 @@ QUnit.module("ActionManager", (hooks) => {
 
         patchWithCleanup(ReportAction.prototype, {
             init() {
-                this._super(...arguments);
+                super.init(...arguments);
                 this.reportUrl = "about:blank";
             },
         });
@@ -371,7 +395,7 @@ QUnit.module("ActionManager", (hooks) => {
         const webClient = await createWebClient({ serverData });
 
         await doAction(webClient, 12); // 12 is a html report action in serverData
-
+        await nextTick();
         const hash = webClient.router.current.hash;
         // used to put report.client_action in the url
         assert.strictEqual(hash.action === "report.client_action", false);

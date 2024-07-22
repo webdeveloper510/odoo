@@ -6,8 +6,7 @@ import { loadJS } from "@web/core/assets";
 // temporary for OnNoResultReturned bug
 import { UncaughtCorsError } from "@web/core/errors/error_service";
 const errorHandlerRegistry = registry.category("error_handlers");
-
-const { Component, onWillRender, useEffect, useRef, useState, xml } = owl;
+import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
 
 const MONDIALRELAY_SCRIPT_URL = "https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js"
 
@@ -67,7 +66,7 @@ export class MondialRelayField extends Component {
                     'city': RelaySelected.Ville,
                     'country': RelaySelected.Pays,
                 });
-                this.props.update(values);
+                this.props.record.update({ [this.props.name]: values });
             },
             OnNoResultReturned: () => {
                 // HACK while Mondial Relay fix his bug
@@ -88,4 +87,8 @@ export class MondialRelayField extends Component {
 }
 MondialRelayField.template = xml`<div t-if="enabled" t-ref="root"/>`;
 
-registry.category("fields").add("mondialrelay_relay", MondialRelayField);
+export const mondialRelayField = {
+    component: MondialRelayField,
+};
+
+registry.category("fields").add("mondialrelay_relay", mondialRelayField);

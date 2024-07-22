@@ -1,20 +1,21 @@
-odoo.define('website.tour.automatic_editor', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const wTourUtils = require("website.tour_utils");
+import wTourUtils from "@website/js/tours/tour_utils";
 
 wTourUtils.registerWebsitePreviewTour('automatic_editor_on_new_website', {
     test: true,
+    edition: true,
     url: '/',
 },
-[
-    {
-        content: "Select the language dropdown",
-        trigger: 'iframe .js_language_selector .dropdown-toggle'
-    },
+() => [
+    wTourUtils.goToTheme(),
     {
         content: "click on Add a language",
-        trigger: 'iframe a.o_add_language',
+        trigger: "we-button[data-add-language]"
+    },
+    {
+        content: "confirm leave editor",
+        trigger: ".modal-dialog button.btn-primary"
     },
     {
         content: "type Parseltongue",
@@ -38,7 +39,6 @@ wTourUtils.registerWebsitePreviewTour('automatic_editor_on_new_website', {
     {
         content: "Select parseltongue",
         trigger: 'iframe a.js_change_lang[data-url_code=pa_GB]',
-        extra_trigger: 'iframe a.js_change_lang .o_lang_flag',
     },
     {
         content: "Check that we're on parseltongue and then go to settings",
@@ -81,19 +81,10 @@ wTourUtils.registerWebsitePreviewTour('automatic_editor_on_new_website', {
         trigger: 'button[name="button_choose_theme"]'
     },
     {
-        content: "Check that the editor is loaded",
-        trigger: 'iframe body.editor_enable',
+        content: "Check that the homepage is loaded",
+        trigger: ".o_website_preview[data-view-xmlid='website.homepage']",
+        extra_trigger: ".o_menu_systray .o_user_menu",
         timeout: 30000,
-        run: () => null, // it's a check
+        isCheck: true,
     },
-    {
-        content: "exit edit mode",
-        trigger: '.o_we_website_top_actions button.btn-primary:contains("Save")',
-    },
-    {
-        content: "wait for editor to close",
-        trigger: 'iframe body:not(.editor_enable)',
-        run: () => null, // It's a check
-    }
 ]);
-});

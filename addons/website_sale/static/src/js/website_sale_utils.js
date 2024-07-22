@@ -1,9 +1,9 @@
-odoo.define('website_sale.utils', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const wUtils = require('website.utils');
+import { _t } from "@web/core/l10n/translation";
+import wUtils from "@website/js/utils";
 
-const cartHandlerMixin = {
+export const cartHandlerMixin = {
     getRedirectOption() {
         const html = document.documentElement;
         this.stayOnPageOption = html.dataset.add2cartRedirect === '1';
@@ -28,21 +28,17 @@ const cartHandlerMixin = {
     /**
      * @private
      */
-    _addToCartInPage(params) {
-        params.force_create = true;
-        return this._rpc({
-            route: "/shop/cart/update_json",
-            params: params,
-        }).then(async data => {
-            sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
-            if (data.cart_quantity && (data.cart_quantity !== parseInt($(".my_cart_quantity").text()))) {
-                // No animation if the product's page images are hidden
-                if ($('div[data-image_width]').data('image_width') !== 'none') {
-                    await animateClone($('header .o_wsale_my_cart').first(), this.$itemImgContainer, 25, 40);
-                }
-                updateCartNavBar(data);
-            }
+    async _addToCartInPage(params) {
+        const data = await this.rpc("/shop/cart/update_json", {
+            ...params,
+            display: false,
+            force_create: true,
         });
+        if (data.cart_quantity && (data.cart_quantity !== parseInt($(".my_cart_quantity").text()))) {
+            updateCartNavBar(data);
+        };
+        showCartNotification(this.call.bind(this), data.notification_info);
+        return data;
     },
 };
 
@@ -77,7 +73,7 @@ function animateClone($cart, $elem, offsetTop, offsetLeft) {
                     left: $cart.offset().left + offsetLeft,
                     width: 75,
                     height: 75,
-                }, 1000, 'easeInOutExpo');
+                }, 500);
 
             $imgclone.animate({
                 width: 0,
@@ -97,8 +93,10 @@ function animateClone($cart, $elem, offsetTop, offsetLeft) {
  * @param {Object} data
  */
 function updateCartNavBar(data) {
+    sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
     $(".my_cart_quantity")
         .parents('li.o_wsale_my_cart').removeClass('d-none').end()
+        .toggleClass('d-none', data.cart_quantity === 0)
         .addClass('o_mycart_zoom_animation').delay(300)
         .queue(function () {
             $(this)
@@ -110,7 +108,29 @@ function updateCartNavBar(data) {
         });
 
     $(".js_cart_lines").first().before(data['website_sale.cart_lines']).end().remove();
-    $(".js_cart_summary").replaceWith(data['website_sale.short_cart_summary']);
+    $("#cart_total").replaceWith(data['website_sale.total']);
+    if (data.cart_ready) {
+        document.querySelector("a[name='website_sale_main_button']")?.classList.remove('disabled');
+    } else {
+        document.querySelector("a[name='website_sale_main_button']")?.classList.add('disabled');
+    }
+}
+
+function showCartNotification(callService, props, options = {}) {
+    // Show the notification about the cart
+    if (props.lines) {
+        callService("cartNotificationService", "add", _t("Item(s) added to your cart"), {
+            lines: props.lines,
+            currency_id: props.currency_id,
+            ...options,
+        });
+    }
+    if (props.warning) {
+        callService("cartNotificationService", "add", _t("Warning"), {
+            warning: props.warning,
+            ...options,
+        });
+    }
 }
 
 /**
@@ -128,17 +148,17 @@ function showWarning(message) {
     if (!cart_alert.length) {
         cart_alert = $(
             '<div class="alert alert-danger alert-dismissible" role="alert" id="data_warning">' +
-                '<button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button> ' +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button> ' +
                 '<span></span>' +
             '</div>').prependTo($page);
     }
     cart_alert.children('span:last-child').text(message);
 }
 
-return {
+export default {
     animateClone: animateClone,
     updateCartNavBar: updateCartNavBar,
     cartHandlerMixin: cartHandlerMixin,
+    showCartNotification: showCartNotification,
     showWarning: showWarning,
 };
-});

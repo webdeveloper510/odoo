@@ -68,18 +68,20 @@ class Lead(models.Model):
 
                         normalized_email = tools.email_normalize(lead.email_from)
                         if not normalized_email:
-                            lead.message_post_with_view(
+                            lead.message_post_with_source(
                                 'crm_iap_enrich.mail_message_lead_enrich_no_email',
-                                subtype_id=self.env.ref('mail.mt_note').id)
+                                subtype_xmlid='mail.mt_note',
+                            )
                             continue
 
                         email_domain = normalized_email.split('@')[1]
                         # Discard domains of generic email providers as it won't return relevant information
                         if email_domain in iap_tools._MAIL_PROVIDERS:
                             lead.write({'iap_enrich_done': True})
-                            lead.message_post_with_view(
+                            lead.message_post_with_source(
                                 'crm_iap_enrich.mail_message_lead_enrich_notfound',
-                                subtype_id=self.env.ref('mail.mt_note').id)
+                                subtype_xmlid='mail.mt_note',
+                            )
                         else:
                             lead_emails[lead.id] = email_domain
 
@@ -87,27 +89,23 @@ class Lead(models.Model):
                         try:
                             iap_response = self.env['iap.enrich.api']._request_enrich(lead_emails)
                         except iap_tools.InsufficientCreditError:
-                            _logger.info('Sent batch %s enrich requests: failed because of credit', len(lead_emails))
+                            _logger.info('Lead enrichment failed because of insufficient credit')
                             if not from_cron:
-                                self.env['iap.account']._send_iap_bus_notification(
+                                self.env['iap.account']._send_no_credit_notification(
                                     service_name='reveal',
-                                    title=_("Not enough credits for Lead Enrichment"),
-                                    error_type='credit')
+                                    title=_("Not enough credits for Lead Enrichment"))
                             # Since there are no credits left, there is no point to process the other batches
                             break
                         except Exception as e:
                             if not from_cron:
-                                self.env['iap.account']._send_iap_bus_notification(
-                                    service_name='reveal',
-                                    error_type="exception",
-                                    title=_('Sent batch %s enrich requests: failed with exception %s', len(lead_emails), e))
-                            _logger.info('Sent batch %s enrich requests: failed with exception %s', len(lead_emails), e)
+                                self.env['iap.account']._send_error_notification(
+                                    message=_('An error occurred during lead enrichment'))
+                            _logger.info('An error occurred during lead enrichment: %s', e)
                         else:
                             if not from_cron:
-                                self.env['iap.account']._send_iap_bus_notification(
-                                    service_name='reveal',
-                                    title=_("The leads/opportunities have successfully been enriched"))
-                            _logger.info('Sent batch %s enrich requests: success', len(lead_emails))
+                                self.env['iap.account']._send_success_notification(
+                                    message=_("The leads/opportunities have successfully been enriched"))
+                            _logger.info('Batch of %s leads successfully enriched', len(lead_emails))
                             self._iap_enrich_from_response(iap_response)
                 except OperationalError:
                     _logger.error('A batch of leads could not be enriched :%s', repr(leads))
@@ -126,7 +124,10 @@ class Lead(models.Model):
             iap_data = iap_response.get(str(lead.id))
             if not iap_data:
                 lead.write({'iap_enrich_done': True})
-                lead.message_post_with_view('crm_iap_enrich.mail_message_lead_enrich_notfound', subtype_id=self.env.ref('mail.mt_note').id)
+                lead.message_post_with_source(
+                    'crm_iap_enrich.mail_message_lead_enrich_notfound',
+                    subtype_xmlid='mail.mt_note',
+                )
                 continue
 
             values = {'iap_enrich_done': True}
@@ -156,10 +157,10 @@ class Lead(models.Model):
 
             template_values = iap_data
             template_values['flavor_text'] = _("Lead enriched based on email address")
-            lead.message_post_with_view(
+            lead.message_post_with_source(
                 'iap_mail.enrich_company',
-                values=template_values,
-                subtype_id=self.env.ref('mail.mt_note').id
+                render_values=template_values,
+                subtype_xmlid='mail.mt_note',
             )
 
     def _merge_get_fields_specific(self):

@@ -5,9 +5,9 @@
     'name': "Mail Group",
     'summary': "Manage your mailing lists",
     'description': """
-        Manage your mailing lists from Odoo.
+Manage your mailing lists from Odoo.
     """,
-    'version': '1.0',
+    'version': '1.1',
     'depends': [
         'mail',
         'portal',

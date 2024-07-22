@@ -14,7 +14,7 @@ class GeoProvider(models.Model):
     _name = "base.geo_provider"
     _description = "Geo Provider"
 
-    tech_name = fields.Char()
+    tech_name = fields.Char(string="Technical Name")
     name = fields.Char()
 
 
@@ -67,8 +67,8 @@ class GeoCoder(models.AbstractModel):
             result = service(addr, **kw)
         except AttributeError:
             raise UserError(_(
-                'Provider %s is not implemented for geolocation service.'
-            ) % provider)
+                'Provider %s is not implemented for geolocation service.',
+                provider))
         except UserError:
             raise
         except Exception:
@@ -128,7 +128,7 @@ class GeoCoder(models.AbstractModel):
                               '\n\nGoogle made this a paid feature.\n'
                               'You should first enable billing on your Google account.\n'
                               'Then, go to Developer Console, and enable the APIs:\n'
-                              'Geocoding, Maps Static, Maps Javascript.\n') % result.get('error_message')
+                              'Geocoding, Maps Static, Maps Javascript.\n', result.get('error_message'))
                 raise UserError(error_msg)
             geo = result['results'][0]['geometry']['location']
             return float(geo['lat']), float(geo['lng'])

@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
-import {AddPageDialog} from "../dialog/dialog";
+import { _t } from "@web/core/l10n/translation";
+import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
 import {useService} from "@web/core/utils/hooks";
-
-const {onWillStart, useState} = owl;
+import { onWillStart, useState } from "@odoo/owl";
 
 /**
  * Used to share code and keep the same behaviour on different types of 'website
@@ -23,7 +23,7 @@ export const PageControllerMixin = (component) => class extends component {
         this.rpc = useService('rpc');
         this.orm = useService('orm');
 
-        this.websiteSelection = odoo.debug ? [{id: 0, name: this.env._t("All Websites")}] : [];
+        this.websiteSelection = odoo.debug ? [{id: 0, name: _t("All Websites")}] : [];
 
         this.state = useState({
             activeWebsite: undefined,
@@ -42,7 +42,9 @@ export const PageControllerMixin = (component) => class extends component {
      */
     async createWebsiteContent() {
         if (this.props.resModel === 'website.page') {
-            return this.dialog.add(AddPageDialog, {selectWebsite: true});
+            return this.dialog.add(AddPageDialog, {
+                websiteId: this.state.activeWebsite.id,
+            });
         }
         const action = this.props.context.create_action;
         if (action) {

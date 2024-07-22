@@ -1,38 +1,55 @@
-odoo.define('website_livechat.tour', function(require) {
-'use strict';
+/** @odoo-module **/
 
-var commonSteps = require("website_livechat.tour_common");
-var tour = require("web_tour.tour");
+import {
+    start,
+    endDiscussion,
+    goodRating,
+    okRating,
+    sadRating,
+    feedback,
+    transcript,
+    close,
+} from "./website_livechat_common";
+import { registry } from "@web/core/registry";
 
-tour.register('website_livechat_complete_flow_tour', {
+registry.category("web_tour.tours").add("website_livechat_complete_flow_tour", {
     test: true,
-    url: '/',
-}, [].concat(commonSteps.startStep, commonSteps.endDiscussionStep, commonSteps.okRatingStep, commonSteps.feedbackStep, commonSteps.transcriptStep, commonSteps.closeStep));
+    url: "/",
+    shadow_dom: ".o-livechat-root",
+    steps: () => [].concat(start, endDiscussion, okRating, feedback, transcript, close),
+});
 
-tour.register('website_livechat_happy_rating_tour', {
+registry.category("web_tour.tours").add("website_livechat_happy_rating_tour", {
     test: true,
-    url: '/',
-}, [].concat(commonSteps.startStep, commonSteps.endDiscussionStep, commonSteps.goodRatingStep));
+    url: "/",
+    shadow_dom: ".o-livechat-root",
+    steps: () => [].concat(start, endDiscussion, goodRating, feedback),
+});
 
-tour.register('website_livechat_ok_rating_tour', {
+registry.category("web_tour.tours").add("website_livechat_ok_rating_tour", {
     test: true,
-    url: '/',
-}, [].concat(commonSteps.startStep, commonSteps.endDiscussionStep, commonSteps.okRatingStep, commonSteps.feedbackStep));
+    url: "/",
+    shadow_dom: ".o-livechat-root",
+    steps: () => [].concat(start, endDiscussion, okRating, feedback),
+});
 
-tour.register('website_livechat_sad_rating_tour', {
+registry.category("web_tour.tours").add("website_livechat_sad_rating_tour", {
     test: true,
-    url: '/',
-}, [].concat(commonSteps.startStep, commonSteps.endDiscussionStep, commonSteps.sadRatingStep, commonSteps.feedbackStep));
+    url: "/",
+    shadow_dom: ".o-livechat-root",
+    steps: () => [].concat(start, endDiscussion, sadRating, feedback),
+});
 
-tour.register('website_livechat_no_rating_tour', {
+registry.category("web_tour.tours").add("website_livechat_no_rating_tour", {
     test: true,
-    url: '/',
-}, [].concat(commonSteps.startStep, commonSteps.endDiscussionStep, commonSteps.transcriptStep, commonSteps.closeStep));
+    url: "/",
+    shadow_dom: ".o-livechat-root",
+    steps: () => [].concat(start, endDiscussion, transcript, close),
+});
 
-tour.register('website_livechat_no_rating_no_close_tour', {
+registry.category("web_tour.tours").add("website_livechat_no_rating_no_close_tour", {
     test: true,
-    url: '/',
-}, [].concat(commonSteps.startStep));
-
-return {};
+    url: "/",
+    shadow_dom: ".o-livechat-root",
+    steps: () => [].concat(start),
 });

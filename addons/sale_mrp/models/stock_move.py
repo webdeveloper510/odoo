@@ -10,6 +10,8 @@ class StockMove(models.Model):
     def _prepare_procurement_values(self):
         res = super()._prepare_procurement_values()
         res['analytic_account_id'] = self.sale_line_id.order_id.analytic_account_id
+        if self.sale_line_id.order_id.analytic_account_id:
+            res['analytic_distribution'] = {self.sale_line_id.order_id.analytic_account_id.id: 100}
         return res
 
 
@@ -20,6 +22,6 @@ class StockMoveLine(models.Model):
         kit_lines = self.filtered(lambda move_line: move_line.move_id.bom_line_id.bom_id.type == 'phantom')
         for move_line in kit_lines:
             unit_price = move_line.product_id.list_price
-            qty = move_line.product_uom_id._compute_quantity(move_line.qty_done, move_line.product_id.uom_id)
+            qty = move_line.product_uom_id._compute_quantity(move_line.quantity, move_line.product_id.uom_id)
             move_line.sale_price = unit_price * qty
         super(StockMoveLine, self - kit_lines)._compute_sale_price()

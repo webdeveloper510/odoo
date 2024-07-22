@@ -1,16 +1,16 @@
-/** @odoo-module */
+/** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { useService } from '@web/core/utils/hooks';
-import { formatFloat } from '@web/views/fields/formatters';
-import { session } from '@web/session';
+import { formatFloat } from "@web/views/fields/formatters";
 import { ViewButton } from '@web/views/view_button/view_button';
 import { FormViewDialog } from '@web/views/view_dialogs/form_view_dialog';
 
 import { ProjectRightSidePanelSection } from './components/project_right_side_panel_section';
 import { ProjectMilestone } from './components/project_milestone';
 import { ProjectProfitability } from './components/project_profitability';
-
-const { Component, onWillStart, useState } = owl;
+import { getCurrency } from '@web/core/currency';
+import { Component, onWillStart, useState } from "@odoo/owl";
 
 export class ProjectRightSidePanel extends Component {
     setup() {
@@ -52,17 +52,14 @@ export class ProjectRightSidePanel extends Component {
 
     get sectionNames() {
         return {
-            'milestones': this.env._t('Milestones'),
-            'profitability': this.env._t('Profitability'),
+            'milestones': _t('Milestones'),
+            'profitability': _t('Profitability'),
         };
     }
 
     get showProjectProfitability() {
-        return !!this.state.data.profitability_items
-            && (
-                this.state.data.profitability_items.revenues.data.length > 0
-                || this.state.data.profitability_items.costs.data.length > 0
-            );
+        const { costs, revenues } = this.state.data.profitability_items;
+        return costs.data.length || revenues.data.length;
     }
 
     formatFloat(value) {
@@ -75,7 +72,7 @@ export class ProjectRightSidePanel extends Component {
             'digits': [false, 0],
             'noSymbol': true,
         });
-        const currency = session.currencies[this.currencyId];
+        const currency = getCurrency(this.currencyId);
         if (!currency) {
             return valueFormatted;
         }
@@ -118,7 +115,7 @@ export class ProjectRightSidePanel extends Component {
         };
         this.openFormViewDialog({
             context,
-            title: this.env._t('New Milestone'),
+            title: _t('New Milestone'),
             resModel: 'project.milestone',
             onRecordSaved: async () => {
                 await this.loadMilestones();

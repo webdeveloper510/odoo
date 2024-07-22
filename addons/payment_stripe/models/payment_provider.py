@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 import logging
 import uuid
 
@@ -7,12 +8,12 @@ import requests
 from werkzeug.urls import url_encode, url_join, url_parse
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import RedirectWarning, UserError, ValidationError
 
-from odoo.addons.payment_stripe import utils as stripe_utils
-from odoo.addons.payment_stripe import const
-from odoo.addons.payment_stripe.controllers.onboarding import OnboardingController
+from odoo.addons.payment import utils as payment_utils
+from odoo.addons.payment_stripe import const, utils as stripe_utils
 from odoo.addons.payment_stripe.controllers.main import StripeController
+from odoo.addons.payment_stripe.controllers.onboarding import OnboardingController
 
 
 _logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ class PaymentProvider(models.Model):
         super()._compute_feature_support_fields()
         self.filtered(lambda p: p.code == 'stripe').update({
             'support_express_checkout': True,
-            'support_manual_capture': True,
+            'support_manual_capture': 'full_only',
             'support_refund': 'partial',
             'support_tokenization': True,
         })
@@ -133,8 +134,18 @@ class PaymentProvider(models.Model):
         """
         self.ensure_one()
 
+        if self.env.company.country_id.code not in const.SUPPORTED_COUNTRIES:
+            raise RedirectWarning(
+                _(
+                    "Stripe Connect is not available in your country, please use another payment"
+                    " provider."
+                ),
+                self.env.ref('payment.action_payment_provider').id,
+                _("Other Payment Providers"),
+            )
+
         if self.state == 'enabled':
-            self.company_id._mark_payment_onboarding_step_as_done()
+            self.env['onboarding.onboarding.step'].action_validate_step_payment_provider()
             action = {'type': 'ir.actions.act_window_close'}
         else:
             # Account creation
@@ -329,23 +340,19 @@ class PaymentProvider(models.Model):
 
         return {
             'type': 'standard',
-            'country': const.COUNTRY_MAPPING.get(
-                self.company_id.country_id.code, self.company_id.country_id.code
-            ),
+            'country': self._stripe_get_country(self.company_id.country_id.code),
             'email': self.company_id.email,
             'business_type': 'individual',
             'company[address][city]': self.company_id.city or '',
-            'company[address][country]': const.COUNTRY_MAPPING.get(
-                self.company_id.country_id.code, self.company_id.country_id.code or ''
-            ),
+            'company[address][country]': self._stripe_get_country(self.company_id.country_id.code),
             'company[address][line1]': self.company_id.street or '',
             'company[address][line2]': self.company_id.street2 or '',
             'company[address][postal_code]': self.company_id.zip or '',
             'company[address][state]': self.company_id.state_id.name or '',
             'company[name]': self.company_id.name,
             'individual[address][city]': self.company_id.city or '',
-            'individual[address][country]': const.COUNTRY_MAPPING.get(
-                self.company_id.country_id.code, self.company_id.country_id.code or ''
+            'individual[address][country]': self._stripe_get_country(
+                self.company_id.country_id.code
             ),
             'individual[address][line1]': self.company_id.street or '',
             'individual[address][line2]': self.company_id.street2 or '',
@@ -421,7 +428,7 @@ class PaymentProvider(models.Model):
         response_content = response.json()
         if response_content.get('error'):  # An exception was raised on the proxy
             error_data = response_content['error']['data']
-            _logger.error("request forwarded with error: %s", error_data['message'])
+            _logger.warning("request forwarded with error: %s", error_data['message'])
             raise ValidationError(_("Stripe Proxy error: %(error)s", error=error_data['message']))
 
         return response_content.get('result', {})
@@ -457,6 +464,54 @@ class PaymentProvider(models.Model):
 
         return stripe_utils.get_publishable_key(self.sudo())
 
+    def _stripe_get_inline_form_values(
+        self, amount, currency, partner_id, is_validation, payment_method_sudo=None, **kwargs
+    ):
+        """ Return a serialized JSON of the required values to render the inline form.
+
+        Note: `self.ensure_one()`
+
+        :param float amount: The amount in major units, to convert in minor units.
+        :param res.currency currency: The currency of the transaction.
+        :param int partner_id: The partner of the transaction, as a `res.partner` id.
+        :param bool is_validation: Whether the operation is a validation.
+        :param payment.method payment_method_sudo: The sudoed payment method record to which the
+                                                   inline form belongs.
+        :return: The JSON serial of the required values to render the inline form.
+        :rtype: str
+        """
+        self.ensure_one()
+
+        if not is_validation:
+            currency_name = currency and currency.name.lower()
+        else:
+            currency_name = self.with_context(
+                validation_pm=payment_method_sudo  # Will be converted to a kwarg in master.
+            )._get_validation_currency().name.lower()
+        partner = self.env['res.partner'].with_context(show_address=1).browse(partner_id).exists()
+        inline_form_values = {
+            'publishable_key': self._stripe_get_publishable_key(),
+            'currency_name': currency_name,
+            'minor_amount': amount and payment_utils.to_minor_currency_units(amount, currency),
+            'capture_method': 'manual' if self.capture_manually else 'automatic',
+            'billing_details': {
+                'name': partner.name or '',
+                'email': partner.email or '',
+                'phone': partner.phone or '',
+                'address': {
+                    'line1': partner.street or '',
+                    'line2': partner.street2 or '',
+                    'city': partner.city or '',
+                    'state': partner.state_id.code or '',
+                    'country': partner.country_id.code or '',
+                    'postal_code': partner.zip or '',
+                },
+            },
+            'is_tokenization_required': self._is_tokenization_required(**kwargs),
+            'payment_methods_mapping': const.PAYMENT_METHODS_MAPPING,
+        }
+        return json.dumps(inline_form_values)
+
     def _stripe_get_country(self, country_code):
         """ Return the mapped country code of the company.
 
@@ -468,3 +523,10 @@ class PaymentProvider(models.Model):
         :rtype: str
         """
         return const.COUNTRY_MAPPING.get(country_code, country_code)
+
+    def _get_default_payment_method_codes(self):
+        """ Override of `payment` to return the default payment method codes. """
+        default_codes = super()._get_default_payment_method_codes()
+        if self.code != 'stripe':
+            return default_codes
+        return const.DEFAULT_PAYMENT_METHODS_CODES

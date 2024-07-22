@@ -1,14 +1,16 @@
 /** @odoo-module **/
 
-import { qweb as QWeb, _t } from 'web.core';
-import Dialog from 'web.Dialog';
-import publicWidget from 'web.public.widget';
-import utils from 'web.utils';
-import wUtils from 'website.utils';
+import { uniqueId } from '@web/core/utils/functions';
+import { renderToElement } from "@web/core/utils/render";
+import { getDataURLFromFile } from "@web/core/utils/urls";
+import Dialog from '@web/legacy/js/core/dialog';
+import publicWidget from '@web/legacy/js/public/public_widget';
+import wUtils from '@website/js/utils';
+import { _t } from "@web/core/l10n/translation";
 
 var SlideUploadDialog = Dialog.extend({
     template: 'website.slide.upload.modal',
-    events: _.extend({}, Dialog.prototype.events, {
+    events: Object.assign({}, Dialog.prototype.events, {
         'click .o_wslides_js_upload_install_button': '_onClickInstallModule',
         'click .o_wslides_select_category': '_onClickSlideCategoryIcon',
         'change input#upload': '_onChangeSlideUpload',
@@ -26,10 +28,19 @@ var SlideUploadDialog = Dialog.extend({
      *      install {id: module ID, name: module short description}
      */
     init: function (parent, options) {
-        options = _.defaults(options || {}, {
-            title: _t("Add Content"),
-            size: 'medium',
-        });
+        options = Object.assign(
+            {
+                _title: _t("Add Content"),
+                get title() {
+                    return this._title;
+                },
+                set title(value) {
+                    this._title = value;
+                },
+                size: "medium",
+            },
+            options || {}
+        );
         this._super(parent, options);
         this._setup();
 
@@ -54,6 +65,9 @@ var SlideUploadDialog = Dialog.extend({
 
         this.file = {};
         this.isValidUrl = true;
+
+        this.rpc = this.bindService("rpc");
+        this.orm = this.bindService("orm");
     },
     start: function () {
         var self = this;
@@ -107,33 +121,24 @@ var SlideUploadDialog = Dialog.extend({
         var self = this;
         this.$('#category_id').select2(this._select2Wrapper(_t('Section'), false,
             function () {
-                return self._rpc({
-                    route: '/slides/category/search_read',
-                    params: {
-                        fields: ['name'],
-                        domain: [['channel_id', '=', self.channelID]],
-                    }
+                return self.rpc('/slides/category/search_read', {
+                    fields: ['name'],
+                    domain: [['channel_id', '=', self.channelID]],
                 });
             })
         );
         this.$('#tag_ids').select2(this._select2Wrapper(_t('Tags'), true, function () {
-            return self._rpc({
-                route: '/slides/tag/search_read',
-                params: {
-                    fields: ['name'],
-                    domain: [],
-                }
+            return self.rpc('/slides/tag/search_read', {
+                fields: ['name'],
+                domain: [],
             });
         }));
     },
     _fetchUrlPreview: function (url, slideCategory) {
-        return this._rpc({
-            route: '/slides/prepare_preview/',
-            params: {
-                'url': url,
-                'slide_category': slideCategory,
-                'channel_id': this.channelID
-            },
+        return this.rpc('/slides/prepare_preview/', {
+            'url': url,
+            'slide_category': slideCategory,
+            'channel_id': this.channelID
         });
     },
     _formSetFieldValue: function (fieldId, value) {
@@ -159,7 +164,7 @@ var SlideUploadDialog = Dialog.extend({
     _formValidateGetValues: async function (forcePublished) {
         var slideCategory = 'document';
         // default slide_category (for article for instance)
-        if (_.contains(this.slide_category_data), this.get('state')) {
+        if (Object.keys(this.slide_category_data).includes(this.get("state"))) {
             slideCategory = this.get('state');
         }
 
@@ -169,7 +174,7 @@ var SlideUploadDialog = Dialog.extend({
         } else {
             sourceType = this.$('input[name="source_type"]:checked').data('value');
         }
-        var values = _.extend({
+        var values = Object.assign({
             'channel_id': this.channelID,
             'description': this._formGetFieldValue('description'),
             'document_google_url': this._formGetFieldValue('document_google_url'),
@@ -184,17 +189,17 @@ var SlideUploadDialog = Dialog.extend({
 
         var canvas = this.$('#data_canvas')[0];
         if (this.file.type === 'application/pdf') {
-            _.extend(values, {
+            Object.assign(values, {
                 'image_1920': canvas.toDataURL().split(',')[1],
                 'slide_category': 'document',
                 'binary_content': this.file.data
             });
         } else if (values['slide_category'] === 'article') {
-            _.extend(values, {
+            Object.assign(values, {
                 'image_1920': this.file.type === 'image/svg+xml' ? await this._svgToPng() : this.file.data,
             });
         } else if (/^image\/.*/.test(this.file.type)) {
-            _.extend(values, {
+            Object.assign(values, {
                 'slide_category': 'infographic',
                 'binary_content': this.file.type === 'image/svg+xml' ? await this._svgToPNG() : this.file.data,
             });
@@ -243,7 +248,7 @@ var SlideUploadDialog = Dialog.extend({
         var self = this;
         // tags
         var tagValues = [];
-        _.each(this.$('#tag_ids').select2('data'), function (val) {
+        this.$('#tag_ids').select2('data').forEach((val) => {
             if (val.create) {
                 tagValues.push([0, 0, {'name': val.text}]);
             } else {
@@ -305,16 +310,17 @@ var SlideUploadDialog = Dialog.extend({
                 return fmt(data.text);
             },
             createSearchChoice: function (term, data) {
-                var addedTags = $(this.opts.element).select2('data');
-                if (_.filter(_.union(addedTags, data), function (tag) {
+                var addedTags = $(this.opts.element).select2('data') || [];
+                addedTags = Array.isArray(addedTags) ? addedTags : [addedTags];
+                if (addedTags.concat(data || []).filter(tag => {
                     return tag.text.toLowerCase().localeCompare(term.toLowerCase()) === 0;
                 }).length === 0) {
                     if (this.opts.can_create) {
                         return {
-                            id: _.uniqueId('tag_'),
+                            id: uniqueId("tag_"),
                             create: true,
                             tag: term,
-                            text: _.str.sprintf(_t("Create new %s '%s'"), tag, term),
+                            text: _t("Create new %s '%s'", tag, term),
                         };
                     } else {
                         return undefined;
@@ -324,7 +330,7 @@ var SlideUploadDialog = Dialog.extend({
             fill_data: function (query, data) {
                 var self = this,
                     tags = {results: []};
-                _.each(data, function (obj) {
+                data.forEach((obj) => {
                     if (self.matcher(query.term, obj[nameKey])) {
                         tags.results.push({id: obj.id, text: obj[nameKey]});
                     }
@@ -483,7 +489,7 @@ var SlideUploadDialog = Dialog.extend({
      */
     _setModalLoading: function (loading) {
         if (loading) {
-            this.$el.closest('.modal-content').append(QWeb.render('website.slide.upload.modal.loading'));
+            this.$el.closest('.modal-content').append(renderToElement('website.slide.upload.modal.loading'));
         } else {
             this.$el.closest('.modal-content').find('.o_wslides_slide_upload_loading').remove();
         }
@@ -508,7 +514,7 @@ var SlideUploadDialog = Dialog.extend({
             this.$modal.find('.modal-dialog').addClass('modal-lg');
         }
         this.$('.o_w_slide_upload_modal_container').empty();
-        this.$('.o_w_slide_upload_modal_container').append(QWeb.render(tmpl, {widget: this}));
+        this.$('.o_w_slide_upload_modal_container').append(renderToElement(tmpl, {widget: this}));
 
         this._resetModalButton();
 
@@ -553,7 +559,6 @@ var SlideUploadDialog = Dialog.extend({
 
         var $input = $(ev.currentTarget);
         var preventOnchange = $input.data('preventOnchange');
-        var $preview = self.$('#slide-image');
 
         var file = ev.target.files[0];
         if (!file) {
@@ -578,27 +583,19 @@ var SlideUploadDialog = Dialog.extend({
             return;
         }
 
-        utils.getDataURLFromFile(file).then(function (buffer) {
-            if (isImage) {
-                $preview.attr('src', buffer);
-            }
-            buffer = buffer.split(',')[1];
-            self.file.data = buffer;
-            self._showPreviewColumn();
-        });
-
-        if (file.type === 'application/pdf') {
-            var ArrayReader = new FileReader();
+        const preview = document.getElementById("slide-image");
+        if (file.type !== 'application/pdf') {
+            getDataURLFromFile(file).then(dataURL => {
+                if (isImage) {
+                    preview.src = dataURL;
+                }
+                this.file.data = dataURL.split(',', 2)[1];
+                this._showPreviewColumn();
+            });
+        } else {
             this.set('can_submit_form', false);
-            // file read as ArrayBuffer for pdfjsLib get_Document API
-            ArrayReader.readAsArrayBuffer(file);
-            ArrayReader.onload = function (evt) {
-                var buffer = evt.target.result;
-                var passwordNeeded = function () {
-                    self._alertDisplay(_t("You can not upload password protected file."));
-                    self._fileReset();
-                    self.set('can_submit_form', true);
-                };
+            getDataURLFromFile(file).then(async dataURL => {
+                this.file.data = dataURL.split(',', 2)[1];
                 /**
                  * The following line fixes pdfjsLib 'Util' global variable.
                  * This is (most likely) related to #32181 which lazy loads most assets.
@@ -617,31 +614,35 @@ var SlideUploadDialog = Dialog.extend({
                  * cause much harm.
                  */
                 window.Util = window.pdfjsLib.Util;
-                window.pdfjsLib.getDocument(new Uint8Array(buffer), null, passwordNeeded).then(function getPdf(pdf) {
-                    self._formSetFieldValue('duration', (pdf._pdfInfo.numPages || 0) * 5);
-                    pdf.getPage(1).then(function getFirstPage(page) {
-                        var scale = 1;
-                        var viewport = page.getViewport(scale);
-                        var canvas = document.getElementById('data_canvas');
-                        var context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        // Render PDF page into canvas context
-                        page.render({
-                            canvasContext: context,
-                            viewport: viewport
-                        }).then(function () {
-                            var imageData = self.$('#data_canvas')[0].toDataURL();
-                            $preview.attr('src', imageData);
-                            if (loaded) {
-                                self.set('can_submit_form', true);
-                            }
-                            loaded = true;
-                            self._showPreviewColumn();
-                        });
-                    });
-                });
-            };
+                // pdf is stored in file.data in base64 and converted in binary (atob) to generate the preview
+                const pdfTask = window.pdfjsLib.getDocument({ data: atob(this.file.data) });
+                pdfTask.onPassword = () => {
+                    this._alertDisplay(_t("You can not upload password protected file."));
+                    this._fileReset();
+                    this.set('can_submit_form', true);
+                    // fixme: throw?
+                };
+                const pdf = await pdfTask.promise;
+
+                self._formSetFieldValue('duration', (pdf.numPages || 0) * 5);
+                const page = await pdf.getPage(1);
+                var viewport = page.getViewport({scale: 1});
+                var canvas = document.getElementById('data_canvas');
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                // Render PDF page into canvas context
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+                preview.src = canvas.toDataURL();
+                if (loaded) {
+                    self.set('can_submit_form', true);
+                }
+                loaded = true;
+                self._showPreviewColumn();
+            });
         }
 
         if (!preventOnchange) {
@@ -668,30 +669,29 @@ var SlideUploadDialog = Dialog.extend({
             this.set('state', '_import');
             if (this.modulesToInstallStatus.installing) {
                 this.$('#o_wslides_install_module_text')
-                    .text(_.str.sprintf(_t('Already installing "%s".'), this.modulesToInstallStatus.name));
+                    .text(_t('Already installing "%s".', this.modulesToInstallStatus.name));
             } else if (this.modulesToInstallStatus.failed) {
                 this.$('#o_wslides_install_module_text')
-                    .text(_.str.sprintf(_t('Failed to install "%s".'), this.modulesToInstallStatus.name));
+                    .text(_t('Failed to install "%s".', this.modulesToInstallStatus.name));
             }
         } else {
-            this.modulesToInstallStatus = _.extend({}, _.find(this.modulesToInstall, function (item) { return item.id === moduleId; }));
+            this.modulesToInstallStatus = Object.assign({}, this.modulesToInstall.find( function (item) { return item.id === moduleId; }));
             this.set('state', '_import');
             this.$('#o_wslides_install_module_text')
-                .text(_.str.sprintf(_t('Do you want to install the "%s" app?'), this.modulesToInstallStatus.name));
+                .text(_t('Do you want to install the "%s" app?', this.modulesToInstallStatus.name));
         }
     },
 
     _onClickInstallModuleConfirm: function () {
         var self = this;
         var $el = this.$('#o_wslides_install_module_text');
-        $el.text(_.str.sprintf(_t('Installing "%s".'), this.modulesToInstallStatus.name));
+        $el.text(_t('Installing "%s".', this.modulesToInstallStatus.name));
         this.modulesToInstallStatus.installing = true;
         this._resetModalButton();
-        this._rpc({
-            model: 'ir.module.module',
-            method: 'button_immediate_install',
-            args: [[this.modulesToInstallStatus.id]],
-        }).then(function () {
+        this.orm.call("ir.module.module", "button_immediate_install", [
+            [this.modulesToInstallStatus.id],
+        ]).then(
+            function () {
             let redirectUrl = window.location.origin + window.location.pathname + '?enable_slide_upload';
             if (self.modulesToInstallStatus.default_slide_category) {
                 redirectUrl += '=';
@@ -699,7 +699,7 @@ var SlideUploadDialog = Dialog.extend({
             }
             window.location.href = redirectUrl;
         }, function () {
-            $el.text(_.str.sprintf(_t('Failed to install "%s".'), self.modulesToInstallStatus.name));
+            $el.text(_t('Failed to install "%s".', self.modulesToInstallStatus.name));
             self.modulesToInstallStatus.installing = false;
             self.modulesToInstallStatus.failed = true;
             self._resetModalButton();
@@ -729,10 +729,7 @@ var SlideUploadDialog = Dialog.extend({
         var oldType = this.get('state');
         this.set('state', '_upload');
 
-        const data = await this._rpc({
-            route: '/slides/add_slide',
-            params: values,
-        });
+        const data = await this.rpc('/slides/add_slide', values);
         this._onFormSubmitDone(data, oldType);
     },
 

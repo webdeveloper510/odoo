@@ -7,6 +7,7 @@ import pytz
 import markupsafe
 
 from collections import defaultdict
+from markupsafe import Markup
 
 from odoo import models, fields, api, _
 from odoo.tools import html_escape, float_is_zero, float_compare
@@ -26,7 +27,8 @@ class AccountEdiFormat(models.Model):
     def _is_enabled_by_default_on_journal(self, journal):
         self.ensure_one()
         if self.code == "in_einvoice_1_03":
-            return journal.company_id.country_id.code == 'IN'
+            # only applicable for taxpayers turnover higher than Rs.5 crore so default on journal is False
+            return False
         return super()._is_enabled_by_default_on_journal(journal)
 
     def _get_l10n_in_base_tags(self):
@@ -90,6 +92,9 @@ class AccountEdiFormat(models.Model):
         result = "".join(matches)
         return result
 
+    def _l10n_in_is_global_discount(self, line):
+        return not line.tax_ids and line.price_subtotal < 0 or False
+
     def _check_move_configuration(self, move):
         if self.code != "in_einvoice_1_03":
             return super()._check_move_configuration(move)
@@ -99,7 +104,7 @@ class AccountEdiFormat(models.Model):
         if not re.match("^.{1,16}$", move.name):
             error_message.append(_("Invoice number should not be more than 16 characters"))
         all_base_tags = self._get_l10n_in_gst_tags() + self._get_l10n_in_non_taxable_tags()
-        for line in move.invoice_line_ids.filtered(lambda line: line.display_type not in ('line_note', 'line_section', 'rounding')):
+        for line in move.invoice_line_ids.filtered(lambda line: line.display_type not in ('line_note', 'line_section', 'rounding') and not self._l10n_in_is_global_discount(line)):
             if line.price_subtotal < 0:
                 # Line having a negative amount is not allowed.
                 if not move._l10n_in_edi_is_managing_invoice_negative_lines_allowed():
@@ -158,12 +163,12 @@ class AccountEdiFormat(models.Model):
                 if not response.get("error"):
                     error = []
                     odoobot = self.env.ref("base.partner_root")
-                    invoice.message_post(author_id=odoobot.id, body=_(
+                    invoice.message_post(author_id=odoobot.id, body=Markup(_(
                         "Somehow this invoice had been submited to government before." \
                         "<br/>Normally, this should not happen too often" \
                         "<br/>Just verify value of invoice by uploade json to government website " \
                         "<a href='https://einvoice1.gst.gov.in/Others/VSignedInvoice'>here<a>."
-                    ))
+                    )))
             if "no-credit" in error_codes:
                 return {invoice: {
                     "success": False,
@@ -214,12 +219,12 @@ class AccountEdiFormat(models.Model):
                 response = {}
                 error = []
                 odoobot = self.env.ref("base.partner_root")
-                invoice.message_post(author_id=odoobot.id, body=_(
+                invoice.message_post(author_id=odoobot.id, body=Markup(_(
                     "Somehow this invoice had been cancelled to government before." \
                     "<br/>Normally, this should not happen too often" \
                     "<br/>Just verify by logging into government website " \
                     "<a href='https://einvoice1.gst.gov.in'>here<a>."
-                ))
+                )))
             if "no-credit" in error_codes:
                 return {invoice: {
                     "success": False,
@@ -489,9 +494,12 @@ class AccountEdiFormat(models.Model):
         is_intra_state = invoice.l10n_in_state_id == invoice.company_id.state_id
         is_overseas = invoice.l10n_in_gst_treatment == "overseas"
         lines = invoice.invoice_line_ids.filtered(lambda line: line.display_type not in ('line_note', 'line_section', 'rounding'))
+        global_discount_line = lines.filtered(self._l10n_in_is_global_discount)
+        lines -= global_discount_line
         tax_details_per_record = tax_details.get("tax_details_per_record")
         sign = invoice.is_inbound() and -1 or 1
         rounding_amount = sum(line.balance for line in invoice.line_ids if line.display_type == 'rounding') * sign
+        global_discount_amount = sum(line.balance for line in global_discount_line) * sign * -1
         json_payload = {
             "Version": "1.1",
             "TranDtls": {
@@ -511,7 +519,7 @@ class AccountEdiFormat(models.Model):
                 for index, line in enumerate(lines, start=1)
             ],
             "ValDtls": {
-                "AssVal": self._l10n_in_round_value(tax_details.get("base_amount")),
+                "AssVal": self._l10n_in_round_value(tax_details.get("base_amount") + global_discount_amount),
                 "CgstVal": self._l10n_in_round_value(tax_details_by_code.get("cgst_amount", 0.00)),
                 "SgstVal": self._l10n_in_round_value(tax_details_by_code.get("sgst_amount", 0.00)),
                 "IgstVal": self._l10n_in_round_value(tax_details_by_code.get("igst_amount", 0.00)),
@@ -523,6 +531,7 @@ class AccountEdiFormat(models.Model):
                     tax_details_by_code.get("state_cess_amount", 0.00)
                     + tax_details_by_code.get("state_cess_non_advol_amount", 0.00)),
                 ),
+                "Discount": self._l10n_in_round_value(global_discount_amount),
                 "RndOffAmt": self._l10n_in_round_value(
                     rounding_amount),
                 "TotInvVal": self._l10n_in_round_value(
@@ -589,6 +598,9 @@ class AccountEdiFormat(models.Model):
                     for gst in ["cgst", "sgst", "igst"]:
                         if any(tag in tags for tag in self.env.ref("l10n_in.tax_tag_%s"%(gst))):
                             line_code = gst
+                        # need to separate rc tax value so it's not pass to other values
+                        if any(tag in tags for tag in self.env.ref("l10n_in.tax_tag_%s_rc" % (gst))):
+                            line_code = gst + '_rc'
             return {
                 "tax": tax,
                 "base_product_id": invl.product_id,

@@ -1,9 +1,8 @@
-odoo.define('website_blog.website_blog', function (require) {
-'use strict';
-var core = require('web.core');
+/** @odoo-module **/
 
-const dom = require('web.dom');
-const publicWidget = require('web.public.widget');
+import { _t } from "@web/core/l10n/translation";
+import dom from "@web/legacy/js/core/dom";
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.websiteBlog = publicWidget.Widget.extend({
     selector: '.website_blog',
@@ -42,9 +41,9 @@ publicWidget.registry.websiteBlog = publicWidget.Widget.extend({
         placeholder.style.minHeight = '100vh';
         this.$('#o_wblog_next_container').append(placeholder);
 
-        // Use _.defer to calculate the 'offset()'' only after that size classes
+        // Use setTimeout() to calculate the 'offset()'' only after that size classes
         // have been applyed and that $el has been resized.
-        _.defer(function () {
+        setTimeout(() => {
             self._forumScrollAction($el, 300, function () {
                 window.location.href = nexInfo.url;
             });
@@ -74,8 +73,11 @@ publicWidget.registry.websiteBlog = publicWidget.Widget.extend({
         var blogPostTitle = $('#o_wblog_post_name').html() || '';
         var articleURL = window.location.href;
         if ($element.hasClass('o_twitter')) {
-            var twitterText = core._t("Amazing blog article: %s! Check it live: %s");
-            var tweetText = _.string.sprintf(twitterText, blogPostTitle, articleURL);
+            var tweetText = _t(
+                "Amazing blog article: %s! Check it live: %s",
+                blogPostTitle,
+                articleURL
+            );
             url = 'https://twitter.com/intent/tweet?tw_p=tweetbutton&text=' + encodeURIComponent(tweetText);
         } else if ($element.hasClass('o_facebook')) {
             url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(articleURL);
@@ -98,5 +100,4 @@ publicWidget.registry.websiteBlog = publicWidget.Widget.extend({
     _forumScrollAction: function ($el, duration, callback) {
         dom.scrollTo($el[0], {duration: duration}).then(() => callback());
     },
-});
 });

@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from werkzeug.urls import url_encode, url_parse
+
 from odoo import http, _
-from odoo.addons.website_sale.controllers import main
 from odoo.exceptions import UserError
 from odoo.http import request
 
-from werkzeug.urls import url_encode, url_parse
+from odoo.addons.website_sale.controllers import main
 
 
 class WebsiteSale(main.WebsiteSale):
@@ -36,24 +38,13 @@ class WebsiteSale(main.WebsiteSale):
             order._auto_apply_rewards()
         return super(WebsiteSale, self).shop_payment(**post)
 
-    @http.route(['/shop/cart'], type='http', auth="public", website=True)
+    @http.route()
     def cart(self, **post):
         order = request.website.sale_get_order()
         if order:
             order._update_programs_and_rewards()
             order._auto_apply_rewards()
-
-        res = super().cart(**post)
-
-        # TODO in master: remove and pass delete=True to the methods fetching the error/success
-        # messages in _get_website_sale_extra_values
-        # clean session messages after displaying them
-        if request.session.get('error_promo_code'):
-            request.session.pop('error_promo_code')
-        if request.session.get('successful_code'):
-            request.session.pop('successful_code')
-
-        return res
+        return super(WebsiteSale, self).cart(**post)
 
     @http.route(['/coupon/<string:code>'], type='http', auth='public', website=True, sitemap=False)
     def activate_coupon(self, code, r='/shop', **kw):
@@ -77,22 +68,35 @@ class WebsiteSale(main.WebsiteSale):
         redirect = url_parts.replace(query=url_encode(url_query))
         return request.redirect(redirect.to_url())
 
-    @http.route(['/shop/claimreward'], type='http', auth='public', website=True, sitemap=False)
-    def claim_reward(self, reward, **post):
-        order = request.website.sale_get_order()
-        coupon_id = False
-        try:
-            reward_id = request.env['loyalty.reward'].sudo().browse(int(reward))
-        except ValueError:
-            reward_id = request.env['loyalty.reward'].sudo()
-        claimable_rewards = order._get_claimable_rewards()
-        for coupon, rewards in claimable_rewards.items():
-            if reward_id in rewards:
-                coupon_id = coupon
+    @http.route('/shop/claimreward', type='http', auth='public', website=True, sitemap=False)
+    def claim_reward(self, reward_id, code=None, **post):
+        order_sudo = request.website.sale_get_order()
         redirect = post.get('r', '/shop/cart')
-        if not coupon_id or not reward_id.exists() or reward_id.multi_product:
+        if not order_sudo:
             return request.redirect(redirect)
-        self._apply_reward(order, reward_id, coupon_id)
+
+        try:
+            reward_id = int(reward_id)
+        except ValueError:
+            reward_id = None
+
+        reward_sudo = request.env['loyalty.reward'].sudo().browse(reward_id).exists()
+        if not reward_sudo or reward_sudo.multi_product:
+            return request.redirect(redirect)
+
+        program_sudo = reward_sudo.program_id
+        claimable_rewards = order_sudo._get_claimable_and_showable_rewards()
+        coupon = request.env['loyalty.card']
+        for coupon_, rewards in claimable_rewards.items():
+            if reward_sudo in rewards:
+                coupon = coupon_
+                if code == coupon.code and (
+                    (program_sudo.trigger == 'with_code' and program_sudo.program_type != 'promo_code')
+                    or (program_sudo.trigger == 'auto' and program_sudo.applies_on == 'future')
+                ):
+                    return self.pricelist(code, **post)
+        if coupon:
+            self._apply_reward(order_sudo, reward_sudo, coupon)
         return request.redirect(redirect)
 
     def _apply_reward(self, order, reward, coupon):

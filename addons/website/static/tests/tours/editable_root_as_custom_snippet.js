@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
-import wTourUtils from 'website.tour_utils';
+import wTourUtils from '@website/js/tours/tour_utils';
 
-tour.register("editable_root_as_custom_snippet", {
+wTourUtils.registerWebsitePreviewTour("editable_root_as_custom_snippet", {
     test: true,
-}, [
+    edition: true,
+    url: '/custom-page',
+}, () => [
     wTourUtils.clickOnSnippet('.s_title.custom[data-oe-model][data-oe-id][data-oe-field][data-oe-xpath]'),
     wTourUtils.changeOption('SnippetSave', 'we-button'),
     {
@@ -15,7 +16,7 @@ tour.register("editable_root_as_custom_snippet", {
     {
         content: "Wait for the custom snippet to appear in the panel",
         trigger: '.oe_snippet[name="Custom Title"]',
-        run: () => null,
+        isCheck: true,
     },
     ...wTourUtils.clickOnSave(),
     {
@@ -25,13 +26,13 @@ tour.register("editable_root_as_custom_snippet", {
     {
         content: "Wait to land on homepage",
         trigger: 'iframe a[href="/"].nav-link.active',
-        run: () => null,
+        isCheck: true,
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     wTourUtils.dragNDrop({id: 's_title', name: 'Custom Title'}),
     {
         content: "Check that the custom snippet does not have branding",
         trigger: 'iframe #wrap .s_title.custom:not([data-oe-model]):not([data-oe-id]):not([data-oe-field]):not([data-oe-xpath])',
-        run: () => null,
+        isCheck: true,
     },
 ]);

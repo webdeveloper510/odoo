@@ -2,6 +2,7 @@
 
 from . import sequence_mixin
 from . import partner
+from . import ir_http
 from . import res_partner_bank
 from . import account_account_tag
 from . import account_account
@@ -32,8 +33,12 @@ from . import account_incoterms
 from . import decimal_precision
 from . import digest
 from . import res_users
-from . import ir_actions_report
 from . import ir_attachment
+from . import ir_actions_report
+from . import ir_module
 from . import res_currency
-from . import mail_thread
 from . import account_report
+from . import onboarding_onboarding
+from . import onboarding_onboarding_step
+from . import template_generic_coa
+from . import uom_uom

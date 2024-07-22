@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-  <t t-name="web.NavBar" owl="1">
+  <t t-name="web.NavBar">
     <header class="o_navbar" t-ref="root">
       <nav
         class="o_main_navbar"
-        data-command-category="navbar"
+        data-command-category="disabled"
       >
         <!-- Apps Menu -->
         <t t-call="web.NavBar.AppsMenu">
@@ -17,7 +17,7 @@
           t-if="currentApp"
           href="getMenuItemHref(currentApp)"
           t-esc="currentApp.name"
-          class="'o_menu_brand d-none d-md-block'"
+          class="'o_menu_brand d-none d-md-flex'"
           dataset="{ menuXmlid: currentApp.xmlid, section: currentApp.id }"
           onSelected="() => this.onNavBarDropdownItemSelection(currentApp)"
         />
@@ -41,7 +41,7 @@
     </header>
   </t>
 
-  <t t-name="web.NavBar.AppsMenu" owl="1">
+  <t t-name="web.NavBar.AppsMenu">
     <Dropdown hotkey="'h'" title="'Home Menu'" class="'o_navbar_apps_menu'">
       <t t-set-slot="toggler">
         <i class="oi oi-apps" />
@@ -59,8 +59,8 @@
     </Dropdown>
   </t>
 
-  <t t-name="web.NavBar.SectionsMenu" owl="1">
-    <div class="o_menu_sections d-none d-md-flex flex-grow-1 flex-shrink-1" t-ref="appSubMenus" role="menu">
+  <t t-name="web.NavBar.SectionsMenu">
+    <div class="o_menu_sections d-none d-md-flex flex-grow-1 flex-shrink-1 w-0" t-ref="appSubMenus" role="menu">
 
       <t t-foreach="sections" t-as="section" t-key="section.id">
         <t
@@ -77,7 +77,6 @@
 
         <t t-if="!section.childrenTree.length">
           <DropdownItem
-            title="section.name"
             class="'o_nav_entry'"
             href="getMenuItemHref(section)"
             hotkey="hotkey"
@@ -89,7 +88,6 @@
         <t t-else="">
           <MenuDropdown
             hotkey="hotkey"
-            title="section.name"
             xmlid="section.xmlid"
           >
             <t t-set-slot="toggler">
@@ -113,13 +111,13 @@
     </div>
   </t>
 
-  <t t-name="web.NavBar.DropdownItem" t-inherit="web.DropdownItem" t-inherit-mode="primary" owl="1">
+  <t t-name="web.NavBar.DropdownItem" t-inherit="web.DropdownItem" t-inherit-mode="primary">
     <xpath expr="//t[@t-tag]" position="attributes">
       <attribute name="t-att-style">props.style</attribute>
     </xpath>
   </t>
 
-  <t t-name="web.NavBar.SectionsMenu.Dropdown.MenuSlot" owl="1">
+  <t t-name="web.NavBar.SectionsMenu.Dropdown.MenuSlot">
     <t t-set="style" t-value="`padding-left: ${decalage}px;`" />
     <t t-foreach="items" t-as="item" t-key="item.id">
       <DropdownItem
@@ -145,7 +143,7 @@
     </t>
   </t>
 
-  <t t-name="web.NavBar.SectionsMenu.MoreDropdown" owl="1">
+  <t t-name="web.NavBar.SectionsMenu.MoreDropdown">
     <Dropdown class="'o_menu_sections_more'" title="'More Menu'" hotkey="hotkey">
       <t t-set-slot="toggler">
         <i class="fa fa-plus"/>

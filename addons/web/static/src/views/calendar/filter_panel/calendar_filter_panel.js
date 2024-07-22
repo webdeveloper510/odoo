@@ -1,17 +1,12 @@
 /** @odoo-module **/
 
-import { usePopover } from "@web/core/popover/popover_hook";
 import { _t } from "@web/core/l10n/translation";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Transition } from "@web/core/transition";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
-import { sprintf } from "@web/core/utils/strings";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { getColor } from "../colors";
 import { Component, useState } from "@odoo/owl";
-
-class CalendarFilterTooltip extends Component {}
-CalendarFilterTooltip.template = "web.CalendarFilterPanel.tooltip";
 
 let nextId = 1;
 
@@ -23,8 +18,6 @@ export class CalendarFilterPanel extends Component {
         });
         this.addDialog = useOwnedDialogs();
         this.orm = useService("orm");
-        this.popover = usePopover();
-        this.removePopover = null;
     }
 
     getFilterColor(filter) {
@@ -35,7 +28,7 @@ export class CalendarFilterPanel extends Component {
         return {
             autoSelect: true,
             resetOnSelect: true,
-            placeholder: `+ ${_t("Add")} ${section.label}`,
+            placeholder: _t("+ Add %s", section.label),
             sources: [
                 {
                     placeholder: _t("Loading..."),
@@ -99,11 +92,11 @@ export class CalendarFilterPanel extends Component {
                 context: {},
             });
             dynamicFilters.push({
-                description: sprintf(_t("Quick search: %s"), request),
+                description: _t("Quick search: %s", request),
                 domain: [["id", "in", nameGets.map((nameGet) => nameGet[0])]],
             });
         }
-        const title = sprintf(_t("Search: %s"), section.label);
+        const title = _t("Search: %s", section.label);
         this.addDialog(SelectCreateDialog, {
             title,
             noCreate: true,
@@ -139,10 +132,15 @@ export class CalendarFilterPanel extends Component {
             if (a.type === b.type) {
                 const va = a.value ? -1 : 0;
                 const vb = b.value ? -1 : 0;
+                //Condition to put unvaluable item (eg: Open Shifts) at the end of the sorted list.
                 if (a.type === "dynamic" && va !== vb) {
                     return va - vb;
                 }
-                return b.label.localeCompare(a.label);
+                return a.label.localeCompare(b.label, undefined, {
+                    numeric: true,
+                    sensitivity: "base",
+                    ignorePunctuation: true,
+                });
             } else {
                 return this.getFilterTypePriority(a.type) - this.getFilterTypePriority(b.type);
             }
@@ -159,13 +157,6 @@ export class CalendarFilterPanel extends Component {
         return this.state.collapsed[section.fieldName] || false;
     }
 
-    closeTooltip() {
-        if (this.removePopover) {
-            this.removePopover();
-            this.removePopover = null;
-        }
-    }
-
     onFilterInputChange(section, filter, ev) {
         this.props.model.updateFilters(section.fieldName, {
             [filter.value]: ev.target.checked,
@@ -180,28 +171,6 @@ export class CalendarFilterPanel extends Component {
             }
         }
         this.props.model.updateFilters(section.fieldName, filters);
-    }
-
-    onFilterMouseEnter(section, filter, ev) {
-        this.closeTooltip();
-        if (!section.hasAvatar || !filter.hasAvatar) {
-            return;
-        }
-
-        this.removePopover = this.popover.add(
-            ev.currentTarget,
-            CalendarFilterTooltip,
-            { section, filter },
-            {
-                closeOnClickAway: false,
-                popoverClass: "o-calendar-filter--tooltip",
-                position: "top",
-            }
-        );
-    }
-
-    onFilterMouseLeave() {
-        this.closeTooltip();
     }
 
     onFilterRemoveBtnClick(section, filter) {

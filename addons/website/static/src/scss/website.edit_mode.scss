@@ -1,8 +1,10 @@
 $-editor-messages-margin-x: 2%;
 %o-editor-messages {
-    border: 2px dashed #999999;
+    background: $o-we-dropzone-bg-color;
     text-align: center;
-    color: white;
+    color: #fff;
+    outline: $o-we-dropzone-border-width dashed $o-we-dropzone-accent-color;
+    outline-offset: -$o-we-dropzone-border-width;
 
     &:before {
         content: attr(data-editor-message);
@@ -10,7 +12,7 @@ $-editor-messages-margin-x: 2%;
         font-size: 20px;
     }
     // Show the default editor message only for "empty" elements
-    &:not(:empty), &:not(:only-child) {
+    &:not(:empty) {
         &[data-editor-message-default]:before {
             content: none;
         }
@@ -18,6 +20,11 @@ $-editor-messages-margin-x: 2%;
     &:after {
         content: attr(data-editor-sub-message);
         display: block;
+    }
+}
+%o-disable-iframes {
+    iframe {
+        pointer-events: none;
     }
 }
 .o_we_snippet_area_animation {
@@ -33,7 +40,8 @@ $-editor-messages-margin-x: 2%;
     &:not(:empty), &[data-oe-type] {
         &:not([data-oe-model="ir.ui.view"]):not([data-oe-type="html"]):not(.o_editable_no_shadow):not([data-oe-type="image"]):hover,
         &.o_editable_date_field_linked {
-            box-shadow: $o-brand-odoo 0 0 5px 2px inset;
+            outline: $o-we-handle-border-width solid $o-we-handles-accent-color;
+            outline-offset: $o-we-handle-border-width;
         }
         &[data-oe-type="image"]:not(.o_editable_no_shadow):hover {
             position: relative;
@@ -43,7 +51,8 @@ $-editor-messages-margin-x: 2%;
                 pointer-events: none;
                 @include o-position-absolute(0, 0, 0, 0);
                 z-index: 1;
-                box-shadow: $o-brand-odoo 0 0 5px 2px inset;
+                outline: $o-we-handle-border-width solid $o-we-handles-accent-color;
+                outline-offset: $o-we-handle-border-width;
             }
         }
     }
@@ -82,7 +91,6 @@ $-editor-messages-margin-x: 2%;
         > .oe_drop_zone.oe_insert:not(.oe_vertical) {
             @extend %o-editor-messages;
             height: auto;
-            text-shadow: -1px -1px 0 $o-brand-odoo, 1px -1px 0 $o-brand-odoo, -1px 1px 0 $o-brand-odoo, 1px 1px 0 $o-brand-odoo;
 
             // Empty editable element during drag & drop
             &:only-child {
@@ -91,8 +99,13 @@ $-editor-messages-margin-x: 2%;
                 padding: 12px 0px;
             }
 
-            &:not(:only-child)::before {
-                font-size: 16px;
+            &:not(:only-child) {
+                &::before {
+                    font-size: 16px;
+                }
+                &[data-editor-message-default]::before {
+                    content: none;
+                }
             }
         }
 
@@ -101,19 +114,21 @@ $-editor-messages-margin-x: 2%;
             @extend %o-editor-messages;
             padding: 112px 0px;
             margin: 20px $-editor-messages-margin-x;
-            color: #999999;
+            border-radius: $border-radius-lg;
         }
 
         // Exception 2: empty wrap during drag & drop (override of base case)
         &#wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):only-child {
             padding: 112px 0px;
-            color: #999999;
             text-shadow: none;
         }
 
         > p:empty:only-child {
             color: #aaa;
         }
+    }
+    &[data-oe-type=html].oe_empty:empty {
+        @extend %o-editor-messages;
     }
 }
 .editor_enable [data-oe-readonly]:hover {
@@ -195,12 +210,15 @@ table.editorbar-panel {
 
 // Facebook Page
 .editor_enable .o_facebook_page:not(.o_facebook_preview) {
-    iframe {
-        pointer-events: none;
-    }
+    @extend %o-disable-iframes;
     .o_facebook_alert .o_add_facebook_page {
         cursor: pointer;
     }
+}
+
+// Prevent Instagram block to open Instagram in edit mode.
+.editor_enable .s_instagram_page {
+    @extend %o-disable-iframes;
 }
 
 // s_countdown preview classes
@@ -254,13 +272,32 @@ body.editor_enable {
         }
     }
     .s_website_form {
-        [data-toggle="datetimepicker"], textarea:not(.o_translatable_attribute):not(.o_translatable_text) {
+        textarea:not(.o_translatable_attribute):not(.o_translatable_text) {
             pointer-events: none;
         }
+    }
+
+    // Some dropdown links are not deactivated in edit, so we prevent clicks.
+    #o_logout,
+    .js_change_lang {
+        pointer-events: none;
+    }
+
+    // Disable "input group date" calendar icon
+    .input-group.date .input-group-text:has(.fa-calendar) {
+        pointer-events: none;
     }
 }
 .o_homepage_editor_welcome_message {
     padding-top: 128px;
     padding-bottom: 128px;
     font-family: $o-font-family-sans-serif;
+}
+// offcanvas backdrop
+body.editor_enable {
+    // We prevent selection to avoid the powerbox hint from being added to the
+    // backdrop by clicking on it in edit mode.
+    .offcanvas-backdrop {
+        user-select: none;
+    }
 }

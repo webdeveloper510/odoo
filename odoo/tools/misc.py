@@ -47,6 +47,7 @@ import odoo.addons
 # get_encodings, ustr and exception_to_unicode were originally from tools.misc.
 # There are moved to loglevels until we refactor tools.
 from odoo.loglevels import get_encodings, ustr, exception_to_unicode     # noqa
+from odoo.tools.float_utils import float_round
 from . import pycompat
 from .cache import *
 from .config import config
@@ -430,10 +431,9 @@ def scan_languages():
     :returns: a list of (lang_code, lang_name) pairs
     :rtype: [(str, unicode)]
     """
-    csvpath = odoo.modules.module.get_resource_path('base', 'data', 'res.lang.csv')
     try:
         # read (code, name) from languages in base/data/res.lang.csv
-        with open(csvpath, 'rb') as csvfile:
+        with file_open('base/data/res.lang.csv', 'rb') as csvfile:
             reader = pycompat.csv_reader(csvfile, delimiter=',', quotechar='"')
             fields = next(reader)
             code_index = fields.index("code")
@@ -443,7 +443,7 @@ def scan_languages():
                 for row in reader
             ]
     except Exception:
-        _logger.error("Could not read %s", csvpath)
+        _logger.error("Could not read res.lang.csv")
         result = []
 
     return sorted(result or [('en_US', u'English')], key=itemgetter(1))
@@ -960,16 +960,29 @@ def dumpstacks(sig=None, frame=None, thread_idents=None):
     threads_info = {th.ident: {'repr': repr(th),
                                'uid': getattr(th, 'uid', 'n/a'),
                                'dbname': getattr(th, 'dbname', 'n/a'),
-                               'url': getattr(th, 'url', 'n/a')}
+                               'url': getattr(th, 'url', 'n/a'),
+                               'query_count': getattr(th, 'query_count', 'n/a'),
+                               'query_time': getattr(th, 'query_time', None),
+                               'perf_t0': getattr(th, 'perf_t0', None)}
                     for th in threading.enumerate()}
     for threadId, stack in sys._current_frames().items():
         if not thread_idents or threadId in thread_idents:
             thread_info = threads_info.get(threadId, {})
-            code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s)" %
+            query_time = thread_info.get('query_time')
+            perf_t0 = thread_info.get('perf_t0')
+            remaining_time = None
+            if query_time and perf_t0:
+                remaining_time = '%.3f' % (time.time() - perf_t0 - query_time)
+                query_time = '%.3f' % query_time
+            # qc:query_count qt:query_time pt:python_time (aka remaining time)
+            code.append("\n# Thread: %s (db:%s) (uid:%s) (url:%s) (qc:%s qt:%s pt:%s)" %
                         (thread_info.get('repr', threadId),
                          thread_info.get('dbname', 'n/a'),
                          thread_info.get('uid', 'n/a'),
-                         thread_info.get('url', 'n/a')))
+                         thread_info.get('url', 'n/a'),
+                         thread_info.get('query_count', 'n/a'),
+                         query_time or 'n/a',
+                         remaining_time or 'n/a'))
             for line in extract_stack(stack):
                 code.append(line)
 
@@ -1363,36 +1376,66 @@ def babel_locale_parse(lang_code):
         except:
             return babel.Locale.parse("en_US")
 
-def formatLang(env, value, digits=None, grouping=True, monetary=False, dp=False, currency_obj=False):
+def formatLang(env, value, digits=2, grouping=True, monetary=False, dp=None, currency_obj=None, rounding_method='HALF-EVEN', rounding_unit='decimals'):
     """
-        Assuming 'Account' decimal.precision=3:
-            formatLang(value) -> digits=2 (default)
-            formatLang(value, digits=4) -> digits=4
-            formatLang(value, dp='Account') -> digits=3
-            formatLang(value, digits=5, dp='Account') -> digits=5
+    This function will format a number `value` to the appropriate format of the language used.
+
+    :param Object env: The environment.
+    :param float value: The value to be formatted.
+    :param int digits: The number of decimals digits.
+    :param bool grouping: Usage of language grouping or not.
+    :param bool monetary: Usage of thousands separator or not.
+        .. deprecated:: 13.0
+    :param str dp: Name of the decimals precision to be used. This will override ``digits``
+                   and ``currency_obj`` precision.
+    :param Object currency_obj: Currency to be used. This will override ``digits`` precision.
+    :param str rounding_method: The rounding method to be used:
+        **'HALF-UP'** will round to the closest number with ties going away from zero,
+        **'HALF-DOWN'** will round to the closest number with ties going towards zero,
+        **'HALF_EVEN'** will round to the closest number with ties going to the closest
+        even number,
+        **'UP'** will always round away from 0,
+        **'DOWN'** will always round towards 0.
+    :param str rounding_unit: The rounding unit to be used:
+        **decimals** will round to decimals with ``digits`` or ``dp`` precision,
+        **units** will round to units without any decimals,
+        **thousands** will round to thousands without any decimals,
+        **lakhs** will round to lakhs without any decimals,
+        **millions** will round to millions without any decimals.
+
+    :returns: The value formatted.
+    :rtype: str
     """
-
-    if digits is None:
-        digits = DEFAULT_DIGITS = 2
-        if dp:
-            decimal_precision_obj = env['decimal.precision']
-            digits = decimal_precision_obj.precision_get(dp)
-        elif currency_obj:
-            digits = currency_obj.decimal_places
-
-    if isinstance(value, str) and not value:
+    # We don't want to return 0
+    if value == '':
         return ''
 
-    lang_obj = get_lang(env)
+    if rounding_unit == 'decimals':
+        if dp:
+            digits = env['decimal.precision'].precision_get(dp)
+        elif currency_obj:
+            digits = currency_obj.decimal_places
+    else:
+        digits = 0
 
-    res = lang_obj.format('%.' + str(digits) + 'f', value, grouping=grouping, monetary=monetary)
+    rounding_unit_mapping = {
+        'decimals': 1,
+        'thousands': 10**3,
+        'lakhs': 10**5,
+        'millions': 10**6,
+    }
+
+    value /= rounding_unit_mapping.get(rounding_unit, 1)
+
+    rounded_value = float_round(value, precision_digits=digits, rounding_method=rounding_method)
+    formatted_value = get_lang(env).format(f'%.{digits}f', rounded_value, grouping=grouping, monetary=monetary)
 
     if currency_obj and currency_obj.symbol:
-        if currency_obj.position == 'after':
-            res = '%s%s%s' % (res, NON_BREAKING_SPACE, currency_obj.symbol)
-        elif currency_obj and currency_obj.position == 'before':
-            res = '%s%s%s' % (currency_obj.symbol, NON_BREAKING_SPACE, res)
-    return res
+        arguments = (formatted_value, NON_BREAKING_SPACE, currency_obj.symbol)
+
+        return '%s%s%s' % (arguments if currency_obj.position == 'after' else arguments[::-1])
+
+    return formatted_value
 
 
 def format_date(env, value, lang_code=False, date_format=False):
@@ -1802,3 +1845,39 @@ def has_list_types(values, types):
         isinstance(values, (list, tuple)) and len(values) == len(types)
         and all(isinstance(item, type_) for item, type_ in zip(values, types))
     )
+
+def get_flag(country_code: str) -> str:
+    """Get the emoji representing the flag linked to the country code.
+
+    This emoji is composed of the two regional indicator emoji of the country code.
+    """
+    return "".join(chr(int(f"1f1{ord(c)+165:02x}", base=16)) for c in country_code)
+
+
+def format_frame(frame):
+    code = frame.f_code
+    return f'{code.co_name} {code.co_filename}:{frame.f_lineno}'
+
+
+def named_to_positional_printf(string: str, args: Mapping) -> tuple[str, tuple]:
+    """ Convert a named printf-style format string with its arguments to an
+    equivalent positional format string with its arguments. This implementation
+    does not support escaped ``%`` characters (``"%%"``).
+    """
+    if '%%' in string:
+        raise ValueError(f"Unsupported escaped '%' in format string {string!r}")
+    args = _PrintfArgs(args)
+    return string % args, tuple(args.values)
+
+
+class _PrintfArgs:
+    """ Helper object to turn a named printf-style format string into a positional one. """
+    __slots__ = ('mapping', 'values')
+
+    def __init__(self, mapping):
+        self.mapping = mapping
+        self.values = []
+
+    def __getitem__(self, key):
+        self.values.append(self.mapping[key])
+        return "%s"

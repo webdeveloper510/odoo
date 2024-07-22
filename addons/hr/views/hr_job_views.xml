@@ -11,9 +11,10 @@
                     <field name="company_id" invisible="1"/>
                     <sheet>
                         <div class="oe_button_box" name="button_box"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                         <div class="oe_title">
                             <label for="name"/>
-                            <h1><field name="name" placeholder="e.g. Sales Manager"/></h1>
+                            <h1><field name="name" options="{'line_breaks': False}" widget="text" placeholder="e.g. Sales Manager"/></h1>
                         </div>
                         <notebook>
                             <page string="Recruitment" name="recruitment_page">
@@ -57,9 +58,9 @@
                     <field name="no_of_employee" optional="hide"/>
                     <field name="expected_employees" optional="hide"/>
                     <field name="no_of_hired_employee" optional="hide"/>
-                    <field name="message_needaction" invisible="1"/>
+                    <field name="message_needaction" column_invisible="True"/>
                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
-                    <field name="company_id" invisible="1"/>
+                    <field name="company_id" column_invisible="True"/>
                 </tree>
             </field>
         </record>
@@ -79,7 +80,7 @@
                                     <span><field name="department_id"/>&amp;nbsp;</span>
                                 </div>
                                 <div t-if="!selection_mode">
-                                    <span>Vacancies : <field name="expected_employees"/></span>
+                                    <span>Vacancies: <field name="expected_employees"/></span>
                                 </div>
                             </div>
                         </t>
@@ -96,7 +97,7 @@
                     <field name="name" string="Job Position"/>
                     <field name="department_id" operator="child_of"/>
                     <separator/>
-                    <filter name="message_needaction" string="Unread Messages" domain="[('message_needaction', '=', True)]"/>
+                    <filter name="message_needaction" string="Unread Messages" domain="[('message_needaction', '=', True)]" groups="mail.group_mail_notification_type_inbox"/>
                     <separator/>
                     <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">

@@ -24,5 +24,28 @@ class AccountTax(models.Model):
                         'It is forbidden to modify a tax used in a POS order not posted. '
                         'You must close the POS sessions before modifying the tax.'
                     ))
-                lines_chunk.invalidate_cache(['tax_ids'], lines_chunk.ids)
+                lines_chunk.invalidate_recordset(['tax_ids'])
         return super(AccountTax, self).write(vals)
+
+    def _hook_compute_is_used(self, taxes_to_compute):
+        # OVERRIDE in order to fetch taxes used in pos
+
+        used_taxes = super()._hook_compute_is_used(taxes_to_compute)
+        taxes_to_compute -= used_taxes
+
+        if taxes_to_compute:
+            self.env['pos.order.line'].flush_model(['tax_ids'])
+            self.env.cr.execute("""
+                SELECT id
+                FROM account_tax
+                WHERE EXISTS(
+                    SELECT 1
+                    FROM account_tax_pos_order_line_rel AS pos
+                    WHERE account_tax_id IN %s
+                    AND account_tax.id = pos.account_tax_id
+                )
+            """, [tuple(taxes_to_compute)])
+
+            used_taxes.update([tax[0] for tax in self.env.cr.fetchall()])
+
+        return used_taxes

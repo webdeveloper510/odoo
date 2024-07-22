@@ -23,8 +23,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
         :raise: werkzeug.exceptions.NotFound if the access token is invalid
         """
         kwargs['is_donation'] = True
-        kwargs['currency_id'] = int(kwargs.get('currency_id', request.env.company.currency_id.id))
-        kwargs['amount'] = float(kwargs.get('amount', 25))
+        kwargs['currency_id'] = self._cast_as_int(kwargs.get('currency_id')) or request.env.company.currency_id.id
+        kwargs['amount'] = self._cast_as_float(kwargs.get('amount')) or 25.0
         kwargs['donation_options'] = kwargs.get('donation_options', json_safe.dumps(dict(customAmount="freeAmount")))
 
         if request.env.user._is_public():
@@ -32,19 +32,6 @@ class PaymentPortal(payment_portal.PaymentPortal):
             kwargs['access_token'] = payment_utils.generate_access_token(kwargs['partner_id'], kwargs['amount'], kwargs['currency_id'])
 
         return self.payment_pay(**kwargs)
-
-    @http.route('/donation/get_provider_fees', type='json', auth='public', website=True, sitemap=False)
-    def get_provider_fees(self, provider_ids=None, amount=None, currency_id=None, country_id=None):
-        providers_sudo = request.env['payment.provider'].sudo().browse(provider_ids)
-        currency = request.env['res.currency'].browse(currency_id)
-        country = request.env['res.country'].browse(country_id)
-
-        # Compute the fees taken by providers supporting the feature
-        fees_by_provider = {
-            pro_sudo.id: pro_sudo._compute_fees(amount, currency, country)
-            for pro_sudo in providers_sudo.filtered('fees_active')
-        }
-        return fees_by_provider
 
     @http.route('/donation/transaction/<minimum_amount>', type='json', auth='public', website=True, sitemap=False)
     def donation_transaction(self, amount, currency_id, partner_id, access_token, minimum_amount=0, **kwargs):
@@ -64,7 +51,11 @@ class PaymentPortal(payment_portal.PaymentPortal):
         else:
             partner_id = request.env.user.partner_id.id
 
-        kwargs.pop('custom_create_values', None)  # Don't allow passing arbitrary create values
+        self._validate_transaction_kwargs(kwargs, additional_allowed_keys=(
+            'donation_comment', 'donation_recipient_email', 'partner_details', 'reference_prefix'
+        ))
+        if use_public_partner:
+            kwargs['custom_create_values'] = {'tokenize': False}
         tx_sudo = self._create_transaction(
             amount=amount, currency_id=currency_id, partner_id=partner_id, **kwargs
         )
@@ -91,10 +82,10 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         return tx_sudo._get_processing_values()
 
-    def _get_custom_rendering_context_values(
+    def _get_extra_payment_form_values(
         self, donation_options=None, donation_descriptions=None, is_donation=False, **kwargs
     ):
-        rendering_context = super()._get_custom_rendering_context_values(
+        rendering_context = super()._get_extra_payment_form_values(
             donation_options=donation_options,
             donation_descriptions=donation_descriptions,
             is_donation=is_donation,
@@ -110,7 +101,6 @@ class PaymentPortal(payment_portal.PaymentPortal):
             # transaction and invoice partners are different).
             partner_sudo = user_sudo.partner_id
             partner_details = {}
-            countries = request.env['res.country']
             if logged_in:
                 partner_details = {
                     'name': partner_sudo.name,
@@ -127,6 +117,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
             rendering_context.update({
                 'is_donation': True,
                 'partner': partner_sudo,
+                'submit_button_label': _("Donate"),
                 'transaction_route': '/donation/transaction/%s' % donation_options.get('minimumAmount', 0),
                 'partner_details': partner_details,
                 'error': {},

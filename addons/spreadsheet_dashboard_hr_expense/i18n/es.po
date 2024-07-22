@@ -3,18 +3,16 @@
 # 	* spreadsheet_dashboard_hr_expense
 # 
 # Translators:
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022
-# Oscar Yu, 2022
-# oscaryuu, 2022
-# Martin Trigaux, 2022
+# Wil Odoo, 2023
+# Larissa Manderfeld, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:44+0000\n"
-"PO-Revision-Date: 2022-09-29 09:44+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Larissa Manderfeld, 2024\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,6 +22,7 @@ msgstr ""
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
+#: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
@@ -56,6 +55,7 @@ msgstr "Gasto"
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
+#: model:spreadsheet.dashboard,name:spreadsheet_dashboard_hr_expense.spreadsheet_dashboard_expense
 #, python-format
 msgid "Expenses"
 msgstr "Gastos"
@@ -71,6 +71,13 @@ msgstr "Análisis de gastos"
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
+msgid "Expenses Analysis by Customer to Reinvoice"
+msgstr "Análisis de gastos por cliente a reembolsar"
+
+#. module: spreadsheet_dashboard_hr_expense
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
+#, python-format
 msgid "KPI - Expenses"
 msgstr "KPI - Gastos"
 
@@ -79,28 +86,36 @@ msgstr "KPI - Gastos"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - To reimburse"
-msgstr "KPI - para reembolsar"
+msgstr "KPI - A reembolsar"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - To report"
-msgstr " KPI - para informar"
+msgstr "KPI - A informar"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "KPI - To validate"
-msgstr "KPI - para validar"
+msgstr "KPI - A validar"
+
+#. module: spreadsheet_dashboard_hr_expense
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
+#: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
+#, python-format
+msgid "Order"
+msgstr "Orden"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Period"
-msgstr "Período"
+msgstr "Periodo"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -114,21 +129,21 @@ msgstr "Producto"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "To reimburse"
-msgstr "para reembolsar"
+msgstr "A reembolsar"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "To report"
-msgstr "Pendientes de reportar"
+msgstr "A informar"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "To validate"
-msgstr "Validar"
+msgstr "A validar"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -136,7 +151,7 @@ msgstr "Validar"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Categories"
-msgstr "Categorías top"
+msgstr "Categorías principales"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -144,7 +159,7 @@ msgstr "Categorías top"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Employees"
-msgstr "empleados principales"
+msgstr "Empleados principales"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
@@ -152,10 +167,18 @@ msgstr "empleados principales"
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #, python-format
 msgid "Top Expenses"
-msgstr "gastos principales"
+msgstr "Gastos principales"
 
 #. module: spreadsheet_dashboard_hr_expense
 #. odoo-javascript
+#: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
+#, python-format
+msgid "Top Reinvoiced Orders"
+msgstr "Pedidos refacturados principales"
+
+#. module: spreadsheet_dashboard_hr_expense
+#. odoo-javascript
+#: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0
 #: code:addons/spreadsheet_dashboard_hr_expense/data/files/expense_dashboard.json:0

@@ -1,13 +1,20 @@
-/** @odoo-module */
+/** @odoo-module **/
 
-import { useService } from '@web/core/utils/hooks';
-import { throttle } from '@web/core/utils/timing';
-import { qweb } from 'web.core';
+import { _t } from "@web/core/l10n/translation";
+import { useAutofocus, useService } from '@web/core/utils/hooks';
+import { debounce } from '@web/core/utils/timing';
 
 import { Component, useState, useRef, onMounted, onWillStart } from "@odoo/owl";
 
 class VideoOption extends Component {}
 VideoOption.template = 'web_editor.VideoOption';
+
+class VideoIframe extends Component {
+    static template = 'web_editor.VideoIframe';
+    static props = {
+        src: { type: String },
+    };
+}
 
 export class VideoSelector extends Component {
     setup() {
@@ -23,40 +30,40 @@ export class VideoSelector extends Component {
 
         this.OPTIONS = {
             autoplay: {
-                label: this.env._t("Autoplay"),
-                description: this.env._t("Videos are muted when autoplay is enabled"),
+                label: _t("Autoplay"),
+                description: _t("Videos are muted when autoplay is enabled"),
                 platforms: [this.PLATFORMS.youtube, this.PLATFORMS.dailymotion, this.PLATFORMS.vimeo],
                 urlParameter: 'autoplay=1',
             },
             loop: {
-                label: this.env._t("Loop"),
+                label: _t("Loop"),
                 platforms: [this.PLATFORMS.youtube, this.PLATFORMS.vimeo],
                 urlParameter: 'loop=1',
             },
             hide_controls: {
-                label: this.env._t("Hide player controls"),
+                label: _t("Hide player controls"),
                 platforms: [this.PLATFORMS.youtube, this.PLATFORMS.dailymotion, this.PLATFORMS.vimeo],
                 urlParameter: 'controls=0',
             },
             hide_fullscreen: {
-                label: this.env._t("Hide fullscreen button"),
+                label: _t("Hide fullscreen button"),
                 platforms: [this.PLATFORMS.youtube],
                 urlParameter: 'fs=0',
                 isHidden: () => this.state.options.filter(option => option.id === 'hide_controls')[0].value,
             },
             hide_yt_logo: {
-                label: this.env._t("Hide Youtube logo"),
+                label: _t("Hide Youtube logo"),
                 platforms: [this.PLATFORMS.youtube],
                 urlParameter: 'modestbranding=1',
                 isHidden: () => this.state.options.filter(option => option.id === 'hide_controls')[0].value,
             },
             hide_dm_logo: {
-                label: this.env._t("Hide Dailymotion logo"),
+                label: _t("Hide Dailymotion logo"),
                 platforms: [this.PLATFORMS.dailymotion],
                 urlParameter: 'ui-logo=0',
             },
             hide_dm_share: {
-                label: this.env._t("Hide sharing button"),
+                label: _t("Hide sharing button"),
                 platforms: [this.PLATFORMS.dailymotion],
                 urlParameter: 'sharing-enable=0',
             },
@@ -98,7 +105,9 @@ export class VideoSelector extends Component {
             }));
         });
 
-        this.onChangeUrl = throttle((ev) => this.updateVideo(ev.target.value), 500);
+        useAutofocus();
+
+        this.onChangeUrl = debounce((ev) => this.updateVideo(ev.target.value), 500);
     }
 
     get shownOptions() {
@@ -130,6 +139,12 @@ export class VideoSelector extends Component {
             this.state.options = [];
             this.state.platform = null;
             this.state.errorMessage = '';
+            /**
+             * When the url input is emptied, we need to call the `selectMedia`
+             * callback function to notify the other components that the media
+             * has changed.
+             */
+            this.props.selectMedia({});
             return;
         }
 
@@ -150,13 +165,19 @@ export class VideoSelector extends Component {
                 options[option.id] = option.value;
             }
         }
-        const { embed_url: src, platform } = await this._getVideoURLData(url, options);
+
+        const {
+            embed_url: src,
+            video_id: videoId,
+            params,
+            platform
+        } = await this._getVideoURLData(url, options);
 
         if (!src) {
-            this.state.errorMessage = this.env._t("The provided url is not valid");
+            this.state.errorMessage = _t("The provided url is not valid");
         } else if (!platform) {
             this.state.errorMessage =
-                this.env._t("The provided url does not reference any supported video");
+                _t("The provided url does not reference any supported video");
         } else {
             this.state.errorMessage = '';
         }
@@ -173,7 +194,13 @@ export class VideoSelector extends Component {
         }
 
         this.state.src = src;
-        this.props.selectMedia({ id: src, src });
+        this.props.selectMedia({
+            id: src,
+            src,
+            platform,
+            videoId,
+            params
+        });
         if (platform !== this.state.platform) {
             this.state.platform = platform;
             this.state.options = newOptions;
@@ -195,9 +222,15 @@ export class VideoSelector extends Component {
      */
     static createElements(selectedMedia) {
         return selectedMedia.map(video => {
-            const template = document.createElement('template');
-            template.innerHTML = qweb.render('web_editor.videoWrapper', { src: video.src });
-            return template.content.firstChild;
+            const div = document.createElement('div');
+            div.dataset.oeExpression = video.src;
+            div.innerHTML = `
+                <div class="css_editable_mode_display"></div>
+                <div class="media_iframe_video_size" contenteditable="false"></div>
+                <iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen"></iframe>
+            `;
+            div.querySelector('iframe').src = video.src;
+            return div;
         });
     }
 }
@@ -207,6 +240,7 @@ VideoSelector.mediaExtraClasses = [];
 VideoSelector.tagNames = ['IFRAME', 'DIV'];
 VideoSelector.template = 'web_editor.VideoSelector';
 VideoSelector.components = {
+    VideoIframe,
     VideoOption,
 };
 VideoSelector.defaultProps = {

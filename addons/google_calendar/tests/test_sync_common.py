@@ -26,6 +26,7 @@ class TestSyncGoogle(HttpCase):
     def setUp(self):
         super().setUp()
         self.google_service = GoogleCalendarService(self.env['google.service'])
+        self.env.user.sudo().unpause_google_synchronization()
         self.organizer_user = new_test_user(self.env, login="organizer_user")
         self.attendee_user = new_test_user(self.env, login='attendee_user')
 

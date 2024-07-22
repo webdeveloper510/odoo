@@ -55,7 +55,7 @@ def MockRequest(
             website_sale_current_pl=website_sale_current_pl,
             context={'lang': ''},
         ),
-        geoip={},
+        geoip=odoo.http.GeoIP('127.0.0.1'),
         db=env.registry.db_name,
         env=env,
         registry=env.registry,
@@ -66,6 +66,8 @@ def MockRequest(
         website=website,
         render=lambda *a, **kw: '<MockResponse>',
     )
+    if url_root is not None:
+        request.httprequest.url = werkzeug.urls.url_join(url_root, path)
     if website:
         request.website_routing = website.id
 

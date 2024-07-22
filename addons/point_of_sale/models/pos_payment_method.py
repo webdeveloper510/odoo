@@ -5,12 +5,13 @@ from odoo.exceptions import UserError
 class PosPaymentMethod(models.Model):
     _name = "pos.payment.method"
     _description = "Point of Sale Payment Methods"
-    _order = "id asc"
+    _order = "sequence, id"
 
     def _get_payment_terminal_selection(self):
         return []
 
     name = fields.Char(string="Method", required=True, translate=True, help='Defines the name of the payment method that will be displayed in the Point of Sale when the payments are selected.')
+    sequence = fields.Integer(copy=False)
     outstanding_account_id = fields.Many2one('account.account',
         string='Outstanding Account',
         ondelete='restrict',
@@ -25,7 +26,7 @@ class PosPaymentMethod(models.Model):
     is_cash_count = fields.Boolean(string='Cash', compute="_compute_is_cash_count", store=True)
     journal_id = fields.Many2one('account.journal',
         string='Journal',
-        domain=[('type', 'in', ('cash', 'bank'))],
+        domain=['|', '&', ('type', '=', 'cash'), ('pos_payment_method_ids', '=', False), ('type', '=', 'bank')],
         ondelete='restrict',
         help='Leave empty to use the receivable account of customer.\n'
              'Defines the journal where to book the accumulated payments (or individual payment if Identify Customer is true) after closing the session.\n'
@@ -37,13 +38,14 @@ class PosPaymentMethod(models.Model):
         default=False,
         help='Forces to set a customer when using this payment method and splits the journal entries for each customer. It could slow down the closing process.')
     open_session_ids = fields.Many2many('pos.session', string='Pos Sessions', compute='_compute_open_session_ids', help='Open PoS sessions that are using this payment method.')
-    config_ids = fields.Many2many('pos.config', string='Point of Sale Configurations')
+    config_ids = fields.Many2many('pos.config', string='Point of Sale')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     use_payment_terminal = fields.Selection(selection=lambda self: self._get_payment_terminal_selection(), string='Use a Payment Terminal', help='Record payments with a terminal on this journal.')
     # used to hide use_payment_terminal when no payment interfaces are installed
     hide_use_payment_terminal = fields.Boolean(compute='_compute_hide_use_payment_terminal')
     active = fields.Boolean(default=True)
     type = fields.Selection(selection=[('cash', 'Cash'), ('bank', 'Bank'), ('pay_later', 'Customer Account')], compute="_compute_type")
+    image = fields.Image("Image", max_width=50, max_height=50)
 
     @api.depends('type')
     def _compute_hide_use_payment_terminal(self):
@@ -83,7 +85,8 @@ class PosPaymentMethod(models.Model):
             pm.is_cash_count = pm.type == 'cash'
 
     def _is_write_forbidden(self, fields):
-        return bool(fields and self.open_session_ids)
+        whitelisted_fields = {'sequence'}
+        return bool(fields - whitelisted_fields and self.open_session_ids)
 
     def write(self, vals):
         if self._is_write_forbidden(set(vals.keys())):

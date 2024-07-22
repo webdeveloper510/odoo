@@ -1,23 +1,21 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-
-const { Component, onWillStart, onWillUpdateProps } = owl;
+import { Component, onWillStart } from "@odoo/owl";
 
 export class JsonPopOver extends Component {
-    
-    setup(){
-        this.jsonValue = JSON.parse(this.props.value);
-        onWillUpdateProps(nextProps => {
-            this.jsonValue = JSON.parse(nextProps.value);
-        });
+    get jsonValue() {
+        return JSON.parse(this.props.record.data[this.props.name]);
     }
 }
 
-JsonPopOver.displayName = _lt("Json Popup");
-JsonPopOver.supportedTypes = ["char"];
+export const jsonPopOver = {
+    component: JsonPopOver,
+    displayName: _t("Json Popup"),
+    supportedTypes: ["char"],
+};
 
 export class PopOverLeadDays extends JsonPopOver {
     setup() {
@@ -50,8 +48,18 @@ export class PopOverLeadDays extends JsonPopOver {
 
 PopOverLeadDays.template = "stock.leadDays";
 
+export const popOverLeadDays = {
+    ...jsonPopOver,
+    component: PopOverLeadDays,
+};
+registry.category("fields").add("lead_days_widget", popOverLeadDays);
+
 export class ReplenishmentHistoryWidget extends JsonPopOver {}
 ReplenishmentHistoryWidget.template = "stock.replenishmentHistory";
 
-registry.category("fields").add("lead_days_widget", PopOverLeadDays);
-registry.category("fields").add("replenishment_history_widget", ReplenishmentHistoryWidget);
+export const replenishmentHistoryWidget = {
+    ...jsonPopOver,
+    component: ReplenishmentHistoryWidget,
+};
+
+registry.category("fields").add("replenishment_history_widget", replenishmentHistoryWidget);

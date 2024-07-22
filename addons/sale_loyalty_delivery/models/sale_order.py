@@ -4,20 +4,26 @@
 from odoo import _, models
 from odoo.fields import Command
 
+
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    def _get_no_effect_on_threshold_lines(self):
-        self.ensure_one()
-        lines = self.order_line.filtered(lambda line:\
-            line.is_delivery or\
-            line.reward_id.reward_type == 'shipping')
-        return lines + super()._get_no_effect_on_threshold_lines()
+    # delivery overrides
 
-    def _get_lines_impacting_invoice_status(self):
-        return super()._get_lines_impacting_invoice_status().filtered(
-            lambda line: not line.is_reward_line
+    def _compute_amount_total_without_delivery(self):
+        res = super()._compute_amount_total_without_delivery()
+        return res - sum(
+            self.order_line.filtered(
+                lambda l: l.coupon_id and l.coupon_id.program_type in ['ewallet', 'gift_card']
+            ).mapped('price_unit')
         )
+
+    # sale_loyalty overrides
+
+    def _get_no_effect_on_threshold_lines(self):
+        res = super()._get_no_effect_on_threshold_lines()
+        return res + self.order_line.filtered(
+            lambda line: line.is_delivery or line.reward_id.reward_type == 'shipping')
 
     def _get_not_rewarded_order_lines(self):
         """Exclude delivery lines from consideration for reward points."""
@@ -25,8 +31,8 @@ class SaleOrder(models.Model):
         return order_line.filtered(lambda line: not line.is_delivery)
 
     def _get_reward_values_free_shipping(self, reward, coupon, **kwargs):
-        delivery_line = self.order_line.filtered(lambda l: l.is_delivery)
-        taxes = delivery_line.product_id.taxes_id.filtered(lambda t: t.company_id.id == self.company_id.id)
+        delivery_line = self.order_line.filtered(lambda l: l.is_delivery)[:1]
+        taxes = delivery_line.product_id.taxes_id._filter_taxes_by_company(self.company_id)
         taxes = self.fiscal_position_id.map_tax(taxes)
         max_discount = reward.discount_max_amount or float('inf')
         return [{
@@ -63,3 +69,8 @@ class SaleOrder(models.Model):
                     filtered_res[coupon] = filtered_rewards
             res = filtered_res
         return res
+
+    def _remove_delivery_line(self):
+        """Override of delivery to recalculate the reward after a delivery line is deleted"""
+        super()._remove_delivery_line()
+        self._update_programs_and_rewards()

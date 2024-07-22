@@ -12,7 +12,7 @@ from odoo.tools import float_round
 class HRLeave(models.Model):
     _inherit = 'hr.leave'
 
-    overtime_id = fields.Many2one('hr.attendance.overtime', string='Extra Hours', groups='hr_holidays.group_hr_holidays_user')
+    overtime_id = fields.Many2one('hr.attendance.overtime', string='Extra Hours')
     employee_overtime = fields.Float(related='employee_id.total_overtime')
     overtime_deductible = fields.Boolean(compute='_compute_overtime_deductible')
 
@@ -29,7 +29,7 @@ class HRLeave(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        fields_to_check = {'number_of_days', 'date_from', 'date_to', 'state', 'employee_id', 'holiday_status_id'}
+        fields_to_check = {'number_of_days', 'request_date_from', 'request_date_to', 'state', 'employee_id', 'holiday_status_id'}
         if not any(field for field in fields_to_check if field in vals):
             return res
         if vals.get('holiday_status_id'):
@@ -59,7 +59,7 @@ class HRLeave(models.Model):
                 if employee.user_id == self.env.user:
                     raise ValidationError(_('You do not have enough extra hours to request this leave'))
                 raise ValidationError(_('The employee does not have enough extra hours to request this leave.'))
-            if not leave.overtime_id:
+            if not leave.sudo().overtime_id:
                 leave.sudo().overtime_id = self.env['hr.attendance.overtime'].sudo().create({
                     'employee_id': employee.id,
                     'date': leave.date_from,
@@ -107,7 +107,7 @@ class HRLeave(models.Model):
                 for d in range((leave.date_to - leave.date_from).days + 1):
                     employee_dates[leave.employee_id].add(self.env['hr.attendance']._get_day_start_and_day(leave.employee_id, leave.date_from + timedelta(days=d)))
         if employee_dates:
-            self.env['hr.attendance']._update_overtime(employee_dates)
+            self.env['hr.attendance'].sudo()._update_overtime(employee_dates)
 
     def unlink(self):
         # TODO master change to ondelete

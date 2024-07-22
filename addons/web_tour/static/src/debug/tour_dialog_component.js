@@ -2,15 +2,16 @@
 
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 
 import { Component } from "@odoo/owl";
 
 export default class ToursDialog extends Component {
     setup() {
-        this.tourService = useService("tour");
-        this.onboardingTours = this.tourService.getOnboardingTours();
-        this.testingTours = this.tourService.getTestingTours();
+        this.title = _t("Tours");
+        this.tourService = useService("tour_service");
+        this.onboardingTours = this.tourService.getSortedTours().filter(tour => !tour.test);
+        this.testingTours = this.tourService.getSortedTours().filter(tour => tour.test);
     }
 
     //--------------------------------------------------------------------------
@@ -24,7 +25,7 @@ export default class ToursDialog extends Component {
      * @param {MouseEvent} ev
      */
     _onStartTour(ev) {
-        this.tourService.reset(ev.target.dataset.name);
+        this.tourService.startTour(ev.target.dataset.name, { mode: 'manual' });
         this.props.close();
     }
     /**
@@ -34,10 +35,9 @@ export default class ToursDialog extends Component {
      * @param {MouseEvent} ev
      */
     _onTestTour(ev) {
-        this.tourService.run(ev.target.dataset.name);
+        this.tourService.startTour(ev.target.dataset.name, { mode: 'auto', stepDelay: 500, showPointerDuration: 250 });
         this.props.close();
     }
 }
 ToursDialog.template = "web_tour.ToursDialog";
 ToursDialog.components = { Dialog };
-ToursDialog.title = _lt("Tours");

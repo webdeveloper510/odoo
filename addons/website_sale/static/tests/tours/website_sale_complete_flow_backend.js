@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import wTourUtils from 'website.tour_utils';
+import wTourUtils from '@website/js/tours/tour_utils';
 
 wTourUtils.registerWebsitePreviewTour('website_sale_tour_backend', {
     test: true,
     url: '/shop/cart',
     edition: true,
-}, [
+}, () => [
         {
             content: "open customize tab",
             trigger: '.o_we_customize_snippet_btn',
@@ -14,7 +14,7 @@ wTourUtils.registerWebsitePreviewTour('website_sale_tour_backend', {
         {
             content: "Enable Extra step",
             extra_trigger: '#oe_snippets .o_we_customize_panel',
-            trigger: '[data-customize-website-views="website_sale.extra_info_option"] we-checkbox',
+            trigger: '[data-customize-website-views="website_sale.extra_info"] we-checkbox',
         },
         ...wTourUtils.clickOnSave(),
     ],

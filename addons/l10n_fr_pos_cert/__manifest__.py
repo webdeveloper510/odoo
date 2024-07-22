@@ -3,7 +3,7 @@
 
 {
     'name': 'France - VAT Anti-Fraud Certification for Point of Sale (CGI 286 I-3 bis)',
-    'icon': '/l10n_fr/static/description/icon.png',
+    'countries': ['fr'],
     'version': '1.0',
     'category': 'Accounting/Localizations/Point of Sale',
     'description': """
@@ -37,10 +37,8 @@ The module adds following features:
     ],
     'post_init_hook': '_setup_inalterability',
     'assets': {
-        'point_of_sale.assets': [
-            'l10n_fr_pos_cert/static/src/js/**/*',
-            'l10n_fr_pos_cert/static/src/css/pos.css',
-            'l10n_fr_pos_cert/static/src/xml/**/*',
+        'point_of_sale._assets_pos': [
+            'l10n_fr_pos_cert/static/src/**/*',
         ],
     },
     'license': 'LGPL-3',

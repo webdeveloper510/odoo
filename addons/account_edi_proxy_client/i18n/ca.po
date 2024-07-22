@@ -3,21 +3,21 @@
 # 	* account_edi_proxy_client
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Arnau Ros, 2022
-# marcescu, 2022
-# Óscar Fonseca <tecnico@extreme-micro.com>, 2022
-# jabiri7, 2022
-# jabelchi, 2023
+# jabiri7, 2023
 # martioodo hola, 2023
+# Martin Trigaux, 2023
+# Arnau Ros, 2023
+# Óscar Fonseca <tecnico@pyming.com>, 2023
+# marcescu, 2023
+# Josep Anton Belchi, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: martioodo hola, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Josep Anton Belchi, 2024\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,11 +46,6 @@ msgid "Active"
 msgstr "Actiu"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_format_code
-msgid "Code"
-msgstr "Codi"
-
-#. module: account_edi_proxy_client
 #: model:ir.model,name:account_edi_proxy_client.model_res_company
 msgid "Companies"
 msgstr "Empreses"
@@ -71,9 +66,14 @@ msgid "Created on"
 msgstr "Creat el"
 
 #. module: account_edi_proxy_client
+#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__demo
+msgid "Demo mode"
+msgstr "Mode de prova"
+
+#. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__display_name
 msgid "Display Name"
-msgstr "Nom a mostrar"
+msgstr "Nom mostrat"
 
 #. module: account_edi_proxy_client
 #: model:ir.actions.act_window,name:account_edi_proxy_client.action_tree_account_edi_proxy_client_user
@@ -86,14 +86,9 @@ msgid "EDI Proxy Users"
 msgstr "Usuaris intermediaris EDI"
 
 #. module: account_edi_proxy_client
-#: model:ir.model,name:account_edi_proxy_client.model_account_edi_format
-msgid "EDI format"
-msgstr "Format Edi"
-
-#. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_format_id
-msgid "Edi Format"
-msgstr "Format Edi"
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_mode
+msgid "EDI operating mode"
+msgstr "Mode operacional EDI"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_identification
@@ -109,11 +104,6 @@ msgstr "ID"
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__id_client
 msgid "Id Client"
 msgstr "Client Id"
-
-#. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user____last_update
-msgid "Last Modified on"
-msgstr "Última modificació el "
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__write_uid
@@ -136,9 +126,24 @@ msgid "Private Key Filename"
 msgstr "Nom del fitxer de clau privada"
 
 #. module: account_edi_proxy_client
+#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__prod
+msgid "Production mode"
+msgstr "Mode de producció"
+
+#. module: account_edi_proxy_client
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__proxy_type
+msgid "Proxy Type"
+msgstr "Tipus de proxy"
+
+#. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__refresh_token
 msgid "Refresh Token"
 msgstr "Actualitza Token"
+
+#. module: account_edi_proxy_client
+#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__test
+msgid "Test mode"
+msgstr "Mode de prova"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,help:account_edi_proxy_client.field_account_edi_proxy_client_user__private_key
@@ -147,11 +152,8 @@ msgstr "La clau per encriptar totes les dades de l'usuari"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,help:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_identification
-msgid ""
-"The unique id that identifies this user for on the edi format, typically the"
-" vat"
-msgstr ""
-"L'ID únic que identifica aquest usuari en el format edi, típicament el vat"
+msgid "The unique id that identifies this user, typically the vat"
+msgstr "L'identificador únic que identifica aquest usuari, típicament el NIF"
 
 #. module: account_edi_proxy_client
 #. odoo-python
@@ -185,9 +187,14 @@ msgstr ""
 "L'URL que aquest servei ha intentat contactar no existeix. L'URL era %r"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_edi_identification_per_format
-msgid "This edi identification is already assigned to a user"
-msgstr "Aquesta identificació edi ja està assignada a un usuari"
+#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_active_company_proxy
+msgid "This company has an active user already created for this EDI type"
+msgstr "La empresa ja té un usuari actiu creat per aquest tipus d'EDI"
+
+#. module: account_edi_proxy_client
+#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_active_edi_identification
+msgid "This edi identification is already assigned to an active user"
+msgstr "Aquesta identificació EDI ja està assignada a un usuari actiu"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_id_client

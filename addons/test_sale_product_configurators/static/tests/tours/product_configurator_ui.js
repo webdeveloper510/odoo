@@ -1,18 +1,26 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
+import { registry } from "@web/core/registry";
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
+import configuratorTourUtils from "@test_sale_product_configurators/js/tour_utils";
 
 // Note: please keep this test without pricelist for maximum coverage.
 // The pricelist is tested on the other tours.
 
-tour.register('sale_product_configurator_tour', {
+registry.category("web_tour.tours").add('sale_product_configurator_tour', {
     url: '/web',
     test: true,
-}, [tour.stepUtils.showAppsMenuItem(), {
+    steps: () => [stepUtils.showAppsMenuItem(), {
     trigger: '.o_app[data-menu-xmlid="sale.sale_menu_root"]',
 }, {
     trigger: '.o_list_button_add',
     extra_trigger: '.o_sale_order'
+}, {
+    trigger: '.o_required_modifier[name=partner_id] input',
+    run: 'text Tajine Saucisse',
+}, {
+    trigger: '.ui-menu-item > a:contains("Tajine Saucisse")',
+    auto: true,
 }, {
     trigger: 'a:contains("Add a product")',
 }, {
@@ -21,42 +29,40 @@ tour.register('sale_product_configurator_tour', {
 }, {
     trigger: 'ul.ui-autocomplete a:contains("Customizable Desk (TEST)")',
 }, {
-    trigger: '.main_product span:contains("Steel")',
-    run: function () {},
+    trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) label:contains("Steel")',
+    isCheck: true,
 }, {
-    trigger: '.main_product span:contains("Aluminium")',
+    trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) label:contains("Aluminium")',
 }, {
-    trigger: 'span.oe_currency_value:contains("800.40")',
-    run: function (){} // check updated price
+    trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] h5:contains("Customizable Desk")) td[name="price"] h5:contains("800.40")',
+    isCheck: true, // check updated price
 }, {
-    trigger: 'input[data-value_name="Black"]'
+    trigger: 'label[style="background-color:#000000"] input'
 }, {
-    trigger: '.btn-primary.disabled span:contains("Confirm")',
-    extra_trigger: '.show .modal-footer', // check confirm is disabled
-    run: () => {},
+    trigger: '.btn-primary:disabled:contains("Confirm")',
+    isCheck: true, // check confirm button is disabled
 }, {
-    trigger: 'input[data-value_name="White"]'
+    trigger: 'label[style="background-color:#FFFFFF"] input'
 }, {
-    trigger: '.btn-primary:not(.disabled)  span:contains("Confirm")',
-    extra_trigger: '.show .modal-footer',
-    run: function (){} // check confirm is available
+    trigger: '.btn-primary:not(:disabled):contains("Confirm")',
+    extra_trigger: '.modal-footer',
+    isCheck: true, // check confirm is available
 }, {
     trigger: 'span:contains("Aluminium"):eq(1)',
-}, {
-    trigger: '.js_product:contains(Conference Chair) .js_add',
-}, {
-    trigger: '.js_product:contains(Chair floor protection) .js_add',
-}, {
-    trigger: 'button span:contains(Confirm)',
+},
+    configuratorTourUtils.addOptionalProduct("Conference Chair"),
+    configuratorTourUtils.addOptionalProduct("Chair floor protection"),
+{
+    trigger: 'button:contains(Confirm)',
     id: 'quotation_product_selected',
 },
 // check that 3 products were added to the SO
 {
     trigger: 'td.o_data_cell:contains("Customizable Desk (TEST) (Aluminium, White)")',
-    run: function (){}
+    isCheck: true,
 }, {
     trigger: 'td.o_data_cell:contains("Conference Chair (TEST) (Aluminium)")',
-    run: function (){}
+    isCheck: true,
 },
 // check that additional line is kept if selected but not edited with a click followed by a check
 {
@@ -67,9 +73,9 @@ tour.register('sale_product_configurator_tour', {
     run: 'click'
 }, {
     trigger: 'td.o_data_cell:contains("Chair floor protection")',
-    run: function (){}
+    isCheck: true,
 }, {
     trigger: 'span[name=amount_total]:contains("960.60")',
-    run: function (){}
-}, ...tour.stepUtils.discardForm()
-]);
+    isCheck: true,
+}, ...stepUtils.saveForm(),
+]});

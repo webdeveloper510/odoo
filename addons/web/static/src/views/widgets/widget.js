@@ -1,15 +1,10 @@
 /* @odoo-module */
 
-import { evaluateExpr } from "@web/core/py_js/py";
+import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
-import { decodeObjectForTemplate } from "@web/views/view_compiler";
 
 import { Component, xml } from "@odoo/owl";
 const viewWidgetRegistry = registry.category("view_widgets");
-
-function findWidgetComponent(name) {
-    return viewWidgetRegistry.get(name);
-}
 
 /**
  * A Component that supports rendering `<widget />` tags in a view arch
@@ -20,55 +15,83 @@ function findWidgetComponent(name) {
  * It supports instancing components from the "view_widgets" registry.
  */
 export class Widget extends Component {
-    get Widget() {
-        return findWidgetComponent(this.props.name);
+    setup() {
+        if (this.props.widgetInfo) {
+            this.widget = this.props.widgetInfo.widget;
+        } else {
+            this.widget = viewWidgetRegistry.get(this.props.name);
+        }
     }
 
     get classNames() {
-        return {
+        const classNames = {
             o_widget: true,
             [`o_widget_${this.props.name}`]: true,
             [this.props.className]: Boolean(this.props.className),
         };
+        if (this.widget.additionalClasses) {
+            for (const cls of this.widget.additionalClasses) {
+                classNames[cls] = true;
+            }
+        }
+        return classNames;
     }
     get widgetProps() {
-        const { node: rawNode } = this.props;
-        const node = rawNode ? decodeObjectForTemplate(rawNode) : {};
-        let propsFromAttrs = {};
-        if (node.attrs) {
-            const extractProps = this.Widget.extractProps || (() => ({}));
-            propsFromAttrs = extractProps({
-                attrs: {
-                    ...node.attrs,
-                    options: evaluateExpr(node.attrs.options || "{}"),
-                },
-            });
-        }
-        const props = { ...this.props };
-        delete props.class;
-        delete props.name;
-        delete props.node;
+        const record = this.props.record;
 
-        return { ...propsFromAttrs, ...props };
+        let readonlyFromModifiers = false;
+        let propsFromNode = {};
+        if (this.props.widgetInfo) {
+            const widgetInfo = this.props.widgetInfo;
+            readonlyFromModifiers = evaluateBooleanExpr(
+                widgetInfo.attrs.readonly,
+                record.evalContextWithVirtualIds
+            );
+            const dynamicInfo = {
+                readonly: readonlyFromModifiers,
+            };
+            propsFromNode = this.widget.extractProps
+                ? this.widget.extractProps(widgetInfo, dynamicInfo)
+                : {};
+        }
+
+        return {
+            record,
+            readonly: !record.isInEdition || readonlyFromModifiers || false,
+            ...propsFromNode,
+        };
     }
 }
 Widget.template = xml/*xml*/ `
     <div t-att-class="classNames" t-att-style="props.style">
-        <t t-component="Widget" t-props="widgetProps" />
+        <t t-component="widget.component" t-props="widgetProps" />
     </div>`;
 
 Widget.parseWidgetNode = function (node) {
     const name = node.getAttribute("name");
-    const WidgetComponent = findWidgetComponent(name);
-    const attrs = Object.fromEntries(
-        [...node.attributes].map(({ name, value }) => {
-            return [name, name === "modifiers" ? JSON.parse(value || "{}") : value];
-        })
-    );
-    return {
-        options: evaluateExpr(node.getAttribute("options") || "{}"),
+    const widget = viewWidgetRegistry.get(name);
+    const widgetInfo = {
         name,
-        rawAttrs: attrs,
-        WidgetComponent,
+        widget,
+        options: {},
+        attrs: {},
     };
+
+    for (const { name, value } of node.attributes) {
+        if (["name", "widget"].includes(name)) {
+            // avoid adding name and widget to attrs
+            continue;
+        }
+        if (name === "options") {
+            widgetInfo.options = evaluateExpr(value);
+        } else if (!name.startsWith("t-att")) {
+            // all other (non dynamic) attributes
+            widgetInfo.attrs[name] = value;
+        }
+    }
+
+    return widgetInfo;
+};
+Widget.props = {
+    "*": true,
 };

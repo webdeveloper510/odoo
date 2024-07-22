@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import tour from "web_tour.tour";
-import wTourUtils from "website.tour_utils";
+import { registry } from "@web/core/registry";
+import wTourUtils from "@website/js/tours/tour_utils";
 
-tour.register('edit_translated_page_redirect', {
+registry.category("web_tour.tours").add('edit_translated_page_redirect', {
     test: true,
     url: '/nl/contactus',
-}, [
+    steps: () => [
     {
         content: "Enter backend",
         trigger: 'a.o_frontend_to_backend_edit_btn',
@@ -32,4 +32,4 @@ tour.register('edit_translated_page_redirect', {
         trigger: 'a.o_frontend_to_backend_edit_btn',
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
-]);
+]});

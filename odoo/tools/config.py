@@ -260,6 +260,8 @@ class configmanager(object):
                          help="specify the database ssl connection mode (see PostgreSQL documentation)")
         group.add_option("--db_maxconn", dest="db_maxconn", type='int', my_default=64,
                          help="specify the maximum number of physical connections to PostgreSQL")
+        group.add_option("--db_maxconn_gevent", dest="db_maxconn_gevent", type='int', my_default=False,
+                         help="specify the maximum number of physical connections to PostgreSQL specifically for the gevent worker")
         group.add_option("--db-template", dest="db_template", my_default="template0",
                          help="specify a custom database template to create a new database")
         parser.add_option_group(group)
@@ -308,16 +310,15 @@ class configmanager(object):
                          help="Time limit (decimal value in hours) records created with a "
                               "TransientModel (mostly wizard) are kept in the database. Default to 1 hour.",
                          type="float")
-        group.add_option("--osv-memory-age-limit", dest="osv_memory_age_limit", my_default=False,
-                         help="Deprecated alias to the transient-age-limit option",
-                         type="float")
         group.add_option("--max-cron-threads", dest="max_cron_threads", my_default=2,
                          help="Maximum number of threads processing concurrently cron jobs (default 2).",
                          type="int")
         group.add_option("--unaccent", dest="unaccent", my_default=False, action="store_true",
                          help="Try to enable the unaccent extension when creating new databases.")
-        group.add_option("--geoip-db", dest="geoip_database", my_default='/usr/share/GeoIP/GeoLite2-City.mmdb',
-                         help="Absolute path to the GeoIP database file.")
+        group.add_option("--geoip-city-db", "--geoip-db", dest="geoip_city_db", my_default='/usr/share/GeoIP/GeoLite2-City.mmdb',
+                         help="Absolute path to the GeoIP City database file.")
+        group.add_option("--geoip-country-db", dest="geoip_country_db", my_default='/usr/share/GeoIP/GeoLite2-Country.mmdb',
+                         help="Absolute path to the GeoIP Country database file.")
         parser.add_option_group(group)
 
         if os.name == 'posix':
@@ -409,10 +410,6 @@ class configmanager(object):
             "The config file '%s' selected with -c/--config doesn't exist or is not readable, "\
             "use -s/--save if you want to generate it"% opt.config)
 
-        die(bool(opt.osv_memory_age_limit) and bool(opt.transient_memory_age_limit),
-            "the osv-memory-count-limit option cannot be used with the "
-            "transient-age-limit option, please only use the latter.")
-
         # place/search the config file on Win32 near the server installation
         # (../etc from the server)
         # if the server is run by an unprivileged user, he has to specify location of a config file where he has the rights to write,
@@ -454,10 +451,11 @@ class configmanager(object):
                 'db_port', 'db_template', 'logfile', 'pidfile', 'smtp_port',
                 'email_from', 'smtp_server', 'smtp_user', 'smtp_password', 'from_filter',
                 'smtp_ssl_certificate_filename', 'smtp_ssl_private_key_filename',
-                'db_maxconn', 'import_partial', 'addons_path', 'upgrade_path',
+                'db_maxconn', 'db_maxconn_gevent', 'import_partial', 'addons_path', 'upgrade_path',
                 'syslog', 'without_demo', 'screencasts', 'screenshots',
                 'dbfilter', 'log_level', 'log_db',
-                'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
+                'log_db_level', 'geoip_city_db', 'geoip_country_db', 'dev_mode',
+                'shell_interface',
         ]
 
         for arg in keys:
@@ -480,7 +478,7 @@ class configmanager(object):
             'stop_after_init', 'without_demo', 'http_enable', 'syslog',
             'list_db', 'proxy_mode',
             'test_file', 'test_tags',
-            'osv_memory_count_limit', 'osv_memory_age_limit', 'transient_age_limit', 'max_cron_threads', 'unaccent',
+            'osv_memory_count_limit', 'transient_age_limit', 'max_cron_threads', 'unaccent',
             'data_dir',
             'server_wide_modules',
         ]
@@ -504,6 +502,8 @@ class configmanager(object):
             elif isinstance(self.options[arg], str) and self.casts[arg].type in optparse.Option.TYPE_CHECKER:
                 self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
 
+        ismultidb = ',' in (self.options.get('db_name') or '')
+        die(ismultidb and (opt.init or opt.update), "Cannot use -i/--init or -u/--update with multiple databases in the -d/--database/db_name")
         self.options['root_path'] = self._normalize(os.path.join(os.path.dirname(__file__), '..'))
         if not self.options['addons_path'] or self.options['addons_path']=='None':
             default_addons = []
@@ -545,7 +545,7 @@ class configmanager(object):
             self.save()
 
         # normalize path options
-        for key in ['data_dir', 'logfile', 'pidfile', 'test_file', 'screencasts', 'screenshots', 'pg_path', 'translate_out', 'translate_in', 'geoip_database']:
+        for key in ['data_dir', 'logfile', 'pidfile', 'test_file', 'screencasts', 'screenshots', 'pg_path', 'translate_out', 'translate_in', 'geoip_city_db', 'geoip_country_db']:
             self.options[key] = self._normalize(self.options[key])
 
         conf.addons_paths = self.options['addons_path'].split(',')
@@ -556,18 +556,48 @@ class configmanager(object):
         return opt
 
     def _warn_deprecated_options(self):
-        if self.options['osv_memory_age_limit']:
-            warnings.warn(
-                "The osv-memory-age-limit is a deprecated alias to "
-                "the transient-age-limit option, please use the latter.",
-                DeprecationWarning)
-            self.options['transient_age_limit'] = self.options.pop('osv_memory_age_limit')
-        if self.options['longpolling_port']:
+        longpolling_port = self.options.pop('longpolling_port', 0)
+        if longpolling_port:
             warnings.warn(
                 "The longpolling-port is a deprecated alias to "
                 "the gevent-port option, please use the latter.",
                 DeprecationWarning)
-            self.options['gevent_port'] = self.options.pop('longpolling_port')
+            self.options['gevent_port'] = longpolling_port
+
+        for old_option_name, new_option_name in [
+            ('geoip_database', 'geoip_city_db'),
+            ('osv_memory_age_limit', 'transient_age_limit')
+        ]:
+            deprecated_value = self.options.pop(old_option_name, None)
+            if deprecated_value:
+                default_value = self.casts[new_option_name].my_default
+                current_value = self.options[new_option_name]
+
+                if deprecated_value in (current_value, default_value):
+                    # Surely this is from a --save that was run in a
+                    # prior version. There is no point in emitting a
+                    # warning because: (1) it holds the same value as
+                    # the correct option, and (2) it is going to be
+                    # automatically removed on the next --save anyway.
+                    pass
+                elif current_value == default_value:
+                    # deprecated_value != current_value == default_value
+                    # assume the new option was not set
+                    self.options[new_option_name] = deprecated_value
+                    warnings.warn(
+                        f"The {old_option_name!r} option found in the "
+                        "configuration file is a deprecated alias to "
+                        f"{new_option_name!r}, please use the latter.",
+                        DeprecationWarning)
+                else:
+                    # deprecated_value != current_value != default_value
+                    self.parser.error(
+                        f"The two options {old_option_name!r} "
+                        "(found in the configuration file but "
+                        f"deprecated) and {new_option_name!r} are set "
+                        "to different values. Please remove the first "
+                        "one and make sure the second is correct."
+                    )
 
     def _is_addons_path(self, path):
         from odoo.modules.module import MANIFEST_NAMES

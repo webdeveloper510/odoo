@@ -1,7 +1,7 @@
-odoo.define('web.testUtilsTests', function (require) {
-"use strict";
+/** @odoo-module **/
 
-var testUtils = require('web.test_utils');
+import testUtils from "@web/../tests/legacy/helpers/test_utils";
+const { DateTime } = luxon;
 
 QUnit.module('web', {}, function () {
 QUnit.module('testUtils', {}, function () {
@@ -26,11 +26,9 @@ QUnit.test('new moment', function (assert) {
     assert.expect(1);
     const unpatchDate = testUtils.mock.patchDate(2018, 9, 23, 14, 50, 0);
 
-    const m = moment();
-    assert.strictEqual(m.format('YYYY-MM-DD HH:mm'), '2018-10-23 14:50');
+    assert.strictEqual(DateTime.now().toFormat("yyyy-MM-dd HH:mm"), '2018-10-23 14:50');
     unpatchDate();
 });
 
-});
 });
 });

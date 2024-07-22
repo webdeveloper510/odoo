@@ -118,11 +118,37 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         # Reload the wizard to apply generated serial numbers
         wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
         wizard.save().apply()
-        # 1st & 3rd MO in sequence should have only 1 move lines (1 lot) for product_to_use_1 (2nd in bom)
+        # 1st & 2nd MO in sequence should have only 1 move lines (1 lot) for product_to_use_1 (2nd in bom)
         self.assertEqual(mo.procurement_group_id.mrp_production_ids[0].move_raw_ids[1].move_lines_count, 1)
-        self.assertEqual(mo.procurement_group_id.mrp_production_ids[2].move_raw_ids[1].move_lines_count, 1)
-        # 2nd MO should have 2 move lines (2 different lots) for product_to_use_1
-        self.assertEqual(mo.procurement_group_id.mrp_production_ids[1].move_raw_ids[1].move_lines_count, 2)
+        self.assertEqual(mo.procurement_group_id.mrp_production_ids[1].move_raw_ids[1].move_lines_count, 1)
+        # 3rd MO should have 2 move lines (2 different lots) for product_to_use_1
+        self.assertEqual(mo.procurement_group_id.mrp_production_ids[2].move_raw_ids[1].move_lines_count, 2)
+
+        # Verify mark as done
+
+        mos = mo.procurement_group_id.mrp_production_ids
+        mos.button_mark_done()
+
+        self.assertRecordValues(mos.lot_producing_id, [
+            {'product_qty': 1},
+            {'product_qty': 1},
+            {'product_qty': 1},
+        ])
+
+        self.assertRecordValues(mos.move_finished_ids, [
+            {'picked': True},
+            {'picked': True},
+            {'picked': True},
+        ])
+
+        self.assertRecordValues(mos.move_raw_ids, [
+            {'picked': True},
+            {'picked': True},
+            {'picked': True},
+            {'picked': True},
+            {'picked': True},
+            {'picked': True},
+        ])
 
     def test_mass_produce_with_tracked_product(self):
         """
@@ -180,7 +206,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         mo.action_confirm()
         mo.action_assign()
         mo.qty_producing = 2
-        mo.move_raw_ids.move_line_ids.write({'qty_done': 1})
+        mo.move_raw_ids.move_line_ids.write({'quantity': 1})
         mo.button_mark_done()
         self.assertEqual(mo.state, 'done')
         # create a Mo to produce 2 units of tracked product
@@ -212,10 +238,11 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         # Check generated serial numbers
         self.assertEqual(mo.procurement_group_id.mrp_production_ids.lot_producing_id.mapped('name'), ["sn#3", "sn#4"])
         #check byproduct quantity
-        self.assertEqual(mo.procurement_group_id.mrp_production_ids.move_byproduct_ids.mapped('quantity_done'), [1, 1])
+        self.assertEqual(mo.procurement_group_id.mrp_production_ids.move_byproduct_ids.mapped('quantity'), [1, 1])
         # check the component quantity
-        self.assertEqual(mo.procurement_group_id.mrp_production_ids.move_raw_ids.mapped('quantity_done'), [1, 1])
+        self.assertEqual(mo.procurement_group_id.mrp_production_ids.move_raw_ids.mapped('quantity'), [1, 1])
         # Mark the MOs as done
+        mo.procurement_group_id.mrp_production_ids.move_raw_ids.picked = True
         mo.procurement_group_id.mrp_production_ids.button_mark_done()
         self.assertEqual(mo.procurement_group_id.mrp_production_ids.mapped('state'), ['done', 'done'])
 

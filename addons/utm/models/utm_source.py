@@ -84,10 +84,11 @@ class UtmSourceMixin(models.AbstractModel):
                 utm_check_skip_record_ids=self.source_id.ids
             )._get_unique_names("utm.source", [values['name']])[0]
 
-        super().write(values)
+        return super().write(values)
 
     def copy(self, default=None):
         """Increment the counter when duplicating the source."""
         default = default or {}
-        default['name'] = self.env['utm.mixin']._get_unique_names("utm.source", [self.name])[0]
+        default_name = default.get('name')
+        default['name'] = self.env['utm.mixin']._get_unique_names("utm.source", [default_name or self.name])[0]
         return super().copy(default)

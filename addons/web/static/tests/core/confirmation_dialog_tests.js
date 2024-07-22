@@ -4,21 +4,21 @@ import { registry } from "@web/core/registry";
 import { uiService } from "@web/core/ui/ui_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { makeTestEnv } from "../helpers/mock_env";
-import { click, getFixture, makeDeferred, mount, nextTick, triggerHotkey } from "../helpers/utils";
+import { makeDialogTestEnv } from "../helpers/mock_env";
+import {
+    click,
+    destroy,
+    getFixture,
+    makeDeferred,
+    mount,
+    nextTick,
+    triggerHotkey,
+} from "../helpers/utils";
 import { makeFakeDialogService } from "../helpers/mock_services";
+import { Component, xml } from "@odoo/owl";
 
 const serviceRegistry = registry.category("services");
 let target;
-
-async function makeDialogTestEnv() {
-    const env = await makeTestEnv();
-    env.dialogData = {
-        isActive: true,
-        close: () => {},
-    };
-    return env;
-}
 
 QUnit.module("Components", (hooks) => {
     hooks.beforeEach(async (assert) => {
@@ -34,7 +34,7 @@ QUnit.module("Components", (hooks) => {
 
     QUnit.module("ConfirmationDialog");
 
-    QUnit.test("pressing escape to close the dialog", async function (assert) {
+    QUnit.test("Without dismiss callback pressing escape to close the dialog", async function (assert) {
         const env = await makeDialogTestEnv();
         await mount(ConfirmationDialog, target, {
             env,
@@ -44,7 +44,9 @@ QUnit.module("Components", (hooks) => {
                 close: () => {
                     assert.step("Close action");
                 },
-                confirm: () => {},
+                confirm: () => {
+                    throw new Error("should not be called");
+                },
                 cancel: () => {
                     assert.step("Cancel action");
                 },
@@ -56,6 +58,91 @@ QUnit.module("Components", (hooks) => {
         assert.verifySteps(
             ["Cancel action", "Close action"],
             "dialog has called its cancel method before its closure"
+        );
+    });
+
+    QUnit.test("With dismiss callback: pressing escape to close the dialog", async function (assert) {
+        const env = await makeDialogTestEnv();
+        await mount(ConfirmationDialog, target, {
+            env,
+            props: {
+                body: "Some content",
+                title: "Confirmation",
+                close: () => {
+                    assert.step("Close action");
+                },
+                confirm: () => {
+                    throw new Error("should not be called");
+                },
+                cancel: () => {
+                    throw new Error("should not be called");
+                },
+                dismiss: () => {
+                    assert.step("Dismiss action");
+                },
+            },
+        });
+        assert.verifySteps([]);
+        triggerHotkey("escape");
+        await nextTick();
+        assert.verifySteps(
+            ["Dismiss action", "Close action"],
+            "dialog has called its dismiss method before its closure"
+        );
+    });
+
+    QUnit.test("Without dismiss callback: clicking on 'X' to close the dialog", async function (assert) {
+        const env = await makeDialogTestEnv();
+        await mount(ConfirmationDialog, target, {
+            env,
+            props: {
+                body: "Some content",
+                title: "Confirmation",
+                close: () => {
+                    assert.step("Close action");
+                },
+                confirm: () => {
+                    throw new Error("should not be called");
+                },
+                cancel: () => {
+                    assert.step("Cancel action");
+                },
+            },
+        });
+        assert.verifySteps([]);
+        await click(target, ".modal-header .btn-close");
+        assert.verifySteps(
+            ["Cancel action", "Close action"],
+            "dialog has called its cancel method before its closure"
+        );
+    });
+
+    QUnit.test("With dismiss callback: clicking on 'X' to close the dialog", async function (assert) {
+        const env = await makeDialogTestEnv();
+        await mount(ConfirmationDialog, target, {
+            env,
+            props: {
+                body: "Some content",
+                title: "Confirmation",
+                close: () => {
+                    assert.step("Close action");
+                },
+                confirm: () => {
+                    throw new Error("should not be called");
+                },
+                cancel: () => {
+                    throw new Error("should not be called");
+                },
+                dismiss: () => {
+                    assert.step("Dismiss action");
+                },
+            },
+        });
+        assert.verifySteps([]);
+        await click(target, ".modal-header .btn-close");
+        assert.verifySteps(
+            ["Dismiss action", "Close action"],
+            "dialog has called its dismiss method before its closure"
         );
     });
 
@@ -73,6 +160,9 @@ QUnit.module("Components", (hooks) => {
                     assert.step("Confirm action");
                 },
                 cancel: () => {
+                    throw new Error("should not be called");
+                },
+                dismiss: () => {
                     throw new Error("should not be called");
                 },
             },
@@ -97,6 +187,9 @@ QUnit.module("Components", (hooks) => {
                 },
                 cancel: () => {
                     assert.step("Cancel action");
+                },
+                dismiss: () => {
+                    throw new Error("should not be called");
                 },
             },
         });
@@ -201,5 +294,42 @@ QUnit.module("Components", (hooks) => {
         def.resolve();
         await nextTick();
         assert.verifySteps(["close"]);
+    });
+
+    QUnit.test("Focus is correctly restored after confirmation", async function (assert) {
+        const env = await makeDialogTestEnv();
+
+        class MyComp extends Component {}
+        MyComp.template = xml`<div class="my-comp"><input type="text" class="my-input"/></div>`;
+
+        await mount(MyComp, target, { env });
+        target.querySelector(".my-input").focus();
+        assert.strictEqual(document.activeElement, target.querySelector(".my-input"));
+
+        const comp = await mount(ConfirmationDialog, target, {
+            env,
+            props: {
+                body: "Some content",
+                title: "Confirmation",
+                confirm: () => {},
+                close: () => {},
+            },
+        });
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".modal-footer .btn-primary")
+        );
+        await click(target, ".modal-footer .btn-primary");
+        assert.strictEqual(
+            document.activeElement,
+            document.body,
+            "As the button is disabled, the focus is now on the body"
+        );
+        destroy(comp);
+        assert.strictEqual(
+            document.activeElement,
+            target.querySelector(".my-input"),
+            "After destruction of the dialog, the focus is restored to the input"
+        );
     });
 });

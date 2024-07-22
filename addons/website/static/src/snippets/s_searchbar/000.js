@@ -1,10 +1,12 @@
 /** @odoo-module **/
 
-import concurrency from 'web.concurrency';
-import publicWidget from 'web.public.widget';
+import { KeepLast } from "@web/core/utils/concurrency";
+import publicWidget from '@web/legacy/js/public/public_widget';
 
-import {qweb} from 'web.core';
-import {Markup} from 'web.utils';
+import { renderToElement, renderToString } from "@web/core/utils/render";
+import { debounce } from '@web/core/utils/timing';
+
+import { markup } from "@odoo/owl";
 
 publicWidget.registry.searchBar = publicWidget.Widget.extend({
     selector: '.o_searchbar_form',
@@ -22,10 +24,12 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
     init: function () {
         this._super.apply(this, arguments);
 
-        this._dp = new concurrency.DropPrevious();
+        this.keepLast = new KeepLast();
 
-        this._onInput = _.debounce(this._onInput, 400);
-        this._onFocusOut = _.debounce(this._onFocusOut, 100);
+        this._onInput = debounce(this._onInput, 400);
+        this._onFocusOut = debounce(this._onFocusOut, 100);
+
+        this.rpc = this.bindService("rpc");
     },
     /**
      * @override
@@ -109,29 +113,19 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
      * @private
      */
     async _fetch() {
-        const res = await this._rpc({
-            route: '/website/snippet/autocomplete',
-            params: {
-                'search_type': this.searchType,
-                'term': this.$input.val(),
-                'order': this.order,
-                'limit': this.limit,
-                'max_nb_chars': Math.round(Math.max(this.autocompleteMinWidth, parseInt(this.$el.width())) * 0.22),
-                'options': this.options,
-            },
+        const res = await this.rpc('/website/snippet/autocomplete', {
+            'search_type': this.searchType,
+            'term': this.$input.val(),
+            'order': this.order,
+            'limit': this.limit,
+            'max_nb_chars': Math.round(Math.max(this.autocompleteMinWidth, parseInt(this.$el.width())) * 0.22),
+            'options': this.options,
         });
-        const fieldNames = [
-            'name',
-            'description',
-            'extra_link',
-            'detail',
-            'detail_strike',
-            'detail_extra',
-        ];
+        const fieldNames = this._getFieldsNames();
         res.results.forEach(record => {
             for (const fieldName of fieldNames) {
                 if (record[fieldName]) {
-                    record[fieldName] = Markup(record[fieldName]);
+                    record[fieldName] = markup(record[fieldName]);
                 }
             }
         });
@@ -154,10 +148,10 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             const results = res['results'];
             let template = 'website.s_searchbar.autocomplete';
             const candidate = template + '.' + this.searchType;
-            if (qweb.has_template(candidate)) {
+            if (candidate in renderToString.app.rawTemplates) {
                 template = candidate;
             }
-            this.$menu = $(qweb.render(template, {
+            this.$menu = $(renderToElement(template, {
                 results: results,
                 parts: res['parts'],
                 hasMoreResults: results.length < res['results_count'],
@@ -225,6 +219,16 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             }
         }
     },
+    _getFieldsNames() {
+        return [
+            'description',
+            'detail',
+            'detail_extra',
+            'detail_strike',
+            'extra_link',
+            'name',
+        ];
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -240,7 +244,7 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
         if (this.searchType === 'all' && !this.$input.val().trim().length) {
             this._render();
         } else {
-            this._dp.add(this._fetch()).then(this._render.bind(this));
+            this.keepLast.add(this._fetch()).then(this._render.bind(this));
         }
     },
     /**
@@ -255,24 +259,24 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
      * @private
      */
     _onKeydown: function (ev) {
-        switch (ev.which) {
-            case $.ui.keyCode.ESCAPE:
+        switch (ev.key) {
+            case "Escape":
                 this._render();
                 break;
-            case $.ui.keyCode.UP:
-            case $.ui.keyCode.DOWN:
+            case "ArrowUp":
+            case "ArrowDown":
                 ev.preventDefault();
                 if (this.$menu) {
                     const focusableEls = [this.$input[0], ...this.$menu[0].children];
                     const focusedEl = document.activeElement;
                     const currentIndex = focusableEls.indexOf(focusedEl) || 0;
-                    const delta = ev.which === $.ui.keyCode.UP ? focusableEls.length - 1 : 1;
+                    const delta = ev.key === "ArrowUp" ? focusableEls.length - 1 : 1;
                     const nextIndex = (currentIndex + delta) % focusableEls.length;
                     const nextFocusedEl = focusableEls[nextIndex];
                     nextFocusedEl.focus();
                 }
                 break;
-            case $.ui.keyCode.ENTER:
+            case "Enter":
                 this.limit = 0; // prevent autocomplete
                 break;
         }

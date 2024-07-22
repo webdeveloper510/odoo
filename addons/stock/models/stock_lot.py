@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from re import findall as regex_findall, split as regex_split
-
 import operator as py_operator
+from operator import attrgetter
+from re import findall as regex_findall, split as regex_split
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -26,24 +26,34 @@ class StockLot(models.Model):
     _check_company_auto = True
     _order = 'name, id'
 
+    def _read_group_location_id(self, locations, domain, order):
+        partner_locations = locations.search([('usage', 'in', ('customer', 'supplier'))])
+        return partner_locations + locations.warehouse_id.search([]).lot_stock_id
+
     name = fields.Char(
         'Lot/Serial Number', default=lambda self: self.env['ir.sequence'].next_by_code('stock.lot.serial'),
         required=True, help="Unique Lot/Serial Number", index='trigram')
     ref = fields.Char('Internal Reference', help="Internal reference number in case it differs from the manufacturer's lot/serial number")
     product_id = fields.Many2one(
         'product.product', 'Product', index=True,
-        domain=lambda self: self._domain_product_id(), required=True, check_company=True)
+        domain=("[('tracking', '!=', 'none'), ('type', '=', 'product')] +"
+            " ([('product_tmpl_id', '=', context['default_product_tmpl_id'])] if context.get('default_product_tmpl_id') else [])"),
+        required=True, check_company=True)
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         related='product_id.uom_id', store=True)
     quant_ids = fields.One2many('stock.quant', 'lot_id', 'Quants', readonly=True)
-    product_qty = fields.Float('Quantity', compute='_product_qty', search='_search_product_qty')
+    product_qty = fields.Float('On Hand Quantity', compute='_product_qty', search='_search_product_qty')
     note = fields.Html(string='Description')
     display_complete = fields.Boolean(compute='_compute_display_complete')
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company.id)
     delivery_ids = fields.Many2many('stock.picking', compute='_compute_delivery_ids', string='Transfers')
     delivery_count = fields.Integer('Delivery order count', compute='_compute_delivery_ids')
     last_delivery_partner_id = fields.Many2one('res.partner', compute='_compute_last_delivery_partner_id')
+    lot_properties = fields.Properties('Properties', definition='product_id.lot_properties_definition', copy=True)
+    location_id = fields.Many2one(
+        'stock.location', 'Location', compute='_compute_single_location', store=True, readonly=False,
+        inverse='_set_single_location', domain="[('usage', '!=', 'view')]", group_expand='_read_group_location_id')
 
     @api.model
     def generate_lot_names(self, first_lot, count):
@@ -62,14 +72,9 @@ class StockLot(models.Model):
         suffix = splitted[-1]
         initial_number = int(initial_number)
 
-        lot_names = []
-        for i in range(0, count):
-            lot_names.append('%s%s%s' % (
-                prefix,
-                str(initial_number + i).zfill(padding),
-                suffix
-            ))
-        return lot_names
+        return [{
+            'lot_name': '%s%s%s' % (prefix, str(initial_number + i).zfill(padding), suffix),
+        } for i in range(0, count)]
 
     @api.model
     def _get_next_serial(self, company, product):
@@ -79,7 +84,7 @@ class StockLot(models.Model):
                 [('company_id', '=', company.id), ('product_id', '=', product.id)],
                 limit=1, order='id DESC')
             if last_serial:
-                return self.env['stock.lot'].generate_lot_names(last_serial.name, 2)[1]
+                return self.env['stock.lot'].generate_lot_names(last_serial.name, 2)[1]['lot_name']
         return False
 
     @api.constrains('name', 'product_id', 'company_id')
@@ -87,30 +92,13 @@ class StockLot(models.Model):
         domain = [('product_id', 'in', self.product_id.ids),
                   ('company_id', 'in', self.company_id.ids),
                   ('name', 'in', self.mapped('name'))]
-        fields = ['company_id', 'product_id', 'name']
         groupby = ['company_id', 'product_id', 'name']
-        records = self._read_group(domain, fields, groupby, lazy=False)
+        records = self._read_group(domain, groupby, having=[('__count', '>', 1)])
         error_message_lines = []
-        for rec in records:
-            if rec['__count'] != 1:
-                product_name = self.env['product.product'].browse(rec['product_id'][0]).display_name
-                error_message_lines.append(_(" - Product: %s, Serial Number: %s", product_name, rec['name']))
+        for __, product, name in records:
+            error_message_lines.append(_(" - Product: %s, Serial Number: %s", product.display_name, name))
         if error_message_lines:
             raise ValidationError(_('The combination of serial number and product must be unique across a company.\nFollowing combination contains duplicates:\n') + '\n'.join(error_message_lines))
-
-    def _domain_product_id(self):
-        domain = [
-            "('tracking', '!=', 'none')",
-            "('type', '=', 'product')",
-            "'|'",
-                "('company_id', '=', False)",
-                "('company_id', '=', company_id)"
-        ]
-        if self.env.context.get('default_product_tmpl_id'):
-            domain.insert(0,
-                ("('product_tmpl_id', '=', %s)" % self.env.context['default_product_tmpl_id'])
-            )
-        return '[' + ', '.join(domain) + ']'
 
     def _check_create(self):
         active_picking_id = self.env.context.get('active_picking_id', False)
@@ -144,6 +132,20 @@ class StockLot(models.Model):
                 lot.last_delivery_partner_id = self.env['stock.picking'].browse(delivery_ids_by_lot[lot.id]).sorted(key='date_done', reverse=True)[0].partner_id
             else:
                 lot.last_delivery_partner_id = False
+
+    @api.depends('quant_ids')
+    def _compute_single_location(self):
+        for lot in self:
+            quants = lot.quant_ids.filtered(lambda q: q.quantity > 0)
+            lot.location_id = quants.location_id if len(quants.location_id) == 1 else False
+
+    def _set_single_location(self):
+        quants = self.quant_ids.filtered(lambda q: q.quantity > 0)
+        if len(quants.location_id) == 1:
+            unpack = len(quants.package_id.quant_ids) > 1
+            quants.move_quants(location_dest_id=self.location_id, message=_("Lot/Serial Number Relocated"), unpack=unpack)
+        elif len(quants.location_id) > 1:
+            raise UserError(_('You can only move a lot/serial to a new location if it exists in a single location.'))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -189,15 +191,13 @@ class StockLot(models.Model):
             '|', ('location_id.usage', '=', 'internal'),
             '&', ('location_id.usage', '=', 'transit'), ('location_id.company_id', '!=', False)
         ]
-        lots_w_quants = self.env['stock.quant'].read_group(domain=domain, fields=['quantity:sum'], groupby=['lot_id'])
+        lots_w_qty = self.env['stock.quant']._read_group(domain=domain, groupby=['lot_id'], aggregates=['quantity:sum'], having=[('quantity:sum', '!=', 0)])
         ids = []
         lot_ids_w_qty = []
-        for lot_w_quants in lots_w_quants:
-            if OPERATORS['='](lot_w_quants['quantity'], 0.0):
-                continue
-            lot_id = lot_w_quants['lot_id'][0]
+        for lot, quantity_sum in lots_w_qty:
+            lot_id = lot.id
             lot_ids_w_qty.append(lot_id)
-            if OPERATORS[operator](lot_w_quants['quantity'], value):
+            if OPERATORS[operator](quantity_sum, value):
                 ids.append(lot_id)
         if value == 0.0 and operator == '=':
             return [('id', 'not in', lot_ids_w_qty)]
@@ -217,7 +217,7 @@ class StockLot(models.Model):
         self = self.with_context(search_default_lot_id=self.id, create=False)
         if self.user_has_groups('stock.group_stock_manager'):
             self = self.with_context(inventory_mode=True)
-        return self.env['stock.quant']._get_quants_action()
+        return self.env['stock.quant'].action_view_quants()
 
     def action_lot_open_transfers(self):
         self.ensure_one()
@@ -238,14 +238,6 @@ class StockLot(models.Model):
                 'view_mode': 'tree,form'
             })
         return action
-
-    def _get_delivery_ids_by_lot_domain(self):
-        # TODO master: delete (dead code)
-        return [
-            ('lot_id', 'in', self.ids),
-            ('state', '=', 'done'),
-            '|', ('picking_code', '=', 'outgoing'), ('produce_line_ids', '!=', False),
-        ]
 
     @api.model
     def _get_outgoing_domain(self):

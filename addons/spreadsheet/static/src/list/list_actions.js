@@ -1,20 +1,19 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import { astToFormula } from "@odoo/o-spreadsheet";
 import { getFirstListFunction, getNumberOfListFormulas } from "./list_helpers";
 
-const { astToFormula } = spreadsheet;
-
-export const SEE_RECORD_LIST = async (cell, env) => {
-    const { col, row, sheetId } = env.model.getters.getCellPosition(cell.id);
+export const SEE_RECORD_LIST = async (position, env) => {
+    const cell = env.model.getters.getCell(position);
+    const sheetId = position.sheetId;
     if (!cell) {
         return;
     }
-    const { args } = getFirstListFunction(cell.content);
+    const { args } = getFirstListFunction(cell.compiledFormula.tokens);
     const evaluatedArgs = args
         .map(astToFormula)
-        .map((arg) => env.model.getters.evaluateFormula(arg));
-    const listId = env.model.getters.getListIdFromPosition(sheetId, col, row);
+        .map((arg) => env.model.getters.evaluateFormula(sheetId, arg));
+    const listId = env.model.getters.getListIdFromPosition(position);
     const { model } = env.model.getters.getListDefinition(listId);
     const dataSource = await env.model.getters.getAsyncListDataSource(listId);
     const recordId = dataSource.getIdFromPosition(evaluatedArgs[1] - 1);
@@ -30,12 +29,15 @@ export const SEE_RECORD_LIST = async (cell, env) => {
     });
 };
 
-export const SEE_RECORD_LIST_VISIBLE = (cell) => {
+export const SEE_RECORD_LIST_VISIBLE = (position, env) => {
+    const evaluatedCell = env.model.getters.getEvaluatedCell(position);
+    const cell = env.model.getters.getCell(position);
     return (
+        evaluatedCell.type !== "empty" &&
+        evaluatedCell.type !== "error" &&
         cell &&
-        cell.evaluated.value !== "" &&
-        !cell.evaluated.error &&
-        getNumberOfListFormulas(cell.content) === 1 &&
-        getFirstListFunction(cell.content).functionName === "ODOO.LIST"
+        cell.isFormula &&
+        getNumberOfListFormulas(cell.compiledFormula.tokens) === 1 &&
+        getFirstListFunction(cell.compiledFormula.tokens).functionName === "ODOO.LIST"
     );
 };

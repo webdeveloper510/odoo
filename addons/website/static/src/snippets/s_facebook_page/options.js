@@ -1,9 +1,14 @@
-odoo.define('website.s_facebook_page_options', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const options = require('web_editor.snippets.options');
+import { pick } from "@web/core/utils/objects";
+import options from "@web_editor/js/editor/snippets.options";
 
 options.registry.facebookPage = options.Class.extend({
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+    },
+
     /**
      * Initializes the required facebook page data to create the iframe.
      *
@@ -21,15 +26,11 @@ options.registry.facebookPage = options.Class.extend({
             small_header: true,
             hide_cover: true,
         };
-        this.fbData = _.defaults(_.pick(this.$target[0].dataset, _.keys(defaults)), defaults);
-
+        this.fbData = Object.assign({}, defaults, pick(this.$target[0].dataset, ...Object.keys(defaults)));
         if (!this.fbData.href) {
             // Fetches the default url for facebook page from website config
             var self = this;
-            defs.push(this._rpc({
-                model: 'website',
-                method: 'search_read',
-                args: [[], ['social_facebook']],
+            defs.push(this.orm.searchRead("website", [], ["social_facebook"], {
                 limit: 1,
             }).then(function (res) {
                 if (res) {
@@ -39,6 +40,12 @@ options.registry.facebookPage = options.Class.extend({
         }
 
         return Promise.all(defs).then(() => this._markFbElement()).then(() => this._refreshPublicWidgets());
+    },
+    /**
+     * @override
+     */
+    onBuilt() {
+        this.$target[0].querySelector('.o_facebook_page_preview')?.remove();
     },
 
     //--------------------------------------------------------------------------
@@ -105,9 +112,9 @@ options.registry.facebookPage = options.Class.extend({
             } else {
                 this.fbData.height = 150;
             }
-            _.each(this.fbData, (value, key) => {
+            for (const [key, value] of Object.entries(this.fbData)) {
                 this.$target[0].dataset[key] = value;
-            });
+            }
         });
     },
     /**
@@ -168,5 +175,4 @@ options.registry.facebookPage = options.Class.extend({
         this.fbData.href = defaultURL;
         return Promise.resolve();
     },
-});
 });

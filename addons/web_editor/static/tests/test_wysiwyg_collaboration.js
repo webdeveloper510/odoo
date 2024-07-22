@@ -1,23 +1,37 @@
 /** @odoo-module **/
 
-import { patch, unpatch } from "@web/core/utils/patch";
+import { patch } from "@web/core/utils/patch";
 import {
     parseTextualSelection,
     setTestSelection,
     renderTextualSelection,
     patchEditorIframe,
 } from '@web_editor/js/editor/odoo-editor/test/utils';
-import { stripHistoryIds } from '@web_editor/js/backend/html_field';
-import Wysiwyg from 'web_editor.wysiwyg';
+import { Wysiwyg, stripHistoryIds } from '@web_editor/js/wysiwyg/wysiwyg';
 import { Mutex } from '@web/core/utils/concurrency';
+import { makeTestEnv } from "@web/../tests/helpers/mock_env";
+import { makeFakeNotificationService } from "@web/../tests/helpers/mock_services";
+import { mount, getFixture } from "@web/../tests/helpers/utils";
+import { registry } from "@web/core/registry";
 
-function makeSpy() {
-    const spy = function() {
-        spy.callCount++;
-        return this._super.apply(this, arguments);
+export function makeSpy(obj, functionName) {
+    const spy = {
+        callCount: 0,
     };
-    spy.callCount = 0;
+    patch(obj, {
+        [functionName]() {
+            spy.callCount++;
+            return super[functionName].apply(this, arguments);
+        }
+    });
     return spy;
+}
+export function makeSpies(obj, methodNames) {
+    const methods = {};
+    for (const methodName of methodNames) {
+        methods[methodName] = makeSpy(obj, methodName);
+    }
+    return methods;
 }
 
 class PeerTest {
@@ -34,7 +48,8 @@ class PeerTest {
         this.isOnline = true;
     }
     async startEditor() {
-        this._started = this.wysiwyg.appendTo(this.wrapper);
+        this._started = this.wysiwyg.startEdition();
+        this.started = true;
         await this._started;
         if (this.initialParsedSelection) {
             await setTestSelection(this.initialParsedSelection, this.document);
@@ -132,69 +147,78 @@ class PeerPool {
     }
 }
 
-async function createPeers(peers) {
+export async function createPeers(peers) {
     const pool = new PeerPool();
 
     let lastGeneratedId = 0;
 
     for (const peerId of peers) {
-        const peerWysiwygWrapper = document.createElement('div');
-        peerWysiwygWrapper.classList.add('peer_wysiwyg_wrapper');
-        peerWysiwygWrapper.classList.add('client_' + peerId);
-
         const iframe = document.createElement('iframe');
         if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
             // Firefox reset the page without this hack.
             // With this hack, chrome does not render content.
             iframe.setAttribute('src', ' javascript:void(0);');
         }
-        document.querySelector('#qunit-fixture').append(iframe);
+        getFixture().append(iframe);
         patchEditorIframe(iframe);
-        iframe.contentDocument.body.append(peerWysiwygWrapper);
+        iframe.contentDocument.body.innerHTML = `<div class="peer_wysiwyg_wrapper client_${peerId}"></div>`;
+        const peerWysiwygWrapper = iframe.contentDocument.querySelector('.peer_wysiwyg_wrapper');
         iframe.contentWindow.$ = $;
 
-        const fakeWysiwygParent = {
-            _trigger_up: () => {},
-        };
-
-        const wysiwyg = new Wysiwyg(fakeWysiwygParent, {
-            value: initialValue,
-            collaborative: true,
-            collaborationChannel: {
-                collaborationFieldName: "fake_field",
-                collaborationModelName: "fake.model",
-                collaborationResId: 1
-            },
-            document: iframe.contentWindow.document,
+        registry.category("services").add("notification", makeFakeNotificationService(), {
+            force: true,
         });
-        patch(wysiwyg, 'web_editor', {
+        registry.category("services").add("popover", { start: () => ({  }) }, {
+            force: true,
+        });
+        const env = await makeTestEnv({
+            mockRPC(route) {
+                if (route === "/web/dataset/call_kw/res.users/read") {
+                    return [{ id: 0, name: "admin" }];
+                }
+            }
+        });
+
+        const wysiwyg = await mount(Wysiwyg, peerWysiwygWrapper, {
+            env,
+            props: {
+                startWysiwyg: () => {},
+                options: {
+                    value: initialValue,
+                    collaborative: true,
+                    collaborationChannel: {
+                        collaborationFieldName: "fake_field",
+                        collaborationModelName: "fake.model",
+                        collaborationResId: 1
+                    },
+                    document: iframe.contentWindow.document,
+                }
+            }
+        });
+        patch(wysiwyg, {
             _generateClientId() {
                 return peerId;
             },
             // Hacky hook as we know this method is called after setting the value in the wysiwyg start and before sending the value to odooEditor.
             _getLastHistoryStepId() {
                 pool.peers[peerId].initialParsedSelection = parseTextualSelection(wysiwyg.$editable[0]);
-                return this._super(...arguments);
+                return super._getLastHistoryStepId(...arguments);
             },
-            call: () => {},
-            getSession: () => ({notification_type: true}),
-            _rpc(params) {
-                if (params.route === '/web_editor/get_ice_servers') {
+            _serviceRpc(route, params) {
+                if (route === '/web_editor/get_ice_servers') {
                     return [];
-                } else if (params.route === '/web_editor/bus_broadcast') {
+                } else if (route === '/web_editor/bus_broadcast') {
                     const currentPeer = pool.peers[peerId];
                     for (const peer of currentPeer._connections) {
-                        peer.wysiwyg.ptp.handleNotification(structuredClone(params.params.bus_data));
+                        peer.wysiwyg.ptp.handleNotification(structuredClone(params.bus_data));
                     }
-                } else if (params.model === "res.users" && params.method === "search_read") {
-                    return [{ name: "admin" }];
                 }
             },
             _getNewPtp() {
-                const ptp = this._super(...arguments);
+                const ptp = super._getNewPtp(...arguments);
                 ptp.options.onRequest.get_client_avatar = () => '';
 
-                patch(ptp, "web_editor_peer_to_peer", {
+                patch(ptp, {
                     removeClient(peerId) {
                         this.notifySelf('ptp_remove', peerId);
                         delete this.clientsInfos[peerId];
@@ -207,7 +231,7 @@ async function createPeers(peers) {
                         if (args[0] === 'ptp_join') {
                             return;
                         }
-                        this._super(...args);
+                        super.notifyAllClients(...args);
                     },
                      _getPtpClients() {
                         return pool.peers[peerId]._connections.map((peer) => {
@@ -244,8 +268,8 @@ async function createPeers(peers) {
                 return '';
             },
             async startEdition() {
-                await this._super(...arguments);
-                patch(this.odooEditor, 'odooEditor', {
+                await super.startEdition(...arguments);
+                patch(this.odooEditor, {
                     _generateId() {
                         // Ensure the id are deterministically gererated for
                         // when we need to sort by them. (eg. in the
@@ -254,7 +278,11 @@ async function createPeers(peers) {
                         return lastGeneratedId.toString();
                     },
                 });
-            }
+            },
+            _hasICEServers() {
+                return true;
+            },
+            _showConflictDialog() {},
         });
         pool.peers[peerId] = new PeerTest({
             peerId,
@@ -266,25 +294,44 @@ async function createPeers(peers) {
     }
     return pool;
 }
-function removePeers(peers) {
+export function removePeers(peers) {
     for (const peer of Object.values(peers)) {
         peer.wysiwyg.destroy();
         peer.wrapper.remove();
     }
 }
 
+const unpatchs = [];
 QUnit.module('web_editor', {
     before() {
-        patch(Wysiwyg, 'web_editor', {
-            activeCollaborationChannelNames: {
-                has: () => false,
-                add: () => {},
-                delete: () => {},
-            }
-        });
+        unpatchs.push(
+            patch(Wysiwyg, {
+                activeCollaborationChannelNames: {
+                    has: () => false,
+                    add: () => {},
+                    delete: () => {},
+                },
+            })
+        );
+        unpatchs.push(
+            patch(Wysiwyg.prototype, {
+                setup() {
+                    const result = super.setup(...arguments);
+                    this.busService = {
+                        addEventListener: () => {},
+                        removeEventListener: () => {},
+                        addChannel: () => {},
+                        deleteChannel: () => {},
+                    };
+                    return result;
+                },
+            })
+        );
     },
     after() {
-        unpatch(Wysiwyg, "web_editor");
+        for (const unpatch of unpatchs) {
+            unpatch();
+        }
     }
 }, () => {
     QUnit.module('Collaboration', {}, () => {
@@ -418,13 +465,13 @@ QUnit.module('web_editor', {
                         await peers.p1.openDataChannel(peers.p3);
                         await peers.p2.openDataChannel(peers.p3);
 
-                        const p3Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                        };
-                        patch(peers.p3.wysiwyg, 'test', p3Spies);
+                        const p3Spies = makeSpies(peers.p3.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                        ]);
+
 
                         assert.equal(peers.p1.wysiwyg._historyShareId, peers.p2.wysiwyg._historyShareId, 'p1 and p2 should have the same _historyShareId');
                         assert.equal(peers.p1.wysiwyg._historyShareId, peers.p3.wysiwyg._historyShareId, 'p1 and p3 should have the same _historyShareId');
@@ -447,7 +494,6 @@ QUnit.module('web_editor', {
                         assert.equal(peers.p3.wysiwyg._isDocumentStale, false, 'p3 should not have a stale document');
 
                         await peers.p3.setOnline();
-                        unpatch(peers.p3.wysiwyg, 'test');
 
                         assert.equal(p3Spies._recoverFromStaleDocument.callCount, 1, 'p3 _recoverFromStaleDocument should have been called once');
                         assert.equal(p3Spies._processMissingSteps.callCount, 1, 'p3 _processMissingSteps should have been called once');
@@ -481,21 +527,19 @@ QUnit.module('web_editor', {
                         peers.p2.setOffline();
                         peers.p3.setOffline();
 
-                        const p2Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                        };
-                        patch(peers.p2.wysiwyg, 'test', p2Spies);
-                        const p3Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                            _onRecoveryClientTimeout: makeSpy(),
-                        };
-                        patch(peers.p3.wysiwyg, 'test', p3Spies);
+                        const p2Spies = makeSpies(peers.p2.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                        ]);
+                        const p3Spies = makeSpies(peers.p3.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                            '_onRecoveryClientTimeout',
+                        ]);
 
                         await peers.p1.wysiwyg.odooEditor.execCommand('insert', 'b');
                         await peers.p1.writeToServer();
@@ -528,9 +572,6 @@ QUnit.module('web_editor', {
                         assert.equal(p3Spies._applySnapshot.callCount, 1, 'p3 _applySnapshot should have been called once');
                         assert.equal(p3Spies._onRecoveryClientTimeout.callCount, 0, 'p3 _onRecoveryClientTimeout should not have been called');
 
-                        unpatch(peers.p2.wysiwyg, 'test');
-                        unpatch(peers.p3.wysiwyg, 'test');
-
                         removePeers(peers);
                     });
                     QUnit.test('should recover from snapshot after PTP_MAX_RECOVERY_TIME if some peer do not respond', async (assert) => {
@@ -552,21 +593,19 @@ QUnit.module('web_editor', {
                         peers.p2.setOffline();
                         peers.p3.setOffline();
 
-                        const p2Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                        };
-                        patch(peers.p2.wysiwyg, 'test', p2Spies);
-                        const p3Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                            _onRecoveryClientTimeout: makeSpy(),
-                        };
-                        patch(peers.p3.wysiwyg, 'test', p3Spies);
+                        const p2Spies = makeSpies(peers.p2.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                        ]);
+                        const p3Spies = makeSpies(peers.p3.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                            '_onRecoveryClientTimeout',
+                        ]);
 
                         await peers.p1.wysiwyg.odooEditor.execCommand('insert', 'b');
                         await peers.p1.writeToServer();
@@ -598,9 +637,6 @@ QUnit.module('web_editor', {
                         assert.equal(p3Spies._applySnapshot.callCount, 1, 'p3 _applySnapshot should have been called once');
                         assert.equal(p3Spies._onRecoveryClientTimeout.callCount, 1, 'p3 _onRecoveryClientTimeout should have been called once');
 
-                        unpatch(peers.p2.wysiwyg, 'test');
-                        unpatch(peers.p3.wysiwyg, 'test');
-
                         removePeers(peers);
                     });
                 });
@@ -624,25 +660,23 @@ QUnit.module('web_editor', {
                         peers.p2.setOffline();
                         peers.p3.setOffline();
 
-                        const p2Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                            _onRecoveryClientTimeout: makeSpy(),
-                            _resetFromClient: makeSpy(),
-                        };
+                        const p2Spies = makeSpies(peers.p2.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                            '_onRecoveryClientTimeout',
+                            '_resetFromClient',
+                        ]);
 
-                        patch(peers.p2.wysiwyg, 'test', p2Spies);
-                        const p3Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                            _onRecoveryClientTimeout: makeSpy(),
-                            _resetFromClient: makeSpy(),
-                        };
-                        patch(peers.p3.wysiwyg, 'test', p3Spies);
+                        const p3Spies = makeSpies(peers.p3.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                            '_onRecoveryClientTimeout',
+                            '_resetFromClient',
+                        ]);
 
                         await peers.p1.wysiwyg.odooEditor.execCommand('insert', 'b');
                         await peers.p1.writeToServer();
@@ -676,9 +710,6 @@ QUnit.module('web_editor', {
                         assert.equal(p3Spies._onRecoveryClientTimeout.callCount, 0, 'p3 _onRecoveryClientTimeout should not have been called');
                         assert.equal(p3Spies._resetFromClient.callCount, 1, 'p3 _resetFromClient should have been called once');
 
-                        unpatch(peers.p2.wysiwyg, 'test');
-                        unpatch(peers.p3.wysiwyg, 'test');
-
                         removePeers(peers);
                     });
                     QUnit.test('should recover from server if there is no peer connected', async (assert) => {
@@ -695,15 +726,14 @@ QUnit.module('web_editor', {
                         await peers.p1.openDataChannel(peers.p2);
                         peers.p2.setOffline();
 
-                        const p2Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                            _onRecoveryClientTimeout: makeSpy(),
-                            _resetFromClient: makeSpy(),
-                        };
-                        patch(peers.p2.wysiwyg, 'test', p2Spies);
+                        const p2Spies = makeSpies(peers.p2.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                            '_onRecoveryClientTimeout',
+                            '_resetFromClient',
+                        ]);
 
                         await peers.p1.wysiwyg.odooEditor.execCommand('insert', 'b');
                         await peers.p1.writeToServer();
@@ -729,8 +759,6 @@ QUnit.module('web_editor', {
                         assert.equal(p2Spies._onRecoveryClientTimeout.callCount, 0, 'p2 _onRecoveryClientTimeout should not have been called');
                         assert.equal(p2Spies._resetFromClient.callCount, 0, 'p2 _resetFromClient should not have been called');
 
-                        unpatch(peers.p2.wysiwyg, 'test');
-
                         removePeers(peers);
                     });
                     QUnit.test('should recover from server if there is no response after PTP_MAX_RECOVERY_TIME', async (assert) => {
@@ -751,15 +779,14 @@ QUnit.module('web_editor', {
                         peers.p2.setOffline();
                         peers.p3.setOffline();
 
-                        const p2Spies = {
-                            _recoverFromStaleDocument: makeSpy(),
-                            _resetFromServerAndResyncWithClients: makeSpy(),
-                            _processMissingSteps: makeSpy(),
-                            _applySnapshot: makeSpy(),
-                            _onRecoveryClientTimeout: makeSpy(),
-                            _resetFromClient: makeSpy(),
-                        };
-                        patch(peers.p2.wysiwyg, 'test', p2Spies);
+                        const p2Spies = makeSpies(peers.p2.wysiwyg, [
+                            '_recoverFromStaleDocument',
+                            '_resetFromServerAndResyncWithClients',
+                            '_processMissingSteps',
+                            '_applySnapshot',
+                            '_onRecoveryClientTimeout',
+                            '_resetFromClient',
+                        ]);
 
                         await peers.p1.wysiwyg.odooEditor.execCommand('insert', 'b');
                         await peers.p1.writeToServer();
@@ -790,8 +817,6 @@ QUnit.module('web_editor', {
                         // unavailable. This test is usefull to check that the
                         // code path to _resetFromClient is properly taken.
                         assert.equal(p2Spies._resetFromClient.callCount, 2, 'p2 _resetFromClient should have been called twice');
-
-                        unpatch(peers.p2.wysiwyg, 'test');
 
                         removePeers(peers);
                     });
@@ -847,21 +872,20 @@ QUnit.module('web_editor', {
                 // should be removed when the fix of undetected missing step
                 // will be merged. (task-3208277)
                 const p1PromiseForMissingStep = new Promise((resolve) => {
-                    patch(peers.p2.wysiwyg, 'missingSteps', {
+                    patch(peers.p2.wysiwyg, {
                         async _processMissingSteps() {
-                            const _super = this._super;
                             // Wait for the p2PromiseForMissingStep to resolve
                             // to avoid undetected missing step.
                             await p2PromiseForMissingStep;
-                            _super(...arguments);
+                            super._processMissingSteps(...arguments);
                             resolve();
                         }
                     })
                 });
                 const p2PromiseForMissingStep = new Promise((resolve) => {
-                    patch(peers.p1.wysiwyg, 'missingSteps', {
+                    patch(peers.p1.wysiwyg, {
                         async _processMissingSteps() {
-                            this._super(...arguments);
+                            super._processMissingSteps(...arguments);
                             resolve();
                         }
                     })

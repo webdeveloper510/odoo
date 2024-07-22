@@ -1,14 +1,4 @@
-odoo.define('web.dom_ready', function (require) {
-'use strict';
-
-    return new Promise(function (resolve, reject) {
-        $(resolve);
-    });
-});
-//==============================================================================
-
-odoo.define('web.dom', function (require) {
-"use strict";
+/** @odoo-module **/
 
 /**
  * DOM Utility helpers
@@ -19,153 +9,9 @@ odoo.define('web.dom', function (require) {
  * something happens in the DOM.
  */
 
-var core = require('web.core');
-const minimalDom = require('@web/legacy/js/core/minimal_dom');
-var _t = core._t;
-
-/**
- * Private function to notify that something has been attached in the DOM
- * @param {htmlString or Element or Array or jQuery} [content] the content that
- * has been attached in the DOM
- * @params {Array} [callbacks] array of {widget: w, callback_args: args} such
- * that on_attach_callback() will be called on each w with arguments args
- */
-function _notify(content, callbacks) {
-    callbacks.forEach(function (c) {
-        if (c.widget && c.widget.on_attach_callback) {
-            c.widget.on_attach_callback(c.callback_args);
-        }
-    });
-    core.bus.trigger('DOM_updated', content);
-}
+import * as minimalDom from '@web/legacy/js/core/minimal_dom';
 
 const dom = Object.assign({}, minimalDom, {
-    /**
-     * Appends content in a jQuery object and optionnally triggers an event
-     *
-     * @param {jQuery} [$target] the node where content will be appended
-     * @param {htmlString or Element or Array or jQuery} [content] DOM element,
-     *   array of elements, HTML string or jQuery object to append to $target
-     * @param {Boolean} [options.in_DOM] true if $target is in the DOM
-     * @param {Array} [options.callbacks] array of objects describing the
-     *   callbacks to perform (see _notify for a complete description)
-     */
-    append: function ($target, content, options) {
-        $target.append(content);
-        if (options && options.in_DOM) {
-            _notify(content, options.callbacks);
-        }
-    },
-    /**
-     * Detects if 2 elements are colliding.
-     *
-     * @param {Element} el1
-     * @param {Element} el2
-     * @returns {boolean}
-     */
-     areColliding(el1, el2) {
-        const el1Rect = el1.getBoundingClientRect();
-        const el2Rect = el2.getBoundingClientRect();
-        return el1Rect.bottom > el2Rect.top
-            && el1Rect.top < el2Rect.bottom
-            && el1Rect.right > el2Rect.left
-            && el1Rect.left < el2Rect.right;
-    },
-    /**
-     * Autoresize a $textarea node, by recomputing its height when necessary
-     * @param {number} [options.min_height] by default, 50.
-     * @param {Widget} [options.parent] if set, autoresize will listen to some
-     *   extra events to decide when to resize itself.  This is useful for
-     *   widgets that are not in the dom when the autoresize is declared.
-     */
-    autoresize: function ($textarea, options) {
-        if ($textarea.data("auto_resize")) {
-            return;
-        }
-
-        var $fixedTextarea;
-        var minHeight;
-
-        function resize() {
-            $fixedTextarea.insertAfter($textarea);
-            var heightOffset = 0;
-            var style = window.getComputedStyle($textarea[0], null);
-            if (style.boxSizing === 'border-box') {
-                var paddingHeight = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-                var borderHeight = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-                heightOffset = borderHeight + paddingHeight;
-            }
-            $fixedTextarea.width($textarea.width());
-            $fixedTextarea.val($textarea.val());
-            var height = $fixedTextarea[0].scrollHeight;
-            $textarea.css({height: Math.max(height + heightOffset, minHeight)});
-        }
-
-        function removeVerticalResize() {
-            // We already compute the correct height:
-            // we don't want the user to resize it vertically.
-            // On Chrome this needs to be called after the DOM is ready.
-            var style = window.getComputedStyle($textarea[0], null);
-            if (style.resize === 'vertical') {
-                $textarea[0].style.resize = 'none';
-            } else if (style.resize === 'both') {
-                $textarea[0].style.resize = 'horizontal';
-            }
-        }
-
-        options = options || {};
-        minHeight = 'min_height' in options ? options.min_height : 50;
-
-        $fixedTextarea = $('<textarea disabled>', {
-            class: $textarea[0].className,
-        });
-
-        var direction = _t.database.parameters.direction === 'rtl' ? 'right' : 'left';
-        $fixedTextarea.css({
-            position: 'absolute',
-            opacity: 0,
-            height: 10,
-            borderTopWidth: 0,
-            borderBottomWidth: 0,
-            padding: 0,
-            overflow: 'hidden',
-            top: -10000,
-        }).css(direction, -10000);
-        $fixedTextarea.data("auto_resize", true);
-
-        // The following line is necessary to prevent the scrollbar to appear
-        // on the textarea on Firefox when adding a new line if the current line
-        // has just enough characters to completely fill the line.
-        // This fix should be fine since we compute the height depending on the
-        // content, there should never be an overflow.
-        // TODO ideally understand why and fix this another way if possible.
-        $textarea.css({'overflow-y': 'hidden'});
-
-        resize();
-        removeVerticalResize();
-        $textarea.data("auto_resize", true);
-
-        $textarea.on('input focus change', resize);
-        if (options.parent) {
-            core.bus.on('DOM_updated', options.parent, function () {
-                resize();
-                removeVerticalResize();
-            });
-        }
-    },
-    /**
-     * @return {HTMLElement|null}
-     */
-    closestScrollable(el) {
-        return $(el).closestScrollable()[0] || null;
-    },
-    /**
-     * @param {HTMLElement} el
-     * @see $.compensateScrollbar
-     */
-    compensateScrollbar(el, ...rest) {
-        $(el).compensateScrollbar(...rest);
-    },
     /**
      * jQuery find function behavior is::
      *
@@ -202,100 +48,6 @@ const dom = Object.assign({}, minimalDom, {
         return $results;
     },
     /**
-     * Detaches widgets from the DOM and performs their on_detach_callback()
-     *
-     * @param {Array} [to_detach] array of {widget: w, callback_args: args} such
-     *   that w.$el will be detached and w.on_detach_callback(args) will be
-     *   called
-     * @param {jQuery} [options.$to_detach] if given, detached instead of
-     *   widgets' $el
-     * @return {jQuery} the detached elements
-     */
-    detach: function (to_detach, options) {
-        to_detach.forEach( function (d) {
-            if (d.widget.on_detach_callback) {
-                d.widget.on_detach_callback(d.callback_args);
-            }
-        });
-        var $to_detach = options && options.$to_detach;
-        if (!$to_detach) {
-            $to_detach = $(to_detach.map(function (d) {
-                return d.widget.el;
-            }));
-        }
-        return $to_detach.detach();
-    },
-    /**
-     * Returns the selection range of an input or textarea
-     *
-     * @param {Object} node DOM item input or texteara
-     * @returns {Object} range
-     */
-    getSelectionRange: function (node) {
-        return {
-            start: node.selectionStart,
-            end: node.selectionEnd,
-        };
-    },
-    /**
-     * Returns the distance between a DOM element and the top-left corner of the
-     * window
-     *
-     * @param {Object} e DOM element (input or texteara)
-     * @return {Object} the left and top distances in pixels
-     */
-    getPosition: function (e) {
-        var position = {left: 0, top: 0};
-        while (e) {
-            position.left += e.offsetLeft;
-            position.top += e.offsetTop;
-            e = e.offsetParent;
-        }
-        return position;
-    },
-    /**
-     * @returns {HTMLElement}
-     */
-    getScrollingElement() {
-        return $().getScrollingElement(...arguments)[0];
-    },
-    /**
-     * @returns {HTMLElement|Window}
-     */
-    getScrollingTarget() {
-        return $().getScrollingTarget(...arguments)[0];
-    },
-    /**
-     * @param {HTMLElement} el
-     * @returns {boolean}
-     */
-    hasScrollableContent(el) {
-        return $(el).hasScrollableContent();
-    },
-    /**
-     * @param {HTMLElement} el
-     * @returns {boolean}
-     */
-    isScrollable(el) {
-        return $(el).isScrollable();
-    },
-    /**
-     * Prepends content in a jQuery object and optionnally triggers an event
-     *
-     * @param {jQuery} [$target] the node where content will be prepended
-     * @param {htmlString or Element or Array or jQuery} [content] DOM element,
-     *   array of elements, HTML string or jQuery object to prepend to $target
-     * @param {Boolean} [options.in_DOM] true if $target is in the DOM
-     * @param {Array} [options.callbacks] array of objects describing the
-     *   callbacks to perform (see _notify for a complete description)
-     */
-    prepend: function ($target, content, options) {
-        $target.prepend(content);
-        if (options && options.in_DOM) {
-            _notify(content, options.callbacks);
-        }
-    },
-    /**
      * Renders a button with standard odoo template. This does not use any xml
      * template to avoid forcing the frontend part to lazy load a xml file for
      * each widget which might want to create a simple button.
@@ -314,7 +66,7 @@ const dom = Object.assign({}, minimalDom, {
      * @returns {jQuery}
      */
     renderButton: function (options) {
-        var jQueryParams = _.extend({
+        var jQueryParams = Object.assign({
             type: 'button',
         }, options.attrs || {});
 
@@ -354,64 +106,6 @@ const dom = Object.assign({}, minimalDom, {
         }
 
         return $button;
-    },
-    /**
-     * Renders a checkbox with standard odoo/BS template. This does not use any
-     * xml template to avoid forcing the frontend part to lazy load a xml file
-     * for each widget which might want to create a simple checkbox.
-     *
-     * @param {Object} [options]
-     * @param {Object} [options.prop]
-     *        Allows to set the input properties (disabled and checked states).
-     * @param {string} [options.text]
-     *        The checkbox's associated text. If none is given then a simple
-     *        checkbox is rendered.
-     * @returns {jQuery}
-     */
-    renderCheckbox: function (options) {
-        var id = _.uniqueId('checkbox-');
-        var $container = $('<div/>', {
-            class: 'form-check',
-        });
-        var $input = $('<input/>', {
-            type: 'checkbox',
-            id: id,
-            class: 'form-check-input',
-        });
-        var $label = $('<label/>', {
-            for: id,
-            class: 'form-check-label',
-            text: options && options.text || '',
-        });
-        if (!options || !options.text) {
-            $label.html('&#8203;'); // BS checkboxes need some label content (so
-                                // add a zero-width space when there is no text)
-        }
-        if (options && options.prop) {
-            $input.prop(options.prop);
-        }
-        if (options && options.role) {
-            $input.attr('role', options.role);
-        }
-        return $container.append($input, $label);
-    },
-    /**
-     * Sets the selection range of a given input or textarea
-     *
-     * @param {Object} node DOM element (input or textarea)
-     * @param {integer} range.start
-     * @param {integer} range.end
-     */
-    setSelectionRange: function (node, range) {
-        if (node.setSelectionRange){
-            node.setSelectionRange(range.start, range.end);
-        } else if (node.createTextRange){
-            node.createTextRange()
-                .collapse(true)
-                .moveEnd('character', range.start)
-                .moveStart('character', range.end)
-                .select();
-        }
     },
     /**
      * Computes the size by which a scrolling point should be decreased so that
@@ -532,5 +226,4 @@ const dom = Object.assign({}, minimalDom, {
         });
     },
 });
-return dom;
-});
+export default dom;

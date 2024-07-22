@@ -47,12 +47,16 @@ class AccountTourUploadBill(models.TransientModel):
             record.preview_invoice = html
 
     def _selection_values(self):
-        journal_alias = self.env['account.journal'] \
-            .search([('type', '=', 'purchase'), ('company_id', '=', self.env.company.id)], limit=1)
+        journal_alias = self.env['account.journal'].search([
+            *self.env['account.journal']._check_company_domain(self.env.company),
+            ('type', '=', 'purchase'),
+        ], limit=1)
 
         values = [('sample', _('Try a sample vendor bill')), ('upload', _('Upload your own bill'))]
         if journal_alias.alias_name and journal_alias.alias_domain:
-            values.append(('email', _('Or send a bill to %s@%s', journal_alias.alias_name, journal_alias.alias_domain)))
+            values.append(('email', _('Send a bill to \n%s@%s', journal_alias.alias_name, journal_alias.alias_domain)))
+        else:
+            values.append(('email_no_alias', _('Send a bill by email')))
         return values
 
     def _action_list_view_bill(self, bill_ids=[]):
@@ -120,7 +124,10 @@ class AccountTourUploadBill(models.TransientModel):
 
             return self._action_list_view_bill(bill.ids)
         else:
-            email_alias = '%s@%s' % (purchase_journal.alias_name, purchase_journal.alias_domain)
+            if self.selection == 'email':
+                email_alias = '%s@%s' % (purchase_journal.alias_name, purchase_journal.alias_domain)
+            else:
+                email_alias = ''
             new_wizard = self.env['account.tour.upload.bill.email.confirm'].create({'email_alias': email_alias})
             view_id = self.env.ref('account.account_tour_upload_bill_email_confirm').id
 

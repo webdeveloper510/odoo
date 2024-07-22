@@ -198,16 +198,93 @@ class TestSaleToInvoice(TestSaleCommon):
         sale_order.invoice_ids.action_post()
         self.assertEqual(downpayment_line[0].price_unit, 50, 'The down payment unit price should not change on SO')
 
+    def test_downpayment_line_name(self):
+        """ Test downpayment's SO line name is updated when invoice is posted. """
+        # Create the SO with one line
+        sale_order = self.env['sale.order'].with_context(tracking_disable=True).create({
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
+            'pricelist_id': self.company_data['default_pricelist'].id,
+            'order_line': [Command.create({
+                'product_id': self.company_data['product_order_no'].id,
+                'product_uom_qty': 5,
+                'tax_id': False,
+            }),]
+        })
+        # Confirm the SO
+        sale_order.action_confirm()
+        # Update delivered quantity of SO line
+        sale_order.order_line.write({'qty_delivered': 5.0})
+        context = {
+            'default_journal_id': self.company_data['default_journal_sale'].id,
+        }
+        # Let's do an invoice for a down payment of 50
+        self.env['sale.advance.payment.inv'].with_context(context).create({
+            'sale_order_ids': [Command.set(sale_order.ids)],
+            'advance_payment_method': 'fixed',
+            'fixed_amount': 50,
+            'deposit_account_id': self.company_data['default_account_revenue'].id
+        }).create_invoices()
+        dp_line = sale_order.order_line.filtered(
+            lambda sol: sol.is_downpayment and not sol.display_type
+        )
+
+        dp_line.name = 'whatever'
+
+        # Confirm the invoice
+        invoice = sale_order.invoice_ids
+        invoice.action_post()
+
+        self.assertNotEqual(
+            dp_line.name, 'whatever',
+            "DP lines description should be recomputed when the linked invoice is posted",
+        )
+
+    def test_downpayment_fixed_amount_with_zero_total_amount(self):
+        # Create the SO with one line and amount total is zero
+        sale_order = self.env['sale.order'].with_context(tracking_disable=True).create({
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
+            'pricelist_id': self.company_data['default_pricelist'].id,
+            'order_line': [Command.create({
+                'product_id': self.company_data['product_order_no'].id,
+                'product_uom_qty': 5,
+                'price_unit': 0,
+                'tax_id': False,
+            }), ]
+        })
+        sale_order.action_confirm()
+        sale_order.order_line.write({'qty_delivered': 5.0})
+        context = {
+            'active_model': 'sale.order',
+            'active_ids': [sale_order.id],
+            'active_id': sale_order.id,
+            'default_journal_id': self.company_data['default_journal_sale'].id,
+        }
+        # Let's do an invoice for a down payment of 50
+        downpayment = self.env['sale.advance.payment.inv'].with_context(context).create({
+            'advance_payment_method': 'fixed',
+            'fixed_amount': 50,
+            'deposit_account_id': self.company_data['default_account_revenue'].id
+        })
+        # Create invoice
+        downpayment.create_invoices()
+        self.assertEqual(downpayment.amount, 0.0, 'The down payment amount should be 0.0')
+
     def test_downpayment_percentage_tax_icl(self):
         """ Test invoice with a percentage downpayment and an included tax
             Check the total amount of invoice is correct and equal to a respective sale order's total amount
         """
         # Confirm the SO
         self.sale_order.action_confirm()
-        tax_downpayment = self.company_data['default_tax_sale'].copy({'price_include': True})
+        tax_downpayment = self.company_data['default_tax_sale'].copy({
+            'name': 'default price included',
+            'price_include': True,
+        })
         # Let's do an invoice for a deposit of 100
-        product_id = self.env['ir.config_parameter'].sudo().get_param('sale.default_deposit_product_id')
-        product_id = self.env['product.product'].browse(int(product_id)).exists()
+        product_id = self.env.company.sale_down_payment_product_id
         product_id.taxes_id = tax_downpayment.ids
         payment = self.env['sale.advance.payment.inv'].with_context(self.context).create({
             'advance_payment_method': 'percentage',
@@ -256,7 +333,6 @@ class TestSaleToInvoice(TestSaleCommon):
         ).create({
             'date': '2020-02-01',
             'reason': 'no reason',
-            'refund_method': 'refund',
             'journal_id': downpayment_invoice.journal_id.id,
         })
         reversal_action = move_reversal.reverse_moves()
@@ -291,8 +367,14 @@ class TestSaleToInvoice(TestSaleCommon):
         for line in self.sale_order.order_line:
             self.assertTrue(float_is_zero(line.untaxed_amount_invoiced, precision_digits=2), "The invoiced amount should be zero, as the line is in draft state")
 
-        self.assertEqual(self.sol_serv_order.untaxed_amount_to_invoice, 297, "The untaxed amount to invoice is wrong")
-        self.assertEqual(self.sol_serv_deliver.untaxed_amount_to_invoice, self.sol_serv_deliver.qty_delivered * self.sol_serv_deliver.price_reduce, "The untaxed amount to invoice should be qty deli * price reduce, so 4 * (180 - 36)")
+        self.assertEqual(
+            self.sol_serv_order.untaxed_amount_to_invoice,
+            297,
+            "The untaxed amount to invoice is wrong")
+        self.assertEqual(
+            self.sol_serv_deliver.untaxed_amount_to_invoice,
+            576,
+            "The untaxed amount to invoice should be qty deli * price reduce, so 4 * (180 - 36)")
         # 'untaxed_amount_to_invoice' is invalid when 'sale_stock' is installed.
         # self.assertEqual(self.sol_prod_deliver.untaxed_amount_to_invoice, 140, "The untaxed amount to invoice should be qty deli * price reduce, so 4 * (180 - 36)")
 
@@ -801,7 +883,10 @@ class TestSaleToInvoice(TestSaleCommon):
         # send quotation
         email_act = self.sale_order.action_quotation_send()
         email_ctx = email_act.get('context', {})
-        self.sale_order.with_context(**email_ctx).message_post_with_template(email_ctx.get('default_template_id'))
+        self.sale_order.with_context(**email_ctx).message_post_with_source(
+            self.env['mail.template'].browse(email_ctx.get('default_template_id')),
+            subtype_xmlid='mail.mt_comment',
+        )
         self.assertTrue(self.sale_order.state == 'sent', 'Sale: state after sending is wrong')
         self.sale_order.order_line._compute_product_updatable()
         self.assertTrue(self.sale_order.order_line[0].product_updatable)
@@ -951,3 +1036,81 @@ class TestSaleToInvoice(TestSaleCommon):
         # check if the salesperson is in the followers list of invoice created from SO
         self.assertIn(salesperson.partner_id, invoice.message_partner_ids, 'Salesperson not in the followers list of '
                                                                            'invoice created from SO')
+    def test_amount_to_invoice_multiple_so(self):
+        """ Testing creating two SOs with the same customer and invoicing them together. We have to ensure
+            that the amount to invoice is correct for each SO.
+        """
+        sale_order_1 = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.company_data['product_delivery_no'].id,
+                    'product_uom_qty': 10,
+                }),
+            ],
+        })
+        sale_order_2 = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.company_data['product_delivery_no'].id,
+                    'product_uom_qty': 20,
+                }),
+            ],
+        })
+
+        sale_order_1.action_confirm()
+        sale_order_2.action_confirm()
+        sale_order_1.order_line.qty_delivered = 10
+        sale_order_2.order_line.qty_delivered = 20
+
+        self.env['sale.advance.payment.inv'].create({
+            'advance_payment_method': 'delivered',
+            'sale_order_ids': [Command.set((sale_order_1 + sale_order_2).ids)],
+        }).create_invoices()
+
+        sale_order_1.invoice_ids.action_post()
+
+        self.assertEqual(sale_order_1.amount_to_invoice, 0.0)
+        self.assertEqual(sale_order_2.amount_to_invoice, 0.0)
+
+    def test_amount_to_invoice_one_line_multiple_so(self):
+        """ Testing creating two SOs linked to the same invoice line. Drawback: the substracted
+            amount to the amount_total will take both sale order into account.
+        """
+        sale_order_1 = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.company_data['product_delivery_no'].id,
+                    'product_uom_qty': 10,
+                }),
+            ],
+        })
+        sale_order_2 = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.company_data['product_delivery_no'].id,
+                    'product_uom_qty': 20,
+                }),
+            ],
+        })
+
+        sale_order_1.action_confirm()
+        sale_order_2.action_confirm()
+        sale_order_1.order_line.qty_delivered = 10
+        sale_order_2.order_line.qty_delivered = 20
+
+        self.env['sale.advance.payment.inv'].create({
+            'advance_payment_method': 'delivered',
+            'sale_order_ids': [Command.set((sale_order_2).ids)],
+        }).create_invoices()
+
+        sale_order_1.invoice_ids = sale_order_2.invoice_ids
+        sale_order_1.invoice_ids.line_ids.sale_line_ids += sale_order_1.order_line
+
+        sale_order_1.invoice_ids.action_post()
+
+        self.assertEqual(sale_order_1.amount_to_invoice, -700.0)
+        self.assertEqual(sale_order_2.amount_to_invoice, 0.0)

@@ -31,6 +31,19 @@ class ResCompany(models.Model):
             res.iap_enrich_auto()
         return res
 
+    @api.model
+    def _get_view(self, view_id=None, view_type='form', **options):
+        arch, view = super()._get_view(view_id, view_type, **options)
+
+        if view_type == 'form':
+            for node in arch.xpath(
+                "//field[@name='name']"
+                "|//field[@name='vat']"
+            ):
+                node.attrib['widget'] = 'field_partner_autocomplete'
+
+        return arch, view
+
     def iap_enrich_auto(self):
         """ Enrich company. This method should be called by automatic processes
         and a protection is added to avoid doing enrich in a loop. """
@@ -65,7 +78,7 @@ class ResCompany(models.Model):
         company_data = {field: value for field, value in company_data.items()
                         if field in self.partner_id._fields and value and (field == 'image_1920' or not self.partner_id[field])}
 
-        # for company and childs: from state_id / country_id name_get like to IDs
+        # for company and childs: from state_id / country_id display_name like to IDs
         company_data.update(self._enrich_extract_m2o_id(company_data, ['state_id', 'country_id']))
         if company_data.get('child_ids'):
             company_data['child_ids'] = [
@@ -81,10 +94,10 @@ class ResCompany(models.Model):
         if additional_data:
             template_values = json.loads(additional_data)
             template_values['flavor_text'] = _("Company auto-completed by Odoo Partner Autocomplete Service")
-            self.partner_id.message_post_with_view(
+            self.partner_id.message_post_with_source(
                 'iap_mail.enrich_company',
-                values=template_values,
-                subtype_id=self.env.ref('mail.mt_note').id,
+                render_values=template_values,
+                subtype_xmlid='mail.mt_note',
             )
         return True
 

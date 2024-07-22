@@ -1,14 +1,17 @@
-odoo.define('website_event.register_toaster_widget', function (require) {
-'use strict';
+/** @odoo-module **/
 
-let core = require('web.core');
-const {Markup} = require('web.utils');
-let _t = core._t;
-let publicWidget = require('web.public.widget');
+import { _t } from "@web/core/l10n/translation";
+import publicWidget from "@web/legacy/js/public/public_widget";
 
 publicWidget.registry.RegisterToasterWidget = publicWidget.Widget.extend({
     selector: '.o_wevent_register_toaster',
-
+    /**
+     * @override
+     */
+    init() {
+        this._super(...arguments);
+        this.notification = this.bindService("notification");
+    },
     /**
      * This widget allows to display a toast message on the page.
      *
@@ -17,9 +20,8 @@ publicWidget.registry.RegisterToasterWidget = publicWidget.Widget.extend({
     start: function () {
         const message = this.$el.data('message');
         if (message && message.length) {
-            this.displayNotification({
+            this.notification.add(message, {
                 title: _t("Register"),
-                message: Markup(message),
                 type: 'info',
             });
         }
@@ -27,6 +29,4 @@ publicWidget.registry.RegisterToasterWidget = publicWidget.Widget.extend({
     },
 });
 
-return publicWidget.registry.RegisterToasterWidget;
-
-});
+export default publicWidget.registry.RegisterToasterWidget;

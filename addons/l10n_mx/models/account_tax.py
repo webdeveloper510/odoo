@@ -1,32 +1,11 @@
 # coding: utf-8
-from odoo import models, fields
-
-
-class AccountTaxTemplate(models.Model):
-    _inherit = 'account.tax.template'
-
-    l10n_mx_tax_type = fields.Selection(
-        selection=[
-            ('Tasa', "Tasa"),
-            ('Cuota', "Cuota"),
-            ('Exento', "Exento"),
-        ],
-        string="Factor Type",
-        default='Tasa',
-        help="The CFDI version 3.3 have the attribute 'TipoFactor' in the tax lines. In it is indicated the factor "
-             "type that is applied to the base of the tax.")
-
-    def _get_tax_vals(self, company, tax_template_to_tax):
-        # OVERRIDE
-        res = super()._get_tax_vals(company, tax_template_to_tax)
-        res['l10n_mx_tax_type'] = self.l10n_mx_tax_type
-        return res
+from odoo import models, fields, api
 
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
-    l10n_mx_tax_type = fields.Selection(
+    l10n_mx_factor_type = fields.Selection(
         selection=[
             ('Tasa', "Tasa"),
             ('Cuota', "Cuota"),
@@ -34,5 +13,21 @@ class AccountTax(models.Model):
         ],
         string="Factor Type",
         default='Tasa',
-        help="The CFDI version 3.3 have the attribute 'TipoFactor' in the tax lines. In it is indicated the factor "
-             "type that is applied to the base of the tax.")
+        help="Mexico: 'TipoFactor' is an attribute for CFDI 4.0. This indicates the factor type that is applied to the base of the tax.",
+    )
+    l10n_mx_tax_type = fields.Selection(
+        selection=[
+            ('isr', "ISR"),
+            ('iva', "IVA"),
+            ('ieps', "IEPS"),
+        ],
+        string="SAT Tax Type",
+        compute="_compute_l10n_mx_tax_type",
+        store=True,
+        readonly=False,
+    )
+
+    @api.depends("country_id")
+    def _compute_l10n_mx_tax_type(self):
+        for tax in self:
+            tax.l10n_mx_tax_type = 'iva' if tax.country_id.code == 'MX' else False

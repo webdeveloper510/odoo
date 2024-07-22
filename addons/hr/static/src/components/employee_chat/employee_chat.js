@@ -1,11 +1,10 @@
 /** @odoo-module */
 
-import { registry } from '@web/core/registry';
+import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
-import { useOpenChat } from "@mail/views/open_chat_hook";
-
-const { Component } = owl;
+import { useOpenChat } from "@mail/core/web/open_chat_hook";
+import { Component } from "@odoo/owl";
 
 export class HrEmployeeChat extends Component {
     setup() {
@@ -16,6 +15,9 @@ export class HrEmployeeChat extends Component {
 HrEmployeeChat.props = {
     ...standardWidgetProps,
 };
-HrEmployeeChat.template = 'hr.OpenChat';
+HrEmployeeChat.template = "hr.OpenChat";
 
-registry.category("view_widgets").add("hr_employee_chat", HrEmployeeChat);
+export const hrEmployeeChat = {
+    component: HrEmployeeChat,
+};
+registry.category("view_widgets").add("hr_employee_chat", hrEmployeeChat);

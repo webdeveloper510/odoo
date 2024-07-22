@@ -1,31 +1,28 @@
 /** @odoo-module **/
 
+import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, useState, onWillUpdateProps } from "@odoo/owl";
-
 export class ColorField extends Component {
-    setup() {
-        this.state = useState({
-            color: this.props.value || '',
-        });
+    static template = "web.ColorField";
+    static props = {
+        ...standardFieldProps,
+    };
 
-        onWillUpdateProps((nextProps) => {
-            this.state.color = nextProps.value || '';
-        });
-    }
-
-    get isReadonly() {
-        return this.props.record.isReadonly(this.props.name);
+    get color() {
+        return this.props.record.data[this.props.name] || "";
     }
 }
 
-ColorField.template = "web.ColorField";
-ColorField.props = {
-    ...standardFieldProps,
+export const colorField = {
+    component: ColorField,
+    supportedTypes: ["char"],
+    extractProps(fieldInfo, dynamicInfo) {
+        return {
+            readonly: dynamicInfo.readonly,
+        };
+    },
 };
 
-ColorField.supportedTypes = ["char"];
-
-registry.category("fields").add("color", ColorField);
+registry.category("fields").add("color", colorField);

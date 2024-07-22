@@ -1,13 +1,18 @@
 /** @odoo-module */
 
 import { CalendarModel } from '@web/views/calendar/calendar_model';
-import { deserializeDateTime, serializeDate, serializeDateTime } from "@web/core/l10n/dates";
+import {
+    deserializeDate,
+    deserializeDateTime,
+    serializeDate,
+    serializeDateTime,
+} from "@web/core/l10n/dates";
 
 export class TimeOffCalendarModel extends CalendarModel {
     setup(params, services) {
         super.setup(params, services);
 
-        this.data.stressDays = {};
+        this.data.mandatoryDays = {};
         if (this.env.isSmall) {
             this.meta.scale = 'month';
         }
@@ -26,38 +31,59 @@ export class TimeOffCalendarModel extends CalendarModel {
     }
 
     makeContextDefaults(record) {
-        const { scale } = this.meta;
         const context = super.makeContextDefaults(record);
         if (this.employeeId) {
-            context['default_employee_id'] = this.employeeId;
+            context["default_employee_id"] = this.employeeId;
         }
 
-        if(['day', 'week'].includes(scale)) {
-            if ('default_date_from' in context) {
-                context['default_date_from'] = serializeDateTime(deserializeDateTime(context['default_date_from']).set({ hours: 7 }));
-            }
-            if ('default_date_to' in context) {
-                context['default_date_to'] = serializeDateTime(deserializeDateTime(context['default_date_from']).set({ hours: 19 }));
-            }
+        function deserialize(str) {
+            // "YYYY-MM-DD".length == 10
+            return str.length > 10 ? deserializeDateTime(str) : deserializeDate(str);
+        }
+        if ("default_date_from" in context) {
+            context["default_date_from"] = serializeDateTime(
+                deserialize(context["default_date_from"]).set({ hours: 7 })
+            );
+        }
+        if ("default_date_to" in context) {
+            context["default_date_to"] = serializeDateTime(
+                deserialize(context["default_date_to"]).set({ hours: 19 })
+            );
         }
         return context;
     }
 
     async updateData(data) {
         await super.updateData(data);
-        data.stressDays = await this.fetchStressDays(data);
+
+        data.mandatoryDays = await this.fetchMandatoryDays(data);
     }
 
-    async fetchStressDays(data) {
-        return this.orm.call("hr.employee", "get_stress_days", [
+    /**
+     * @override
+     */
+    fetchUnusualDays(data) {
+        return this.orm.call(this.meta.resModel, "get_unusual_days", [
+            serializeDateTime(data.range.start),
+            serializeDateTime(data.range.end),
+        ],
+        {
+            context: {
+                'employee_id': this.employeeId,
+            }
+        });
+    }
+
+    async fetchMandatoryDays(data) {
+        return this.orm.call("hr.employee", "get_mandatory_days", [
             this.employeeId,
             serializeDate(data.range.start, "datetime"),
             serializeDate(data.range.end, "datetime"),
         ]);
     }
 
-    get stressDays() {
-        return this.data.stressDays;
+    get mandatoryDays() {
+        return this.data.mandatoryDays;
     }
 
     get employeeId() {

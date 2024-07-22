@@ -18,7 +18,7 @@ class Job(models.Model):
     def action_new_survey(self):
         self.ensure_one()
         survey = self.env['survey.survey'].create({
-            'title': _("Interview Form : %s") % self.name,
+            'title': _("Interview Form: %s", self.name),
         })
         self.write({'survey_id': survey.id})
 
@@ -27,7 +27,6 @@ class Job(models.Model):
                 'view_mode': 'form,tree',
                 'res_model': 'survey.survey',
                 'type': 'ir.actions.act_window',
-                'context': {'form_view_initial_mode': 'edit'},
                 'res_id': survey.id,
             }
 

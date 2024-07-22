@@ -52,7 +52,7 @@ class WebsiteSnippetFilter(models.Model):
         for record in self:
             for field_name in record.field_names.split(","):
                 if not field_name.strip():
-                    raise ValidationError(_("Empty field name in %r") % (record.field_names))
+                    raise ValidationError(_("Empty field name in %r", record.field_names))
 
     def _render(self, template_key, limit, search_domain=None, with_sample=False):
         """Renders the website dynamic snippet items"""
@@ -75,20 +75,16 @@ class WebsiteSnippetFilter(models.Model):
             records=records,
             is_sample=is_sample,
         ))
-        return [etree.tostring(el, encoding='unicode') for el in html.fromstring('<root>%s</root>' % str(content)).getchildren()]
+        return [etree.tostring(el, encoding='unicode', method='html') for el in html.fromstring('<root>%s</root>' % str(content)).getchildren()]
 
     def _prepare_values(self, limit=None, search_domain=None):
         """Gets the data and returns it the right format for render."""
         self.ensure_one()
 
-        # TODO adapt in master: the "limit" field is there to prevent loading
-        # an arbitrary number of records asked by the client side. It was
-        # however set to 6 for a blog post filter, probably thinking it was a
-        # default limit and not a max limit. That means that configuring a
-        # higher limit via the editor (which allows up to 16) was not working.
-        # As a stable fix, this was made to bypass the max limit if it is under
-        # 16, and only for newly configured snippets.
-        max_limit = max(self.limit, 16) if self.env.context.get('_bugfix_force_minimum_max_limit_to_16') else self.limit
+        # The "limit" field is there to prevent loading an arbitrary number of
+        # records asked by the client side. This here makes sure you can always
+        # load at least 16 records as it is what the editor allows.
+        max_limit = max(self.limit, 16)
         limit = limit and min(limit, max_limit) or max_limit
 
         if self.filter_id:

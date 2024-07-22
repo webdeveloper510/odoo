@@ -1,7 +1,7 @@
-/** @odoo-module alias=website_sale_stock.website_sale**/
+/** @odoo-module **/
 
-import { WebsiteSale } from 'website_sale.website_sale';
-import { is_email } from 'web.utils';
+import { WebsiteSale } from '@website_sale/js/website_sale';
+import { isEmail } from '@web/core/utils/strings';
 
 WebsiteSale.include({
     events: Object.assign({}, WebsiteSale.prototype.events, {
@@ -34,16 +34,13 @@ WebsiteSale.include({
         const formEl = stockNotificationEl.querySelector('#stock_notification_form');
         const email = stockNotificationEl.querySelector('#stock_notification_input').value.trim();
 
-        if (!is_email(email)) {
+        if (!isEmail(email)) {
             return this._displayEmailIncorrectMessage(stockNotificationEl);
         }
 
-        this._rpc({
-            route: "/shop/add/stock_notification",
-            params: {
-                product_id: productId,
-                email,
-            },
+        this.rpc("/shop/add/stock_notification", {
+            product_id: productId,
+            email,
         }).then((data) => {
             const message = stockNotificationEl.querySelector('#stock_notification_success_message');
 

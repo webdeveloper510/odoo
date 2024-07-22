@@ -4,12 +4,14 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.addons.product.models.product_template import PRICE_CONTEXT_KEYS
 
 _logger = logging.getLogger(__name__)
 
 
 class EventTemplateTicket(models.Model):
     _inherit = 'event.type.ticket'
+    _order = "sequence, price, name, id"
 
     def _default_product_id(self):
         return self.env.ref('event_sale.product_product_event', raise_if_not_found=False)
@@ -19,6 +21,7 @@ class EventTemplateTicket(models.Model):
     product_id = fields.Many2one(
         'product.product', string='Product', required=True,
         domain=[("detailed_type", "=", "event")], default=_default_product_id)
+    currency_id = fields.Many2one(related="product_id.currency_id", string="Currency")
     price = fields.Float(
         string='Price', compute='_compute_price',
         digits='Product Price', readonly=False, store=True)
@@ -48,20 +51,12 @@ class EventTemplateTicket(models.Model):
     # context_dependent, core part of the pricelist mess
     # This field usage should be restricted to the UX, and any use in effective
     # price computation should be replaced by clear calls to the pricelist API
-    @api.depends_context('uom', 'qty', 'pricelist') # Cf product.price context dependencies
+    @api.depends_context(*PRICE_CONTEXT_KEYS)
     @api.depends('product_id', 'price')
     def _compute_price_reduce(self):
         for ticket in self:
-            product = ticket.product_id
-            pricelist = product.product_tmpl_id._get_contextual_pricelist()
-            lst_price = product.currency_id._convert(
-                product.lst_price,
-                pricelist.currency_id,
-                self.env.company,
-                fields.Datetime.now()
-            )
-            discount = (lst_price - product._get_contextual_price()) / lst_price if lst_price else 0.0
-            ticket.price_reduce = (1.0 - discount) * ticket.price
+            contextual_discount = ticket.product_id._get_contextual_discount()
+            ticket.price_reduce = (1.0 - contextual_discount) * ticket.price
 
     def _init_column(self, column_name):
         if column_name != "product_id":
@@ -105,12 +100,15 @@ class EventTemplateTicket(models.Model):
 
 class EventTicket(models.Model):
     _inherit = 'event.event.ticket'
-    _order = "event_id, price"
+    _order = "event_id, sequence, price, name, id"
 
     # product
     price_reduce_taxinc = fields.Float(
         string='Price Reduce Tax inc', compute='_compute_price_reduce_taxinc',
         compute_sudo=True)
+    price_incl = fields.Float(
+        string='Price include', compute='_compute_price_incl',
+        digits='Product Price', readonly=False)
 
     def _compute_price_reduce_taxinc(self):
         for event in self:
@@ -118,6 +116,16 @@ class EventTicket(models.Model):
             tax_ids = event.product_id.taxes_id.filtered(lambda r: r.company_id == event.event_id.company_id)
             taxes = tax_ids.compute_all(event.price_reduce, event.event_id.company_id.currency_id, 1.0, product=event.product_id)
             event.price_reduce_taxinc = taxes['total_included']
+
+    @api.depends('product_id', 'product_id.taxes_id', 'price')
+    def _compute_price_incl(self):
+        for event in self:
+            if event.product_id and event.price:
+                tax_ids = event.product_id.taxes_id.filtered(lambda r: r.company_id == event.event_id.company_id)
+                taxes = tax_ids.compute_all(event.price, event.currency_id, 1.0, product=event.product_id)
+                event.price_incl = taxes['total_included']
+            else:
+                event.price_incl = 0
 
     @api.depends('product_id.active')
     def _compute_sale_available(self):

@@ -1,3 +1,5 @@
+/** @odoo-module */
+
 import { setSelection } from '../../src/OdooEditor.js';
 import { Powerbox } from '../../src/powerbox/Powerbox.js';
 import { BasicEditor, _isMobile, insertText, testEditor, triggerEvent } from '../utils.js';
@@ -94,6 +96,7 @@ describe('Powerbox', () => {
     describe('class', () => {
         it('should properly order default commands and categories', async () => {
             const editable = document.createElement('div');
+            editable.classList.add('odoo-editor-editable');
             document.body.append(editable);
             const powerbox = new Powerbox({
                 categories: [
@@ -127,6 +130,7 @@ describe('Powerbox', () => {
         });
         it('should navigate through commands with arrow keys', async () => {
             const editable = document.createElement('div');
+            editable.classList.add('odoo-editor-editable');
             document.body.append(editable);
             const powerbox = new Powerbox({
                 categories: [],
@@ -177,6 +181,7 @@ describe('Powerbox', () => {
         });
         it('should filter commands with `commandFilters`', async () => {
             const editable = document.createElement('div');
+            editable.classList.add('odoo-editor-editable');
             document.body.append(editable);
             const powerbox = new Powerbox({
                 categories: [],
@@ -202,6 +207,7 @@ describe('Powerbox', () => {
         });
         it('should filter commands with `isDisabled`', async () => {
             const editable = document.createElement('div');
+            editable.classList.add('odoo-editor-editable');
             document.body.append(editable);
             let disableCommands = false;
             const powerbox = new Powerbox({
@@ -312,6 +318,7 @@ describe('Powerbox', () => {
         });
         it('should close the Powerbox on press Escape', async () => {
             const editable = document.createElement('div');
+            editable.classList.add('odoo-editor-editable');
             document.body.append(editable);
             const powerbox = new Powerbox({
                 categories: [],

@@ -1,7 +1,8 @@
-/** @odoo-module */
+/** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { useService } from '@web/core/utils/hooks';
-import { getCSSVariableValue, DEFAULT_PALETTE } from 'web_editor.utils';
+import weUtils from '@web_editor/js/common/utils';
 import { Attachment, FileSelector, IMAGE_MIMETYPES, IMAGE_EXTENSIONS } from './file_selector';
 import { KeepLast } from "@web/core/utils/concurrency";
 
@@ -60,12 +61,12 @@ export class ImageSelector extends FileSelector {
         this.state.showOptimized = false;
         this.NUMBER_OF_MEDIA_TO_DISPLAY = 10;
 
-        this.uploadText = this.env._t("Upload an image");
+        this.uploadText = _t("Upload an image");
         this.urlPlaceholder = "https://www.odoo.com/logo.png";
-        this.addText = this.env._t("Add URL");
-        this.searchPlaceholder = this.env._t("Search an image");
-        this.urlWarningTitle = this.env._t("Uploaded image's format is not supported. Try with: " + IMAGE_EXTENSIONS.join(', '));
-        this.allLoadedText = this.env._t("All images have been loaded");
+        this.addText = _t("Add URL");
+        this.searchPlaceholder = _t("Search an image");
+        this.urlWarningTitle = _t("Uploaded image's format is not supported. Try with: " + IMAGE_EXTENSIONS.join(', '));
+        this.allLoadedText = _t("All images have been loaded");
         this.showOptimizedOption = this.env.debug;
         this.MIN_ROW_HEIGHT = 128;
 
@@ -95,6 +96,10 @@ export class ImageSelector extends FileSelector {
 
     get selectedMediaIds() {
         return this.props.selectedMedia[this.props.id].filter(media => media.mediaType === 'libraryMedia').map(({ id }) => id);
+    }
+
+    get allAttachments() {
+        return [...super.allAttachments, ...this.state.libraryMedia];
     }
 
     get attachmentsDomain() {
@@ -137,6 +142,33 @@ export class ImageSelector extends FileSelector {
         await this.uploadService.uploadFiles(files, { resModel: this.props.resModel, resId: this.props.resId, isImage: true }, (attachment) => this.onUploaded(attachment));
     }
 
+    async uploadUrl(url) {
+        await fetch(url).then(async result => {
+            const blob = await result.blob();
+            blob.id = new Date().getTime();
+            blob.name = new URL(url, window.location.href).pathname.split("/").findLast(s => s);
+            await this.uploadFiles([blob]);
+        }).catch(async () => {
+            await new Promise(resolve => {
+                // If it works from an image, use URL.
+                const imageEl = document.createElement("img");
+                imageEl.onerror = () => {
+                    // This message is about the blob fetch failure.
+                    // It is only displayed if the fallback did not work.
+                    this.notificationService.add(_t("An error occurred while fetching the entered URL."), {
+                        title: _t("Error"),
+                        sticky: true,
+                    });
+                    resolve();
+                };
+                imageEl.onload = () => {
+                    super.uploadUrl(url).then(resolve);
+                };
+                imageEl.src = url;
+            });
+        });
+    }
+
     validateUrl(...args) {
         const { isValidUrl, path } = super.validateUrl(...args);
         const isValidFileFormat = IMAGE_EXTENSIONS.some(format => path.endsWith(format));
@@ -155,7 +187,7 @@ export class ImageSelector extends FileSelector {
         // Color-substitution for dynamic SVG attachment
         const primaryColors = {};
         for (let color = 1; color <= 5; color++) {
-            primaryColors[color] = getCSSVariableValue('o-color-' + color);
+            primaryColors[color] = weUtils.getCSSVariableValue('o-color-' + color);
         }
         return attachments.map(attachment => {
             if (attachment.image_src.startsWith('/')) {
@@ -278,7 +310,7 @@ export class ImageSelector extends FileSelector {
                 colorCustomizedURL.searchParams.forEach((value, key) => {
                     const match = key.match(/^c([1-5])$/);
                     if (match) {
-                        colorCustomizedURL.searchParams.set(key, getCSSVariableValue(`o-color-${match[1]}`));
+                        colorCustomizedURL.searchParams.set(key, weUtils.getCSSVariableValue(`o-color-${match[1]}`));
                     }
                 });
                 attachment.image_src = colorCustomizedURL.pathname + colorCustomizedURL.search;
@@ -306,7 +338,7 @@ export class ImageSelector extends FileSelector {
     }
 
     async onImageLoaded(imgEl, attachment) {
-        this.debouncedScroll();
+        this.debouncedScrollUpdate();
         if (attachment.mediaType === 'libraryMedia' && !imgEl.src.startsWith('blob')) {
             // This call applies the theme's color palette to the
             // loaded illustration. Upon replacement of the image,
@@ -332,11 +364,11 @@ export class ImageSelector extends FileSelector {
             if (response.headers.get('content-type') === 'image/svg+xml') {
                 let svg = await response.text();
                 const dynamicColors = {};
-                const combinedColorsRegex = new RegExp(Object.values(DEFAULT_PALETTE).join('|'), 'gi');
+                const combinedColorsRegex = new RegExp(Object.values(weUtils.DEFAULT_PALETTE).join('|'), 'gi');
                 svg = svg.replace(combinedColorsRegex, match => {
-                    const colorId = Object.keys(DEFAULT_PALETTE).find(key => DEFAULT_PALETTE[key] === match.toUpperCase());
+                    const colorId = Object.keys(weUtils.DEFAULT_PALETTE).find(key => weUtils.DEFAULT_PALETTE[key] === match.toUpperCase());
                     const colorKey = 'c' + colorId
-                    dynamicColors[colorKey] = getCSSVariableValue('o-color-' + colorId);
+                    dynamicColors[colorKey] = weUtils.getCSSVariableValue('o-color-' + colorId);
                     return dynamicColors[colorKey];
                 });
                 const fileName = mediaUrl.split('/').pop();
@@ -349,7 +381,7 @@ export class ImageSelector extends FileSelector {
                     media.dynamicColors = dynamicColors;
                 }
             }
-        } catch (_e) {
+        } catch {
             console.error('CORS is misconfigured on the API server, image will be treated as non-dynamic.');
         }
     }

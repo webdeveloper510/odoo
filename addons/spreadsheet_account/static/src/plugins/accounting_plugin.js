@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import * as spreadsheet from "@odoo/o-spreadsheet";
 import { AccountingDataSource } from "../accounting_datasource";
 const DATA_SOURCE_ID = "ACCOUNTING_AGGREGATES";
 
@@ -8,10 +8,10 @@ const DATA_SOURCE_ID = "ACCOUNTING_AGGREGATES";
  * @typedef {import("../accounting_functions").DateRange} DateRange
  */
 
-export default class AccountingPlugin extends spreadsheet.UIPlugin {
-    constructor(getters, history, dispatch, config) {
-        super(getters, history, dispatch, config);
-        this.dataSources = config.dataSources;
+export class AccountingPlugin extends spreadsheet.UIPlugin {
+    constructor(config) {
+        super(config);
+        this.dataSources = config.custom.dataSources;
         if (this.dataSources) {
             this.dataSources.add(DATA_SOURCE_ID, AccountingDataSource);
         }

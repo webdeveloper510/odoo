@@ -6,7 +6,7 @@
     'sequence': 100,
     'category': 'Manufacturing/Maintenance',
     'description': """
-        Track equipments and maintenance requests""",
+Track equipment and maintenance requests""",
     'depends': ['mail'],
     'summary': 'Track equipment and manage maintenance requests',
     'website': 'https://www.odoo.com/app/maintenance',
@@ -14,12 +14,11 @@
         'security/maintenance.xml',
         'security/ir.model.access.csv',
         'data/maintenance_data.xml',
-        'data/mail_alias_data.xml',
         'data/mail_activity_type_data.xml',
         'data/mail_message_subtype_data.xml',
         'views/maintenance_views.xml',
         'views/mail_activity_views.xml',
-        'data/maintenance_cron.xml',
+        'views/res_config_settings_views.xml',
     ],
     'demo': ['data/maintenance_demo.xml'],
     'installable': True,
@@ -27,6 +26,9 @@
     'assets': {
         'web.assets_backend': [
             'maintenance/static/src/**/*',
+        ],
+        'web.assets_tests': [
+            'maintenance/static/tests/tours/**/*',
         ],
     },
     'license': 'LGPL-3',

@@ -1,12 +1,12 @@
 /** @odoo-module */
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import * as spreadsheet from "@odoo/o-spreadsheet";
 
 import "./list_functions";
 
-import ListCorePlugin from "@spreadsheet/list/plugins/list_core_plugin";
-import ListUIPlugin from "@spreadsheet/list/plugins/list_ui_plugin";
+import { ListCorePlugin } from "@spreadsheet/list/plugins/list_core_plugin";
+import { ListUIPlugin } from "@spreadsheet/list/plugins/list_ui_plugin";
 
 import { SEE_RECORD_LIST, SEE_RECORD_LIST_VISIBLE } from "./list_actions";
 const { inverseCommandRegistry } = spreadsheet.registries;
@@ -15,7 +15,13 @@ function identity(cmd) {
     return [cmd];
 }
 
-const { coreTypes, invalidateEvaluationCommands } = spreadsheet;
+const {
+    coreTypes,
+    invalidateEvaluationCommands,
+    invalidateCFEvaluationCommands,
+    invalidateDependenciesCommands,
+} = spreadsheet;
+
 const { cellMenuRegistry } = spreadsheet.registries;
 
 coreTypes.add("INSERT_ODOO_LIST");
@@ -29,17 +35,26 @@ invalidateEvaluationCommands.add("UPDATE_ODOO_LIST_DOMAIN");
 invalidateEvaluationCommands.add("INSERT_ODOO_LIST");
 invalidateEvaluationCommands.add("REMOVE_ODOO_LIST");
 
+invalidateDependenciesCommands.add("UPDATE_ODOO_LIST_DOMAIN");
+invalidateDependenciesCommands.add("INSERT_ODOO_LIST");
+invalidateDependenciesCommands.add("REMOVE_ODOO_LIST");
+
+invalidateCFEvaluationCommands.add("UPDATE_ODOO_LIST_DOMAIN");
+invalidateCFEvaluationCommands.add("INSERT_ODOO_LIST");
+invalidateCFEvaluationCommands.add("REMOVE_ODOO_LIST");
+
 cellMenuRegistry.add("list_see_record", {
-    name: _lt("See record"),
+    name: _t("See record"),
     sequence: 200,
-    action: async (env) => {
-        const cell = env.model.getters.getActiveCell();
-        await SEE_RECORD_LIST(cell, env);
+    execute: async (env) => {
+        const position = env.model.getters.getActivePosition();
+        await SEE_RECORD_LIST(position, env);
     },
     isVisible: (env) => {
-        const cell = env.model.getters.getActiveCell();
-        return SEE_RECORD_LIST_VISIBLE(cell);
+        const position = env.model.getters.getActivePosition();
+        return SEE_RECORD_LIST_VISIBLE(position, env);
     },
+    icon: "o-spreadsheet-Icon.SEE_RECORDS",
 });
 
 inverseCommandRegistry

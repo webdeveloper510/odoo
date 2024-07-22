@@ -4,9 +4,8 @@ from markupsafe import Markup
 from unittest.mock import patch
 
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.exceptions import AccessError, UserError
-from odoo.modules.module import get_module_resource
-from odoo.tests import Form, tagged, users
+from odoo.exceptions import AccessError, ValidationError, UserError
+from odoo.tests import Form, HttpCase, tagged, users
 from odoo.tools import convert_file
 
 
@@ -46,10 +45,30 @@ class TestMailTemplate(MailCommon):
             'subject': '{{ 1 + 5 }}',
         })
 
-        values = mail_compose_message.get_mail_values(self.partner_employee.ids)
+        values = mail_compose_message._prepare_mail_values(self.partner_employee.ids)
 
         self.assertEqual(values[self.partner_employee.id]['subject'], '6', 'We must trust mail template values')
         self.assertIn('13', values[self.partner_employee.id]['body_html'], 'We must trust mail template values')
+
+    @users('admin')
+    def test_mail_template_abstract_model(self):
+        """Check abstract models cannot be set on templates."""
+        # create
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            self.env['mail.template'].create({
+                'name': 'Test abstract template',
+                'model_id': self.env['ir.model']._get('mail.thread').id, # abstract model
+            })
+        # write
+        template = self.env['mail.template'].create({
+            'name': 'Test abstract template',
+            'model_id': self.env['ir.model']._get('res.partner').id,
+        })
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            template.write({
+                'name': 'Test abstract template',
+                'model_id': self.env['ir.model']._get('mail.thread').id,
+            })
 
     def test_mail_template_acl(self):
         # Sanity check
@@ -135,6 +154,21 @@ class TestMailTemplate(MailCommon):
 
         employee_template.with_context(lang='fr_FR').sudo().subject = '{{ object.foo }}'
 
+    def test_mail_template_parse_partner_to(self):
+        for partner_to, expected in [
+            ('1', [1]),
+            ('1,2,3', [1, 2, 3]),
+            ('1, 2,  3', [1, 2, 3]),  # remove spaces
+            ('[1, 2, 3]', [1, 2, 3]),  # %r of a list
+            ('(1, 2, 3)', [1, 2, 3]),  # %r of a tuple
+            ('1,[],2,"3"', [1, 2, 3]),  # type tolerant
+            ('(1, "wrong", 2, "partner_name", "3")', [1, 2, 3]),  # fault tolerant
+            ('res.partner(1, 2, 3)', [2]),  # invalid input but avoid crash
+        ]:
+            with self.subTest(partner_to=partner_to):
+                parsed = self.mail_template._parse_partner_to(partner_to)
+                self.assertListEqual(parsed, expected)
+
     def test_server_archived_usage_protection(self):
         """ Test the protection against using archived server (servers used cannot be archived) """
         IrMailServer = self.env['ir.mail_server']
@@ -154,13 +188,14 @@ class TestMailTemplate(MailCommon):
 @tagged('mail_template')
 class TestMailTemplateReset(MailCommon):
 
-    def _load(self, module, *args):
-        convert_file(self.cr, module='mail',
-                     filename=get_module_resource(module, *args),
+    def _load(self, module, filepath):
+        # pylint: disable=no-value-for-parameter
+        convert_file(self.env, module='mail',
+                     filename=filepath,
                      idref={}, mode='init', noupdate=False, kind='test')
 
     def test_mail_template_reset(self):
-        self._load('mail', 'tests', 'test_mail_template.xml')
+        self._load('mail', 'tests/test_mail_template.xml')
 
         mail_template = self.env.ref('mail.mail_template_test').with_context(lang=self.env.user.lang)
 
@@ -192,7 +227,7 @@ class TestMailTemplateReset(MailCommon):
 
     def test_mail_template_reset_translation(self):
         """ Test if a translated value can be reset correctly when its translation exists/doesn't exist in the po file of the directory """
-        self._load('mail', 'tests', 'test_mail_template.xml')
+        self._load('mail', 'tests/test_mail_template.xml')
 
         self.env['res.lang']._activate_lang('en_UK')
         self.env['res.lang']._activate_lang('fr_FR')
@@ -234,8 +269,15 @@ class TestMailTemplateReset(MailCommon):
         self.assertEqual(mail_template.with_context(lang='fr_FR').name, 'Mail: Test Mail Template FR')
 
 
-@tagged('-at_install', 'post_install')
-class TestConfigRestrictEditor(MailCommon):
+@tagged("mail_template", "-at_install", "post_install")
+class TestMailTemplateUI(HttpCase):
+
+    def test_mail_template_dynamic_placeholder_tour(self):
+        self.start_tour("/web", 'mail_template_dynamic_placeholder_tour', login="admin")
+
+
+@tagged("mail_template", "-at_install", "post_install")
+class TestTemplateConfigRestrictEditor(MailCommon):
 
     def test_switch_icp_value(self):
         # Sanity check

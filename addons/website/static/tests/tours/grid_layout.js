@@ -1,20 +1,19 @@
 /** @odoo-module **/
 
-import wTourUtils from 'website.tour_utils';
+import wTourUtils from '@website/js/tours/tour_utils';
+
+const snippet = {
+    id: 's_text_image',
+    name: 'Text - Image',
+};
 
 wTourUtils.registerWebsitePreviewTour('website_replace_grid_image', {
     test: true,
     url: '/',
     edition: true,
-}, [
-    wTourUtils.dragNDrop({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
-    wTourUtils.clickOnSnippet({
-        id: 's_text_image',
-        name: 'Text - Image',
-    }),
+}, () => [
+    wTourUtils.dragNDrop(snippet),
+    wTourUtils.clickOnSnippet(snippet),
     {
         content: "Toggle to grid mode",
         trigger: '.o_we_user_value_widget[data-name="grid_mode"]',
@@ -48,7 +47,7 @@ wTourUtils.registerWebsitePreviewTour("scroll_to_new_grid_item", {
     test: true,
     url: "/",
     edition: true,
-}, [
+}, () => [
     // Drop enough snippets to scroll.
     wTourUtils.dragNDrop({id: "s_text_image", name: "Text - Image"}),
     wTourUtils.dragNDrop({id: "s_image_text", name: "Image - Text"}),
@@ -74,6 +73,6 @@ wTourUtils.registerWebsitePreviewTour("scroll_to_new_grid_item", {
     }, {
         content: "Make sure the scroll check is done",
         trigger: ".o_scrolled_to_grid_item",
-        run: () => {}, // This is a check.
+        isCheck: true,
     },
 ]);

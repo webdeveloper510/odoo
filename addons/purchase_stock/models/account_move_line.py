@@ -29,108 +29,6 @@ class AccountMoveLine(models.Model):
         out_and_not_invoiced_qty = min(aml_qty, total_out_and_not_invoiced_qty)
         return self.product_id.uom_id._compute_quantity(out_and_not_invoiced_qty, self.product_uom_id)
 
-    def _get_price_diff_account(self):
-        self.ensure_one()
-        if self.product_id.cost_method == 'standard':
-            return False
-        accounts = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=self.move_id.fiscal_position_id)
-        return accounts['expense']
-
-    def _create_in_invoice_svl(self):
-        # TODO master delete (dead code)
-        svl_vals_list = []
-        for line in self:
-            line = line.with_company(line.company_id)
-            move = line.move_id.with_company(line.move_id.company_id)
-            po_line = line.purchase_line_id
-            uom = line.product_uom_id or line.product_id.uom_id
-
-            # Don't create value for more quantity than received
-            quantity = po_line.qty_received - (po_line.qty_invoiced - line.quantity)
-            quantity = max(min(line.quantity, quantity), 0)
-            if float_is_zero(quantity, precision_rounding=uom.rounding):
-                continue
-
-            layers = line._get_stock_valuation_layers(move)
-            # Retrieves SVL linked to a return.
-            if not layers:
-                continue
-
-            price_unit = line._get_gross_unit_price()
-            price_unit = line.currency_id._convert(price_unit, line.company_id.currency_id, line.company_id, line.date, round=False)
-            price_unit = line.product_uom_id._compute_price(price_unit, line.product_id.uom_id)
-            layers_price_unit = line._get_stock_valuation_layers_price_unit(layers)
-            layers_to_correct = line._get_stock_layer_price_difference(layers, layers_price_unit, price_unit)
-            svl_vals_list += line._prepare_in_invoice_svl_vals(layers_to_correct)
-        return self.env['stock.valuation.layer'].sudo().create(svl_vals_list)
-
-    def _get_stock_valuation_layers_price_unit(self, layers):
-        # TODO master delete (dead code)
-        price_unit_by_layer = {}
-        for layer in layers:
-            price_unit_by_layer[layer] = layer.value / layer.quantity
-        return price_unit_by_layer
-
-    def _get_stock_layer_price_difference(self, layers, layers_price_unit, price_unit):
-        # TODO master delete (dead code)
-        self.ensure_one()
-        po_line = self.purchase_line_id
-        aml_qty = self.product_uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
-        invoice_lines = po_line.invoice_lines - self
-        invoices_qty = 0
-        for invoice_line in invoice_lines:
-            invoices_qty += invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, invoice_line.product_id.uom_id)
-        qty_received = po_line.product_uom._compute_quantity(po_line.qty_received, self.product_id.uom_id)
-        out_qty = qty_received - sum(layers.mapped('remaining_qty'))
-        out_and_not_billed_qty = max(0, out_qty - invoices_qty)
-        total_to_correct = max(0, aml_qty - out_and_not_billed_qty)
-        # we also need to skip the remaining qty that is already billed
-        total_to_skip = max(0, invoices_qty - out_qty)
-        layers_to_correct = {}
-        for layer in layers:
-            if float_compare(total_to_correct, 0, precision_rounding=self.product_id.uom_id.rounding) <= 0:
-                break
-            remaining_qty = layer.remaining_qty
-            qty_to_skip = min(total_to_skip, remaining_qty)
-            remaining_qty = max(0, remaining_qty - qty_to_skip)
-            qty_to_correct = min(total_to_correct, remaining_qty)
-            total_to_skip -= qty_to_skip
-            total_to_correct -= qty_to_correct
-            unit_valuation_difference = price_unit - layers_price_unit[layer]
-            if float_is_zero(unit_valuation_difference * qty_to_correct, precision_rounding=self.company_id.currency_id.rounding):
-                continue
-            po_pu_curr = po_line.currency_id._convert(po_line.price_unit, self.currency_id, self.company_id, self.date, round=False)
-            price_difference_curr = po_pu_curr - self._get_gross_unit_price()
-            layers_to_correct[layer] = (qty_to_correct, unit_valuation_difference, price_difference_curr)
-        return layers_to_correct
-
-    def _prepare_in_invoice_svl_vals(self, layers_correction):
-        # TODO master delete (dead code)
-        svl_vals_list = []
-        invoiced_qty = self.quantity
-        common_svl_vals = {
-            'account_move_id': self.move_id.id,
-            'account_move_line_id': self.id,
-            'company_id': self.company_id.id,
-            'product_id': self.product_id.id,
-            'quantity': 0,
-            'unit_cost': 0,
-            'remaining_qty': 0,
-            'remaining_value': 0,
-            'description': self.move_id.name and '%s - %s' % (self.move_id.name, self.product_id.name) or self.product_id.name,
-        }
-        for layer, (quantity, price_difference, price_difference_curr) in layers_correction.items():
-            svl_vals = self.product_id._prepare_in_svl_vals(quantity, price_difference)
-            diff_value_curr = self.currency_id.round(price_difference_curr * quantity)
-            svl_vals.update(**common_svl_vals, stock_valuation_layer_id=layer.id, price_diff_value=diff_value_curr)
-            svl_vals_list.append(svl_vals)
-            # Adds the difference into the last SVL's remaining value.
-            layer.remaining_value += svl_vals['value']
-            if float_compare(invoiced_qty, 0, self.product_id.uom_id.rounding) <= 0:
-                break
-
-        return svl_vals_list
-
     def _apply_price_difference(self):
         svl_vals_list = []
         aml_vals_list = []
@@ -172,7 +70,7 @@ class AccountMoveLine(models.Model):
             move = aml.move_id
             if move.state != 'posted':
                 continue
-            state_trackings = move.message_ids.tracking_value_ids.filtered(lambda t: t.field == am_state_field).sorted('id')
+            state_trackings = move.message_ids.tracking_value_ids.filtered(lambda t: t.field_id == am_state_field).sorted('id')
             time = state_trackings[-1:].create_date or move.create_date  # `or` in case it has been created in posted state
             history.append((time, aml, False))
         # Sort history based on the datetime. In case of equality, the prority is given to SVLs, then to IDs.
@@ -293,7 +191,7 @@ class AccountMoveLine(models.Model):
                     out_qty_to_invoice = 0
                 aml = initial_pdiff_svl.account_move_line_id
                 parent_layer = initial_pdiff_svl.stock_valuation_layer_id
-                layer_price_unit = parent_layer.value / parent_layer.quantity
+                layer_price_unit = parent_layer._get_layer_price_unit()
             else:
                 sign = 1
                 # get the invoiced qty of the layer without considering `self`
@@ -301,7 +199,7 @@ class AccountMoveLine(models.Model):
                 remaining_out_qty_to_invoice = max(0, out_layer_qty - invoiced_layer_qty)
                 out_qty_to_invoice = min(remaining_out_qty_to_invoice, invoicing_layer_qty)
                 qty_to_correct = invoicing_layer_qty - out_qty_to_invoice
-                layer_price_unit = layer.value / layer.quantity
+                layer_price_unit = layer._get_layer_price_unit()
 
                 returned_move = layer.stock_move_id.origin_returned_move_id
                 if returned_move and returned_move._is_out() and returned_move._is_returned(valued_type='out'):
@@ -344,7 +242,7 @@ class AccountMoveLine(models.Model):
         vals_list = []
 
         sign = self.move_id.direction_sign
-        expense_account = self._get_price_diff_account()
+        expense_account = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=self.move_id.fiscal_position_id)['expense']
         if not expense_account:
             return vals_list
 
@@ -385,3 +283,45 @@ class AccountMoveLine(models.Model):
             'stock_valuation_layer_id': corrected_layer.id,
             'price_diff_value': self.currency_id.round(pdiff * quantity),
         }
+
+    def _get_price_unit_val_dif_and_relevant_qty(self):
+        self.ensure_one()
+        # Retrieve stock valuation moves.
+        valuation_stock_moves = self.env['stock.move'].search([
+            ('purchase_line_id', '=', self.purchase_line_id.id),
+            ('state', '=', 'done'),
+            ('product_qty', '!=', 0.0),
+        ]) if self.purchase_line_id else self.env['stock.move']
+
+        if self.product_id.cost_method != 'standard' and self.purchase_line_id:
+            if self.move_type == 'in_refund':
+                valuation_stock_moves = valuation_stock_moves.filtered(lambda stock_move: stock_move._is_out())
+            else:
+                valuation_stock_moves = valuation_stock_moves.filtered(lambda stock_move: stock_move._is_in())
+
+            if not valuation_stock_moves:
+                return 0, 0
+
+            valuation_price_unit_total, valuation_total_qty = valuation_stock_moves._get_valuation_price_and_qty(self, self.move_id.currency_id)
+            valuation_price_unit = valuation_price_unit_total / valuation_total_qty
+            valuation_price_unit = self.product_id.uom_id._compute_price(valuation_price_unit, self.product_uom_id)
+        else:
+            # Valuation_price unit is always expressed in invoice currency, so that it can always be computed with the good rate
+            price_unit = self.product_id.uom_id._compute_price(self.product_id.standard_price, self.product_uom_id)
+            price_unit = -price_unit if self.move_id.move_type == 'in_refund' else price_unit
+            valuation_date = valuation_stock_moves and max(valuation_stock_moves.mapped('date')) or self.date
+            valuation_price_unit = self.company_currency_id._convert(
+                price_unit, self.currency_id,
+                self.company_id, valuation_date, round=False
+            )
+
+        price_unit = self._get_gross_unit_price()
+
+        price_unit_val_dif = price_unit - valuation_price_unit
+        # If there are some valued moves, we only consider their quantity already used
+        if self.product_id.cost_method == 'standard':
+            relevant_qty = self.quantity
+        else:
+            relevant_qty = self._get_out_and_not_invoiced_qty(valuation_stock_moves)
+
+        return price_unit_val_dif, relevant_qty

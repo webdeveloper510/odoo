@@ -1,7 +1,6 @@
-odoo.define('website_event_booth_sale.booth_registration', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const BoothRegistration = require('website_event_booth.booth_registration');
+import BoothRegistration from "@website_event_booth/js/booth_register";
 
 /**
  * This class changes the displayed price after selecting the requested booths.
@@ -11,6 +10,12 @@ BoothRegistration.include({
     //--------------------------------------------------------------------------
     // Overrides
     //--------------------------------------------------------------------------
+
+    start() {
+        return this._super.apply(this, arguments).then(() => {
+            this.categoryPrice = this.selectedBoothCategory ? this.selectedBoothCategory.dataset.price : undefined;
+        });
+    },
 
     _onChangeBoothType(ev) {
         this.categoryPrice = parseFloat($(ev.currentTarget).data('price'));
@@ -37,7 +42,5 @@ BoothRegistration.include({
         let $elem = this.$('.o_wbooth_booth_total_price .oe_currency_value');
         $elem.text(boothsCount * this.categoryPrice);
     },
-
-});
 
 });

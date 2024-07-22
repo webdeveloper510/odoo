@@ -1,4 +1,10 @@
-import { URL_REGEX, URL_REGEX_WITH_INFOS, descendants, setSelection } from '../../src/OdooEditor.js';
+/** @odoo-module */
+
+import {
+    URL_REGEX,
+    descendants,
+    setSelection,
+} from '../../src/OdooEditor.js';
 import {
     BasicEditor,
     click,
@@ -26,13 +32,11 @@ const testUrlRegex = (content, {expectedUrl} = {}) => {
             window.chai.assert.equal(expectedUrl, match && match[0]);
         }
         window.chai.assert.exists(content.match(URL_REGEX));
-        window.chai.assert.exists(content.match(URL_REGEX_WITH_INFOS));
     });
 }
 const testNotUrlRegex = (url) => {
     it(`should NOT be a link: ${url}`, () => {
         window.chai.assert.notExists(url.match(URL_REGEX));
-        window.chai.assert.notExists(url.match(URL_REGEX_WITH_INFOS));
     });
 }
 
@@ -354,7 +358,7 @@ describe('Link', () => {
                     stepFunction: async editor => {
                         await deleteBackward(editor);
                     },
-                    contentAfter: '<p>a<a href="https://hellomoto.com">hello[]moto.com</a></p>',
+                    contentAfter: '<p>a<a href="http://hellomoto.com">hello[]moto.com</a></p>',
                 });
             });
             it('should change the url in one step', async () => {
@@ -717,11 +721,11 @@ describe('Link', () => {
                 stepFunction: async editor => {
                     await clickOnLink(editor);
                     await deleteBackward(editor);
-                    await insertText(editor, '1');
-                    await insertText(editor, '2');
-                    await insertText(editor, '3');
+                    await insertText(editor, 'a');
+                    await insertText(editor, 'b');
+                    await insertText(editor, 'c');
                 },
-                contentAfter: '<p>a<a href="#/">123[]</a>c</p>',
+                contentAfter: '<p>a<a href="#/">abc[]</a>c</p>',
             });
         });
         it('should delete the content from the link when popover is active', async () => {

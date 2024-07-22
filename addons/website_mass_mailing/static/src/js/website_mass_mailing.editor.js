@@ -1,15 +1,16 @@
-odoo.define('website_mass_mailing.editor', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var core = require('web.core');
-const Dialog = require('web.Dialog');
-var options = require('web_editor.snippets.options');
-
-const qweb = core.qweb;
-var _t = core._t;
-
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _t } from "@web/core/l10n/translation";
+import { renderToElement } from "@web/core/utils/render";
+import options from "@web_editor/js/editor/snippets.options";
 
 options.registry.mailing_list_subscribe = options.Class.extend({
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+    },
+
     /**
      * @override
      */
@@ -18,17 +19,19 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         if (this.mailingLists.length) {
             this.$target.attr("data-list-id", this.mailingLists[0][0]);
         } else {
-            Dialog.confirm(this, _t("No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"), {
-                confirm_callback: () => {
-                    this.trigger_up('request_save', {
+            this.call("dialog", "add", ConfirmationDialog, {
+                body: _t("No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"),
+                confirm: () => {
+                    this.trigger_up("request_save", {
                         reload: false,
                         onSuccess: () => {
-                            window.location.href = '/web#action=mass_mailing.action_view_mass_mailing_lists';
+                            window.location.href =
+                                "/web#action=mass_mailing.action_view_mass_mailing_lists";
                         },
                     });
                 },
-                cancel_callback: () => {
-                    this.trigger_up('remove_snippet', {
+                cancel: () => {
+                    this.trigger_up("remove_snippet", {
                         $snippet: this.$target,
                     });
                 },
@@ -85,12 +88,12 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
-        this.mailingLists = await this._rpc({
-            model: 'mailing.list',
-            method: 'name_search',
-            args: ['', [['is_public', '=', true]]],
-            context: this.options.recordInfo.context,
-        });
+        this.mailingLists = await this.orm.call(
+            "mailing.list",
+            "name_search",
+            ["", [["is_public", "=", true]]],
+            { context: this.options.recordInfo.context }
+        );
         if (this.mailingLists.length) {
             const selectEl = uiFragment.querySelector('we-select[data-attribute-name="listId"]');
             for (const mailingList of this.mailingLists) {
@@ -119,7 +122,7 @@ options.registry.recaptchaSubscribe = options.Class.extend({
             recaptchaLegalEl.remove();
         } else {
             const template = document.createElement('template');
-            template.innerHTML = qweb.render("google_recaptcha.recaptcha_legal_terms");
+            template.content.append(renderToElement("google_recaptcha.recaptcha_legal_terms"));
             this.$target[0].appendChild(template.content.firstElementChild);
         }
     },
@@ -138,5 +141,4 @@ options.registry.recaptchaSubscribe = options.Class.extend({
         }
         return this._super(...arguments);
     },
-});
 });

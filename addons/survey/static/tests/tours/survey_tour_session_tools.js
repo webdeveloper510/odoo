@@ -1,21 +1,21 @@
-odoo.define('survey.session_tour_tools', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var tour = require('web_tour.tour');
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
 /**
  * Tool that gathers common steps to every 'survey session' tours.
  */
-return {
-    accessSurveySteps: [tour.stepUtils.showAppsMenuItem(), {
+export const accessSurveysteps = [
+    stepUtils.showAppsMenuItem(),
+    {
         trigger: '.o_app[data-menu-xmlid="survey.menu_surveys"]',
-        edition: 'community'
-    }, {
+        edition: "community",
+    },
+    {
         trigger: '.o_app[data-menu-xmlid="survey.menu_surveys"]',
-        edition: 'enterprise'
-    }, {
+        edition: "enterprise",
+    },
+    {
         trigger: '.oe_kanban_card:contains("User Session Survey")',
-    }]
-};
-
-});
+    },
+];

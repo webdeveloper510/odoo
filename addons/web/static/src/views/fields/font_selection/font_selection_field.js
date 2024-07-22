@@ -1,23 +1,29 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { standardFieldProps } from "../standard_field_props";
 import { formatSelection } from "../formatters";
 
 import { Component } from "@odoo/owl";
 
 export class FontSelectionField extends Component {
+    static template = "web.FontSelectionField";
+    static props = {
+        ...standardFieldProps,
+        placeholder: { type: String, optional: true },
+        required: { type: Boolean, optional: true },
+    };
+
     get options() {
         return this.props.record.fields[this.props.name].selection.filter(
             (option) => option[0] !== false && option[1] !== ""
         );
     }
-    get isRequired() {
-        return this.props.record.isRequired(this.props.name);
-    }
     get string() {
-        return formatSelection(this.props.value, { selection: this.options });
+        return formatSelection(this.props.record.data[this.props.name], {
+            selection: this.options,
+        });
     }
 
     stringify(value) {
@@ -29,24 +35,20 @@ export class FontSelectionField extends Component {
      */
     onChange(ev) {
         const value = JSON.parse(ev.target.value);
-        this.props.update(value);
+        this.props.record.update({ [this.props.name]: value });
     }
 }
 
-FontSelectionField.template = "web.FontSelectionField";
-FontSelectionField.props = {
-    ...standardFieldProps,
-    placeholder: { type: String, optional: true },
+export const fontSelectionField = {
+    component: FontSelectionField,
+    displayName: _t("Font Selection"),
+    supportedTypes: ["selection"],
+    extractProps({ attrs }, dynamicInfo) {
+        return {
+            placeholder: attrs.placeholder,
+            required: dynamicInfo.required,
+        };
+    },
 };
 
-FontSelectionField.displayName = _lt("Font Selection");
-FontSelectionField.supportedTypes = ["selection"];
-FontSelectionField.legacySpecialData = "_fetchSpecialRelation";
-
-FontSelectionField.extractProps = ({ attrs }) => {
-    return {
-        placeholder: attrs.placeholder,
-    };
-};
-
-registry.category("fields").add("font", FontSelectionField);
+registry.category("fields").add("font", fontSelectionField);

@@ -56,7 +56,7 @@ class TestPaymentTransaction(MercadoPagoCommon, PaymentHttpCommon):
             processing_values = tx._get_processing_values()
         form_info = self._extract_values_from_html_form(processing_values['redirect_form_html'])
         self.assertEqual(form_info['action'], 'https://dummy.com')
-        self.assertEqual(form_info['method'], 'post')
+        self.assertEqual(form_info['method'], 'get')
         self.assertDictEqual(form_info['inputs'], {})
 
     def test_processing_notification_data_confirms_transaction(self):
@@ -64,7 +64,7 @@ class TestPaymentTransaction(MercadoPagoCommon, PaymentHttpCommon):
         successful payment. """
         tx = self._create_transaction(flow='redirect')
         with patch(
-            'odoo.addons.payment_mercado_pago.models.payment_provider.Paymentprovider'
+            'odoo.addons.payment_mercado_pago.models.payment_provider.PaymentProvider'
             '._mercado_pago_make_request', return_value=self.verification_data
         ):
             tx._process_notification_data(self.redirect_notification_data)
@@ -72,11 +72,11 @@ class TestPaymentTransaction(MercadoPagoCommon, PaymentHttpCommon):
 
     @mute_logger('odoo.addons.payment_mercado_pago.models.payment_transaction')
     def test_processing_notification_data_rejects_transaction(self):
-        """ Test that the transaction state to 'error' when the notification data indicate a status of
+        """ Test that the transaction state is set to 'error' when the notification data indicate a status of
         404 error payment. """
         tx = self._create_transaction(flow='redirect')
         with patch(
-            'odoo.addons.payment_mercado_pago.models.payment_provider.Paymentprovider'
+            'odoo.addons.payment_mercado_pago.models.payment_provider.PaymentProvider'
             '._mercado_pago_make_request', return_value=self.verification_data_for_error_state
         ):
             tx._process_notification_data(self.redirect_notification_data)

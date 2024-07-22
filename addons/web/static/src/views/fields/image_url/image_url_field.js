@@ -1,23 +1,31 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { _lt } from "@web/core/l10n/translation";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, onWillUpdateProps, useState } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
+import { useRecordObserver } from "@web/model/relational_model/utils";
 
 export class ImageUrlField extends Component {
+    static template = "web.ImageUrlField";
+    static props = {
+        ...standardFieldProps,
+        width: { type: Number, optional: true },
+        height: { type: Number, optional: true },
+    };
+
+    static fallbackSrc = "/web/static/img/placeholder.png";
+
     setup() {
         this.notification = useService("notification");
         this.state = useState({
-            src: this.props.value,
+            src: this.props.record.data[this.props.name],
         });
 
-        onWillUpdateProps((nextProps) => {
-            if (this.props.value !== nextProps.value) {
-                this.state.src = nextProps.value;
-            }
+        useRecordObserver((record) => {
+            this.state.src = record.data[this.props.name];
         });
     }
 
@@ -34,31 +42,32 @@ export class ImageUrlField extends Component {
 
     onLoadFailed() {
         this.state.src = this.constructor.fallbackSrc;
-        this.notification.add(this.env._t("Could not display the specified image url."), {
+        this.notification.add(_t("Could not display the specified image url."), {
             type: "info",
         });
     }
 }
 
-ImageUrlField.fallbackSrc = "/web/static/img/placeholder.png";
-
-ImageUrlField.template = "web.ImageUrlField";
-ImageUrlField.props = {
-    ...standardFieldProps,
-    width: { type: Number, optional: true },
-    height: { type: Number, optional: true },
+export const imageUrlField = {
+    component: ImageUrlField,
+    displayName: _t("Image"),
+    supportedOptions: [
+        {
+            label: _t("Size"),
+            name: "size",
+            type: "selection",
+            choices: [
+                { label: _t("Small"), value: "[0,90]" },
+                { label: _t("Medium"), value: "[0,180]" },
+                { label: _t("Large"), value: "[0,270]" },
+            ],
+        },
+    ],
+    supportedTypes: ["char"],
+    extractProps: ({ attrs, options }) => ({
+        width: options.size ? options.size[0] : attrs.width,
+        height: options.size ? options.size[1] : attrs.height,
+    }),
 };
 
-ImageUrlField.displayName = _lt("Image");
-ImageUrlField.supportedTypes = ["char"];
-
-ImageUrlField.extractProps = ({ attrs }) => {
-    return {
-        width: attrs.options.size ? attrs.options.size[0] : attrs.width,
-        height: attrs.options.size ? attrs.options.size[1] : attrs.height,
-    };
-};
-
-registry.category("fields").add("image_url", ImageUrlField);
-// TODO WOWL: remove below when old registry is removed.
-registry.category("fields").add("kanban.image_url", ImageUrlField);
+registry.category("fields").add("image_url", imageUrlField);

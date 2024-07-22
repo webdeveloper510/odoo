@@ -1,9 +1,6 @@
 /** @odoo-module **/
 
-import {
-    makeFakeLocalizationService,
-    makeFakeNotificationService,
-} from "@web/../tests/helpers/mock_services";
+import { makeFakeLocalizationService } from "@web/../tests/helpers/mock_services";
 import {
     click,
     clickSave,
@@ -87,7 +84,7 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(route, { method, args }) {
-                if (method === "write") {
+                if (method === "web_save") {
                     assert.deepEqual(
                         args[1],
                         { int_field: 999, float_field: 5, display_name: "new name" },
@@ -129,7 +126,7 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 resId: 1,
                 mockRPC(route, { method, args }) {
-                    if (method === "write") {
+                    if (method === "web_save") {
                         assert.strictEqual(
                             args[1].int_field,
                             69,
@@ -181,7 +178,7 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 resId: 1,
                 mockRPC(route, { method, args }) {
-                    if (method === "write") {
+                    if (method === "web_save") {
                         assert.strictEqual(
                             args[1].int_field,
                             69,
@@ -228,7 +225,7 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 resId: 1,
                 mockRPC(route, { method, args }) {
-                    if (method === "write") {
+                    if (method === "web_save") {
                         assert.strictEqual(
                             args[1].float_field,
                             69,
@@ -296,7 +293,7 @@ QUnit.module("Fields", (hooks) => {
 
         assert.verifySteps([
             "/web/dataset/call_kw/partner/get_views",
-            "/web/dataset/call_kw/partner/read",
+            "/web/dataset/call_kw/partner/web_read",
         ]);
     });
 
@@ -322,7 +319,7 @@ QUnit.module("Fields", (hooks) => {
                 </kanban>`,
             resId: 1,
             mockRPC(route, { method, args }) {
-                if (method === "write") {
+                if (method === "web_save") {
                     assert.strictEqual(args[1].int_field, 69, "New value of progress bar saved");
                 }
             },
@@ -370,18 +367,18 @@ QUnit.module("Fields", (hooks) => {
             type: "kanban",
             resModel: "partner",
             arch: /* xml */ `
-                <kanban>
-                    <templates>
-                        <t t-name="kanban-box">
-                            <div>
-                                <field name="int_field" widget="progressbar" options="{'editable': true, 'max_value': 'float_field', 'readonly': True}" />
-                            </div>
-                        </t>
-                    </templates>
-                </kanban>`,
+                        <kanban>
+                            <templates>
+                                <t t-name="kanban-box">
+                                    <div>
+                                        <field name="int_field" widget="progressbar" options="{'editable': true, 'max_value': 'float_field', 'readonly': True}" />
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>`,
             resId: 1,
             mockRPC(route, { method, args }) {
-                if (method === "write") {
+                if (method === "web_save") {
                     throw new Error("Not supposed to write");
                 }
             },
@@ -465,7 +462,7 @@ QUnit.module("Fields", (hooks) => {
                     </form>`,
                 resId: 1,
                 mockRPC: function (route, { method, args }) {
-                    if (method === "write") {
+                    if (method === "web_save") {
                         assert.strictEqual(
                             args[1].int_field,
                             1037,
@@ -507,13 +504,6 @@ QUnit.module("Fields", (hooks) => {
         "ProgressBarField: write gibbrish instead of int throws warning",
         async function (assert) {
             serverData.models.partner.records[0].int_field = 99;
-            const mock = () => {
-                assert.step("Show error message");
-                return () => {};
-            };
-            registry.category("services").add("notification", makeFakeNotificationService(mock), {
-                force: true,
-            });
 
             await makeView({
                 serverData,
@@ -534,8 +524,39 @@ QUnit.module("Fields", (hooks) => {
 
             await editInput(target, ".o_progressbar_value .o_input", "trente sept virgule neuf");
             await clickSave(target);
-            assert.containsOnce(target, ".o_form_dirty", "The form has not been saved");
-            assert.verifySteps(["Show error message"], "The error message was shown correctly");
+            assert.containsOnce(
+                target,
+                ".o_form_status_indicator span.text-danger",
+                "The form has not been saved"
+            );
+            assert.strictEqual(
+                target.querySelector(".o_form_button_save").disabled,
+                true,
+                "save button is disabled"
+            );
+        }
+    );
+
+    QUnit.test(
+        "ProgressBarField: color is correctly set when value > max value",
+        async function (assert) {
+            serverData.models.partner.records[0].float_field = 101;
+            await makeView({
+                serverData,
+                type: "form",
+                resModel: "partner",
+                arch: `
+                    <form>
+                        <field name="float_field" widget="progressbar" options="{'overflow_class': 'bg-warning'}"/>
+                    </form>`,
+                resId: 1,
+            });
+
+            assert.containsOnce(
+                target,
+                ".o_progressbar .bg-warning",
+                "As the value has excedded the max value, the color should be set to bg-warning"
+            );
         }
     );
 });

@@ -23,7 +23,7 @@ import {
     prepareUpdate,
     setSelection,
     isMediaElement,
-    isVisibleEmpty,
+    isSelfClosingElement,
     isNotEditableNode,
     createDOMPathGenerator,
     closestElement,
@@ -65,7 +65,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
             leftNode.remove();
             return;
         }
-        if (!isBlock(leftNode) || isVisibleEmpty(leftNode)) {
+        if (!isBlock(leftNode) || isSelfClosingElement(leftNode)) {
             /**
              * Backspace just after an inline node, convert to backspace at the
              * end of that inline node.
@@ -113,7 +113,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
             throw UNREMOVABLE_ROLLBACK_CODE;
         }
         const closestLi = closestElement(this, 'li');
-        if ((closestLi && !closestLi.previousElementSibling) || !isBlock(this) || isVisibleEmpty(this)) {
+        if ((closestLi && !closestLi.previousElementSibling) || !isBlock(this) || isSelfClosingElement(this)) {
             /**
              * Backspace at the beginning of an inline node, nothing has to be
              * done: propagate the backspace. If the node was empty, we remove
@@ -126,7 +126,7 @@ HTMLElement.prototype.oDeleteBackward = function (offset, alreadyMoved = false, 
             const parentOffset = childNodeIndex(this);
 
             if (!nodeSize(this) || contentIsZWS) {
-                const visible = isVisible(this) && !contentIsZWS;
+                const visible = isVisible(this);
                 const restore = prepareUpdate(...boundariesOut(this));
                 this.remove();
                 restore();

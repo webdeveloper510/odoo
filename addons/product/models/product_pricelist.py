@@ -7,9 +7,10 @@ from odoo.exceptions import UserError
 
 class Pricelist(models.Model):
     _name = "product.pricelist"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Pricelist"
     _rec_names_search = ['name', 'currency_id']  # TODO check if should be removed
-    _order = "sequence asc, id desc"
+    _order = "sequence asc, id asc"
 
     def _default_currency_id(self):
         return self.env.company.currency_id.id
@@ -25,16 +26,24 @@ class Pricelist(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         default=_default_currency_id,
-        required=True)
+        required=True,
+        tracking=1,
+    )
 
     company_id = fields.Many2one(
-        comodel_name='res.company')
+        comodel_name='res.company',
+        tracking=5,
+        default=lambda self: self.env.company,
+    )
+
     country_group_ids = fields.Many2many(
         comodel_name='res.country.group',
         relation='res_country_group_pricelist_rel',
         column1='pricelist_id',
         column2='res_country_group_id',
-        string="Country Groups")
+        string="Country Groups",
+        tracking=10,
+    )
 
     discount_policy = fields.Selection(
         selection=[
@@ -42,89 +51,141 @@ class Pricelist(models.Model):
             ('without_discount', "Show public price & discount to the customer"),
         ],
         default='with_discount',
-        required=True)
+        required=True,
+        tracking=15,
+    )
 
     item_ids = fields.One2many(
         comodel_name='product.pricelist.item',
         inverse_name='pricelist_id',
         string="Pricelist Rules",
+        domain=[
+            '&',
+            '|', ('product_tmpl_id', '=', None), ('product_tmpl_id.active', '=', True),
+            '|', ('product_id', '=', None), ('product_id.active', '=', True),
+        ],
         copy=True)
 
-    def name_get(self):
-        return [(pricelist.id, '%s (%s)' % (pricelist.name, pricelist.currency_id.name)) for pricelist in self]
+    @api.depends('currency_id')
+    def _compute_display_name(self):
+        for pricelist in self:
+            pricelist.display_name = f'{pricelist.name} ({pricelist.currency_id.name})'
 
-    def _get_products_price(self, products, quantity, uom=None, date=False, **kwargs):
-        """Compute the pricelist prices for the specified products, qty & uom.
+    def write(self, values):
+        res = super().write(values)
 
-        Note: self.ensure_one()
+        # Make sure that there is no multi-company issue in the existing rules after the company
+        # change.
+        if 'company_id' in values and len(self) == 1:
+            self.item_ids._check_company()
 
-        :returns: dict{product_id: product price}, considering the current pricelist
-        :rtype: dict
+        return res
+
+    def _get_products_price(self, products, *args, **kwargs):
+        """Compute the pricelist prices for the specified products, quantity & uom.
+
+        Note: self and self.ensure_one()
+
+        :param products: recordset of products (product.product/product.template)
+        :param float quantity: quantity of products requested (in given uom)
+        :param currency: record of currency (res.currency) (optional)
+        :param uom: unit of measure (uom.uom record) (optional)
+            If not specified, prices returned are expressed in product uoms
+        :param date: date to use for price computation and currency conversions (optional)
+        :type date: date or datetime
+
+        :returns: {product_id: product price}, considering the current pricelist if any
+        :rtype: dict(int, float)
         """
-        self.ensure_one()
+        self and self.ensure_one()  # self is at most one record
         return {
             product_id: res_tuple[0]
-            for product_id, res_tuple in self._compute_price_rule(
-                products,
-                quantity,
-                uom=uom,
-                date=date,
-                **kwargs
-            ).items()
+            for product_id, res_tuple in self._compute_price_rule(products, *args, **kwargs).items()
         }
 
-    def _get_product_price(self, product, quantity, uom=None, date=False, **kwargs):
+    def _get_product_price(self, product, *args, **kwargs):
         """Compute the pricelist price for the specified product, qty & uom.
 
-        Note: self.ensure_one()
+        Note: self and self.ensure_one()
 
-        :returns: unit price of the product, considering pricelist rules
+        :param product: product record (product.product/product.template)
+        :param float quantity: quantity of products requested (in given uom)
+        :param currency: record of currency (res.currency) (optional)
+        :param uom: unit of measure (uom.uom record) (optional)
+            If not specified, prices returned are expressed in product uoms
+        :param date: date to use for price computation and currency conversions (optional)
+        :type date: date or datetime
+
+        :returns: unit price of the product, considering pricelist rules if any
         :rtype: float
         """
-        self.ensure_one()
-        return self._compute_price_rule(
-            product, quantity, uom=uom, date=date, **kwargs
-        )[product.id][0]
+        self and self.ensure_one()  # self is at most one record
+        return self._compute_price_rule(product, *args, **kwargs)[product.id][0]
 
-    def _get_product_price_rule(self, product, quantity, uom=None, date=False, **kwargs):
+    def _get_product_price_rule(self, product, *args, **kwargs):
         """Compute the pricelist price & rule for the specified product, qty & uom.
 
-        Note: self.ensure_one()
+        Note: self and self.ensure_one()
+
+        :param product: product record (product.product/product.template)
+        :param float quantity: quantity of products requested (in given uom)
+        :param currency: record of currency (res.currency) (optional)
+        :param uom: unit of measure (uom.uom record) (optional)
+            If not specified, prices returned are expressed in product uoms
+        :param date: date to use for price computation and currency conversions (optional)
+        :type date: date or datetime
 
         :returns: (product unit price, applied pricelist rule id)
         :rtype: tuple(float, int)
         """
-        self.ensure_one()
-        return self._compute_price_rule(product, quantity, uom=uom, date=date, **kwargs)[product.id]
+        self and self.ensure_one()  # self is at most one record
+        return self._compute_price_rule(product, *args, **kwargs)[product.id]
 
-    def _get_product_rule(self, product, quantity, uom=None, date=False, **kwargs):
+    def _get_product_rule(self, product, *args, **kwargs):
         """Compute the pricelist price & rule for the specified product, qty & uom.
 
-        Note: self.ensure_one()
+        Note: self and self.ensure_one()
+
+        :param product: product record (product.product/product.template)
+        :param float quantity: quantity of products requested (in given uom)
+        :param currency: record of currency (res.currency) (optional)
+        :param uom: unit of measure (uom.uom record) (optional)
+            If not specified, prices returned are expressed in product uoms
+        :param date: date to use for price computation and currency conversions (optional)
+        :type date: date or datetime
 
         :returns: applied pricelist rule id
         :rtype: int or False
         """
-        self.ensure_one()
-        return self._compute_price_rule(
-            product, quantity, uom=uom, date=date, **kwargs
-        )[product.id][1]
+        self and self.ensure_one()  # self is at most one record
+        return self._compute_price_rule(product, *args, compute_price=False, **kwargs)[product.id][1]
 
-    def _compute_price_rule(self, products, qty, uom=None, date=False, **kwargs):
+    def _compute_price_rule(
+            self, products, quantity, currency=None, uom=None, date=False, compute_price=True,
+            **kwargs
+    ):
         """ Low-level method - Mono pricelist, multi products
         Returns: dict{product_id: (price, suitable_rule) for the given pricelist}
 
+        Note: self and self.ensure_one()
+
         :param products: recordset of products (product.product/product.template)
-        :param float qty: quantity of products requested (in given uom)
+        :param float quantity: quantity of products requested (in given uom)
+        :param currency: record of currency (res.currency)
+                         note: currency.ensure_one()
         :param uom: unit of measure (uom.uom record)
             If not specified, prices returned are expressed in product uoms
         :param date: date to use for price computation and currency conversions
         :type date: date or datetime
+        :param bool compute_price: whether the price should be computed (default: True)
 
         :returns: product_id: (price, pricelist_rule)
         :rtype: dict
         """
-        self.ensure_one()
+        self and self.ensure_one()  # self is at most one record
+
+        currency = currency or self.currency_id or self.env.company.currency_id
+        currency.ensure_one()
 
         if not products:
             return {}
@@ -146,32 +207,42 @@ class Pricelist(models.Model):
             # Compute quantity in product uom because pricelist rules are specified
             # w.r.t product default UoM (min_quantity, price_surchage, ...)
             if target_uom != product_uom:
-                qty_in_product_uom = target_uom._compute_quantity(qty, product_uom, raise_if_failure=False)
+                qty_in_product_uom = target_uom._compute_quantity(
+                    quantity, product_uom, raise_if_failure=False
+                )
             else:
-                qty_in_product_uom = qty
+                qty_in_product_uom = quantity
 
             for rule in rules:
                 if rule._is_applicable_for(product, qty_in_product_uom):
                     suitable_rule = rule
                     break
 
-            kwargs['pricelist'] = self
-            price = suitable_rule._compute_price(product, qty, target_uom, date=date, currency=self.currency_id)
+            if compute_price:
+                price = suitable_rule._compute_price(
+                    product, quantity, target_uom, date=date, currency=currency)
+            else:
+                # Skip price computation when only the rule is requested.
+                price = 0.0
             results[product.id] = (price, suitable_rule.id)
 
         return results
 
     # Split methods to ease (community) overrides
     def _get_applicable_rules(self, products, date, **kwargs):
-        self.ensure_one()
+        self and self.ensure_one()  # self is at most one record
+        if not self:
+            return self.env['product.pricelist.item']
+
         # Do not filter out archived pricelist items, since it means current pricelist is also archived
         # We do not want the computation of prices for archived pricelist to always fallback on the Sales price
         # because no rule was found (thanks to the automatic orm filtering on active field)
         return self.env['product.pricelist.item'].with_context(active_test=False).search(
             self._get_applicable_rules_domain(products=products, date=date, **kwargs)
-        )
+        ).with_context(self.env.context)
 
     def _get_applicable_rules_domain(self, products, date, **kwargs):
+        self and self.ensure_one()  # self is at most one record
         if products._name == 'product.template':
             templates_domain = ('product_tmpl_id', 'in', products.ids)
             products_domain = ('product_id.product_tmpl_id', 'in', products.ids)
@@ -189,13 +260,13 @@ class Pricelist(models.Model):
         ]
 
     # Multi pricelists price|rule computation
-    def _price_get(self, product, qty, **kwargs):
+    def _price_get(self, product, quantity, **kwargs):
         """ Multi pricelist, mono product - returns price per pricelist """
         return {
             key: price[0]
-            for key, price in self._compute_price_rule_multi(product, qty, **kwargs)[product.id].items()}
+            for key, price in self._compute_price_rule_multi(product, quantity, **kwargs)[product.id].items()}
 
-    def _compute_price_rule_multi(self, products, qty, uom=None, date=False, **kwargs):
+    def _compute_price_rule_multi(self, products, quantity, uom=None, date=False, **kwargs):
         """ Low-level method - Multi pricelist, multi products
         Returns: dict{product_id: dict{pricelist_id: (price, suitable_rule)} }"""
         if not self.ids:
@@ -204,7 +275,7 @@ class Pricelist(models.Model):
             pricelists = self
         results = {}
         for pricelist in pricelists:
-            subres = pricelist._compute_price_rule(products, qty, uom=uom, date=date, **kwargs)
+            subres = pricelist._compute_price_rule(products, quantity, uom=uom, date=date, **kwargs)
             for product_id, price in subres.items():
                 results.setdefault(product_id, {})
                 results[product_id][pricelist.id] = price
@@ -219,9 +290,8 @@ class Pricelist(models.Model):
         First, the pricelist of the specific property (res_id set), this one
                 is created when saving a pricelist on the partner form view.
         Else, it will return the pricelist of the partner country group
-        Else, it will return the generic property (res_id not set), this one
-                is created on the company creation.
-        Else, it will return the first available pricelist
+        Else, it will return the generic property (res_id not set)
+        Else, it will return the first available pricelist if any
 
         :param int company_id: if passed, used for looking up properties,
             instead of current user's company
@@ -237,10 +307,26 @@ class Pricelist(models.Model):
         pl_domain = self._get_partner_pricelist_multi_search_domain_hook(company_id)
 
         # if no specific property, try to find a fitting pricelist
-        result = Property._get_multi('property_product_pricelist', Partner._name, partner_ids)
+        specific_properties = Property._get_multi(
+            'property_product_pricelist', Partner._name,
+            list(models.origin_ids(partner_ids)),  # Some NewID can be in the partner_ids
+        )
+        result = {}
+        remaining_partner_ids = []
+        for pid in partner_ids:
+            if (
+                specific_properties.get(pid)
+                and specific_properties[pid]._get_partner_pricelist_multi_filter_hook()
+            ):
+                result[pid] = specific_properties[pid]
+            elif (
+                isinstance(pid, models.NewId) and specific_properties.get(pid.origin)
+                and specific_properties[pid.origin]._get_partner_pricelist_multi_filter_hook()
+            ):
+                result[pid] = specific_properties[pid.origin]
+            else:
+                remaining_partner_ids.append(pid)
 
-        remaining_partner_ids = [pid for pid, val in result.items() if not val or
-                                 not val._get_partner_pricelist_multi_filter_hook()]
         if remaining_partner_ids:
             # get fallback pricelist when no pricelist for a given country
             pl_fallback = (
@@ -249,14 +335,12 @@ class Pricelist(models.Model):
                 Pricelist.search(pl_domain, limit=1)
             )
             # group partners by country, and find a pricelist for each country
-            domain = [('id', 'in', remaining_partner_ids)]
-            groups = Partner.read_group(domain, ['country_id'], ['country_id'])
-            for group in groups:
-                country_id = group['country_id'] and group['country_id'][0]
-                pl = Pricelist.search(pl_domain + [('country_group_ids.country_ids', '=', country_id)], limit=1)
+            remaining_partners = self.env['res.partner'].browse(remaining_partner_ids)
+            partners_by_country = remaining_partners.grouped('country_id')
+            for country, partners in partners_by_country.items():
+                pl = Pricelist.search(pl_domain + [('country_group_ids.country_ids', '=', country.id if country else False)], limit=1)
                 pl = pl or pl_fallback
-                for pid in Partner.search(group['__domain']).ids:
-                    result[pid] = pl
+                result.update(dict.fromkeys(partners._ids, pl))
 
         return result
 

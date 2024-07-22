@@ -27,6 +27,9 @@ class TestOnchangeProductId(TransactionCase):
         cls.product_model = cls.env['product.product']
         cls.product_uom_model = cls.env['uom.uom']
         cls.supplierinfo_model = cls.env["product.supplierinfo"]
+        cls.env['account.tax.group'].create(
+            {'name': 'Test Account Tax Group', 'company_id': cls.env.company.id}
+        )
 
     def test_onchange_product_id(self):
         # Required for `product_uom` to be visible in the view

@@ -42,10 +42,11 @@ class ChangeProductionQty(models.TransientModel):
             if self._need_quantity_propagation(move, qty):
                 push_moves |= move.copy({'product_uom_qty': qty})
             else:
-                self._update_product_qty(move, qty)
+                move.write({'product_uom_qty': move.product_uom_qty + qty})
 
         if push_moves:
-            push_moves._action_confirm()._action_assign()
+            push_moves._action_confirm()
+        production.move_finished_ids._action_assign()
 
         return modification
 
@@ -53,22 +54,10 @@ class ChangeProductionQty(models.TransientModel):
     def _need_quantity_propagation(self, move, qty):
         return move.move_dest_ids and not float_is_zero(qty, precision_rounding=move.product_uom.rounding)
 
-    @api.model
-    def _update_product_qty(self, move, qty):
-        move.write({'product_uom_qty': move.product_uom_qty + qty})
-
     def change_prod_qty(self):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         for wizard in self:
             production = wizard.mo_id
-            produced = sum(production.move_finished_ids.filtered(lambda m: m.product_id == production.product_id).mapped('quantity_done'))
-            if wizard.product_qty < produced:
-                format_qty = '%.{precision}f'.format(precision=precision)
-                raise UserError(_(
-                    "You have already processed %(quantity)s. Please input a quantity higher than %(minimum)s ",
-                    quantity=format_qty % produced,
-                    minimum=format_qty % produced
-                ))
             old_production_qty = production.product_qty
             new_production_qty = wizard.product_qty
 

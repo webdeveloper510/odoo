@@ -3,16 +3,15 @@
 # 	* product_images
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Kevilyn Rosa, 2023
+# Wil Odoo, 2023
 # Layna Nascimento, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:02+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Layna Nascimento, 2023\n"
 "Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
@@ -22,29 +21,31 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
 "%(matching_images_count)s matching images have been found for "
 "%(product_count)s products."
 msgstr ""
-"%(matching_images_count)s imagens correspondentes foram encontradas  para "
+"%(matching_images_count)s imagens correspondentes foram encontradas para "
 "%(product_count)s produtos."
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid ""
-"<span attrs=\"{'invisible': [('nb_products_selected', '&lt;=', 10000)]}\">\n"
+"<span invisible=\"nb_products_selected &lt;= 10000\">\n"
 "                            As only 10,000 products can be processed per day, the remaining will be\n"
 "                            done tomorrow.\n"
 "                        </span>"
 msgstr ""
-"<span attrs=\"{'invisible': [('nb_products_selected', '&lt;=', 10000)]}\">\n"
-"                           Já que somente 10.000 produtos podem ser processados por dia, o restante será\n"
-"                                     feito amanhã.\n"
+"<span invisible=\"nb_products_selected &lt;= 10000\">\n"
+"                            Já que somente 10.000 produtos podem ser processados por dia, o restante será\n"
+"                            feito amanhã.\n"
 "                        </span>"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
@@ -57,7 +58,7 @@ msgstr ""
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.res_config_settings_view_form
 msgid "API Key"
-msgstr "Chave API"
+msgstr "Chave de API"
 
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
@@ -120,11 +121,6 @@ msgid "Image Fetch Pending"
 msgstr "Busca de imagem pendente"
 
 #. module: product_images
-#: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard____last_update
-msgid "Last Modified on"
-msgstr "Última modificação em"
-
-#. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__write_uid
 msgid "Last Updated by"
 msgstr "Última atualização por"
@@ -160,17 +156,16 @@ msgstr ""
 
 #. module: product_images
 #: model:ir.actions.server,name:product_images.ir_cron_fetch_image_ir_actions_server
-#: model:ir.cron,cron_name:product_images.ir_cron_fetch_image
-#: model:ir.cron,name:product_images.ir_cron_fetch_image
 msgid "Product Images: Get product images from Google"
 msgstr "Imagens de produtos: obter imagens de produtos do Google"
 
 #. module: product_images
 #: model:ir.model,name:product_images.model_product_product
 msgid "Product Variant"
-msgstr "Variação do Produto"
+msgstr "Variante do produto"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "Product images"
@@ -182,6 +177,7 @@ msgid "Products To Process"
 msgstr "Produtos a serem processados"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
@@ -197,6 +193,7 @@ msgid "Search Engine ID"
 msgstr "ID do mecanismo de pesquisa"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "The API Key and Search Engine ID must be set in the General Settings."
@@ -205,6 +202,7 @@ msgstr ""
 "configurações gerais."
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid ""
@@ -212,7 +210,7 @@ msgid ""
 "your Google Cloud Platform project page and enable it, then retry. If you "
 "enabled this API recently, please wait a few minutes and retry."
 msgstr ""
-"A API de pesquisa personalizada não está ativada em seu projeto do Google. "
+"A API de busca personalizada não está ativada em seu projeto do Google. "
 "Visite a página do seu projeto do Google Cloud Platform, ative-a e tente "
 "novamente. Se você ativou essa API recentemente, aguarde alguns minutos e "
 "tente novamente."
@@ -220,7 +218,7 @@ msgstr ""
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_res_config_settings__google_pse_id
 msgid "The identifier of the Google Programmable Search Engine"
-msgstr "O identificador do mecanismo de pesquisa programável do Google"
+msgstr "O identificador do mecanismo de busca programável do Google"
 
 #. module: product_images
 #: model:ir.model.fields,help:product_images.field_product_fetch_image_wizard__products_to_process
@@ -232,6 +230,7 @@ msgstr ""
 " barras e nenhuma imagem)"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
@@ -245,6 +244,7 @@ msgstr ""
 "restaurada ou para reinstalar o módulo “product_images”."
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/models/ir_cron_trigger.py:0
 #, python-format
 msgid "This action is already scheduled. Please try again later."
@@ -253,7 +253,7 @@ msgstr "Essa ação já está programada. Tente novamente mais tarde."
 #. module: product_images
 #: model:ir.model,name:product_images.model_ir_cron_trigger
 msgid "Triggered actions"
-msgstr "Ações engatilhadas"
+msgstr "Ações disparadas"
 
 #. module: product_images
 #: model:ir.model.fields,help:product_images.field_product_product__image_fetch_pending
@@ -267,6 +267,7 @@ msgid "You selected"
 msgstr "Você selecionou"
 
 #. module: product_images
+#. odoo-python
 #: code:addons/product_images/wizard/product_fetch_image_wizard.py:0
 #, python-format
 msgid "Your API Key or your Search Engine ID is incorrect."

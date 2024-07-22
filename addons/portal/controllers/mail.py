@@ -165,12 +165,15 @@ class PortalChatter(http.Controller):
         result.update({'default_message_id': message.id})
 
         if attachment_ids:
-            # sudo write the attachment to bypass the read access
-            # verification in mail message
-            record = request.env[res_model].browse(res_id)
-            message_values = {'res_id': res_id, 'model': res_model}
-            attachments = record._message_post_process_attachments([], attachment_ids, message_values)
-
+            # _message_post_helper already checks for pid/hash/token -> use message
+            # environment to keep the sudo mode when activated
+            record = message.env[res_model].browse(res_id)
+            attachments = record._process_attachments_for_post(
+                [], attachment_ids,
+                {'res_id': res_id, 'model': res_model}
+            )
+            # sudo write the attachment to bypass the read access verification in
+            # mail message
             if attachments.get('attachment_ids'):
                 message.sudo().write(attachments)
 
@@ -222,7 +225,7 @@ class PortalChatter(http.Controller):
                 domain = expression.AND([Message._get_search_domain_share(), domain])
             Message = request.env['mail.message'].sudo()
         return {
-            'messages': Message.search(domain, limit=limit, offset=offset).portal_message_format(),
+            'messages': Message.search(domain, limit=limit, offset=offset).portal_message_format(options=kw),
             'message_count': Message.search_count(domain)
         }
 
@@ -274,3 +277,8 @@ class MailController(mail.MailController):
                             url = url.replace(query=urls.url_encode(url_params)).to_url()
                         return request.redirect(url)
         return super(MailController, cls)._redirect_to_record(model, res_id, access_token=access_token, **kwargs)
+
+    # Add website=True to support the portal layout
+    @http.route('/mail/unfollow', type='http', website=True)
+    def mail_action_unfollow(self, model, res_id, pid, token, **kwargs):
+        return super().mail_action_unfollow(model, res_id, pid, token, **kwargs)

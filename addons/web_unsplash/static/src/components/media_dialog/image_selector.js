@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { patch } from 'web.utils';
+import { _t } from "@web/core/l10n/translation";
+import { patch } from "@web/core/utils/patch";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { MediaDialog, TABS } from '@web_editor/components/media_dialog/media_dialog';
 import { ImageSelector } from '@web_editor/components/media_dialog/image_selector';
@@ -37,9 +38,9 @@ UnsplashError.components = {
     UnsplashCredentials,
 };
 
-patch(ImageSelector.prototype, 'image_selector_unsplash', {
+patch(ImageSelector.prototype, {
     setup() {
-        this._super();
+        super.setup();
         this.unsplash = useService('unsplash');
         this.keepLastUnsplash = new KeepLast();
 
@@ -52,50 +53,50 @@ patch(ImageSelector.prototype, 'image_selector_unsplash', {
 
         this.errorMessages = {
             'key_not_found': {
-                title: this.env._t("Setup Unsplash to access royalty free photos."),
+                title: _t("Setup Unsplash to access royalty free photos."),
                 subtitle: "",
             },
             401: {
-                title: this.env._t("Unauthorized Key"),
-                subtitle: this.env._t("Please check your Unsplash access key and application ID."),
+                title: _t("Unauthorized Key"),
+                subtitle: _t("Please check your Unsplash access key and application ID."),
             },
             403: {
-                title: this.env._t("Search is temporarily unavailable"),
-                subtitle: this.env._t("The max number of searches is exceeded. Please retry in an hour or extend to a better account."),
+                title: _t("Search is temporarily unavailable"),
+                subtitle: _t("The max number of searches is exceeded. Please retry in an hour or extend to a better account."),
             },
         };
     },
 
     get canLoadMore() {
         if (this.state.searchService === 'all') {
-            return this._super() || this.state.needle && !this.state.isMaxed && !this.state.unsplashError;
+            return super.canLoadMore || this.state.needle && !this.state.isMaxed && !this.state.unsplashError;
         } else if (this.state.searchService === 'unsplash') {
             return this.state.needle && !this.state.isMaxed && !this.state.unsplashError;
         }
-        return this._super();
+        return super.canLoadMore;
     },
 
     get hasContent() {
         if (this.state.searchService === 'all') {
-            return this._super() || !!this.state.unsplashRecords.length;
+            return super.hasContent || !!this.state.unsplashRecords.length;
         } else if (this.state.searchService === 'unsplash') {
             return !!this.state.unsplashRecords.length;
         }
-        return this._super();
+        return super.hasContent;
     },
 
     get errorTitle() {
         if (this.errorMessages[this.state.unsplashError]) {
             return this.errorMessages[this.state.unsplashError].title;
         }
-        return this.env._t("Something went wrong");
+        return _t("Something went wrong");
     },
 
     get errorSubtitle() {
         if (this.errorMessages[this.state.unsplashError]) {
             return this.errorMessages[this.state.unsplashError].subtitle;
         }
-        return this.env._t("Please check your internet connection or contact administrator.");
+        return _t("Please check your internet connection or contact administrator.");
     },
 
     get selectedRecordIds() {
@@ -103,7 +104,29 @@ patch(ImageSelector.prototype, 'image_selector_unsplash', {
     },
 
     get isFetching() {
-        return this._super() || this.state.isFetchingUnsplash;
+        return super.isFetching || this.state.isFetchingUnsplash;
+    },
+
+    get combinedRecords() {
+        /**
+         * Creates an array with alternating elements from two arrays.
+         *
+         * @param {Array} a
+         * @param {Array} b
+         * @returns {Array} alternating elements from a and b, starting with
+         *     an element of a
+         */
+        function alternate(a, b) {
+            return [
+                a.map((v, i) => i < b.length ? [v, b[i]] : v),
+                b.slice(a.length),
+            ].flat(2);
+        }
+        return alternate(this.state.unsplashRecords, this.state.libraryMedia);
+    },
+
+    get allAttachments() {
+        return [...super.allAttachments, ...this.state.unsplashRecords];
     },
 
     // It seems that setters are mandatory when patching a component that
@@ -152,7 +175,7 @@ patch(ImageSelector.prototype, 'image_selector_unsplash', {
     },
 
     async loadMore(...args) {
-        await this._super(...args);
+        await super.loadMore(...args);
         return this.keepLastUnsplash.add(this.fetchUnsplashRecords(this.state.unsplashRecords.length)).then(({ records, isMaxed }) => {
             // This is never reached if another search or loadMore occurred.
             this.state.unsplashRecords.push(...records);
@@ -161,7 +184,7 @@ patch(ImageSelector.prototype, 'image_selector_unsplash', {
     },
 
     async search(...args) {
-        await this._super(...args);
+        await super.search(...args);
         await this.searchUnsplash();
     },
 
@@ -196,15 +219,14 @@ ImageSelector.components = {
     UnsplashError,
 };
 
-patch(MediaDialog.prototype, 'media_dialog_unsplash', {
+patch(MediaDialog.prototype, {
     setup() {
-        this._super();
+        super.setup();
 
         this.uploadService = useService('upload');
     },
 
     async save() {
-        const _super = this._super.bind(this);
         const selectedImages = this.selectedMedia[TABS.IMAGES.id];
         if (selectedImages) {
             const unsplashRecords = selectedImages.filter(media => media.mediaType === 'unsplashRecord');
@@ -215,13 +237,13 @@ patch(MediaDialog.prototype, 'media_dialog_unsplash', {
                 });
             }
         }
-        return _super(...arguments);
+        return super.save(...arguments);
     },
 });
 
-patch(uploadService, 'upload_service_unsplash', {
+patch(uploadService, {
     start(env, { rpc }) {
-        const service = this._super(...arguments);
+        const service = super.start(...arguments);
         return {
             ...service,
             async uploadUnsplashRecords(records, { resModel, resId }, onUploaded) {
@@ -229,10 +251,8 @@ patch(uploadService, 'upload_service_unsplash', {
                 const file = service.addFile({
                     id: service.fileId,
                     name: records.length > 1 ?
-                    _.str.sprintf(env._t("Uploading %s '%s' images."), records.length, records[0].query) :
-                    _.str.sprintf(env._t("Uploading '%s' image."), records[0].query),
-                    size: null,
-                    progress: 0,
+                    _t("Uploading %s '%s' images.", records.length, records[0].query) :
+                    _t("Uploading '%s' image.", records[0].query),
                 });
 
                 try {

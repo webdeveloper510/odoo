@@ -8,7 +8,9 @@ import {
     clickSave,
     editInput,
     getFixture,
+    nextTick,
     triggerEvent,
+    triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 
@@ -20,7 +22,6 @@ let target;
 QUnit.module("Fields", (hooks) => {
     hooks.beforeEach(() => {
         target = getFixture();
-
         serverData = {
             models: {
                 partner: {
@@ -55,6 +56,17 @@ QUnit.module("Fields", (hooks) => {
                             txt: "some text",
                         },
                     ],
+                },
+                partner_list: {
+                    fields: {
+                        partner_ids: {
+                            string: "Partners",
+                            type: "one2many",
+                            relation: "partner",
+                            relation_field: "id",
+                        },
+                    },
+                    records: [{ id: 1, partner_ids: [1] }],
                 },
             },
         };
@@ -159,7 +171,7 @@ QUnit.module("Fields", (hooks) => {
             arch: `
                 <form>
                     <field name="bar" />
-                    <field name="txt" attrs="{'invisible': [('bar', '=', True)]}" />
+                    <field name="txt" invisible="bar" />
                 </form>`,
         });
 
@@ -255,11 +267,7 @@ QUnit.module("Fields", (hooks) => {
         });
 
         const textarea = target.querySelector("textarea");
-        assert.strictEqual(
-            textarea.rows,
-            4,
-            "rowCount should be the one set on the field",
-        );
+        assert.strictEqual(textarea.rows, 4, "rowCount should be the one set on the field");
     });
 
     QUnit.test(
@@ -282,8 +290,9 @@ QUnit.module("Fields", (hooks) => {
             });
 
             // ensure that autoresize is correctly done
-            let height = target.querySelector(".o_field_widget[name=text_field] textarea")
-                .offsetHeight;
+            let height = target.querySelector(
+                ".o_field_widget[name=text_field] textarea"
+            ).offsetHeight;
             // focus the field to manually trigger autoresize
             await triggerEvent(target, ".o_field_widget[name=text_field] textarea", "focus");
             assert.strictEqual(
@@ -352,8 +361,9 @@ QUnit.module("Fields", (hooks) => {
         await click(target.querySelectorAll(".o_notebook .nav .nav-link")[2]);
         assert.hasClass(target.querySelectorAll(".o_notebook .nav .nav-link")[2], "active");
 
-        height = target.querySelector(".o_field_widget[name=text_field_empty] textarea")
-            .offsetHeight;
+        height = target.querySelector(
+            ".o_field_widget[name=text_field_empty] textarea"
+        ).offsetHeight;
         assert.strictEqual(height, 50, "empty textarea should have height of 50px");
     });
 
@@ -584,12 +594,85 @@ QUnit.module("Fields", (hooks) => {
             arch: '<tree editable="top"><field name="foo"/></tree>',
         });
 
-        await click(target.querySelector(".o_list_button_add"));
+        await click(
+            target.querySelector(
+                ".o_control_panel_main_buttons .d-none.d-xl-inline-flex .o_list_button_add"
+            )
+        );
 
         assert.strictEqual(
             target.querySelector("textarea"),
             document.activeElement,
             "text area should have the focus"
         );
+    });
+
+    QUnit.test("field text with dynamic placeholder", async (assert) => {
+        serverData.models.partner.fields.model_reference_field = {
+            string: "Model Reference Field",
+            type: "char",
+            default: "partner",
+        };
+
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="model_reference_field" invisible="1"/>
+                    <sheet>
+                        <group>
+                            <field
+                                name="txt"
+                                options="{
+                                    'dynamic_placeholder': true,
+                                    'dynamic_placeholder_model_reference_field': 'model_reference_field'
+                                }"
+                            />
+                        </group>
+                    </sheet>
+                </form>`,
+        });
+
+        await click(target, "[name=txt] textarea");
+        assert.strictEqual(document.activeElement, target.querySelector("[name=txt] textarea"));
+
+        assert.containsNone(document.body, ".o_popover .o_model_field_selector_popover");
+        triggerHotkey("#");
+        await nextTick();
+        assert.containsOnce(document.body, ".o_popover .o_model_field_selector_popover");
+    });
+
+    QUnit.test("text field should vertical autoresize when saving", async function (assert) {
+        serverData.models.partner.fields.foo.type = "text";
+        serverData.models.partner.records[0].foo = "1";
+        await makeView({
+            type: "form",
+            resModel: "partner_list",
+            resId: 1,
+            serverData,
+            arch: `
+                <form>
+                    <field name="partner_ids" widget="one2many">
+                        <tree editable="bottom">
+                            <field name="foo" widget="text"/>
+                        </tree>
+                    </field>
+                </form>`,
+        });
+
+        await click(target, "[name=foo] div");
+        let textarea = target.querySelector(".o_field_widget[name='foo'] textarea");
+        const initialHeight = textarea.offsetHeight;
+
+        await editInput(textarea, null, "1\n2\n3\n4\n5\n6\n7\n8");
+        await clickSave(target);
+
+        await click(target, "[name=foo] div");
+        textarea = target.querySelector(".o_field_widget[name='foo'] textarea");
+        const afterHeight = textarea.offsetHeight;
+
+        assert.ok(afterHeight > initialHeight, "Should be taller than one character");
     });
 });

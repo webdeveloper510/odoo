@@ -5,8 +5,7 @@ import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
-
-const { Component, EventBus, onWillRender } = owl;
+import { Component, onWillRender } from "@odoo/owl";
 
 export class QtyAtDatePopover extends Component {
     setup() {
@@ -14,25 +13,23 @@ export class QtyAtDatePopover extends Component {
     }
 
     openForecast() {
-        this.actionService.doAction("stock.stock_replenishment_product_product_action", {
+        this.actionService.doAction("stock.stock_forecasted_product_product_action", {
             additionalContext: {
                 active_model: 'product.product',
                 active_id: this.props.record.data.product_id[0],
                 warehouse: this.props.record.data.warehouse_id && this.props.record.data.warehouse_id[0],
-                move_to_match_ids: this.props.record.data.move_ids.records.map(record => record.data.id),
-                sale_line_to_match_id: this.props.record.data.id,
+                move_to_match_ids: this.props.record.data.move_ids.records.map(record => record.resId),
+                sale_line_to_match_id: this.props.record.resId,
             },
         });
     }
 }
 
-QtyAtDatePopover.template = "sale_stock.QtyDetailPopOver";
+QtyAtDatePopover.template = "sale_stock.QtyAtDatePopover";
 
 export class QtyAtDateWidget extends Component {
     setup() {
-        this.bus = new EventBus();
-        this.popover = usePopover();
-        this.closePopover = null;
+        this.popover = usePopover(this.constructor.components.Popover, { position: "top" });
         this.calcData = {};
         onWillRender(() => {
             this.initCalcData();
@@ -74,19 +71,17 @@ export class QtyAtDateWidget extends Component {
 
     showPopup(ev) {
         this.updateCalcData();
-        this.closePopover = this.popover.add(
-            ev.currentTarget,
-            this.constructor.components.Popover,
-            {bus: this.bus, record: this.props.record, calcData: this.calcData},
-            {
-                position: 'top',
-            }
-            );
-        this.bus.addEventListener('close-popover', this.closePopover);
+        this.popover.open(ev.currentTarget, {
+            record: this.props.record,
+            calcData: this.calcData,
+        });
     }
 }
 
 QtyAtDateWidget.components = { Popover: QtyAtDatePopover };
-QtyAtDateWidget.template = "sale_stock.qtyAtDate";
+QtyAtDateWidget.template = "sale_stock.QtyAtDate";
 
-registry.category("view_widgets").add("qty_at_date_widget", QtyAtDateWidget);
+export const qtyAtDateWidget = {
+    component: QtyAtDateWidget,
+};
+registry.category("view_widgets").add("qty_at_date_widget", qtyAtDateWidget);

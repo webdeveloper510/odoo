@@ -1,7 +1,5 @@
 /** @odoo-module */
 
-import { loadJS } from "@web/core/assets";
-
 /**
  * Get the intersection of two arrays
  *
@@ -32,11 +30,6 @@ export function getMaxObjectId(o) {
     const nums = keys.map((id) => parseInt(id, 10));
     const max = Math.max(...nums);
     return max;
-}
-
-/** converts and orderBy Object to a string equivalent that can be processed by orm.call */
-export function orderByToString(orderBy) {
-    return orderBy.map((o) => `${o.name} ${o.asc ? "ASC" : "DESC"}`).join(", ");
 }
 
 /**
@@ -97,12 +90,9 @@ export function isEmpty(item) {
     return false;
 }
 
-/**
- * Load external libraries required for o-spreadsheet
- * @returns {Promise<void>}
- */
-export async function loadSpreadsheetDependencies() {
-    await loadJS("/web/static/lib/Chart/Chart.js");
-    // chartjs-gauge should only be loaded when Chart.js is fully loaded !
-    await loadJS("/spreadsheet/static/lib/chartjs-gauge/chartjs-gauge.js");
+export function containsReferences(cell) {
+    if (!cell.isFormula) {
+        return false;
+    }
+    return cell.compiledFormula.tokens.some((token) => token.type === "REFERENCE");
 }

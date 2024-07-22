@@ -1,34 +1,24 @@
-odoo.define('website_sale.tour_shop_cart_recovery', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var localStorage = require('web.local_storage');
-var tour = require('web_tour.tour');
-const tourUtils = require('website_sale.tour_utils');
-require('web.dom_ready');
+import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
+import tourUtils from "@website_sale/js/tours/tour_utils";
 
 var orderIdKey = 'website_sale.tour_shop_cart_recovery.orderId';
 var recoveryLinkKey = 'website_sale.tour_shop_cart_recovery.recoveryLink';
 
-tour.register('shop_cart_recovery', {
+registry.category("web_tour.tours").add('shop_cart_recovery', {
     test: true,
-    url: '/shop?search=Acoustic Bloc Screens',
-},
-[
-    {
-        content: "select Acoustic Bloc Screens",
-        trigger: '.oe_product_cart a:containsExact("Acoustic Bloc Screens")',
-    },
-    {
-        content: "click add to cart",
-        trigger: '#product_details #add_to_cart',
-    },
+    url: '/shop',
+    steps: () => [
+        ...tourUtils.addToCart({productName: "Acoustic Bloc Screens"}),
         tourUtils.goToCart(),
     {
         content: "check product is in cart, get cart id, logout, go to login",
-        trigger: 'td.td-product_name:contains("Acoustic Bloc Screens")',
+        trigger: 'div:has(a>h6:contains("Acoustic Bloc Screens"))',
         run: function () {
             var orderId = $('.my_cart_quantity').data('order-id');
-            localStorage.setItem(orderIdKey, orderId);
+            browser.localStorage.setItem(orderIdKey, orderId);
             window.location.href = "/web/session/logout?redirect=/web/login";
         },
     },
@@ -36,7 +26,7 @@ tour.register('shop_cart_recovery', {
         content: "login as admin and go to the SO (backend)",
         trigger: '.oe_login_form',
         run: function () {
-            var orderId = localStorage.getItem(orderIdKey);
+            var orderId = browser.localStorage.getItem(orderIdKey);
             var url = "/web#action=sale.action_orders&view_type=form&id=" + orderId;
             var $loginForm = $('.oe_login_form');
             $loginForm.find('input[name="login"]').val("admin");
@@ -47,7 +37,7 @@ tour.register('shop_cart_recovery', {
     },
     {
         content: "click action",
-        trigger: '.dropdown-toggle:contains("Action")',
+        trigger: '.o_cp_action_menus .dropdown-toggle',
     },
     {
         content: "click Send a Cart Recovery Email",
@@ -59,10 +49,10 @@ tour.register('shop_cart_recovery', {
     },
     {
         content: "check the mail is sent, grab the recovery link, and logout",
-        trigger: '.o_Message_content a:containsExact("Resume order")',
+        trigger: '.o-mail-Message-body a:containsExact("Resume order")',
         run: function () {
-            var link = $('.o_Message_content a:containsExact("Resume order")').attr('href');
-            localStorage.setItem(recoveryLinkKey, link);
+            var link = $('.o-mail-Message-body a:containsExact("Resume order")').attr('href');
+            browser.localStorage.setItem(recoveryLinkKey, link);
             window.location.href = "/web/session/logout?redirect=/";
         }
     },
@@ -70,6 +60,7 @@ tour.register('shop_cart_recovery', {
         content: "go to the recovery link",
         trigger: 'a[href="/web/login"]',
         run: function () {
+            const localStorage = browser.localStorage;
             window.location.href = localStorage.getItem(recoveryLinkKey);
         },
     },
@@ -80,8 +71,7 @@ tour.register('shop_cart_recovery', {
     },
     {
         content: "check product is in restored cart",
-        trigger: 'td.td-product_name:contains("Acoustic Bloc Screens")',
+        trigger: 'div>a>h6:contains("Acoustic Bloc Screens")',
         run: function () {},
     },
-]);
-});
+]});

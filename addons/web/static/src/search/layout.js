@@ -1,15 +1,22 @@
 /** @odoo-module **/
 
-import { pick } from "@web/core/utils/objects";
-
 import { Component, useRef } from "@odoo/owl";
+import { ControlPanel } from "@web/search/control_panel/control_panel";
+import { SearchPanel } from "@web/search/search_panel/search_panel";
 
 /**
  * @param {Object} params
  * @returns {Object}
  */
 export function extractLayoutComponents(params) {
-    return pick(params, "ControlPanel", "SearchPanel", "Banner");
+    const layoutComponents = {
+        ControlPanel: params.ControlPanel || ControlPanel,
+        SearchPanel: params.SearchPanel || SearchPanel,
+    };
+    if (params.Banner) {
+        layoutComponents.Banner = params.Banner;
+    }
+    return layoutComponents;
 }
 
 export class Layout extends Component {
@@ -19,8 +26,6 @@ export class Layout extends Component {
     }
     get controlPanelSlots() {
         const slots = { ...this.props.slots };
-        slots["control-panel-bottom-left-buttons"] = slots["layout-buttons"];
-        delete slots["layout-buttons"];
         delete slots.default;
         return slots;
     }
@@ -31,11 +36,7 @@ export class Layout extends Component {
         }
         return {
             ...this.props.display,
-            controlPanel: {
-                ...controlPanel,
-                "top-left": false,
-                "bottom-left-buttons": false,
-            },
+            controlPanel,
         };
     }
 }

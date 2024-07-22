@@ -7,7 +7,6 @@
                     <main class="modal-body p-3">
                         <form t-attf-action="/event/#{eventId}/meeting_room_create"
                             id="o_wevent_create_meeting_room_form"
-                            class="text-dark"
                             method="POST">
                             <h2>Launch a new topic</h2>
                             <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
@@ -26,7 +25,7 @@
                             <div class="row m-2">
                                 <label class="col-4 mt-2 text-start">Language</label>
                                 <select class="o_wevent_create_meeting_room_lang form-select col-8" name="lang_code" required="1">
-                                    <option t-foreach="langs" t-as="language" t-att-value="language[0]" t-out="language[1]"
+                                    <option t-foreach="langs" t-as="language" t-key="language_index" t-att-value="language[0]" t-out="language[1]"
                                         t-att-selected="language[0] == defaultLangCode and 'selected' or None"/>
                                 </select>
                             </div>

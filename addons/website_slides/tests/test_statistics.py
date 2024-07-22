@@ -47,12 +47,12 @@ class TestChannelStatistics(common.SlidesCase):
         # slide statistics computation
         self.assertEqual(float_compare(channel_publisher.total_time, sum(s.completion_time for s in channel_publisher.slide_content_ids), 3), 0)
         # members computation
-        self.assertEqual(channel_publisher.members_count, 1)
-        channel_publisher.action_add_member()
-        self.assertEqual(channel_publisher.members_count, 1)
+        self.assertEqual(channel_publisher.members_all_count, 1)
+        channel_publisher._action_add_members(self.user_officer.partner_id)
+        self.assertEqual(channel_publisher.members_all_count, 1)
         channel_publisher._action_add_members(self.user_emp.partner_id)
         channel_publisher.invalidate_recordset(['partner_ids'])
-        self.assertEqual(channel_publisher.members_count, 2)
+        self.assertEqual(channel_publisher.members_all_count, 2)
         self.assertEqual(channel_publisher.partner_ids, self.user_officer.partner_id | self.user_emp.partner_id)
 
     @mute_logger('odoo.models')
@@ -127,19 +127,33 @@ class TestChannelStatistics(common.SlidesCase):
         self.assertEqual(member_publisher.completion, 33)
         self.assertEqual(channel_publisher.completion, 33)
 
-        # Should update completion when slide is marked as uncompleted
-        self.slide.with_user(self.user_emp).action_mark_uncompleted()
-        self.assertEqual(member_emp.completion, 67)
-        self.assertEqual(channel_emp.completion, 67)
+        self.slide_4.is_published = True
+        self.assertEqual(member_emp.completion, 100)
+        self.assertEqual(channel_emp.completion, 100)
+        self.assertEqual(member_publisher.completion, 25)
+        self.assertEqual(channel_publisher.completion, 25)
+
+        # Should update completion when a slide is unlinked
+        self.slide_4.with_user(self.user_manager).unlink()
+        self.assertEqual(member_emp.completion, 100)
+        self.assertEqual(channel_emp.completion, 100)
         self.assertEqual(member_publisher.completion, 33)
         self.assertEqual(channel_publisher.completion, 33)
 
-        # Should update completion when a slide is unlinked
-        self.slide.with_user(self.user_manager).unlink()
+        # Should update completion when slide is marked as uncompleted
+        slide_emp = self.slide.with_user(self.user_emp)
+        slide_emp.action_mark_uncompleted()
         self.assertEqual(member_emp.completion, 100)
         self.assertEqual(channel_emp.completion, 100)
+        self.assertTrue(channel_emp.completed)
+        self.assertFalse(slide_emp.user_membership_id.completed)
+        self.slide.invalidate_model(['user_has_completed'])
+        slide_publisher = self.slide.with_user(self.user_officer)
+        slide_publisher.action_mark_uncompleted()
         self.assertEqual(member_publisher.completion, 0)
         self.assertEqual(channel_publisher.completion, 0)
+        self.assertFalse(channel_publisher.completed)
+        self.assertFalse(slide_emp.user_membership_id.completed)
 
     @mute_logger('odoo.models')
     def test_channel_user_statistics_complete_check_member(self):
@@ -216,6 +230,7 @@ class TestSlideStatistics(common.SlidesCase):
 
         self.assertEqual(self.channel.total_slides, 3, 'The channel should contain 3 slides')
         self.assertEqual(category.total_slides, 2, 'The first category should contain 2 slides')
+        self.assertEqual(category.completion_time, 4.5, 'The first category should be 4.5 hours long')
         other_category = self.env['slide.slide'].with_user(self.user_officer).create({
             'name': 'Other Category',
             'channel_id': self.channel.id,

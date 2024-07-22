@@ -7,11 +7,10 @@ from lxml import etree
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
-from odoo.modules import get_module_resource
-from odoo.modules.module import get_resource_from_path, get_resource_path
+from odoo.modules.module import get_resource_from_path
 from odoo.tools.convert import xml_import
-from odoo.tools.misc import file_open
-from odoo.tools.translate import TranslationImporter
+from odoo.tools.misc import file_path
+from odoo.tools.translate import TranslationImporter, get_po_paths
 
 
 class TemplateResetMixin(models.AbstractModel):
@@ -40,10 +39,9 @@ class TemplateResetMixin(models.AbstractModel):
     def _load_records_write(self, values):
         # OVERRIDE to make the fields blank that are not present in xml record
         if self.env.context.get('reset_template'):
-            # We don't want to change anything for magic columns, values present in XML record, and
-            # special fields self.CONCURRENCY_CHECK_FIELD (__last_update) and 'template_fs'
+            # We don't want to change anything for magic columns, values present in XML record, and 'template_fs'
             fields_in_xml_record = values.keys()
-            fields_not_to_touch = set(models.MAGIC_COLUMNS) | fields_in_xml_record | {self.CONCURRENCY_CHECK_FIELD, 'template_fs'}
+            fields_not_to_touch = set(models.MAGIC_COLUMNS) | fields_in_xml_record | {'template_fs'}
             fields_to_empty = self._fields.keys() - fields_not_to_touch
             # For the fields not defined in xml record, if they have default values, we should not
             # enforce empty values for them and the default values should be kept
@@ -63,23 +61,9 @@ class TemplateResetMixin(models.AbstractModel):
     def _override_translation_term(self, module_name, xml_ids):
         translation_importer = TranslationImporter(self.env.cr)
 
-        for code, _ in self.env['res.lang'].get_installed():
-            lang_code = tools.get_iso_codes(code)
-            # In case of sub languages (e.g fr_BE), load the base language first, (e.g fr.po) and
-            # then load the main translation file (e.g fr_BE.po)
-
-            # Step 1: reset translation terms with base language file
-            if '_' in lang_code:
-                base_lang_code = lang_code.split('_')[0]
-                base_trans_file = get_module_resource(module_name, 'i18n', base_lang_code + '.po')
-                if base_trans_file:
-                    translation_importer.load_file(base_trans_file, code, xmlids=xml_ids)
-
-            # Step 2: reset translation file with main language file (can possibly override the
-            # terms coming from the base language)
-            trans_file = get_module_resource(module_name, 'i18n', lang_code + '.po')
-            if trans_file:
-                translation_importer.load_file(trans_file, code, xmlids=xml_ids)
+        for lang, _ in self.env['res.lang'].get_installed():
+            for po_path in get_po_paths(module_name, lang):
+                translation_importer.load_file(po_path, lang, xmlids=xml_ids)
 
         translation_importer.save(overwrite=True, force_overwrite=True)
 
@@ -94,7 +78,7 @@ class TemplateResetMixin(models.AbstractModel):
         for template in self.filtered('template_fs'):
             external_id = template.get_external_id().get(template.id)
             module, xml_id = external_id.split('.')
-            fullpath = get_resource_path(*template.template_fs.split('/'))
+            fullpath = file_path(template.template_fs)
             if fullpath:
                 for field_name, field in template._fields.items():
                     if field.translate is True:
@@ -104,7 +88,7 @@ class TemplateResetMixin(models.AbstractModel):
                     # We don't have a way to pass context while loading record from a file, so we use this hack
                     # to pass the context key that is needed to reset the fields not available in data file
                     rec.set('context', json.dumps({'reset_template': 'True'}))
-                    obj = xml_import(template.env.cr, module, {}, mode='init', xml_filename=fullpath)
+                    obj = xml_import(template.env, module, {}, mode='init', xml_filename=fullpath)
                     obj._tag_record(rec)
                     template._override_translation_term(module, [xml_id, external_id])
             else:

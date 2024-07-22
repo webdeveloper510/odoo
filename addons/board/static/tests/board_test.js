@@ -1,15 +1,10 @@
 /** @odoo-module **/
 
 import { BoardAction } from "@board/board_action";
-import { fakeCookieService } from "@web/../tests/helpers/mock_services";
 import { click, dragAndDrop, getFixture, patchWithCleanup } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import AbstractModel from "web.AbstractModel";
-import AbstractView from "web.AbstractView";
-import ListView from "web.ListView";
-import legacyViewRegistry from "web.view_registry";
 
 const serviceRegistry = registry.category("services");
 
@@ -105,13 +100,13 @@ QUnit.module("Board", (hooks) => {
                         </column>
                     </board>
                 </form>`,
-            mockRPC(route, args) {
+            async mockRPC(route, args) {
                 if (route === "/web/action/load") {
                     assert.step("load action");
-                    return Promise.resolve({
+                    return {
                         res_model: "partner",
                         views: [[4, "list"]],
-                    });
+                    };
                 }
                 if (route === "/web/dataset/call_kw/partner/web_search_read") {
                     assert.deepEqual(
@@ -132,7 +127,7 @@ QUnit.module("Board", (hooks) => {
                 }
                 if (route === "/web/view/edit_custom") {
                     assert.step("edit custom");
-                    return Promise.resolve(true);
+                    return true;
                 }
                 if (args.method === "get_views" && args.model == "partner") {
                     assert.deepEqual(
@@ -573,9 +568,6 @@ QUnit.module("Board", (hooks) => {
                         views: [[false, "kanban"]],
                     });
                 }
-                if (route === "/web/dataset/search_read") {
-                    return Promise.resolve({ records: [{ foo: "aqualung" }] });
-                }
             },
         });
 
@@ -736,54 +728,6 @@ QUnit.module("Board", (hooks) => {
         }
     );
 
-    QUnit.test(
-        "Dashboard should pass groupbys to legacy views",
-        async function (assert) {
-            assert.expect(2);
-            const TestModel = AbstractModel.extend({
-                __load: function (params) {
-                    assert.deepEqual(params.groupedBy, ["bar"]);
-                }
-            });
-            const TestGridView = AbstractView.extend({
-                viewType: 'test_grid',
-                config: Object.assign({}, AbstractView.prototype.config, {
-                    Model: TestModel,
-                }),
-                init: function (viewInfo, params) {
-                    this._super.apply(this, arguments);
-                    assert.deepEqual(params.groupBy, ["bar"]);
-                    this.loadParams.groupedBy = params.groupBy;
-                }
-            });
-            legacyViewRegistry.add("test_grid", TestGridView);
-            serverData.views["partner,false,test_grid"] = `<div/>`;
-
-            await makeView({
-                serverData,
-                type: "form",
-                resModel: "board",
-                arch: `
-                <form string="My Dashboard" js_class="board">
-                    <board style="2-1">
-                        <column>
-                            <action context="{'group_by': 'bar'}" string="ABC" name="51"></action>
-                        </column>
-                    </board>
-                </form>`,
-                mockRPC(route, args) {
-                    if (route === "/web/action/load") {
-                        return Promise.resolve({
-                            res_model: "partner",
-                            views: [[false, "test_grid"]],
-                        });
-                    }
-                },
-            });
-            delete legacyViewRegistry.map.test_grid
-        }
-    );
-
     QUnit.test("click on a cell of pivot view inside dashboard", async function (assert) {
         serverData.views["partner,4,pivot"] =
             '<pivot><field name="int_field" type="measure"/></pivot>';
@@ -835,8 +779,6 @@ QUnit.module("Board", (hooks) => {
     });
 
     QUnit.test("graphs in dashboard aren't squashed", async function (assert) {
-        registry.category("services").add("cookie", fakeCookieService);
-
         serverData.views["partner,4,graph"] =
             '<graph><field name="int_field" type="measure"/></graph>';
 
@@ -867,41 +809,5 @@ QUnit.module("Board", (hooks) => {
             target.querySelector(".o-dashboard-action .o_graph_renderer canvas").offsetHeight,
             300
         );
-    });
-
-    QUnit.test("Carry over the filter to legacy views", async function (assert) {
-        const TestView = ListView.extend({
-            viewType: "test_view",
-        });
-        legacyViewRegistry.add("test_view", TestView);
-        serverData.views["partner,false,test_view"] = `<tree string="Partner"></tree>`;
-
-        await makeView({
-            serverData,
-            type: "form",
-            resModel: "board",
-            arch: `
-                <form string="My Dashboard" js_class="board">
-                    <board style="2-1">
-                        <column>
-                            <action string="ABC" name="Partners Action 1" domain="[['foo', '!=', 'False']]"></action>
-                        </column>
-                    </board>
-                </form>`,
-            mockRPC(route, args) {
-                if (route === "/web/action/load") {
-                    return {
-                        id: 1,
-                        name: "Partners Action 1",
-                        res_model: "partner",
-                        type: "ir.actions.act_window",
-                        views: [[false, "test_view"]],
-                    };
-                }
-                if (route === "/web/dataset/search_read") {
-                    assert.deepEqual(args.domain, [["foo", "!=", "False"]]);
-                }
-            },
-        });
     });
 });

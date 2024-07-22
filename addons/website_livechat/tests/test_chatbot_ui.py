@@ -7,7 +7,7 @@ from odoo.addons.website_livechat.tests.common import TestLivechatCommon
 
 
 @tests.tagged('post_install', '-at_install')
-class TestLivechatChatbotUI(tests.HttpCase, TestLivechatCommon, ChatbotCase):
+class TestLivechatChatbotUI(TestLivechatCommon, ChatbotCase):
     def setUp(self):
         super().setUp()
         self.env['im_livechat.channel'].search([
@@ -29,16 +29,16 @@ class TestLivechatChatbotUI(tests.HttpCase, TestLivechatCommon, ChatbotCase):
         self.start_tour('/', 'website_livechat_chatbot_flow_tour', step_delay=100)
 
         operator = self.chatbot_script.operator_partner_id
-        livechat_mail_channel = self.env['mail.channel'].search([
+        livechat_discuss_channel = self.env['discuss.channel'].search([
             ('livechat_channel_id', '=', self.livechat_channel.id),
             ('livechat_operator_id', '=', operator.id),
             ('message_ids', '!=', False),
         ])
 
-        self.assertTrue(bool(livechat_mail_channel))
-        self.assertEqual(len(livechat_mail_channel), 1)
+        self.assertTrue(bool(livechat_discuss_channel))
+        self.assertEqual(len(livechat_discuss_channel), 1)
 
-        conversation_messages = livechat_mail_channel.message_ids.sorted('id')
+        conversation_messages = livechat_discuss_channel.message_ids.sorted('id')
 
         expected_messages = [
             ("Hello! I'm a bot!", operator, False),
@@ -95,6 +95,9 @@ class TestLivechatChatbotUI(tests.HttpCase, TestLivechatCommon, ChatbotCase):
                     ], limit=1).user_script_answer_id
                 )
 
+    def test_chatbot_available_after_reload(self):
+        self.start_tour("/", "website_livechat_chatbot_after_reload_tour", step_delay=100)
+
     def test_chatbot_redirect(self):
         chatbot_redirect_script = self.env["chatbot.script"].create(
             {"title": "Redirection Bot"}
@@ -120,7 +123,7 @@ class TestLivechatChatbotUI(tests.HttpCase, TestLivechatCommon, ChatbotCase):
                 "script_step_id": question_step.id,
             },
             {
-                "name": "Go to the /chabtot-redirect page",
+                "name": "Go to the /chatbot-redirect page",
                 "redirect_link": "/chatbot-redirect",
                 "script_step_id": question_step.id,
             },
@@ -128,11 +131,11 @@ class TestLivechatChatbotUI(tests.HttpCase, TestLivechatCommon, ChatbotCase):
         livechat_channel = self.env["im_livechat.channel"].create({
             'name': 'Redirection Channel',
             'rule_ids': [Command.create({
-                'regex_url': '/',
+                'regex_url': '/contactus',
                 'chatbot_script_id': chatbot_redirect_script.id,
             })]
         })
-        default_website = self.env.ref('website.default_website')
+        default_website = self.env.ref("website.default_website")
         default_website.channel_id = livechat_channel.id
-        self.env.ref('website.default_website').channel_id = livechat_channel.id
-        self.start_tour('/', 'website_livechat.chatbot_redirect')
+        self.env.ref("website.default_website").channel_id = livechat_channel.id
+        self.start_tour("/contactus", "website_livechat.chatbot_redirect")

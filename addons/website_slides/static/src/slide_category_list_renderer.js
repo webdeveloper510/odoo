@@ -2,8 +2,7 @@
 
 import { makeContext } from "@web/core/context";
 import { ListRenderer } from "@web/views/list/list_renderer";
-
-const { useEffect } = owl;
+import { useEffect } from "@odoo/owl";
 
 export class SlideCategoryListRenderer extends ListRenderer {
     setup() {
@@ -72,7 +71,7 @@ export class SlideCategoryListRenderer extends ListRenderer {
             case "enter":
             case "tab":
             case "shift+tab": {
-                this.props.list.unselectRecord(true);
+                this.props.list.leaveEditMode();
                 return true;
             }
         }

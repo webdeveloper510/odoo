@@ -1,12 +1,11 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { BoardController } from "./board_controller";
-import { XMLParser } from "@web/core/utils/xml";
+import { visitXML } from "@web/core/utils/xml";
 import { Domain } from "@web/core/domain";
-
-export class BoardArchParser extends XMLParser {
+export class BoardArchParser {
     parse(arch, customViewId) {
         let nextId = 1;
         const archInfo = {
@@ -19,7 +18,7 @@ export class BoardArchParser extends XMLParser {
         };
         let currentIndex = -1;
 
-        this.visitXML(arch, (node) => {
+        visitXML(arch, (node) => {
             switch (node.tagName) {
                 case "form":
                     archInfo.title = node.getAttribute("string");
@@ -36,7 +35,7 @@ export class BoardArchParser extends XMLParser {
                     const isFolded = Boolean(
                         node.hasAttribute("fold") ? parseInt(node.getAttribute("fold"), 10) : 0
                     );
-                    let action = {
+                    const action = {
                         id: nextId++,
                         title: node.getAttribute("string"),
                         actionId: parseInt(node.getAttribute("name"), 10),
@@ -45,11 +44,7 @@ export class BoardArchParser extends XMLParser {
                         isFolded,
                     };
                     if (node.hasAttribute("domain")) {
-                        let domain = node.getAttribute("domain");
-                        // Since bfadb8e491fe2acda63a79f9577eaaec8a1c8d9c some databases might have
-                        // double-encoded domains in the db, so we need to unescape them before use.
-                        // TODO: remove unescape in saas-16.3
-                        domain = _.unescape(domain);
+                        const domain = node.getAttribute("domain");
                         action.domain = new Domain(domain).toList();
                         // so it can be serialized when reexporting board xml
                         action.domain.toString = () => node.getAttribute("domain");
@@ -65,7 +60,7 @@ export class BoardArchParser extends XMLParser {
 
 export const boardView = {
     type: "form",
-    display_name: _lt("Board"),
+    display_name: _t("Board"),
     Controller: BoardController,
 
     props: (genericProps, view) => {

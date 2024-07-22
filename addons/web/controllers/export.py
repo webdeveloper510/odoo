@@ -224,7 +224,7 @@ class ExportXlsxWriter:
                 cell_value = pycompat.to_text(cell_value)
             except UnicodeDecodeError:
                 raise UserError(_("Binary fields can not be exported to Excel unless their content is base64-encoded. That does not seem to be the case for %s.", self.field_names)[column])
-        elif isinstance(cell_value, (list, tuple)):
+        elif isinstance(cell_value, (list, tuple, dict)):
             cell_value = pycompat.to_text(cell_value)
 
         if isinstance(cell_value, str):
@@ -334,10 +334,7 @@ class Export(http.Controller):
                 if field.get('type') in ('properties', 'properties_definition'):
                     continue
                 if field.get('readonly'):
-                    # If none of the field's states unsets readonly, skip the field
-                    if all(dict(attrs).get('readonly', True)
-                           for attrs in field.get('states', {}).values()):
-                        continue
+                    continue
             if not field.get('exportable', True):
                 continue
 
@@ -487,7 +484,7 @@ class ExportFormat(object):
         if not import_compat and groupby:
             groupby_type = [Model._fields[x.split(':')[0]].type for x in groupby]
             domain = [('id', 'in', ids)] if ids else domain
-            groups_data = Model.with_context(active_test=False).read_group(domain, [x if x != '.id' else 'id' for x in field_names], groupby, lazy=False)
+            groups_data = Model.read_group(domain, ['__count'], groupby, lazy=False)
 
             # read_group(lazy=False) returns a dict only for final groups (with actual data),
             # not for intermediary groups. The full group tree must be re-constructed.
@@ -513,7 +510,7 @@ class ExportFormat(object):
 class CSVExport(ExportFormat, http.Controller):
 
     @http.route('/web/export/csv', type='http', auth="user")
-    def index(self, data):
+    def web_export_csv(self, data):
         try:
             return self.base(data)
         except Exception as exc:
@@ -557,7 +554,7 @@ class CSVExport(ExportFormat, http.Controller):
 class ExcelExport(ExportFormat, http.Controller):
 
     @http.route('/web/export/xlsx', type='http', auth="user")
-    def index(self, data):
+    def web_export_xlsx(self, data):
         try:
             return self.base(data)
         except Exception as exc:

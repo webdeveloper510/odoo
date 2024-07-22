@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { getBundle, loadBundle } from "@web/core/assets";
+import { loadBundle } from "@web/core/assets";
 import { sprintf } from "@web/core/utils/strings";
+import { loadSpreadsheetDependencies } from "./helpers";
 
 const actionRegistry = registry.category("actions");
 
@@ -13,8 +15,8 @@ const actionRegistry = registry.category("actions");
  * @param {function} actionLazyLoader
  */
 export async function loadSpreadsheetAction(env, actionName, actionLazyLoader) {
-    const desc = await getBundle("spreadsheet.o_spreadsheet");
-    await loadBundle(desc);
+    await loadSpreadsheetDependencies();
+    await loadBundle("spreadsheet.o_spreadsheet");
 
     if (actionRegistry.get(actionName) === actionLazyLoader) {
         // At this point, the real spreadsheet client action should be loaded and have
@@ -26,7 +28,7 @@ export async function loadSpreadsheetAction(env, actionName, actionLazyLoader) {
         actionRegistry.add(
             actionName,
             () => {
-                const msg = sprintf(env._t("%s couldn't be loaded"), actionName);
+                const msg = sprintf(_t("%s couldn't be loaded"), actionName);
                 env.services.notification.add(msg, { type: "danger" });
             },
             { force: true }

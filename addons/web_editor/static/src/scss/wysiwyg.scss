@@ -109,11 +109,11 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
             .o_color_picker_inputs we-button {
                 border: 1px solid black;
                 padding: 0 6px;
+                color: white;
             }
 
             .o_color_picker_inputs we-button.active {
                 background-color: #2b2b33;
-
             }
         }
 
@@ -150,6 +150,12 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         }
 
         .o_colorpicker_section {
+            &.o_custom_gradient_editor{
+                .o_custom_gradient_btn{
+                    border: 1px solid var(--o-we-toolbar-border);
+                }
+            }
+
             &::after {
                 content: "";
                 display: table;
@@ -171,7 +177,8 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
 
 // Toolbar - Generic rules shared among backend & frontend
 .oe-toolbar {
-    display: grid;
+    display: flex;
+    align-items: center;
 
     .btn {
         display: flex;
@@ -199,16 +206,11 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
 
 // Floating Toolbar
 .oe-toolbar.oe-floating {
-    gap: 0 $o-we-sidebar-content-field-control-item-spacing * .7;
-    grid-auto-flow: column;
+    gap: $o-we-sidebar-content-field-control-item-spacing * .7;
     align-items: stretch;
-    height: auto;
     min-height: $o-we-toolbar-height;
-    max-width: none;
-    border-radius: $o-we-item-border-radius;
     padding: 0 $o-we-sidebar-content-field-control-item-spacing;
     background-color: var(--o-we-toolbar-bg, #{$o-we-toolbar-bg});
-    box-shadow: 0 0 4px rgba(#000, .1), 0 4px 18px rgba(#000, .25);
     color: var(--o-we-toolbar-color-text, #{$o-we-toolbar-color-text});
     font-family: $o-we-font-family;
 
@@ -231,11 +233,6 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
             margin-right: calc(#{$o-we-toolbar-entries-gap} - #{$o-we-toolbar-entries-border-width});
             background: var(--o-we-toolbar-border, #{$o-we-toolbar-border});
             transform: scaleY(.6)
-        }
-
-        // Adjust dropdown-menu position, but not when already handled in js
-        .o-dropdown-menu:not([x-placement]) {
-            margin-left: $o-we-toolbar-entries-gap;
         }
     }
 
@@ -293,7 +290,7 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         overflow: visible;
         border-top: 1px solid var(--o-we-toolbar-border, #{$o-we-toolbar-border});
         background-color: var(--o-we-toolbar-bg, #{$o-we-toolbar-bg});
-        box-shadow: 0 18px 18px rgba(#000, .23);
+        box-shadow: $box-shadow;
         @include border-top-radius(0);
         @include border-bottom-radius($o-we-item-border-radius);
 
@@ -359,13 +356,18 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         }
 
         .o_we_colorpicker_switch_panel button {
-            @extend .btn;
             margin-bottom: -1px;
+            border: 0;
+            padding: $btn-padding-y-sm $btn-padding-x-sm;
+            background: transparent;
+            color: var(--o-we-toolbar-color-clickable, #{$o-we-toolbar-color-clickable});
+
+            &:hover {
+                color: var(--o-we-toolbar-color-clickable-active, #{$o-we-toolbar-color-clickable-active});
+            }
 
             &.active {
-                border-bottom: 1px solid var(--o-we-toolbar-color-accent, #{$o-we-toolbar-color-accent});
-                background: none;
-                box-shadow: none;
+                box-shadow: inset 0 ($border-width * -1) 0 var(--o-we-toolbar-color-accent, #{$o-we-toolbar-color-accent});
                 color: var(--o-we-toolbar-color-clickable-active, #{$o-we-toolbar-color-clickable-active});
             }
 
@@ -385,13 +387,24 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
 
     .colorpicker {
         background: var(--o-we-toolbar-bg, #{$o-we-toolbar-bg});
-        box-shadow: 0px 3px 9px rgba(0, 0, 0, 0.2);
+        box-shadow: $box-shadow;
     }
 
     .o_image_alt {
         @include o-text-overflow();
         max-width: 150px;
     }
+
+    input#fontSizeCurrentValue {
+        width: 20px;
+        border: none;
+    }
+}
+
+// Toolbar in Sidebar (website editor, mass mailing)
+#oe_snippets > .o_we_customize_panel .oe-toolbar {
+    display: grid;
+    align-items: stretch;
 }
 
 // Floating Table Picker
@@ -413,7 +426,8 @@ body:not(.editor_has_snippets) {
         z-index: 1056;
     }
 }
-@media only screen and (max-width: 767px) {
+
+@include media-breakpoint-down(md) {
     .oe-toolbar {
         background-color: white;
 
@@ -533,7 +547,6 @@ img.o_we_selected_image {
     }
 
     .oe-toolbar.oe-floating {
-        box-shadow: 0 10px 10px -5px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-wrap: wrap;
         margin-bottom: 1rem;
@@ -594,7 +607,7 @@ img.o_we_selected_image {
     border-radius: 3px;
 }
 
-.oe-bordered-editor>.note-editable {
+.oe-bordered-editor .note-editable {
     border-width: 1px;
     padding: 4px 40px 4px 4px;
     min-height: 180px;
@@ -680,7 +693,12 @@ img.o_we_selected_image {
     // Prevent the edited link from being deselected when clicking between
     // buttons in the popover
     user-select: none;
+    box-shadow: $box-shadow;
+    border-color: rgba(0,0,0,0.025);
 
+    .popover-arrow::before {
+        border-right-color: rgba(0, 0, 0, 0.05);
+    }
     // As the popover is displayed both in the frontend and the backend,
     // the font styles need to be uniformized.
     font-size: 12px;
@@ -717,4 +735,41 @@ img.o_we_selected_image {
 }
 textarea.o_codeview {
     min-height: 400px;
+}
+
+@keyframes fade {
+    0%,100% { opacity: 0 }
+    30%,70% { opacity: 1 }
+  }
+.o-chatgpt-content {
+    position: absolute;
+    background: rgba(1, 186, 210, 0.5);
+    opacity: 0;
+    animation: fade 1.5s ease-in-out;
+    z-index: 1;
+    outline: 2px dashed #01bad2;
+    outline-offset: -2px;
+}
+
+.o-prompt-input {
+    position: relative;
+    // see .o-mail-Composer-input
+    > textarea {
+        padding-top: 10px; // carefully crafted to have the text in the middle in chat window
+        padding-bottom: 10px;
+        min-height: 40px;
+        max-height: 110px;
+        resize: none;
+    }
+}
+button.o-message-insert {
+    line-height: 1;
+}
+.o-chatgpt-message > div > *:last-child, .o-chatgpt-alternative > *:last-child {
+    margin-bottom: 0;
+}
+.o-message-error {
+    color: #d44c59;
+    font-weight: bold;
+    --bg-opacity: 0.25;
 }

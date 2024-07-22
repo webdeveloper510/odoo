@@ -77,23 +77,18 @@ class WebsiteVisitor(models.Model):
     create_date = fields.Datetime('First Connection', readonly=True)
     last_connection_datetime = fields.Datetime('Last Connection', default=fields.Datetime.now, help="Last page view date", readonly=True)
     time_since_last_action = fields.Char('Last action', compute="_compute_time_statistics", help='Time since last page view. E.g.: 2 minutes ago')
-    is_connected = fields.Boolean('Is connected ?', compute='_compute_time_statistics', help='A visitor is considered as connected if his last page view was within the last 5 minutes.')
+    is_connected = fields.Boolean('Is connected?', compute='_compute_time_statistics', help='A visitor is considered as connected if his last page view was within the last 5 minutes.')
 
     _sql_constraints = [
         ('access_token_unique', 'unique(access_token)', 'Access token should be unique.'),
     ]
 
     @api.depends('partner_id')
-    def name_get(self):
-        res = []
+    def _compute_display_name(self):
         for record in self:
             # Accessing name of partner through sudo to avoid infringing
             # record rule if partner belongs to another company.
-            res.append((
-                record.id,
-                record.partner_id.sudo().name or _('Website Visitor #%s', record.id)
-            ))
-        return res
+            record.display_name = record.partner_id.sudo().name or _('Website Visitor #%s', record.id)
 
     @api.depends('access_token')
     def _compute_partner_id(self):
@@ -125,15 +120,15 @@ class WebsiteVisitor(models.Model):
     @api.depends('website_track_ids')
     def _compute_page_statistics(self):
         results = self.env['website.track']._read_group(
-            [('visitor_id', 'in', self.ids), ('url', '!=', False)], ['visitor_id', 'page_id', 'url'], ['visitor_id', 'page_id', 'url'], lazy=False)
+            [('visitor_id', 'in', self.ids), ('url', '!=', False)], ['visitor_id', 'page_id'], ['__count'])
         mapped_data = {}
-        for result in results:
-            visitor_info = mapped_data.get(result['visitor_id'][0], {'page_count': 0, 'visitor_page_count': 0, 'page_ids': set()})
-            visitor_info['visitor_page_count'] += result['__count']
+        for visitor, page, count in results:
+            visitor_info = mapped_data.get(visitor.id, {'page_count': 0, 'visitor_page_count': 0, 'page_ids': set()})
+            visitor_info['visitor_page_count'] += count
             visitor_info['page_count'] += 1
-            if result['page_id']:
-                visitor_info['page_ids'].add(result['page_id'][0])
-            mapped_data[result['visitor_id'][0]] = visitor_info
+            if page:
+                visitor_info['page_ids'].add(page.id)
+            mapped_data[visitor.id] = visitor_info
 
         for visitor in self:
             visitor_info = mapped_data.get(visitor.id, {'page_count': 0, 'visitor_page_count': 0, 'page_ids': set()})
@@ -149,10 +144,10 @@ class WebsiteVisitor(models.Model):
     @api.depends('website_track_ids.page_id')
     def _compute_last_visited_page_id(self):
         results = self.env['website.track']._read_group(
-            [('visitor_id', 'in', self.ids)],
-            ['visitor_id', 'page_id', 'visit_datetime:max'],
-            ['visitor_id', 'page_id'], lazy=False)
-        mapped_data = {result['visitor_id'][0]: result['page_id'][0] for result in results if result['page_id']}
+            [('visitor_id', 'in', self.ids), ('page_id', '!=', False)],
+            ['visitor_id', 'page_id'],
+            order='visit_datetime:max')
+        mapped_data = {visitor.id: page.id for visitor, page in results}
         for visitor in self:
             visitor.last_visited_page_id = mapped_data.get(visitor.id, False)
 
@@ -171,7 +166,7 @@ class WebsiteVisitor(models.Model):
     def _prepare_message_composer_context(self):
         return {
             'default_model': 'res.partner',
-            'default_res_id': self.partner_id.id,
+            'default_res_ids': self.partner_id.ids,
             'default_partner_ids': [self.partner_id.id],
         }
 
@@ -182,7 +177,6 @@ class WebsiteVisitor(models.Model):
         visitor_composer_ctx = self._prepare_message_composer_context()
         compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
         compose_ctx = dict(
-            default_use_template=False,
             default_composition_mode='comment',
         )
         compose_ctx.update(**visitor_composer_ctx)

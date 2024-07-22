@@ -1,11 +1,10 @@
-odoo.define('website_twitter.animation', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var core = require('web.core');
-const {Markup} = require('web.utils');
-var publicWidget = require('web.public.widget');
+import { renderToElement } from "@web/core/utils/render";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { escape } from "@web/core/utils/strings";
 
-var qweb = core.qweb;
+import { markup } from "@odoo/owl";
 
 publicWidget.registry.twitter = publicWidget.Widget.extend({
     selector: '.twitter',
@@ -16,6 +15,11 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
         'click .twitter_timeline .tweet': '_onTweetClick',
     },
 
+    init() {
+        this._super(...arguments);
+        this.rpc = this.bindService("rpc");
+    },
+
     /**
      * @override
      */
@@ -24,21 +28,21 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
         var $timeline = this.$('.twitter_timeline');
 
         $timeline.append('<center><div><img src="/website_twitter/static/src/img/loadtweet.gif"></div></center>');
-        var def = this._rpc({route: '/website_twitter/get_favorites'}).then(function (data) {
+        var def = this.rpc('/website_twitter/get_favorites').then(function (data) {
             $timeline.empty();
 
             if (data.error) {
-                $timeline.append(qweb.render('website.Twitter.Error', {data: data}));
+                $timeline.append(renderToElement('website.Twitter.Error', {data: data}));
                 return;
             }
 
-            if (_.isEmpty(data)) {
+            if (Object.keys(data || {}).length === 0) {
                 return;
             }
 
-            var tweets = _.map(data, function (tweet) {
+            var tweets = data.map((tweet) => {
                 // Parse tweet date
-                if (_.isEmpty(tweet.created_at)) {
+                if (Object.keys(tweet.created_at || {}).length === 0) {
                     tweet.created_at = '';
                 } else {
                     var v = tweet.created_at.split(' ');
@@ -47,7 +51,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
                 }
 
                 // Parse tweet text
-                tweet.text = Markup(_.escape(tweet.text)
+                tweet.text = markup(escape(tweet.text)
                     .replace(
                         /[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g,
                         function (url) {
@@ -67,18 +71,18 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
                         }
                     ));
 
-                return qweb.render('website.Twitter.Tweet', {tweet: tweet});
+                return renderToElement('website.Twitter.Tweet', {tweet: tweet});
 
                 function _makeLink(url, text) {
-                    return Markup`<a href="${url}" target="_blank" rel="noreferrer noopener">${text}</a>`;
+                    return markup(`<a href="${url}" target="_blank" rel="noreferrer noopener">${text}</a>`);
                 }
             });
 
             var f = Math.floor(tweets.length / 3);
             var tweetSlices = [tweets.slice(0, f).join(' '), tweets.slice(f, f * 2).join(' '), tweets.slice(f * 2, tweets.length).join(' ')];
 
-            self.$scroller = $(qweb.render('website.Twitter.Scroller')).appendTo($timeline);
-            _.each(self.$scroller.find('div[id^="scroller"]'), function (element, index) {
+            self.$scroller = $(renderToElement('website.Twitter.Scroller')).appendTo($timeline);
+            self.$scroller.find('div[id^="scroller"]').toArray().forEach((element, index) => {
                 var $scrollWrapper = $('<div/>', {class: 'scrollWrapper'});
                 var $scrollableArea = $('<div/>', {class: 'scrollableArea'});
                 $scrollWrapper.append($scrollableArea)
@@ -86,7 +90,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
                 $scrollableArea.append(tweetSlices[index]);
                 $(element).append($scrollWrapper);
                 var totalWidth = 0;
-                _.each($scrollableArea.children(), function (area) {
+                $scrollableArea.children().forEach((area) => {
                     totalWidth += $(area).outerWidth(true);
                 });
                 $scrollableArea.width(totalWidth);
@@ -116,7 +120,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
         if (!this.$scroller) {
             return;
         }
-        _.each(this.$scroller.find('.scrollWrapper'), function (el) {
+        this.$scroller.find('.scrollWrapper').toArray().forEach((el) => {
             var $wrapper = $(el);
             $wrapper.data('getNextElementWidth', true);
             $wrapper.data('autoScrollingInterval', setInterval(function () {
@@ -141,7 +145,7 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
         if (!this.$scroller) {
             return;
         }
-        _.each(this.$scroller.find('.scrollWrapper'), function (el) {
+        this.$scroller.find('.scrollWrapper').toArray().forEach((el) => {
             var $wrapper = $(el);
             clearInterval($wrapper.data('autoScrollingInterval'));
         });
@@ -176,5 +180,4 @@ publicWidget.registry.twitter = publicWidget.Widget.extend({
             window.open(url, '_blank');
         }
     },
-});
 });

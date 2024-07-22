@@ -11,17 +11,10 @@ class SaleOrderCancel(models.TransientModel):
     _description = "Sales Order Cancel"
 
     @api.model
-    def _default_email_from(self):
-        if self.env.user.email:
-            return self.env.user.email_formatted
-        raise UserError(_("Unable to post message, please configure the sender's email address."))
-
-    @api.model
     def _default_author_id(self):
         return self.env.user.partner_id
 
     # origin
-    email_from = fields.Char(string="From", default=_default_email_from)
     author_id = fields.Many2one(
         'res.partner',
         string="Author",
@@ -59,35 +52,33 @@ class SaleOrderCancel(models.TransientModel):
 
     @api.depends('order_id')
     def _compute_subject(self):
-        for wizard in self:
-            if wizard.template_id:
-                wizard.subject = wizard.template_id._render_field(
-                    'subject',
-                    wizard.order_id.ids,
-                    post_process=True,
-                    compute_lang=True,
-                )[wizard.order_id.id]
+        for wizard_su in self.filtered('template_id'):
+            wizard_su.subject = wizard_su.template_id._render_field(
+                'subject',
+                [wizard_su.order_id.id],
+                compute_lang=True,
+                options={'post_process': True},
+            )[wizard_su.order_id.id]
 
     @api.depends('order_id')
     def _compute_body(self):
-        for wizard in self:
-            if wizard.template_id:
-                wizard.body = wizard.template_id._render_field(
-                    'body_html',
-                    wizard.order_id.ids,
-                    post_process=True,
-                    compute_lang=True,
-                )[wizard.order_id.id]
+        for wizard_su in self.filtered('template_id'):
+            wizard_su.body = wizard_su.template_id._render_field(
+                'body_html',
+                [wizard_su.order_id.id],
+                compute_lang=True,
+                options={'post_process': True},
+            )[wizard_su.order_id.id]
 
     def action_send_mail_and_cancel(self):
         self.ensure_one()
         self.order_id.message_post(
-            subject=self.subject,
+            author_id=self.author_id.id,
             body=self.body,
             message_type='comment',
-            email_from=self.email_from,
             email_layout_xmlid='mail.mail_notification_light',
             partner_ids=self.recipient_ids.ids,
+            subject=self.subject,
         )
         return self.action_cancel()
 

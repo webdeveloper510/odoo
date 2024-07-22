@@ -133,11 +133,8 @@ class AccountMove(models.Model):
     l10n_ec_sri_payment_id = fields.Many2one(
         comodel_name="l10n_ec.sri.payment",
         string="Payment Method (SRI)",
+        help="Ecuador: Payment Methods Defined by the SRI.",
     )
-
-    # NOTE: For backward compatibility, removed in master
-    def _get_l10n_ec_identification_type(self):
-        return PartnerIdTypeEc.get_ats_code_for_partner(self.partner_id, self.move_type)
 
     @api.model
     def _get_l10n_ec_documents_allowed(self, identification_code):

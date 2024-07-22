@@ -53,12 +53,12 @@ class TestStockValuationCommon(TransactionCase):
                 'picking_type_id': in_move.picking_type_id.id,
                 'location_id': in_move.location_id.id,
                 'location_dest_id': in_move.location_dest_id.id,
-            })
+                })
             in_move.write({'picking_id': picking.id})
 
         in_move._action_confirm()
         in_move._action_assign()
-        in_move.move_line_ids.qty_done = quantity
+        in_move.picked = True
         in_move._action_done()
 
         self.days += 1
@@ -84,7 +84,7 @@ class TestStockValuationCommon(TransactionCase):
                 'picking_type_id': out_move.picking_type_id.id,
                 'location_id': out_move.location_id.id,
                 'location_dest_id': out_move.location_dest_id.id,
-            })
+                })
             out_move.write({'picking_id': picking.id})
 
         out_move._action_confirm()
@@ -97,7 +97,8 @@ class TestStockValuationCommon(TransactionCase):
                 'location_id': out_move.location_id.id,
                 'location_dest_id': out_move.location_dest_id.id,
             })
-        out_move.move_line_ids.qty_done = quantity
+        out_move.move_line_ids.quantity = quantity
+        out_move.picked = True
         out_move._action_done()
 
         self.days += 1
@@ -117,7 +118,8 @@ class TestStockValuationCommon(TransactionCase):
             dropshipped.price_unit = unit_cost
         dropshipped._action_confirm()
         dropshipped._action_assign()
-        dropshipped.move_line_ids.qty_done = quantity
+        dropshipped.move_line_ids.quantity = quantity
+        dropshipped.picked = True
         dropshipped._action_done()
         return dropshipped
 
@@ -128,7 +130,8 @@ class TestStockValuationCommon(TransactionCase):
         stock_return_picking.product_return_moves.quantity = quantity_to_return
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_ids[0].move_line_ids[0].qty_done = quantity_to_return
+        return_pick.move_ids[0].move_line_ids[0].quantity = quantity_to_return
+        return_pick.move_ids[0].picked = True
         return_pick._action_done()
         return return_pick.move_ids
 
@@ -156,7 +159,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10)
         move2 = self._make_in_move(self.product1, 10)
         move3 = self._make_out_move(self.product1, 15)
-        move1.move_line_ids.qty_done = 15
+        move1.move_line_ids.quantity = 15
 
         self.assertEqual(self.product1.value_svl, 100)
         self.assertEqual(self.product1.quantity_svl, 10)
@@ -167,7 +170,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10)
         move2 = self._make_in_move(self.product1, 10)
         move3 = self._make_out_move(self.product1, 15)
-        move1.move_line_ids.qty_done = 5
+        move1.move_line_ids.quantity = 5
 
         self.assertEqual(self.product1.value_svl, 0)
         self.assertEqual(self.product1.quantity_svl, 0)
@@ -181,7 +184,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
         self.env['stock.move.line'].create({
             'move_id': move1.id,
             'product_id': move1.product_id.id,
-            'qty_done': 5,
+            'quantity': 5,
             'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
@@ -195,7 +198,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
 
         move1 = self._make_in_move(self.product1, 10)
         move2 = self._make_out_move(self.product1, 1)
-        move2.move_line_ids.qty_done = 5
+        move2.move_line_ids.quantity = 5
 
         self.assertEqual(self.product1.value_svl, 50)
         self.assertEqual(self.product1.quantity_svl, 5)
@@ -205,7 +208,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
 
         move1 = self._make_in_move(self.product1, 10)
         move2 = self._make_out_move(self.product1, 5)
-        move2.move_line_ids.qty_done = 1
+        move2.move_line_ids.quantity = 1
 
         self.assertEqual(self.product1.value_svl, 90)
         self.assertEqual(self.product1.quantity_svl, 9)
@@ -232,7 +235,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
         self.env['stock.move.line'].create({
             'move_id': move1.id,
             'product_id': move1.product_id.id,
-            'qty_done': 10,
+            'quantity': 10,
             'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
@@ -257,7 +260,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
         self.product1.product_tmpl_id.categ_id.property_valuation = 'manual_periodic'
 
         move1 = self._make_dropship_move(self.product1, 10)
-        move1.move_line_ids.qty_done = 15
+        move1.move_line_ids.quantity = 15
 
         valuation_layers = self.product1.stock_valuation_layer_ids
         self.assertEqual(len(valuation_layers), 4)
@@ -298,10 +301,11 @@ class TestStockValuationStandard(TestStockValuationCommon):
 
         picking.action_confirm()
         # set quantity done only on one move
-        in_move.move_line_ids.qty_done = 2
+        in_move.move_line_ids.quantity = 2
+        in_move.picked = True
         res_dict = picking.button_validate()
         wizard = self.env[(res_dict.get('res_model'))].with_context(res_dict.get('context')).browse(res_dict.get('res_id'))
-        res_dict_for_back_order = wizard.process()
+        wizard.process()
 
         self.assertTrue(product2.stock_valuation_layer_ids)
         self.assertFalse(product1.stock_valuation_layer_ids)
@@ -357,7 +361,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10)
         move2 = self._make_in_move(self.product1, 10, unit_cost=20)
         move3 = self._make_out_move(self.product1, 15)
-        move1.move_line_ids.qty_done = 15
+        move1.move_line_ids.quantity = 15
 
         self.assertEqual(self.product1.value_svl, 125)
         self.assertEqual(self.product1.quantity_svl, 10)
@@ -366,7 +370,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10)
         move2 = self._make_in_move(self.product1, 10, unit_cost=20)
         move3 = self._make_out_move(self.product1, 15)
-        move1.move_line_ids.qty_done = 5
+        move1.move_line_ids.quantity = 5
 
         self.assertEqual(self.product1.value_svl, 0)
         self.assertEqual(self.product1.quantity_svl, 0)
@@ -378,7 +382,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         self.env['stock.move.line'].create({
             'move_id': move1.id,
             'product_id': move1.product_id.id,
-            'qty_done': 5,
+            'quantity': 5,
             'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
@@ -394,7 +398,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         move3 = self._make_out_move(self.product1, 15)
         self.env['stock.move.line'].create({
             'product_id': move1.product_id.id,
-            'qty_done': 5,
+            'quantity': 5,
             'product_uom_id': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
@@ -410,7 +414,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10)
         move2 = self._make_in_move(self.product1, 10, unit_cost=20)
         move3 = self._make_out_move(self.product1, 15)
-        move3.move_line_ids.qty_done = 20
+        move3.move_line_ids.quantity = 20
 
         self.assertEqual(self.product1.value_svl, 0)
         self.assertEqual(self.product1.quantity_svl, 0)
@@ -420,7 +424,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10)
         move2 = self._make_in_move(self.product1, 10, unit_cost=20)
         move3 = self._make_out_move(self.product1, 15)
-        move3.move_line_ids.qty_done = 10
+        move3.move_line_ids.quantity = 10
 
         self.assertEqual(sum(self.product1.stock_valuation_layer_ids.mapped('remaining_qty')), 10)
         self.assertEqual(self.product1.value_svl, 150)
@@ -630,7 +634,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
         self.product1.product_tmpl_id.categ_id.property_valuation = 'manual_periodic'
         move1 = self._make_in_move(self.product1, 20, unit_cost=10)
         move2 = self._make_out_move(self.product1, 10)
-        move1.move_line_ids.qty_done = 10
+        move1.move_line_ids.quantity = 10
 
         self.assertEqual(self.product1.value_svl, 0)
         self.assertEqual(self.product1.quantity_svl, 0)
@@ -640,7 +644,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 20, unit_cost=10)
         move2 = self._make_out_move(self.product1, 10)
         move3 = self._make_out_move(self.product1, 10)
-        move1.move_line_ids.qty_done = 10
+        move1.move_line_ids.quantity = 10
         move4 = self._make_in_move(self.product1, 20, unit_cost=15)
 
         self.assertEqual(self.product1.value_svl, 150)
@@ -651,7 +655,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10)
         move2 = self._make_in_move(self.product1, 10, unit_cost=15)
         move3 = self._make_out_move(self.product1, 20)
-        move1.move_line_ids.qty_done = 20
+        move1.move_line_ids.quantity = 20
 
         self.assertEqual(self.product1.value_svl, 100)
         self.assertEqual(self.product1.quantity_svl, 10)
@@ -663,7 +667,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
         move3 = self._make_out_move(self.product1, 15)
         move4 = self._make_out_move(self.product1, 20)
         move5 = self._make_in_move(self.product1, 100, unit_cost=15)
-        move1.move_line_ids.qty_done = 20
+        move1.move_line_ids.quantity = 20
 
         self.assertEqual(self.product1.value_svl, 1375)
         self.assertEqual(self.product1.quantity_svl, 95)
@@ -673,20 +677,24 @@ class TestStockValuationFIFO(TestStockValuationCommon):
         move1 = self._make_in_move(self.product1, 20, unit_cost=10)
         move2 = self._make_out_move(self.product1, 10)
         move3 = self._make_in_move(self.product1, 20, unit_cost=15)
-        move2.move_line_ids.qty_done = 25
+        move2.move_line_ids.quantity = 25
 
         self.assertEqual(self.product1.value_svl, 225)
         self.assertEqual(self.product1.quantity_svl, 15)
         self.assertEqual(sum(self.product1.stock_valuation_layer_ids.mapped('remaining_qty')), 15)
 
     def test_change_in_past_decrease_out_1(self):
+        """ Decrease the quantity of an outgoing stock.move.line will act like
+        an inventory adjustement and not a return. It will take the standard price
+        of the product in order to set the value and not the move's layers.
+        """
         self.product1.product_tmpl_id.categ_id.property_valuation = 'manual_periodic'
         move1 = self._make_in_move(self.product1, 20, unit_cost=10)
         move2 = self._make_out_move(self.product1, 15)
         move3 = self._make_in_move(self.product1, 20, unit_cost=15)
-        move2.move_line_ids.qty_done = 5
+        move2.move_line_ids.quantity = 5
 
-        self.assertEqual(self.product1.value_svl, 450)
+        self.assertEqual(self.product1.value_svl, 490)
         self.assertEqual(self.product1.quantity_svl, 35)
         self.assertEqual(sum(self.product1.stock_valuation_layer_ids.mapped('remaining_qty')), 35)
 
@@ -698,7 +706,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
         self.env['stock.move.line'].create({
             'move_id': move2.id,
             'product_id': move2.product_id.id,
-            'qty_done': 5,
+            'quantity': 5,
             'product_uom_id': move2.product_uom.id,
             'location_id': move2.location_id.id,
             'location_dest_id': move2.location_dest_id.id,
@@ -754,7 +762,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
 
         self.assertEqual(self.product1.value_svl, 30)
         self.assertEqual(self.product1.quantity_svl, 2)
-        self.assertAlmostEqual(self.product1.standard_price, 10)
+        self.assertAlmostEqual(self.product1.standard_price, 15)
 
     def test_return_delivery_2(self):
         self._make_in_move(self.product1, 1, unit_cost=10)
@@ -931,11 +939,6 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
-        cls.env.company.write({
-            'property_stock_account_input_categ_id': cls.stock_input_account.id,
-            'property_stock_account_output_categ_id': cls.stock_output_account.id,
-            'property_stock_valuation_account_id': cls.stock_valuation_account.id,
-        })
 
     def test_standard_manual_to_auto_1(self):
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
@@ -1035,6 +1038,21 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
         # An accounting entry should only be created for the emptying now that the category is manual.
         self.assertEqual(len(self.product1.stock_valuation_layer_ids.mapped('account_move_id')), 2)
         self.assertEqual(len(self.product1.stock_valuation_layer_ids), 3)
+
+    def test_return_delivery_fifo(self):
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
+        self.env['decimal.precision'].search([
+            ('name', '=', 'Product Price'),
+        ]).digits = 4
+        self.product1.standard_price = 280.8475
+
+        move1 = self._make_out_move(self.product1, 4, create_picking=True, force_assign=True)
+        move2 = self._make_return(move1, 4)
+
+        for move in [move1, move2]:
+            self.assertEqual(len(move.stock_valuation_layer_ids), 1)
+            self.assertAlmostEqual(move.stock_valuation_layer_ids.unit_cost, self.product1.standard_price)
+            self.assertAlmostEqual(abs(move.stock_valuation_layer_ids.value), 1123.39)
 
 @tagged('post_install', '-at_install')
 class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCommon):
@@ -1145,7 +1163,8 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
 
         in_move._action_confirm()
         in_move._action_assign()
-        in_move.move_line_ids.qty_done = quantity
+        in_move.move_line_ids.quantity = quantity
+        in_move.picked = True
         in_move._action_done()
 
         return in_move.with_context(svl=True)
@@ -1164,7 +1183,8 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
             dropshipped.price_unit = unit_cost
         dropshipped._action_confirm()
         dropshipped._action_assign()
-        dropshipped.move_line_ids.qty_done = quantity
+        dropshipped.move_line_ids.quantity = quantity
+        dropshipped.picked = True
         dropshipped._action_done()
         return dropshipped
 
@@ -1175,7 +1195,8 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
         stock_return_picking.product_return_moves.quantity = quantity_to_return
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_ids[0].move_line_ids[0].qty_done = quantity_to_return
+        return_pick.move_ids[0].move_line_ids[0].quantity = quantity_to_return
+        return_pick.move_ids.picked = True
         return_pick._action_done()
         return return_pick.move_ids
 
@@ -1204,10 +1225,9 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
         self.assertEqual(self.product1.standard_price, 15)
 
         refund_wizard = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice.ids).create({
-            'refund_method': 'refund',
             'journal_id': invoice.journal_id.id,
         })
-        action = refund_wizard.reverse_moves()
+        action = refund_wizard.refund_moves()
         reverse_invoice = self.env['account.move'].browse(action['res_id'])
         with Form(reverse_invoice) as reverse_invoice_form:
             with reverse_invoice_form.invoice_line_ids.edit(0) as line:
@@ -1251,7 +1271,6 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
         """
         # pylint: disable=bad-whitespace
         self.product1.categ_id.property_cost_method = 'fifo'
-
         move1 = self._make_dropship_move(self.product1, 2, unit_cost=10)
         move2 = self._make_return(move1, 2)
 
@@ -1302,7 +1321,8 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCom
         stock_return_picking.location_id = self.stock_location
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_ids[0].move_line_ids[0].qty_done = 2
+        return_pick.move_ids[0].move_line_ids[0].quantity = 2
+        return_pick.move_ids[0].picked = True
         return_pick._action_done()
         move2 = return_pick.move_ids
 

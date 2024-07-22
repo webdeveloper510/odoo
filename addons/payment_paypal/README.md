@@ -14,6 +14,13 @@ submission provided by the `payment` module.
 
 ## Module history
 
+- `17.0`
+  - The support for customer fees is removed as it is no longer supported by the `payment` module.
+    odoo/odoo#132104
+- `16.2`
+  - The "Merchant Account ID" and "Use IPN" fields are removed. odoo/odoo#104974
+- `16.1`
+  - Customer fees are converted into the currency of the payment transaction. odoo/odoo#100156
 - `15.2`
   - An HTTP 404 "Forbidden" error is raised instead of a Validation error when the authenticity of
     the webhook notification cannot be verified. odoo/odoo#81607

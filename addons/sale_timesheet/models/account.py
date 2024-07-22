@@ -21,32 +21,50 @@ TIMESHEET_INVOICE_TYPES = [
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-    def _default_sale_line_domain(self):
-        domain = super(AccountAnalyticLine, self)._default_sale_line_domain()
-        return expression.OR([domain, [('qty_delivered_method', '=', 'timesheet')]])
-
     timesheet_invoice_type = fields.Selection(TIMESHEET_INVOICE_TYPES, string="Billable Type",
             compute='_compute_timesheet_invoice_type', compute_sudo=True, store=True, readonly=True)
     commercial_partner_id = fields.Many2one('res.partner', compute="_compute_commercial_partner")
     timesheet_invoice_id = fields.Many2one('account.move', string="Invoice", readonly=True, copy=False, help="Invoice created from the timesheet", index='btree_not_null')
     so_line = fields.Many2one(compute="_compute_so_line", store=True, readonly=False,
-        domain="[('is_service', '=', True), ('is_expense', '=', False), ('state', 'in', ['sale', 'done']), ('order_partner_id', 'child_of', commercial_partner_id)]",
+        domain="""[
+            ('qty_delivered_method', 'in', ['analytic', 'timesheet']),
+            ('order_partner_id.commercial_partner_id', '=', commercial_partner_id),
+            ('is_service', '=', True),
+            ('is_expense', '=', False),
+            ('state', '=', 'sale')
+        ]""",
         help="Sales order item to which the time spent will be added in order to be invoiced to your customer. Remove the sales order item for the timesheet entry to be non-billable.")
     # we needed to store it only in order to be able to groupby in the portal
     order_id = fields.Many2one(related='so_line.order_id', store=True, readonly=True, index=True)
     is_so_line_edited = fields.Boolean("Is Sales Order Item Manually Edited")
+    allow_billable = fields.Boolean(related="project_id.allow_billable")
 
-    @api.depends('project_id.commercial_partner_id', 'task_id.commercial_partner_id')
+    def _default_sale_line_domain(self):
+        # [XBO] TODO: remove me in master
+        return expression.OR([[
+            ('is_service', '=', True),
+            ('is_expense', '=', False),
+            ('state', '=', 'sale'),
+            ('order_partner_id', 'child_of', self.sudo().commercial_partner_id.ids)
+        ], super()._default_sale_line_domain()])
+
+    def _compute_allowed_so_line_ids(self):
+        # [XBO] TODO: remove me in master
+        super()._compute_allowed_so_line_ids()
+
+    @api.depends('project_id.partner_id.commercial_partner_id', 'task_id.partner_id.commercial_partner_id')
     def _compute_commercial_partner(self):
         for timesheet in self:
-            timesheet.commercial_partner_id = timesheet.task_id.commercial_partner_id or timesheet.project_id.commercial_partner_id
+            timesheet.commercial_partner_id = timesheet.task_id.partner_id.commercial_partner_id or timesheet.project_id.partner_id.commercial_partner_id
 
-    @api.depends('so_line.product_id', 'project_id', 'amount')
+    @api.depends('so_line.product_id', 'project_id.billing_type', 'amount')
     def _compute_timesheet_invoice_type(self):
         for timesheet in self:
             if timesheet.project_id:  # AAL will be set to False
-                invoice_type = 'non_billable' if not timesheet.so_line else False
-                if timesheet.so_line and timesheet.so_line.product_id.type == 'service':
+                invoice_type = False
+                if not timesheet.so_line:
+                    invoice_type = 'non_billable' if timesheet.project_id.billing_type != 'manually' else 'billable_manual'
+                elif timesheet.so_line.product_id.type == 'service':
                     if timesheet.so_line.product_id.invoice_policy == 'delivery':
                         if timesheet.so_line.product_id.service_type == 'timesheet':
                             invoice_type = 'timesheet_revenues' if timesheet.amount > 0 else 'billable_time'
@@ -78,6 +96,9 @@ class AccountAnalyticLine(models.Model):
     def _compute_project_id(self):
         super(AccountAnalyticLine, self.filtered(lambda t: t._is_not_billed()))._compute_project_id()
 
+    def _is_readonly(self):
+        return super()._is_readonly() or not self._is_not_billed()
+
     def _is_not_billed(self):
         self.ensure_one()
         return not self.timesheet_invoice_id or self.timesheet_invoice_id.state == 'cancel'
@@ -85,16 +106,12 @@ class AccountAnalyticLine(models.Model):
     def _check_timesheet_can_be_billed(self):
         return self.so_line in self.project_id.mapped('sale_line_employee_ids.sale_line_id') | self.task_id.sale_line_id | self.project_id.sale_line_id
 
-    def write(self, values):
-        # prevent to update invoiced timesheets if one line is of type delivery
-        self._check_can_write(values)
-        result = super(AccountAnalyticLine, self).write(values)
-        return result
-
     def _check_can_write(self, values):
+        # prevent to update invoiced timesheets if one line is of type delivery
         if self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == "delivery") and self.filtered(lambda t: t.timesheet_invoice_id and t.timesheet_invoice_id.state != 'cancel'):
             if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'amount', 'date']):
                 raise UserError(_('You cannot modify timesheets that are already invoiced.'))
+        return super()._check_can_write(values)
 
     def _timesheet_determine_sale_line(self):
         """ Deduce the SO line associated to the timesheet line:
@@ -117,8 +134,8 @@ class AccountAnalyticLine(models.Model):
             else:  # then pricing_type = 'employee_rate'
                 map_entry = self.project_id.sale_line_employee_ids.filtered(
                     lambda map_entry:
-                        map_entry.employee_id == self.employee_id
-                        and map_entry.sale_line_id.order_partner_id.commercial_partner_id == self.task_id.commercial_partner_id
+                        map_entry.employee_id == (self.employee_id or self.env.user.employee_id)
+                        and map_entry.sale_line_id.order_partner_id.commercial_partner_id == self.task_id.partner_id.commercial_partner_id
                 )
                 if map_entry:
                     return map_entry.sale_line_id
@@ -170,6 +187,28 @@ class AccountAnalyticLine(models.Model):
             if mapping_entry:
                 return mapping_entry.cost
         return super()._hourly_cost()
+
+    def action_sale_order_from_timesheet(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Sale Order'),
+            'res_model': 'sale.order',
+            'views': [[False, 'form']],
+            'context': {'create': False, 'show_sale': True},
+            'res_id': self.order_id.id,
+        }
+
+    def action_invoice_from_timesheet(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Invoice'),
+            'res_model': 'account.move',
+            'views': [[False, 'form']],
+            'context': {'create': False},
+            'res_id': self.timesheet_invoice_id.id,
+        }
 
     def _timesheet_convert_sol_uom(self, sol, to_unit):
         to_uom = self.env.ref(to_unit)

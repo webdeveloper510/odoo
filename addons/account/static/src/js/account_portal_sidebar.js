@@ -1,10 +1,8 @@
-odoo.define('account.AccountPortalSidebar', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const dom = require('web.dom');
-var publicWidget = require('web.public.widget');
-var PortalSidebar = require('portal.PortalSidebar');
-var utils = require('web.utils');
+import dom from "@web/legacy/js/core/dom";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import PortalSidebar from "@portal/js/portal_sidebar";
 
 publicWidget.registry.AccountPortalSidebar = PortalSidebar.extend({
     selector: '.o_portal_invoice_sidebar',
@@ -51,7 +49,8 @@ publicWidget.registry.AccountPortalSidebar = PortalSidebar.extend({
         $el.height($wrapwrap[0].scrollHeight);
 
         // scroll to the right place after iframe resize
-        if (!utils.isValidAnchor(window.location.hash)) {
+        const isAnchor = /^#[\w-]+$/.test(window.location.hash)
+        if (!isAnchor) {
             return;
         }
         var $target = $(window.location.hash);
@@ -69,5 +68,4 @@ publicWidget.registry.AccountPortalSidebar = PortalSidebar.extend({
         var href = $(ev.currentTarget).attr('href');
         this._printIframeContent(href);
     },
-});
 });

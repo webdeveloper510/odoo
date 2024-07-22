@@ -1,13 +1,12 @@
 /** @odoo-module */
 
-import publicWidget from 'web.public.widget';
-import "portal.portal"; // force dependencies
+import { PortalHomeCounters } from '@portal/js/portal';
 
-publicWidget.registry.PortalHomeCounters.include({
+PortalHomeCounters.include({
     /**
      * @override
      */
     _getCountersAlwaysDisplayed() {
-        return this._super(...arguments).concat(['quotation_count', 'order_count']);
+        return this._super(...arguments).concat(['order_count']);
     },
 });

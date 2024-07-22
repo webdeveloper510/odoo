@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import * as spreadsheet from "@odoo/o-spreadsheet";
 
-const { Component, useSubEnv } = owl;
+import { Component, useSubEnv } from "@odoo/owl";
 const { registries } = spreadsheet;
 const { figureRegistry } = registries;
 
@@ -11,6 +11,7 @@ export class MobileFigureContainer extends Component {
         useSubEnv({
             model: this.props.spreadsheetModel,
             isDashboard: () => this.props.spreadsheetModel.getters.isDashboard(),
+            openSidePanel: () => {},
         });
     }
 
@@ -37,3 +38,7 @@ export class MobileFigureContainer extends Component {
 }
 
 MobileFigureContainer.template = "documents_spreadsheet.MobileFigureContainer";
+
+MobileFigureContainer.props = {
+    spreadsheetModel: Object,
+};

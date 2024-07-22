@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "account_qr_code_sepa",
+    'name': "Account SEPA QR Code",
 
     'description': """
-        This module adds support for SEPA Credit Transfer QR-code generation.
+This module adds support for SEPA Credit Transfer QR-code generation.
     """,
 
     'category': 'Accounting/Payment',

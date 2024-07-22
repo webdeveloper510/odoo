@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from 'website.tour_utils';
+import wTourUtils from '@website/js/tours/tour_utils';
 
 const makeSteps = (steps = []) => [
     wTourUtils.dragNDrop({
@@ -47,14 +47,19 @@ wTourUtils.registerWebsitePreviewTour('website_no_action_no_dirty_page', {
     test: true,
     url: '/',
     edition: true,
-}, makeSteps());
+}, () => makeSteps());
 
 wTourUtils.registerWebsitePreviewTour('website_no_dirty_page', {
     test: true,
     url: '/',
     edition: true,
-}, makeSteps([
+}, () => makeSteps([
     {
+        // This has been known to mark the page as dirty because of the "drag
+        // the column on image move" feature.
+        content: "Click on default image",
+        trigger: 'iframe .s_text_image img',
+    }, {
         content: "Click on default paragraph",
         trigger: 'iframe .s_text_image h2 + p.o_default_snippet_text',
     }, {
@@ -76,3 +81,41 @@ wTourUtils.registerWebsitePreviewTour('website_no_dirty_page', {
         },
     },
 ]));
+
+wTourUtils.registerWebsitePreviewTour('website_no_dirty_lazy_image', {
+    test: true,
+    url: '/',
+    edition: true,
+}, () => [
+    wTourUtils.dragNDrop({
+        id: 's_text_image',
+        name: 'Text - Image',
+    }), {
+        content: "Replace first paragraph, to insert a new link",
+        // Ensure the test keeps testing what it should test (eg if we ever
+        // remove the lazy loading on those language img))
+        extra_trigger: 'iframe img.o_lang_flag[loading="lazy"]',
+        trigger: 'iframe #wrap .s_text_image p',
+        run: 'text SomeTestText',
+    }, {
+        content: "Click elsewhere to be sure the editor fully process the new content",
+        extra_trigger: 'iframe #wrap .s_text_image p:contains("SomeTestText")',
+        trigger: 'iframe #wrap .s_text_image img',
+    }, {
+        content: "Check that there is no more than one dirty flag",
+        extra_trigger: '.o_we_user_value_widget[data-replace-media="true"]',
+        trigger: 'iframe body',
+        run: function () {
+            const dirtyCount = this.$anchor[0].querySelectorAll('.o_dirty').length;
+            if (dirtyCount !== 1) {
+                console.error(dirtyCount + " dirty flag(s) found");
+            } else {
+                this.$anchor[0].querySelector('#wrap').classList.add('o_dirty_as_expected');
+            }
+        },
+    }, {
+        content: "Check previous step went through correctly about dirty flags",
+        trigger: 'iframe #wrap.o_dirty_as_expected',
+        run: () => null, // it's a check
+    }
+]);

@@ -28,15 +28,12 @@ class BaseModuleUpgrade(models.TransientModel):
         if view_type != 'form':
             return res
 
-        if not(self._context.get('active_model') and self._context.get('active_id')):
-            return res
-
         if not self.get_module_list():
             res['arch'] = '''<form string="Upgrade Completed">
                                 <separator string="Upgrade Completed" colspan="4"/>
                                 <footer>
                                     <button name="config" string="Start Configuration" type="object" class="btn-primary" data-hotkey="q"/>
-                                    <button special="cancel" data-hotkey="z" string="Close" class="btn-secondary"/>
+                                    <button special="cancel" data-hotkey="x" string="Close" class="btn-secondary"/>
                                 </footer>
                              </form>'''
 
@@ -60,13 +57,11 @@ class BaseModuleUpgrade(models.TransientModel):
                         FROM ir_module_module m
                         JOIN ir_module_module_dependency d ON (m.id = d.module_id)
                         LEFT JOIN ir_module_module m2 ON (d.name = m2.name)
-                        WHERE m.id in %s and (m2.state IS NULL or m2.state IN %s) """
-            self._cr.execute(query, (tuple(mods.ids), ('uninstalled',)))
+                        WHERE m.id = any(%s) and (m2.state IS NULL or m2.state = %s) """
+            self._cr.execute(query, (mods.ids, 'uninstalled'))
             unmet_packages = [row[0] for row in self._cr.fetchall()]
             if unmet_packages:
-                raise UserError(_('The following modules are not installed or unknown: %s') % ('\n\n' + '\n'.join(unmet_packages)))
-
-            mods.download()
+                raise UserError(_('The following modules are not installed or unknown: %s', '\n\n' + '\n'.join(unmet_packages)))
 
         # terminate transaction before re-creating cursor below
         self._cr.commit()

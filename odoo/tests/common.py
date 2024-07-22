@@ -5,17 +5,14 @@ helpers and classes to write tests.
 
 """
 import base64
-import collections
 import concurrent.futures
 import contextlib
 import difflib
-import functools
 import importlib
 import inspect
 import itertools
 import json
 import logging
-import operator
 import os
 import pathlib
 import platform
@@ -29,37 +26,36 @@ import tempfile
 import threading
 import time
 import unittest
-from . import case
 import warnings
-from collections import defaultdict
+from collections import defaultdict, deque
 from concurrent.futures import Future, CancelledError, wait
 try:
     from concurrent.futures import InvalidStateError
 except ImportError:
     InvalidStateError = NotImplementedError
 from contextlib import contextmanager, ExitStack
-from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
+from datetime import datetime
+from functools import lru_cache
 from itertools import zip_longest as izip_longest
-from unittest.mock import patch, Mock
+from unittest.mock import patch, _patch
 from xmlrpc import client as xmlrpclib
 
 import requests
 import werkzeug.urls
 from lxml import etree, html
+from requests import PreparedRequest, Session
 
 import odoo
 from odoo import api
 from odoo.models import BaseModel
 from odoo.exceptions import AccessError
 from odoo.modules.registry import Registry
-from odoo.osv import expression
-from odoo.osv.expression import normalize_domain, TRUE_LEAF, FALSE_LEAF
 from odoo.service import security
 from odoo.sql_db import BaseCursor, Cursor
-from odoo.tools import float_compare, single_email_re, profiler, lower_logging
-from odoo.tools.misc import find_in_path
-from odoo.tools.safe_eval import safe_eval
+from odoo.tools import float_compare, single_email_re, profiler, lower_logging, SQL
+from odoo.tools.misc import find_in_path, mute_logger
+
+from . import case
 
 try:
     # the behaviour of decorator changed in 5.0.5 changing the structure of the traceback when
@@ -80,6 +76,23 @@ except ImportError:
     websocket = None
 
 _logger = logging.getLogger(__name__)
+
+
+# backward compatibility: Form was defined in this file
+def __getattr__(name):
+    # pylint: disable=import-outside-toplevel
+    if name != 'Form':
+        raise AttributeError(name)
+
+    from .form import Form
+
+    warnings.warn(
+        "Since 17.0: odoo.tests.common.Form is deprecated, use odoo.tests.Form",
+        category=PendingDeprecationWarning,
+        stacklevel=2,
+    )
+    return Form
+
 
 # The odoo library is supposed already configured.
 ADDONS_PATH = odoo.tools.config['addons_path']
@@ -184,18 +197,18 @@ class RecordCapturer:
         self._domain = domain
 
     def __enter__(self):
-        self._before = self._model.search(self._domain)
+        self._before = self._model.search(self._domain, order='id')
         self._after = None
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_type is None:
-            self._after = self._model.search(self._domain) - self._before
+            self._after = self._model.search(self._domain, order='id') - self._before
 
     @property
     def records(self):
         if self._after is None:
-            return self._model.search(self._domain) - self._before
+            return self._model.search(self._domain, order='id') - self._before
         return self._after
 
 
@@ -233,7 +246,9 @@ def _normalize_arch_for_assert(arch_string, parser_method="xml"):
     arch_string = etree.fromstring(arch_string, parser=parser)
     return etree.tostring(arch_string, pretty_print=True, encoding='unicode')
 
-
+class BlockedRequest(requests.exceptions.ConnectionError):
+    pass
+_super_send = requests.Session.send
 class BaseCase(case.TestCase, metaclass=MetaCase):
     """ Subclass of TestCase for Odoo-specific code. This class is abstract and
     expects self.registry, self.cr and self.uid to be initialized by subclasses.
@@ -247,6 +262,20 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
         super().__init__(methodName)
         self.addTypeEqualityFunc(etree._Element, self.assertTreesEqual)
         self.addTypeEqualityFunc(html.HtmlElement, self.assertTreesEqual)
+
+    @classmethod
+    def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
+        # allow localhost requests
+        # TODO: also check port?
+        url = werkzeug.urls.url_parse(r.url)
+        if url.host in (HOST, 'localhost'):
+            return _super_send(s, r, **kw)
+        if url.scheme == 'file':
+            return _super_send(s, r, **kw)
+
+        _logger.getChild('requests').info(
+            "Blocking un-mocked external HTTP request %s %s", r.method, r.url)
+        raise BlockedRequest(f"External requests verboten (was {r.method} {r.url})")
 
     def run(self, result):
         testMethod = getattr(self, self._testMethodName)
@@ -271,6 +300,26 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
                 super().run(result)
             if not failure:
                 break
+
+    @classmethod
+    def setUpClass(cls):
+        def check_remaining_patchers():
+            for patcher in _patch._active_patches:
+                _logger.warning("A patcher (targeting %s.%s) was remaining active at the end of %s, disabling it...", patcher.target, patcher.attribute, cls.__name__)
+                patcher.stop()
+        cls.addClassCleanup(check_remaining_patchers)
+        super().setUpClass()
+        if 'standard' in cls.test_tags:
+            # if the method is passed directly `patch` discards the session
+            # object which we need
+            # pylint: disable=unnecessary-lambda
+            patcher = patch.object(
+                requests.sessions.Session,
+                'send',
+                lambda s, r, **kwargs: cls._request_handler(s, r, **kwargs),
+            )
+            patcher.start()
+            cls.addClassCleanup(patcher.stop)
 
     def cursor(self):
         return self.registry.cursor()
@@ -418,7 +467,7 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
         actual_queries = []
 
         def execute(self, query, params=None, log_exceptions=None):
-            actual_queries.append(query)
+            actual_queries.append(query.code if isinstance(query, SQL) else query)
             return Cursor_execute(self, query, params, log_exceptions)
 
         def get_unaccent_wrapper(cr):
@@ -637,6 +686,7 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             when normalizing both archs. Takes either "xml" or "html"
         :type parser: str
         """
+        self.maxDiff = 10000
         if original:
             original = _normalize_arch_for_assert(original, parser)
         if expected:
@@ -659,12 +709,6 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             profile_session=self.profile_session,
             **kwargs)
 
-    def patch_requests(self):
-        # requests.get -> requests.api.request -> Session().request
-        # TBD: enable by default & set side_effect=NotImplementedError to force an error
-        p = patch('requests.Session.request', Mock(spec_set=[]))
-        self.addCleanup(p.stop)
-        return p.start()
 
 savepoint_seq = itertools.count()
 
@@ -687,6 +731,7 @@ class TransactionCase(BaseCase):
     registry: Registry = None
     env: api.Environment = None
     cr: Cursor = None
+    muted_registry_logger = mute_logger(odoo.modules.registry._logger.name)
 
 
     @classmethod
@@ -704,10 +749,18 @@ class TransactionCase(BaseCase):
         super().setUpClass()
 
         cls.addClassCleanup(cls._gc_filestore)
-
         cls.registry = odoo.registry(get_db_name())
-        cls.addClassCleanup(cls.registry.reset_changes)
-        cls.addClassCleanup(cls.registry.clear_caches)
+        cls.registry_start_sequence = cls.registry.registry_sequence
+        def reset_changes():
+            if (cls.registry_start_sequence != cls.registry.registry_sequence) or cls.registry.registry_invalidated:
+                with cls.registry.cursor() as cr:
+                    cls.registry.setup_models(cr)
+            cls.registry.registry_invalidated = False
+            cls.registry.registry_sequence = cls.registry_start_sequence
+            with cls.muted_registry_logger:
+                cls.registry.clear_all_caches()
+            cls.registry.cache_invalidated.clear()
+        cls.addClassCleanup(reset_changes)
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
@@ -726,7 +779,7 @@ class TransactionCase(BaseCase):
         self.addCleanup(envs.update, list(envs))
         self.addCleanup(envs.clear)
 
-        self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.muted_registry_logger(self.registry.clear_all_caches))
 
         # This prevents precommit functions and data from piling up
         # until cr.flush is called in 'assertRaises' clauses
@@ -737,7 +790,7 @@ class TransactionCase(BaseCase):
             cb._funcs = funcs
             cb.data = data
         for callback in [cr.precommit, cr.postcommit, cr.prerollback, cr.postrollback]:
-            self.addCleanup(_reset, callback, collections.deque(callback._funcs), dict(callback.data))
+            self.addCleanup(_reset, callback, deque(callback._funcs), dict(callback.data))
 
         # flush everything in setUpClass before introducing a savepoint
         self.env.flush_all()
@@ -745,18 +798,6 @@ class TransactionCase(BaseCase):
         self._savepoint_id = next(savepoint_seq)
         self.cr.execute('SAVEPOINT test_%d' % self._savepoint_id)
         self.addCleanup(self.cr.execute, 'ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
-
-        self.patch(self.registry['res.partner'], '_get_gravatar_image', lambda *a: False)
-
-
-class SavepointCase(TransactionCase):
-    @classmethod
-    def __init_subclass__(cls):
-        super().__init_subclass__()
-        warnings.warn(
-            "Deprecated class SavepointCase has been merged into TransactionCase",
-            DeprecationWarning, stacklevel=2,
-        )
 
 
 class SingleTransactionCase(BaseCase):
@@ -775,7 +816,7 @@ class SingleTransactionCase(BaseCase):
         super().setUpClass()
         cls.registry = odoo.registry(get_db_name())
         cls.addClassCleanup(cls.registry.reset_changes)
-        cls.addClassCleanup(cls.registry.clear_caches)
+        cls.addClassCleanup(cls.registry.clear_all_caches)
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
@@ -830,7 +871,6 @@ def fchain(future, next_callback):
 
     return new_future
 
-
 def save_test_file(test_name, content, prefix, extension='png', logger=_logger, document_type='Screenshot', date_format="%Y%m%d_%H%M%S_%f"):
     assert re.fullmatch(r'\w*_', prefix)
     assert re.fullmatch(r'[a-z]+', extension)
@@ -850,36 +890,34 @@ class ChromeBrowser:
     """ Helper object to control a Chrome headless process. """
     remote_debugging_port = 0  # 9222, change it in a non-git-tracked file
 
-    def __init__(self, test_class):
+    def __init__(self, test_class, headless=True):
         self._logger = test_class._logger
         self.test_class = test_class
         if websocket is None:
             self._logger.warning("websocket-client module is not installed")
             raise unittest.SkipTest("websocket-client module is not installed")
-        self.devtools_port = None
-        self.ws_url = ''  # WebSocketUrl
-        self.ws = None  # websocket
         self.user_data_dir = tempfile.mkdtemp(suffix='_chrome_odoo')
-        self.chrome_pid = None
 
         otc = odoo.tools.config
-        self.screenshots_dir = os.path.join(otc['screenshots'], get_db_name(), 'screenshots')
         self.screencasts_dir = None
-        self.screencasts_frames_dir = None
+        self.screencast_frames = []
         if otc['screencasts']:
             self.screencasts_dir = os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
-            self.screencasts_frames_dir = os.path.join(self.screencasts_dir, 'frames')
             os.makedirs(self.screencasts_frames_dir, exist_ok=True)
-        self.screencast_frames = []
-        os.makedirs(self.screenshots_dir, exist_ok=True)
 
-        self.window_size = test_class.browser_size
-        self.touch_enabled = test_class.touch_enabled
-        self.sigxcpu_handler = None
-        self._chrome_start()
-        self._find_websocket()
-        self._logger.info('Websocket url found: %s', self.ws_url)
-        self._open_websocket()
+        if os.name == 'posix':
+            self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
+            signal.signal(signal.SIGXCPU, self.signal_handler)
+        else:
+            self.sigxcpu_handler = None
+
+        self.chrome, self.devtools_port = self._chrome_start(
+            user_data_dir=self.user_data_dir,
+            window_size=test_class.browser_size,
+            touch_enabled=test_class.touch_enabled,
+            headless=headless,
+        )
+        self.ws = self._open_websocket()
         self._request_id = itertools.count()
         self._result = Future()
         self.error_checker = None
@@ -904,9 +942,10 @@ class ChromeBrowser:
         self._websocket_send('Runtime.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
-        if os.name == 'posix':
-            self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
-            signal.signal(signal.SIGXCPU, self.signal_handler)
+
+    @property
+    def screencasts_frames_dir(self):
+        return os.path.join(self.screencasts_dir, 'frames')
 
     def signal_handler(self, sig, frame):
         if sig == signal.SIGXCPU:
@@ -915,51 +954,44 @@ class ChromeBrowser:
             os._exit(0)
 
     def stop(self):
-        if self.chrome_pid is not None:
-            self._logger.info("Closing chrome headless with pid %s", self.chrome_pid)
+        if hasattr(self, 'ws'):
+            self._websocket_send('Page.stopScreencast')
+            if self.screencasts_dir:
+                screencasts_frames_dir = self.screencasts_frames_dir
+                self.screencasts_dir = None
+                if os.path.isdir(screencasts_frames_dir):
+                    shutil.rmtree(screencasts_frames_dir, ignore_errors=True)
+
+            self._websocket_request('Page.stopLoading')
+            self._websocket_request('Runtime.evaluate', params={'expression': """
+            ('serviceWorker' in navigator) &&
+                navigator.serviceWorker.getRegistrations().then(
+                    registrations => Promise.all(registrations.map(r => r.unregister()))
+                )
+            """, 'awaitPromise': True})
+            # wait for the screenshot or whatever
+            wait(self._responses.values(), 10)
+            self._result.cancel()
+
+            self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
             self._websocket_send('Browser.close')
             self._logger.info("Closing websocket connection")
             self.ws.close()
-            self._logger.info("Terminating chrome headless with pid %s", self.chrome_pid)
-            os.kill(self.chrome_pid, signal.SIGTERM)
+        if self.chrome:
+            self._logger.info("Terminating chrome headless with pid %s", self.chrome.pid)
+            self.chrome.terminate()
+
         if self.user_data_dir and os.path.isdir(self.user_data_dir) and self.user_data_dir != '/':
             self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
             shutil.rmtree(self.user_data_dir, ignore_errors=True)
+
         # Restore previous signal handler
         if self.sigxcpu_handler and os.name == 'posix':
             signal.signal(signal.SIGXCPU, self.sigxcpu_handler)
 
     @property
     def executable(self):
-        system = platform.system()
-        if system == 'Linux':
-            for bin_ in ['google-chrome', 'chromium', 'chromium-browser', 'google-chrome-stable']:
-                try:
-                    return find_in_path(bin_)
-                except IOError:
-                    continue
-
-        elif system == 'Darwin':
-            bins = [
-                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-                '/Applications/Chromium.app/Contents/MacOS/Chromium',
-            ]
-            for bin_ in bins:
-                if os.path.exists(bin_):
-                    return bin_
-
-        elif system == 'Windows':
-            bins = [
-                '%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe',
-                '%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe',
-                '%LocalAppData%\\Google\\Chrome\\Application\\chrome.exe',
-            ]
-            for bin_ in bins:
-                bin_ = os.path.expandvars(bin_)
-                if os.path.exists(bin_):
-                    return bin_
-
-        raise unittest.SkipTest("Chrome executable not found")
+        return _find_executable()
 
     def _chrome_without_limit(self, cmd):
         if os.name == 'posix' and platform.system() != 'Darwin':
@@ -982,18 +1014,17 @@ class ChromeBrowser:
             time.sleep(CHECK_BROWSER_SLEEP)
             if port_file.is_file() and port_file.stat().st_size > 5:
                 with port_file.open('r', encoding='utf-8') as f:
-                    self.devtools_port = int(f.readline())
-                    return proc.pid
+                    return proc, int(f.readline())
         raise unittest.SkipTest(f'Failed to detect chrome devtools port after {BROWSER_WAIT :.1f}s.')
 
-    def _chrome_start(self):
-        if self.chrome_pid is not None:
-            return
-
-        switches = {
+    def _chrome_start(
+            self,
+            user_data_dir: str,
+            window_size: str, touch_enabled: bool,
+            headless=True
+    ):
+        headless_switches = {
             '--headless': '',
-            '--no-default-browser-check': '',
-            '--no-first-run': '',
             '--disable-extensions': '',
             '--disable-background-networking' : '',
             '--disable-background-timer-throttling' : '',
@@ -1002,24 +1033,29 @@ class ChromeBrowser:
             '--disable-breakpad': '',
             '--disable-client-side-phishing-detection': '',
             '--disable-crash-reporter': '',
-            '--disable-default-apps': '',
             '--disable-dev-shm-usage': '',
-            '--disable-device-discovery-notifications': '',
             '--disable-namespace-sandbox': '',
-            '--user-data-dir': self.user_data_dir,
             '--disable-translate': '',
-            # required for tours that use Youtube autoplay conditions (namely website_slides' "course_tour")
-            '--autoplay-policy': 'no-user-gesture-required',
-            '--window-size': self.window_size,
-            '--remote-debugging-address': HOST,
-            '--remote-debugging-port': str(self.remote_debugging_port),
             '--no-sandbox': '',
             '--disable-gpu': '',
-            '--remote-allow-origins': '*',
+        }
+        switches = {
+            # required for tours that use Youtube autoplay conditions (namely website_slides' "course_tour")
+            '--autoplay-policy': 'no-user-gesture-required',
+            '--disable-default-apps': '',
+            '--disable-device-discovery-notifications': '',
+            '--no-default-browser-check': '',
+            '--remote-debugging-address': HOST,
+            '--remote-debugging-port': str(self.remote_debugging_port),
+            '--user-data-dir': user_data_dir,
+            '--window-size': window_size,
+            '--no-first-run': '',
             # '--enable-precise-memory-info': '', # uncomment to debug memory leaks in qunit suite
             # '--js-flags': '--expose-gc', # uncomment to debug memory leaks in qunit suite
         }
-        if self.touch_enabled:
+        if headless:
+            switches.update(headless_switches)
+        if touch_enabled:
             # enable Chrome's Touch mode, useful to detect touch capabilities using
             # "'ontouchstart' in window"
             switches['--touch-events'] = ''
@@ -1029,20 +1065,15 @@ class ChromeBrowser:
         url = 'about:blank'
         cmd.append(url)
         try:
-            self.chrome_pid = self._spawn_chrome(cmd)
+            proc, devtools_port = self._spawn_chrome(cmd)
         except OSError:
             raise unittest.SkipTest("%s not found" % cmd[0])
-        self._logger.info('Chrome pid: %s', self.chrome_pid)
-
-    def _find_websocket(self):
-        version = self._json_command('version')
-        self._logger.info('Browser version: %s', version['Browser'])
-        infos = self._json_command('', get_key=0)  # Infos about the first tab
-        self.ws_url = infos['webSocketDebuggerUrl']
-        self.dev_tools_frontend_url = infos.get('devtoolsFrontendUrl')
+        self._logger.info('Chrome pid: %s', proc.pid)
         self._logger.info('Chrome headless temporary user profile dir: %s', self.user_data_dir)
 
-    def _json_command(self, command, timeout=3, get_key=None):
+        return proc, devtools_port
+
+    def _json_command(self, command, timeout=3):
         """Queries browser state using JSON
 
         Available commands:
@@ -1068,21 +1099,17 @@ class ChromeBrowser:
         delay = 0.1
         tries = 0
         failure_info = None
-        message = ''
+        message = None
         while timeout > 0:
             try:
-                os.kill(self.chrome_pid, 0)
+                self.chrome.send_signal(0)
             except ProcessLookupError:
                 message = 'Chrome crashed at startup'
                 break
             try:
                 r = requests.get(url, timeout=3)
                 if r.ok:
-                    res = r.json()
-                    if get_key is None:
-                        return res
-                    else:
-                        return res[get_key]
+                    return r.json()
             except requests.ConnectionError as e:
                 failure_info = str(e)
                 message = 'Connection Error while trying to connect to Chrome debugger'
@@ -1090,8 +1117,7 @@ class ChromeBrowser:
                 failure_info = str(e)
                 message = 'Connection Timeout while trying to connect to Chrome debugger'
                 break
-            except (KeyError, IndexError):
-                message = 'Key "%s" not found in json result "%s" after connecting to Chrome debugger' % (get_key, res)
+
             time.sleep(delay)
             timeout -= delay
             delay = delay * 1.5
@@ -1103,10 +1129,31 @@ class ChromeBrowser:
         raise unittest.SkipTest("Error during Chrome headless connection")
 
     def _open_websocket(self):
-        self.ws = websocket.create_connection(self.ws_url, enable_multithread=True, suppress_origin=True)
-        if self.ws.getstatus() != 101:
+        version = self._json_command('version')
+        self._logger.info('Browser version: %s', version['Browser'])
+
+        start = time.time()
+        while (time.time() - start) < 5.0:
+            ws_url = next((
+                target['webSocketDebuggerUrl']
+                for target in self._json_command('')
+                if target['type'] == 'page'
+                if target['url'] == 'about:blank'
+            ), None)
+            if ws_url:
+                break
+
+            time.sleep(0.1)
+        else:
+            self.stop()
+            raise unittest.SkipTest("Error during Chrome connection: never found 'page' target")
+
+        self._logger.info('Websocket url found: %s', ws_url)
+        ws = websocket.create_connection(ws_url, enable_multithread=True, suppress_origin=True)
+        if ws.getstatus() != 101:
             raise unittest.SkipTest("Cannot connect to chrome dev tools")
-        self.ws.settimeout(0.01)
+        ws.settimeout(0.01)
+        return ws
 
     def _receive(self, dbname):
         threading.current_thread().dbname = dbname
@@ -1236,7 +1283,7 @@ class ChromeBrowser:
                 self._websocket_send('DOM.getDocument', params={'depth': 0}, with_future=True),
                 lambda d: self._websocket_send("DOM.querySelector", params={
                     'nodeId': d['root']['nodeId'],
-                    'selector': '.o_legacy_form_view.o_form_editable, .o_form_dirty',
+                    'selector': '.o_form_dirty',
                 }, with_future=True)
             )
             @qs.add_done_callback
@@ -1302,6 +1349,8 @@ which leads to stray network requests and inconsistencies."""
         if not self.screencasts_frames_dir:
             return
         self._websocket_send('Page.screencastFrameAck', params={'sessionId': sessionId})
+        if not self.screencasts_dir:
+            return
         outfile = os.path.join(self.screencasts_frames_dir, 'frame_%05d.b64' % len(self.screencast_frames))
         try:
             with open(outfile, 'w') as f:
@@ -1324,21 +1373,14 @@ which leads to stray network requests and inconsistencies."""
         # endGroup, assert, profile, profileEnd, count, timeEnd
     }
 
-    def take_screenshot(self, prefix='sc_', suffix=None):
+    def take_screenshot(self, prefix='sc_'):
         def handler(f):
             base_png = f.result(timeout=0)['data']
             if not base_png:
                 self._logger.warning("Couldn't capture screenshot: expected image data, got ?? error ??")
                 return
-
             decoded = base64.b64decode(base_png, validate=True)
-            fname = '{}{:%Y%m%d_%H%M%S_%f}{}.png'.format(
-                prefix, datetime.now(),
-                suffix or '_%s' % self.test_class.__name__)
-            full_path = os.path.join(self.screenshots_dir, fname)
-            with open(full_path, 'wb') as f:
-                f.write(decoded)
-            self._logger.runbot('Screenshot in: %s', full_path)
+            save_test_file(self.test_class.__name__, decoded, prefix, logger=self._logger)
 
         self._logger.info('Asking for screenshot')
         f = self._websocket_send('Page.captureScreenshot', with_future=True)
@@ -1478,35 +1520,6 @@ which leads to stray network requests and inconsistencies."""
             self._logger.info('Waiting for frame %r to stop loading', frame_id)
             e.wait(10)
 
-    def clear(self):
-        self._websocket_send('Page.stopScreencast')
-        if self.screencasts_dir and os.path.isdir(self.screencasts_frames_dir):
-            self.screencasts_dir = self.screencasts_frames_dir = None
-            shutil.rmtree(self.screencasts_frames_dir, ignore_errors=True)
-        self.screencast_frames = []
-        self._websocket_request('Page.stopLoading')
-        self._websocket_request('Runtime.evaluate', params={'expression': """
-        ('serviceWorker' in navigator) &&
-            navigator.serviceWorker.getRegistrations().then(
-                registrations => Promise.all(registrations.map(r => r.unregister()))
-            )
-        """, 'awaitPromise': True})
-        # wait for the screenshot or whatever
-        wait(self._responses.values(), 10)
-        self._logger.info('Deleting cookies and clearing local storage')
-        self._websocket_request('Network.clearBrowserCache')
-        self._websocket_request('Network.clearBrowserCookies')
-        self._websocket_request('Runtime.evaluate', params={'expression': 'try {localStorage.clear(); sessionStorage.clear();} catch(e) {}'})
-        self.navigate_to('about:blank', wait_stop=True)
-        # hopefully after navigating to about:blank there's no event left
-        self._frames.clear()
-        # wait for the clearing requests to finish in case the browser is re-used
-        wait(self._responses.values(), 10)
-        self._responses.clear()
-        self._result.cancel()
-        self._result = Future()
-        self.had_failure = False
-
     def _from_remoteobject(self, arg):
         """ attempts to make a CDT RemoteObject comprehensible
         """
@@ -1582,6 +1595,37 @@ which leads to stray network requests and inconsistencies."""
             return m[0]
         return replacer
 
+@lru_cache(1)
+def _find_executable():
+    system = platform.system()
+    if system == 'Linux':
+        for bin_ in ['google-chrome', 'chromium', 'chromium-browser', 'google-chrome-stable']:
+            try:
+                return find_in_path(bin_)
+            except IOError:
+                continue
+
+    elif system == 'Darwin':
+        bins = [
+            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+            '/Applications/Chromium.app/Contents/MacOS/Chromium',
+        ]
+        for bin_ in bins:
+            if os.path.exists(bin_):
+                return bin_
+
+    elif system == 'Windows':
+        bins = [
+            '%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe',
+            '%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe',
+            '%LocalAppData%\\Google\\Chrome\\Application\\chrome.exe',
+        ]
+        for bin_ in bins:
+            bin_ = os.path.expandvars(bin_)
+            if os.path.exists(bin_):
+                return bin_
+
+    raise unittest.SkipTest("Chrome executable not found")
 
 class Opener(requests.Session):
     """
@@ -1613,6 +1657,12 @@ class Transport(xmlrpclib.Transport):
         return super().request(*args, **kwargs)
 
 
+class JsonRpcException(Exception):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+
+
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
     registry_test_mode = True
@@ -1626,6 +1676,9 @@ class HttpCase(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        if cls.registry_test_mode:
+            cls.registry.enter_test_mode(cls.cr)
+            cls.addClassCleanup(cls.registry.leave_test_mode)
 
         ICP = cls.env['ir.config_parameter']
         ICP.set_param('web.base.url', cls.base_url())
@@ -1636,28 +1689,12 @@ class HttpCase(TransactionCase):
 
     def setUp(self):
         super().setUp()
-        if self.registry_test_mode:
-            self.registry.enter_test_mode(self.cr)
-            self.addCleanup(self.registry.leave_test_mode)
 
         self.xmlrpc_common = xmlrpclib.ServerProxy(self.xmlrpc_url + 'common', transport=Transport(self.cr))
         self.xmlrpc_db = xmlrpclib.ServerProxy(self.xmlrpc_url + 'db', transport=Transport(self.cr))
         self.xmlrpc_object = xmlrpclib.ServerProxy(self.xmlrpc_url + 'object', transport=Transport(self.cr))
         # setup an url opener helper
         self.opener = Opener(self.cr)
-
-    @classmethod
-    def start_browser(cls):
-        # start browser on demand
-        if cls.browser is None:
-            cls.browser = ChromeBrowser(cls)
-            cls.addClassCleanup(cls.terminate_browser)
-
-    @classmethod
-    def terminate_browser(cls):
-        if cls.browser:
-            cls.browser.stop()
-            cls.browser = None
 
     def url_open(self, url, data=None, files=None, timeout=12, headers=None, allow_redirects=True, head=False):
         if url.startswith('/'):
@@ -1693,7 +1730,7 @@ class HttpCase(TransactionCase):
         self.session.logout(keep_db=keep_db)
         odoo.http.root.session_store.save(self.session)
 
-    def authenticate(self, user, password):
+    def authenticate(self, user, password, browser: ChromeBrowser = None):
         if getattr(self, 'session', None):
             odoo.http.root.session_store.delete(self.session)
 
@@ -1730,9 +1767,9 @@ class HttpCase(TransactionCase):
         # completely) or clear-ing session.cookies.
         self.opener = Opener(self.cr)
         self.opener.cookies['session_id'] = session.sid
-        if self.browser:
+        if browser:
             self._logger.info('Setting session cookie in browser')
-            self.browser.set_cookie('session_id', session.sid, '/', HOST)
+            browser.set_cookie('session_id', session.sid, '/', HOST)
 
         return session
 
@@ -1742,7 +1779,6 @@ class HttpCase(TransactionCase):
         - load page given by url_path
         - wait for ready object to be available
         - eval(code) inside the page
-        - open another chrome window to watch code execution if watch is True
 
         To signal success test do: console.log('test successful')
         To signal test failure raise an exception or call console.error with a message.
@@ -1756,15 +1792,12 @@ class HttpCase(TransactionCase):
         if any(f.filename.endswith('/coverage/execfile.py') for f in inspect.stack()  if f.filename):
             timeout = timeout * 1.5
 
-        self.start_browser()
-        if watch and self.browser.dev_tools_frontend_url:
-            _logger.warning('watch mode is only suitable for local testing - increasing tour timeout to 3600')
-            timeout = max(timeout*10, 3600)
-            debug_front_end = f'http://127.0.0.1:{self.browser.devtools_port}{self.browser.dev_tools_frontend_url}'
-            self.browser._chrome_without_limit([self.browser.executable, debug_front_end])
-            time.sleep(3)
+        if watch:
+            _logger.warning('watch mode is only suitable for local testing')
+
+        browser = ChromeBrowser(type(self), headless=not watch)
         try:
-            self.authenticate(login, login)
+            self.authenticate(login, login, browser=browser)
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
             # test cursors, which uses different caches than this transaction.
@@ -1778,22 +1811,22 @@ class HttpCase(TransactionCase):
                 url = parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
             self._logger.info('Open "%s" in browser', url)
 
-            if self.browser.screencasts_dir:
+            if browser.screencasts_dir:
                 self._logger.info('Starting screencast')
-                self.browser.start_screencast()
+                browser.start_screencast()
             if cookies:
                 for name, value in cookies.items():
-                    self.browser.set_cookie(name, value, '/', HOST)
+                    browser.set_cookie(name, value, '/', HOST)
 
-            self.browser.navigate_to(url, wait_stop=not bool(ready))
+            browser.navigate_to(url, wait_stop=not bool(ready))
 
             # Needed because tests like test01.js (qunit tests) are passing a ready
             # code = ""
-            self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
+            self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
             error = False
             try:
-                self.browser._wait_code_ok(code, timeout, error_checker=error_checker)
+                browser._wait_code_ok(code, timeout, error_checker=error_checker)
             except ChromeBrowserException as chrome_browser_exception:
                 error = chrome_browser_exception
             if error:  # dont keep initial traceback, keep that outside of except
@@ -1804,10 +1837,7 @@ class HttpCase(TransactionCase):
                 self.fail('%s\n\n%s' % (message, error))
 
         finally:
-            # clear browser to make it stop sending requests, in case we call
-            # the method several times in a test method
-            self.browser.delete_cookie('session_id', domain=HOST)
-            self.browser.clear()
+            browser.stop()
             self._wait_remaining_requests()
 
     @classmethod
@@ -1818,9 +1848,13 @@ class HttpCase(TransactionCase):
         """Wrapper for `browser_js` to start the given `tour_name` with the
         optional delay between steps `step_delay`. Other arguments from
         `browser_js` can be passed as keyword arguments."""
-        step_delay = ', %s' % step_delay if step_delay else ''
-        code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
-        ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours['%s'].ready" % tour_name)
+        options = {
+            'stepDelay': step_delay if step_delay else 0,
+            'keepWatchBrowser': kwargs.get('watch', False),
+            'startUrl': url_path,
+        }
+        code = kwargs.pop('code', "odoo.startTour('%s', %s)" % (tour_name, json.dumps(options)))
+        ready = kwargs.pop('ready', "odoo.isTourReady('%s')" % tour_name)
         return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
 
     def profile(self, **kwargs):
@@ -1833,16 +1867,33 @@ class HttpCase(TransactionCase):
             return sup.profile(description=request.httprequest.full_path)
         return profiler.Nested(_profiler, patch('odoo.http.Request._get_profiler_context_manager', route_profiler))
 
+    def make_jsonrpc_request(self, route, params=None, headers=None):
+        """Make a JSON-RPC request to the server.
 
-# kept for backward compatibility
-class HttpSavepointCase(HttpCase):
-    @classmethod
-    def __init_subclass__(cls):
-        super().__init_subclass__()
-        warnings.warn(
-            "Deprecated class HttpSavepointCase has been merged into HttpCase",
-            DeprecationWarning, stacklevel=2,
-        )
+        :param str route: the route to request
+        :param dict params: the parameters to send
+        :raises requests.HTTPError: if one occurred
+        :raises JsonRpcException: if the response contains an error
+        :return: The 'result' key from the response if any.
+        """
+        data = json.dumps({
+            'id': 0,
+            'jsonrpc': '2.0',
+            'method': 'call',
+            'params': params,
+        }).encode()
+        headers = headers or {}
+        headers['Content-Type'] = 'application/json'
+        response = self.url_open(route, data, headers=headers)
+        response.raise_for_status()
+        decoded_response = response.json()
+        if 'result' in decoded_response:
+            return decoded_response['result']
+        if 'error' in decoded_response:
+            raise JsonRpcException(
+                code=decoded_response['error']['code'],
+                message=decoded_response['error']['data']['name']
+            )
 
 
 def no_retry(arg):
@@ -1915,993 +1966,6 @@ def can_import(module):
     else:
         return True
 
-
-class Form(object):
-    """ Server-side form view implementation (partial)
-
-    Implements much of the "form view" manipulation flow, such that
-    server-side tests can more properly reflect the behaviour which would be
-    observed when manipulating the interface:
-
-    * call default_get and the relevant onchanges on "creation"
-    * call the relevant onchanges on setting fields
-    * properly handle defaults & onchanges around x2many fields
-
-    Saving the form returns the created record if in creation mode.
-
-    Regular fields can just be assigned directly to the form, for
-    :class:`~odoo.fields.Many2one` fields assign a singleton recordset::
-
-        # empty recordset => creation mode
-        f = Form(self.env['sale.order'])
-        f.partner_id = a_partner
-        so = f.save()
-
-    When editing a record, using the form as a context manager to
-    automatically save it at the end of the scope::
-
-        with Form(so) as f2:
-            f2.payment_term_id = env.ref('account.account_payment_term_15days')
-            # f2 is saved here
-
-    For :class:`~odoo.fields.Many2many` fields, the field itself is a
-    :class:`~odoo.tests.common.M2MProxy` and can be altered by adding or
-    removing records::
-
-        with Form(user) as u:
-            u.groups_id.add(env.ref('account.group_account_manager'))
-            u.groups_id.remove(id=env.ref('base.group_portal').id)
-
-    Finally :class:`~odoo.fields.One2many` are reified as
-    :class:`~odoo.tests.common.O2MProxy`.
-
-    Because the :class:`~odoo.fields.One2many` only exists through its
-    parent, it is manipulated more directly by creating "sub-forms"
-    with the :meth:`~odoo.tests.common.O2MProxy.new` and
-    :meth:`~odoo.tests.common.O2MProxy.edit` methods. These would
-    normally be used as context managers since they get saved in the
-    parent record::
-
-        with Form(so) as f3:
-            # add support
-            with f3.order_line.new() as line:
-                line.product_id = env.ref('product.product_product_2')
-            # add a computer
-            with f3.order_line.new() as line:
-                line.product_id = env.ref('product.product_product_3')
-            # we actually want 5 computers
-            with f3.order_line.edit(1) as line:
-                line.product_uom_qty = 5
-            # remove support
-            f3.order_line.remove(index=0)
-            # SO is saved here
-
-    :param recordp: empty or singleton recordset. An empty recordset will
-                    put the view in "creation" mode and trigger calls to
-                    default_get and on-load onchanges, a singleton will
-                    put it in "edit" mode and only load the view's data.
-    :type recordp: odoo.models.Model
-    :param view: the id, xmlid or actual view object to use for
-                    onchanges and view constraints. If none is provided,
-                    simply loads the default view for the model.
-    :type view: int | str | odoo.model.Model
-
-    .. versionadded:: 12.0
-    """
-    def __init__(self, recordp, view=None):
-        # necessary as we're overriding setattr
-        assert isinstance(recordp, BaseModel)
-        env = recordp.env
-        object.__setattr__(self, '_env', env)
-
-        # store model bit only
-        object.__setattr__(self, '_model', recordp.browse(()))
-        if isinstance(view, BaseModel):
-            assert view._name == 'ir.ui.view', "the view parameter must be a view id, xid or record, got %s" % view
-            view_id = view.id
-        elif isinstance(view, str):
-            view_id = env.ref(view).id
-        else:
-            view_id = view or False
-        fvg = recordp.get_view(view_id, 'form')
-        fvg['tree'] = etree.fromstring(fvg['arch'])
-        fvg['fields'] = self._get_view_fields(fvg['tree'], recordp)
-
-        object.__setattr__(self, '_view', fvg)
-
-        self._process_fvg(recordp, fvg)
-
-        # ordered?
-        vals = dict.fromkeys(fvg['fields'], False)
-        object.__setattr__(self, '_values', vals)
-        object.__setattr__(self, '_changed', set())
-        if recordp:
-            assert recordp['id'], "editing unstored records is not supported"
-            # always load the id
-            vals['id'] = recordp['id']
-
-            self._init_from_values(recordp)
-        else:
-            self._init_from_defaults(self._model)
-
-    def _get_view_fields(self, node, model):
-        level = node.xpath('count(ancestor::field)')
-        fnames = set(el.get('name') for el in node.xpath('.//field[count(ancestor::field) = %s]' % level))
-        fields = {fname: info for fname, info in model.fields_get().items() if fname in fnames}
-        return fields
-
-    def _o2m_set_edition_view(self, descr, node, level):
-        default_view = next(
-            (m for m in node.get('mode', 'tree').split(',') if m != 'form'),
-            'tree'
-        )
-        refs = self._env['ir.ui.view']._get_view_refs(node)
-        # always fetch for simplicity, ensure we always have a tree and
-        # a form view
-        submodel = self._env[descr['relation']]
-        views = {view.tag: view for view in node.xpath('./*[descendant::field]')}
-        for view_type in ['tree', 'form']:
-            # embedded views should take the priority on externals
-            if view_type not in views:
-                sub_fvg = submodel.with_context(**refs).get_view(view_type=view_type)
-                sub_node = etree.fromstring(sub_fvg['arch'])
-                views[view_type] = sub_node
-                node.append(sub_node)
-        # if the default view is a kanban or a non-editable list, the
-        # "edition controller" is the form view
-        edition_view = 'tree' if default_view == 'tree' and views['tree'].get('editable') else 'form'
-        edition = {
-            'fields': self._get_view_fields(views[edition_view], submodel),
-            'tree': views[edition_view],
-        }
-
-        # don't recursively process o2ms in o2ms
-        self._process_fvg(submodel, edition, level=level-1)
-        descr['edition_view'] = edition
-
-    def __str__(self):
-        return "<%s %s(%s)>" % (
-            type(self).__name__,
-            self._model._name,
-            self._values.get('id', False),
-        )
-
-    def _process_fvg(self, model, fvg, level=2):
-        """ Post-processes to augment the view_get with:
-        * an id field (may not be present if not in the view but needed)
-        * pre-processed modifiers (map of modifier name to json-loaded domain)
-        * pre-processed onchanges list
-        """
-        inherited_modifiers = ['invisible']
-        fvg['fields'].setdefault('id', {'type': 'id'})
-        # pre-resolve modifiers & bind to arch toplevel
-        modifiers = fvg['modifiers'] = {'id': {'required': [FALSE_LEAF], 'readonly': [TRUE_LEAF]}}
-        contexts = fvg['contexts'] = {}
-        order = fvg['fields_ordered'] = []
-        field_level = fvg['tree'].xpath('count(ancestor::field)')
-        eval_context = {
-            "uid": self._env.user.id,
-            "tz": self._env.user.tz,
-            "lang": self._env.user.lang,
-            "datetime": datetime,
-            "context_today": lambda: odoo.fields.Date.context_today(self._env.user),
-            "relativedelta": relativedelta,
-            "current_date": time.strftime("%Y-%m-%d"),
-            "allowed_company_ids": [self._env.user.company_id.id],
-            "context": {},
-        }
-        for f in fvg['tree'].xpath('.//field[count(ancestor::field) = %s]' % field_level):
-            fname = f.get('name')
-            order.append(fname)
-
-            node_modifiers = {}
-            for modifier, domain in json.loads(f.get('modifiers', '{}')).items():
-                if isinstance(domain, int):
-                    node_modifiers[modifier] = [TRUE_LEAF] if domain else [FALSE_LEAF]
-                elif isinstance(domain, str):
-                    node_modifiers[modifier] = normalize_domain(safe_eval(domain, eval_context))
-                else:
-                    node_modifiers[modifier] = normalize_domain(domain)
-
-            for a in f.xpath('ancestor::*[@modifiers][count(ancestor::field) = %s]' % field_level):
-                ancestor_modifiers = json.loads(a.get('modifiers'))
-                for modifier in inherited_modifiers:
-                    if modifier in ancestor_modifiers:
-                        domain = ancestor_modifiers[modifier]
-                        ancestor_domain = ([TRUE_LEAF] if domain else [FALSE_LEAF]) if isinstance(domain, int) else normalize_domain(domain)
-                        node_domain = node_modifiers.get(modifier, [])
-                        # Combine the field modifiers with his ancestor modifiers with an OR connector
-                        # e.g. A field is invisible if its own invisible modifier is True
-                        # OR if one of its ancestor invisible modifier is True
-                        node_modifiers[modifier] = expression.OR([ancestor_domain, node_domain])
-
-            if fname in modifiers:
-                # The field is multiple times in the view, combine the modifier domains with an AND connector
-                # e.g. a field is invisible if all occurences of the field are invisible in the view.
-                # e.g. a field is readonly if all occurences of the field are readonly in the view.
-                for modifier in set(node_modifiers.keys()).union(modifiers[fname].keys()):
-                    modifiers[fname][modifier] = expression.AND([
-                        modifiers[fname].get(modifier, [FALSE_LEAF]),
-                        node_modifiers.get(modifier, [FALSE_LEAF]),
-                    ])
-            else:
-                modifiers[fname] = node_modifiers
-
-            ctx = f.get('context')
-            if ctx:
-                contexts[fname] = ctx
-
-            descr = fvg['fields'].get(fname) or {'type': None}
-            # FIXME: better widgets support
-            # NOTE: selection breaks because of m2o widget=selection
-            if f.get('widget') in ['many2many']:
-                descr['type'] = f.get('widget')
-            if level and descr['type'] == 'one2many':
-                self._o2m_set_edition_view(descr, f, level)
-
-        fvg['onchange'] = model._onchange_spec({'arch': etree.tostring(fvg['tree'])})
-
-    def _init_from_defaults(self, model):
-        vals = self._values
-        vals.clear()
-        vals['id'] = False
-
-        # call onchange with an empty list of fields; this retrieves default
-        # values, applies onchanges and return the result
-        self._perform_onchange([])
-        # fill in whatever fields are still missing with falsy values
-        vals.update(
-            (f, _cleanup_from_default(descr['type'], False))
-            for f, descr in self._view['fields'].items()
-            if f not in vals
-        )
-        # mark all fields as modified (though maybe this should be done on
-        # save when creating for better reliability?)
-        self._changed.update(self._view['fields'])
-
-    def _init_from_values(self, values):
-        self._values.update(
-            record_to_values(self._view['fields'], values))
-
-    def __getattr__(self, field):
-        descr = self._view['fields'].get(field)
-        assert descr is not None, "%s was not found in the view" % field
-
-        v = self._values[field]
-        if descr['type'] == 'many2one':
-            Model = self._env[descr['relation']]
-            if not v:
-                return Model
-            return Model.browse(v)
-        elif descr['type'] == 'many2many':
-            return M2MProxy(self, field)
-        elif descr['type'] == 'one2many':
-            return O2MProxy(self, field)
-        return v
-
-    def _get_modifier(self, field, modifier, *, default=False, view=None, modmap=None, vals=None):
-        if view is None:
-            view = self._view
-
-        d = (modmap or view['modifiers'])[field].get(modifier, default)
-        if isinstance(d, bool):
-            return d
-
-        if vals is None:
-            vals = self._values
-        stack = []
-        for it in reversed(d):
-            if it == '!':
-                stack.append(not stack.pop())
-            elif it == '&':
-                e1 = stack.pop()
-                e2 = stack.pop()
-                stack.append(e1 and e2)
-            elif it == '|':
-                e1 = stack.pop()
-                e2 = stack.pop()
-                stack.append(e1 or e2)
-            elif isinstance(it, tuple):
-                if it == TRUE_LEAF:
-                    stack.append(True)
-                    continue
-                elif it == FALSE_LEAF:
-                    stack.append(False)
-                    continue
-                f, op, val = it
-                # hack-ish handling of parent.<field> modifiers
-                f, n = re.subn(r'^parent\.', '', f, 1)
-                if n:
-                    field_val = vals['•parent•'][f]
-                else:
-                    field_val = vals[f]
-                    # apparent artefact of JS data representation: m2m field
-                    # values are assimilated to lists of ids?
-                    # FIXME: SSF should do that internally, but the requirement
-                    #        of recursively post-processing to generate lists of
-                    #        commands on save (e.g. m2m inside an o2m) means the
-                    #        data model needs proper redesign
-                    # we're looking up the "current view" so bits might be
-                    # missing when processing o2ms in the parent (see
-                    # values_to_save:1450 or so)
-                    f_ = view['fields'].get(f, {'type': None})
-                    if f_['type'] == 'many2many':
-                        # field value should be [(6, _, ids)], we want just the ids
-                        field_val = field_val[0][2] if field_val else []
-
-                stack.append(self._OPS[op](field_val, val))
-            else:
-                raise ValueError("Unknown domain element %s" % [it])
-        [result] = stack
-        return result
-    _OPS = {
-        '=': operator.eq,
-        '==': operator.eq,
-        '!=': operator.ne,
-        '<': operator.lt,
-        '<=': operator.le,
-        '>=': operator.ge,
-        '>': operator.gt,
-        'in': lambda a, b: (a in b) if isinstance(b, (tuple, list)) else (b in a),
-        'not in': lambda a, b: (a not in b) if isinstance(b, (tuple, list)) else (b not in a),
-    }
-    def _get_context(self, field):
-        c = self._view['contexts'].get(field)
-        if not c:
-            return {}
-
-        # see _getEvalContext
-        # the context for a field's evals (of domain/context) is the composition of:
-        # * the parent's values
-        # * ??? element.context ???
-        # * the environment's context (?)
-        # * a few magic values
-        record_id = self._values.get('id') or False
-
-        ctx = dict(self._values_to_save(all_fields=True))
-        ctx.update(self._env.context)
-        ctx.update(
-            id=record_id,
-            active_id=record_id,
-            active_ids=[record_id] if record_id else [],
-            active_model=self._model._name,
-            current_date=date.today().strftime("%Y-%m-%d"),
-        )
-        return safe_eval(c, ctx, {'context': ctx})
-
-    def __setattr__(self, field, value):
-        descr = self._view['fields'].get(field)
-        assert descr is not None, "%s was not found in the view" % field
-        assert descr['type'] not in ('many2many', 'one2many'), \
-            "Can't set an o2m or m2m field, manipulate the corresponding proxies"
-
-        assert not self._get_modifier(field, 'readonly'), \
-            "can't write on readonly field {}".format(field)
-        assert not self._get_modifier(field, 'invisible'), \
-            "can't write on invisible field {}".format(field)
-
-        if descr['type'] == 'many2one':
-            assert isinstance(value, BaseModel) and value._name == descr['relation']
-            # store just the id: that's the output of default_get & (more
-            # or less) onchange.
-            value = value.id
-
-        self._values[field] = value
-        self._perform_onchange([field])
-
-    # enables with Form(...) as f: f.a = 1; f.b = 2; f.c = 3
-    # q: how to get recordset?
-    def __enter__(self):
-        return self
-    def __exit__(self, etype, _evalue, _etb):
-        if not etype:
-            self.save()
-
-    def save(self):
-        """ Saves the form, returns the created record if applicable
-
-        * does not save ``readonly`` fields
-        * does not save unmodified fields (during edition) — any assignment
-          or onchange return marks the field as modified, even if set to its
-          current value
-
-        :raises AssertionError: if the form has any unfilled required field
-        """
-        id_ = self._values.get('id')
-        values = self._values_to_save()
-        if id_:
-            r = self._model.browse(id_)
-            if values:
-                r.write(values)
-        else:
-            r = self._model.create(values)
-        self._values.update(
-            record_to_values(self._view['fields'], r)
-        )
-        self._changed.clear()
-        self._model.env.flush_all()
-        self._model.env.clear()  # discard cache and pending recomputations
-        return r
-
-    def _values_to_save(self, all_fields=False):
-        """ Validates values and returns only fields modified since
-        load/save
-
-        :param bool all_fields: if False (the default), checks for required
-                                fields and only save fields which are changed
-                                and not readonly
-        """
-        view = self._view
-        fields = self._view['fields']
-        record_values = self._values
-        changed = self._changed
-        return self._values_to_save_(
-            record_values, fields, view,
-            changed, all_fields
-        )
-
-    def _values_to_save_(
-            self, record_values, fields, view,
-            changed, all_fields=False, modifiers_values=None,
-            parent_link=None
-    ):
-        """ Validates & extracts values to save, recursively in order to handle
-         o2ms properly
-
-        :param dict record_values: values of the record to extract
-        :param dict fields: fields_get result
-        :param view: view tree
-        :param set changed: set of fields which have been modified (since last save)
-        :param bool all_fields:
-            whether to ignore normal filtering and just return everything
-        :param dict modifiers_values:
-            defaults to ``record_values``, but o2ms need some additional
-            massaging
-        """
-        values = {}
-        for f in fields:
-            if f == 'id':
-                continue
-
-            get_modifier = functools.partial(
-                self._get_modifier,
-                f, view=view,
-                vals=modifiers_values or record_values
-            )
-            descr = fields[f]
-            v = record_values[f]
-            # note: maybe `invisible` should not skip `required` if model attribute
-            if v is False and not (all_fields or f == parent_link or descr['type'] == 'boolean' or get_modifier('invisible') or get_modifier('column_invisible')):
-                if get_modifier('required'):
-                    raise AssertionError("{} is a required field ({})".format(f, view['modifiers'][f]))
-
-            # skip unmodified fields unless all_fields
-            if not (all_fields or f in changed):
-                continue
-
-            if get_modifier('readonly'):
-                node = _get_node(view, f)
-                if not (all_fields or node.get('force_save')):
-                    continue
-
-            if descr['type'] == 'one2many':
-                subview = descr['edition_view']
-                fields_ = subview['fields']
-                oldvals = v
-                v = []
-                for (c, rid, vs) in oldvals:
-                    if c == 1 and not vs:
-                        c, vs = 4, False
-                    elif c in (0, 1):
-                        vs = vs or {}
-
-                        missing = fields_.keys() - vs.keys()
-                        # FIXME: maybe do this during initial loading instead?
-                        if missing:
-                            Model = self._env[descr['relation']]
-                            if c == 0:
-                                vs.update(dict.fromkeys(missing, False))
-                                vs.update(
-                                    (k, _cleanup_from_default(fields_[k], v))
-                                    for k, v in Model.default_get(list(missing)).items()
-                                )
-                            else:
-                                vs.update(record_to_values(
-                                    {k: v for k, v in fields_.items() if k not in vs},
-                                    Model.browse(rid)
-                                ))
-                        vs = self._values_to_save_(
-                            vs, fields_, subview,
-                            vs._changed if isinstance(vs, UpdateDict) else vs.keys(),
-                            all_fields,
-                            modifiers_values={'id': False, **vs, '•parent•': record_values},
-                            # related o2m don't have a relation_field
-                            parent_link=descr.get('relation_field'),
-                        )
-                    v.append((c, rid, vs))
-
-            values[f] = v
-        return values
-
-    def _perform_onchange(self, fields, context=None):
-        assert isinstance(fields, list)
-        # marks any onchange source as changed
-        self._changed.update(fields)
-
-        # skip calling onchange() if there's no trigger on any of the changed
-        # fields
-        spec = self._view['onchange']
-        if fields and not any(spec[f] for f in fields):
-            return
-
-        record = self._model.browse(self._values.get('id'))
-        if context is not None:
-            record = record.with_context(**context)
-        result = record.onchange(self._onchange_values(), fields, spec)
-        self._model.env.flush_all()
-        self._model.env.clear()  # discard cache and pending recomputations
-        if result.get('warning'):
-            _logger.getChild('onchange').warning("%(title)s %(message)s" % result.get('warning'))
-        values = result.get('value', {})
-        # mark onchange output as changed
-        self._changed.update(values.keys() & self._view['fields'].keys())
-        self._values.update(
-            (k, self._cleanup_onchange(
-                self._view['fields'][k],
-                v, self._values.get(k),
-            ))
-            for k, v in values.items()
-            if k in self._view['fields']
-        )
-        return result
-
-    def _onchange_values(self):
-        return self._onchange_values_(self._view['fields'], self._values)
-
-    def _onchange_values_(self, fields, record):
-        """ Recursively cleanup o2m values for onchanges:
-
-        * if an o2m command is a 1 (UPDATE) and there is nothing to update, send
-          a 4 instead (LINK_TO) instead as that's what the webclient sends for
-          unmodified rows
-        * if an o2m command is a 1 (UPDATE) and only a subset of its fields have
-          been modified, only send the modified ones
-
-        This needs to be recursive as there are people who put invisible o2ms
-        inside their o2ms.
-        """
-        values = {}
-        for k, v in record.items():
-            if fields[k]['type'] == 'one2many':
-                subfields = fields[k]['edition_view']['fields']
-                it = values[k] = []
-                for (c, rid, vs) in v:
-                    if c == 1 and isinstance(vs, UpdateDict):
-                        vs = dict(vs.changed_items())
-
-                    if c == 1 and not vs:
-                        it.append((4, rid, False))
-                    elif c in (0, 1):
-                        it.append((c, rid, self._onchange_values_(subfields, vs)))
-                    else:
-                        it.append((c, rid, vs))
-            else:
-                values[k] = v
-        return values
-
-    def _cleanup_onchange(self, descr, value, current):
-        if descr['type'] == 'many2one':
-            if not value:
-                return False
-            # out of onchange, m2o are name-gotten
-            return value[0]
-        elif descr['type'] == 'one2many':
-            # ignore o2ms nested in o2ms
-            if not descr['edition_view']:
-                return []
-
-            if current is None:
-                current = []
-            v = []
-            c = {t[1] for t in current if t[0] in (1, 2)}
-            current_values = {c[1]: c[2] for c in current if c[0] == 1}
-            # which view should this be???
-            subfields = descr['edition_view']['fields']
-            # TODO: simplistic, unlikely to work if e.g. there's a 5 inbetween other commands
-            for command in value:
-                if command[0] == 0:
-                    v.append((0, 0, {
-                        k: self._cleanup_onchange(subfields[k], v, None)
-                        for k, v in command[2].items()
-                        if k in subfields
-                    }))
-                elif command[0] == 1:
-                    record_id = command[1]
-                    c.discard(record_id)
-                    stored = current_values.get(record_id)
-                    if stored is None:
-                        record = self._env[descr['relation']].browse(record_id)
-                        stored = UpdateDict(record_to_values(subfields, record))
-
-                    updates = (
-                        (k, self._cleanup_onchange(subfields[k], v, stored.get(k)))
-                        for k, v in command[2].items()
-                        if k in subfields
-                    )
-                    for field, value in updates:
-                        # if there are values from the onchange which differ
-                        # from current values, update & mark field as changed
-                        if stored.get(field, value) != value:
-                            stored._changed.add(field)
-                            stored[field] = value
-
-                    v.append((1, record_id, stored))
-                elif command[0] == 2:
-                    c.discard(command[1])
-                    v.append((2, command[1], False))
-                elif command[0] == 4:
-                    c.discard(command[1])
-                    v.append((1, command[1], None))
-                elif command[0] == 5:
-                    v = []
-            # explicitly mark all non-relinked (or modified) records as deleted
-            for id_ in c: v.append((2, id_, False))
-            return v
-        elif descr['type'] == 'many2many':
-            # onchange result is a bunch of commands, normalize to single 6
-            if current is None:
-                ids = []
-            else:
-                ids = list(current[0][2])
-            for command in value:
-                if command[0] == 1:
-                    ids.append(command[1])
-                elif command[0] == 3:
-                    ids.remove(command[1])
-                elif command[0] == 4:
-                    ids.append(command[1])
-                elif command[0] == 5:
-                    del ids[:]
-                elif command[0] == 6:
-                    ids[:] = command[2]
-                else:
-                    raise ValueError(
-                        "Unsupported M2M command %d" % command[0])
-            return [(6, False, ids)]
-
-        return value
-
-class O2MForm(Form):
-    # noinspection PyMissingConstructor
-    def __init__(self, proxy, index=None):
-        m = proxy._model
-        object.__setattr__(self, '_proxy', proxy)
-        object.__setattr__(self, '_index', index)
-
-        object.__setattr__(self, '_env', m.env)
-        object.__setattr__(self, '_model', m)
-
-        # copy so we don't risk breaking it too much (?)
-        fvg = dict(proxy._descr['edition_view'])
-        object.__setattr__(self, '_view', fvg)
-        self._process_fvg(m, fvg)
-
-        vals = dict.fromkeys(fvg['fields'], False)
-        object.__setattr__(self, '_values', vals)
-        object.__setattr__(self, '_changed', set())
-        if index is None:
-            self._init_from_defaults(m)
-        else:
-            vals = proxy._records[index]
-            self._values.update(vals)
-            if hasattr(vals, '_changed'):
-                self._changed.update(vals._changed)
-
-    def _get_modifier(self, field, modifier, *, default=False, view=None, modmap=None, vals=None):
-        if vals is None:
-            vals = {**self._values, '•parent•': self._proxy._parent._values}
-
-        return super()._get_modifier(field, modifier, default=default, view=view, modmap=modmap, vals=vals)
-
-    def _onchange_values(self):
-        values = super(O2MForm, self)._onchange_values()
-        # computed o2m may not have a relation_field(?)
-        descr = self._proxy._descr
-        if 'relation_field' in descr: # note: should be fine because not recursive
-            values[descr['relation_field']] = self._proxy._parent._onchange_values()
-        return values
-
-    def save(self):
-        proxy = self._proxy
-        commands = proxy._parent._values[proxy._field]
-        values = self._values_to_save()
-        if self._index is None:
-            commands.append((0, 0, values))
-        else:
-            index = proxy._command_index(self._index)
-            (c, id_, vs) = commands[index]
-            if c == 0:
-                vs.update(values)
-            elif c == 1:
-                if vs is None:
-                    vs = UpdateDict()
-                assert isinstance(vs, UpdateDict), type(vs)
-                vs.update(values)
-                commands[index] = (1, id_, vs)
-            else:
-                raise AssertionError("Expected command type 0 or 1, found %s" % c)
-
-        # FIXME: should be called when performing on change => value needs to be serialised into parent every time?
-        proxy._parent._perform_onchange([proxy._field], self._env.context)
-
-    def _values_to_save(self, all_fields=False):
-        """ Validates values and returns only fields modified since
-        load/save
-        """
-        values = UpdateDict(self._values)
-        values._changed.update(self._changed)
-        if all_fields:
-            return values
-
-        for f in self._view['fields']:
-            if self._get_modifier(f, 'required') and not (self._get_modifier(f, 'column_invisible') or self._get_modifier(f, 'invisible')):
-                assert self._values[f] is not False, "{} is a required field".format(f)
-
-        return values
-
-class UpdateDict(dict):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._changed = set()
-        if args and isinstance(args[0], UpdateDict):
-            self._changed.update(args[0]._changed)
-
-    def changed_items(self):
-        return (
-            (k, v) for k, v in self.items()
-            if k in self._changed
-        )
-
-    def update(self, *args, **kw):
-        super().update(*args, **kw)
-        if args and isinstance(args[0], UpdateDict):
-            self._changed.update(args[0]._changed)
-
-class X2MProxy(object):
-    _parent = None
-    _field = None
-    def _assert_editable(self):
-        assert not self._parent._get_modifier(self._field, 'readonly'),\
-            'field %s is not editable' % self._field
-        assert not self._parent._get_modifier(self._field, 'invisible'),\
-            'field %s is not visible' % self._field
-
-class O2MProxy(X2MProxy):
-    """ O2MProxy()
-    """
-    def __init__(self, parent, field):
-        self._parent = parent
-        self._field = field
-        # reify records to a list so they can be manipulated easily?
-        self._records = []
-        model = self._model
-        fields = self._descr['edition_view']['fields']
-        for (command, rid, values) in self._parent._values[self._field]:
-            if command == 0:
-                self._records.append(values)
-            elif command == 1:
-                if values is None:
-                    # read based on view info
-                    r = model.browse(rid)
-                    values = UpdateDict(record_to_values(fields, r))
-                self._records.append(values)
-            elif command == 2:
-                pass
-            else:
-                raise AssertionError("O2M proxy only supports commands 0, 1 and 2, found %s" % command)
-
-    def __len__(self):
-        return len(self._records)
-
-    @property
-    def _model(self):
-        model = self._parent._env[self._descr['relation']]
-        ctx = self._parent._get_context(self._field)
-        if ctx:
-            model = model.with_context(**ctx)
-        return model
-
-    @property
-    def _descr(self):
-        return self._parent._view['fields'][self._field]
-
-    def _command_index(self, for_record):
-        """ Takes a record index and finds the corresponding record index
-        (skips all 2s, basically)
-
-        :param int for_record:
-        """
-        commands = self._parent._values[self._field]
-        return next(
-            cidx
-            for ridx, cidx in enumerate(
-                cidx for cidx, (c, _1, _2) in enumerate(commands)
-                if c in (0, 1)
-            )
-            if ridx == for_record
-        )
-
-    def new(self):
-        """ Returns a :class:`Form` for a new
-        :class:`~odoo.fields.One2many` record, properly initialised.
-
-        The form is created from the list view if editable, or the field's
-        form view otherwise.
-
-        :raises AssertionError: if the field is not editable
-        """
-        self._assert_editable()
-        return O2MForm(self)
-
-    def edit(self, index):
-        """ Returns a :class:`Form` to edit the pre-existing
-        :class:`~odoo.fields.One2many` record.
-
-        The form is created from the list view if editable, or the field's
-        form view otherwise.
-
-        :raises AssertionError: if the field is not editable
-        """
-        self._assert_editable()
-        return O2MForm(self, index)
-
-    def remove(self, index):
-        """ Removes the record at ``index`` from the parent form.
-
-        :raises AssertionError: if the field is not editable
-        """
-        self._assert_editable()
-        # remove reified record from local list & either remove 0 from
-        # commands list or replace 1 (update) by 2 (remove)
-        cidx = self._command_index(index)
-        commands = self._parent._values[self._field]
-        (command, rid, _) = commands[cidx]
-        if command == 0:
-            # record not saved yet -> just remove the command
-            del commands[cidx]
-        elif command == 1:
-            # record already saved, replace by 2
-            commands[cidx] = (2, rid, 0)
-        else:
-            raise AssertionError("Expected command 0 or 1, got %s" % commands[cidx])
-        # remove reified record
-        del self._records[index]
-        self._parent._perform_onchange([self._field])
-
-class M2MProxy(X2MProxy, collections.abc.Sequence):
-    """ M2MProxy()
-
-    Behaves as a :class:`~collection.Sequence` of recordsets, can be
-    indexed or sliced to get actual underlying recordsets.
-    """
-    def __init__(self, parent, field):
-        self._parent = parent
-        self._field = field
-
-    def __getitem__(self, it):
-        p = self._parent
-        model = p._view['fields'][self._field]['relation']
-        return p._env[model].browse(self._get_ids()[it])
-
-    def __len__(self):
-        return len(self._get_ids())
-
-    def __iter__(self):
-        return iter(self[:])
-
-    def __contains__(self, record):
-        relation_ = self._parent._view['fields'][self._field]['relation']
-        assert isinstance(record, BaseModel)\
-           and record._name == relation_
-
-        return record.id in self._get_ids()
-
-
-    def add(self, record):
-        """ Adds ``record`` to the field, the record must already exist.
-
-        The addition will only be finalized when the parent record is saved.
-        """
-        self._assert_editable()
-        parent = self._parent
-        relation_ = parent._view['fields'][self._field]['relation']
-        assert isinstance(record, BaseModel) and record._name == relation_,\
-            "trying to assign a '{}' object to a '{}' field".format(
-                record._name,
-                relation_,
-            )
-        self._get_ids().append(record.id)
-
-        parent._perform_onchange([self._field])
-
-    def _get_ids(self):
-        return self._parent._values[self._field][0][2]
-
-    def remove(self, id=None, index=None):
-        """ Removes a record at a certain index or with a provided id from
-        the field.
-        """
-
-        self._assert_editable()
-        assert (id is None) ^ (index is None), \
-            "can remove by either id or index"
-
-        if id is None:
-            # remove by index
-            del self._get_ids()[index]
-        else:
-            self._get_ids().remove(id)
-
-        self._parent._perform_onchange([self._field])
-
-    def clear(self):
-        """ Removes all existing records in the m2m
-        """
-        self._assert_editable()
-        self._get_ids()[:] = []
-        self._parent._perform_onchange([self._field])
-
-def record_to_values(fields, record):
-    r = {}
-    # don't read the id explicitly, not sure why but if any of the "magic" hr
-    # field is read alongside `id` then it blows up e.g.
-    # james.read(['barcode']) works fine but james.read(['id', 'barcode'])
-    # triggers an ACL error on barcode, likewise km_home_work or
-    # emergency_contact or whatever. Since we always get the id anyway, just
-    # remove it from the fields to read
-    to_read = list(fields.keys() - {'id'})
-    if not to_read:
-        return r
-    for f, v in record.read(to_read)[0].items():
-        descr = fields[f]
-        if descr['type'] == 'many2one':
-            v = v and v[0]
-        elif descr['type'] == 'many2many':
-            v = [(6, 0, v or [])]
-        elif descr['type'] == 'one2many':
-            v = [(1, r, None) for r in v or []]
-        elif descr['type'] == 'datetime' and isinstance(v, datetime):
-            v = odoo.fields.Datetime.to_string(v)
-        elif descr['type'] == 'date' and isinstance(v, date):
-            v = odoo.fields.Date.to_string(v)
-        r[f] = v
-    return r
-
-def _cleanup_from_default(type_, value):
-    if not value:
-        if type_ == 'many2many':
-            return [(6, False, [])]
-        elif type_ == 'one2many':
-            return []
-        elif type_ in ('integer', 'float'):
-            return 0
-        return value
-
-    if type_ == 'one2many':
-        return [c for c in value if c[0] != 6]
-    elif type_ == 'datetime' and isinstance(value, datetime):
-        return odoo.fields.Datetime.to_string(value)
-    elif type_ == 'date' and isinstance(value, date):
-        return odoo.fields.Date.to_string(value)
-    return value
-
-def _get_node(view, f, *arg):
-    """ Find etree node for the field ``f`` in the view's arch
-    """
-    return next((
-        n for n in view['tree'].iter('field')
-        if n.get('name') == f
-    ), *arg)
 
 def tagged(*tags):
     """A decorator to tag BaseCase objects.

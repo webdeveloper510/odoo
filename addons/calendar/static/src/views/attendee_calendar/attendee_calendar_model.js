@@ -1,13 +1,19 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { CalendarModel } from "@web/views/calendar/calendar_model";
 import { askRecurrenceUpdatePolicy } from "@calendar/views/ask_recurrence_update_policy_hook";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { onWillStart } from "@odoo/owl";
 
 export class AttendeeCalendarModel extends CalendarModel {
-    setup(params, { dialog }) {
+    setup(params, { dialog, rpc }) {
         super.setup(...arguments);
         this.dialog = dialog;
+        this.rpc = rpc;
+        onWillStart(async () => {
+            this.credentialStatus = await this.rpc("/calendar/check_credentials");
+        });
     }
 
     get attendees() {
@@ -145,7 +151,7 @@ export class AttendeeCalendarModel extends CalendarModel {
         } else {
             const confirm = await new Promise((resolve) => {
                 this.dialog.add(ConfirmationDialog, {
-                    body: this.env._t("Are you sure you want to delete this record ?"),
+                    body: _t("Are you sure you want to delete this record?"),
                     confirm: resolve.bind(null, true),
                 }, {
                     onClose: resolve.bind(null, false),

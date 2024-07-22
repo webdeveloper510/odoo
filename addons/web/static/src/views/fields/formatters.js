@@ -4,12 +4,16 @@ import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 import { localization as l10n } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { escape, nbsp, sprintf } from "@web/core/utils/strings";
+import { escape } from "@web/core/utils/strings";
 import { isBinarySize } from "@web/core/utils/binary";
-import { session } from "@web/session";
-import { humanNumber, insertThousandsSep } from "@web/core/utils/numbers";
+import {
+    formatFloat as formatFloatNumber,
+    humanNumber,
+    insertThousandsSep,
+} from "@web/core/utils/numbers";
 
 import { markup } from "@odoo/owl";
+import { formatCurrency } from "@web/core/currency";
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -60,10 +64,7 @@ export function formatBoolean(value) {
 }
 
 /**
- * Returns a string representing a char.  If the value is false, then we return
- * an empty string.
- *
- * @param {string|false} value
+ * @param {string} value
  * @param {Object} [options] additional options
  * @param {boolean} [options.escape=false] if true, escapes the formatted value
  * @param {boolean} [options.isPassword=false] if true, returns '********'
@@ -71,7 +72,6 @@ export function formatBoolean(value) {
  * @returns {string}
  */
 export function formatChar(value, options) {
-    value = typeof value === "string" ? value : "";
     if (options && options.isPassword) {
         return "*".repeat(value ? value.length : 0);
     }
@@ -95,7 +95,8 @@ export function formatChar(value, options) {
  * @param {string} [options.thousandsSep] thousands separator to insert
  * @param {number[]} [options.grouping] array of relative offsets at which to
  *   insert `thousandsSep`. See `insertThousandsSep` method.
- * @param {boolean} [options.noTrailingZeros=false] if true, the decimal part
+ * @param {number} [options.decimals] used for humanNumber formmatter
+ * @param {boolean} [options.trailingZeros=true] if false, the decimal part
  *   won't contain unnecessary trailing zeros.
  * @returns {string}
  */
@@ -103,24 +104,7 @@ export function formatFloat(value, options = {}) {
     if (value === false) {
         return "";
     }
-    if (options.humanReadable) {
-        return humanNumber(value, options);
-    }
-    const grouping = options.grouping || l10n.grouping;
-    const thousandsSep = "thousandsSep" in options ? options.thousandsSep : l10n.thousandsSep;
-    const decimalPoint = "decimalPoint" in options ? options.decimalPoint : l10n.decimalPoint;
-    let precision;
-    if (options.digits && options.digits[1] !== undefined) {
-        precision = options.digits[1];
-    } else {
-        precision = 2;
-    }
-    const formatted = (value || 0).toFixed(precision).split(".");
-    formatted[0] = insertThousandsSep(formatted[0], thousandsSep, grouping);
-    if (options.noTrailingZeros) {
-        formatted[1] = formatted[1].replace(/0+$/, "");
-    }
-    return formatted[1] ? formatted.join(decimalPoint) : formatted[0];
+    return formatFloatNumber(value, options);
 }
 
 /**
@@ -137,7 +121,7 @@ export function formatFloatFactor(value, options = {}) {
         return "";
     }
     const factor = options.factor || 1;
-    return formatFloat(value * factor, options);
+    return formatFloatNumber(value * factor, options);
 }
 
 /**
@@ -194,6 +178,7 @@ export function formatFloatTime(value, options = {}) {
  * @param {boolean} [options.isPassword=false] if returns true, acts like
  * @param {string} [options.thousandsSep] thousands separator to insert
  * @param {number[]} [options.grouping] array of relative offsets at which to
+ * @param {number} [options.decimals] used for humanNumber formmatter
  *   insert `thousandsSep`. See `insertThousandsSep` method.
  * @returns {string}
  */
@@ -226,8 +211,10 @@ export function formatInteger(value, options = {}) {
 export function formatMany2one(value, options) {
     if (!value) {
         value = "";
+    } else if (value[1]) {
+        value = value[1];
     } else {
-        value = value[1] || "";
+        value = _t("Unnamed");
     }
     if (options && options.escape) {
         value = encodeURIComponent(value);
@@ -250,7 +237,7 @@ export function formatX2many(value) {
     } else if (count === 1) {
         return _t("1 record");
     } else {
-        return sprintf(_t("%s records"), count);
+        return _t("%s records", count);
     }
 }
 
@@ -293,24 +280,7 @@ export function formatMonetary(value, options = {}) {
         const dataValue = options.data[currencyField];
         currencyId = Array.isArray(dataValue) ? dataValue[0] : dataValue;
     }
-    const currency = session.currencies[currencyId];
-    const digits = options.digits || (currency && currency.digits);
-
-    let formattedValue;
-    if (options.humanReadable) {
-        formattedValue = humanNumber(value, { decimals: digits ? digits[1] : 2 });
-    } else {
-        formattedValue = formatFloat(value, { digits });
-    }
-
-    if (!currency || options.noSymbol) {
-        return formattedValue;
-    }
-    const formatted = [currency.symbol, formattedValue];
-    if (currency.position === "after") {
-        formatted.reverse();
-    }
-    return formatted.join(nbsp);
+    return formatCurrency(value, currencyId, options)
 }
 
 /**
@@ -324,8 +294,8 @@ export function formatMonetary(value, options = {}) {
  */
 export function formatPercentage(value, options = {}) {
     value = value || 0;
-    options = Object.assign({ noTrailingZeros: true, thousandsSep: "" }, options);
-    const formatted = formatFloat(value * 100, options);
+    options = Object.assign({ trailingZeros: false, thousandsSep: "" }, options);
+    const formatted = formatFloatNumber(value * 100, options);
     return `${formatted}${options.noSymbol ? "" : "%"}`;
 }
 
@@ -376,7 +346,18 @@ export function formatSelection(value, options = {}) {
  * @returns {string}
  */
 export function formatText(value) {
-    return value || "";
+    return value ? value.toString() : "";
+}
+
+/**
+ * Returns the value.
+ * Note that, this function is added to be coherent with the rest of the formatters.
+ *
+ * @param {html} value
+ * @returns {html}
+ */
+export function formatHtml(value) {
+    return value;
 }
 
 export function formatJson(value) {
@@ -393,7 +374,7 @@ registry
     .add("float", formatFloat)
     .add("float_factor", formatFloatFactor)
     .add("float_time", formatFloatTime)
-    .add("html", (value) => value)
+    .add("html", formatHtml)
     .add("integer", formatInteger)
     .add("json", formatJson)
     .add("many2one", formatMany2one)

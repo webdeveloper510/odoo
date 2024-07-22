@@ -1,13 +1,14 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import { Spreadsheet } from "@odoo/o-spreadsheet";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
-import { getFixture } from "@web/../tests/helpers/utils";
-import { loadJS, templates } from "@web/core/assets";
+import { makeTestEnv } from "@web/../tests/helpers/mock_env";
+import { getFixture, nextTick } from "@web/../tests/helpers/utils";
+import { loadBundle, templates } from "@web/core/assets";
+import { PublicReadonlySpreadsheet } from "@spreadsheet/public_readonly_app/public_readonly";
 
-const { App } = owl;
-const { Spreadsheet } = spreadsheet;
-const { getMenuChildren } = spreadsheet.helpers;
+import { App } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 
 /** @typedef {import("@spreadsheet/o_spreadsheet/o_spreadsheet").Model} Model */
 
@@ -17,11 +18,43 @@ const { getMenuChildren } = spreadsheet.helpers;
  * @returns {Promise<HTMLElement>}
  */
 export async function mountSpreadsheet(model) {
-    await loadJS("/web/static/lib/Chart/Chart.js");
+    await loadBundle("web.chartjs_lib");
     const app = new App(Spreadsheet, {
         props: { model },
         templates: templates,
-        env: model.config.evalContext.env,
+        env: model.config.custom.env,
+        test: true,
+    });
+    registerCleanup(() => app.destroy());
+    const fixture = getFixture();
+    await app.mount(fixture);
+    return fixture;
+}
+
+/**
+ * Mount public spreadsheet component with the given data
+ * @param {Model} model
+ * @returns {Promise<HTMLElement>}
+ */
+export async function mountPublicSpreadsheet(data, dataUrl, mode) {
+    const serviceRegistry = registry.category("services");
+    const fakeHTTPService = {
+        start() {
+            return {
+                get: (route, params) => {
+                    if (route === dataUrl) {
+                        return data;
+                    }
+                },
+            };
+        },
+    };
+    serviceRegistry.add("http", fakeHTTPService);
+    const env = await makeTestEnv();
+    const app = new App(PublicReadonlySpreadsheet, {
+        props: { dataUrl, downloadExcelUrl: "downloadUrl", mode },
+        templates,
+        env,
         test: true,
     });
     registerCleanup(() => app.destroy());
@@ -31,14 +64,28 @@ export async function mountSpreadsheet(model) {
 }
 
 export async function doMenuAction(registry, path, env) {
-    const root = path[0];
-    let node = registry.get(root);
-    for (const p of path.slice(1)) {
-        const children = getMenuChildren(node, env);
-        node = children.find((child) => child.id === p);
+    await getActionMenu(registry, path, env).execute(env);
+}
+
+export function getActionMenu(registry, _path, env) {
+    const path = [..._path];
+    let items = registry.getMenuItems();
+    while (items.length && path.length) {
+        const id = path.shift();
+        const item = items.find((item) => item.id === id);
+        if (!item) {
+            throw new Error(`Menu item ${id} not found`);
+        }
+        if (path.length === 0) {
+            return item;
+        }
+        items = item.children(env);
     }
-    if (!node) {
-        throw new Error(`Cannot find menu with path "${path.join("/")}"`);
-    }
-    await node.action(env);
+    throw new Error(`Menu item not found`);
+}
+
+export async function keyDown(eventArgs) {
+    const ev = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...eventArgs });
+    document.activeElement.dispatchEvent(ev);
+    return await nextTick();
 }

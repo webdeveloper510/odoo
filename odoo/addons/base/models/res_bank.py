@@ -30,22 +30,21 @@ class Bank(models.Model):
     active = fields.Boolean(default=True)
     bic = fields.Char('Bank Identifier Code', index=True, help="Sometimes called BIC or Swift.")
 
-    def name_get(self):
-        result = []
+    @api.depends('bic')
+    def _compute_display_name(self):
         for bank in self:
-            name = bank.name + (bank.bic and (' - ' + bank.bic) or '')
-            result.append((bank.id, name))
-        return result
+            name = (bank.name or '') + (bank.bic and (' - ' + bank.bic) or '')
+            bank.display_name = name
 
     @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        domain = []
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
         if name:
-            domain = ['|', ('bic', '=ilike', name + '%'), ('name', operator, name)]
+            name_domain = ['|', ('bic', '=ilike', name + '%'), ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
-                domain = ['&'] + domain
-        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+                name_domain = ['&', '!'] + name_domain[1:]
+            domain = domain + name_domain
+        return self._search(domain, limit=limit, order=order)
 
     @api.onchange('country')
     def _onchange_country_id(self):
@@ -76,7 +75,7 @@ class ResPartnerBank(models.Model):
     acc_type = fields.Selection(selection=lambda x: x.env['res.partner.bank'].get_supported_account_types(), compute='_compute_acc_type', string='Type', help='Bank account type: Normal or IBAN. Inferred from the bank account number.')
     acc_number = fields.Char('Account Number', required=True)
     sanitized_acc_number = fields.Char(compute='_compute_sanitized_acc_number', string='Sanitized Account Number', readonly=True, store=True)
-    acc_holder_name = fields.Char(string='Account Holder Name', help="Account holder name, in case it is different than the name of the Account Holder")
+    acc_holder_name = fields.Char(string='Account Holder Name', help="Account holder name, in case it is different than the name of the Account Holder", compute='_compute_account_holder_name', readonly=False, store=True)
     partner_id = fields.Many2one('res.partner', 'Account Holder', ondelete='cascade', index=True, domain=['|', ('is_company', '=', True), ('parent_id', '=', False)], required=True)
     allow_out_payment = fields.Boolean('Send Money', help='This account can be used for outgoing payments', default=False, copy=False, readonly=False)
     bank_id = fields.Many2one('res.bank', string='Bank')
@@ -102,30 +101,33 @@ class ResPartnerBank(models.Model):
         for bank in self:
             bank.acc_type = self.retrieve_acc_type(bank.acc_number)
 
+    @api.depends('partner_id')
+    def _compute_account_holder_name(self):
+        for bank in self:
+            bank.acc_holder_name = bank.partner_id.name
+
     @api.model
     def retrieve_acc_type(self, acc_number):
         """ To be overridden by subclasses in order to support other account_types.
         """
         return 'bank'
-    
-    def name_get(self):
-        return [(acc.id, '{} - {}'.format(acc.acc_number, acc.bank_id.name) if acc.bank_id else acc.acc_number)
-                for acc in self]
+
+    @api.depends('acc_number', 'bank_id')
+    def _compute_display_name(self):
+        for acc in self:
+            acc.display_name = f'{acc.acc_number} - {acc.bank_id.name}' if acc.bank_id else acc.acc_number
 
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        pos = 0
-        while pos < len(args):
-            # DLE P14
-            if args[pos][0] == 'acc_number':
-                op = args[pos][1]
-                value = args[pos][2]
+    def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
+        def sanitize(arg):
+            if isinstance(arg, (tuple, list)) and arg[0] == 'acc_number':
+                value = arg[2]
                 if not isinstance(value, str) and isinstance(value, Iterable):
                     value = [sanitize_account_number(i) for i in value]
                 else:
                     value = sanitize_account_number(value)
-                if 'like' in op:
-                    value = '%' + value + '%'
-                args[pos] = ('sanitized_acc_number', op, value)
-            pos += 1
-        return super(ResPartnerBank, self)._search(args, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
+                return ('sanitized_acc_number', arg[1], value)
+            return arg
+
+        domain = [sanitize(item) for item in domain]
+        return super()._search(domain, offset, limit, order, access_rights_uid)

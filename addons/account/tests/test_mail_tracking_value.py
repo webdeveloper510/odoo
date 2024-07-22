@@ -4,13 +4,13 @@
 
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.test_mail.tests.common import TestMailCommon
+from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests import Form
 from odoo.tests.common import tagged
 
 
 @tagged('post_install', '-at_install')
-class TestTracking(AccountTestInvoicingCommon, TestMailCommon):
+class TestTracking(AccountTestInvoicingCommon, MailCommon):
 
     def test_aml_change_tracking(self):
         """ tests that the field_groups is correctly set """

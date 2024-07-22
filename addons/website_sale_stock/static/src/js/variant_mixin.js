@@ -1,14 +1,13 @@
-odoo.define('website_sale_stock.VariantMixin', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const {Markup} = require('web.utils');
-const field_utils = require('web.field_utils');
-var VariantMixin = require('sale.VariantMixin');
-var publicWidget = require('web.public.widget');
-var core = require('web.core');
-var QWeb = core.qweb;
+import VariantMixin from "@website_sale/js/sale_variant_mixin";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { renderToFragment } from "@web/core/utils/render";
+import { formatFloat } from "@web/core/utils/numbers";
 
-require('website_sale.website_sale');
+import "@website_sale/js/website_sale";
+
+import { markup } from "@odoo/owl";
 
 /**
  * Addition to the variant_mixin._onChangeCombination
@@ -72,7 +71,7 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
                 0,
                 Math.ceil(-Math.log10(combination.uom_rounding))
             );
-            return field_utils.format.float(qty, {digits: [false, decimals]});
+            return formatFloat(qty, {digits: [false, decimals]});
         }
     }
 
@@ -80,12 +79,11 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
         .find('.availability_message_' + combination.product_template)
         .remove();
     combination.has_out_of_stock_message = $(combination.out_of_stock_message).text() !== '';
-    combination.out_of_stock_message = Markup(combination.out_of_stock_message);
-    const $message = $(QWeb.render(
+    combination.out_of_stock_message = markup(combination.out_of_stock_message);
+    $('div.availability_messages').append(renderToFragment(
         'website_sale_stock.product_availability',
         combination
     ));
-    $('div.availability_messages').html($message);
 };
 
 publicWidget.registry.WebsiteSale.include({
@@ -110,6 +108,4 @@ publicWidget.registry.WebsiteSale.include({
     }
 });
 
-return VariantMixin;
-
-});
+export default VariantMixin;

@@ -6,7 +6,7 @@ from datetime import datetime
 from base64 import b64encode, b64decode
 from odoo import models, fields, service, _, api
 from odoo.exceptions import UserError
-from odoo.modules.module import get_module_resource
+from odoo.tools.misc import file_open
 from requests.exceptions import HTTPError, RequestException
 from cryptography import x509
 from cryptography.x509 import ObjectIdentifier, load_der_x509_certificate
@@ -243,7 +243,7 @@ class AccountJournal(models.Model):
         """
         CCSID_data = self._l10n_sa_api_get_compliance_CSID(otp)
         if CCSID_data.get('error'):
-            raise UserError(_("Could not obtain Compliance CSID: %s") % CCSID_data['error'])
+            raise UserError(_("Could not obtain Compliance CSID: %s", CCSID_data['error']))
         self.sudo().write({
             'l10n_sa_compliance_csid_json': json.dumps(CCSID_data),
             'l10n_sa_production_csid_json': False,
@@ -275,7 +275,7 @@ class AccountJournal(models.Model):
         CCSID_data = json.loads(self_sudo.l10n_sa_compliance_csid_json)
         PCSID_data = self_sudo._l10n_sa_request_production_csid(CCSID_data, renew, OTP)
         if PCSID_data.get('error'):
-            raise UserError(_("Could not obtain Production CSID: %s") % PCSID_data['error'])
+            raise UserError(_("Could not obtain Production CSID: %s", PCSID_data['error']))
         self_sudo.l10n_sa_production_csid_json = json.dumps(PCSID_data)
 
     # ====== Compliance Checks =======
@@ -289,8 +289,8 @@ class AccountJournal(models.Model):
             'simplified/invoice.xml', 'simplified/credit.xml', 'simplified/debit.xml',
         ], {}
         for file in file_names:
-            fpath = get_module_resource('l10n_sa_edi', 'tests/compliance', file)
-            with open(fpath, 'rb') as ip:
+            fpath = f'l10n_sa_edi/tests/compliance/{file}'
+            with file_open(fpath, 'rb', filter_ext=('.xml',)) as ip:
                 compliance_files[file] = ip.read().decode()
         return compliance_files
 
@@ -325,10 +325,10 @@ class AccountJournal(models.Model):
             if result.get('error'):
                 raise UserError(Markup("<p class='mb-0'>%s <b>%s</b></p>") % (_("Could not complete Compliance Checks for the following file:"), fname))
             if result['validationResults']['status'] == 'WARNING':
-                warnings = "".join(Markup("<li><b>%s</b>: %s </li>") % (e['code'], e['message']) for e in result['validationResults']['warningMessages'])
+                warnings = Markup().join(Markup("<li><b>%(code)s</b>: %(message)s </li>") % e for e in result['validationResults']['warningMessages'])
                 self.l10n_sa_csr_errors = Markup("<br/><br/><ul class='pl-3'><b>%s</b>%s</ul>") % (_("Warnings:"), warnings)
             elif result['validationResults']['status'] != 'PASS':
-                errors = "".join(Markup("<li><b>%s</b>: %s </li>") % (e['code'], e['message']) for e in result['validationResults']['errorMessages'])
+                errors = Markup().join(Markup("<li><b>%(code)s</b>: %(message)s </li>") % e for e in result['validationResults']['errorMessages'])
                 raise UserError(Markup("<p class='mb-0'>%s <b>%s</b> %s</p>")
                                 % (_("Could not complete Compliance Checks for the following file:"), fname, Markup("<br/><br/><ul class='pl-3'><b>%s</b>%s</ul>") % (_("Errors:"), errors)))
         self.l10n_sa_compliance_checks_passed = True

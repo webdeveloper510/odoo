@@ -1,24 +1,20 @@
 /** @odoo-module */
 
-import {
-    addFieldDependencies,
-    archParseBoolean,
-    getActiveActions,
-    getDecoration,
-    processButton,
-    stringToOrderBy,
-} from "@web/views/utils";
 import { Field } from "@web/views/fields/field";
-import { XMLParser } from "@web/core/utils/xml";
-import { Widget } from "@web/views/widgets/widget";
+import { visitXML } from "@web/core/utils/xml";
+import { stringToOrderBy } from "@web/search/utils/order_by";
+import { archParseBoolean, getActiveActions, getDecoration, processButton } from "@web/views/utils";
 import { encodeObjectForTemplate } from "@web/views/view_compiler";
+import { combineModifiers } from "@web/model/relational_model/utils";
+import { Widget } from "@web/views/widgets/widget";
 
-export class GroupListArchParser extends XMLParser {
+export class GroupListArchParser {
     parse(arch, models, modelName, jsClass) {
         const fieldNodes = {};
+        const fieldNextIds = {};
         const buttons = [];
         let buttonId = 0;
-        this.visitXML(arch, (node) => {
+        visitXML(arch, (node) => {
             if (node.tagName === "button") {
                 buttons.push({
                     ...processButton(node),
@@ -27,8 +23,12 @@ export class GroupListArchParser extends XMLParser {
                 return false;
             } else if (node.tagName === "field") {
                 const fieldInfo = Field.parseFieldNode(node, models, modelName, "list", jsClass);
-                fieldNodes[fieldInfo.name] = fieldInfo;
-                node.setAttribute("field_id", fieldInfo.name);
+                if (!(fieldInfo.name in fieldNextIds)) {
+                    fieldNextIds[fieldInfo.name] = 0;
+                }
+                const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
+                fieldNodes[fieldId] = fieldInfo;
+                node.setAttribute("field_id", fieldId);
                 return false;
             }
         });
@@ -36,11 +36,7 @@ export class GroupListArchParser extends XMLParser {
     }
 }
 
-export class ListArchParser extends XMLParser {
-    isColumnVisible(columnInvisibleModifier) {
-        return columnInvisibleModifier !== true;
-    }
-
+export class ListArchParser {
     parseFieldNode(node, models, modelName) {
         return Field.parseFieldNode(node, models, modelName, "list");
     }
@@ -53,9 +49,10 @@ export class ListArchParser extends XMLParser {
         return processButton(node);
     }
 
-    parse(arch, models, modelName) {
-        const xmlDoc = this.parseXML(arch);
+    parse(xmlDoc, models, modelName) {
         const fieldNodes = {};
+        const widgetNodes = {};
+        let widgetNextId = 0;
         const columns = [];
         const fields = models[modelName];
         let buttonId = 0;
@@ -68,74 +65,73 @@ export class ListArchParser extends XMLParser {
         const groupListArchParser = new GroupListArchParser();
         let buttonGroup;
         let handleField = null;
-        let defaultOrder = stringToOrderBy(xmlDoc.getAttribute("default_order") || null);
         const treeAttr = {};
         let nextId = 0;
-        const activeFields = {};
-        this.visitXML(arch, (node) => {
+        const fieldNextIds = {};
+        visitXML(xmlDoc, (node) => {
             if (node.tagName !== "button") {
                 buttonGroup = undefined;
             }
             if (node.tagName === "button") {
-                const modifiers = JSON.parse(node.getAttribute("modifiers") || "{}");
-                if (this.isColumnVisible(modifiers.column_invisible)) {
-                    const button = {
-                        ...this.processButton(node),
-                        defaultRank: "btn-link",
-                        type: "button",
-                        id: buttonId++,
+                const button = {
+                    ...this.processButton(node),
+                    defaultRank: "btn-link",
+                    type: "button",
+                    id: buttonId++,
+                };
+                if (buttonGroup) {
+                    buttonGroup.buttons.push(button);
+                    buttonGroup.column_invisible = combineModifiers(
+                        buttonGroup.column_invisible,
+                        node.getAttribute("column_invisible"),
+                        "AND"
+                    );
+                } else {
+                    buttonGroup = {
+                        id: `column_${nextId++}`,
+                        type: "button_group",
+                        buttons: [button],
+                        hasLabel: false,
+                        column_invisible: node.getAttribute("column_invisible"),
                     };
-                    if (buttonGroup) {
-                        buttonGroup.buttons.push(button);
-                    } else {
-                        buttonGroup = {
-                            id: `column_${nextId++}`,
-                            type: "button_group",
-                            buttons: [button],
-                            hasLabel: false,
-                        };
-                        columns.push(buttonGroup);
-                    }
+                    columns.push(buttonGroup);
                 }
             } else if (node.tagName === "field") {
                 const fieldInfo = this.parseFieldNode(node, models, modelName);
-                fieldNodes[fieldInfo.name] = fieldInfo;
-                node.setAttribute("field_id", fieldInfo.name);
-                if (fieldInfo.widget === "handle") {
+                if (!(fieldInfo.name in fieldNextIds)) {
+                    fieldNextIds[fieldInfo.name] = 0;
+                }
+                const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
+                fieldNodes[fieldId] = fieldInfo;
+                node.setAttribute("field_id", fieldId);
+                if (fieldInfo.isHandle) {
                     handleField = fieldInfo.name;
                 }
-                addFieldDependencies(
-                    activeFields,
-                    models[modelName],
-                    fieldInfo.FieldComponent.fieldDependencies
-                );
-                if (this.isColumnVisible(fieldInfo.modifiers.column_invisible)) {
-                    const label = fieldInfo.FieldComponent.label;
-                    columns.push({
-                        ...fieldInfo,
-                        id: `column_${nextId++}`,
-                        className: node.getAttribute("class"), // for oe_edit_only and oe_read_only
-                        optional: node.getAttribute("optional") || false,
-                        type: "field",
-                        hasLabel: !(fieldInfo.noLabel || fieldInfo.FieldComponent.noLabel),
-                        label: (fieldInfo.widget && label && label.toString()) || fieldInfo.string,
-                    });
-                }
+                const label = fieldInfo.field.label;
+                columns.push({
+                    ...fieldInfo,
+                    id: `column_${nextId++}`,
+                    className: node.getAttribute("class"), // for oe_edit_only and oe_read_only
+                    optional: node.getAttribute("optional") || false,
+                    type: "field",
+                    hasLabel: !(
+                        archParseBoolean(fieldInfo.attrs.nolabel) || fieldInfo.field.noLabel
+                    ),
+                    label: (fieldInfo.widget && label && label.toString()) || fieldInfo.string,
+                });
                 return false;
             } else if (node.tagName === "widget") {
                 const widgetInfo = this.parseWidgetNode(node);
-                addFieldDependencies(
-                    activeFields,
-                    models[modelName],
-                    widgetInfo.WidgetComponent.fieldDependencies
-                );
+                const widgetId = `widget_${++widgetNextId}`;
+                widgetNodes[widgetId] = widgetInfo;
+                node.setAttribute("widget_id", widgetId);
 
                 const widgetProps = {
-                    ...widgetInfo,
+                    name: widgetInfo.name,
                     // FIXME: this is dumb, we encode it into a weird object so that the widget
                     // can decode it later...
-                    node: encodeObjectForTemplate({ attrs: widgetInfo.rawAttrs }).slice(1, -1),
-                    className: node.getAttribute("class"),
+                    node: encodeObjectForTemplate({ attrs: widgetInfo.attrs }).slice(1, -1),
+                    className: node.getAttribute("class") || "",
                 };
                 columns.push({
                     ...widgetInfo,
@@ -145,28 +141,23 @@ export class ListArchParser extends XMLParser {
                 });
             } else if (node.tagName === "groupby" && node.getAttribute("name")) {
                 const fieldName = node.getAttribute("name");
-                const xmlSerializer = new XMLSerializer();
-                const groupByArch = xmlSerializer.serializeToString(node);
                 const coModelName = fields[fieldName].relation;
-                const groupByArchInfo = groupListArchParser.parse(groupByArch, models, coModelName);
+                const groupByArchInfo = groupListArchParser.parse(node, models, coModelName);
                 groupBy.buttons[fieldName] = groupByArchInfo.buttons;
                 groupBy.fields[fieldName] = {
-                    activeFields: groupByArchInfo.fieldNodes,
                     fieldNodes: groupByArchInfo.fieldNodes,
                     fields: models[coModelName],
                 };
                 return false;
             } else if (node.tagName === "header") {
-                // AAB: not sure we need to handle invisible="1" button as the usecase seems way
+                // AAB: not sure we need to handle invisible="True" button as the usecase seems way
                 // less relevant than for fields (so for buttons, relying on the modifiers logic
                 // that applies later on could be enough, even if the value is always true)
-                headerButtons = [...node.children]
-                    .map((node) => ({
-                        ...processButton(node),
-                        type: "button",
-                        id: buttonId++,
-                    }))
-                    .filter((button) => button.modifiers.invisible !== true);
+                headerButtons = [...node.children].map((node) => ({
+                    ...this.processButton(node),
+                    type: "button",
+                    id: buttonId++,
+                }));
                 return false;
             } else if (node.tagName === "control") {
                 for (const childNode of node.children) {
@@ -192,9 +183,21 @@ export class ListArchParser extends XMLParser {
                 treeAttr.activeActions = activeActions;
 
                 treeAttr.className = xmlDoc.getAttribute("class") || null;
-                treeAttr.editable = activeActions.edit ? xmlDoc.getAttribute("editable") : false;
+                let editableAttr = xmlDoc.getAttribute("editable");
+                // FIXME: supported values for the editable attribute are normally "top"/"bottom".
+                // However, form views aren't validated, and a few x2many list have editable="1".
+                // In master, we'll throw to enforce valid values, but in 17, let's fallback on
+                // "bottom".
+                if (editableAttr && !["top", "bottom"].includes(editableAttr)) {
+                    editableAttr = archParseBoolean(editableAttr) ? "bottom" : null;
+                }
+                treeAttr.editable = editableAttr;
                 treeAttr.multiEdit = activeActions.edit
                     ? archParseBoolean(node.getAttribute("multi_edit") || "")
+                    : false;
+
+                treeAttr.openFormView = treeAttr.editable
+                    ? archParseBoolean(xmlDoc.getAttribute("open_form_view") || "")
                     : false;
 
                 const limitAttr = node.getAttribute("limit");
@@ -210,6 +213,11 @@ export class ListArchParser extends XMLParser {
                 treeAttr.rawExpand = xmlDoc.getAttribute("expand");
                 treeAttr.decorations = getDecoration(xmlDoc);
 
+                treeAttr.defaultGroupBy = xmlDoc.getAttribute("default_group_by");
+                treeAttr.defaultOrder = stringToOrderBy(
+                    xmlDoc.getAttribute("default_order") || null
+                );
+
                 // custom open action when clicking on record row
                 const action = xmlDoc.getAttribute("action");
                 const type = xmlDoc.getAttribute("type");
@@ -217,24 +225,19 @@ export class ListArchParser extends XMLParser {
             }
         });
 
-        if (!defaultOrder.length && handleField) {
-            defaultOrder = stringToOrderBy(handleField);
-        }
-
-        for (const [key, field] of Object.entries(fieldNodes)) {
-            activeFields[key] = field; // TODO process
+        if (!treeAttr.defaultOrder.length && handleField) {
+            const handleFieldSort = `${handleField}, id`;
+            treeAttr.defaultOrder = stringToOrderBy(handleFieldSort);
         }
 
         return {
             creates,
-            handleField,
             headerButtons,
             fieldNodes,
-            activeFields,
+            widgetNodes,
             columns,
             groupBy,
-            defaultOrder,
-            __rawArch: arch,
+            xmlDoc,
             ...treeAttr,
         };
     }

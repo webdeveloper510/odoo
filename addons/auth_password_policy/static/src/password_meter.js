@@ -1,17 +1,14 @@
 /** @odoo-module **/
 
-import { sprintf } from "@web/core/utils/strings";
+import { _t } from "@web/core/l10n/translation";
 import { computeScore } from "./password_policy";
-
-const { Component, xml } = owl;
+import { Component, xml } from "@odoo/owl";
 
 export class Meter extends Component {
     get title() {
-        return sprintf(
-            this.env._t(
-                "Required: %s\n\nHint: to increase password strength, increase length, use multiple words, and use non-letter characters."
-            ),
-            String(this.props.required) || this.env._t("no requirements")
+        return _t(
+            "Required: %s\n\nHint: to increase password strength, increase length, use multiple words, and use non-letter characters.",
+            String(this.props.required) || _t("no requirements")
         );
     }
 

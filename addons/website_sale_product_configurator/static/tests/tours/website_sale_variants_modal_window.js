@@ -1,14 +1,12 @@
-odoo.define('website_sale.tour_variants_modal_window', function (require) {
-    'use strict';
+/** @odoo-module **/
 
-    var tour = require('web_tour.tour');
+    import { registry } from "@web/core/registry";
 
     // This tour relies on a data created from the python test.
-    tour.register('tour_variants_modal_window', {
+    registry.category("web_tour.tours").add('tour_variants_modal_window', {
         test: true,
         url: '/shop?search=Short (TEST)',
-    },
-    [
+        steps: () => [
         {
             content: "Select the Short (TEST) product",
             trigger: '.oe_product_cart a:containsExact("Short (TEST)")',
@@ -45,23 +43,23 @@ odoo.define('website_sale.tour_variants_modal_window', function (require) {
         },
         {
             content: "Check the product is in the cart",
-            trigger: 'td.td-product_name:contains(Short (TEST))',
+            trigger: 'div>a>h6:contains(Short (TEST))',
         },
         {
             content: "Check always variant",
-            trigger: 'td.td-product_name:contains(M always)',
+            trigger: 'div>a>h6:contains(M always)',
         },
         {
             content: "Check dynamic variant",
-            trigger: 'td.td-product_name:contains(M dynamic)',
+            trigger: 'div>a>h6:contains(M dynamic)',
         },
         {
             content: "Check never variant",
-            trigger: 'td.td-product_name:contains(Never attribute size: M never)',
+            trigger: 'div.text-muted>span:contains(Never attribute size: M never)',
         },
         {
             content: "Check never custom variant",
-            trigger: 'td.td-product_name:contains(Never attribute size custom: Yes never custom: TEST)',
+            trigger: 'div.text-muted>span:contains(Never attribute size custom: Yes never custom: TEST)',
+            isCheck: true,
         }
-    ]);
-});
+    ]});

@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
-import tour from 'web_tour.tour';
+import { registry } from "@web/core/registry";
 
-tour.register('test_website_page_manager', {
+registry.category("web_tour.tours").add('test_website_page_manager', {
     test: true,
     url: '/web#action=test_website.action_test_model_multi_website',
-}, [
+    steps: () => [
 // Part 1: check that the website filter is working
 {
     content: "Check that we see records from My Website",
@@ -24,11 +24,14 @@ tour.register('test_website_page_manager', {
     trigger: ".o_list_selection_box:contains('2 selected')",
     run: () => null, // it's a check
 }, {
-    content: "Click on My Website search filter",
-    trigger: "button.dropdown-toggle:contains('My Website')",
+    content: "Click on the 'Select all records' checkbox again to unselect all records and see the search bar",
+    trigger: "thead .o_list_record_selector",
+}, {
+	content: "Click on the search options",
+	trigger: ".o_searchview_dropdown_toggler",
 }, {
     content: "Select My Website 2",
-    trigger: ".dropdown-menu.show > .dropdown-item:contains('My Website 2')",
+    trigger: ".o_dropdown_container.o_website_menu > .dropdown-item:contains('My Website 2')",
 }, {
     // This step is just here to ensure there is more records than the 2
     // available on website 1, to ensure the test is actually testing something.
@@ -49,29 +52,33 @@ tour.register('test_website_page_manager', {
     content: "Wait for List View to be loaded",
     trigger: '.o_list_renderer',
     run: () => null, // it's a check
-}]);
+}]
+});
 
-tour.register('test_website_page_manager_js_class_bug', {
+registry.category("web_tour.tours").add('test_website_page_manager_js_class_bug', {
     test: true,
     url: '/web#action=test_website.action_test_model_multi_website_js_class_bug',
-}, [{
+    steps: () => [
+{
     content: "Click on Kanban View",
     trigger: '.o_cp_switch_buttons .o_kanban',
 }, {
     content: "Wait for Kanban View to be loaded",
     trigger: '.o_kanban_renderer',
     run: () => null, // it's a check
-}]);
+}]
+});
 
-tour.register('test_website_page_manager_no_website_id', {
+registry.category("web_tour.tours").add('test_website_page_manager_no_website_id', {
     test: true,
     url: '/web#action=test_website.action_test_model',
-}, [{
+    steps: () => [
+{
     content: "Click on Kanban View",
     trigger: '.o_cp_switch_buttons .o_kanban',
 }, {
     content: "Wait for Kanban View to be loaded",
     trigger: '.o_kanban_renderer',
     run: () => null, // it's a check
-}]);
-
+}]
+});

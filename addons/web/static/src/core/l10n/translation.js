@@ -1,7 +1,13 @@
 /** @odoo-module **/
 
-export const translatedTerms = {};
+import { Deferred } from "@web/core/utils/concurrency";
+import { sprintf } from "@web/core/utils/strings";
 
+export const translationLoaded = Symbol("translationLoaded");
+export const translatedTerms = {
+    [translationLoaded]: false,
+};
+export const translationIsReady = new Deferred();
 /**
  * Translate a term, or return the term if no translation can be found.
  *
@@ -13,17 +19,15 @@ export const translatedTerms = {};
  * @param {string} term
  * @returns {string}
  */
-export function _t(term) {
-    return translatedTerms[term] || term;
-}
-
-class LazyTranslatedString extends String {
-    valueOf() {
-        const str = super.valueOf();
-        return _t(str);
-    }
-    toString() {
-        return this.valueOf();
+export function _t(term, ...values) {
+    if (translatedTerms[translationLoaded]) {
+        const translation = translatedTerms[term] ?? term;
+        if (values.length === 0) {
+            return translation;
+        }
+        return sprintf(translation, ...values);
+    } else {
+        return new LazyTranslatedString(term, ...values);
     }
 }
 
@@ -37,8 +41,28 @@ class LazyTranslatedString extends String {
  * @param {string} term
  * @returns {LazyTranslatedString}
  */
-export function _lt(term) {
-    return new LazyTranslatedString(term);
+export const _lt = (term, ...values) => _t(term, ...values);
+
+class LazyTranslatedString extends String {
+    constructor(term, ...values) {
+        super(term);
+        this.values = values;
+    }
+    valueOf() {
+        const term = super.valueOf();
+        if (translatedTerms[translationLoaded]) {
+            const translation = translatedTerms[term] ?? term;
+            if (this.values.length === 0) {
+                return translation;
+            }
+            return sprintf(translation, ...this.values);
+        } else {
+            throw new Error(`translation error`);
+        }
+    }
+    toString() {
+        return this.valueOf();
+    }
 }
 
 /*
@@ -48,17 +72,17 @@ export function _lt(term) {
  * strings we're using with a translation mark here so the extractor can do its
  * job.
  */
-_lt("less than a minute ago");
-_lt("about a minute ago");
-_lt("%d minutes ago");
-_lt("about an hour ago");
-_lt("%d hours ago");
-_lt("a day ago");
-_lt("%d days ago");
-_lt("about a month ago");
-_lt("%d months ago");
-_lt("about a year ago");
-_lt("%d years ago");
+_t("less than a minute ago");
+_t("about a minute ago");
+_t("%d minutes ago");
+_t("about an hour ago");
+_t("%d hours ago");
+_t("a day ago");
+_t("%d days ago");
+_t("about a month ago");
+_t("%d months ago");
+_t("about a year ago");
+_t("%d years ago");
 
 /**
  * Load the installed languages long names and code

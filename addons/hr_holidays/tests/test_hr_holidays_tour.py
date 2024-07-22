@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from freezegun import freeze_time
+
 from odoo.tests import HttpCase
 from odoo.tests.common import tagged
 
@@ -8,6 +10,7 @@ from datetime import date
 
 @tagged('post_install', '-at_install')
 class TestHrHolidaysTour(HttpCase):
+    @freeze_time('01/17/2022')
     def test_hr_holidays_tour(self):
         admin_user = self.env.ref('base.user_admin')
         admin_employee = admin_user.employee_id
@@ -29,7 +32,7 @@ class TestHrHolidaysTour(HttpCase):
             'leave_validation_type': 'hr',
         })
         # add allocation
-        allocation = self.env['hr.leave.allocation'].create({
+        self.env['hr.leave.allocation'].create({
             'name': 'Expired Allocation',
             'employee_id': admin_employee.id,
             'holiday_status_id': holidays_type_1.id,
@@ -38,6 +41,5 @@ class TestHrHolidaysTour(HttpCase):
             'date_from': '2022-01-01',
             'date_to': '2022-12-31',
         })
-        allocation.action_validate()
 
         self.start_tour('/web', 'hr_holidays_tour', login="admin")

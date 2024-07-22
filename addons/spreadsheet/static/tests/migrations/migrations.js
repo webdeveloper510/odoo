@@ -1,9 +1,7 @@
 /** @odoo-module */
 
 import { migrate, ODOO_VERSION } from "@spreadsheet/o_spreadsheet/migration";
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
-
-const { Model } = spreadsheet;
+import { Model } from "@odoo/o-spreadsheet";
 
 QUnit.module("spreadsheet > migrations");
 
@@ -290,6 +288,92 @@ QUnit.test("fieldMatchings offsets are correctly preserved after migration", (as
     assert.deepEqual(migratedData.sheets[0].figures[0].data.fieldMatching, {
         Filter: { chain: "parent_id", type: "date", offset: "-1" },
     });
+});
+
+QUnit.test("group year/quarter/month filters to a single filter type", (assert) => {
+    const data = {
+        version: 14,
+        odooVersion: 5,
+        globalFilters: [
+            {
+                id: "1",
+                type: "relation",
+                label: "a relational filter",
+                defaultValue: [2],
+                defaultValueDisplayNames: ["Mitchell Admin"],
+                modelName: "res.users",
+            },
+            {
+                id: "2",
+                type: "date",
+                label: "a year relational filter",
+                rangeType: "year",
+                defaultsToCurrentPeriod: true,
+            },
+            {
+                id: "3",
+                type: "date",
+                label: "a quarter relational filter",
+                rangeType: "quarter",
+                defaultsToCurrentPeriod: true,
+            },
+            {
+                id: "4",
+                type: "date",
+                label: "a month relational filter",
+                rangeType: "month",
+                defaultsToCurrentPeriod: true,
+            },
+            {
+                id: "5",
+                type: "date",
+                label: "a relative date filter",
+                defaultValue: "last_week",
+                rangeType: "relative",
+                defaultsToCurrentPeriod: false,
+            },
+        ],
+    };
+    const migratedData = migrate(data);
+    const filters = migratedData.globalFilters;
+    assert.deepEqual(filters, [
+        {
+            id: "1",
+            type: "relation",
+            label: "a relational filter",
+            defaultValue: [2],
+            defaultValueDisplayNames: ["Mitchell Admin"],
+            modelName: "res.users",
+        },
+        {
+            id: "2",
+            type: "date",
+            label: "a year relational filter",
+            rangeType: "fixedPeriod",
+            defaultValue: "this_year",
+        },
+        {
+            id: "3",
+            type: "date",
+            label: "a quarter relational filter",
+            rangeType: "fixedPeriod",
+            defaultValue: "this_quarter",
+        },
+        {
+            id: "4",
+            type: "date",
+            label: "a month relational filter",
+            rangeType: "fixedPeriod",
+            defaultValue: "this_month",
+        },
+        {
+            id: "5",
+            type: "date",
+            label: "a relative date filter",
+            rangeType: "relative",
+            defaultValue: "last_week",
+        },
+    ]);
 });
 
 QUnit.test("Odoo version is exported", (assert) => {

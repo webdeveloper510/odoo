@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
+import * as spreadsheet from "@odoo/o-spreadsheet";
 import { waitForDataSourcesLoaded } from "@spreadsheet/../tests/utils/model";
 
-const { toCartesian, toZone } = spreadsheet.helpers;
+const { toCartesian, toZone, lettersToNumber } = spreadsheet.helpers;
 
 /**
  * @typedef {import("@spreadsheet/global_filters/plugins/global_filters_core_plugin").GlobalFilter} GlobalFilter
@@ -12,8 +12,11 @@ const { toCartesian, toZone } = spreadsheet.helpers;
 /**
  * Select a cell
  */
-export function selectCell(model, xc) {
+export function selectCell(model, xc, sheetId = model.getters.getActiveSheetId()) {
     const { col, row } = toCartesian(xc);
+    if (sheetId !== model.getters.getActiveSheetId()) {
+        model.dispatch("ACTIVATE_SHEET", { sheetIdTo: sheetId });
+    }
     return model.selection.selectCell(col, row);
 }
 
@@ -23,7 +26,7 @@ export function selectCell(model, xc) {
  * @param {{filter: GlobalFilter}} filter
  */
 export async function addGlobalFilter(model, filter, fieldMatchings = {}) {
-    const result = model.dispatch("ADD_GLOBAL_FILTER", { ...filter, ...fieldMatchings });
+    const result = model.dispatch("ADD_GLOBAL_FILTER", { filter, ...fieldMatchings });
     await waitForDataSourcesLoaded(model);
     return result;
 }
@@ -41,7 +44,7 @@ export async function removeGlobalFilter(model, id) {
  * Edit a global filter and ensure the data sources are completely reloaded
  */
 export async function editGlobalFilter(model, filter) {
-    const result = model.dispatch("EDIT_GLOBAL_FILTER", filter);
+    const result = model.dispatch("EDIT_GLOBAL_FILTER", { filter });
     await waitForDataSourcesLoaded(model);
     return result;
 }
@@ -54,6 +57,10 @@ export async function setGlobalFilterValue(model, payload) {
     const result = model.dispatch("SET_GLOBAL_FILTER_VALUE", payload);
     await waitForDataSourcesLoaded(model);
     return result;
+}
+
+export function moveGlobalFilter(model, id, delta) {
+    return model.dispatch("MOVE_GLOBAL_FILTER", { id, delta });
 }
 
 /**
@@ -92,6 +99,44 @@ export function setCellFormat(model, xc, format, sheetId = model.getters.getActi
  */
 export function setCellStyle(model, xc, style, sheetId = model.getters.getActiveSheetId()) {
     model.dispatch("UPDATE_CELL", { ...toCartesian(xc), sheetId, style });
+}
+
+/**
+ * Add columns
+ * @param {Model} model
+ * @param {"before"|"after"} position
+ * @param {string} column
+ * @param {number} quantity
+ * @param {UID} sheetId
+ */
+export function addColumns(
+    model,
+    position,
+    column,
+    quantity,
+    sheetId = model.getters.getActiveSheetId()
+) {
+    return model.dispatch("ADD_COLUMNS_ROWS", {
+        sheetId,
+        dimension: "COL",
+        position,
+        base: lettersToNumber(column),
+        quantity,
+    });
+}
+
+/**
+ * Delete columns
+ * @param {Model} model
+ * @param {string[]} columns
+ * @param {UID} sheetId
+ */
+export function deleteColumns(model, columns, sheetId = model.getters.getActiveSheetId()) {
+    return model.dispatch("REMOVE_COLUMNS_ROWS", {
+        sheetId,
+        dimension: "COL",
+        elements: columns.map(lettersToNumber),
+    });
 }
 
 /** Create a test chart in the active sheet*/

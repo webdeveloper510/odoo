@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { browser } from "../browser/browser";
 import { ConnectionLostError, RPCError } from "../network/rpc_service";
 import { registry } from "../registry";
@@ -75,6 +76,7 @@ export function rpcErrorHandler(env, error, originalError) {
         return true;
     }
 }
+
 errorHandlerRegistry.add("rpcErrorHandler", rpcErrorHandler, { sequence: 97 });
 
 // -----------------------------------------------------------------------------
@@ -99,7 +101,7 @@ export function lostConnectionHandler(env, error, originalError) {
             return true;
         }
         connectionLostNotifRemove = env.services.notification.add(
-            env._t("Connection lost. Trying to reconnect..."),
+            _t("Connection lost. Trying to reconnect..."),
             { sticky: true }
         );
         let delay = 2000;
@@ -111,12 +113,9 @@ export function lostConnectionHandler(env, error, originalError) {
                         connectionLostNotifRemove();
                         connectionLostNotifRemove = null;
                     }
-                    env.services.notification.add(
-                        env._t("Connection restored. You are back online."),
-                        {
-                            type: "info",
-                        }
-                    );
+                    env.services.notification.add(_t("Connection restored. You are back online."), {
+                        type: "info",
+                    });
                 })
                 .catch(() => {
                     // exponential backoff, with some jitter
@@ -147,7 +146,7 @@ const defaultDialogs = new Map([
  * @param {UncaughError} error
  * @returns {boolean}
  */
-function defaultHandler(env, error) {
+export function defaultHandler(env, error) {
     const DialogComponent = defaultDialogs.get(error.constructor) || ErrorDialog;
     env.services.dialog.add(DialogComponent, {
         traceback: error.traceback,

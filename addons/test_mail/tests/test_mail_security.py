@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.addons.test_mail.tests.common import TestMailCommon
+from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
 from odoo.exceptions import AccessError
 
 
-class TestSubtypeAccess(TestMailCommon):
+class TestSubtypeAccess(MailCommon):
 
     def test_subtype_access(self):
         """

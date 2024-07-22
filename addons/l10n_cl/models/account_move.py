@@ -158,6 +158,7 @@ class AccountMove(models.Model):
             base_line_vals_list,
             self.currency_id,
             tax_lines=tax_line_vals_list,
+            is_company_currency_requested=self.currency_id != self.company_id.currency_id,
         )
 
         if include_sii:
@@ -212,7 +213,7 @@ class AccountMove(models.Model):
                 'subtotal_amount_taxable': 0,
                 'subtotal_amount_exempt': 0,
                 'vat_amount': 0,
-                'total_amount': currency_round_other_currency.round(abs(self.amount_total_signed)) \
+                'total_amount': currency_round_other_currency.round(abs(self.amount_total_signed))
                     if export else currency_round_other_currency.round(self.amount_total),
                 'round_currency': currency_round_other_currency.decimal_places,
                 'name': self._l10n_cl_normalize_currency_name(currency_round_other_currency.name),
@@ -222,8 +223,8 @@ class AccountMove(models.Model):
             if line.tax_line_id and line.tax_line_id.l10n_cl_sii_code == 14:
                 values['vat_amount'] += line[key_main_currency] * sign_main_currency
                 if other_currency:
-                    values['second_currency']['vat_amount'] += line[key_other_currency] * sign_main_currency # amount_currency behaves as balance
-                vat_percent = line.tax_line_id.amount if line.tax_line_id.amount > vat_percent else vat_percent
+                    values['second_currency']['vat_amount'] += line[key_other_currency] * sign_main_currency
+                vat_percent = max(vat_percent, line.tax_line_id.amount)
             if line.display_type == 'product':
                 if line.tax_ids.filtered(lambda x: x.l10n_cl_sii_code == 14):
                     values['subtotal_amount_taxable'] += line[key_main_currency] * sign_main_currency
@@ -263,7 +264,7 @@ class AccountMove(models.Model):
         :return:
         """
         self.ensure_one()
-
+        cid = self.company_id.id
         tax = [{'tax_code': line.tax_line_id.l10n_cl_sii_code,
                 'tax_name': line.tax_line_id.name,
                 'tax_base': abs(sum(self.invoice_line_ids.filtered(
@@ -272,8 +273,8 @@ class AccountMove(models.Model):
                 'tax_percent': abs(line.tax_line_id.amount),
                 'tax_amount_currency': self.currency_id.round(abs(line.amount_currency)),
                 'tax_amount': self.currency_id.round(abs(line.balance))} for line in self.line_ids.filtered(
-            lambda x: x.tax_group_id.id in [
-                self.env.ref('l10n_cl.tax_group_ila').id, self.env.ref('l10n_cl.tax_group_retenciones').id])]
+            lambda x: x.tax_group_id.id in [self.env.ref(f'account.{cid}_tax_group_ila').id,
+                                            self.env.ref(f'account.{cid}_tax_group_retenciones').id])]
         return tax
 
     def _float_repr_float_round(self, value, decimal_places):

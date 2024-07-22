@@ -35,7 +35,8 @@ class AccountEdiFormat(models.Model):
 
     def _is_compatible_with_journal(self, journal):
         if self.code == "in_ewaybill_1_03":
-            return journal.type in ("sale", "purchase")
+            # In the Invoice we have a button to send Ewaybill so not required to send it automatically.
+            return False
         return super()._is_compatible_with_journal(journal)
 
     def _is_enabled_by_default_on_journal(self, journal):
@@ -157,7 +158,7 @@ class AccountEdiFormat(models.Model):
                 response = {"data": ""}
                 odoobot = self.env.ref("base.partner_root")
                 invoices.message_post(author_id=odoobot.id, body=
-                    "%s<br/>%s:<br/>%s" %(
+                    Markup("%s<br/>%s:<br/>%s") %(
                         _("Somehow this E-waybill has been canceled in the government portal before. You can verify by checking the details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)"),
                         _("Error"),
                         error_message
@@ -192,6 +193,12 @@ class AccountEdiFormat(models.Model):
             inv_res = {"success": True, "attachment": attachment}
             res[invoices] = inv_res
         return res
+
+    def _l10n_in_edi_ewaybill_handle_zero_distance_alert_if_present(self, invoice, response):
+        if invoice.l10n_in_distance == 0 and (alert := response.get("data", {}).get('alert')):
+            pattern = r", Distance between these two pincodes is \d+, "
+            if re.fullmatch(pattern, alert) and (distance := int(re.search(r'\d+', alert).group())) > 0:
+                invoice.l10n_in_distance = distance
 
     def _l10n_in_edi_ewaybill_irn_post_invoice_edi(self, invoices):
         response = {}
@@ -265,6 +272,7 @@ class AccountEdiFormat(models.Model):
             )
 
             invoices.message_post(body=body)
+            self._l10n_in_edi_ewaybill_handle_zero_distance_alert_if_present(invoices, response)
         return res
 
     def _l10n_in_edi_irn_ewaybill_generate_json(self, invoice):
@@ -363,6 +371,7 @@ class AccountEdiFormat(models.Model):
                 str(response.get("data", {}).get('EwbValidTill'))
             )
             invoices.message_post(body=body)
+            self._l10n_in_edi_ewaybill_handle_zero_distance_alert_if_present(invoices, response)
         return res
 
     def _l10n_in_edi_ewaybill_get_error_message(self, code):

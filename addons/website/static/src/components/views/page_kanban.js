@@ -4,7 +4,7 @@ import {PageControllerMixin, PageRendererMixin} from "./page_views_mixin";
 import {PageSearchModel} from "./page_search_model";
 import {registry} from '@web/core/registry';
 import {kanbanView} from "@web/views/kanban/kanban_view";
-
+import {CheckboxItem} from "@web/core/dropdown/checkbox_item";
 
 export class PageKanbanController extends PageControllerMixin(kanbanView.Controller) {
     /**
@@ -15,6 +15,10 @@ export class PageKanbanController extends PageControllerMixin(kanbanView.Control
     }
 }
 PageKanbanController.template = 'website.PageKanbanView';
+PageKanbanController.components = {
+    ...kanbanView.Controller.components,
+    CheckboxItem,
+};
 
 // TODO master: remove `PageRendererMixin` extend, props override and template
 export class PageKanbanRenderer extends PageRendererMixin(kanbanView.Renderer) {}

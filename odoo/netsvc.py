@@ -160,17 +160,15 @@ def init_logger():
         'ofxparse',# ofxparse importing ABC from collections
         'astroid',  # deprecated imp module (fixed in 2.5.1)
         'requests_toolbelt', # importing ABC from collections (fixed in 0.9)
-        'firebase_admin', # deprecated method_whitelist
     ]:
         warnings.filterwarnings('ignore', category=DeprecationWarning, module=module)
 
+    # rsjmin triggers this with Python 3.10+ (that warning comes from the C code and has no `module`)
+    warnings.filterwarnings('ignore', r'^PyUnicode_FromUnicode\(NULL, size\) is deprecated', category=DeprecationWarning)
     # the SVG guesser thing always compares str and bytes, ignore it
     warnings.filterwarnings('ignore', category=BytesWarning, module='odoo.tools.image')
     # reportlab does a bunch of bytes/str mixing in a hashmap
     warnings.filterwarnings('ignore', category=BytesWarning, module='reportlab.platypus.paraparser')
-    # difficult to fix in 3.7, will be fixed in 16.0 with python 3.8+
-    warnings.filterwarnings('ignore', r'^Attribute .* is deprecated and will be removed in Python 3.14; use .* instead', category=DeprecationWarning)
-    warnings.filterwarnings('ignore', r'^.* is deprecated and will be removed in Python 3.14; use .* instead', category=DeprecationWarning)
 
     # need to be adapted later but too muchwork for this pr.
     warnings.filterwarnings('ignore', r'^datetime.datetime.utcnow\(\) is deprecated and scheduled for removal in a future version.*', category=DeprecationWarning)

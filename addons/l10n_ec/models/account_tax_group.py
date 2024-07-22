@@ -21,8 +21,6 @@ _TYPE_EC = [
     ("withhold_income_purchase", "Profit Withhold on Purchases"),
     ("outflows_tax", "Exchange Outflows"),
     ("other", "Others"),
-    ("withhold_vat", "VAT Withhold (Deprecated)"),  # removed in master
-    ("withhold_income_tax", "Profit Withhold (Deprecated)"),  # removed in master
 ]
 
 

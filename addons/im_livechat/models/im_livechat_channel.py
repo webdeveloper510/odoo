@@ -3,6 +3,7 @@
 import base64
 import random
 import re
+from operator import itemgetter
 
 from odoo import api, Command, fields, models, modules, _
 
@@ -17,11 +18,7 @@ class ImLivechatChannel(models.Model):
     _name = 'im_livechat.channel'
     _inherit = ['rating.parent.mixin']
     _description = 'Livechat Channel'
-    _rating_satisfaction_days = 7  # include only last 7 days to compute satisfaction
-
-    def _default_image(self):
-        image_path = modules.get_module_resource('im_livechat', 'static/src/img', 'default.png')
-        return base64.b64encode(open(image_path, 'rb').read())
+    _rating_satisfaction_days = 14  # include only last 14 days to compute satisfaction
 
     def _default_user_ids(self):
         return [(6, 0, [self._uid])]
@@ -35,10 +32,10 @@ class ImLivechatChannel(models.Model):
     # attribute fields
     name = fields.Char('Channel Name', required=True)
     button_text = fields.Char('Text of the Button', default=_default_button_text,
-        help="Default text displayed on the Livechat Support Button")
+        help="Default text displayed on the Livechat Support Button", translate=True)
     default_message = fields.Char('Welcome Message', default=_default_default_message,
-        help="This is an automated 'welcome' message that your visitor will see when they initiate a new conversation.")
-    input_placeholder = fields.Char('Chat Input Placeholder', help='Text that prompts the user to initiate the chat.')
+        help="This is an automated 'welcome' message that your visitor will see when they initiate a new conversation.", translate=True)
+    input_placeholder = fields.Char('Chat Input Placeholder', help='Text that prompts the user to initiate the chat.', translate=True)
     header_background_color = fields.Char(default="#875A7B", help="Default background color of the channel header once open")
     title_color = fields.Char(default="#FFFFFF", help="Default title color of the channel once open")
     button_background_color = fields.Char(default="#875A7B", help="Default background color of the Livechat button")
@@ -49,14 +46,15 @@ class ImLivechatChannel(models.Model):
         help="URL to a static page where you client can discuss with the operator of the channel.")
     are_you_inside = fields.Boolean(string='Are you inside the matrix?',
         compute='_are_you_inside', store=False, readonly=True)
+    available_operator_ids = fields.Many2many('res.users', compute='_compute_available_operator_ids')
     script_external = fields.Html('Script (external)', compute='_compute_script_external', store=False, readonly=True, sanitize=False)
     nbr_channel = fields.Integer('Number of conversation', compute='_compute_nbr_channel', store=False, readonly=True)
 
-    image_128 = fields.Image("Image", max_width=128, max_height=128, default=_default_image)
+    image_128 = fields.Image("Image", max_width=128, max_height=128)
 
     # relationnal fields
     user_ids = fields.Many2many('res.users', 'im_livechat_channel_im_user', 'channel_id', 'user_id', string='Operators', default=_default_user_ids)
-    channel_ids = fields.One2many('mail.channel', 'livechat_channel_id', 'Sessions')
+    channel_ids = fields.One2many('discuss.channel', 'livechat_channel_id', 'Sessions')
     chatbot_script_count = fields.Integer(string='Number of Chatbot', compute='_compute_chatbot_script_count')
     rule_ids = fields.One2many('im_livechat.channel.rule', 'channel_id', 'Rules')
 
@@ -64,11 +62,16 @@ class ImLivechatChannel(models.Model):
         for channel in self:
             channel.are_you_inside = bool(self.env.uid in [u.id for u in channel.user_ids])
 
+    @api.depends('user_ids.im_status')
+    def _compute_available_operator_ids(self):
+        for record in self:
+            record.available_operator_ids = record.user_ids.filtered(lambda user: user.im_status == 'online')
+
     @api.depends('rule_ids.chatbot_script_id')
     def _compute_chatbot_script_count(self):
-        data = self.env['im_livechat.channel.rule'].read_group(
-            [('channel_id', 'in', self.ids)], ['chatbot_script_id:count_distinct'], ['channel_id'])
-        mapped_data = {rule['channel_id'][0]: rule['chatbot_script_id'] for rule in data}
+        data = self.env['im_livechat.channel.rule']._read_group(
+            [('channel_id', 'in', self.ids)], ['channel_id'], ['chatbot_script_id:count_distinct'])
+        mapped_data = {channel.id: count_distinct for channel, count_distinct in data}
         for channel in self:
             channel.chatbot_script_count = mapped_data.get(channel.id, 0)
 
@@ -87,10 +90,10 @@ class ImLivechatChannel(models.Model):
 
     @api.depends('channel_ids')
     def _compute_nbr_channel(self):
-        data = self.env['mail.channel']._read_group([
-            ('livechat_channel_id', 'in', self.ids)
-        ], ['__count'], ['livechat_channel_id'], lazy=False)
-        channel_count = {x['livechat_channel_id'][0]: x['__count'] for x in data}
+        data = self.env['discuss.channel']._read_group([
+            ('livechat_channel_id', 'in', self.ids),
+        ], ['livechat_channel_id'], ['__count'])
+        channel_count = {livechat_channel.id: count for livechat_channel, count in data}
         for record in self:
             record.nbr_channel = channel_count.get(record.id, 0)
 
@@ -130,21 +133,25 @@ class ImLivechatChannel(models.Model):
     # --------------------------
     # Channel Methods
     # --------------------------
-    def _get_available_users(self):
-        """ get available user of a given channel
-            :retuns : return the res.users having their im_status online
-        """
-        self.ensure_one()
-        return self.user_ids.filtered(lambda user: user.im_status == 'online')
-
-    def _get_livechat_mail_channel_vals(self, anonymous_name, operator=None, chatbot_script=None, user_id=None, country_id=None):
-        # partner to add to the mail.channel
-        operator_partner_id = operator.partner_id.id if operator else chatbot_script.operator_partner_id.id
+    def _get_livechat_discuss_channel_vals(
+        self, anonymous_name, previous_operator_id=None, chatbot_script=None, user_id=None, country_id=None, lang=None
+    ):
+        user_operator = False
+        if chatbot_script:
+            if chatbot_script.id not in self.browse(self.ids).mapped('rule_ids.chatbot_script_id.id'):
+                return False
+        else:
+            user_operator = self._get_operator(previous_operator_id=previous_operator_id, lang=lang, country_id=country_id)
+            if not user_operator:
+                # no one available
+                return False
+        # partner to add to the discuss.channel
+        operator_partner_id = user_operator.partner_id.id if user_operator else chatbot_script.operator_partner_id.id
         members_to_add = [Command.create({'partner_id': operator_partner_id, 'is_pinned': False})]
         visitor_user = False
         if user_id:
             visitor_user = self.env['res.users'].browse(user_id)
-            if visitor_user and visitor_user.active and operator and visitor_user != operator:  # valid session user (not public)
+            if visitor_user and visitor_user.active and user_operator and visitor_user != user_operator:  # valid session user (not public)
                 members_to_add.append(Command.create({'partner_id': visitor_user.partner_id.id}))
 
         if chatbot_script:
@@ -152,7 +159,7 @@ class ImLivechatChannel(models.Model):
         else:
             name = ' '.join([
                 visitor_user.display_name if visitor_user else anonymous_name,
-                operator.livechat_username if operator.livechat_username else operator.name
+                user_operator.livechat_username or user_operator.name
             ])
 
         return {
@@ -167,95 +174,123 @@ class ImLivechatChannel(models.Model):
             'name': name,
         }
 
-    def _open_livechat_mail_channel(self, anonymous_name, previous_operator_id=None, chatbot_script=None, user_id=None, country_id=None, persisted=True):
-        """ Return a livechat session. If the session is persisted, creates a mail.channel record with a connected operator or with Odoobot as
-            an operator if a chatbot has been configured, or return false otherwise
-            :param anonymous_name : the name of the anonymous person of the session
-            :param previous_operator_id : partner_id.id of the previous operator that this visitor had in the past
-            :param chatbot_script : chatbot script if there is one configured
-            :param user_id : the id of the logged in visitor, if any
-            :param country_code : the country of the anonymous person of the session
-            :param persisted: whether or not the session should be persisted
-            :type anonymous_name : str
-            :return : channel header
-            :rtype : dict
+    def _get_less_active_operator(self, operator_statuses, operators):
+        """ Retrieve the most available operator based on the following criteria:
+        - Lowest number of active chats.
+        - Not in  a call.
+        - If an operator is in a call and has two or more active chats, don't
+          give priority over an operator with more conversations who is not in a
+          call.
 
-            If this visitor already had an operator within the last 7 days (information stored with the 'im_livechat_previous_operator_pid' cookie),
-            the system will first try to assign that operator if he's available (to improve user experience).
+        :param operator_statuses: list of dictionaries containing the operator's
+            id, the number of active chats and a boolean indicating if the
+            operator is in a call. The list is ordered by the number of active
+            chats (ascending) and whether the operator is in a call
+            (descending).
+        :param operators: recordset of :class:`ResUsers` operators to choose from.
+        :return: the :class:`ResUsers` record for the chosen operator
         """
-        self.ensure_one()
-        user_operator = False
-        if chatbot_script:
-            if chatbot_script.id not in self.env['im_livechat.channel.rule'].search(
-                    [('channel_id', 'in', self.ids)]).mapped('chatbot_script_id').ids:
-                return False
-        elif previous_operator_id:
-            available_users = self._get_available_users()
-            # previous_operator_id is the partner_id of the previous operator, need to convert to user
-            if previous_operator_id in available_users.mapped('partner_id').ids:
-                user_operator = next(available_user for available_user in available_users if available_user.partner_id.id == previous_operator_id)
-        if not user_operator and not chatbot_script:
-            user_operator = self._get_random_operator()
-        if not user_operator and not chatbot_script:
-            # no one available
+        if not operators:
             return False
-        mail_channel_vals = self._get_livechat_mail_channel_vals(anonymous_name, user_operator, chatbot_script, user_id=user_id, country_id=country_id)
-        if persisted:
-            # create the session, and add the link with the given channel
-            mail_channel = self.env["mail.channel"].with_context(mail_create_nosubscribe=False).sudo().create(mail_channel_vals)
-            if user_operator:
-                mail_channel._broadcast([user_operator.partner_id.id])
-            return mail_channel.sudo().channel_info()[0]
-        else:
-            operator_partner_id = user_operator.partner_id if user_operator else chatbot_script.operator_partner_id
-            display_name = operator_partner_id.user_livechat_username or operator_partner_id.display_name
-            return {
-                'name': mail_channel_vals['name'],
-                'chatbot_current_step_id': mail_channel_vals['chatbot_current_step_id'],
-                'state': 'open',
-                'operator_pid': (operator_partner_id.id, display_name.replace(',', '')),
-                'chatbot_script_id': chatbot_script.id if chatbot_script else None
-            }
 
-    def _get_random_operator(self):
-        """ Return a random operator from the available users of the channel that have the lowest number of active livechats.
-        A livechat is considered 'active' if it has at least one message within the 30 minutes.
+        # 1) only consider operators in the list to choose from
+        operator_statuses = [
+            s for s in operator_statuses if s['livechat_operator_id'] in set(operators.partner_id.ids)
+        ]
 
-        (Some annoying conversions have to be made on the fly because this model holds 'res.users' as available operators
-        and the mail_channel model stores the partner_id of the randomly selected operator)
+        # 2) try to select an inactive op, i.e. one w/ no active status (no recent chat)
+        active_op_partner_ids = {s['livechat_operator_id'] for s in operator_statuses}
+        candidates = operators.filtered(lambda o: o.partner_id.id not in active_op_partner_ids)
+        if candidates:
+            return random.choice(candidates)
 
+        # 3) otherwise select least active ops, based on status ordering (count + in_call)
+        best_status = operator_statuses[0]
+        best_status_op_partner_ids = {
+            s['livechat_operator_id']
+            for s in operator_statuses
+            if (s['count'], s['in_call']) == (best_status['count'], best_status['in_call'])
+        }
+        candidates = operators.filtered(lambda o: o.partner_id.id in best_status_op_partner_ids)
+        return random.choice(candidates)
+
+    def _get_operator(self, previous_operator_id=None, lang=None, country_id=None):
+        """ Return an operator for a livechat. Try to return the previous
+        operator if available. If not, one of the most available operators be
+        returned.
+
+        A livechat is considered 'active' if it has at least one message within
+        the 30 minutes. This method will try to match the given lang and
+        country_id.
+
+        (Some annoying conversions have to be made on the fly because this model
+        holds 'res.users' as available operators and the discuss_channel model
+        stores the partner_id of the randomly selected operator)
+
+        :param previous_operator_id: id of the previous operator with whom the
+            visitor was chatting.
+        :param lang: code of the preferred lang of the visitor.
+        :param country_id: id of the country of the visitor.
         :return : user
         :rtype : res.users
         """
-        operators = self._get_available_users()
-        if len(operators) == 0:
+        if not self.available_operator_ids:
             return False
-
-        self.env.cr.execute("""SELECT COUNT(DISTINCT c.id), c.livechat_operator_id
-            FROM mail_channel c
-            LEFT OUTER JOIN mail_message m ON c.id = m.res_id AND m.model = 'mail.channel'
-            WHERE c.channel_type = 'livechat'
+        self.env.cr.execute("""
+            WITH operator_rtc_session AS (
+                SELECT COUNT(DISTINCT s.id) as nbr, member.partner_id as partner_id
+                  FROM discuss_channel_rtc_session s
+                  JOIN discuss_channel_member member ON (member.id = s.channel_member_id)
+                  GROUP BY member.partner_id
+            )
+            SELECT COUNT(DISTINCT c.id), COALESCE(rtc.nbr, 0) > 0 as in_call, c.livechat_operator_id
+            FROM discuss_channel c
+            LEFT OUTER JOIN mail_message m ON c.id = m.res_id AND m.model = 'discuss.channel'
+            LEFT OUTER JOIN operator_rtc_session rtc ON rtc.partner_id = c.livechat_operator_id
+            WHERE c.channel_type = 'livechat' AND c.create_date > ((now() at time zone 'UTC') - interval '24 hours')
+            AND (
+                c.livechat_active IS TRUE
+                OR m.create_date > ((now() at time zone 'UTC') - interval '30 minutes')
+            )
             AND c.livechat_operator_id in %s
-            AND m.create_date > ((now() at time zone 'UTC') - interval '30 minutes')
-            GROUP BY c.livechat_operator_id
-            ORDER BY COUNT(DISTINCT c.id) asc""", (tuple(operators.mapped('partner_id').ids),))
-        active_channels = self.env.cr.dictfetchall()
-
-        # If inactive operator(s), return one of them
-        active_channel_operator_ids = [active_channel['livechat_operator_id'] for active_channel in active_channels]
-        inactive_operators = [operator for operator in operators if operator.partner_id.id not in active_channel_operator_ids]
-        if inactive_operators:
-            return random.choice(inactive_operators)
-
-        # If no inactive operator, active_channels is not empty as len(operators) > 0 (see above).
-        # Get the less active operator using the active_channels first element's count (since they are sorted 'ascending')
-        lowest_number_of_conversations = active_channels[0]['count']
-        less_active_operator = random.choice([
-            active_channel['livechat_operator_id'] for active_channel in active_channels
-            if active_channel['count'] == lowest_number_of_conversations])
-
-        # convert the selected 'partner_id' to its corresponding res.users
-        return next(operator for operator in operators if operator.partner_id.id == less_active_operator)
+            GROUP BY c.livechat_operator_id, rtc.nbr
+            ORDER BY COUNT(DISTINCT c.id) < 2 OR rtc.nbr IS NULL DESC, COUNT(DISTINCT c.id) ASC, rtc.nbr IS NULL DESC""",
+            (tuple(self.available_operator_ids.partner_id.ids),)
+        )
+        operator_statuses = self.env.cr.dictfetchall()
+        operator = None
+        # Try to match the previous operator
+        if previous_operator_id in self.available_operator_ids.partner_id.ids:
+            previous_operator_status = next(
+                (status for status in operator_statuses if status['livechat_operator_id'] == previous_operator_id),
+                None
+            )
+            if not previous_operator_status or previous_operator_status['count'] < 2 or not previous_operator_status['in_call']:
+                previous_operator_user = next(
+                    available_user
+                    for available_user in self.available_operator_ids
+                    if available_user.partner_id.id == previous_operator_id
+                )
+                return previous_operator_user
+        # Try to match an operator with the same main lang as the visitor
+        # If no operator with the same lang, try to match an operator with the addition lang
+        if lang:
+            same_lang_operator_ids = self.available_operator_ids.filtered(lambda operator: operator.partner_id.lang == lang)
+            if same_lang_operator_ids:
+                operator = self._get_less_active_operator(operator_statuses, same_lang_operator_ids)
+            else:
+                addition_lang_operator_ids = self.available_operator_ids.filtered(lambda operator: lang in operator.res_users_settings_id.livechat_lang_ids.mapped('code'))
+                if addition_lang_operator_ids:
+                    operator = self._get_less_active_operator(operator_statuses, addition_lang_operator_ids)
+        # Try to match an operator with the same country as the visitor
+        if country_id and not operator:
+            same_country_operator_ids = self.available_operator_ids.filtered(lambda operator: operator.partner_id.country_id.id == country_id)
+            if same_country_operator_ids:
+                operator = self._get_less_active_operator(operator_statuses, same_country_operator_ids)
+        # Try to get a random operator, regardless of the lang or the country
+        if not operator:
+            operator = self._get_less_active_operator(operator_statuses, self.available_operator_ids)
+        return operator
 
     def _get_channel_infos(self):
         self.ensure_one()
@@ -278,11 +313,13 @@ class ImLivechatChannel(models.Model):
         if username is None:
             username = _('Visitor')
         info = {}
-        info['available'] = self.chatbot_script_count or len(self._get_available_users()) > 0
+        info['available'] = self.chatbot_script_count or len(self.available_operator_ids) > 0
         info['server_url'] = self.get_base_url()
         if info['available']:
             info['options'] = self._get_channel_infos()
-            info['options']['current_partner_id'] = self.env.user.partner_id.id
+            info['options']['current_partner_id'] = (
+                self.env.user.partner_id.id if not self.env.user._is_public() else None
+            )
             info['options']["default_username"] = username
         return info
 

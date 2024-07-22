@@ -2,24 +2,28 @@
 
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
-import { debounce } from "@web/core/utils/timing";
+import { throttleForAnimation } from "@web/core/utils/timing";
 import { BlockUI } from "./block_ui";
 import { browser } from "@web/core/browser/browser";
 import { getTabableElements } from "@web/core/utils/ui";
 import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
-import { EventBus, useEffect, useRef } from "@odoo/owl";
+import { EventBus, reactive, useEffect, useRef } from "@odoo/owl";
 
 export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
+function getFirstAndLastTabableElements(el) {
+    const tabableEls = getTabableElements(el);
+    return [tabableEls[0], tabableEls[tabableEls.length - 1]];
+}
+
 /**
  * This hook will set the UI active element
- * when the caller component will mount/unmount.
+ * when the caller component will mount/patch and
+ * only if the t-reffed element has some tabable elements.
  *
  * The caller component could pass a `t-ref` value of its template
  * to delegate the UI active element to another element than itself.
- * In that case, it is mandatory that the referenced element is fixed and
- * not dynamically attached in/detached from the DOM (e.g. with t-if directive).
  *
  * @param {string} refName
  */
@@ -28,7 +32,7 @@ export function useActiveElement(refName) {
         throw new Error("refName not given to useActiveElement");
     }
     const uiService = useService("ui");
-    const owner = useRef(refName);
+    const ref = useRef(refName);
 
     function trapFocus(e) {
         const hotkey = getActiveHotkey(e);
@@ -36,9 +40,7 @@ export function useActiveElement(refName) {
             return;
         }
         const el = e.currentTarget;
-        const tabableEls = getTabableElements(el);
-        const firstTabableEl = tabableEls[0] || el;
-        const lastTabableEl = tabableEls[tabableEls.length - 1] || el;
+        const [firstTabableEl, lastTabableEl] = getFirstAndLastTabableElements(el);
         switch (hotkey) {
             case "tab":
                 if (document.activeElement === lastTabableEl) {
@@ -60,19 +62,13 @@ export function useActiveElement(refName) {
     useEffect(
         (el) => {
             if (el) {
+                const [firstTabableEl] = getFirstAndLastTabableElements(el);
+                if (!firstTabableEl) {
+                    // no tabable elements: no need to trap focus nor become the UI active element
+                    return;
+                }
                 const oldActiveElement = document.activeElement;
                 uiService.activateElement(el);
-                const tabableEls = getTabableElements(el);
-                if (tabableEls.length === 0 && el.tabIndex < 0) {
-                    /**
-                     * It's possible that the active element is not a focusable element,
-                     * adding tabindex="-1" will allow the element to be focusable.
-                     * Note that, even if the default of tabIndex is -1, for the element to be
-                     * focusable it should be explicitly set.
-                     */
-                    el.tabIndex = -1;
-                }
-                const firstTabableEl = tabableEls[0] || el;
 
                 el.addEventListener("keydown", trapFocus);
 
@@ -82,13 +78,25 @@ export function useActiveElement(refName) {
                 return () => {
                     uiService.deactivateElement(el);
                     el.removeEventListener("keydown", trapFocus);
-                    if (el.contains(document.activeElement)) {
+
+                    /**
+                     * In some cases, the current active element is not
+                     * anymore in el (e.g. with ConfirmationDialog, the
+                     * confirm button is disabled when clicked, so the
+                     * focus is lost). In that case, we also want to restore
+                     * the focus to the previous active element so we
+                     * check if the current active element is the body
+                     */
+                    if (
+                        el.contains(document.activeElement) ||
+                        document.activeElement === document.body
+                    ) {
                         oldActiveElement.focus();
                     }
                 };
             }
         },
-        () => [owner.el]
+        () => [ref.el]
     );
 }
 
@@ -124,20 +132,34 @@ export function getMediaQueryLists() {
 // window size handling.
 const MEDIAS = getMediaQueryLists();
 
-export const uiService = {
+export const utils = {
     getSize() {
         return MEDIAS.findIndex((media) => media.matches);
     },
+    isSmall(ui = {}) {
+        return (ui.size || utils.getSize()) <= SIZES.SM;
+    },
+};
+
+const bus = new EventBus();
+
+export function listenSizeChange(callback) {
+    bus.addEventListener("resize", callback);
+    return () => bus.removeEventListener("resize", callback);
+}
+
+export const uiService = {
     start(env) {
         // block/unblock code
-        const bus = new EventBus();
         registry.category("main_components").add("BlockUI", { Component: BlockUI, props: { bus } });
 
         let blockCount = 0;
-        function block() {
+        function block(data) {
             blockCount++;
             if (blockCount === 1) {
-                bus.trigger("BLOCK");
+                bus.trigger("BLOCK", {
+                    message: data?.message,
+                });
             }
         }
         function unblock() {
@@ -172,34 +194,33 @@ export const uiService = {
             }
         }
 
-        const ui = {
+        const ui = reactive({
             bus,
-            size: this.getSize(),
+            size: utils.getSize(),
             get activeElement() {
                 return activeElems[activeElems.length - 1];
             },
             get isBlocked() {
                 return blockCount > 0;
             },
-            get isSmall() {
-                return ui.size <= SIZES.SM;
-            },
+            isSmall: utils.isSmall(),
             block,
             unblock,
             activateElement,
             deactivateElement,
             getActiveElementOf,
-        };
+        });
 
         // listen to media query status changes
         const updateSize = () => {
             const prevSize = ui.size;
-            ui.size = this.getSize();
+            ui.size = utils.getSize();
             if (ui.size !== prevSize) {
+                ui.isSmall = utils.isSmall(ui);
                 bus.trigger("resize");
             }
         };
-        browser.addEventListener("resize", debounce(updateSize, 100));
+        browser.addEventListener("resize", throttleForAnimation(updateSize));
 
         Object.defineProperty(env, "isSmall", {
             get() {

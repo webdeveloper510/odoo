@@ -1,28 +1,59 @@
 /** @odoo-module **/
 
+import { Component } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
+import { useSpecialData } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component } from "@odoo/owl";
-
+let nextId = 0;
 export class RadioField extends Component {
+    static template = "web.RadioField";
+    static props = {
+        ...standardFieldProps,
+        orientation: { type: String, optional: true },
+        label: { type: String, optional: true },
+        domain: { type: Array, optional: true },
+    };
+    static defaultProps = {
+        orientation: "vertical",
+    };
+
     setup() {
-        this.id = `radio_field_${++RadioField.nextId}`;
+        this.id = `radio_field_${nextId++}`;
+        this.type = this.props.record.fields[this.props.name].type;
+        if (this.type === "many2one") {
+            this.specialData = useSpecialData(async (orm, props) => {
+                const { relation } = props.record.fields[props.name];
+                const kwargs = {
+                    specification: { display_name: 1 },
+                    domain: props.domain,
+                };
+                const { records } = await orm.call(relation, "web_search_read", [], kwargs);
+                return records.map((record) => [record.id, record.display_name]);
+            });
+        }
     }
 
     get items() {
-        return RadioField.getItems(this.props.name, this.props.record);
-    }
-    get string() {
-        return this.props.record.activeFields[this.props.name].string;
+        switch (this.type) {
+            case "selection":
+                return this.props.record.fields[this.props.name].selection;
+            case "many2one": {
+                return this.specialData.data;
+            }
+            default:
+                return [];
+        }
     }
     get value() {
-        switch (this.props.type) {
+        switch (this.type) {
             case "selection":
-                return this.props.value;
+                return this.props.record.data[this.props.name];
             case "many2one":
-                return Array.isArray(this.props.value) ? this.props.value[0] : this.props.value;
+                return Array.isArray(this.props.record.data[this.props.name])
+                    ? this.props.record.data[this.props.name][0]
+                    : this.props.record.data[this.props.name];
             default:
                 return null;
         }
@@ -32,63 +63,34 @@ export class RadioField extends Component {
      * @param {any} value
      */
     onChange(value) {
-        switch (this.props.type) {
+        switch (this.type) {
             case "selection":
-                this.props.update(value[0]);
+                this.props.record.update({ [this.props.name]: value[0] });
                 break;
             case "many2one":
-                this.props.update(value);
+                this.props.record.update({ [this.props.name]: value });
                 break;
         }
     }
 }
 
-RadioField.nextId = 0;
-
-RadioField.template = "web.RadioField";
-RadioField.props = {
-    ...standardFieldProps,
-    orientation: { type: String, optional: true },
-};
-RadioField.defaultProps = {
-    orientation: "vertical",
-};
-
-RadioField.displayName = _lt("Radio");
-RadioField.supportedTypes = ["many2one", "selection"];
-RadioField.legacySpecialData = "_fetchSpecialMany2ones";
-
-RadioField.isEmpty = (record, fieldName) => record.data[fieldName] === false;
-RadioField.extractProps = ({ attrs }) => {
-    return {
-        orientation: attrs.options.horizontal ? "horizontal" : "vertical",
-    };
+export const radioField = {
+    component: RadioField,
+    displayName: _t("Radio"),
+    supportedOptions: [
+        {
+            label: _t("Display horizontally"),
+            name: "horizontal",
+            type: "boolean",
+        },
+    ],
+    supportedTypes: ["many2one", "selection"],
+    isEmpty: (record, fieldName) => record.data[fieldName] === false,
+    extractProps: ({ options, string }, dynamicInfo) => ({
+        orientation: options.horizontal ? "horizontal" : "vertical",
+        label: string,
+        domain: dynamicInfo.domain(),
+    }),
 };
 
-RadioField.getItems = (fieldName, record) => {
-    switch (record.fields[fieldName].type) {
-        case "selection":
-            return record.fields[fieldName].selection;
-        case "many2one": {
-            const value = record.preloadedData[fieldName] || [];
-            return value.map((item) => [item.id, item.display_name]);
-        }
-        default:
-            return [];
-    }
-};
-
-registry.category("fields").add("radio", RadioField);
-
-export async function preloadRadio(orm, record, fieldName) {
-    const field = record.fields[fieldName];
-    const context = record.evalContext;
-    const domain = record.getFieldDomain(fieldName).toList(context);
-    const records = await orm.searchRead(field.relation, domain, ["id"]);
-    return await orm.call(field.relation, "name_get", [records.map((record) => record.id)]);
-}
-
-registry.category("preloadedData").add("radio", {
-    loadOnTypes: ["many2one"],
-    preload: preloadRadio,
-});
+registry.category("fields").add("radio", radioField);

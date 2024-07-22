@@ -3,16 +3,15 @@
 # 	* pos_epson_printer
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Ryoko Tsuda <ryoko@quartile.co>, 2022
+# Wil Odoo, 2023
 # Junko Augias, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:54+0000\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Junko Augias, 2023\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -29,7 +28,7 @@ msgstr "現金箱"
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid ""
 "Check on the printer configuration for the 'Device ID' setting. It should be"
@@ -42,16 +41,21 @@ msgid "Config Settings"
 msgstr "コンフィグ設定"
 
 #. module: pos_epson_printer
-#. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
-#, python-format
-msgid "Connection to the printer failed"
-msgstr "プリンターへの接続に失敗しました"
-
-#. module: pos_epson_printer
 #: model:ir.model.fields,field_description:pos_epson_printer.field_pos_config__epson_printer_ip
 msgid "Epson Printer IP"
 msgstr "EpsonプリンタIP"
+
+#. module: pos_epson_printer
+#: model:ir.model.fields,field_description:pos_epson_printer.field_pos_printer__epson_printer_ip
+msgid "Epson Printer IP Address"
+msgstr "EpsonプリンタIPアドレス"
+
+#. module: pos_epson_printer
+#. odoo-python
+#: code:addons/pos_epson_printer/models/pos_printer.py:0
+#, python-format
+msgid "Epson Printer IP Address cannot be empty."
+msgstr "EpsonプリンタIPアドレスは空欄ではいけません。"
 
 #. module: pos_epson_printer
 #: model_terms:ir.ui.view,arch_db:pos_epson_printer.pos_iot_config_view_form
@@ -61,42 +65,32 @@ msgstr "EpsonレシートプリンタIPアドレス"
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid ""
 "If you are on a secure server (HTTPS) please make sure you manually accepted"
-" the certificate by accessing %s"
-msgstr "セキュアサーバー(HTTPS)を使用している場合は、%sにアクセスして証明書を手動で受け入れたかどうか確認して下さい。"
+" the certificate by accessing %s. "
+msgstr "安全なサーバ(HTTPS)を使用している場合は、%sにアクセスし、証明書を手動で承認したことを確認して下さい。"
 
 #. module: pos_epson_printer
 #: model:ir.model.fields,help:pos_epson_printer.field_pos_config__epson_printer_ip
+#: model:ir.model.fields,help:pos_epson_printer.field_pos_printer__epson_printer_ip
 msgid "Local IP address of an Epson receipt printer."
 msgstr "EpsonレシートプリンタローカルIPアドレス"
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid "No paper was detected by the printer"
 msgstr "プリンタに紙がありません"
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid "Please check if the printer has enough paper and is ready to print."
 msgstr "プリンタに十分な用紙があり、印刷できる状態になっているか確認して下さい。"
-
-#. module: pos_epson_printer
-#. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
-#, python-format
-msgid ""
-"Please check if the printer is still connected. \n"
-"Some browsers don't allow HTTP calls from websites to devices in the network (for security reasons). If it is the case, you will need to follow Odoo's documentation for 'Self-signed certificate for ePOS printers' and 'Secure connection (HTTPS)' to solve the issue"
-msgstr ""
-"プリンタが接続されているか確認して下さい。\n"
-"ブラウザによっては、Webサイトからネットワーク内のデバイスへのHTTPコールを許可しないものがあります(セキュリティ上の理由)。この場合、Odooの'ePOSプリンター用の自己署名証明書'と'安全な接続(HTTPS)'のドキュメントに従って問題を解決する必要があります。"
 
 #. module: pos_epson_printer
 #: model:ir.model,name:pos_epson_printer.model_pos_config
@@ -104,13 +98,28 @@ msgid "Point of Sale Configuration"
 msgstr "POS設定"
 
 #. module: pos_epson_printer
+#: model:ir.model,name:pos_epson_printer.model_pos_printer
+msgid "Point of Sale Printer"
+msgstr "POSプリンタ"
+
+#. module: pos_epson_printer
+#: model:ir.model,name:pos_epson_printer.model_pos_session
+msgid "Point of Sale Session"
+msgstr "POSセッション"
+
+#. module: pos_epson_printer
 #: model:ir.model.fields,field_description:pos_epson_printer.field_res_config_settings__pos_epson_printer_ip
 msgid "Pos Epson Printer Ip"
 msgstr "POS EpsonプリンタIP"
 
 #. module: pos_epson_printer
+#: model:ir.model.fields,field_description:pos_epson_printer.field_pos_printer__printer_type
+msgid "Printer Type"
+msgstr "プリンタタイプ"
+
+#. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid "Printing failed"
 msgstr "プリントに失敗しました"
@@ -125,21 +134,26 @@ msgstr "IoT Boxに接続されているレシートプリンタの代わりに�
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid "The following error code was given by the printer:"
-msgstr "プリンタから以下のエラーコードが表示されました。"
+msgstr "プリンタから以下のエラーコードが表示されました:"
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid "The printer was successfully reached, but it wasn't able to print."
 msgstr "プリンタへの接続は成功しましたが、印刷できませんでした。"
 
 #. module: pos_epson_printer
 #. odoo-javascript
-#: code:addons/pos_epson_printer/static/src/js/printers.js:0
+#: code:addons/pos_epson_printer/static/src/app/epson_printer.js:0
 #, python-format
 msgid "To find more details on the error reason, please search online for:"
 msgstr "エラーの詳細については、オンラインで検索して下さい:"
+
+#. module: pos_epson_printer
+#: model:ir.model.fields.selection,name:pos_epson_printer.selection__pos_printer__printer_type__epson_epos
+msgid "Use an Epson printer"
+msgstr "Epsonプリンタを使用"

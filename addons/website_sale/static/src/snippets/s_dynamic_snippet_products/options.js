@@ -1,10 +1,9 @@
-odoo.define('website_sale.s_dynamic_snippet_products_options', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const options = require('web_editor.snippets.options');
-const s_dynamic_snippet_carousel_options = require('website.s_dynamic_snippet_carousel_options');
+import options from "@web_editor/js/editor/snippets.options";
+import s_dynamic_snippet_carousel_options from "@website/snippets/s_dynamic_snippet_carousel/options";
 
-var wUtils = require('website.utils');
+import wUtils from "@website/js/utils";
 
 const alternativeSnippetRemovedOptions = [
     'filter_opt', 'product_category_opt', 'product_tag_opt', 'product_names_opt',
@@ -28,16 +27,9 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
         }
         this.productCategories = {};
         this.isAlternativeProductSnippet = this.$target.hasClass('o_wsale_alternative_products');
-    },
-    /**
-     * @override
-     */
-    onBuilt() {
-        this._super.apply(this, arguments);
-        // TODO Remove in master.
-        this.$target[0].dataset['snippet'] = 's_dynamic_snippet_products';
-    },
 
+        this.orm = this.bindService("orm");
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -58,14 +50,7 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
      * @returns {Promise}
      */
     _fetchProductCategories: function () {
-        return this._rpc({
-            model: 'product.public.category',
-            method: 'search_read',
-            kwargs: {
-                domain: wUtils.websiteDomain(this),
-                fields: ['id', 'name'],
-            }
-        });
+        return this.orm.searchRead("product.public.category", wUtils.websiteDomain(this), ["id", "name"]);
     },
     /**
      *
@@ -101,5 +86,4 @@ const dynamicSnippetProductsOptions = s_dynamic_snippet_carousel_options.extend(
 
 options.registry.dynamic_snippet_products = dynamicSnippetProductsOptions;
 
-return dynamicSnippetProductsOptions;
-});
+export default dynamicSnippetProductsOptions;

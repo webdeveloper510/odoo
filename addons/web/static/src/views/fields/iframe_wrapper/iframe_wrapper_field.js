@@ -1,11 +1,16 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { standardFieldProps } from "../standard_field_props";
 import { Component, useEffect, useRef } from "@odoo/owl";
 
 export class IframeWrapperField extends Component {
+    static template = "web.IframeWrapperField";
+    static props = {
+        ...standardFieldProps,
+    };
+
     setup() {
         this.iframeRef = useRef("iframe");
 
@@ -26,17 +31,16 @@ export class IframeWrapperField extends Component {
                 iframeDoc.write(value);
                 iframeDoc.close();
             },
-            () => [this.props.value]
+            () => [this.props.record.data[this.props.name]]
         );
     }
 }
 
-IframeWrapperField.template = "web.IframeWrapperField";
-IframeWrapperField.props = {
-    ...standardFieldProps,
+export const iframeWrapperField = {
+    component: IframeWrapperField,
+    displayName: _t("Wrap raw html within an iframe"),
+    // If HTML, don't forget to adjust the sanitize options to avoid stripping most of the metadata
+    supportedTypes: ["text", "html"],
 };
-IframeWrapperField.displayName = _lt("Wrap raw html within an iframe");
-// If HTML, don't forget to adjust the sanitize options to avoid stripping most of the metadata
-IframeWrapperField.supportedTypes = ["text", "html"];
 
-registry.category("fields").add("iframe_wrapper", IframeWrapperField);
+registry.category("fields").add("iframe_wrapper", iframeWrapperField);

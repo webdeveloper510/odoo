@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import wTourUtils from "website.tour_utils";
+import wTourUtils from "@website/js/tours/tour_utils";
 
 const snippets = [
     {
@@ -37,18 +37,22 @@ wTourUtils.registerWebsitePreviewTour("snippet_popup_and_scrollbar", {
     test: true,
     url: "/",
     edition: true,
-}, [
+}, () => [
     wTourUtils.dragNDrop(snippets[1]), // Media List
     wTourUtils.dragNDrop(snippets[0]), // Popup
     checkScrollbar(false),
-    wTourUtils.clickOnSnippet(snippets[0]), // Popup
+    {
+        content: 'Click on the s_popup snippet',
+        in_modal: false,
+        trigger: 'iframe .s_popup .modal',
+    },
     toggleBackdrop(), // hide Popup backdrop
     checkScrollbar(true),
     wTourUtils.goBackToBlocks(),
     {
         content: "Drag the Media List block and drop it in the popup.",
         trigger: "#oe_snippets .oe_snippet:has(> [data-snippet='s_media_list']) .oe_snippet_thumbnail",
-        run: "drag_and_drop iframe #wrap .s_popup .modal-content.oe_structure",
+        run: "drag_and_drop_native iframe #wrap .s_popup .modal-content.oe_structure",
     },
     checkScrollbar(false),
     {
@@ -85,10 +89,14 @@ wTourUtils.registerWebsitePreviewTour("snippet_popup_and_scrollbar", {
     {
         content: "Drag the Media List block and drop it in the popup.",
         trigger: "#oe_snippets .oe_snippet:has(> [data-snippet='s_media_list']) .oe_snippet_thumbnail",
-        run: "drag_and_drop iframe #wrap .s_popup .modal-content.oe_structure",
+        run: "drag_and_drop_native iframe #wrap .s_popup .modal-content.oe_structure",
     },
     checkScrollbar(false),
-    wTourUtils.clickOnSnippet(snippets[0]), // Popup
+    {
+        content: 'Click on the s_popup snippet',
+        in_modal: false,
+        trigger: 'iframe .s_popup .modal',
+    },
     {
         content: "Remove the s_popup snippet",
         trigger: ".o_we_customize_panel we-customizeblock-options:contains('Popup') we-button.oe_snippet_remove:first",
@@ -100,7 +108,7 @@ wTourUtils.registerWebsitePreviewTour("snippet_popup_and_scrollbar", {
     {
         content: "Drag a Media List snippet and drop it in the Cookies Bar.",
         trigger: "#oe_snippets .oe_snippet:has(> [data-snippet='s_media_list']) .oe_snippet_thumbnail",
-        run: "drag_and_drop iframe #website_cookies_bar .modal-content.oe_structure",
+        run: "drag_and_drop_native iframe #website_cookies_bar .modal-content.oe_structure",
     },
     {
         content: "Select the Media List snippet in the Cookies Bar.",

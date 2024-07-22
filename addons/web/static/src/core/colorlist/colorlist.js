@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 
 import { Component, useRef, useState, useExternalListener } from "@odoo/owl";
 
@@ -36,18 +36,18 @@ export class ColorList extends Component {
 }
 
 ColorList.COLORS = [
-    _lt("No color"),
-    _lt("Red"),
-    _lt("Orange"),
-    _lt("Yellow"),
-    _lt("Light blue"),
-    _lt("Dark purple"),
-    _lt("Salmon pink"),
-    _lt("Medium blue"),
-    _lt("Dark blue"),
-    _lt("Fuchsia"),
-    _lt("Green"),
-    _lt("Purple"),
+    _t("No color"),
+    _t("Red"),
+    _t("Orange"),
+    _t("Yellow"),
+    _t("Cyan"),
+    _t("Purple"),
+    _t("Almond"),
+    _t("Teal"),
+    _t("Blue"),
+    _t("Raspberry"),
+    _t("Green"),
+    _t("Violet"),
 ];
 ColorList.template = "web.ColorList";
 ColorList.defaultProps = {

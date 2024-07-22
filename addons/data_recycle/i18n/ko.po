@@ -3,18 +3,15 @@
 # 	* data_recycle
 # 
 # Translators:
-# Martin Trigaux, 2022
-# Linkup <link-up@naver.com>, 2022
-# Sarah Park, 2023
-# Daye Jeong, 2023
+# Wil Odoo, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.5alpha1\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-20 09:01+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Daye Jeong, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Wil Odoo, 2023\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,10 +25,11 @@ msgid ""
 "' recycling rule.<br/>\n"
 "You can validate those changes"
 msgstr ""
-"' 재사용 규칙.<br/>\n"
-"변경사항을 확인할 수 있습니다"
+"' 재활용 규칙.<br/>\n"
+"변경 사항을 확인할 수 있습니다"
 
 #. module: data_recycle
+#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_record.py:0
 #, python-format
 msgid "**Record Deleted**"
@@ -46,7 +44,7 @@ msgstr "<span class=\"me-1\">매</span>"
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__active
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__active
 msgid "Active"
-msgstr "활성"
+msgstr "활성화"
 
 #. module: data_recycle
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__recycle_action__archive
@@ -66,7 +64,7 @@ msgstr "회사"
 #. module: data_recycle
 #: model:ir.ui.menu,name:data_recycle.menu_data_cleaning_config
 msgid "Configuration"
-msgstr "구성"
+msgstr "설정"
 
 #. module: data_recycle
 #: model_terms:ir.actions.act_window,help:data_recycle.action_data_recycle_record
@@ -93,10 +91,15 @@ msgstr "데이터 정리"
 
 #. module: data_recycle
 #: model:ir.actions.server,name:data_recycle.ir_cron_clean_records_ir_actions_server
-#: model:ir.cron,cron_name:data_recycle.ir_cron_clean_records
-#: model:ir.cron,name:data_recycle.ir_cron_clean_records
 msgid "Data Recycle: Clean Records"
-msgstr "데이터 재사용: 기록 정리"
+msgstr "데이터 재활용: 기록 정리"
+
+#. module: data_recycle
+#. odoo-python
+#: code:addons/data_recycle/models/data_recycle_model.py:0
+#, python-format
+msgid "Data to Recycle"
+msgstr "재활용할 데이터"
 
 #. module: data_recycle
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__notify_frequency_period__days
@@ -122,7 +125,7 @@ msgstr "델타 단위"
 #. module: data_recycle
 #: model_terms:ir.ui.view,arch_db:data_recycle.view_data_recycle_record_list
 msgid "Discard"
-msgstr "작성 취소"
+msgstr "취소"
 
 #. module: data_recycle
 #: model_terms:ir.ui.view,arch_db:data_recycle.view_data_recycle_record_search
@@ -155,13 +158,7 @@ msgstr "ID"
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__include_archived
 msgid "Include Archived"
-msgstr "ㅍ"
-
-#. module: data_recycle
-#: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model____last_update
-#: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record____last_update
-msgid "Last Modified on"
-msgstr "최근 수정일"
+msgstr "보관된 항목 포함"
 
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__last_notification
@@ -273,7 +270,7 @@ msgstr "재활용 모델"
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__recycle_record_ids
 msgid "Recycle Record"
-msgstr "재활용 기록"
+msgstr "재활용 레코드"
 
 #. module: data_recycle
 #: model:ir.ui.menu,name:data_recycle.menu_data_cleaning_config_rules_recycle
@@ -327,6 +324,7 @@ msgid "The notification frequency should be greater than 0"
 msgstr "알림주기는 0보다 커야합니다."
 
 #. module: data_recycle
+#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_model.py:0
 #, python-format
 msgid "This model doesn't manage archived records. Only deletion is possible."
@@ -338,20 +336,21 @@ msgid "Time Field"
 msgstr "시간 필드"
 
 #. module: data_recycle
+#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_record.py:0
 #, python-format
 msgid "Undefined Name"
 msgstr "정의되지 않은 이름"
 
 #. module: data_recycle
-#. openerp-web
+#. odoo-javascript
 #: code:addons/data_recycle/static/src/views/data_recycle_list_view.xml:0
 #, python-format
 msgid "Unselect"
 msgstr "선택 취소"
 
 #. module: data_recycle
-#. openerp-web
+#. odoo-javascript
 #: code:addons/data_recycle/static/src/views/data_recycle_list_view.xml:0
 #: model_terms:ir.ui.view,arch_db:data_recycle.view_data_recycle_record_list
 #, python-format

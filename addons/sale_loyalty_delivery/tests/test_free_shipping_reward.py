@@ -11,7 +11,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestSaleCouponProgramRules, cls).setUpClass()
+        super().setUpClass()
         cls.iPadMini = cls.env['product.product'].create({'name': 'Large Cabinet', 'list_price': 320.0})
         tax_15pc_excl = cls.env['account.tax'].create({
             'name': "15% Tax excl",
@@ -336,7 +336,7 @@ class TestSaleCouponProgramRules(TestSaleCouponCommon):
         })
         product = self.env['product.product'].create({
             'name': 'Test product',
-            'type': 'product',
+            'type': 'consu',
             'list_price': 200.0,
             'invoice_policy': 'delivery',
         })

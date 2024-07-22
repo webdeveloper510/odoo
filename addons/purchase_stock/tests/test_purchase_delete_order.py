@@ -80,4 +80,4 @@ class TestDeleteOrder(PurchaseTestCommon):
         # Check purchase order and related move are canceled while linked move state is not
         self.assertEqual(purchase_order.state, 'cancel', 'Purchase Order should be canceled')
         self.assertEqual(purchase_order.order_line.move_ids.state, 'cancel', 'Purchase order move should be canceled')
-        self.assertEqual(move.state, 'waiting', 'Move should be still waiting')
+        self.assertEqual(move.state, 'confirmed', 'Move state should be recomputed to confimed')

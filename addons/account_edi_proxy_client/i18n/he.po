@@ -3,26 +3,26 @@
 # 	* account_edi_proxy_client
 # 
 # Translators:
-# Lilach Gilliam <lilach.gilliam@gmail.com>, 2022
-# Martin Trigaux, 2022
-# דודי מלכה <Dudimalka6@gmail.com>, 2022
-# Yihya Hugirat <hugirat@gmail.com>, 2022
-# Ha Ketem <haketem@gmail.com>, 2022
+# דודי מלכה <Dudimalka6@gmail.com>, 2023
+# Lilach Gilliam <lilach.gilliam@gmail.com>, 2023
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023
+# Martin Trigaux, 2023
+# Ha Ketem <haketem@gmail.com>, 2023
+# Yihya Hugirat <hugirat@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-14 05:51+0000\n"
-"PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: ZVI BLONDER <ZVIBLONDER@gmail.com>, 2023\n"
+"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"Last-Translator: Yihya Hugirat <hugirat@gmail.com>, 2023\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: he\n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: (n % 10 == 0 && n % 1 == 0 && n > 10) ? 2 : 3;\n"
+"Plural-Forms: nplurals=3; plural=(n == 1 && n % 1 == 0) ? 0 : (n == 2 && n % 1 == 0) ? 1: 2;\n"
 
 #. module: account_edi_proxy_client
 #: model:ir.model,name:account_edi_proxy_client.model_account_edi_proxy_client_user
@@ -45,11 +45,6 @@ msgid "Active"
 msgstr "פעיל"
 
 #. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_format_code
-msgid "Code"
-msgstr "קוד"
-
-#. module: account_edi_proxy_client
 #: model:ir.model,name:account_edi_proxy_client.model_res_company
 msgid "Companies"
 msgstr "חברות"
@@ -70,6 +65,11 @@ msgid "Created on"
 msgstr "נוצר ב-"
 
 #. module: account_edi_proxy_client
+#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__demo
+msgid "Demo mode"
+msgstr ""
+
+#. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__display_name
 msgid "Display Name"
 msgstr "שם לתצוגה"
@@ -85,13 +85,8 @@ msgid "EDI Proxy Users"
 msgstr ""
 
 #. module: account_edi_proxy_client
-#: model:ir.model,name:account_edi_proxy_client.model_account_edi_format
-msgid "EDI format"
-msgstr ""
-
-#. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_format_id
-msgid "Edi Format"
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_mode
+msgid "EDI operating mode"
 msgstr ""
 
 #. module: account_edi_proxy_client
@@ -108,11 +103,6 @@ msgstr "מזהה"
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__id_client
 msgid "Id Client"
 msgstr "מספר זיהוי לקוח"
-
-#. module: account_edi_proxy_client
-#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user____last_update
-msgid "Last Modified on"
-msgstr "שינוי אחרון ב"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__write_uid
@@ -135,9 +125,24 @@ msgid "Private Key Filename"
 msgstr ""
 
 #. module: account_edi_proxy_client
+#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__prod
+msgid "Production mode"
+msgstr ""
+
+#. module: account_edi_proxy_client
+#: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__proxy_type
+msgid "Proxy Type"
+msgstr ""
+
+#. module: account_edi_proxy_client
 #: model:ir.model.fields,field_description:account_edi_proxy_client.field_account_edi_proxy_client_user__refresh_token
 msgid "Refresh Token"
 msgstr "רענן אסימון"
+
+#. module: account_edi_proxy_client
+#: model:ir.model.fields.selection,name:account_edi_proxy_client.selection__account_edi_proxy_client_user__edi_mode__test
+msgid "Test mode"
+msgstr ""
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,help:account_edi_proxy_client.field_account_edi_proxy_client_user__private_key
@@ -146,9 +151,7 @@ msgstr "המפתח להצפנת כל נתוני המשתמש"
 
 #. module: account_edi_proxy_client
 #: model:ir.model.fields,help:account_edi_proxy_client.field_account_edi_proxy_client_user__edi_identification
-msgid ""
-"The unique id that identifies this user for on the edi format, typically the"
-" vat"
+msgid "The unique id that identifies this user, typically the vat"
 msgstr ""
 
 #. module: account_edi_proxy_client
@@ -178,8 +181,13 @@ msgid ""
 msgstr ""
 
 #. module: account_edi_proxy_client
-#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_edi_identification_per_format
-msgid "This edi identification is already assigned to a user"
+#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_active_company_proxy
+msgid "This company has an active user already created for this EDI type"
+msgstr ""
+
+#. module: account_edi_proxy_client
+#: model:ir.model.constraint,message:account_edi_proxy_client.constraint_account_edi_proxy_client_user_unique_active_edi_identification
+msgid "This edi identification is already assigned to an active user"
 msgstr ""
 
 #. module: account_edi_proxy_client

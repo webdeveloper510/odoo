@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { is24HourFormat } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { renderToString } from "@web/core/utils/render";
@@ -7,8 +8,10 @@ import { useDebounced } from "@web/core/utils/timing";
 import { getColor } from "../colors";
 import { useCalendarPopover, useClickHandler, useFullCalendar } from "../hooks";
 import { CalendarCommonPopover } from "./calendar_common_popover";
+import { browser } from "@web/core/browser/browser";
+import { getWeekNumber } from "../utils";
 
-import { Component, useEffect } from "@odoo/owl";
+import { Component, onMounted, useEffect } from "@odoo/owl";
 
 const SCALE_TO_FC_VIEW = {
     day: "timeGridDay",
@@ -39,6 +42,8 @@ const HOUR_FORMATS = {
     },
 };
 
+const { DateTime } = luxon;
+
 export class CalendarCommonRenderer extends Component {
     setup() {
         this.fc = useFullCalendar("fullCalendar", this.options);
@@ -46,22 +51,26 @@ export class CalendarCommonRenderer extends Component {
         this.popover = useCalendarPopover(this.constructor.components.Popover);
         this.onWindowResizeDebounced = useDebounced(this.onWindowResize, 200);
 
+        onMounted(() => {
+            if (this.props.model.scale === "day" || this.props.model.scale === "week") {
+                //Need to wait React
+                browser.setTimeout(() => {
+                    if (this.fc.api.view) {
+                        this.fc.api.scrollToTime("06:00:00");
+                    }
+                }, 0);
+            }
+        });
+
         useEffect(() => {
             this.updateSize();
         });
-
-        useEffect(
-            (view) => {
-                this.env.config.setDisplayName(`${this.props.displayName} (${view.title})`);
-            },
-            () => [this.fc.api.view]
-        );
     }
 
     get options() {
         return {
             allDaySlot: this.props.model.hasAllDaySlot,
-            allDayText: this.env._t("All day"),
+            allDayText: _t(""),
             columnHeaderFormat: this.env.isSmall
                 ? SHORT_SCALE_TO_HEADER_FORMAT[this.props.model.scale]
                 : SCALE_TO_HEADER_FORMAT[this.props.model.scale],
@@ -77,6 +86,7 @@ export class CalendarCommonRenderer extends Component {
             eventDrop: this.onEventDrop,
             eventLimit: this.props.model.eventLimit,
             eventLimitClick: this.onEventLimitClick,
+            eventLimitText: this.env.isSmall ? "" : "more",
             eventMouseEnter: this.onEventMouseEnter,
             eventMouseLeave: this.onEventMouseLeave,
             eventRender: this.onEventRender,
@@ -101,18 +111,24 @@ export class CalendarCommonRenderer extends Component {
             snapDuration: { minutes: 15 },
             timeZone: luxon.Settings.defaultZone.name,
             unselectAuto: false,
-            weekLabel:
-                this.props.model.scale === "month" && this.env.isSmall ? "" : this.env._t("Week"),
-            weekNumberCalculation: "ISO",
+            weekLabel: this.props.model.scale === "month" && this.env.isSmall ? "" : _t("Week"),
+            weekends: this.props.isWeekendVisible,
+            weekNumberCalculation: (date) => getWeekNumber(date, this.props.model.firstDayOfWeek),
             weekNumbers: true,
             weekNumbersWithinDays: !this.env.isSmall,
             windowResize: this.onWindowResizeDebounced,
+            columnHeaderHtml: this.getHeaderHtml,
         };
     }
 
     getStartTime(record) {
         const timeFormat = is24HourFormat() ? "HH:mm" : "hh:mm a";
         return record.start.toFormat(timeFormat);
+    }
+
+    getEndTime(record) {
+        const timeFormat = is24HourFormat() ? "HH:mm" : "hh:mm a";
+        return record.end.toFormat(timeFormat);
     }
 
     computeEventSelector(event) {
@@ -132,15 +148,18 @@ export class CalendarCommonRenderer extends Component {
         return Object.values(this.props.model.records).map((r) => this.convertRecordToEvent(r));
     }
     convertRecordToEvent(record) {
+        const allDay = record.isAllDay || record.end.diff(record.start, "hours").hours >= 24;
         return {
             id: record.id,
             title: record.title,
             start: record.start.toISO(),
             end:
-                ["week", "month"].includes(this.props.model.scale) && record.isAllDay
+                ["week", "month"].includes(this.props.model.scale) &&
+                (record.isAllDay ||
+                    (allDay && record.end.toMillis() !== record.end.startOf("day").toMillis()))
                     ? record.end.plus({ days: 1 }).toISO()
                     : record.end.toISO(),
-            allDay: record.isAllDay,
+            allDay: allDay,
         };
     }
     getPopoverProps(record) {
@@ -157,11 +176,16 @@ export class CalendarCommonRenderer extends Component {
         this.popover.open(
             target,
             this.getPopoverProps(record),
-            `o_cw_popover o_calendar_color_${typeof(color) === "number" ? color : 0}`
+            `o_cw_popover o_calendar_color_${typeof color === "number" ? color : 0}`
         );
     }
     updateSize() {
-        const height = window.innerHeight - this.fc.el.getBoundingClientRect().top;
+        let headerHeight = 0;
+        if (!this.env.isSmall) {
+            headerHeight =
+                document.querySelector(".o_calendar_header")?.getBoundingClientRect()?.height ?? 0;
+        }
+        const height = window.innerHeight - this.fc.el.getBoundingClientRect().top - headerHeight;
         this.fc.el.style.height = `${height}px`;
         this.fc.api.updateSize();
     }
@@ -171,6 +195,9 @@ export class CalendarCommonRenderer extends Component {
         this.highlightEvent(info.event, "o_cw_custom_highlight");
     }
     onDateClick(info) {
+        if (info?.jsEvent?.defaultPrevented) {
+            return;
+        }
         this.props.createRecord(this.fcEventToRecord(info));
     }
     onDayRender(info) {
@@ -188,7 +215,7 @@ export class CalendarCommonRenderer extends Component {
     onEventRender(info) {
         const { el, event } = info;
         el.dataset.eventId = event.id;
-        el.classList.add("o_event", "py-0");
+        el.classList.add("o_event");
         const record = this.props.model.records[event.id];
 
         if (record) {
@@ -196,6 +223,7 @@ export class CalendarCommonRenderer extends Component {
             const injectedContentStr = renderToString(this.constructor.eventTemplate, {
                 ...record,
                 startTime: this.getStartTime(record),
+                endTime: this.getEndTime(record),
             });
             const domParser = new DOMParser();
             const { children } = domParser.parseFromString(injectedContentStr, "text/html").body;
@@ -216,15 +244,28 @@ export class CalendarCommonRenderer extends Component {
             if (record.isStriked) {
                 el.classList.add("o_event_striked");
             }
-        }
+            if (record.duration <= 0.25) {
+                el.classList.add("o_event_oneliner");
+            }
+            if (DateTime.now() >= record.end) {
+                el.classList.add("o_past_event");
+            }
 
-        if (!el.querySelector(".fc-bg")) {
-            const bg = document.createElement("div");
-            bg.classList.add("fc-bg");
-            el.appendChild(bg);
+            if (!record.isAllDay && !record.isTimeHidden && record.isMonth) {
+                el.classList.add("o_event_dot");
+            } else if (record.isAllDay) {
+                el.classList.add("o_event_allday");
+            }
+
+            if (!el.classList.contains("fc-bg")) {
+                const bg = document.createElement("div");
+                bg.classList.add("fc-bg");
+                el.appendChild(bg);
+            }
         }
     }
     async onSelect(info) {
+        info.jsEvent.preventDefault();
         this.popover.close();
         await this.props.createRecord(this.fcEventToRecord(info));
         this.fc.api.unselect();
@@ -282,9 +323,25 @@ export class CalendarCommonRenderer extends Component {
     onWindowResize() {
         this.updateSize();
     }
+
+    getHeaderHtml(date) {
+        const scale = this.props.model.scale;
+        const {
+            weekdayShort: weekdayShort,
+            weekdayLong: weekdayLong,
+            day,
+        } = DateTime.fromJSDate(date);
+        return renderToString(this.constructor.headerTemplate, {
+            weekdayShort,
+            weekdayLong,
+            day,
+            scale,
+        });
+    }
 }
 CalendarCommonRenderer.components = {
     Popover: CalendarCommonPopover,
 };
 CalendarCommonRenderer.template = "web.CalendarCommonRenderer";
 CalendarCommonRenderer.eventTemplate = "web.CalendarCommonRenderer.event";
+CalendarCommonRenderer.headerTemplate = "web.CalendarCommonRendererHeader";

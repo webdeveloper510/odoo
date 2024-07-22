@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
+import binascii
 from datetime import time
 import logging
 import re
@@ -15,6 +16,7 @@ from odoo import api, fields, models, _, _lt, tools
 from odoo.tools import posix_to_ldml, float_utils, format_date, format_duration, pycompat
 from odoo.tools.mail import safe_attrs
 from odoo.tools.misc import get_lang, babel_locale_parse
+from odoo.tools.mimetypes import guess_mimetype
 
 _logger = logging.getLogger(__name__)
 
@@ -27,6 +29,14 @@ def nl2br(string):
     :rtype: unicode
     """
     return pycompat.to_text(string).replace('\n', Markup('<br>\n'))
+
+
+def nl2br_enclose(string, enclosure_tag='div'):
+    """ Like nl2br, but returns enclosed Markup allowing to better manipulate
+    trusted and untrusted content. New lines added by use are trusted, other
+    content is escaped. """
+    converted = nl2br(escape(string))
+    return Markup(f'<{enclosure_tag}>{converted}</{enclosure_tag}>')
 
 #--------------------------------------------------------------------
 # QWeb Fields converters
@@ -382,19 +392,27 @@ class ImageConverter(models.AbstractModel):
 
     @api.model
     def _get_src_data_b64(self, value, options):
-        try: # FIXME: maaaaaybe it could also take raw bytes?
-            image = Image.open(BytesIO(base64.b64decode(value)))
+        try:
+            img_b64 = base64.b64decode(value)
+        except binascii.Error:
+            raise ValueError("Invalid image content") from None
+
+        if img_b64 and guess_mimetype(img_b64, '') == 'image/webp':
+            return self.env["ir.qweb"]._get_converted_image_data_uri(value)
+
+        try:
+            image = Image.open(BytesIO(img_b64))
             image.verify()
         except IOError:
-            raise ValueError("Non-image binary fields can not be converted to HTML")
+            raise ValueError("Non-image binary fields can not be converted to HTML") from None
         except: # image.verify() throws "suitable exceptions", I have no idea what they are
-            raise ValueError("Invalid image content")
+            raise ValueError("Invalid image content") from None
 
         return "data:%s;base64,%s" % (Image.MIME[image.format], value.decode('ascii'))
 
     @api.model
     def value_to_html(self, value, options):
-        return Markup('<img src="%s">' % self._get_src_data_b64(value, options))
+        return Markup('<img src="%s">') % self._get_src_data_b64(value, options)
 
 class ImageUrlConverter(models.AbstractModel):
     """ ``image_url`` widget rendering, inserts an image tag in the
@@ -449,7 +467,7 @@ class MonetaryConverter(models.AbstractModel):
         # lang.format will not set one by default. currency.round will not
         # provide one either. So we need to generate a precision value
         # (integer > 0) from the currency's rounding (a float generally < 1.0).
-        fmt = "%.{0}f".format(display_currency.decimal_places)
+        fmt = "%.{0}f".format(options.get('decimal_places', display_currency.decimal_places))
 
         if options.get('from_currency'):
             date = options.get('date') or fields.Date.today()
@@ -631,13 +649,26 @@ class DurationConverter(models.AbstractModel):
             v, r = divmod(r, secs_per_unit)
             if not v:
                 continue
-            section = babel.dates.format_timedelta(
-                v*secs_per_unit,
-                granularity=round_to,
-                add_direction=options.get('add_direction'),
-                format=options.get('format', 'long'),
-                threshold=1,
-                locale=locale)
+            try:
+                section = babel.dates.format_timedelta(
+                    v*secs_per_unit,
+                    granularity=round_to,
+                    add_direction=options.get('add_direction'),
+                    format=options.get('format', 'long'),
+                    threshold=1,
+                    locale=locale)
+            except KeyError:
+                # in case of wrong implementation of babel, try to fallback on en_US locale.
+                # https://github.com/python-babel/babel/pull/827/files
+                # Some bugs already fixed in 2.10 but ubuntu22 is 2.8
+                localeUS = babel_locale_parse('en_US')
+                section = babel.dates.format_timedelta(
+                    v*secs_per_unit,
+                    granularity=round_to,
+                    add_direction=options.get('add_direction'),
+                    format=options.get('format', 'long'),
+                    threshold=1,
+                    locale=localeUS)
             if section:
                 sections.append(section)
 
@@ -715,7 +746,7 @@ class BarcodeConverter(models.AbstractModel):
             if k.startswith('img_') and k[4:] in safe_attrs:
                 img_element.set(k[4:], v)
         if not img_element.get('alt'):
-            img_element.set('alt', _('Barcode %s') % value)
+            img_element.set('alt', _('Barcode %s', value))
         img_element.set('src', 'data:image/png;base64,%s' % base64.b64encode(barcode).decode())
         return Markup(html.tostring(img_element, encoding='unicode'))
 
@@ -754,6 +785,12 @@ class Contact(models.AbstractModel):
     @api.model
     def value_to_html(self, value, options):
         if not value:
+            if options.get('null_text'):
+                val = {
+                    'options': options,
+                }
+                template_options = options.get('template_options', {})
+                return self.env['ir.qweb']._render('base.no_contact', val, **template_options)
             return ''
 
         opf = options.get('fields') or ["name", "address", "phone", "mobile", "email"]
@@ -767,16 +804,16 @@ class Contact(models.AbstractModel):
             opsep = Markup('<br/>')
 
         value = value.sudo().with_context(show_address=True)
-        name_get = value.name_get()[0][1]
+        display_name = value.display_name or ''
         # Avoid having something like:
-        # name_get = 'Foo\n  \n' -> This is a res.partner with a name and no address
+        # display_name = 'Foo\n  \n' -> This is a res.partner with a name and no address
         # That would return markup('<br/>') as address. But there is no address set.
-        if any(elem.strip() for elem in name_get.split("\n")[1:]):
-            address = opsep.join(name_get.split("\n")[1:]).strip()
+        if any(elem.strip() for elem in display_name.split("\n")[1:]):
+            address = opsep.join(display_name.split("\n")[1:]).strip()
         else:
             address = ''
         val = {
-            'name': name_get.split("\n")[0],
+            'name': display_name.split("\n")[0],
             'address': address,
             'phone': value.phone,
             'mobile': value.mobile,

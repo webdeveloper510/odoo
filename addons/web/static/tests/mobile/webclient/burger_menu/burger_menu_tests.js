@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { click, legacyExtraNextTick } from "@web/../tests/helpers/utils";
+import { click, nextTick } from "@web/../tests/helpers/utils";
 import {
     createWebClient,
     doAction,
@@ -59,9 +59,7 @@ QUnit.test("Burger Menu on an App", async (assert) => {
 
     await createWebClient({ serverData });
     await click(document.body, ".o_navbar_apps_menu .dropdown-toggle");
-    await legacyExtraNextTick();
     await click(document.body, ".o_app:nth-of-type(2)");
-    await legacyExtraNextTick();
 
     assert.containsNone(document.body, ".o_burger_menu");
 
@@ -72,7 +70,7 @@ QUnit.test("Burger Menu on an App", async (assert) => {
         document.body.querySelector(".o_burger_menu nav.o_burger_menu_content li").textContent,
         "SubMenu"
     );
-    assert.hasClass(document.body.querySelector(".o_burger_menu_content"), "o_burger_menu_dark");
+    assert.hasClass(document.body.querySelector(".o_burger_menu_content"), "o_burger_menu_app");
 
     await click(document.body, ".o_burger_menu_topbar");
     assert.doesNotHaveClass(
@@ -81,7 +79,7 @@ QUnit.test("Burger Menu on an App", async (assert) => {
     );
 
     await click(document.body, ".o_burger_menu_topbar");
-    assert.hasClass(document.body.querySelector(".o_burger_menu_content"), "o_burger_menu_dark");
+    assert.hasClass(document.body.querySelector(".o_burger_menu_content"), "o_burger_menu_app");
 });
 
 QUnit.test("Burger Menu on an App without SubMenu", async (assert) => {
@@ -89,9 +87,7 @@ QUnit.test("Burger Menu on an App without SubMenu", async (assert) => {
 
     await createWebClient({ serverData });
     await click(document.body, ".o_navbar_apps_menu .dropdown-toggle");
-    await legacyExtraNextTick();
     await click(document.body, ".o_app:nth-of-type(2)");
-    await legacyExtraNextTick();
 
     assert.containsNone(document.body, ".o_burger_menu");
 
@@ -111,7 +107,6 @@ QUnit.test("Burger menu closes when an action is requested", async (assert) => {
     assert.containsOnce(document.body, ".o_burger_menu");
 
     await doAction(wc, 1);
-    await legacyExtraNextTick();
     assert.containsNone(document.body, ".o_burger_menu");
     assert.containsOnce(document.body, ".o_kanban_view");
 });
@@ -131,9 +126,7 @@ QUnit.test("Burger menu closes when click on menu item", async (assert) => {
     };
     await createWebClient({ serverData });
     await click(document.body, ".o_navbar_apps_menu .dropdown-toggle");
-    await legacyExtraNextTick();
     await click(document.body, ".o_app:nth-of-type(2)");
-    await legacyExtraNextTick();
 
     assert.containsNone(document.body, ".o_burger_menu");
 
@@ -144,7 +137,6 @@ QUnit.test("Burger menu closes when click on menu item", async (assert) => {
         "SubMenu"
     );
     await click(document.body, ".o_burger_menu nav.o_burger_menu_content li");
-    await legacyExtraNextTick();
-    await legacyExtraNextTick();
+    await nextTick();
     assert.containsNone(document.body, ".o_burger_menu");
 });

@@ -1,15 +1,12 @@
-odoo.define('website_links.charts', function (require) {
-'use strict';
+/** @odoo-module **/
 
-var core = require('web.core');
-var publicWidget = require('web.public.widget');
-
-var _t = core._t;
+import { loadBundle } from "@web/core/assets";
+import { _t } from "@web/core/l10n/translation";
+import publicWidget from "@web/legacy/js/public/public_widget";
+import { browser } from "@web/core/browser/browser";
+const { DateTime } = luxon;
 
 var BarChart = publicWidget.Widget.extend({
-    jsLibs: [
-        '/web/static/lib/Chart/Chart.js',
-    ],
     /**
      * @constructor
      * @param {Object} parent
@@ -19,9 +16,12 @@ var BarChart = publicWidget.Widget.extend({
      */
     init: function (parent, beginDate, endDate, dates) {
         this._super.apply(this, arguments);
-        this.beginDate = beginDate.locale("en");
-        this.endDate = endDate;
-        this.number_of_days = this.endDate.diff(this.beginDate, 'days') + 2;
+        this.beginDate = beginDate.startOf("day");
+        this.endDate = endDate.startOf("day");
+        if (this.beginDate.toISO() === this.endDate.toISO()) {
+            this.endDate = this.endDate.plus({ days: 1 });
+        }
+        this.number_of_days = this.endDate.diff(this.beginDate).as("days");
         this.dates = dates;
     },
     /**
@@ -30,11 +30,10 @@ var BarChart = publicWidget.Widget.extend({
     start: function () {
         // Fill data for each day (with 0 click for days without data)
         var clicksArray = [];
-        var beginDateCopy = this.beginDate;
-        for (var i = 0; i < this.number_of_days; i++) {
-            var dateKey = beginDateCopy.format('YYYY-MM-DD');
+        for (var i = 0; i <= this.number_of_days; i++) {
+            var dateKey = this.beginDate.toFormat("yyyy-MM-dd");
             clicksArray.push([dateKey, (dateKey in this.dates) ? this.dates[dateKey] : 0]);
-            beginDateCopy.add(1, 'days');
+            this.beginDate = this.beginDate.plus({ days: 1 });
         }
 
         var nbClicks = 0;
@@ -66,12 +65,12 @@ var BarChart = publicWidget.Widget.extend({
         var context = canvas.getContext('2d');
         new Chart(context, config);
     },
+    willStart: async function () {
+        await loadBundle("web.chartjs_lib");
+    },
 });
 
 var PieChart = publicWidget.Widget.extend({
-    jsLibs: [
-        '/web/static/lib/Chart/Chart.js',
-    ],
     /**
      * @override
      * @param {Object} parent
@@ -107,11 +106,17 @@ var PieChart = publicWidget.Widget.extend({
                     label: this.data.length > 0 ? this.data[0].key : _t('No data'),
                 }]
             },
+            options: {
+                aspectRatio: 2,
+            },
         };
 
         var canvas = this.$('canvas')[0];
         var context = canvas.getContext('2d');
         new Chart(context, config);
+    },
+    willStart: async function () {
+        await loadBundle("web.chartjs_lib");
     },
 });
 
@@ -121,10 +126,15 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         'click .copy-to-clipboard': '_onCopyToClipboardClick',
     },
 
+    init() {
+        this._super(...arguments);
+        this.orm = this.bindService("orm");
+    },
+
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         var self = this;
         this.charts = {};
 
@@ -139,8 +149,6 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         defs.push(this._lastWeekClicksByCountry());
         defs.push(this._lastMonthClicksByCountry());
         defs.push(this._super.apply(this, arguments));
-
-        new ClipboardJS($('.copy-to-clipboard')[0]);
 
         this.animating_copy = false;
 
@@ -164,29 +172,30 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
                 // This is a trick to get the date without the local formatting.
                 // We can't simply do .locale("en") because some Odoo languages
                 // are not supported by moment.js (eg: Arabic Syria).
-                const date = moment(
+                // FIXME this now uses luxon, check if this is still needed? Probably can be replaced by deserializeDate
+                const date = DateTime.fromFormat(
                     _clicksByDay[i]["__domain"].find((el) => el.length && el.includes(">="))[2]
-                        .split(" ")[0], "YYYY MM DD"
+                        .split(" ")[0], "yyyy-MM-dd"
                 );
                 if (i === 0) {
                     beginDate = date;
                 }
-                formattedClicksByDay[date.locale("en").format("YYYY-MM-DD")] =
+                formattedClicksByDay[date.setLocale("en").toFormat("yyyy-MM-dd")] =
                     _clicksByDay[i]["create_date_count"];
             }
 
             // Process all time line chart data
-            var now = moment();
+            var now = DateTime.now();
             self.charts.all_time_bar = new BarChart(self, beginDate, now, formattedClicksByDay);
             self.charts.all_time_bar.attachTo($('#all_time_clicks_chart'));
 
             // Process month line chart data
-            beginDate = moment().subtract(30, 'days');
+            beginDate = DateTime.now().minus({ days: 30 });
             self.charts.last_month_bar = new BarChart(self, beginDate, now, formattedClicksByDay);
             self.charts.last_month_bar.attachTo($('#last_month_clicks_chart'));
 
             // Process week line chart data
-            beginDate = moment().subtract(7, 'days');
+            beginDate = DateTime.now().minus({ days: 7 });
             self.charts.last_week_bar = new BarChart(self, beginDate, now, formattedClicksByDay);
             self.charts.last_week_bar.attachTo($('#last_week_clicks_chart'));
 
@@ -215,33 +224,29 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
      * @private
      */
     _totalClicks: function () {
-        return this._rpc({
-            model: 'link.tracker.click',
-            method: 'search_count',
-            args: [[this.links_domain]],
-        });
+        return this.orm.searchCount("link.tracker.click", [this.links_domain]);
     },
     /**
      * @private
      */
     _clicksByDay: function () {
-        return this._rpc({
-            model: 'link.tracker.click',
-            method: 'read_group',
-            args: [[this.links_domain], ['create_date']],
-            kwargs: {groupby: 'create_date:day'},
-        });
+        return this.orm.readGroup(
+            "link.tracker.click",
+            [this.links_domain],
+            ["create_date"],
+            ["create_date:day"]
+        );
     },
     /**
      * @private
      */
     _clicksByCountry: function () {
-        return this._rpc({
-            model: 'link.tracker.click',
-            method: 'read_group',
-            args: [[this.links_domain], ['country_id']],
-            kwargs: {groupby: 'country_id'},
-        });
+        return this.orm.readGroup(
+            "link.tracker.click",
+            [this.links_domain],
+            ["country_id"],
+            ["country_id"]
+        );
     },
     /**
      * @private
@@ -251,12 +256,12 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         const aWeekAgoDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         // get the date in the format YYYY-MM-DD.
         const aWeekAgoString = aWeekAgoDate.toISOString().split("T")[0];
-        return this._rpc({
-            model: 'link.tracker.click',
-            method: 'read_group',
-            args: [[this.links_domain, ["create_date", ">", aWeekAgoString]], ["country_id"]],
-            kwargs: {groupby: 'country_id'},
-        });
+        return this.orm.readGroup(
+            "link.tracker.click",
+            [this.links_domain, ["create_date", ">", aWeekAgoString]],
+            ["country_id"],
+            ["country_id"]
+        );
     },
     /**
      * @private
@@ -266,12 +271,12 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
         const aMonthAgoDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         // get the date in the format YYYY-MM-DD.
         const aMonthAgoString = aMonthAgoDate.toISOString().split("T")[0];
-        return this._rpc({
-            model: 'link.tracker.click',
-            method: 'read_group',
-            args: [[this.links_domain, ["create_date", ">", aMonthAgoString]], ["country_id"]],
-            kwargs: {groupby: 'country_id'},
-        });
+        return this.orm.readGroup(
+            "link.tracker.click",
+            [this.links_domain, ["create_date", ">", aMonthAgoString]],
+            ["country_id"],
+            ["country_id"]
+        );
     },
 
     //--------------------------------------------------------------------------
@@ -282,8 +287,11 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
      * @private
      * @param {Event} ev
      */
-    _onCopyToClipboardClick: function (ev) {
+    _onCopyToClipboardClick: async function (ev) {
         ev.preventDefault();
+
+        const textValue = ev.target.dataset.clipboardText;
+        await browser.navigator.clipboard.writeText(textValue);
 
         if (this.animating_copy) {
             return;
@@ -309,8 +317,7 @@ publicWidget.registry.websiteLinksCharts = publicWidget.Widget.extend({
     },
 });
 
-return {
+export default {
     BarChart: BarChart,
     PieChart: PieChart,
 };
-});

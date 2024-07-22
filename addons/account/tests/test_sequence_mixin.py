@@ -262,23 +262,24 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         new_journal.code = "MISC2"
         copy2.journal_id = new_journal
         self.assertEqual(copy2.name, 'MISC2/2016/01/0001')
+
         with Form(copy2) as move_form:  # It is editable in the form
-            with mute_logger('odoo.tests.common.onchange'):
+            with self.assertLogs('odoo.tests.form') as cm:
                 move_form.name = 'MyMISC/2016/0001'
-                self.assertIn(
-                    'The sequence will restart at 1 at the start of every year',
-                    move_form._perform_onchange(['name'])['warning']['message'],
-                )
+            self.assertTrue(cm.output[0].startswith('WARNING:odoo.tests.form.onchange:'))
+            self.assertIn('The sequence will restart at 1 at the start of every year', cm.output[0])
+
             move_form.journal_id = self.test_move.journal_id
             self.assertEqual(move_form.name, '/')
+
             move_form.journal_id = new_journal
             self.assertEqual(move_form.name, 'MISC2/2016/01/0001')
-            with mute_logger('odoo.tests.common.onchange'):
+
+            with self.assertLogs('odoo.tests.form') as cm:
                 move_form.name = 'MyMISC/2016/0001'
-                self.assertIn(
-                    'The sequence will restart at 1 at the start of every year',
-                    move_form._perform_onchange(['name'])['warning']['message'],
-                )
+            self.assertTrue(cm.output[0].startswith('WARNING:odoo.tests.form.onchange:'))
+            self.assertIn('The sequence will restart at 1 at the start of every year', cm.output[0])
+
         copy2.action_post()
         self.assertEqual(copy2.name, 'MyMISC/2016/0001')
 
@@ -741,7 +742,7 @@ class TestSequenceMixinConcurrency(TransactionCase):
         with self.env.registry.cursor() as cr:
             env = api.Environment(cr, SUPERUSER_ID, {})
             moves = env['account.move'].browse(self.data['move_ids'])
-            moves.button_draft()
+            moves.filtered(lambda x: x.state in ('posted', 'cancel')).button_draft()
             moves.posted_before = False
             moves.unlink()
             journal = env['account.journal'].browse(self.data['journal_id'])

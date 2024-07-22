@@ -1,7 +1,6 @@
-odoo.define("website.tour.parallax", function (require) {
-"use strict";
+/** @odoo-module **/
 
-const wTourUtils = require("website.tour_utils");
+import wTourUtils from "@website/js/tours/tour_utils";
 
 const coverSnippet = {id: "s_cover", name: "Cover"};
 
@@ -9,7 +8,7 @@ wTourUtils.registerWebsitePreviewTour("test_parallax", {
     test: true,
     url: "/",
     edition: true,
-}, [
+}, () => [
     wTourUtils.dragNDrop(coverSnippet),
     wTourUtils.clickOnSnippet(coverSnippet),
     wTourUtils.changeOption("BackgroundOptimize", "we-toggler"),
@@ -17,36 +16,36 @@ wTourUtils.registerWebsitePreviewTour("test_parallax", {
 {
     content: "Check that the Cover snippet has the Blur filter on its background image",
     trigger: "iframe .s_cover span[data-gl-filter='blur']",
-    run: () => {}, //it's a check
+    isCheck: true,
 },
     wTourUtils.changeOption("Parallax", "we-toggler"),
     wTourUtils.changeOption("Parallax", 'we-button[data-select-data-attribute="0"]'),
 {
     content: "Check that the data related to the filter have been transferred to the new target",
     trigger: "iframe .s_cover[data-gl-filter='blur']",
-    run: () => {}, //it's a check
+    isCheck: true,
 },
 {
     content: "Check that the 'o_modified_image_to_save' class has been transferred to the new target",
     trigger: "iframe .s_cover.o_modified_image_to_save",
-    run: () => {}, //it's a check
+    isCheck: true,
 },
     wTourUtils.changeOption("Parallax", "we-toggler"),
     wTourUtils.changeOption("Parallax", 'we-button[data-select-data-attribute="1"]'),
 {
     content: "Check that the 'o_modified_image_to_save' class has been deleted from the old target",
     trigger: "iframe .s_cover:not(.o_modified_image_to_save)",
-    run: () => {}, //it's a check
+    isCheck: true,
 },
 {
     content: "Check that the 'o_modified_image_to_save' class has been transferred to the new target",
     trigger: "iframe span.s_parallax_bg.o_modified_image_to_save",
-    run: () => {}, //it's a check
+    isCheck: true,
 },
 {
     content: "Check that the data related to the filter have been transferred to the new target",
     trigger: "iframe span.s_parallax_bg[data-gl-filter='blur']",
-    run: () => {}, //it's a check
+    isCheck: true,
 },
     wTourUtils.changeOption("Parallax", "we-toggler"),
     wTourUtils.changeOption("Parallax", 'we-button[data-select-data-attribute="1.5"]'),
@@ -63,4 +62,3 @@ wTourUtils.registerWebsitePreviewTour("test_parallax", {
     run: () => {}, //it's a check
 },
 ]);
-});

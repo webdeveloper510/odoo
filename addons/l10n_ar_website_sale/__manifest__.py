@@ -1,10 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Argentinean eCommerce',
+    'countries': ['ar'],
     'version': '1.0',
     'category': 'Accounting/Localizations/Website',
     'sequence': 14,
-    'author': 'Odoo, ADHOC SA',
+    'author': 'Odoo S.A., ADHOC SA',
     'description': """Be able to see Identification Type and AFIP Responsibility in ecommerce checkout form.""",
     'depends': [
         'website_sale',

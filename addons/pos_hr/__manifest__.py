@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': "pos_hr",
+    'name': "POS - HR",
     'category': "Hidden",
     'summary': 'Link module between Point of Sale and HR',
 
@@ -22,16 +22,8 @@ The actual till still requires one user but an unlimited number of employees can
     'installable': True,
     'auto_install': True,
     'assets': {
-        'point_of_sale.assets': [
-            'pos_hr/static/src/css/pos.css',
-            'pos_hr/static/src/js/models.js',
-            'pos_hr/static/src/js/SelectCashierMixin.js',
-            'pos_hr/static/src/js/Chrome.js',
-            'pos_hr/static/src/js/HeaderLockButton.js',
-            'pos_hr/static/src/js/CashierName.js',
-            'pos_hr/static/src/js/LoginScreen.js',
-            'pos_hr/static/src/js/PaymentScreen.js',
-            'pos_hr/static/src/xml/**/*',
+        'point_of_sale._assets_pos': [
+            'pos_hr/static/src/**/*',
         ],
         'web.assets_tests': [
             'pos_hr/static/tests/**/*',

@@ -1,7 +1,6 @@
-/** @odoo-module alias=mass_mailing.field_html_tests **/
+/** @odoo-module **/
 
-import * as ajax from "web.ajax";
-import weTestUtils from "web_editor.test_utils";
+import weTestUtils from "@web_editor/../tests/test_utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
 import {
     editInput,
@@ -10,8 +9,8 @@ import {
     nextTick,
     patchWithCleanup,
 } from "@web/../tests/helpers/utils";
-import * as legacyTestUtils from "web.test_utils";
 import { assets } from "@web/core/assets";
+import { Wysiwyg } from '@web_editor/js/wysiwyg/wysiwyg';
 
 let serverData;
 let fixture;
@@ -47,32 +46,19 @@ QUnit.module('field html', (hooks) => {
         serverData = { models };
         setupViewRegistries();
 
-        legacyTestUtils.mock.patch(ajax, {
-            loadAsset: function (xmlId) {
-                if (xmlId === 'template.assets') {
-                    return Promise.resolve({
-                        cssLibs: [],
-                        cssContents: ['.field_body {background-color: red;}'],
-                        jsContents: ['window.odoo = {define: function(){}}; // inline asset'],
-                    });
-                }
-                if (xmlId === 'template.assets_all_style') {
-                    return Promise.resolve({
-                        cssLibs: $('link[href]:not([type="image/x-icon"])').map(function () {
-                            return $(this).attr('href');
-                        }).get(),
-                        cssContents: ['.field_body {background-color: red;}']
-                    });
-                }
-                if (xmlId === 'web_editor.wysiwyg_iframe_editor_assets') {
-                    return Promise.resolve({});
-                }
-                throw 'Wrong template';
+        patchWithCleanup(Wysiwyg.prototype, {
+            async _getColorpickerTemplate() {
+                return weTestUtils.COLOR_PICKER_TEMPLATE;
+            },
+            async _getAssets() {
+                return [{
+                    cssLibs: [],
+                    jsLibs: [],
+                    cssContents: ['.field_body {background-color: red;}'],
+                    jsContents: ['window.odoo = {define: function(){}}; // inline asset'],
+                }];
             },
         });
-    });
-    hooks.afterEach(() => {
-        legacyTestUtils.mock.unpatch(ajax);
     });
 
     QUnit.test('save arch and html', async function (assert) {
@@ -123,7 +109,7 @@ QUnit.module('field html', (hooks) => {
             arch: `
                 <form>
                     <field name="display_name"/>
-                    <field name="body_arch" widget="mass_mailing_html" attrs="{'invisible': [['display_name', '=', 'hide']]}"/>
+                    <field name="body_arch" widget="mass_mailing_html" invisible="display_name == 'hide'"/>
                 </form>`,
         });
 

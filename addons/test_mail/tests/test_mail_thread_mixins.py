@@ -2,13 +2,32 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import exceptions, tools
-from odoo.addons.test_mail.tests.common import TestMailCommon, TestRecipients
-from odoo.tests.common import tagged
+from odoo.addons.mail.tests.common import MailCommon
+from odoo.addons.mail.tests.mail_tracking_duration_mixin_case import MailTrackingDurationMixinCase
+from odoo.addons.test_mail.tests.common import TestRecipients
+from odoo.tests.common import tagged, users
 from odoo.tools import mute_logger
 
 
+@tagged('mail_thread', 'mail_track')
+class TestMailTrackingDurationMixin(MailTrackingDurationMixinCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass('mail.test.mail.tracking.duration')
+
+    def test_mail_tracking_duration(self):
+        self._test_record_duration_tracking()
+
+    def test_mail_tracking_duration_batch(self):
+        self._test_record_duration_tracking_batch()
+
+    def test_queries_batch_mail_tracking_duration(self):
+        self._test_queries_batch_duration_tracking()
+
+
 @tagged('mail_thread', 'mail_blacklist')
-class TestMailThread(TestMailCommon, TestRecipients):
+class TestMailThread(MailCommon, TestRecipients):
 
     @mute_logger('odoo.models.unlink')
     def test_blacklist_mixin_email_normalized(self):
@@ -58,3 +77,26 @@ class TestMailThread(TestMailCommon, TestRecipients):
                     self.assertTrue(new_record.is_blacklisted)
 
                 bl_record.unlink()
+
+
+@tagged('mail_thread', 'mail_thread_cc')
+class TestMailThreadCC(MailCommon):
+
+    @users("employee")
+    @mute_logger('odoo.addons.mail.models.mail_mail')
+    def test_suggested_recipients_mail_cc(self):
+        """ MailThreadCC mixin adds its own suggested recipients management
+        coming from CC (carbon copy) management. """
+        record = self.env['mail.test.cc'].create({
+            'email_cc': 'cc1@example.com, cc2@example.com, cc3 <cc3@example.com>',
+        })
+        suggestions = record._message_get_suggested_recipients()[record.id]
+        self.assertEqual(
+            sorted(suggestions),
+            [
+                (False, '"cc3" <cc3@example.com>', None, 'CC Email', {}),
+                (False, 'cc1@example.com', None, 'CC Email', {}),
+                (False, 'cc2@example.com', None, 'CC Email', {}),
+            ],
+            'cc should be in suggestions'
+        )

@@ -3,23 +3,23 @@
 # 	* utm
 # 
 # Translators:
-# Jasmina Macur <jasmina@hbs.si>, 2022
-# Tadej Lupšina <tadej@hbs.si>, 2022
-# laznikd <laznik@mentis.si>, 2022
-# matjaz k <matjaz@mentis.si>, 2022
-# Boris Kodelja <boris@hbs.si>, 2022
-# Martin Trigaux, 2022
-# Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
+# Jasmina Macur <jasmina@hbs.si>, 2023
+# laznikd <laznik@mentis.si>, 2023
+# Tadej Lupšina <tadej@hbs.si>, 2023
+# Martin Trigaux, 2023
+# matjaz k <matjaz@mentis.si>, 2023
+# Boris Kodelja <boris@hbs.si>, 2023
+# Matjaz Mozetic <m.mozetic@matmoz.si>, 2023
 # Tomaž Jug <tomaz@editor.si>, 2023
 # Grega Vavtar <grega@hbs.si>, 2024
 # Katja Deržič, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:32+0000\n"
-"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"POT-Creation-Date: 2023-10-26 21:56+0000\n"
+"PO-Revision-Date: 2023-10-26 23:09+0000\n"
 "Last-Translator: Katja Deržič, 2024\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
@@ -36,6 +36,7 @@ msgid "%(content)s (%(model_description)s created on %(create_date)s)"
 msgstr ""
 
 #. module: utm
+#: model:ir.model.fields,field_description:utm.field_utm_campaign__active
 #: model:ir.model.fields,field_description:utm.field_utm_medium__active
 msgid "Active"
 msgstr "Aktivno"
@@ -60,7 +61,14 @@ msgid "Approved"
 msgstr "Odobreno"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
+msgid "Archive"
+msgstr "Arhiv"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Archived"
 msgstr "Arhivirano"
 
@@ -121,6 +129,11 @@ msgstr "Kampanje"
 msgid ""
 "Campaigns are used to centralize your marketing efforts and track their "
 "results."
+msgstr ""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
+msgid "Campaigns that are assigned to me"
 msgstr ""
 
 #. module: utm
@@ -242,11 +255,6 @@ msgstr "Opravljeno"
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
-msgid "Dropdown menu"
-msgstr "Spusti seznam"
-
-#. module: utm
-#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
 msgid "Edit"
 msgstr "Uredi"
 
@@ -311,15 +319,6 @@ msgid "Ideas"
 msgstr "Ideas"
 
 #. module: utm
-#: model:ir.model.fields,field_description:utm.field_utm_campaign____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_medium____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_source____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_stage____last_update
-#: model:ir.model.fields,field_description:utm.field_utm_tag____last_update
-msgid "Last Modified on"
-msgstr "Zadnjič spremenjeno"
-
-#. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_medium__write_uid
 #: model:ir.model.fields,field_description:utm.field_utm_source__write_uid
@@ -370,7 +369,7 @@ msgstr "Medij"
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_medium__name
 msgid "Medium Name"
-msgstr "Naziv medija"
+msgstr "Srednje ime"
 
 #. module: utm
 #: model:ir.actions.act_window,name:utm.utm_medium_action
@@ -380,9 +379,15 @@ msgid "Mediums"
 msgstr "Mediji"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
+msgid "My Campaigns"
+msgstr ""
+
+#. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_source_mixin__name
 #: model:ir.model.fields,field_description:utm.field_utm_stage__name
 #: model:ir.model.fields,field_description:utm.field_utm_tag__name
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_tree
 msgid "Name"
 msgstr "Naziv"
 
@@ -431,6 +436,11 @@ msgstr "Poročilo"
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Responsible"
 msgstr "Odgovoren"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_kanban
+msgid "Restore"
+msgstr "Obnovi"
 
 #. module: utm
 #. odoo-javascript
@@ -524,6 +534,7 @@ msgid "Stage"
 msgstr "Stopnja"
 
 #. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_search
 #: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_tree
 msgid "Stages"
@@ -532,8 +543,8 @@ msgstr "Stopnje"
 #. module: utm
 #: model_terms:ir.actions.act_window,help:utm.action_view_utm_stage
 msgid ""
-"Stages allow you to organize your workflow  (e.g. : plan, design, in "
-"progress,  done, …)."
+"Stages allow you to organize your workflow  (e.g. plan, design, in progress,"
+" done, …)."
 msgstr ""
 
 #. module: utm
@@ -545,11 +556,12 @@ msgstr ""
 
 #. module: utm
 #: model:ir.model.constraint,message:utm.constraint_utm_tag_name_uniq
-msgid "Tag name already exists !"
-msgstr "Označba že obstaja!"
+msgid "Tag name already exists!"
+msgstr ""
 
 #. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_campaign__tag_ids
+#: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Tags"
 msgstr "Ključne besede"
 
@@ -617,11 +629,9 @@ msgstr ""
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
 #, python-format
 msgid ""
-"Track incoming events (e.g. : Christmas, Black Friday, ...) and publish "
-"timely content."
+"Track incoming events (e.g. Christmas, Black Friday, ...) and publish timely"
+" content."
 msgstr ""
-"Spremljanje prihajajočih dogodkov (npr.: božič, črni petek, ...) in "
-"objavljanje pravočasnih vsebin."
 
 #. module: utm
 #: model:ir.model,name:utm.model_utm_campaign
@@ -690,6 +700,21 @@ msgstr ""
 #, python-format
 msgid "Use This For My Campaigns"
 msgstr "Uporabite to za kampanje"
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_stage_view_form
+msgid "e.g. \"Brainstorming\""
+msgstr ""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_source_view_tree
+msgid "e.g. \"Christmas Mailing\""
+msgstr ""
+
+#. module: utm
+#: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_tree
+msgid "e.g. \"Email\""
+msgstr ""
 
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_campaign_view_form

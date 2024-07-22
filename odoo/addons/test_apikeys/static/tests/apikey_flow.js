@@ -1,15 +1,14 @@
-odoo.define('test_apikeys.tour', function(require) {
-"use strict";
+/** @odoo-module **/
 
-const tour = require('web_tour.tour');
-const ajax = require('web.ajax');
+import { jsonrpc } from "@web/core/network/rpc_service";
+import { registry } from "@web/core/registry";
 
-tour.register('apikeys_tour_setup', {
+registry.category("web_tour.tours").add('apikeys_tour_setup', {
     test: true,
     url: '/web?debug=1', // Needed as API key part is now only displayed in debug mode
-}, [{
+    steps: () => [{
     content: 'Open user account menu',
-    trigger: '.o_user_menu .oe_topbar_name',
+    trigger: '.o_user_menu .dropdown-toggle',
     run: 'click',
 }, {
     content: "Open preferences / profile screen",
@@ -49,7 +48,7 @@ tour.register('apikeys_tour_setup', {
     trigger: 'p:contains("Here is your new API key")',
     run: async () => {
         const key = $('code [name=key] span').text();
-        await ajax.jsonRpc('/web/dataset/call_kw', 'call', {
+        await jsonrpc('/web/dataset/call_kw', {
             model: 'ir.logging', method: 'send_key',
             args: [key],
             kwargs: {},
@@ -57,26 +56,18 @@ tour.register('apikeys_tour_setup', {
         $('button:contains("Done")').click();
     }
 }, {
-    content: 'Re-open preferences',
-    trigger: '.o_user_menu .oe_topbar_name',
-}, {
-    trigger: '[data-menu=settings]',
-}, {
-    content: "Switch to security tab",
-    trigger: 'a[role=tab]:contains("Account Security")',
-    run: 'click',
-}, {
-    content: "check that our key is present",
+    content: "check that our key is present (FIXME: requires HR to be installed)",
     trigger: '[name=api_key_ids] td:contains("my key")',
-}]);
+    run() {},
+}]});
 
 // deletes the previously created key
-tour.register('apikeys_tour_teardown', {
+registry.category("web_tour.tours").add('apikeys_tour_teardown', {
     test: true,
     url: '/web?debug=1', // Needed as API key part is now only displayed in debug mode
-}, [{
+    steps: () => [{
     content: 'Open preferences',
-    trigger: '.o_user_menu .oe_topbar_name',
+    trigger: '.o_user_menu .dropdown-toggle',
 }, {
     trigger: '[data-menu=settings]',
 }, {
@@ -96,7 +87,7 @@ tour.register('apikeys_tour_teardown', {
     trigger: 'button:contains(Confirm Password)',
 }, {
     content: 'Re-open preferences again',
-    trigger: '.o_user_menu .oe_topbar_name',
+    trigger: '.o_user_menu .dropdown-toggle',
 }, {
     trigger: '[data-menu=settings]',
 }, {
@@ -111,5 +102,4 @@ tour.register('apikeys_tour_teardown', {
             throw new Error("Expected API keys to be hidden (because empty), but it's not");
         };
     }
-}]);
-});
+}]});

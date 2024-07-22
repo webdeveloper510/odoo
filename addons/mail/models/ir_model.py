@@ -23,6 +23,10 @@ class IrModel(models.Model):
         """ Delete mail data (followers, messages, activities) associated with
         the models being deleted.
         """
+        if not self:
+            return True
+
+        # Delete followers, messages and attachments for models that will be unlinked.
         mail_models = self.search([
             ('model', 'in', ('mail.activity', 'mail.activity.type', 'mail.followers', 'mail.message'))
         ], order='id')

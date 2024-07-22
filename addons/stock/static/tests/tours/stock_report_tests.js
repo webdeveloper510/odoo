@@ -1,14 +1,13 @@
-odoo.define('stock.reports.setup.tour', function (require) {
-    "use strict";
+/** @odoo-module **/
+    
+    import { registry } from "@web/core/registry";
 
-    const tour = require('web_tour.tour');
-
-    tour.register('test_stock_route_diagram_report', {
+    registry.category("web_tour.tours").add('test_stock_route_diagram_report', {
         test: true,
-    }, [
+        steps: () => [
     {
         trigger: '.o_kanban_record',
-        extra_trigger:'.breadcrumb',
+        extra_trigger: '.o_breadcrumb',
     },
     {
         trigger: '.nav-item > a:contains("Inventory")',
@@ -18,6 +17,6 @@ odoo.define('stock.reports.setup.tour', function (require) {
     },
     {
         trigger: 'iframe .o_report_stock_rule',
+        isCheck: true,
     },
-    ]);
-});
+    ]});

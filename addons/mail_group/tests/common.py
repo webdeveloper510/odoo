@@ -3,10 +3,10 @@
 
 from odoo import Command, tools
 from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.addons.test_mail.tests.common import TestMailCommon
+from odoo.addons.mail.tests.common import MailCommon
 
 
-class TestMailListCommon(TestMailCommon):
+class TestMailListCommon(MailCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -54,8 +54,6 @@ class TestMailListCommon(TestMailCommon):
             'mail_group_id': cls.test_group.id,
         })
         cls.test_group_valid_members = cls.test_group_member_1 + cls.test_group_member_2 + cls.test_group_member_4_emp
-
-        cls._init_mail_gateway()
 
         # Create some messages
         cls.test_group_msg_1_pending = cls.env['mail.group.message'].create({

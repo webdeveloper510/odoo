@@ -41,6 +41,11 @@
             <field name="name">Job Campaign</field>
     </record>
 
+    <record model="hr.recruitment.stage" id="stage_job0">
+        <field name="name">New</field>
+        <field name="sequence">0</field>
+        <field name="template_id" ref="email_template_data_applicant_congratulations"/> 
+    </record>
     <record model="hr.recruitment.stage" id="stage_job1">
         <field name="name">Initial Qualification</field>
         <field name="sequence">1</field>
@@ -48,7 +53,6 @@
     <record model="hr.recruitment.stage" id="stage_job2">
         <field name="name">First Interview</field>
         <field name="sequence">2</field>
-        <field name="template_id" ref="email_template_data_applicant_congratulations"/> 
     </record>
     <record model="hr.recruitment.stage" id="stage_job3">
         <field name="name">Second Interview</field>
@@ -97,6 +101,11 @@
         <record id="refuse_reason_8" model="hr.applicant.refuse.reason">
             <field name="name">Refused by Applicant: salary</field>
             <field name="template_id" ref="email_template_data_applicant_not_interested"/>
+        </record>
+
+        <record model="ir.config_parameter" id="hr_recruitment_blacklisted_emails" forcecreate="False">
+            <field name="key">hr_recruitment.blacklisted_emails</field>
+            <field name="value"> </field>
         </record>
 
 </data>

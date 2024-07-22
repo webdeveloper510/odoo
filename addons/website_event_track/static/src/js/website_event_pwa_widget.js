@@ -1,5 +1,4 @@
-odoo.define("website_event_track.website_event_pwa_widget", function (require) {
-    "use strict";
+/** @odoo-module **/
 
     /*
      * The "deferredPrompt" Promise will resolve only if the "beforeinstallprompt" event
@@ -7,17 +6,18 @@ odoo.define("website_event_track.website_event_pwa_widget", function (require) {
      * to avoid missed-events (as the browser can trigger it very early in the page lifecycle).
      */
     var deferredPrompt = new Promise(function (resolve, reject) {
-        if (!("serviceWorker" in navigator)) {
-            return reject();
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("beforeinstallprompt", function (ev) {
+                ev.preventDefault();
+                resolve(ev);
+            });
+        } else {
+            console.log("ServiceWorker not supported");
         }
-        window.addEventListener("beforeinstallprompt", function (ev) {
-            ev.preventDefault();
-            resolve(ev);
-        });
     });
 
-    var config = require("web.config");
-    var publicWidget = require("web.public.widget");
+    import publicWidget from "@web/legacy/js/public/public_widget";
+    import { utils as uiUtils } from "@web/core/ui/ui_service";
 
     var PWAInstallBanner = publicWidget.Widget.extend({
         template: "pwa_install_banner",
@@ -58,9 +58,7 @@ odoo.define("website_event_track.website_event_pwa_widget", function (require) {
                 .then(this._registerServiceWorker.bind(this))
                 .then(function () {
                     // Don't wait for the prompt's Promise as it may never resolve.
-                    deferredPrompt.then(self._showInstallBanner.bind(self)).catch(function () {
-                        console.log("ServiceWorker not supported");
-                    });
+                    deferredPrompt.then(self._showInstallBanner.bind(self));
                 })
                 .then(this._prefetch.bind(this));
         },
@@ -156,7 +154,7 @@ odoo.define("website_event_track.website_event_pwa_widget", function (require) {
          * @private
          */
         _showInstallBanner: function () {
-            if (!config.device.isMobile) {
+            if (!uiUtils.isSmall()) {
                 return;
             }
             var self = this;
@@ -196,15 +194,11 @@ odoo.define("website_event_track.website_event_pwa_widget", function (require) {
                             console.log("User dismissed the install prompt");
                         }
                     });
-                })
-                .catch(function () {
-                    console.log("ServiceWorker not supported");
                 });
         },
     });
 
-    return {
+    export default {
         PWAInstallBanner: PWAInstallBanner,
         WebsiteEventPWAWidget: publicWidget.registry.WebsiteEventPWAWidget,
     };
-});

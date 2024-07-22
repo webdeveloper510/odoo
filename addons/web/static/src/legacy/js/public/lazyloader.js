@@ -1,11 +1,10 @@
-odoo.define('web.public.lazyloader', function (require) {
-'use strict';
+/** @odoo-module **/
 
-const {
+import {
     BUTTON_HANDLER_SELECTOR,
     makeAsyncHandler,
     makeButtonHandler,
-} = require('@web/legacy/js/core/minimal_dom');
+} from '@web/legacy/js/core/minimal_dom';
 
 // Track when all JS files have been lazy loaded. Will allow to unblock the
 // related DOM sections when the whole JS have been loaded and executed.
@@ -176,13 +175,13 @@ function _loadScripts(scripts, index) {
     }
     const script = scripts[index];
     script.addEventListener('load', _loadScripts.bind(this, scripts, index + 1));
+    script.setAttribute('defer', 'defer');
     script.src = script.dataset.src;
     script.removeAttribute('data-src');
 }
 
-return {
+export default {
     loadScripts: _loadScripts,
     allScriptsLoaded: _allScriptsLoaded,
     registerPageReadinessDelay: retriggeringWaitingProms.push.bind(retriggeringWaitingProms),
 };
-});

@@ -6,6 +6,8 @@
         <field name="arch" type="xml">
             <form>
                 <group col="1">
+                    <field name="author_id" invisible="1"/>
+                    <field name="lang" invisible="1"/>
                     <field name="render_model" invisible="1"/>
                     <field name="order_id" invisible="1"/>
                     <field name="template_id" invisible="1"/>
@@ -15,16 +17,15 @@
                          role="alert">
                         <span>Are you sure you want to cancel this order? <br/></span>
                         <span id="display_invoice_alert"
-                              attrs="{'invisible': [('display_invoice_alert', '=', False)]}">
+                              invisible="not display_invoice_alert">
                             Draft invoices for this order will be cancelled. <br/>
                         </span>
                     </div>
                     <group col="2">
                         <field name="recipient_ids"
                                widget="many2many_tags_email"
-                               context="{'force_email': True,
-                                         'show_email': True,
-                                         'no_create_edit': True}"/>
+                               options="{'no_quick_create': True}"
+                               context="{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}"/>
                     </group>
                     <group col="2">
                         <field name="subject" placeholder="Subject"/>
