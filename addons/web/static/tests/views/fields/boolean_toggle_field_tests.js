@@ -249,13 +249,13 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(_route, { method }) {
-                if (method === "web_save") {
-                    assert.step("web_save");
+                if (method === "write") {
+                    assert.step("write");
                 }
             },
         });
         await click(target, ".o_field_widget[name='bar'] input");
-        assert.verifySteps(["web_save"]);
+        assert.verifySteps(["write"]);
     });
 
     QUnit.test("BooleanToggleField - autosave option set to false", async function (assert) {
@@ -269,8 +269,8 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             resId: 1,
             mockRPC(_route, { method }) {
-                if (method === "web_save") {
-                    assert.step("web_save");
+                if (method === "write") {
+                    assert.step("write");
                 }
             },
         });

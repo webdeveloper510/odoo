@@ -2,29 +2,26 @@
 
 import { AttendeeCalendarModel } from "@calendar/views/attendee_calendar/attendee_calendar_model";
 import { patch } from "@web/core/utils/patch";
-import { useState } from "@odoo/owl";
 
-patch(AttendeeCalendarModel, {
+patch(AttendeeCalendarModel, "microsoft_calendar_microsoft_calendar_model", {
     services: [...AttendeeCalendarModel.services, "rpc"],
 });
 
-patch(AttendeeCalendarModel.prototype, {
+patch(AttendeeCalendarModel.prototype, "microsoft_calendar_microsoft_calendar_model_functions", {
     setup(params, { rpc }) {
-        super.setup(...arguments);
+        this._super(...arguments);
         this.rpc = rpc;
+        this.microsoftIsSync = true;
         this.microsoftPendingSync = false;
-        this.state = useState({
-            microsoftIsSync: true,
-            microsoftIsPaused: false,
-        })
     },
 
     /**
      * @override
      */
     async updateData() {
+        const _super = this._super.bind(this);
         if (this.microsoftPendingSync) {
-            return super.updateData(...arguments);
+            return _super(...arguments);
         }
         try {
             await Promise.race([
@@ -38,7 +35,7 @@ patch(AttendeeCalendarModel.prototype, {
             console.error("Could not synchronize microsoft events now.", error);
             this.microsoftPendingSync = false;
         }
-        return super.updateData(...arguments);
+        return _super(...arguments);
     },
 
     async syncMicrosoftCalendar(silent = false) {
@@ -53,17 +50,12 @@ patch(AttendeeCalendarModel.prototype, {
                 silent,
             },
         );
-        if (["need_config_from_admin", "need_auth", "sync_stopped", "sync_paused"].includes(result.status)) {
-            this.state.microsoftIsSync = false;
+        if (["need_config_from_admin", "need_auth", "sync_stopped"].includes(result.status)) {
+            this.microsoftIsSync = false;
         } else if (result.status === "no_new_event_from_microsoft" || result.status === "need_refresh") {
-            this.state.microsoftIsSync = true;
+            this.microsoftIsSync = true;
         }
-        this.state.microsoftIsPaused = result.status == "sync_paused";
         this.microsoftPendingSync = false;
         return result;
     },
-
-    get microsoftCredentialsSet() {
-        return this.credentialStatus['microsoft_calendar'] ?? false;
-    }
 });

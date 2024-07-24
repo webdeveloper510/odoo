@@ -3,25 +3,24 @@
 # 	* barcodes
 # 
 # Translators:
-# Óscar Fonseca <tecnico@pyming.com>, 2023
-# Quim - eccit <quim@eccit.com>, 2023
-# jabiri7, 2023
-# Arnau Ros, 2023
-# Manel Fernandez Ramirez <manelfera@outlook.com>, 2023
-# Ivan Espinola, 2023
-# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2023
-# Josep Anton Belchi, 2023
-# Martin Trigaux, 2023
-# RGB Consulting <odoo@rgbconsulting.com>, 2023
-# AncesLatino2004, 2023
+# Manel Fernandez Ramirez <manelfera@outlook.com>, 2022
+# Quim - eccit <quim@eccit.com>, 2022
+# jabelchi, 2022
+# Arnau Ros, 2022
+# Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2022
+# AncesLatino2004, 2022
+# Martin Trigaux, 2022
+# RGB Consulting <odoo@rgbconsulting.com>, 2022
+# Ivan Espinola, 2022
+# jabiri7, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: AncesLatino2004, 2023\n"
+"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"Last-Translator: jabiri7, 2022\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,11 +29,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
-msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*'?"
+msgid " '*' is not a valid Regex Barcode Pattern. Did you mean '.*' ?"
 msgstr ""
+" '*' no és un patró Regex vàlid per a codi de barres. Potser volia utilitzar"
+" '.*' ?"
 
 #. module: barcodes
 #: model_terms:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -92,13 +92,6 @@ msgid "Any"
 msgstr "Alguna"
 
 #. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
-#, python-format
-msgid "Barcode"
-msgstr "Codi de barres"
-
-#. module: barcodes
 #: model:ir.model,name:barcodes.model_barcodes_barcode_events_mixin
 msgid "Barcode Event Mixin"
 msgstr "Barreja d'esdeveniments de codi de barres"
@@ -134,7 +127,7 @@ msgid "Barcode Scanned"
 msgstr "Codi de barres escanejat"
 
 #. module: barcodes
-#. odoo-javascript
+#. openerp-web
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Barcode: "
@@ -161,7 +154,7 @@ msgstr "Creat el"
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__display_name
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__display_name
 msgid "Display Name"
-msgstr "Nom mostrat"
+msgstr "Nom a mostrar"
 
 #. module: barcodes
 #: model:ir.model.fields.selection,name:barcodes.selection__barcode_rule__encoding__ean13
@@ -195,6 +188,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: barcodes
+#: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature____last_update
+#: model:ir.model.fields,field_description:barcodes.field_barcode_rule____last_update
+msgid "Last Modified on"
+msgstr "Última modificació el "
+
+#. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature__write_uid
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__write_uid
 msgid "Last Updated by"
@@ -221,18 +220,13 @@ msgstr "Nomenclatura"
 msgid ""
 "Patterns can also define how numerical values, such as weight or price, can be\n"
 "                                encoded into the barcode. They are indicated by <code>{NNN}</code> where the N's\n"
-"                                define where the number's digits are encoded. Floats are also supported with the\n"
-"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases,\n"
-"                                the barcode field on the associated records <i>must</i> show these digits as\n"
+"                                define where the number's digits are encoded. Floats are also supported with the \n"
+"                                decimals indicated with D's, such as <code>{NNNDD}</code>. In these cases, \n"
+"                                the barcode field on the associated records <i>must</i> show these digits as \n"
 "                                zeroes."
 msgstr ""
-
-#. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.js:0
-#, python-format
-msgid "Please, Scan again!"
-msgstr ""
+"Els patrons també poden definir com es codifiquen els valors numèrics, tals com el pes o el preu, en el codi de barres. S'indica per <code>{NNN}</code>, on les Ns defineixen en quina posició es codifiquen els números.\n"
+"També es permeten nombres reals si els decimals s'indiquen amb Ds, per exemple <code>{NNNDD}</code>. En aquests casos, el camp del codi de barres en els registres associats <i>ha de</i> mostrar zeros en aquestes posicions."
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule__name
@@ -255,13 +249,6 @@ msgid "Tables"
 msgstr "Taules "
 
 #. module: barcodes
-#. odoo-javascript
-#: code:addons/barcodes/static/src/components/barcode_scanner.xml:0
-#, python-format
-msgid "Tap to scan"
-msgstr "Toca per escanejar"
-
-#. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule__pattern
 msgid "The barcode matching pattern"
 msgstr "El patró de coincidència de codis de barres"
@@ -277,7 +264,6 @@ msgid "The matched pattern will alias to this barcode"
 msgstr "El patró coincident serà un sobrenom per aquest codi de barres"
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -288,7 +274,6 @@ msgstr ""
 "només pot contenir un parell de claus."
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -299,7 +284,6 @@ msgstr ""
 "només poden contenir N seguides de D."
 
 #. module: barcodes
-#. odoo-python
 #: code:addons/barcodes/models/barcode_rule.py:0
 #, python-format
 msgid ""
@@ -355,7 +339,7 @@ msgid "Unit Product"
 msgstr "Unitat de producte"
 
 #. module: barcodes
-#. odoo-javascript
+#. openerp-web
 #: code:addons/barcodes/static/src/barcode_handlers.js:0
 #, python-format
 msgid "Unknown barcode command"

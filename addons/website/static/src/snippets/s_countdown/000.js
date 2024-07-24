@@ -1,10 +1,13 @@
-/** @odoo-module **/
+odoo.define('website.s_countdown', function (require) {
+'use strict';
 
-import publicWidget from "@web/legacy/js/public/public_widget";
-import weUtils from "@web_editor/js/common/utils";
-import { isCSSColor } from '@web/core/utils/colors';
-import { _t } from "@web/core/l10n/translation";
-import { renderToElement } from "@web/core/utils/render";
+const {ColorpickerWidget} = require('web.Colorpicker');
+const core = require('web.core');
+const publicWidget = require('web.public.widget');
+const weUtils = require('web_editor.utils');
+
+const qweb = core.qweb;
+const _t = core._t;
 
 const CountdownWidget = publicWidget.Widget.extend({
     selector: '.s_countdown',
@@ -14,11 +17,6 @@ const CountdownWidget = publicWidget.Widget.extend({
      * @override
      */
     start: function () {
-        // Remove SVG previews (used to simulated canvas)
-        this.$el[0].querySelectorAll('svg').forEach(el => {
-            el.parentNode.remove();
-        });
-
         this.$wrapper = this.$('.s_countdown_canvas_wrapper');
         this.$wrapper.addClass('d-flex justify-content-center');
         this.hereBeforeTimerEnds = false;
@@ -86,7 +84,7 @@ const CountdownWidget = publicWidget.Widget.extend({
      * @returns {string}
      */
     _ensureCssColor: function (color) {
-        if (isCSSColor(color)) {
+        if (ColorpickerWidget.isCSSColor(color)) {
             return color;
         }
         return weUtils.getCSSVariableValue(color) || this.defaultColor;
@@ -116,7 +114,7 @@ const CountdownWidget = publicWidget.Widget.extend({
                 if (!this.$('.s_countdown_end_redirect_message').length) {
                     const $container = this.$('> .container, > .container-fluid, > .o_container_small');
                     $container.append(
-                        $(renderToElement('website.s_countdown.end_redirect_message', {
+                        $(qweb.render('website.s_countdown.end_redirect_message', {
                             redirectUrl: redirectUrl,
                         }))
                     );
@@ -431,4 +429,5 @@ const CountdownWidget = publicWidget.Widget.extend({
 
 publicWidget.registry.countdown = CountdownWidget;
 
-export default CountdownWidget;
+return CountdownWidget;
+});

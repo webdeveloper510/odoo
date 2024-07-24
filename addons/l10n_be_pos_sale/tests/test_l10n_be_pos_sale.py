@@ -9,7 +9,7 @@ from odoo import Command
 class TestPoSSaleL10NBe(TestPointOfSaleHttpCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref='be_comp'):
+    def setUpClass(cls, chart_template_ref='l10n_be.l10nbe_chart_template'):
         super().setUpClass(chart_template_ref=chart_template_ref)
 
     def test_settle_order_is_invoice(self):

@@ -1,11 +1,11 @@
 /** @odoo-module **/
 
 import { NewContentModal, MODULE_STATUS } from '@website/systray_items/new_content';
-import { patch } from "@web/core/utils/patch";
+import { patch } from 'web.utils';
 
-patch(NewContentModal.prototype, {
+patch(NewContentModal.prototype, 'website_blog_new_content', {
     setup() {
-        super.setup();
+        this._super();
 
         const newBlogElement = this.state.newContentElements.find(element => element.moduleXmlId === 'base.module_website_blog');
         newBlogElement.createNewContent = () => this.onAddContent('website_blog.blog_post_action_add', true);

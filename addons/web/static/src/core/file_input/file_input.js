@@ -1,9 +1,9 @@
 /** @odoo-module **/
 
 import { useService } from "@web/core/utils/hooks";
-
-import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { checkFileSize } from "@web/core/utils/files";
+
+import { Component, onMounted, useRef } from "@odoo/owl";
 
 /**
  * Custom file input
@@ -26,12 +26,7 @@ import { checkFileSize } from "@web/core/utils/files";
 export class FileInput extends Component {
     setup() {
         this.http = useService("http");
-        this.notification = useService("notification");
         this.fileInputRef = useRef("file-input");
-        this.state = useState({
-            // Disables upload button if currently uploading.
-            isDisable: false,
-        });
 
         onMounted(() => {
             if (this.props.autoOpen) {
@@ -58,7 +53,14 @@ export class FileInput extends Component {
     async uploadFiles(params) {
         if ((params.ufile && params.ufile.length) || params.file) {
             const fileSize = (params.ufile && params.ufile[0].size) || params.file.size;
-            if (!checkFileSize(fileSize, this.notification)) {
+            if (!checkFileSize(fileSize, this.env.services.notification)) {
+                // FIXME
+                // Note that the notification service is not added as a
+                // dependency of this component (through useService hook),
+                // in order to avoid introducing a breaking change in a stable version.
+                // If the notification service is not available, the
+                // checkFileSize function will not display any notification
+                // but will still return the correct value.
                 return null;
             }
         }
@@ -82,19 +84,10 @@ export class FileInput extends Component {
      * - resId: the id of the resModel target instance
      */
     async onFileInputChange() {
-        this.state.isDisable = true;
         const parsedFileData = await this.uploadFiles(this.httpParams);
         if (parsedFileData) {
-            // When calling onUpload, also pass the files to allow to get data like their names
-            this.props.onUpload(
-                parsedFileData,
-                this.fileInputRef.el ? this.fileInputRef.el.files : []
-            );
-            // Because the input would not trigger this method if the same file name is uploaded,
-            // we must clear the value after handling the upload
-            this.fileInputRef.el.value = null;
+            this.props.onUpload(parsedFileData);
         }
-        this.state.isDisable = false;
     }
 
     /**

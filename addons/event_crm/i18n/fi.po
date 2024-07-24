@@ -3,21 +3,21 @@
 # 	* event_crm
 # 
 # Translators:
-# Jussi Lehto <jussi@gulfeo.com>, 2023
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2023
-# Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2023
-# Kari Lindgren <kari.lindgren@emsystems.fi>, 2023
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
-# Martin Trigaux, 2023
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Jussi Lehto <jussi@gulfeo.com>, 2022
+# Tuomas Lyyra <tuomas.lyyra@legenda.fi>, 2022
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2022
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2022
+# Martin Trigaux, 2022
+# Kari Lindgren <kari.lindgren@emsystems.fi>, 2022
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-10-04 09:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
@@ -38,7 +38,6 @@ msgid "# Registrations"
 msgstr "# Ilmoittautumiset"
 
 #. module: event_crm
-#. odoo-python
 #: code:addons/event_crm/models/event_registration.py:0
 #, python-format
 msgid "(updated)"
@@ -67,14 +66,14 @@ msgid "Archived"
 msgstr "Arkistoitu"
 
 #. module: event_crm
+#: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_trigger__confirm
+msgid "Attendees are confirmed"
+msgstr "Osallistujat on vahvistettu"
+
+#. module: event_crm
 #: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_trigger__create
 msgid "Attendees are created"
 msgstr "Osallistujat luodaan"
-
-#. module: event_crm
-#: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_trigger__confirm
-msgid "Attendees are registered"
-msgstr "Osallistujat ovat rekisteröityneet"
 
 #. module: event_crm
 #: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_trigger__done
@@ -140,11 +139,11 @@ msgstr "Luomisen tyyppi"
 #: model:ir.model.fields,help:event_crm.field_event_lead_rule__lead_creation_trigger
 msgid ""
 "Creation: at attendee creation;\n"
-"Registered: at attendee registration, manually or automatically;\n"
+"Confirmation: when attendee is confirmed, manually or automatically;\n"
 "Attended: when attendance is confirmed and registration set to done;"
 msgstr ""
 "Luominen: osallistujan luomisessa;\n"
-"Rekisteröity: osallistujan rekisteröinnin yhteydessä, manuaalisesti tai automaattisesti;\n"
+"Vahvistus: kun osallistuja vahvistetaan, manuaalisesti tai automaattisesti;\n"
 "Osallistunut: kun osallistuminen on vahvistettu ja rekisteröinti on tehty;"
 
 #. module: event_crm
@@ -234,6 +233,11 @@ msgid "If the Attendees meet these Conditions"
 msgstr "Jos osallistujat täyttävät seuraavat ehdot"
 
 #. module: event_crm
+#: model:ir.model.fields,field_description:event_crm.field_event_lead_rule____last_update
+msgid "Last Modified on"
+msgstr "Viimeksi muokattu"
+
+#. module: event_crm
 #: model:ir.model.fields,field_description:event_crm.field_event_lead_rule__write_uid
 msgid "Last Updated by"
 msgstr "Viimeksi päivittänyt"
@@ -303,7 +307,6 @@ msgid "Name"
 msgstr "Nimi"
 
 #. module: event_crm
-#. odoo-python
 #: code:addons/event_crm/models/event_lead_rule.py:0
 #, python-format
 msgid "New registrations"
@@ -326,7 +329,6 @@ msgid "Opportunity"
 msgstr "Mahdollisuus"
 
 #. module: event_crm
-#. odoo-python
 #: code:addons/event_crm/models/event_registration.py:0
 #: code:addons/event_crm/models/event_registration.py:0
 #, python-format
@@ -341,11 +343,11 @@ msgstr "Osallistujaa kohti"
 #. module: event_crm
 #: model:ir.model.fields,help:event_crm.field_event_lead_rule__lead_creation_basis
 msgid ""
-"Per Attendee: A Lead is created for each Attendee (B2C).\n"
-"Per Order: A single Lead is created per Ticket Batch/Sale Order (B2B)"
+"Per Attendee : A Lead is created for each Attendee (B2C).\n"
+"Per Order : A single Lead is created per Ticket Batch/Sale Order (B2B)"
 msgstr ""
-"Osallistujaa kohti: (B2C).\n"
-"Tilausta kohti: Yksi liidi luodaan kutakin lippuerää tai myyntitilausta kohden (B2B)"
+"Osallistujaa kohden : Jokaiselle osallistujalle luodaan liidi (B2C).\n"
+"Tilausta kohden : Yksi liidi luodaan kutakin lippuerää/myyntitilausta kohden (B2B)"
 
 #. module: event_crm
 #: model:ir.model.fields.selection,name:event_crm.selection__event_lead_rule__lead_creation_basis__order
@@ -437,7 +439,6 @@ msgid "Trigger Type"
 msgstr "Liipaisin-tyyppi"
 
 #. module: event_crm
-#. odoo-python
 #: code:addons/event_crm/models/event_registration.py:0
 #: code:addons/event_crm/models/event_registration.py:0
 #, python-format

@@ -3,19 +3,19 @@
 # 	* website_slides_survey
 # 
 # Translators:
-# Foldi Robert <foldirobert@nexterp.ro>, 2024
-# Cozmin Candea <office@terrabit.ro>, 2024
-# Dorin Hongu <dhongu@gmail.com>, 2024
-# Hongu Cosmin <cosmin513@gmail.com>, 2024
-# Martin Trigaux, 2024
+# Foldi Robert <foldirobert@nexterp.ro>, 2022
+# Hongu Cosmin <cosmin513@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Cozmin Candea <office@terrabit.ro>, 2023
+# Dorin Hongu <dhongu@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:10+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
+"POT-Creation-Date: 2023-04-14 05:53+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2023\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,8 +42,8 @@ msgstr ""
 msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Dear <t t-out=\"object.partner_id.name or 'participant' or ''\">participant</t><br><br>\n"
-"        Unfortunately, you have failed the certification and are no longer a member of the course: <t t-out=\"object.slide_partner_id.channel_id.name or ''\">Basics of Gardening</t>.<br><br>\n"
+"        Dear <t t-out=\"object.partner_id.name or 'participant' or ''\">participant</t><br/><br/>\n"
+"        Unfortunately, you have failed the certification and are no longer a member of the course: <t t-out=\"object.slide_partner_id.channel_id.name or ''\">Basics of Gardening</t>.<br/><br/>\n"
 "        Don't hesitate to enroll again!\n"
 "        <div style=\"margin: 16px 0px 16px 0px;\">\n"
 "            <a t-att-href=\"(object.slide_partner_id.channel_id.website_url)\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
@@ -57,8 +57,18 @@ msgid ""
 msgstr ""
 
 #. module: website_slides_survey
+#: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
+msgid "<i class=\"fa fa-arrow-right me-1\"/>Add Questions to this Survey"
+msgstr ""
+
+#. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"fa fa-arrow-right\"/> Get Certified"
+msgid "<i class=\"fa fa-arrow-right me-1\"/>All Certifications"
+msgstr ""
+
+#. module: website_slides_survey
+#: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
+msgid "<i class=\"fa fa-arrow-right\"/> See Certifications"
 msgstr ""
 
 #. module: website_slides_survey
@@ -92,21 +102,6 @@ msgid "<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>"
 msgstr "<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>"
 
 #. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Add Questions to this Survey"
-msgstr ""
-
-#. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Certifications"
-msgstr ""
-
-#. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
-msgid "<i class=\"oi oi-arrow-right\"/> See Certifications"
-msgstr ""
-
-#. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.badge_content
 msgid "<i class=\"text-muted\"> awarded users</i>"
 msgstr "<i class=\"text-muted\">utilizatori premiați</i>"
@@ -119,9 +114,11 @@ msgstr ""
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_channel_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"nbr_certification &gt; 0\">Finished</span>\n"
-"                <span class=\"o_stat_text\" invisible=\"nbr_certification == 0\">Certified</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '&gt;', 0)]}\">Finished</span>\n"
+"                <span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '=', 0)]}\">Certified</span>"
 msgstr ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '&gt;', 0)]}\">Terminat</span>\n"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '=', 0)]}\">Certificat</span>"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.all_user_card
@@ -145,7 +142,7 @@ msgstr ""
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.course_main
-msgid "<span>Start Now</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
+msgid "<span>Start Now</span><i class=\"fa fa-chevron-right ms-2 align-middle\"/>"
 msgstr ""
 
 #. module: website_slides_survey
@@ -315,11 +312,6 @@ msgid "Certifications"
 msgstr "Certificări"
 
 #. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "Certifications are exams that you successfully passed. <br/>"
-msgstr ""
-
-#. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_sidebar_done_button
 msgid "Certifications you have passed cannot be marked as not done"
@@ -464,13 +456,13 @@ msgstr ""
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "Score:"
-msgstr ""
+msgid "Score :"
+msgstr "Scor :"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
 msgid "Search"
-msgstr "Căutare"
+msgstr "Caută"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
@@ -510,7 +502,7 @@ msgstr ""
 #. module: website_slides_survey
 #: model:ir.model,name:website_slides_survey.model_slide_slide
 msgid "Slides"
-msgstr "Prezentări"
+msgstr "Diapozitive"
 
 #. module: website_slides_survey
 #: model:ir.model.fields,field_description:website_slides_survey.field_survey_user_input__slide_partner_id

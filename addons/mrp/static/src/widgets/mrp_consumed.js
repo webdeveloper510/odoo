@@ -1,8 +1,9 @@
 /** @odoo-module */
 
 import { registry } from "@web/core/registry";
-import { FloatField, floatField } from '@web/views/fields/float/float_field';
-import { useRef, useEffect } from "@odoo/owl";
+import { FloatField } from '@web/views/fields/float/float_field';
+
+const { useRef, useEffect } = owl;
 
 export class MrpConsumed extends FloatField {
     setup() {
@@ -23,13 +24,9 @@ export class MrpConsumed extends FloatField {
     }
 
     onInput(ev) {
+        this.props.setDirty(true);
         return this.props.record.update({ manual_consumption: true });
     }
 }
 
-export const mrpConsumed = {
-    ...floatField,
-    component: MrpConsumed,
-};
-
-registry.category('fields').add('mrp_consumed', mrpConsumed);
+registry.category('fields').add('mrp_consumed', MrpConsumed);

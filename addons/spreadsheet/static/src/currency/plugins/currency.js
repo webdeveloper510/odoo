@@ -1,9 +1,8 @@
 /** @odoo-module */
 
-import { helpers, registries, UIPlugin } from "@odoo/o-spreadsheet";
+import spreadsheet from "../../o_spreadsheet/o_spreadsheet_extended";
 import { CurrencyDataSource } from "../currency_data_source";
-const { featurePluginRegistry } = registries;
-const { createCurrencyFormat } = helpers;
+const { uiPluginRegistry } = spreadsheet.registries;
 
 const DATA_SOURCE_ID = "CURRENCIES";
 
@@ -11,11 +10,10 @@ const DATA_SOURCE_ID = "CURRENCIES";
  * @typedef {import("../currency_data_source").Currency} Currency
  */
 
-class CurrencyPlugin extends UIPlugin {
-    constructor(config) {
-        super(config);
-        this.currentCompanyCurrencyFormat = config.defaultCurrencyFormat;
-        this.dataSources = config.custom.dataSources;
+class CurrencyPlugin extends spreadsheet.UIPlugin {
+    constructor(getters, history, dispatch, config) {
+        super(getters, history, dispatch, config);
+        this.dataSources = config.dataSources;
         if (this.dataSources) {
             this.dataSources.add(DATA_SOURCE_ID, CurrencyDataSource);
         }
@@ -39,18 +37,37 @@ class CurrencyPlugin extends UIPlugin {
     }
 
     /**
+     *
      * @param {Currency | undefined} currency
+     * @private
+     *
      * @returns {string | undefined}
      */
     computeFormatFromCurrency(currency) {
         if (!currency) {
             return undefined;
         }
-        return createCurrencyFormat({
-            symbol: currency.symbol,
-            position: currency.position,
-            decimalPlaces: currency.decimalPlaces,
-        });
+        const decimalFormatPart = currency.decimalPlaces
+            ? "." + "0".repeat(currency.decimalPlaces)
+            : "";
+        const numberFormat = "#,##0" + decimalFormatPart;
+        const symbolFormatPart = "[$" + currency.symbol + "]";
+        return currency.position === "after"
+            ? numberFormat + symbolFormatPart
+            : symbolFormatPart + numberFormat;
+    }
+
+    /**
+     * Returns the default display format of a given currency
+     * @param {string} currencyName
+     * @returns {string | undefined}
+     */
+    getCurrencyFormat(currencyName) {
+        const currency =
+            currencyName &&
+            this.dataSources &&
+            this.dataSources.get(DATA_SOURCE_ID).getCurrency(currencyName);
+        return this.computeFormatFromCurrency(currency);
     }
 
     /**
@@ -59,9 +76,6 @@ class CurrencyPlugin extends UIPlugin {
      * @returns {string | undefined}
      */
     getCompanyCurrencyFormat(companyId) {
-        if (!companyId && this.currentCompanyCurrencyFormat) {
-            return this.currentCompanyCurrencyFormat;
-        }
         const currency =
             this.dataSources &&
             this.dataSources.get(DATA_SOURCE_ID).getCompanyCurrencyFormat(companyId);
@@ -69,10 +83,7 @@ class CurrencyPlugin extends UIPlugin {
     }
 }
 
-CurrencyPlugin.getters = [
-    "getCurrencyRate",
-    "computeFormatFromCurrency",
-    "getCompanyCurrencyFormat",
-];
+CurrencyPlugin.modes = ["normal", "headless"];
+CurrencyPlugin.getters = ["getCurrencyRate", "getCurrencyFormat", "getCompanyCurrencyFormat"];
 
-featurePluginRegistry.add("odooCurrency", CurrencyPlugin);
+uiPluginRegistry.add("odooCurrency", CurrencyPlugin);

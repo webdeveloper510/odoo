@@ -11,10 +11,12 @@ class ResConfigSettings(models.TransientModel):
 
     company_id = fields.Many2one('res.company', string='Company', required=True,
         default=lambda self: self.env.company)
-    is_root_company = fields.Boolean(compute='_compute_is_root_company')
     user_default_rights = fields.Boolean(
         "Default Access Rights",
         config_parameter='base_setup.default_user_rights')
+    external_email_server_default = fields.Boolean(
+        "Custom Email Servers",
+        config_parameter='base_setup.default_external_email_server')
     module_base_import = fields.Boolean("Allow users to import data from CSV/XLS/XLSX/ODS files")
     module_google_calendar = fields.Boolean(
         string='Allow the users to synchronize their calendar  with Google Calendar')
@@ -25,13 +27,14 @@ class ResConfigSettings(models.TransientModel):
     )
     module_auth_oauth = fields.Boolean("Use external authentication providers (OAuth)")
     module_auth_ldap = fields.Boolean("LDAP Authentication")
+    # TODO: remove in master
+    module_base_gengo = fields.Boolean("Translate Your Website with Gengo")
     module_account_inter_company_rules = fields.Boolean("Manage Inter Company")
     module_voip = fields.Boolean("Asterisk (VoIP)")
     module_web_unsplash = fields.Boolean("Unsplash Image Library")
     module_partner_autocomplete = fields.Boolean("Partner Autocomplete")
     module_base_geolocalize = fields.Boolean("GeoLocalize")
     module_google_recaptcha = fields.Boolean("reCAPTCHA")
-    module_website_cf_turnstile = fields.Boolean("Cloudflare Turnstile")
     report_footer = fields.Html(related="company_id.report_footer", string='Custom Report Footer', help="Footer text displayed at the bottom of all reports.", readonly=False)
     group_multi_currency = fields.Boolean(string='Multi-Currencies',
             implied_group='base.group_multi_currency',
@@ -43,7 +46,6 @@ class ResConfigSettings(models.TransientModel):
     language_count = fields.Integer('Number of Languages', compute="_compute_language_count")
     company_name = fields.Char(related="company_id.display_name", string="Company Name")
     company_informations = fields.Text(compute="_compute_company_informations")
-    company_country_code = fields.Char(related="company_id.country_id.code", string="Company Country Code", readonly=True)
     profiling_enabled_until = fields.Datetime("Profiling enabled until", config_parameter='base.profiling_enabled_until')
     module_product_images = fields.Boolean("Get product pictures using barcode")
 
@@ -55,6 +57,9 @@ class ResConfigSettings(models.TransientModel):
             'res_model': 'res.company',
             'res_id': self.env.company.id,
             'target': 'current',
+            'context': {
+                'form_view_initial_mode': 'edit',
+            },
         }
 
     def open_default_user(self):
@@ -117,8 +122,3 @@ class ResConfigSettings(models.TransientModel):
 
         for record in self:
             record.company_informations = informations
-
-    @api.depends('company_id')
-    def _compute_is_root_company(self):
-        for record in self:
-            record.is_root_company = not record.company_id.parent_id

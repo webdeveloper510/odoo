@@ -20,19 +20,15 @@ passed to the Accept.js SDK, the solution qualifies for SAQ A-EP.
 
 - Direct payment flow
 - Tokenization with or without payment
-- Full manual capture
+- Manual capture
 - Full refunds
 
 ## Missing features
 
-- Partial manual capture
 - Webhook notifications: not available
 
 ## Module history
 
-- `16.1`
-  - The "Authorize Currency" field is replaced by the generic "Currencies" field of `payment`.
-    odoo/odoo#101018
 - `16.0`
   - Archiving a token no longer deactivates the related payment method on Authorize. odoo/odoo#93774
 - `15.4`

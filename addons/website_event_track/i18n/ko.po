@@ -3,15 +3,17 @@
 # 	* website_event_track
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# JH CHOI <hwangtog@gmail.com>, 2022
+# Sarah Park, 2023
 # Daye Jeong, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-05-23 08:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:56+0000\n"
 "Last-Translator: Daye Jeong, 2023\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +33,7 @@ msgstr "\"행사 앱 이름\" 필드는 필수 입력 사항입니다."
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__wishlist_visitor_count
 #: model:ir.model.fields,field_description:website_event_track.field_website_visitor__event_track_wishlisted_count
 msgid "# Wishlisted"
-msgstr "# 위시리스트에 추가됨"
+msgstr "# 위시리스트"
 
 #. module: website_event_track
 #. odoo-python
@@ -60,6 +62,11 @@ msgstr "%s 행사"
 #, python-format
 msgid "%s Online Events Application"
 msgstr "%s 온라인 행사 신청서"
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
+msgid "&amp;bull;"
+msgstr "&amp;bull;"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_17
@@ -95,6 +102,16 @@ msgstr "<b>제안자</b>:"
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_template_new
 msgid "<b>Speaker Biography</b>:"
 msgstr "<b>발표자 약력</b>:"
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
+msgid "<b>Speaker Profile</b>"
+msgstr "<b>발표자 프로필</b>"
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
+msgid "<b>Talk Intro</b>"
+msgstr "<b>토크 소개</b>"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_template_new
@@ -147,22 +164,25 @@ msgstr "<i class=\"fa fa-ban me-2\"/>게시 안 됨"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_search
-msgid "<i class=\"fa fa-bell mx-2 text-muted\"/> Favorite Talks"
-msgstr "<i class=\"fa fa-bell mx-2 text-muted\"/> 좋아하는 강연"
+msgid "<i class=\"fa fa-bell me-2 text-muted\"/> Favorite Talks"
+msgstr "<i class=\"fa fa-bell me-2 text-muted\"/> 좋아하는 토크 "
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
+msgid "<i class=\"fa fa-folder-open\"/> Favorites"
+msgstr "<i class=\"fa fa-folder-open\"/> 즐겨찾기"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
 msgid ""
-"<i class=\"oi oi-fw oi-arrow-right\"/>\n"
+"<i class=\"fa fa-fw fa-arrow-right\"/>\n"
 "                        Write one."
 msgstr ""
-"<i class=\"oi oi-fw oi-arrow-right\"/>\n"
-"                        작성하기."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
-msgid "<span class=\"d-none d-md-block\">&amp;bull;</span>"
-msgstr "<span class=\"d-none d-md-block\">&amp;bull;</span>"
+msgid "<span class=\"d-none d-md-block ms-2\">&amp;bull;</span>"
+msgstr "<span class=\"d-none d-md-block ms-2\">&amp;bull;</span>"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.res_config_settings_view_form
@@ -172,12 +192,6 @@ msgid ""
 msgstr ""
 "<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
 "specific.\" groups=\"website.group_multi_website\"/>"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
-#: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
-msgid "<span class=\"fa fa-plus me-1\"/> Schedule Tracks"
-msgstr "<span class=\"fa fa-plus me-1\"/> 세션 예약하기"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -237,12 +251,35 @@ msgstr "<span> at </span>"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_template_new
 msgid "<span>New track proposal</span>"
-msgstr "<span>신규 세션 제안</span>"
+msgstr "<span>신규 트랙 제안</span>"
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
+msgid "<span>hours</span>"
+msgstr "<span>시간</span>"
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
+msgid ""
+"<strong>Lightning Talks</strong>. These are 30 minutes talks on many\n"
+"                                    different topics. Most topics are accepted in lightning talks."
+msgstr ""
+"<strong>번개 강연</strong>. 이것은 많은 다양한 주제에 대한 \n"
+"                                   30분짜리 강연입니다. 대부분의 주제는 번개 강연에서 허용됩니다."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
 msgid "<strong>Location:</strong>"
 msgstr "<strong>위치:</strong>"
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
+msgid ""
+"<strong>Regular Talks</strong>. These are standard talks with slides,\n"
+"                                    alocated in slots of 60 minutes."
+msgstr ""
+"<strong>정기 강연</strong>. 슬라이드가 있는 표준 강연이며, \n"
+"                                    60분 간격으로 배치됩니다."
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track7
@@ -270,7 +307,7 @@ msgstr "조치 필요"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__active
 msgid "Active"
-msgstr "활성화"
+msgstr "활성"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_ids
@@ -290,7 +327,7 @@ msgstr "활동 상태"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "활동 유형 아이콘"
+msgstr "업무 유형 아이콘"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_stage_view_form
@@ -313,12 +350,12 @@ msgstr "파이프라인 활동 안에 새로운 단계 추가하기"
 #: model_terms:ir.actions.act_window,help:website_event_track.action_event_track_tag
 msgid ""
 "Add tags to your tracks to help your attendees browse your event web pages."
-msgstr "세션에 태그를 추가하여 참가자가 행사 웹페이지를 찾아볼 수 있도록 하세요."
+msgstr "트랙에 태그를 추가하여 참가자가 행사 웹페이지를 찾아볼 수 있도록 하세요."
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track19
-msgid "Advanced lead management: tips and tricks from the fields"
-msgstr "고급 영업제안 관리 : 현장 경험에 의한 유용한 팁과 요령"
+msgid "Advanced lead management : tips and tricks from the fields"
+msgstr "고급 영업제안 관리 : 현장 경험에 의한 팁과 요령"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track13
@@ -328,15 +365,9 @@ msgstr "고급 보고"
 #. module: website_event_track
 #. odoo-python
 #: code:addons/website_event_track/models/event_event.py:0
-#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_topbar
 #, python-format
 msgid "Agenda"
 msgstr "의제"
-
-#. module: website_event_track
-#: model:ir.model.fields,field_description:website_event_track.field_event_track__color
-msgid "Agenda Color"
-msgstr "의제 색상"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
@@ -346,7 +377,7 @@ msgstr "모든 강연"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_event_view_form
 msgid "Allow Track Proposals"
-msgstr "세션 제안 허용"
+msgstr "트랙 제안 허용"
 
 #. module: website_event_track
 #. odoo-javascript
@@ -359,10 +390,10 @@ msgstr "푸시 알림을 허용하시겠습니까?"
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid ""
 "Allow video and audio recording of their\n"
-"                            presentation, for publishing on our website."
+"                                    presentation, for publishing on our website."
 msgstr ""
-"웹 사이트에 게시할 수 있도록\n"
-"                            프레젠테이션의 비디오 및 오디오 녹화를 허용합니다."
+"웹 사이트에 게시할 수 있도록 \n"
+"                                    프레젠테이션의 비디오 및 오디오 녹화를 허용합니다."
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__wishlisted_by_default
@@ -383,7 +414,6 @@ msgid "Application"
 msgstr "응용 프로그램"
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Archived"
 msgstr "보관됨"
@@ -427,7 +457,7 @@ msgstr "과정 태그 사용 가능"
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_18
 msgid "Bandy clamp hack"
-msgstr "밴디 클램프 사용 팁"
+msgstr "밴디 클램프 꿀팁"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__partner_biography
@@ -475,6 +505,11 @@ msgid "Button Title"
 msgstr "버튼 제목"
 
 #. module: website_event_track
+#: model:ir.model.fields,field_description:website_event_track.field_event_track__website_cta_delay
+msgid "Button appears"
+msgstr ""
+
+#. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__is_website_cta_live
 msgid "CTA button is available"
 msgstr "CTA 버튼 사용 가능"
@@ -497,12 +532,12 @@ msgstr "단계 취소됨"
 #. module: website_event_track
 #: model:event.track.stage,name:website_event_track.event_track_stage5
 msgid "Cancelled"
-msgstr "취소됨"
+msgstr "취소 됨"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Categories"
-msgstr "카테고리"
+msgstr "범주"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_tag__category_id
@@ -515,11 +550,7 @@ msgid "Climate positive"
 msgstr "기후 포지티브"
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
-msgid "Close"
-msgstr "닫기"
-
-#. module: website_event_track
+#: model:ir.model.fields,field_description:website_event_track.field_event_track__color
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_stage__color
 msgid "Color"
 msgstr "색상"
@@ -554,7 +585,7 @@ msgstr "회사명"
 #. module: website_event_track
 #: model:ir.model,name:website_event_track.model_res_config_settings
 msgid "Config Settings"
-msgstr "환경 설정"
+msgstr "설정 구성"
 
 #. module: website_event_track
 #: model:mail.template,subject:website_event_track.mail_template_data_track_confirmation
@@ -604,25 +635,40 @@ msgid "Contact Phone"
 msgstr "연락 번호"
 
 #. module: website_event_track
+#: model:ir.model.fields,help:website_event_track.field_event_track__contact_email
+msgid "Contact email is private and used internally"
+msgstr ""
+
+#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal_contact_details
 msgid "Contact me through a different email/phone"
 msgstr "다른 이메일/전화를 통해 연락주십시오."
 
 #. module: website_event_track
+#: model:ir.model.fields,help:website_event_track.field_event_track__partner_id
+msgid "Contact of the track, may be different from speaker."
+msgstr ""
+
+#. module: website_event_track
+#: model:ir.model.fields,help:website_event_track.field_event_track__contact_phone
+msgid "Contact phone is private and used internally"
+msgstr ""
+
+#. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.action_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.action_event_track_from_event
 msgid "Create a Track"
-msgstr "세션 만들기"
+msgstr "트랙 만들기"
 
 #. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.action_event_track_location
 msgid "Create a Track Location"
-msgstr "세션 위치 만들기"
+msgstr "트랙 위치 만들기"
 
 #. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.action_event_track_tag
 msgid "Create a Track Tag"
-msgstr "세션 태그 만들기"
+msgstr "트랙 태그 만들기"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__create_uid
@@ -657,7 +703,7 @@ msgstr "DIY 목재 클래딩 프로젝트"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
 msgid "Date"
-msgstr "날짜"
+msgstr "일자"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_11
@@ -687,9 +733,9 @@ msgid ""
 "            You will use these stages in order to track the progress in\n"
 "            solving an event track."
 msgstr ""
-"세션의 생성부터 세션 종료까지\n"
+"트랙의 생성부터 트랙 종료까지\n"
 "            행사에서 사용될 각 단계를 정의합니다.\n"
-"            이러한 단계를 사용함으로써 행사 세션 진행 상황을 쉽게\n"
+"            이러한 단계를 사용함으로써 행사 트랙의 진행 상황을 쉽게\n"
 "            추적하고 문제를 해결할 수 있습니다."
 
 #. module: website_event_track
@@ -744,7 +790,7 @@ msgstr "표시명"
 msgid ""
 "Display a Call to Action button to your Attendees while they watch your "
 "Track."
-msgstr "참석자가 세션을 시청하는 동안 클릭 유도 버튼을 표시합니다."
+msgstr "참석자가 트랙을 시청하는 동안 클릭 유도 버튼을 표시합니다."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_aside_other_track
@@ -757,9 +803,14 @@ msgid "Dowel Hack"
 msgstr "다웰 사용 팁"
 
 #. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
+msgid "Dropdown menu"
+msgstr "드롭다운 메뉴"
+
+#. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__duration
 msgid "Duration"
-msgstr "소요시간"
+msgstr "기간"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_3
@@ -852,7 +903,7 @@ msgstr "행사 과정 태그"
 #. module: website_event_track
 #: model:ir.model,name:website_event_track.model_event_track_tag_category
 msgid "Event Track Tag Category"
-msgstr "행사 세션 태그 카테고리"
+msgstr "행사 트랙 태그 카테고리"
 
 #. module: website_event_track
 #: model:ir.actions.act_window,name:website_event_track.action_event_track
@@ -876,7 +927,7 @@ msgstr "행사 결산"
 #. module: website_event_track
 #: model:mail.template,name:website_event_track.mail_template_data_track_confirmation
 msgid "Event: Track Confirmation"
-msgstr "행사: 세션 확인"
+msgstr "행사: 트랙 확인"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_res_config_settings__events_app_name
@@ -904,14 +955,14 @@ msgid "Favorites"
 msgstr "즐겨찾기"
 
 #. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_topbar
+msgid "Filter Tracks..."
+msgstr "필터 과정..."
+
+#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.snippet_options
 msgid "Filter by Tags"
 msgstr "태그별 필터"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
-msgid "Filters"
-msgstr "필터"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_display_list
@@ -936,12 +987,12 @@ msgstr "팔로워"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "팔로워 (협력사)"
+msgstr "팔로워 (파트너)"
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "멋진 아이콘 폰트 예: fa-tasks"
+msgstr "멋진 아이콘 폰트 예 : fa-tasks"
 
 #. module: website_event_track
 #: model:event.track.tag.category,name:website_event_track.event_track_tag_category_2
@@ -976,7 +1027,7 @@ msgstr "녹색"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_stage__legend_done
 msgid "Green Kanban Label"
-msgstr "녹색 칸반 라벨"
+msgstr "녹색 칸반 꼬리표"
 
 #. module: website_event_track
 #: model:ir.model.fields.selection,name:website_event_track.selection__event_track__kanban_state__normal
@@ -986,7 +1037,7 @@ msgstr "회색"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_stage__legend_normal
 msgid "Grey Kanban Label"
-msgstr "회색 칸반 라벨"
+msgstr "회색 칸반 꼬리표"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_visitor_view_search
@@ -1094,7 +1145,7 @@ msgstr "예외 활동을 표시하기 위한 아이콘"
 msgid ""
 "If checked, automatically publish tracks so that access links to customers "
 "are provided."
-msgstr "이 옵션을 선택하면 자동으로 세션을 게시하고 고객에게 링크를 제공합니다."
+msgstr "이 옵션을 선택하면 자동으로 트랙을 게시하고 고객에게 링크를 제공합니다."
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__message_needaction
@@ -1110,7 +1161,7 @@ msgstr "이 옵션을 선택하면 일부 정보가 전달 오류를 생성합�
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track_stage__is_visible_in_agenda
 msgid "If checked, the related tracks will be visible in the frontend."
-msgstr "체크 시 관련 세션이 프론트엔드에 표시됩니다."
+msgstr "체크하면 관련 트랙이 프론트엔드에 표시됩니다."
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track_stage__mail_template_id
@@ -1186,7 +1237,7 @@ msgstr "소개"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__is_website_cta_live
 msgid "Is CTA Live"
-msgstr "실시간 CTA"
+msgstr "실시간 CTA 여부"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__message_is_follower
@@ -1206,27 +1257,27 @@ msgstr "미리 알림 켜짐"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__is_track_done
 msgid "Is Track Done"
-msgstr "세션 완료"
+msgstr "트랙 완료"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__is_track_live
 msgid "Is Track Live"
-msgstr "실시간 세션"
+msgstr "실시간 트랙"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__is_track_soon
 msgid "Is Track Soon"
-msgstr "곧 진행 예정 세션"
+msgstr "곧 진행 예정 트랙"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__is_track_today
 msgid "Is Track Today"
-msgstr "오늘 진행 세션"
+msgstr "오늘 진행 트랙"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__is_track_upcoming
 msgid "Is Track Upcoming"
-msgstr "예정된 세션"
+msgstr "예정된 트랙"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_visitor__is_wishlisted
@@ -1266,7 +1317,7 @@ msgstr "칸반 상태"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__kanban_state_label
 msgid "Kanban State Label"
-msgstr "칸반 상태 라벨"
+msgstr "단계 상태 꼬리표"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__legend_done
@@ -1282,6 +1333,16 @@ msgstr "가구를 판매하는 주요 성공 요인"
 #: model:event.track,name:website_event_track.event_7_track_9
 msgid "Kitchens for the Future"
 msgstr "미래형 부엌"
+
+#. module: website_event_track
+#: model:ir.model.fields,field_description:website_event_track.field_event_track____last_update
+#: model:ir.model.fields,field_description:website_event_track.field_event_track_location____last_update
+#: model:ir.model.fields,field_description:website_event_track.field_event_track_stage____last_update
+#: model:ir.model.fields,field_description:website_event_track.field_event_track_tag____last_update
+#: model:ir.model.fields,field_description:website_event_track.field_event_track_tag_category____last_update
+#: model:ir.model.fields,field_description:website_event_track.field_event_track_visitor____last_update
+msgid "Last Modified on"
+msgstr "최근 수정일"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__write_uid
@@ -1322,11 +1383,6 @@ msgstr "꼭 필요한 가구를 배치하는게 더욱 중요합니다"
 #: model:event.track,name:website_event_track.event_7_track_4
 msgid "Life at Home Around the World: William’s Story"
 msgstr "전 세계 가정에서의 생활: 윌리엄 이야기"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
-msgid "Lightning Talks"
-msgstr "라이트닝 토크"
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_19
@@ -1388,6 +1444,11 @@ msgstr "점심"
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__website_cta
 msgid "Magic Button"
 msgstr "매직 버튼"
+
+#. module: website_event_track
+#: model:ir.model.fields,field_description:website_event_track.field_event_track__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "주요 첨부 파일"
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_18
@@ -1507,7 +1568,7 @@ msgstr "다음 활동 요약"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__activity_type_id
 msgid "Next Activity Type"
-msgstr "다음 활동 유형"
+msgstr "다음 업무 유형"
 
 #. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.event_track_visitor_action
@@ -1530,7 +1591,7 @@ msgstr "이 방문자가 즐겨찾는 세션이 없습니다"
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
 msgid "No track found."
-msgstr "세션을 찾을 수 없습니다"
+msgstr "트랙을 찾을 수 없습니다"
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track_tag__color
@@ -1555,7 +1616,7 @@ msgstr "조치가 필요한 메시지 수"
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "전송 오류가 발생한 메시지 수입니다."
+msgstr "전송 오류 메시지 수"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_24
@@ -1564,13 +1625,13 @@ msgstr "오래된 것이 새로운 것이다"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_20
-msgid "Our Last Day Together!"
-msgstr "함께 하는 마지막 날!"
+msgid "Our Last Day Together !"
+msgstr ""
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_visitor__partner_id
 msgid "Partner"
-msgstr "협력사"
+msgstr "파트너"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_track14
@@ -1665,11 +1726,6 @@ msgid "Raising qualitive insights from your customers"
 msgstr "고객의 긍정적인 통찰력 향상"
 
 #. module: website_event_track
-#: model:ir.model.fields,field_description:website_event_track.field_event_track__rating_ids
-msgid "Ratings"
-msgstr "평가"
-
-#. module: website_event_track
 #. odoo-python
 #: code:addons/website_event_track/models/event_track_stage.py:0
 #: model:event.track.stage,legend_done:website_event_track.event_track_stage0
@@ -1690,17 +1746,12 @@ msgstr "빨간색"
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_stage__legend_blocked
 msgid "Red Kanban Label"
-msgstr "빨간색 칸반 라벨"
+msgstr "빨간색 칸반 꼬리표"
 
 #. module: website_event_track
 #: model:event.track.stage,name:website_event_track.event_track_stage4
 msgid "Refused"
 msgstr "반려됨"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
-msgid "Regular Talks"
-msgstr "정기 강연"
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__track_start_relative
@@ -1754,9 +1805,10 @@ msgid "SMS Delivery error"
 msgstr "SMS 전송 에러"
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_topbar
-msgid "Search Tracks"
-msgstr "트랙 검색"
+#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
+#: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
+msgid "Schedule some tracks to get started"
+msgstr "시작하려면 몇 가지 세션을 예약하세요"
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_6
@@ -1775,7 +1827,7 @@ msgstr "카테고리 선택"
 msgid ""
 "Sent to speakers whose track proposal is accepted (set the template on the "
 "right stage)"
-msgstr "세션 제안이 승인된 발표자에게 전송(적절한 단계에서 서식 설정)"
+msgstr "세션 제안이 승인된 발표자에게 전송(적절한 단계에서 템플릿 설정)"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__seo_name
@@ -1798,11 +1850,6 @@ msgstr "순서"
 #, python-format
 msgid "Set Favorite"
 msgstr "즐겨찾기 설정"
-
-#. module: website_event_track
-#: model:ir.model.fields,field_description:website_event_track.field_event_track__website_cta_delay
-msgid "Show Button"
-msgstr "버튼 표시"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
@@ -1837,9 +1884,21 @@ msgid "Speaker Photo"
 msgstr "발표자 사진"
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
-msgid "Speaker Profile"
-msgstr "발표자 프로필"
+#: model:ir.model.fields,help:website_event_track.field_event_track__partner_email
+msgid ""
+"Speaker email is used for public display and may vary from contact email"
+msgstr ""
+
+#. module: website_event_track
+#: model:ir.model.fields,help:website_event_track.field_event_track__partner_name
+msgid "Speaker name is used for public display and may vary from contact name"
+msgstr ""
+
+#. module: website_event_track
+#: model:ir.model.fields,help:website_event_track.field_event_track__partner_phone
+msgid ""
+"Speaker phone is used for public display and may vary from contact phone"
+msgstr ""
 
 #. module: website_event_track
 #. odoo-python
@@ -1882,10 +1941,10 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
-"활동 기준 상태\n"
-"기한 초과: 기한이 이미 지났습니다.\n"
-"오늘: 활동 날짜가 오늘입니다.\n"
-"예정: 향후 계획된 활동입니다."
+"활동에 기조한 상태입니다\n"
+"기한초과: 이미 기한이 지났습니다\n"
+"오늘: 활동 날짜가 오늘입니다\n"
+"계획: 향후 활동입니다."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -1909,8 +1968,8 @@ msgstr "태그 이름"
 
 #. module: website_event_track
 #: model:ir.model.constraint,message:website_event_track.constraint_event_track_tag_name_uniq
-msgid "Tag name already exists!"
-msgstr "태그명이 이미 존재합니다!"
+msgid "Tag name already exists !"
+msgstr "동일한 태그명이 존재합니다!"
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__tag_ids
@@ -1918,11 +1977,6 @@ msgstr "태그명이 이미 존재합니다!"
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_tag_category_view_form
 msgid "Tags"
 msgstr "태그"
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
-msgid "Talk Intro"
-msgstr "강연 소개"
 
 #. module: website_event_track
 #. odoo-python
@@ -1956,7 +2010,6 @@ msgstr "즐겨찾기에서 강연 삭제"
 #. odoo-python
 #: code:addons/website_event_track/models/event_event.py:0
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_aside
-#: model_terms:ir.ui.view,arch_db:website_event_track.session_topbar
 #, python-format
 msgid "Talks"
 msgstr "강연"
@@ -2016,23 +2069,11 @@ msgstr ""
 "    가장 비싼 목재 10가지에 대해 한번 알아봅시다."
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
-msgid ""
-"These are 30 minutes talks on many different topics. Most topics are "
-"accepted in lightning talks."
-msgstr "라이트닝 토크는 일반적으로 30분 동안 진행되며, 대부분의 주제에 대해 발표가 허용됩니다."
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
-msgid "These are standard talks with slides, alocated in slots of 60 minutes."
-msgstr "슬라이드가 있는 일반 강연으로, 강의당 60분씩 시간이 할당됩니다."
-
-#. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.event_track_visitor_action
 msgid ""
 "They will be created automatically once attendees start browsing your "
 "events."
-msgstr "참석자가 행사를 검색하기 시작하면 자동으로 생성됩니다."
+msgstr "참석자가 이벤트를 검색하기 시작하면 자동으로 생성됩니다."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -2069,7 +2110,7 @@ msgstr "이 단계에 표시할 레코드가 없으면 칸반 화면은 접혀 �
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_stage_view_form
 msgid "This step is done. Click to block or set in progress."
-msgstr "이 단계가 완료되었습니다. 차단하거나 설정하시려면 클릭하십시오."
+msgstr "이 단계가 완료되었습니다. 클릭하여 차단하거나 진행 중으로 설정하십시오."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
@@ -2080,10 +2121,10 @@ msgstr "이 세션에 대한 설명이 없습니다."
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid ""
 "Timely release of presentation material (slides),\n"
-"                            for publishing on our website."
+"                                    for publishing on our website."
 msgstr ""
-"웹 사이트에 게시할 프레젠테이션 자료(슬라이드)를\n"
-"                            시기별로 출시합니다."
+"웹 사이트에 게시할 프레젠테이션 자료(슬라이드)를 \n"
+"                                      시기별로 출시합니다."
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__name
@@ -2231,6 +2272,11 @@ msgid "Track blocked"
 msgstr "과정 진행이 막힘"
 
 #. module: website_event_track
+#: model:ir.model.fields,help:website_event_track.field_event_track__duration
+msgid "Track duration in hours."
+msgstr "시간 단위로 추적합니다."
+
+#. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_event__track_ids
 #: model:ir.model.fields,field_description:website_event_track.field_event_track_tag__track_ids
 #: model:ir.ui.menu,name:website_event_track.menu_event_track
@@ -2345,14 +2391,8 @@ msgstr "방문자가 이 세션을 즐겨찾기 목록에 추가할 때까지 �
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
 #: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
-msgid "We could not find any track at this moment."
-msgstr "현재 세션을 찾을 수 없습니다."
-
-#. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
-#: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
-msgid "We could not find any track matching your search for:"
-msgstr "검색 조건과 일치하는 세션을 찾을 수 없습니다:"
+msgid "We did not find any track matching your"
+msgstr "일치하는 세션을 찾지 못했습니다."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -2453,7 +2493,7 @@ msgstr "웹사이트 오픈그래프 이미지"
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_10
 msgid "Welcome to Day 2"
-msgstr "2일차 시작을 환영합니다"
+msgstr "2일차 시작을 환영합니다."
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_1
@@ -2474,8 +2514,8 @@ msgstr "이 강연은 누가 진행하나요? 참석자에게 강연을 소개�
 
 #. module: website_event_track
 #: model:event.track,name:website_event_track.event_7_track_l3_2
-msgid "Who's OpenWood anyway?"
-msgstr "OpenWood는 어떤 회사인가요?"
+msgid "Who's OpenWood anyway ?"
+msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
@@ -2535,11 +2575,6 @@ msgid "e.g. \"John Doe was born in...\""
 msgstr "예. \"John Doe의 출생지는...\""
 
 #. module: website_event_track
-#: model_terms:ir.ui.view,arch_db:website_event_track.view_event_location_tree
-msgid "e.g. \"Main Conference Room\""
-msgstr "예. \"메인 회의실\""
-
-#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 msgid "e.g. \"This talk will be about...\""
@@ -2547,19 +2582,19 @@ msgstr "예. \"이 강연의 주제는...\""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
-msgid "e.g. Get Yours Now!"
-msgstr "예. 지금 주문하세요!"
+msgid "e.g. Get Yours Now !"
+msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_view_form_quick_create
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 msgid "e.g. Inspiring Business Talk"
-msgstr "예: 감동적인 비즈니스 강연"
+msgstr "예 : 감동적인 비즈니스 강연"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
 msgid "e.g. http://www.example.com"
-msgstr "예: http://www.example.com"
+msgstr "예. http://www.example.com"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_kanban
@@ -2567,21 +2602,20 @@ msgid "hours"
 msgstr "시간"
 
 #. module: website_event_track
-#. odoo-javascript
-#: code:addons/website_event_track/static/src/js/event_track_timer.js:0
-#, python-format
-msgid "in %s"
-msgstr "%s에서"
-
-#. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_form
-msgid "minutes after Track start"
-msgstr "세션 시작 몇 분 후"
+msgid "minutes after track starts"
+msgstr ""
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.registration_complete
 msgid "register to your favorites talks now."
 msgstr "지금 즐겨찾는 강연에 등록하세요."
+
+#. module: website_event_track
+#: model_terms:ir.ui.view,arch_db:website_event_track.agenda_online
+#: model_terms:ir.ui.view,arch_db:website_event_track.tracks_main
+msgid "search."
+msgstr "검색."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_content

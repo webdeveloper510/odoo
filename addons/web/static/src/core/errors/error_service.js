@@ -2,6 +2,7 @@
 
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { browser } from "../browser/browser";
+import { _lt } from "../l10n/translation";
 import { registry } from "../registry";
 import { completeUncaughtError, getErrorTechnicalName } from "./error_utils";
 
@@ -22,13 +23,13 @@ export class UncaughtError extends Error {
 }
 
 export class UncaughtClientError extends UncaughtError {
-    constructor(message = "Uncaught Javascript Error") {
+    constructor(message = _lt("Uncaught Javascript Error")) {
         super(message);
     }
 }
 
 export class UncaughtPromiseError extends UncaughtError {
-    constructor(message = "Uncaught Promise") {
+    constructor(message = _lt("Uncaught Promise")) {
         super(message);
         this.unhandledRejectionEvent = null;
     }
@@ -37,7 +38,7 @@ export class UncaughtPromiseError extends UncaughtError {
 // FIXME: this error is misnamed and actually represends errors in third-party scripts
 // rename this in master
 export class UncaughtCorsError extends UncaughtError {
-    constructor(message = "Uncaught CORS Error") {
+    constructor(message = _lt("Uncaught CORS Error")) {
         super(message);
     }
 }
@@ -49,24 +50,24 @@ export const errorService = {
             while (originalError instanceof Error && "cause" in originalError) {
                 originalError = originalError.cause;
             }
-            for (const [name, handler] of registry.category("error_handlers").getEntries()) {
-                try {
-                    if (handler(env, uncaughtError, originalError)) {
-                        break;
-                    }
-                } catch (e) {
-                    console.error(
-                        `A crash occured in error handler ${name} while handling ${uncaughtError}:`,
-                        e
-                    );
-                    return;
+            const services = env.services;
+            if (!services.dialog || !services.notification || !services.rpc) {
+                // here, the environment is not ready to provide feedback to the user.
+                // We simply wait 1 sec and try again, just in case the application can
+                // recover.
+                if (retry) {
+                    browser.setTimeout(() => {
+                        handleError(uncaughtError, false);
+                    }, 1000);
+                }
+                return;
+            }
+            for (const handler of registry.category("error_handlers").getAll()) {
+                if (handler(env, uncaughtError, originalError)) {
+                    break;
                 }
             }
-            if (
-                uncaughtError.event &&
-                !uncaughtError.event.defaultPrevented &&
-                uncaughtError.traceback
-            ) {
+            if (uncaughtError.event && !uncaughtError.event.defaultPrevented) {
                 // Log the full traceback instead of letting the browser log the incomplete one
                 uncaughtError.event.preventDefault();
                 console.error(uncaughtError.traceback);
@@ -96,11 +97,12 @@ export const errorService = {
             let uncaughtError;
             if (isRedactedError) {
                 uncaughtError = new UncaughtCorsError();
-                uncaughtError.traceback =
+                uncaughtError.traceback = env._t(
                     `Unknown CORS error\n\n` +
-                    `An unknown CORS error occured.\n` +
-                    `The error probably originates from a JavaScript file served from a different origin.\n` +
-                    `(Opening your browser console might give you a hint on the error.)`;
+                        `An unknown CORS error occured.\n` +
+                        `The error probably originates from a JavaScript file served from a different origin.\n` +
+                        `(Opening your browser console might give you a hint on the error.)`
+                );
             } else {
                 uncaughtError = new UncaughtClientError();
                 uncaughtError.event = ev;

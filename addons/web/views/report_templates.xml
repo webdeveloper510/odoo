@@ -14,17 +14,15 @@
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="initial-scale=1"/>
                 <title><t t-esc="title or 'Odoo Report'"/></title>
-                <t t-call-assets="web.report_assets_common"/>
-                <!-- Temporary code: only used to maintain CSS for legacy HTML reports (full width...) -->
-                <!-- Should be removed once the reports are fully converted. -->
+                <t t-call-assets="web.report_assets_common" t-js="false"/>
+                <!--The following is kind of a hack-->
+                <!--in an iframe, we don't want the session to perform qweb_templates rpc-->
                 <script type="text/javascript">
-                    document.addEventListener('DOMContentLoaded', () => {
-                        if (window.self !== window.top) {
-                            document.body.classList.add("o_in_iframe", "container-fluid");
-                            document.body.classList.remove("container");
-                        }
-                    });
+                    window.odoo = {};
+                    window.odoo.__session_info__ = {is_report: true};
                 </script>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.report_assets_common" t-css="false"/>
             </head>
             <body t-att-class="'container' if not full_width else 'container-fluid'" t-att-dir="env['res.lang']._lang_get(lang or env.user.lang).direction or 'ltr'">
                 <div id="wrapwrap">
@@ -49,6 +47,7 @@
                 <meta name="viewport" content="initial-scale=1"/>
                 <title><t t-esc="title or 'Odoo Report'"/></title>
                 <t t-call-assets="web.report_assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
                 <style>
                     <t t-out="preview_css"/>
 
@@ -187,9 +186,9 @@
                                </tr>
                            </tbody>
                        </table>
-                       <div id="right-elements" t-attf-class="#{'col-5' if report_type != 'html' else 'col-12 col-md-5'} ms-5 d-inline-block float-end">
-                           <div id="total" class="clearfix row">
-                               <div class="ms-auto">
+                       <div class="clearfix">
+                           <div id="total" class="row">
+                               <div class="col-6 ms-auto">
                                    <table class="table table-sm table-borderless" style="page-break-inside: avoid; position:relative;">
                                        <tbody><tr class="border-black o_subtotal" style="">
                                            <td><strong>Untaxed Amount</strong></td>
@@ -214,16 +213,13 @@
                                </div>
                            </div>
                        </div>
-                       <div id="payment_term">
-                            <div class="mb-3">
-                                <p name="payment_term">
-                                    <span>Payment terms: 30 Days</span>
-                                </p>
-                                <p name="payment_communication">
-                                    Payment Communication: <b><span>INV/2023/00003</span></b>
-                                </p>
-                            </div>
-                        </div>
+                       <p class="mt-4">
+                           Please use the following communication for your payment : <b><span>
+                           INV/2023/00003</span></b>
+                       </p>
+                       <p name="payment_term">
+                           <span>Payment terms: 30 Days</span>
+                       </p>
                    </div>
            </t>
         </t>
@@ -280,58 +276,35 @@
 
     <template id="address_layout">
         <t t-set="colclass" t-value="('col-sm-5' if report_type == 'html' else 'col-5') + ' ms-auto'"/>
-        <div t-if="address" class="address row " title="This block is not always present depending on the printed document.">
-            <t t-if="information_block">
-                <t t-set="colclass" t-value="'col-5 offset-1'"/>
-                <div name="information_block" class="col-6">
-                    <t t-out="information_block or None">
-                        <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 opacity-75 text-muted text-center">
-                            <strong>Information block</strong>
-                            <div>Usually contains a source address or a complementary address.</div>
-                        </div>
-                    </t>
-                </div>
-            </t>
-
-            <div name="address" t-att-class="colclass">
-                <t t-esc="address or None">
-                    <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 opacity-75 text-muted text-center">
-                        <strong>Address block</strong>
-                        <div>Usually contains the address of the document's recipient.</div>
+        <t t-if="address">
+            <div class="address row">
+                <t t-if="information_block">
+                    <t t-set="colclass" t-value="'col-5 offset-1'"/>
+                    <div name="information_block" class="col-6">
+                        <t t-out="information_block"/>
                     </div>
                 </t>
+                <div name="address" t-att-class="colclass">
+                    <t t-esc="address"/>
+                </div>
             </div>
-        </div>
-        <div class="oe_structure" t-else=""></div>
+        </t>
     </template>
 
     <template id="external_layout_striped">
         <div t-attf-class="o_company_#{company.id}_layout header" t-att-style="report_header_style">
             <div class="o_background_header">
             <div class="float-end">
-                <div class="mt0 text-end h3" t-if="company.report_header" t-field="company.report_header">Company tagline</div>
+                <div class="mt0 text-end h3" t-field="company.report_header"/>
             </div>
             <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" class="float-start" alt="Logo"/>
             <div class="float-start company_address">
-                <ul class="list-unstyled" name='company_address_list'>
-                    <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
-                        <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                            <strong>Company address block</strong>
-                            <div>Contains the company address.</div>
-                        </div>
-                    </span></li>
-                    <li t-else="">
-                        <span t-field="company.company_details">
-                            <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                <strong>Company details block</strong>
-                                <div>Contains the company details.</div>
-                            </div>
-                        </span>
-                    </li>
-                    <li t-if="not forced_vat"/>
-                    <li t-else="">
-                        <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
-                        <span t-esc="forced_vat">US12345671</span>
+                <ul class="list-unstyled">
+                    <li t-if="company.is_company_details_empty"><t t-esc="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li>
+                    <li t-else=""><t t-esc="company.company_details"/></li>
+                    <li t-if="forced_vat">
+                        <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
+                        <span t-esc="forced_vat"/>
                     </li>
                 </ul>
             </div>
@@ -356,7 +329,7 @@
                     <span class="topage"/>
                 </div>
                 <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
-                    <span t-out="o.name">(document name)</span>
+                    <span t-field="o.name"/>
                 </div>
             </div>
         </div>
@@ -370,27 +343,14 @@
                     <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
                 </div>
                 <div class="col-6 text-end mb4">
-                    <div class="mt0 h4" t-if="company.report_header" t-field="company.report_header">Company tagline</div>
+                    <div class="mt0 h4" t-field="company.report_header"/>
                     <div name="company_address" class="float-end mb4">
-                        <ul class="list-unstyled" name="company_address_list">
-                            <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
-                                <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                    <strong>Company address block</strong>
-                                    <div>Contains the company address.</div>
-                                </div>
-                            </span></li>
-                            <li t-else="">
-                                <span t-field="company.company_details">
-                                    <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                        <strong>Company details block</strong>
-                                        <div>Contains the company details.</div>
-                                    </div>
-                                </span>
-                            </li>
-                            <li t-if="not forced_vat"/>
-                            <li t-else="">
-                                <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
-                                <span t-esc="forced_vat">US12345671</span>
+                        <ul class="list-unstyled">
+                            <li t-if="company.is_company_details_empty"><t t-esc="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li>
+                            <li t-else=""><t t-esc="company.company_details"/></li>
+                            <li t-if="forced_vat">
+                                <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
+                                <span t-esc="forced_vat"/>
                             </li>
                         </ul>
                     </div>
@@ -409,12 +369,12 @@
 
         <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout">
             <div class="text-center">
-                <div t-field="company.report_footer">Company Report Footer</div>
+                <div t-field="company.report_footer"/>
                 <div t-if="report_type == 'pdf'">
                     Page: <span class="page"/> / <span class="topage"/>
                 </div>
                 <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
-                    <span t-out="o.name">(document name)</span>
+                    <span t-field="o.name"/>
                 </div>
             </div>
         </div>
@@ -428,25 +388,12 @@
                         <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
                     </div>
                     <div class="col-5 offset-1" name="company_address">
-                        <ul class="list-unstyled" name='company_address_list'>
-                            <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
-                                <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                    <strong>Company address block</strong>
-                                    <div>Contains the company address.</div>
-                                </div>
-                            </span></li>
-                            <li t-else="">
-                                <span t-field="company.company_details">
-                                    <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                        <strong>Company details block</strong>
-                                        <div>Contains the company details.</div>
-                                    </div>
-                                </span>
-                            </li>
-                            <li t-if="not forced_vat"/>
-                            <li t-else="">
-                                <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
-                                <span t-esc="forced_vat">US12345671</span>
+                        <ul class="list-unstyled">
+                            <li t-if="company.is_company_details_empty"><t t-esc="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li>
+                            <li t-else=""><t t-esc="company.company_details"/></li>
+                            <li t-if="forced_vat">
+                                <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
+                                <span t-esc="forced_vat"/>
                             </li>
                         </ul>
                     </div>
@@ -469,7 +416,7 @@
                     <span t-else="" t-field="company.company_details"/>
                 </div>
                 <div class="col-3">
-                    <div class="mt0 mb0 h5" t-if="company.report_header" t-field="company.report_header">Company tagline</div>
+                    <div class="mt0 mb0 h5" t-field="company.report_header"/>
                 </div>
                 <div class="col-1">
                     <ul t-if="report_type == 'pdf'" class="list-inline pagenumber float-end text-center">
@@ -486,7 +433,7 @@
                 <div class="col-3 mb4">
                     <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 45px;" alt="Logo"/>
                 </div>
-                <div class="col-9 text-end" style="margin-top:22px;" t-if="company.report_header" t-field="company.report_header" name="moto">Company tagline</div>
+                <div class="col-9 text-end" style="margin-top:22px;" t-field="company.report_header" name="moto"/>
             </div>
             <div t-if="company.logo or company.report_header" class="row zero_min_height">
                 <div class="col-12">
@@ -495,25 +442,12 @@
             </div>
             <div class="row">
                 <div class="col-6" name="company_address">
-                    <ul class="list-unstyled" name="company_address_list">
-                        <li t-if="company.is_company_details_empty"><span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'>
-                            <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                <strong>Company address block</strong>
-                                <div>Contains the company address.</div>
-                            </div>
-                        </span></li>
-                        <li t-else="">
-                            <span t-field="company.company_details">
-                                <div class="bg-light border-1 rounded h-100 d-flex flex-column align-items-center justify-content-center p-4 w-100 opacity-75 text-muted text-center">
-                                    <strong>Company details block</strong>
-                                    <div>Contains the company details.</div>
-                                </div>
-                            </span>
-                        </li>
-                        <li t-if="not forced_vat"/>
-                        <li t-else="">
-                            <t t-esc="company.country_id.vat_label or 'Tax ID'">Tax ID</t>:
-                            <span t-esc="forced_vat">US12345671</span>
+                    <ul class="list-unstyled">
+                        <li t-if="company.is_company_details_empty"><t t-esc="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/></li>
+                        <li t-else=""><t t-esc="company.company_details"/></li>
+                        <li t-if="forced_vat">
+                            <t t-esc="company.country_id.vat_label or 'Tax ID'"/>:
+                            <span t-esc="forced_vat"/>
                         </li>
                     </ul>
                 </div>
@@ -538,7 +472,7 @@
                     Page: <span class="page"/> / <span class="topage"/>
                 </div>
                 <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
-                    <span t-out="o.name">(document name)</span>
+                    <span t-field="o.name"/>
                 </div>
             </div>
         </div>
@@ -669,7 +603,7 @@
                     }
                 }
                 .row > div > table,
-                div#total table, .totals_taxes_company_currency table {
+                div#total table {
                     &amp;:first-child,
                     &amp;:last-child,
                     &amp;.o_subtotal,
@@ -683,9 +617,6 @@
             <t t-elif="layout == 'web.external_layout_boxed'">
                 &amp;.o_report_layout_boxed {
                     #total strong {
-                        color: <t t-esc='primary'/>;
-                    }
-                    .totals_taxes_company_currency strong{
                         color: <t t-esc='primary'/>;
                     }
                     #informations strong {
@@ -712,7 +643,7 @@
                     }
                 }
                 .row > div > table,
-                div#total table, .totals_taxes_company_currency table {
+                div#total table {
                     tr {
                         &amp;.o_total td {
                             background-color: rgba(<t t-esc='primary'/>, 0.9);
@@ -751,7 +682,7 @@
                             }
                         }
                     }
-                    #total, .totals_taxes_company_currency {
+                    #total {
                         strong {
                             color: <t t-esc='secondary'/>;
                         }
@@ -767,9 +698,6 @@
                         color: <t t-esc='secondary'/>;
                     }
                     #total strong{
-                        color: <t t-esc='primary'/>;
-                    }
-                    .totals_taxes_company_currency strong{
                         color: <t t-esc='primary'/>;
                     }
                     table {

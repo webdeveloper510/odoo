@@ -3,18 +3,18 @@
 # 	* stock_landed_costs
 # 
 # Translators:
-# Uros Kalajdzic <ukalajdzic@gmail.com>, 2023
-# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
-# Martin Trigaux, 2023
+# Uros Kalajdzic <ukalajdzic@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2022
 # Milan Bojovic <mbojovic@outlook.com>, 2023
 # コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-29 10:44+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"PO-Revision-Date: 2022-09-22 05:55+0000\n"
 "Last-Translator: コフスタジオ, 2024\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,6 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
@@ -37,11 +36,6 @@ msgstr "već izvan"
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
 msgid "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
 msgstr "<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-
-#. module: stock_landed_costs
-#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
-msgid "<span class=\"o_stat_text\">Valuation</span>"
-msgstr "<span class=\"o_stat_text\">Procena</span>"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_account_move_line__product_type
@@ -57,7 +51,7 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__account_id
 msgid "Account"
-msgstr "Računi"
+msgstr "Račun"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__account_journal_id
@@ -77,7 +71,7 @@ msgstr "Aktivnosti"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Dekoracija izuzeća aktivnosti"
+msgstr "Dekoracija izuzeć́a aktivnosti"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_state
@@ -107,13 +101,13 @@ msgstr "Primeni na"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_attachment_count
 msgid "Attachment Count"
-msgstr "Broj priloga"
+msgstr "Brojač priloga"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__product_template__split_method_landed_cost__by_current_cost_price
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost_lines__split_method__by_current_cost_price
 msgid "By Current Cost"
-msgstr "Po trenutnoj ceni"
+msgstr "Od strane Trenutne Cene"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__product_template__split_method_landed_cost__by_quantity
@@ -154,6 +148,11 @@ msgid "Company"
 msgstr "Kompanija"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__company_id
+msgid "Company related to this journal"
+msgstr "Kompanija povezana sa ovim izveštajem"
+
+#. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
 msgid "Compute"
 msgstr "Izracunaj"
@@ -180,7 +179,6 @@ msgid "Cost Lines"
 msgstr "Cost Lines"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -268,7 +266,7 @@ msgstr "Završeno"
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost__state__draft
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Draft"
-msgstr "Nacrt"
+msgstr "Priprema"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__product_template__split_method_landed_cost__equal
@@ -279,11 +277,11 @@ msgstr "Jednako"
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost_lines__split_method
 msgid ""
-"Equal: Cost will be equally divided.\n"
-"By Quantity: Cost will be divided according to product's quantity.\n"
-"By Current cost: Cost will be divided according to product's current cost.\n"
-"By Weight: Cost will be divided depending on its weight.\n"
-"By Volume: Cost will be divided depending on its volume."
+"Equal : Cost will be equally divided.\n"
+"By Quantity : Cost will be divided according to product's quantity.\n"
+"By Current cost : Cost will be divided according to product's current cost.\n"
+"By Weight : Cost will be divided depending on its weight.\n"
+"By Volume : Cost will be divided depending on its volume."
 msgstr ""
 
 #. module: stock_landed_costs
@@ -326,7 +324,7 @@ msgstr "ID"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_exception_icon
 msgid "Icon"
-msgstr "Ikonica"
+msgstr "Ikona"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__activity_exception_icon
@@ -357,7 +355,7 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_is_follower
 msgid "Is Follower"
-msgstr "Je pratilac"
+msgstr "Je Pratilac"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_account_move_line__is_landed_costs_line
@@ -426,25 +424,25 @@ msgid "Landed cost validated"
 msgstr "Landed cost validated"
 
 #. module: stock_landed_costs
-#: model_terms:ir.actions.act_window,help:stock_landed_costs.action_stock_landed_cost
-msgid ""
-"Landed costs allow you to include additional costs (shipment, insurance, "
-"customs duties, etc) into the cost of the product."
-msgstr ""
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost____last_update
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines____last_update
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines____last_update
+msgid "Last Modified on"
+msgstr "Poslednja izmena dana"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_uid
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__write_uid
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__write_uid
 msgid "Last Updated by"
-msgstr "Poslednji put ažurirao"
+msgstr "Poslednje izmenio/la"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_date
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__write_date
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__write_date
 msgid "Last Updated on"
-msgstr "Poslednji put ažurirano"
+msgstr "Poslednje ažuriranje dana"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -457,9 +455,14 @@ msgid "Lc Journal"
 msgstr "Lc Journal"
 
 #. module: stock_landed_costs
+#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Glavni prilog"
+
+#. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_has_error
 msgid "Message Delivery error"
-msgstr "Greška pri isporuci poruke"
+msgstr "Greška u isporuci poruke"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_ids
@@ -475,10 +478,9 @@ msgstr "Rok moje aktivnosti"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__name
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
 msgid "Name"
-msgstr "Naziv"
+msgstr "Ime"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
@@ -499,7 +501,7 @@ msgstr "Sledeća aktivnost događaj u kalendaru"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr "Rok za sledeću aktivnost"
+msgstr "Rok za sledeću aktivnosti"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_summary
@@ -532,7 +534,6 @@ msgid "Number of messages with delivery error"
 msgstr "Broj poruka sa greškom u isporuci"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Only draft landed costs can be validated"
@@ -549,14 +550,12 @@ msgid "Picking"
 msgstr "Biranje"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Please configure Stock Expense Account for product: %s."
 msgstr "Please configure Stock Expense Account for product: %s."
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid "Please define %s on which those additional costs should apply."
@@ -590,11 +589,6 @@ msgid "Quantity"
 msgstr "Količina"
 
 #. module: stock_landed_costs
-#: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__rating_ids
-msgid "Ratings"
-msgstr "Ocene"
-
-#. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__activity_user_id
 msgid "Responsible User"
 msgstr "Odgovorni korisnik"
@@ -613,12 +607,12 @@ msgstr ""
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__split_method
 msgid "Split Method"
-msgstr "Metoda razdvajanja"
+msgstr "Metoda Split"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__state
 msgid "State"
-msgstr "Država"
+msgstr "Stanje"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_search
@@ -673,7 +667,7 @@ msgstr "Ukupno"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__picking_ids
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost__target_model__picking
 msgid "Transfers"
-msgstr "Transferi"
+msgstr "Prenos"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__activity_exception_decoration
@@ -683,10 +677,9 @@ msgstr "Zabeležen tip aktivnosti izuzeća."
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
 msgid "Validate"
-msgstr "Potvrdi"
+msgstr "Overi"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -695,6 +688,11 @@ msgid ""
 msgstr ""
 "Validated landed costs cannot be cancelled, but you could create negative "
 "landed costs to reverse them"
+
+#. module: stock_landed_costs
+#: model_terms:ir.ui.view,arch_db:stock_landed_costs.view_stock_landed_cost_form
+msgid "Valuation"
+msgstr "Procena"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_stock_valuation_adjustment_lines
@@ -733,7 +731,6 @@ msgid "Weight"
 msgstr "Težina"
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 #, python-format
 msgid ""
@@ -744,7 +741,6 @@ msgstr ""
 "applied for products with FIFO or average costing method."
 
 #. module: stock_landed_costs
-#. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 #, python-format
 msgid ""

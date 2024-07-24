@@ -1,7 +1,10 @@
-/** @odoo-module **/
+odoo.define('website_sale.form', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import FormEditorRegistry from "@website/js/form_editor_registry";
+const core = require('web.core');
+var FormEditorRegistry = require('website.form_editor_registry');
+
+const _lt = core._lt;
 
 FormEditorRegistry.add('create_customer', {
     formFields: [{
@@ -9,22 +12,24 @@ FormEditorRegistry.add('create_customer', {
         modelRequired: true,
         name: 'name',
         fillWith: 'name',
-        string: _t('Your Name'),
+        string: _lt('Your Name'),
     }, {
         type: 'email',
         required: true,
         fillWith: 'email',
         name: 'email',
-        string: _t('Your Email'),
+        string: _lt('Your Email'),
     }, {
         type: 'tel',
         fillWith: 'phone',
         name: 'phone',
-        string: _t('Phone Number'),
+        string: _lt('Phone Number'),
     }, {
         type: 'char',
         name: 'company_name',
         fillWith: 'commercial_company_name',
-        string: _t('Company Name'),
+        string: _lt('Company Name'),
     }],
+});
+
 });

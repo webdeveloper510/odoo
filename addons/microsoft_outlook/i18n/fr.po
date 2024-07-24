@@ -3,15 +3,16 @@
 # 	* microsoft_outlook
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Cécile Collart <cco@odoo.com>, 2022
 # Jolien De Paepe, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-29 10:45+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-05-23 08:23+0000\n"
+"PO-Revision-Date: 2022-09-22 05:53+0000\n"
 "Last-Translator: Jolien De Paepe, 2023\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -23,38 +24,38 @@ msgstr ""
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
+msgid ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                        Connect your Outlook account"
+msgstr ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                        Connecter votre compte Outlook"
+
+#. module: microsoft_outlook
+#: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
+#: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
 msgstr "<i class=\"fa fa-cog\" title=\"Modifier les paramètres\"/>"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
-#: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                        Connect your Outlook account"
-msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                        Connecter votre compte Outlook"
-
-#. module: microsoft_outlook
-#: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
-msgid ""
-"<span invisible=\"server_type != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('server_type', '!=', 'outlook'), ('microsoft_outlook_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Outlook Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"server_type != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('server_type', '!=', 'outlook'), ('microsoft_outlook_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Jeton Outlook valide\n"
 "                    </span>"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid ""
-"<span invisible=\"smtp_authentication != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('smtp_authentication', '!=', 'outlook'), ('microsoft_outlook_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Outlook Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"smtp_authentication != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('smtp_authentication', '!=', 'outlook'), ('microsoft_outlook_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Jeton Outlook valide\n"
 "                    </span>"
 
@@ -181,7 +182,7 @@ msgstr "ID client outlook"
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_res_config_settings__microsoft_outlook_client_secret
 msgid "Outlook Client Secret"
-msgstr "Outlook Secret client"
+msgstr "Outlook Secret Client"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields.selection,name:microsoft_outlook.selection__fetchmail_server__server_type__outlook
@@ -278,6 +279,17 @@ msgstr ""
 #: model:ir.model.fields,help:microsoft_outlook.field_microsoft_outlook_mixin__microsoft_outlook_uri
 msgid "The URL to generate the authorization code from Outlook"
 msgstr "L'URL pour générer le code d'autorisation à partir d'Outlook"
+
+#. module: microsoft_outlook
+#. odoo-python
+#: code:addons/microsoft_outlook/models/ir_mail_server.py:0
+#, python-format
+msgid ""
+"This server %r can only be used for your personal email address. Please fill"
+" the \"from_filter\" field with %r."
+msgstr ""
+"Ce serveur %r ne peut être utilisé que pour votre adresse email personnelle."
+" Veuillez compléter le champ \"from_filter\" avec %r."
 
 #. module: microsoft_outlook
 #. odoo-python

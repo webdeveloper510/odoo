@@ -71,7 +71,6 @@ class TestPosMrp(TestPointOfSaleCommon):
             'amount_tax': 0.0,
             'amount_return': 0.0,
             'to_invoice': False,
-            'last_order_preparation_change': '{}'
         })
         payment_context = {"active_ids": order.ids, "active_id": order.id}
         order_payment = self.PosMakePayment.with_context(**payment_context).create({
@@ -203,9 +202,8 @@ class TestPosMrp(TestPointOfSaleCommon):
         'amount_tax': 0,
         'amount_total': 2.0,
         'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
-        'date_order': fields.Datetime.to_string(fields.Datetime.now()),
         'fiscal_position_id': False,
-        'pricelist_id': self.pos_config.pricelist_id.id,
+        'pricelist_id': self.pos_config.available_pricelist_ids[0].id,
         'lines': [[0,
                     0,
                     {'discount': 0,
@@ -302,9 +300,8 @@ class TestPosMrp(TestPointOfSaleCommon):
             'amount_tax': 0,
             'amount_total': 2.0,
             'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
             'fiscal_position_id': False,
-            'pricelist_id': self.pos_config.pricelist_id.id,
+            'pricelist_id': self.pos_config.available_pricelist_ids[0].id,
             'lines': [[0,
                         0,
                         {'discount': 0,

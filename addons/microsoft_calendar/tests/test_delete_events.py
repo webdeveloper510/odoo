@@ -306,26 +306,6 @@ class TestDeleteEvents(TestCommon):
         )
 
     @patch.object(MicrosoftCalendarService, 'delete')
-    def test_delete_synced_event_with_sync_config_paused(self, mock_delete):
-        """
-        Deletes an event with the Outlook Calendar synchronization paused, the event must be archived completely.
-        """
-        # Set user synchronization configuration as active and pause it.
-        self.organizer_user.microsoft_synchronization_stopped = False
-        self.organizer_user.pause_microsoft_synchronization()
-
-        # Try to delete a simple event in Odoo Calendar.
-        self.simple_event.with_user(self.organizer_user).unlink()
-        self.call_post_commit_hooks()
-        self.simple_event.invalidate_recordset()
-
-        # Ensure that synchronization is paused, delete wasn't called and record doesn't exist anymore.
-        self.assertFalse(self.organizer_user.microsoft_synchronization_stopped)
-        self.assertEqual(self.organizer_user._get_microsoft_sync_status(), "sync_paused")
-        self.assertFalse(self.simple_event.exists(), "Event must be deleted from Odoo even though sync configuration is off")
-        mock_delete.assert_not_called()
-
-    @patch.object(MicrosoftCalendarService, 'delete')
     def test_delete_recurrence_previously_synced(self, mock_delete):
         # Arrange: select recurrent event and update token validity to simulate an active sync environment.
         idx = 0

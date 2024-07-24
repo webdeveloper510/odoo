@@ -13,9 +13,6 @@ class ResConfigDevToolDownloadXsd extends ResConfigDevTool {
     /**
      * Downloads every XSD file, based on installed localisations.
      */
-
-    static template = "res_config_dev_tool";
-
     setup() {
         super.setup();
         this.rpc = useService("rpc");
@@ -31,8 +28,6 @@ class ResConfigDevToolDownloadXsd extends ResConfigDevTool {
     }
 }
 
-const resConfigDevToolDownloadXsd = {
-    component: ResConfigDevToolDownloadXsd,
-};
+ResConfigDevToolDownloadXsd.template = "res_config_dev_tool";
 
-registry.category("view_widgets").add("res_config_dev_tool", resConfigDevToolDownloadXsd, {force: true});
+registry.category("view_widgets").add("res_config_dev_tool", ResConfigDevToolDownloadXsd, {force: true});

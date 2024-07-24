@@ -11,18 +11,9 @@ class ResCompany(models.Model):
     siret = fields.Char(related='partner_id.siret', string='SIRET', size=14, readonly=False)
     ape = fields.Char(string='APE')
 
-    l10n_fr_rounding_difference_loss_account_id = fields.Many2one('account.account', check_company=True)
-    l10n_fr_rounding_difference_profit_account_id = fields.Many2one('account.account', check_company=True)
-
-    @api.model
-    def _get_france_country_codes(self):
-        """Returns every country code that can be used to represent France
-        """
-        return ['FR', 'MF', 'MQ', 'NC', 'PF', 'RE', 'GF', 'GP', 'TF'] # These codes correspond to France and DOM-TOM.
-
     @api.model
     def _get_unalterable_country(self):
-        return self._get_france_country_codes()
+        return ['FR', 'MF', 'MQ', 'NC', 'PF', 'RE', 'GF', 'GP', 'TF'] # These codes correspond to France and DOM-TOM.
 
     def _is_accounting_unalterable(self):
         if not self.vat and not self.country_id:
@@ -58,7 +49,7 @@ class ResCompany(models.Model):
             for seq_field in sequence_fields:
                 if not company[seq_field]:
                     vals = {
-                        'name': _('Securisation of %s - %s', seq_field, company.name),
+                        'name': _('Securisation of %s - %s') % (seq_field, company.name),
                         'code': 'FRSECURE%s-%s' % (company.id, seq_field),
                         'implementation': 'no_gap',
                         'prefix': '',

@@ -8,19 +8,15 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 class WebsiteSaleWishlist(WebsiteSale):
 
-    def _get_additional_shop_values(self, values):
-        """ Hook to update values used for rendering website_sale.products template """
-        vals = super()._get_additional_shop_values(values)
-        vals['products_in_wishlist'] = request.env['product.wishlist'].current().product_id.product_tmpl_id
-        return vals
-
     @route(['/shop/wishlist/add'], type='json', auth="public", website=True)
     def add_to_wishlist(self, product_id, **kw):
         website = request.website
         pricelist = website.pricelist_id
         product = request.env['product.product'].browse(product_id)
 
-        price = product._get_combination_info_variant()['price']
+        price = product._get_combination_info_variant(
+            pricelist=website.pricelist_id,
+        )['price']
 
         Wishlist = request.env['product.wishlist']
         if request.website.is_public_user():
@@ -54,13 +50,12 @@ class WebsiteSaleWishlist(WebsiteSale):
 
         return request.render("website_sale_wishlist.product_wishlist", dict(wishes=values))
 
-    @route('/shop/wishlist/remove/<int:wish_id>', type='json', auth='public', website=True)
-    def rm_from_wishlist(self, wish_id, **kw):
-        wish = request.env['product.wishlist'].browse(wish_id)
+    @route(['/shop/wishlist/remove/<model("product.wishlist"):wish>'], type='json', auth="public", website=True)
+    def rm_from_wishlist(self, wish, **kw):
         if request.website.is_public_user():
             wish_ids = request.session.get('wishlist_ids') or []
-            if wish_id in wish_ids:
-                request.session['wishlist_ids'].remove(wish_id)
+            if wish.id in wish_ids:
+                request.session['wishlist_ids'].remove(wish.id)
                 request.session.touch()
                 wish.sudo().unlink()
         else:

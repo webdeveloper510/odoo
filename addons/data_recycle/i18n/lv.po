@@ -3,18 +3,18 @@
 # 	* data_recycle
 # 
 # Translators:
-# Martin Trigaux, 2023
-# Anzelika Adejanova, 2023
-# ievaputnina <ievai.putninai@gmail.com>, 2023
-# Arnis Putniņš <arnis@allegro.lv>, 2023
+# Anzelika Adejanova, 2022
+# ievaputnina <ievai.putninai@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Arnis Putniņš <arnis@allegro.lv>, 2022
 # Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023\n"
 "Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,6 @@ msgid ""
 msgstr ""
 
 #. module: data_recycle
-#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_record.py:0
 #, python-format
 msgid "**Record Deleted**"
@@ -93,14 +92,9 @@ msgstr ""
 
 #. module: data_recycle
 #: model:ir.actions.server,name:data_recycle.ir_cron_clean_records_ir_actions_server
+#: model:ir.cron,cron_name:data_recycle.ir_cron_clean_records
+#: model:ir.cron,name:data_recycle.ir_cron_clean_records
 msgid "Data Recycle: Clean Records"
-msgstr ""
-
-#. module: data_recycle
-#. odoo-python
-#: code:addons/data_recycle/models/data_recycle_model.py:0
-#, python-format
-msgid "Data to Recycle"
 msgstr ""
 
 #. module: data_recycle
@@ -138,7 +132,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__display_name
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__display_name
 msgid "Display Name"
-msgstr "Attēlotais nosaukums"
+msgstr "Parādīt vārdu"
 
 #. module: data_recycle
 #: model:ir.actions.act_window,name:data_recycle.action_data_recycle_record
@@ -163,6 +157,12 @@ msgid "Include Archived"
 msgstr ""
 
 #. module: data_recycle
+#: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model____last_update
+#: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record____last_update
+msgid "Last Modified on"
+msgstr "Pēdējoreiz mainīts"
+
+#. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__last_notification
 msgid "Last Notification"
 msgstr ""
@@ -171,13 +171,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__write_uid
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__write_uid
 msgid "Last Updated by"
-msgstr "Pēdējoreiz atjaunināja"
+msgstr "Pēdējoreiz atjaunoja"
 
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__write_date
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__write_date
 msgid "Last Updated on"
-msgstr "Pēdējoreiz atjaunināts"
+msgstr "Pēdējoreiz atjaunots"
 
 #. module: data_recycle
 #: model:ir.model.fields,help:data_recycle.field_data_recycle_model__notify_user_ids
@@ -199,7 +199,7 @@ msgstr "Modelis"
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__res_model_name
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__res_model_name
 msgid "Model Name"
-msgstr "Modeļa nosaukums"
+msgstr "Model Name"
 
 #. module: data_recycle
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__notify_frequency_period__months
@@ -236,7 +236,7 @@ msgstr ""
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__res_id
 msgid "Record ID"
-msgstr "Ieraksta ID"
+msgstr "Record ID"
 
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__name
@@ -326,7 +326,6 @@ msgid "The notification frequency should be greater than 0"
 msgstr ""
 
 #. module: data_recycle
-#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_model.py:0
 #, python-format
 msgid "This model doesn't manage archived records. Only deletion is possible."
@@ -338,21 +337,20 @@ msgid "Time Field"
 msgstr ""
 
 #. module: data_recycle
-#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_record.py:0
 #, python-format
 msgid "Undefined Name"
 msgstr ""
 
 #. module: data_recycle
-#. odoo-javascript
+#. openerp-web
 #: code:addons/data_recycle/static/src/views/data_recycle_list_view.xml:0
 #, python-format
 msgid "Unselect"
 msgstr ""
 
 #. module: data_recycle
-#. odoo-javascript
+#. openerp-web
 #: code:addons/data_recycle/static/src/views/data_recycle_list_view.xml:0
 #: model_terms:ir.ui.view,arch_db:data_recycle.view_data_recycle_record_list
 #, python-format
@@ -368,7 +366,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__notify_frequency_period__weeks
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__time_field_delta_unit__weeks
 msgid "Weeks"
-msgstr "Nedēļas"
+msgstr "Weeks"
 
 #. module: data_recycle
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__time_field_delta_unit__years

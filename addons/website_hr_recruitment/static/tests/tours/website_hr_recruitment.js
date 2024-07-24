@@ -1,12 +1,13 @@
-/** @odoo-module **/
+odoo.define('website_hr_recruitment.tour', function(require) {
+    'use strict';
 
-    import { registry } from "@web/core/registry";
-    import wTourUtils from "@website/js/tours/tour_utils";
+    var tour = require("web_tour.tour");
+    const wTourUtils = require("website.tour_utils");
 
     function applyForAJob(jobName, application) {
         return [{
             content: "Select Job",
-            trigger: `.oe_website_jobs h3:contains(${jobName})`,
+            trigger: `.oe_website_jobs h3 span:contains(${jobName})`,
         }, {
             content: "Apply",
             trigger: ".js_hr_recruitment a:contains('Apply')",
@@ -20,12 +21,8 @@
             run: `text ${application.email}`,
         }, {
             content: "Complete phone number",
-            trigger: "input[name=partner_phone]",
+            trigger: "input[name=partner_mobile]",
             run: `text ${application.phone}`,
-        }, {
-            content: "Complete LinkedIn profile",
-            trigger: "input[name=linkedin_profile]",
-            run: `text linkedin.com/in/${application.name.toLowerCase().replace(' ', '-')}`,
         }, {
             content: "Complete Subject",
             trigger: "textarea[name=description]",
@@ -35,15 +32,14 @@
             trigger: ".s_website_form_send",
         }, {
             content: "Check the form is submitted without errors",
-            trigger: "#jobs_thankyou h1:contains('Congratulations')",
-            isCheck: true,
+            trigger: ".oe_structure:has(h1:contains('Congratulations'))",
         }];
     }
 
-    registry.category("web_tour.tours").add('website_hr_recruitment_tour', {
+    tour.register('website_hr_recruitment_tour', {
         test: true,
         url: '/jobs',
-        steps: () => [
+    }, [
         ...applyForAJob('Guru', {
             name: 'John Smith',
             email: 'john@smith.com',
@@ -63,12 +59,12 @@
             phone: '118.712',
             subject: '### HR [INTERN] RECRUITMENT TEST DATA ###',
         }),
-    ]});
+    ]);
 
     wTourUtils.registerWebsitePreviewTour('website_hr_recruitment_tour_edit_form', {
         test: true,
         url: '/jobs',
-    }, () => [{
+    }, [{
         content: 'Go to the Guru job page',
         trigger: 'iframe a[href*="guru"]',
     }, {
@@ -93,11 +89,12 @@
     }, {
         content: 'Add a new field',
         trigger: 'we-button[data-add-field]',
-    },
-    ...wTourUtils.clickOnSave(),
-    {
+    }, {
+        content: 'Save',
+        trigger: 'button[data-action="save"]',
+    }, {
         content: 'Go back to /jobs page after save',
-        trigger: 'iframe body',
+        trigger: 'iframe body:not(.editor_enable)',
         run: () => {
             window.location.href = wTourUtils.getClientActionUrl('/jobs');
         }
@@ -130,29 +127,5 @@
     },
 ]);
 
-    // This tour addresses an issue that occurred in a website form containing
-    // the 'hide-change-model' attribute. Specifically, when a model-required
-    // field is selected, the alert message should not display an undefined
-    // action name.
-    wTourUtils.registerWebsitePreviewTour('model_required_field_should_have_action_name', {
-        test: true,
-        url: '/jobs',
-    }, () => [{
-        content: "Select Job",
-        trigger: "iframe h3:contains('Guru')",
-    }, {
-        content: "Apply",
-        trigger: "iframe a:contains('Apply')",
-    },
-    ...wTourUtils.clickOnEditAndWaitEditMode(),
-    {
-        content: "click on the your name field",
-        trigger: "iframe #hr_recruitment_form div.s_website_form_model_required",
-    }, {
-        content: "Select model-required field",
-        trigger: "we-customizeblock-options we-alert > span:not(:contains(undefined))",
-        isCheck: true,
-    }
-]);
-
-export default {};
+    return {};
+});

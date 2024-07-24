@@ -3,16 +3,18 @@
 # 	* sale_management
 # 
 # Translators:
-# Wil Odoo, 2023
-# Abe Manyo, 2024
+# Martin Trigaux, 2022
+# Abdul Munif Hanafi <amunifhanafi@gmail.com>, 2022
+# Abe Manyo, 2023
+# Edi Santoso <repopamor@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:30+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Abe Manyo, 2024\n"
+"POT-Creation-Date: 2022-10-04 09:23+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
+"Last-Translator: Edi Santoso <repopamor@gmail.com>, 2023\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,28 +23,24 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "1.5"
-msgstr "1.5"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
-msgid ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Values set here are "
-"company-specific.\" groups=\"base.group_multi_company\"/>"
-msgstr ""
-"<span class=\"fa fa-lg fa-building-o p-2\" title=\"Value ditetapkan disini "
-"khusus pada perusahaan.\" groups=\"base.group_multi_company\"/>"
-
-#. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "<span invisible=\"not require_payment\">of</span>"
-msgstr "<span invisible=\"not require_payment\">of</span>"
+#: model:sale.order.template.line,name:sale_management.sale_order_template_line_1
+msgid "4 Person Desk"
+msgstr "Meja 4 Orang"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
 msgid "<span>Options</span>"
 msgstr "<span>Opsi</span>"
+
+#. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
+msgid "<span>Payment</span>"
+msgstr "<span>Pembayaran</span>"
+
+#. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
+msgid "<span>Signature</span>"
+msgstr "<span>Tanda Tangan</span>"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__active
@@ -169,14 +167,6 @@ msgid "Default Template"
 msgstr "Templat Default"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
-msgid ""
-"Default values will be overwritten by values provided by the quotation "
-"template."
-msgstr ""
-"Value default yang akan ditimpa value yang disediakan templat quotation"
-
-#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__name
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__name
@@ -186,9 +176,16 @@ msgid "Description"
 msgstr "Deskripsi"
 
 #. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
+msgid ""
+"Design your quotation templates using building blocks<br/>\n"
+"                            <em attrs=\"{'invisible': [('module_sale_quotation_builder','=',False)]}\">Warning: this option will install the Website app.</em>"
+msgstr ""
+
+#. module: sale_management
 #: model:ir.model,name:sale_management.model_digest_digest
 msgid "Digest"
-msgstr "Digest"
+msgstr "Singkat"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
@@ -216,16 +213,15 @@ msgid "Display Type"
 msgstr "Display Type"
 
 #. module: sale_management
-#. odoo-python
 #: code:addons/sale_management/models/digest.py:0
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
 msgstr "Tidak punya akses, lewati data ini untuk email singkat pengguna"
 
 #. module: sale_management
-#: model_terms:ir.ui.view,arch_db:sale_management.report_saleorder_document_inherit_sale_management
-msgid "Extra Chips"
-msgstr "Chip Ekstra"
+#: model_terms:ir.ui.view,arch_db:sale_management.res_config_settings_view_form
+msgid "Documentation"
+msgstr "Dokumentasi"
 
 #. module: sale_management
 #: model:ir.model.constraint,message:sale_management.constraint_sale_order_template_line_non_accountable_fields_null
@@ -258,15 +254,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_template__journal_id
-msgid ""
-"If set, SO with this template will invoice in this journal; otherwise the "
-"sales journal with the lowest sequence is used."
-msgstr ""
-"Bila ditetapkan, SO dengan templat ini akan difaktur di jurnal ini; bila "
-"tidak jurnal sales dengan urutan terendah akan digunakan."
-
-#. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__active
 msgid ""
 "If unchecked, it will allow you to hide the quotation template without "
@@ -276,19 +263,17 @@ msgstr ""
 "quotation tanpa menghapus templat."
 
 #. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__journal_id
-msgid "Invoicing Journal"
-msgstr "Jurnal Faktur"
-
-#. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_digest_digest__kpi_all_sale_total_value
 msgid "Kpi All Sale Total Value"
 msgstr "Kpi All Sale Total Value"
 
 #. module: sale_management
-#: model:sale.order.template.line,name:sale_management.sale_order_template_line_1
-msgid "Large Meeting Table"
-msgstr "Meja Meeting Besar"
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_option____last_update
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template____last_update
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line____last_update
+#: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option____last_update
+msgid "Last Modified on"
+msgstr "Terakhir diubah pada"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_uid
@@ -296,7 +281,7 @@ msgstr "Meja Meeting Besar"
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__write_uid
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__write_uid
 msgid "Last Updated by"
-msgstr "Terakhir Diperbarui oleh"
+msgstr "Terakhir diperbarui oleh"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__write_date
@@ -304,7 +289,7 @@ msgstr "Terakhir Diperbarui oleh"
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__write_date
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__write_date
 msgid "Last Updated on"
-msgstr "Terakhir Diperbarui pada"
+msgstr "Terakhir diperbarui pada"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__line_id
@@ -348,7 +333,12 @@ msgstr "Pembayaran Daring"
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__require_signature
 msgid "Online Signature"
-msgstr "Tanda Tangan Online"
+msgstr "Tanda Tangan Daring"
+
+#. module: sale_management
+#: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
+msgid "Online confirmation"
+msgstr "Konfirmasi online"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__sale_order_template_option_ids
@@ -367,18 +357,6 @@ msgstr "Opsional produk baris"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
 msgid "Options"
 msgstr "Opsi"
-
-#. module: sale_management
-#: model:ir.model.fields,field_description:sale_management.field_sale_order_template__prepayment_percent
-msgid "Prepayment percentage"
-msgstr "Persentase pembayaran di muka"
-
-#. module: sale_management
-#. odoo-python
-#: code:addons/sale_management/models/sale_order_template.py:0
-#, python-format
-msgid "Prepayment percentage must be a valid percentage."
-msgstr "Persentase pembayaran di muka harus merupakan persentase valid."
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__is_present
@@ -404,6 +382,11 @@ msgstr "Kuantitas"
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 msgid "Quantity:"
 msgstr "Jumlah:"
+
+#. module: sale_management
+#: model:ir.model.fields,field_description:sale_management.field_res_config_settings__module_sale_quotation_builder
+msgid "Quotation Builder"
+msgstr "Pembuat Quotation"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template__number_of_days
@@ -451,8 +434,8 @@ msgstr "Kutipan template"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_template_view_form
-msgid "Quotation Validity"
-msgstr "Validitas Quotation"
+msgid "Quotation expires after"
+msgstr "Quotation kadaluwarsa pada"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
@@ -500,7 +483,7 @@ msgstr "Order Penjualan"
 #. module: sale_management
 #: model:ir.model,name:sale_management.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Baris Pesanan Penjualan"
+msgstr "Detail Order Penjualan"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_option__order_id
@@ -549,7 +532,7 @@ msgid ""
 msgstr ""
 "Kerepotan menggunakan katalog produk yang kompleks? Coba Konfigurator Produk"
 " untuk membantu sales mengonfigurasi produk dengan beragam opsi: warna, "
-"ukuran, kapasitas, dsb. Membuat encoding sale order lebih mudah dan bebas "
+"ukuran, kapasitas, dsb. Membuat encoding sale order lebih gampang dan bebas "
 "kesalahan."
 
 #. module: sale_management
@@ -573,28 +556,20 @@ msgstr ""
 "quotation ini."
 
 #. module: sale_management
-#: model:ir.model.fields,help:sale_management.field_sale_order_template__prepayment_percent
-msgid "The percentage of the amount needed to be paid to confirm quotations."
-msgstr ""
-"Persentase jumlah yang dibutuhkan yang harus dibayar untuk mengonfirmasi "
-"quotation."
-
-#. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__mail_template_id
 msgid ""
 "This e-mail template will be sent on confirmation. Leave empty to send "
 "nothing."
 msgstr ""
-"Templat e-mail ini akan dikirim pada konfirmasi. Kosongkan untuk tidak "
-"mengirim apa-apa."
+"Templat e-mail ini akan dikirim pada konfirmasi. Kosongkan untuk mengirim "
+"templat kosong."
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_option__is_present
 msgid ""
 "This field will be checked if the option line's product is already present "
 "in the quotation."
-msgstr ""
-"Field ini akan diperiksa bila produk baris opsi sudah tersedia di quotation."
+msgstr "Field ini"
 
 #. module: sale_management
 #: model:digest.tip,name:sale_management.digest_tip_sale1_management_0
@@ -625,12 +600,12 @@ msgstr "Harga Satuan:"
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_line__product_uom_id
 #: model:ir.model.fields,field_description:sale_management.field_sale_order_template_option__uom_id
 msgid "Unit of Measure"
-msgstr "Satuan Ukuran"
+msgstr "Satuan"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 msgid "UoM"
-msgstr "Satuan Ukuran"
+msgstr "Satuan"
 
 #. module: sale_management
 #: model_terms:ir.actions.act_window,help:sale_management.sale_order_template_action
@@ -644,14 +619,12 @@ msgstr ""
 "                Lakukan cross-selling dan berikan diskon untuk mendorong sales Anda."
 
 #. module: sale_management
-#. odoo-python
 #: code:addons/sale_management/models/sale_order_option.py:0
 #, python-format
 msgid "You cannot add options to a confirmed order."
 msgstr "Anda tidak dapat menambahkan opsi untuk order yang dikonfirmasi"
 
 #. module: sale_management
-#. odoo-python
 #: code:addons/sale_management/models/sale_order_template_line.py:0
 #, python-format
 msgid ""
@@ -662,7 +635,6 @@ msgstr ""
 "menghapus baris saat ini dan membuat baris baru dengan tipe yang tepat."
 
 #. module: sale_management
-#. odoo-python
 #: code:addons/sale_management/models/sale_order.py:0
 #, python-format
 msgid ""
@@ -673,7 +645,6 @@ msgstr ""
 "Mohon ganti perusahaan quotation Anda atau hapus produk dari perusahaan lain (%(bad_products)s)."
 
 #. module: sale_management
-#. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 #, python-format
 msgid "Your template cannot contain products from multiple companies."
@@ -681,7 +652,6 @@ msgstr ""
 "Templat Anda tidak boleh memiliki produk dari lebih dari satu perusahaan."
 
 #. module: sale_management
-#. odoo-python
 #: code:addons/sale_management/models/sale_order_template.py:0
 #, python-format
 msgid ""

@@ -1,10 +1,9 @@
-/** @odoo-module **/
+odoo.define('website.s_facebook_page', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import { pick } from "@web/core/utils/objects";
-import { clamp } from "@web/core/utils/numbers";
-import publicWidget from "@web/legacy/js/public/public_widget";
-import { debounce } from "@web/core/utils/timing";
+var publicWidget = require('web.public.widget');
+var utils = require('web.utils');
+const { debounce } = require("@web/core/utils/timing");
 
 const FacebookPageWidget = publicWidget.Widget.extend({
     selector: '.o_facebook_page',
@@ -17,7 +16,7 @@ const FacebookPageWidget = publicWidget.Widget.extend({
         var def = this._super.apply(this, arguments);
         this.previousWidth = 0;
 
-        const params = pick(this.$el[0].dataset, 'href', 'id', 'height', 'tabs', 'small_header', 'hide_cover');
+        const params = _.pick(this.$el[0].dataset, 'href', 'id', 'height', 'tabs', 'small_header', 'hide_cover');
         if (!params.href) {
             return def;
         }
@@ -56,11 +55,10 @@ const FacebookPageWidget = publicWidget.Widget.extend({
     _renderIframe(params) {
         this.options.wysiwyg && this.options.wysiwyg.odooEditor.observerUnactive();
 
-        params.width = clamp(Math.floor(this.$el.width()), 180, 500);
+        params.width = utils.confine(Math.floor(this.$el.width()), 180, 500);
         if (this.previousWidth !== params.width) {
             this.previousWidth = params.width;
-            const searchParams = new URLSearchParams(params);
-            const src = "https://www.facebook.com/plugins/page.php?" + searchParams;
+            const src = $.param.querystring("https://www.facebook.com/plugins/page.php", params);
             this.iframeEl = Object.assign(document.createElement("iframe"), {
                 src: src,
                 width: params.width,
@@ -72,7 +70,6 @@ const FacebookPageWidget = publicWidget.Widget.extend({
                 scrolling: "no",
                 frameborder: "0",
                 allowTransparency: "true",
-                "aria-label": _t("Facebook"),
             });
             this.el.replaceChildren(this.iframeEl);
         }
@@ -83,4 +80,5 @@ const FacebookPageWidget = publicWidget.Widget.extend({
 
 publicWidget.registry.facebookPage = FacebookPageWidget;
 
-export default FacebookPageWidget;
+return FacebookPageWidget;
+});

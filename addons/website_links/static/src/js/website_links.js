@@ -1,9 +1,10 @@
-/** @odoo-module **/
+odoo.define('website_links.website_links', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import publicWidget from "@web/legacy/js/public/public_widget";
-import { browser } from "@web/core/browser/browser";
-import { KeepLast } from "@web/core/utils/concurrency";
+var core = require('web.core');
+var publicWidget = require('web.public.widget');
+
+var _t = core._t;
 
 var SelectBox = publicWidget.Widget.extend({
     events: {
@@ -20,15 +21,25 @@ var SelectBox = publicWidget.Widget.extend({
         this._super.apply(this, arguments);
         this.obj = obj;
         this.placeholder = placeholder;
-
-        this.orm = this.bindService("orm");
-        this.keepLast = new KeepLast();
-
-        // TODO remove in master, contained the whole list of preloaded entries.
-        // Now we lazy load results based on the user search. We still save them
-        // in this array each time so that the "Create" feature works and so
-        // that potential custo may still make sense, or at least do not crash.
-        this.objects = [];
+    },
+    /**
+     * @override
+     */
+    willStart: function () {
+        var self = this;
+        var defs = [this._super.apply(this, arguments)];
+        defs.push(this._rpc({
+            model: this.obj,
+            method: 'search_read',
+            kwargs: {
+                fields: ['id', 'name'],
+            },
+        }).then(function (result) {
+            self.objects = _.map(result, function (val) {
+                return {id: val.id, text: val.name};
+            });
+        }));
+        return Promise.all(defs);
     },
     /**
      * @override
@@ -42,82 +53,12 @@ var SelectBox = publicWidget.Widget.extend({
                 if (self._objectExists(term)) {
                     return null;
                 }
-                return { id: term, text: `Create '${term}'` };
+                return {id: term, text: _.str.sprintf("Create '%s'", term)};
             },
             createSearchChoicePosition: 'bottom',
             multiple: false,
-            ajax: {
-                dataType: 'json',
-                data: term => term,
-                transport: (params, success, failure) => {
-                    // Do not search immediately: wait for the user to stop
-                    // typing (basically, this is a debounce).
-                    clearTimeout(this._loadDataTimeout);
-                    this._loadDataTimeout = setTimeout(() => {
-                        // We want to search with a limit and not care about any
-                        // pagination implementation. To make this work, we
-                        // display the exact match first though, which requires
-                        // an extra RPC (could be refactored into a new
-                        // controller in master but... see TODO).
-                        // TODO at some point this whole app will be moved as a
-                        // backend screen, with real m2o fields etc... in which
-                        // case the "exact match" feature should be handled by
-                        // the ORM somehow ?
-                        const limit = 100;
-                        const searchReadParams = [
-                            ['id', 'name'],
-                            {
-                                limit: limit,
-                                order: 'name, id desc', // Allows to have exact match first
-                            },
-                        ];
-                        const proms = [];
-                        proms.push(this.orm.searchRead(
-                            this.obj,
-                            // Exact match + results that start with the search
-                            [['name', '=ilike', `${params.data}%`]],
-                            ...searchReadParams
-                        ));
-                        proms.push(this.orm.searchRead(
-                            this.obj,
-                            // Results that contain the search but do not start
-                            // with it
-                            [['name', '=ilike', `%_${params.data}%`]],
-                            ...searchReadParams
-                        ));
-                        // Keep last is there in case a RPC takes longer than
-                        // the debounce delay + next rpc delay for some reason.
-                        this.keepLast.add(Promise.all(proms)).then(([startingMatches, endingMatches]) => {
-                            // We loaded max a 2 * limit amount of records but
-                            // ensure that we do not display "ending matches" if
-                            // we may not have loaded all "starting matches".
-                            if (startingMatches.length < limit) {
-                                const startingMatchesId = startingMatches.map((value) => value.id);
-                                const extraEndingMatches = endingMatches.filter(
-                                    (value) => !startingMatchesId.includes(value.id)
-                                );
-                                return startingMatches.concat(extraEndingMatches);
-                            }
-                            // In that case, we made one RPC too much but this
-                            // was chosen over not making them go in parallel.
-                            // We don't want to display "ending matches" if not
-                            // all "starting matches" have been loaded.
-                            return startingMatches;
-                        })
-                        .then(params.success)
-                        .catch(params.error);
-                    }, 400);
-                },
-                results: data => {
-                    this.objects = data.map(x => ({
-                        id: x.id,
-                        text: x.name,
-                    }));
-                    return {
-                        results: this.objects,
-                    };
-                },
-            },
+            data: self.objects,
+            minimumInputLength: self.objects.length > 100 ? 3 : 0,
         });
     },
 
@@ -130,21 +71,29 @@ var SelectBox = publicWidget.Widget.extend({
      * @param {String} query
      */
     _objectExists: function (query) {
-        return this.objects.find(val => val.text.toLowerCase() === query.toLowerCase()) !== undefined;
+        return _.find(this.objects, function (val) {
+            return val.text.toLowerCase() === query.toLowerCase();
+        }) !== undefined;
     },
     /**
      * @private
      * @param {String} name
      */
     _createObject: function (name) {
+        var self = this;
         var args = {
             name: name
         };
-        if (this.obj === "utm.campaign") {
+        if (this.obj === "utm.campaign"){
             args.is_auto_campaign = true;
         }
-        return this.orm.create(this.obj, [args]).then(record => {
-            this.$el.attr('value', record);
+        return this._rpc({
+            model: this.obj,
+            method: 'create',
+            args: [args],
+        }).then(function (record) {
+            self.$el.attr('value', record);
+            self.objects.push({'id': record, 'text': name});
         });
     },
 
@@ -157,7 +106,7 @@ var SelectBox = publicWidget.Widget.extend({
      * @param {Object} ev
      */
     _onChange: function (ev) {
-        if (!ev.added || typeof ev.added.id !== "string") {
+        if (!ev.added || !_.isString(ev.added.id)) {
             return;
         }
         this._createObject(ev.added.id);
@@ -183,7 +132,13 @@ var RecentLinkBox = publicWidget.Widget.extend({
         this._super.apply(this, arguments);
         this.link_obj = obj;
         this.animating_copy = false;
-        this.rpc = this.bindService("rpc");
+    },
+    /**
+     * @override
+     */
+    start: function () {
+        new ClipboardJS(this.$('.btn_shorten_url_clipboard').get(0));
+        return this._super.apply(this, arguments);
     },
 
     //--------------------------------------------------------------------------
@@ -193,9 +148,7 @@ var RecentLinkBox = publicWidget.Widget.extend({
     /**
      * @private
      */
-    _toggleCopyButton: async function () {
-        await browser.navigator.clipboard.writeText(this.link_obj.short_url);
-
+    _toggleCopyButton: function () {
         if (this.animating_copy) {
             return;
         }
@@ -288,9 +241,12 @@ var RecentLinkBox = publicWidget.Widget.extend({
         if (initCode === newCode) {
             showNewCode(newCode);
         } else {
-            this.rpc('/website_links/add_code', {
-                init_code: initCode,
-                new_code: newCode,
+            this._rpc({
+                route: '/website_links/add_code',
+                params: {
+                    init_code: initCode,
+                    new_code: newCode,
+                },
             }).then(function (result) {
                 showNewCode(result[0].code);
             }, function () {
@@ -331,10 +287,6 @@ var RecentLinkBox = publicWidget.Widget.extend({
 });
 
 var RecentLinks = publicWidget.Widget.extend({
-    init() {
-        this._super(...arguments);
-        this.rpc = this.bindService("rpc");
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -345,11 +297,14 @@ var RecentLinks = publicWidget.Widget.extend({
      */
     getRecentLinks: function (filter) {
         var self = this;
-        return this.rpc('/website_links/recent_links', {
-            filter: filter,
-            limit: 20,
+        return this._rpc({
+            route: '/website_links/recent_links',
+            params: {
+                filter: filter,
+                limit: 20,
+            },
         }).then(function (result) {
-            result.reverse().forEach((link) => {
+            _.each(result.reverse(), function (link) {
                 self._addLink(link);
             });
             self._updateNotification();
@@ -375,9 +330,7 @@ var RecentLinks = publicWidget.Widget.extend({
      * @private
      */
     removeLinks: function () {
-        this.getChildren().forEach((child) => {
-            child.destroy();
-        });
+        _.invoke(this.getChildren(), 'destroy');
     },
     /**
      * @private
@@ -404,31 +357,29 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
         'submit #o_website_links_link_tracker_form': '_onFormSubmit',
     },
 
-    init() {
-        this._super(...arguments);
-        this.rpc = this.bindService("rpc");
-    },
-
     /**
      * @override
      */
-    start: async function () {
+    start: function () {
         var defs = [this._super.apply(this, arguments)];
 
         // UTMS selects widgets
-        const campaignSelect = new SelectBox(this, "utm.campaign", _t("e.g. June Sale, Paris Roadshow, ..."));
+        var campaignSelect = new SelectBox(this, 'utm.campaign', _t("e.g. Promotion of June, Winter Newsletter, .."));
         defs.push(campaignSelect.attachTo($('#campaign-select')));
 
-        const mediumSelect = new SelectBox(this, "utm.medium", _t("e.g. InMails, Ads, Social, ..."));
+        var mediumSelect = new SelectBox(this, 'utm.medium', _t("e.g. Newsletter, Social Network, .."));
         defs.push(mediumSelect.attachTo($('#channel-select')));
 
-        const sourceSelect = new SelectBox(this, "utm.source", _t("e.g. LinkedIn, Facebook, Leads, ..."));
+        var sourceSelect = new SelectBox(this, 'utm.source', _t("e.g. Search Engine, Website page, .."));
         defs.push(sourceSelect.attachTo($('#source-select')));
 
         // Recent Links Widgets
         this.recentLinks = new RecentLinks(this);
         defs.push(this.recentLinks.appendTo($('#o_website_links_recent_links')));
         this.recentLinks.getRecentLinks('newest');
+
+        // Clipboard Library
+        new ClipboardJS($('#btn_shorten_url').get(0));
 
         this.url_copy_animating = false;
 
@@ -476,7 +427,7 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
      * @param {Event} ev
      */
     _onUrlKeyUp: function (ev) {
-        if (!$('#btn_shorten_url').hasClass('btn-copy') || ev.key === "Enter") {
+        if (!$('#btn_shorten_url').hasClass('btn-copy') || ev.which === 13) {
             return;
         }
 
@@ -487,10 +438,7 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
     /**
      * @private
      */
-    _onShortenUrlButtonClick: async function (ev) {
-        const textValue = ev.target.dataset.clipboardText;
-        await browser.navigator.clipboard.writeText(textValue);
-
+    _onShortenUrlButtonClick: function () {
         if (!$('#btn_shorten_url').hasClass('btn-copy') || this.url_copy_animating) {
             return;
         }
@@ -548,7 +496,10 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
 
         $('#btn_shorten_url').text(_t("Generating link..."));
 
-        this.rpc('/website_links/new', params).then(function (result) {
+        this._rpc({
+            route: '/website_links/new',
+            params: params,
+        }).then(function (result) {
             if ('error' in result) {
                 // Handle errors
                 if (result.error === 'empty_url') {
@@ -582,8 +533,9 @@ publicWidget.registry.websiteLinks = publicWidget.Widget.extend({
     },
 });
 
-export default {
+return {
     SelectBox: SelectBox,
     RecentLinkBox: RecentLinkBox,
     RecentLinks: RecentLinks,
 };
+});

@@ -92,8 +92,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
 
         in_move._action_confirm()
         in_move._action_assign()
-        in_move.move_line_ids.quantity = quantity
-        in_move.picked = True
+        in_move.move_line_ids.qty_done = quantity
         in_move._action_done()
 
         self.days += 1
@@ -130,8 +129,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
                 'location_id': out_move.location_id.id,
                 'location_dest_id': out_move.location_dest_id.id,
             })
-        out_move.move_line_ids.quantity = quantity
-        out_move.picked = True
+        out_move.move_line_ids.qty_done = quantity
         out_move._action_done()
 
         self.days += 1
@@ -185,7 +183,7 @@ class TestStockValuationLCFIFO(TestStockValuationLCCommon):
     def test_alreadyout_3(self):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10, create_picking=True)
         move2 = self._make_out_move(self.product1, 10)
-        move1.move_line_ids.quantity = 15
+        move1.move_line_ids.qty_done = 15
         lc = self._make_lc(move1, 60)
 
         self.assertEqual(self.product1.value_svl, 70)
@@ -201,8 +199,8 @@ class TestStockValuationLCFIFO(TestStockValuationLCCommon):
         in_svl = self.product1.stock_valuation_layer_ids.sorted()[-1]
 
         self.assertEqual(out_svl.value, -250)
-        # 15 * 16.66
-        self.assertAlmostEqual(in_svl.value, 249.9)
+        # 15 * 16.67
+        self.assertAlmostEqual(in_svl.value, 250.05)
 
     def test_rounding_1(self):
         """3@100, out 1, out 1, out 1"""
@@ -320,7 +318,7 @@ class TestStockValuationLCAVCO(TestStockValuationLCCommon):
         po.button_confirm()
 
         receipt = po.picking_ids
-        receipt.move_line_ids.quantity = 1
+        receipt.move_line_ids.qty_done = 1
         receipt.button_validate()
 
         action = po.action_create_invoice()
@@ -378,7 +376,8 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         # Process the receipt
         receipt = rfq.picking_ids
-        receipt.button_validate()
+        wiz = receipt.button_validate()
+        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save().process()
         self.assertEqual(rfq.order_line.qty_received, 10)
 
         input_aml = self._get_stock_input_move_lines()[-1]
@@ -466,7 +465,9 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         # Process the receipt
         receipt = rfq.picking_ids
-        receipt.button_validate()
+        wiz = receipt.button_validate()
+        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save()
+        wiz.process()
         self.assertEqual(rfq.order_line.qty_received, 10)
 
         input_aml = self._get_stock_input_move_lines()[-1]
@@ -519,7 +520,8 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         # Process the receipt
         receipt = rfq.picking_ids
-        receipt.button_validate()
+        wiz = receipt.button_validate()
+        wiz = Form(self.env['stock.immediate.transfer'].with_context(wiz['context'])).save().process()
         self.assertEqual(rfq.order_line.qty_received, 10)
 
         input_aml = self._get_stock_input_move_lines()[-1]
@@ -582,3 +584,74 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
 
         self.assertEqual(self.product1.quantity_svl, 10)
         self.assertEqual(self.product1.value_svl, 150)
+
+    def test_create_landed_cost_from_bill_multi_currencies(self):
+        # create a vendor bill in EUR where base currency in USD
+        company = self.env.user.company_id
+        usd_currency = self.env.ref('base.USD')
+        eur_currency = self.env.ref('base.EUR')
+
+        company.currency_id = usd_currency
+
+        invoice_date = '2023-01-01'
+        accounting_date = '2024-01-31'
+
+        self.cr.execute("UPDATE res_company SET currency_id = %s WHERE id = %s", (usd_currency.id, company.id))
+        self.env['res.currency.rate'].search([]).unlink()
+        self.env['res.currency.rate'].create({
+            'name': invoice_date,
+            'rate': 1.0,
+            'currency_id': usd_currency.id,
+            'company_id': company.id,
+        })
+
+        self.env['res.currency.rate'].create({
+            'name': invoice_date,
+            'rate': 0.5,
+            'currency_id': eur_currency.id,
+            'company_id': company.id,
+        })
+
+        self.env['res.currency.rate'].create({
+            'name': accounting_date,
+            'rate': 0.25,
+            'currency_id': eur_currency.id,
+            'company_id': company.id,
+        })
+
+        po_form = Form(self.env['purchase.order'])
+        po_form.partner_id = self.vendor1
+        with po_form.order_line.new() as po_line:
+            po_line.product_id = self.product1
+            po_line.product_qty = 1
+            po_line.price_unit = 10
+            po_line.taxes_id.clear()
+        po = po_form.save()
+        po.button_confirm()
+
+        receipt = po.picking_ids
+        receipt.move_line_ids.qty_done = 1
+        receipt.button_validate()
+
+        action = po.action_create_invoice()
+        bill = self.env['account.move'].browse(action['res_id'])
+        bill_form = Form(bill)
+        bill_form.invoice_date = invoice_date
+        bill_form.date = accounting_date
+        bill_form.currency_id = eur_currency
+
+        with bill_form.invoice_line_ids.new() as inv_line:
+            inv_line.product_id = self.productlc1
+            inv_line.price_unit = 5
+            inv_line.currency_id = eur_currency
+
+        bill = bill_form.save()
+        bill.action_post()
+
+        action = bill.button_create_landed_costs()
+        lc_form = Form(self.env[action['res_model']].browse(action['res_id']))
+        lc_form.picking_ids.add(receipt)
+        lc = lc_form.save()
+        lc.button_validate()
+
+        self.assertEqual(lc.cost_lines.price_unit, 10)

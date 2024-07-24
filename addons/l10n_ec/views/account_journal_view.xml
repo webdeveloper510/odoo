@@ -10,19 +10,22 @@
                     <field name="l10n_ec_require_emission" invisible="1"/>
                     <field name="l10n_ec_entity"
                            placeholder="001"
-                           invisible="not l10n_ec_require_emission"
-                           required="l10n_ec_require_emission"/>
+                           attrs="{'invisible':[('l10n_ec_require_emission', '!=', True)],
+                                   'required':[('l10n_ec_require_emission', '=', True)]}"
+                           />
                     <field name="l10n_ec_emission"
                            placeholder="001"
-                           invisible="not l10n_ec_require_emission"
-                           required="l10n_ec_require_emission"/>
+                           attrs="{'invisible':[('l10n_ec_require_emission', '!=', True)],
+                                   'required':[('l10n_ec_require_emission', '=', True)]}"
+                           />
                     <field name="l10n_ec_emission_address_id"
-                           invisible="not l10n_ec_require_emission"
-                           required="l10n_ec_require_emission"
+                           attrs="{'invisible':[('l10n_ec_require_emission', '!=', True)],
+                                   'required':[('l10n_ec_require_emission', '=', True)]}"
                            context="{'default_parent_id': company_partner_id, 
                                      'default_type': 'invoice',
                                      'form_view_ref': 'base.view_partner_address_form'
-                                     }"/>
+                                     }"
+                           />
                 </field>
             </field>
         </record>

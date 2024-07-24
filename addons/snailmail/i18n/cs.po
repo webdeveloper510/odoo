@@ -3,17 +3,22 @@
 # 	* snailmail
 # 
 # Translators:
-# Ivana Bartonkova, 2023
+# Jaroslav Helemik Nemec <nemec@helemik.cz>, 2022
+# Michal Veselý <michal@veselyberanek.net>, 2022
+# Jan Horzinka <jan.horzinka@centrum.cz>, 2022
+# karolína schusterová <karolina.schusterova@vdp.sk>, 2022
+# Martin Trigaux, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
+# Jiří Podhorecký, 2022
 # Jakub Smolka, 2023
-# Wil Odoo, 2023
 # Aleš Fiala <f.ales1@seznam.cz>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-04-14 05:52+0000\n"
+"PO-Revision-Date: 2022-09-22 05:55+0000\n"
 "Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
@@ -21,11 +26,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
-
-#. module: snailmail
-#: model:ir.model.fields.selection,name:snailmail.selection__snailmail_letter__error_code__attachment_error
-msgid "ATTACHMENT_ERROR"
-msgstr ""
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_res_company__snailmail_cover
@@ -42,7 +42,7 @@ msgstr "Adresa"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core/failure_model_patch.js:0
+#: code:addons/snailmail/static/src/components/notification_group/notification_group.xml:0
 #, python-format
 msgid "An error occurred when sending a letter with Snailmail."
 msgstr "Při odesílání dopisu klasickou poštou došlo k chybě."
@@ -63,7 +63,7 @@ msgstr "Došlo k neznámé chybě. Kontaktujte podporu."
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "An unknown error occurred. Please contact our"
 msgstr "Došlo k neznámé chybě. Kontaktujte prosím naši"
@@ -80,7 +80,7 @@ msgstr "Název souboru přílohy"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core/notification_model_patch.js:0
+#: code:addons/snailmail/static/src/models/snailmail_notification_popover_content_view.js:0
 #, python-format
 msgid "Awaiting Dispatch"
 msgstr "Čeká se na odeslání"
@@ -97,8 +97,8 @@ msgstr "Obě strany"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "Buy credits"
 msgstr "Koupit kredity"
@@ -109,6 +109,7 @@ msgid "CREDIT_ERROR"
 msgstr "CREDIT_ERROR"
 
 #. module: snailmail
+#: model_terms:ir.ui.view,arch_db:snailmail.snailmail_confirm_view
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_form
 msgid "Cancel"
 msgstr "Zrušit"
@@ -120,7 +121,7 @@ msgstr "Zrušit dopis"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_missing_required_fields
 #, python-format
 msgid "Cancel letter"
@@ -133,7 +134,7 @@ msgstr "Zrušit oznámení v případě selhání"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core/notification_model_patch.js:0
+#: code:addons/snailmail/static/src/models/snailmail_notification_popover_content_view.js:0
 #: model:ir.model.fields.selection,name:snailmail.selection__snailmail_letter__state__canceled
 #, python-format
 msgid "Canceled"
@@ -148,7 +149,7 @@ msgstr "Město"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_format_error
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_missing_required_fields
 #, python-format
@@ -156,6 +157,7 @@ msgid "Close"
 msgstr "Zavřít"
 
 #. module: snailmail
+#: model:ir.model.fields,field_description:snailmail.field_res_company__snailmail_color
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__color
 msgid "Color"
 msgstr "Barva"
@@ -168,12 +170,17 @@ msgstr "Společnosti"
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__company_id
 msgid "Company"
-msgstr "Společnost"
+msgstr "Firma"
 
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_res_config_settings
 msgid "Config Settings"
-msgstr "Konfigurační nastavení"
+msgstr "Nastavení konfigurace"
+
+#. module: snailmail
+#: model_terms:ir.ui.view,arch_db:snailmail.snailmail_confirm_view
+msgid "Confirm"
+msgstr "Potvrdit"
 
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_res_partner
@@ -185,7 +192,7 @@ msgstr "Kontakt"
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__country_id
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_missing_required_fields
 msgid "Country"
-msgstr "Země"
+msgstr "Stát"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__cover
@@ -197,21 +204,21 @@ msgstr "Titulní strana"
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error__create_uid
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__create_uid
 msgid "Created by"
-msgstr "Vytvořeno uživatelem"
+msgstr "Vytvořeno od"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__create_date
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error__create_date
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__create_date
 msgid "Created on"
-msgstr "Vytvořeno dne"
+msgstr "Vytvořeno"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__display_name
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error__display_name
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__display_name
 msgid "Display Name"
-msgstr "Zobrazovací název"
+msgstr "Zobrazované jméno"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__attachment_datas
@@ -227,11 +234,11 @@ msgstr "ID dokumentu"
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_mail_thread
 msgid "Email Thread"
-msgstr "Emailové vlákno"
+msgstr "E-mailové vlákno"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core/notification_model_patch.js:0
+#: code:addons/snailmail/static/src/models/snailmail_notification_popover_content_view.js:0
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__error_code
 #: model:ir.model.fields.selection,name:snailmail.selection__snailmail_letter__state__error
 #, python-format
@@ -245,7 +252,7 @@ msgstr "FORMAT_ERROR"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.js:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #: model:ir.actions.act_window,name:snailmail.snailmail_letter_missing_required_fields_action
 #, python-format
 msgid "Failed letter"
@@ -264,7 +271,7 @@ msgstr "Chyba formátu"
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_snailmail_letter_format_error
 msgid "Format Error Sending a Snailmail Letter"
-msgstr "Chyba formátování při odesílání dopisu poštou"
+msgstr "Chyba formátování k odeslání dopisu klasickou poštou"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__id
@@ -291,18 +298,25 @@ msgid "Invalid recipient name."
 msgstr "Neplatné jméno příjemce."
 
 #. module: snailmail
+#: model:ir.model.fields,field_description:snailmail.field_snailmail_letter____last_update
+#: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error____last_update
+#: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields____last_update
+msgid "Last Modified on"
+msgstr "Naposled změněno"
+
+#. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__write_uid
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error__write_uid
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__write_uid
 msgid "Last Updated by"
-msgstr "Naposledy upraveno uživatelem"
+msgstr "Naposledy upraveno od"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__write_date
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error__write_date
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__write_date
 msgid "Last Updated on"
-msgstr "Naposledy upraveno dne"
+msgstr "Naposled upraveno"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_mail_mail__letter_ids
@@ -337,12 +351,27 @@ msgstr "Zpráva"
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_mail_notification
 msgid "Message Notifications"
-msgstr "Notifikace zprávy"
+msgstr "Oznámení zpráv"
+
+#. module: snailmail
+#: model:ir.model.fields,help:snailmail.field_mail_mail__message_type
+#: model:ir.model.fields,help:snailmail.field_mail_message__message_type
+msgid ""
+"Message type: email for email message, notification for system message, "
+"comment for other messages such as user replies"
+msgstr ""
+"Druh zprávy: 'E-mail' pro e-mailové zprávy, 'Upozornění' pro zprávy systému,"
+" 'Komentář' pro ostatní zprávy, jako odpovědi uživatelů."
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__model
 msgid "Model"
 msgstr "Model"
+
+#. module: snailmail
+#: model:ir.model.fields,field_description:snailmail.field_snailmail_confirm__model_name
+msgid "Model Name"
+msgstr "Název modelu"
 
 #. module: snailmail
 #: model:ir.model.fields.selection,name:snailmail.selection__snailmail_letter__error_code__no_price_available
@@ -364,7 +393,7 @@ msgstr "Typ oznámení"
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__notification_ids
 msgid "Notifications"
-msgstr "Notifikace"
+msgstr "Upozornění"
 
 #. module: snailmail
 #. odoo-python
@@ -413,7 +442,7 @@ msgstr "Tisk v barvě"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "Re-send letter"
 msgstr "Znovu poslat dopis"
@@ -431,7 +460,7 @@ msgstr "Související záznam"
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_ir_actions_report
 msgid "Report Action"
-msgstr "Dokumentová akce"
+msgstr "Nahlásit akci"
 
 #. module: snailmail
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_form
@@ -440,7 +469,7 @@ msgstr "Odeslat nyní"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core/notification_model_patch.js:0
+#: code:addons/snailmail/static/src/models/snailmail_notification_popover_content_view.js:0
 #: model:ir.model.fields.selection,name:snailmail.selection__snailmail_letter__state__sent
 #, python-format
 msgid "Sent"
@@ -459,15 +488,23 @@ msgid "Snail Mails are successfully sent"
 msgstr "Snail Maily byly úspěšně odeslány"
 
 #. module: snailmail
+#. odoo-python
+#: code:addons/snailmail/wizard/snailmail_confirm.py:0
 #: model:ir.model.fields.selection,name:snailmail.selection__mail_message__message_type__snailmail
 #: model:ir.model.fields.selection,name:snailmail.selection__mail_notification__notification_type__snail
+#, python-format
 msgid "Snailmail"
-msgstr "Poštovní dopis"
+msgstr "klasická pošta"
 
 #. module: snailmail
-#: model:ir.model.fields,field_description:snailmail.field_res_company__snailmail_color
-msgid "Snailmail Color"
-msgstr ""
+#: model:ir.model,name:snailmail.model_snailmail_confirm
+msgid "Snailmail Confirm"
+msgstr "Snailmail potvrďte"
+
+#. module: snailmail
+#: model_terms:ir.ui.view,arch_db:snailmail.snailmail_confirm_view
+msgid "Snailmail Confirmation"
+msgstr "Potvrzení Snailmailu"
 
 #. module: snailmail
 #: model:ir.model.fields.selection,name:snailmail.selection__mail_notification__failure_type__sn_credit
@@ -476,7 +513,7 @@ msgstr "Chyba kreditu Snailmail"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/messaging_menu/messaging_menu_patch.js:0
+#: code:addons/snailmail/static/src/models/notification_group.js:0
 #, python-format
 msgid "Snailmail Failures"
 msgstr "Selkání klasické pošty"
@@ -531,6 +568,7 @@ msgstr "Chybná zpráva Snailmail"
 
 #. module: snailmail
 #: model:ir.actions.server,name:snailmail.snailmail_print_ir_actions_server
+#: model:ir.cron,cron_name:snailmail.snailmail_print
 msgid "Snailmail: process letters queue"
 msgstr "Klasická pošta: fronta zpracování dopisů"
 
@@ -539,7 +577,7 @@ msgstr "Klasická pošta: fronta zpracování dopisů"
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields__state_id
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_letter_missing_required_fields
 msgid "State"
-msgstr "Stát"
+msgstr "Stav"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__state
@@ -600,7 +638,7 @@ msgstr "Do země partnera nelze poslat klasický dopis"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid ""
 "The country to which you want to send the letter is not supported by our "
@@ -625,7 +663,7 @@ msgstr "Dokument byl správně odeslán poštou. <br>Trasovací ID je %s"
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid ""
 "The letter could not be sent due to insufficient credits on your IAP "
@@ -657,20 +695,7 @@ msgstr "Aktualizovat adresu a znovu odeslat"
 #. module: snailmail
 #: model:ir.model,name:snailmail.model_snailmail_letter_missing_required_fields
 msgid "Update address of partner"
-msgstr "Aktualizace adresy partnera"
-
-#. module: snailmail
-#: model:ir.model.fields,help:snailmail.field_mail_mail__message_type
-#: model:ir.model.fields,help:snailmail.field_mail_message__message_type
-msgid ""
-"Used to categorize message generator\n"
-"'email': generated by an incoming email e.g. mailgateway\n"
-"'comment': generated by user input e.g. through discuss or composer\n"
-"'email_outgoing': generated by a mailing\n"
-"'notification': generated by system e.g. tracking messages\n"
-"'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n"
-"'user_notification': generated for a specific recipient"
-msgstr ""
+msgstr "Aktualizovat adresu partnera"
 
 #. module: snailmail
 #: model:ir.model.fields,help:snailmail.field_snailmail_letter__state
@@ -682,6 +707,11 @@ msgstr ""
 "Po vytvoření dopisu je stav „Čekající“.\n"
 "Pokud je dopis správně odeslán, stav se změní na „Odesláno“,\n"
 "Pokud ne, dostane se do stavu „Chyba“ a chybová zpráva se zobrazí v poli „Chybová zpráva“."
+
+#. module: snailmail
+#: model_terms:ir.ui.view,arch_db:snailmail.snailmail_confirm_view
+msgid "You are about to send this"
+msgstr "Chystáte se odeslat toto"
 
 #. module: snailmail
 #. odoo-python
@@ -707,7 +737,7 @@ msgstr ""
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "You need credits on your IAP account to send a letter."
 msgstr "K odeslání dopisu potřebujete kredity na účtu IAP."
@@ -724,15 +754,20 @@ msgid "Zip"
 msgstr "PSČ"
 
 #. module: snailmail
+#: model_terms:ir.ui.view,arch_db:snailmail.snailmail_confirm_view
+msgid "by post. Are you sure you want to continue?"
+msgstr "poštou. Jste si jisti, že chcete pokračovat?"
+
+#. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "for further assistance."
 msgstr "pro další pomoc."
 
 #. module: snailmail
 #. odoo-javascript
-#: code:addons/snailmail/static/src/core_ui/snailmail_error.xml:0
+#: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "support"
 msgstr "podporu"

@@ -19,10 +19,6 @@ import { session } from "@web/session";
 const serviceRegistry = registry.category("services");
 let target;
 
-function toCIDS(...ids) {
-    return `cids=${ids.join("-")}&_company_switching=1`;
-}
-
 const ORIGINAL_TOGGLE_DELAY = MobileSwitchCompanyMenu.toggleDelay;
 async function createSwitchCompanyMenu(routerParams = {}, toggleDelay = 0) {
     patchWithCleanup(MobileSwitchCompanyMenu, { toggleDelay });
@@ -49,9 +45,9 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
         target = getFixture();
         patchWithCleanup(session.user_companies, {
             allowed_companies: {
-                1: { id: 1, name: "Hermit", parent_id: false, child_ids: [] },
-                2: { id: 2, name: "Herman's", parent_id: false, child_ids: [] },
-                3: { id: 3, name: "Heroes TM", parent_id: false, child_ids: [] },
+                1: { id: 1, name: "Hermit" },
+                2: { id: 2, name: "Herman's" },
+                3: { id: 3, name: "Heroes TM" },
             },
             current_company: 1,
         });
@@ -109,7 +105,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 2
          *   [ ] Company 3
          */
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [1]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 1);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 1);
@@ -124,7 +120,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 2);
         assert.containsN(scMenuEl, "[data-company-id] .fa-square-o", 1);
         await prom;
-        assert.verifySteps(["cids=1-2&_company_switching=1"]);
+        assert.verifySteps(["cids=1%2C2"]);
     });
 
     QUnit.test("can toggle multiple companies at once", async (assert) => {
@@ -143,7 +139,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 2
          *   [ ] Company 3
          */
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [1]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 1);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 1);
@@ -162,7 +158,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
 
         assert.verifySteps([]);
         await prom; // await toggle promise
-        assert.verifySteps(["cids=2-3&_company_switching=1"]);
+        assert.verifySteps(["cids=2%2C3"]);
     });
 
     QUnit.test("single company selected: toggling it off will keep it", async (assert) => {
@@ -182,7 +178,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 3
          */
         assert.deepEqual(scMenu.env.services.router.current.hash, { cids: 1 });
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [1]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 1);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 1);
@@ -194,11 +190,8 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 3
          */
         await click(scMenuEl.querySelectorAll(".toggle_company")[0]);
-        assert.deepEqual(scMenu.env.services.router.current.hash, {
-            cids: 1,
-            _company_switching: 1,
-        });
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [1]);
+        assert.deepEqual(scMenu.env.services.router.current.hash, { cids: 1 });
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 1);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-squarqe", 0);
         assert.containsN(scMenuEl, "[data-company-id] .fa-square-o", 3);
@@ -218,7 +211,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 2
          *   [ ] Company 3
          */
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [1]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 1);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 1);
@@ -230,7 +223,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 3
          */
         await click(scMenuEl.querySelectorAll(".log_into")[1]);
-        assert.verifySteps(["cids=2&_company_switching=1"]);
+        assert.verifySteps(["cids=2"]);
     });
 
     QUnit.test("multi company mode: log into a non selected company", async (assert) => {
@@ -239,7 +232,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
         function onPushState(url) {
             assert.step(url.split("#")[1]);
         }
-        Object.assign(browser.location, { hash: "cids=3-1" });
+        Object.assign(browser.location, { hash: "cids=3%2C1" });
         const scMenu = await createSwitchCompanyMenu({ onPushState });
         const scMenuEl = target.querySelector(".o_burger_menu_companies");
 
@@ -248,7 +241,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 2
          *   [x] **Company 3**
          */
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [3, 1]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [3, 1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 3);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 2);
@@ -256,11 +249,11 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
 
         /**
          *   [x] Company 1
-         *   [x] **Company 2**    -> log into
-         *   [x] Company 3
+         *   [ ] Company 2      -> log into
+         *   [x] **Company 3**
          */
         await click(scMenuEl.querySelectorAll(".log_into")[1]);
-        assert.verifySteps([toCIDS(2, 3, 1)]);
+        assert.verifySteps(["cids=2%2C3%2C1"]);
     });
 
     QUnit.test("multi company mode: log into an already selected company", async (assert) => {
@@ -269,7 +262,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
         function onPushState(url) {
             assert.step(url.split("#")[1]);
         }
-        Object.assign(browser.location, { hash: "cids=2-3" });
+        Object.assign(browser.location, { hash: "cids=2%2C3" });
         const scMenu = await createSwitchCompanyMenu({ onPushState });
         const scMenuEl = target.querySelector(".o_burger_menu_companies");
 
@@ -278,7 +271,7 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [x] **Company 2**
          *   [x] Company 3
          */
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [2, 3]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [2, 3]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 2);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 2);
@@ -286,11 +279,11 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
 
         /**
          *   [ ] Company 1
-         *   [x] Company 2
-         *   [x] **Company 3**      -> log into
+         *   [x] **Company 2**
+         *   [x] Company 3      -> log into
          */
         await click(scMenuEl.querySelectorAll(".log_into")[2]);
-        assert.verifySteps([toCIDS(3, 2)]);
+        assert.verifySteps(["cids=3%2C2"]);
     });
 
     QUnit.test("companies can be logged in even if some toggled within delay", async (assert) => {
@@ -307,23 +300,20 @@ QUnit.module("MobileSwitchCompanyMenu", (hooks) => {
          *   [ ] Company 2
          *   [ ] Company 3
          */
-        assert.deepEqual(scMenu.env.services.company.activeCompanyIds, [1]);
+        assert.deepEqual(scMenu.env.services.company.allowedCompanyIds, [1]);
         assert.strictEqual(scMenu.env.services.company.currentCompany.id, 1);
         assert.containsN(scMenuEl, "[data-company-id]", 3);
         assert.containsN(scMenuEl, "[data-company-id] .fa-check-square", 1);
         assert.containsN(scMenuEl, "[data-company-id] .fa-square-o", 2);
 
         /**
-         *   [ ] **Company 1**  -> 2) toggled
-         *   [x] Company 2      -> 3) logged in
-         *   [ ] Company 3      -> 1) toggled
+         *   [ ] **Company 1**  -> toggled
+         *   [ ] Company 2      -> logged in
+         *   [ ] Company 3      -> toggled
          */
         await click(scMenuEl.querySelectorAll(".toggle_company")[2]);
         await click(scMenuEl.querySelectorAll(".toggle_company")[0]);
         await click(scMenuEl.querySelectorAll(".log_into")[1]);
-
-        // When "Company 2" is logged into, only one company is currently selected
-        // so we treat it as single company mode
-        assert.verifySteps([toCIDS(2)]);
+        assert.verifySteps(["cids=2"]);
     });
 });

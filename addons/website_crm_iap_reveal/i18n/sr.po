@@ -3,21 +3,21 @@
 # 	* website_crm_iap_reveal
 # 
 # Translators:
-# Djordje Marjanovic <djvmarjanovic@gmail.com>, 2023
+# Djordje Marjanovic <djvmarjanovic@gmail.com>, 2022
+# Uros Kalajdzic <ukalajdzic@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2022
 # Branko Milinković, 2023
-# Aleksandar Gajić <aleksandar.gajic@modoolar.com>, 2023
-# Martin Trigaux, 2023
-# Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
 # Milan Bojovic <mbojovic@outlook.com>, 2023
 # Nemanja Skadric, 2024
 # コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-10-10 10:23+0000\n"
+"PO-Revision-Date: 2022-09-22 05:56+0000\n"
 "Last-Translator: コフスタジオ, 2024\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
@@ -141,7 +141,6 @@ msgid "Display Name"
 msgstr "Naziv za prikaz"
 
 #. module: website_crm_iap_reveal
-#. odoo-python
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
 #, python-format
 msgid "Enter Valid Regex."
@@ -205,21 +204,27 @@ msgid "Industries"
 msgstr "Industrija"
 
 #. module: website_crm_iap_reveal
+#: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule____last_update
+#: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view____last_update
+msgid "Last Modified on"
+msgstr "Poslednja izmena dana"
+
+#. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__write_uid
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__write_uid
 msgid "Last Updated by"
-msgstr "Poslednji put ažurirao"
+msgstr "Poslednje izmenio/la"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__write_date
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__write_date
 msgid "Last Updated on"
-msgstr "Poslednji put ažurirano"
+msgstr "Poslednje ažuriranje dana"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_type__lead
 msgid "Lead"
-msgstr "Lid"
+msgstr "Trag"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -244,7 +249,17 @@ msgid "Lead Generation Views"
 msgstr "Lead Generation Views"
 
 #. module: website_crm_iap_reveal
+#: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
+#, python-format
+msgid ""
+"Lead Generation requires a GeoIP resolver which could not be found on your "
+"system. Please consult https://pypi.org/project/GeoIP/."
+msgstr ""
+
+#. module: website_crm_iap_reveal
 #: model:ir.actions.server,name:website_crm_iap_reveal.ir_cron_crm_reveal_lead_ir_actions_server
+#: model:ir.cron,cron_name:website_crm_iap_reveal.ir_cron_crm_reveal_lead
+#: model:ir.cron,name:website_crm_iap_reveal.ir_cron_crm_reveal_lead
 msgid "Lead Generation: Leads/Opportunities Generation"
 msgstr "Lead Generation: Leads/Opportunities Generation"
 
@@ -281,6 +296,12 @@ msgstr "Maximum 5 contacts are allowed!"
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__priority__1
 msgid "Medium"
 msgstr "Posrednik"
+
+#. module: website_crm_iap_reveal
+#: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
+#, python-format
+msgid "Missing Library"
+msgstr ""
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_view__reveal_state__not_found
@@ -323,7 +344,7 @@ msgstr ""
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields.selection,name:website_crm_iap_reveal.selection__crm_reveal_rule__lead_type__opportunity
 msgid "Opportunity"
-msgstr "Prodajna prilika"
+msgstr "Prilika"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -336,7 +357,6 @@ msgid "Opportunity Generation Conditions"
 msgstr "Opportunity Generation Conditions"
 
 #. module: website_crm_iap_reveal
-#. odoo-python
 #: code:addons/website_crm_iap_reveal/models/crm_reveal_rule.py:0
 #, python-format
 msgid "Opportunity created by Odoo Lead Generation"
@@ -417,7 +437,7 @@ msgstr "Niz"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_view__reveal_state
 msgid "State"
-msgstr "Država"
+msgstr "Stanje"
 
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__state_ids
@@ -497,7 +517,7 @@ msgstr "Visits to Leads Rules"
 #. module: website_crm_iap_reveal
 #: model:ir.model.fields,field_description:website_crm_iap_reveal.field_crm_reveal_rule__website_id
 msgid "Website"
-msgstr "Web stranica"
+msgstr "Website"
 
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
@@ -527,4 +547,4 @@ msgstr "zaposleni"
 #. module: website_crm_iap_reveal
 #: model_terms:ir.ui.view,arch_db:website_crm_iap_reveal.crm_reveal_rule_form
 msgid "to"
-msgstr "u"
+msgstr "do"

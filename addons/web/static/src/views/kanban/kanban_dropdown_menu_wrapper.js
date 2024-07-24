@@ -9,6 +9,3 @@ export class KanbanDropdownMenuWrapper extends Component {
     }
 }
 KanbanDropdownMenuWrapper.template = "web.KanbanDropdownMenuWrapper";
-KanbanDropdownMenuWrapper.props = {
-    slots: Object,
-};

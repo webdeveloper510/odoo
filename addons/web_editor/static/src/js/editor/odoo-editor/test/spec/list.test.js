@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import {
     BasicEditor,
     click,
@@ -1619,7 +1617,7 @@ describe('List', () => {
                                         </li>
                                     </ol>
                                 </li>
-                                <li>qr</li>
+                                <li>q]r</li>
                                 <li>st</li>
                             </ul>`),
                         stepFunction: toggleOrderedList,
@@ -1645,7 +1643,7 @@ describe('List', () => {
                                         </li>
                                     </ol>
                                 </li>
-                                <li>qr</li>
+                                <li>q]r</li>
                                 <li>st</li>
                             </ul>`),
                     });
@@ -2826,7 +2824,27 @@ describe('List', () => {
                                 '<ul><li><h1>abc</h1></li><li><h2>def[]ghi</h2></li><li><h4>klm</h4></li></ul>',
                         });
                     });
+                    it('should merge a bold list item (checked/unchecked) into a non-formatted list item', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore:
+                                '<ul class="o_checklist"><li class="o_checked"><p>abc</p></li><li><p><b>de</b>fg[]</p><p><b>hij</b>klm</p></li><li class="o_checked"><p>nop</p></li></ul>',
+                            stepFunction: deleteForward,
+                            // Two paragraphs in a checklist item = Two list items.
+                            // Paragraphs in list items are treated as nonsense.
+                            contentAfter:
+                                '<ul class="o_checklist"><li class="o_checked">abc</li><li><b>de</b>fg[]<b>hij</b>klm</li><li class="o_checked">nop</li></ul>',
+                        });
+                    });
                     it('should treat two blocks in a checklist item and keep the blocks', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore:
+                                '<ul class="o_checklist"><li class="o_checked"><p>abc</p></li><li><p>def[]</p><p>ghi</p></li><li class="o_checked"><p>klm</p></li></ul>',
+                            stepFunction: deleteForward,
+                            contentAfter:
+                                '<ul class="o_checklist"><li class="o_checked">abc</li><li>def[]ghi</li><li class="o_checked">klm</li></ul>',
+                        });
                         await testEditor(BasicEditor, {
                             removeCheckIds: true,
                             contentBefore:
@@ -2834,6 +2852,16 @@ describe('List', () => {
                             stepFunction: deleteForward,
                             contentAfter:
                                 '<ul class="o_checklist"><li class="o_checked"><h1>abc</h1></li><li class="o_checked"><h2>def[]ghi</h2></li><li class="o_checked"><h4>klm</h4></li></ul>',
+                        });
+                    });
+                    it('should merge a bold list item into a non-formatted list item', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore:
+                                '<ul><li><p>abc</p></li><li><p><b>de</b>fg[]</p><p><b>hij</b>klm</p></li><li><p>nop</p></li></ul>',
+                            stepFunction: deleteForward,
+                            contentAfter:
+                                '<ul><li>abc</li><li><b>de</b>fg[]<b>hij</b>klm</li><li>nop</li></ul>',
                         });
                     });
                 });
@@ -6226,7 +6254,7 @@ describe('List', () => {
                         </ol>`),
                 });
             });
-            describe('empty list items, starting and ending with links', () => {
+            it('should empty list items, starting and ending with links', async () => {
                 // Since we introduce \ufeff characters in and around links, we
                 // can enter situations where the links aren't technically fully
                 // selected but should be treated as if they were. These tests
@@ -6259,17 +6287,13 @@ describe('List', () => {
                     '<ul><li>ab</li><li>[\ufeff<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>]\ufeff</li><li>ij</li></ul>',
                     '<ul><li>ab</li><li>\ufeff[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>]\ufeff</li><li>ij</li></ul>',
                 ];
-                let testIndex = 1;
                 for (const contentBefore of tests) {
-                    it(`should empty list items, starting and ending with links (${testIndex})`, async () => {
-                        await testEditor(BasicEditor, {
-                            contentBefore,
-                            stepFunction: deleteBackward,
-                            contentAfterEdit: '<ul><li>ab</li><li placeholder="List" class="oe-hint">[]<br></li><li>ij</li></ul>',
-                            contentAfter: '<ul><li>ab</li><li>[]<br></li><li>ij</li></ul>',
-                        });
+                    await testEditor(BasicEditor, {
+                        contentBefore,
+                        stepFunction: deleteBackward,
+                        contentAfterEdit: '<ul><li>ab</li><li placeholder="List" class="oe-hint">[]<br></li><li>ij</li></ul>',
+                        contentAfter: '<ul><li>ab</li><li>[]<br></li><li>ij</li></ul>',
                     });
-                    testIndex += 1;
                 }
             });
         });

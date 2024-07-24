@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-<t t-name="web.X2ManyFieldDialog">
-    <Dialog title="title" withBodyPadding="false" modalRef="modalRef" contentClass="contentClass">
-        <FormRenderer record="record" archInfo="archInfo"/>
+<t t-name="web.X2ManyFieldDialog" owl="1">
+    <Dialog title="title" withBodyPadding="false" modalRef="modalRef" contentClass="'o_form_view'">
+        <FormRenderer record="record" fields="archInfo.fields" archInfo="archInfo"/>
         <t t-set-slot="footer">
             <t t-if="footerArchInfo">
                 <FormRenderer record="record" archInfo="footerArchInfo"/>
@@ -34,9 +34,9 @@
     </Dialog>
 </t>
 
-<t t-name="web.Many2XAutocomplete" >
+<t t-name="web.Many2XAutocomplete" owl="1" >
     <div class="o_input_dropdown" t-ref="autocomplete_container">
-        <input t-if="env.isSmall and props.dropdown"
+        <input t-if="env.isSmall"
             type="text"
             t-att-id="props.id"
             class="o_input"
@@ -56,21 +56,10 @@
             onSelect.bind="onSelect"
             onInput.bind="onInput"
             onChange.bind="onChange"
-            dropdown="props.dropdown"
-            autofocus="props.autofocus"
-            resetOnSelect="props.value === ''"
             onCancel.bind="onCancel"
         />
-        <span class="o_dropdown_button" />
+        <a role="button" class="o_dropdown_button" draggable="false" />
     </div>
-</t>
-
-<t t-name="web.AvatarMany2XAutocomplete">
-    <span class="o_avatar_many2x_autocomplete o_avatar d-flex align-items-center">
-        <img t-if="option.value" class="rounded me-1"
-             t-attf-src="/web/image/{{option.resModel}}/{{option.value}}/avatar_128" />
-        <t t-esc="option.label" />
-    </span>
 </t>
 
 </templates>

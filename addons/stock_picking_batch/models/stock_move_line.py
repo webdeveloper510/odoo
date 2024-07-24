@@ -52,7 +52,10 @@ class StockMoveLine(models.Model):
             for line in lines:
                 move = line.move_id
                 line_by_move[move] |= line
-                qty = line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id, rounding_method='HALF-UP')
+                if move.from_immediate_transfer:
+                    qty = line.product_uom_id._compute_quantity(line.qty_done, line.product_id.uom_id, rounding_method='HALF-UP')
+                else:
+                    qty = line.reserved_qty
                 qty_by_move[line.move_id] += qty
 
             if lines == picking.move_line_ids and lines.move_id == picking.move_ids:

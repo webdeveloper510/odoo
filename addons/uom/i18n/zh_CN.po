@@ -3,15 +3,17 @@
 # 	* uom
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Jeffery CHEN <jeffery9@gmail.com>, 2022
+# Chloe Wang, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Wil Odoo, 2023\n"
+"POT-Creation-Date: 2022-09-23 08:03+0000\n"
+"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"Last-Translator: Chloe Wang, 2023\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,7 +46,7 @@ msgstr ""
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__active
 msgid "Active"
-msgstr "已启用"
+msgstr "启用"
 
 #. module: uom
 #: model_terms:ir.actions.act_window,help:uom.product_uom_form_action
@@ -59,7 +61,7 @@ msgstr "计量单位类别"
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.uom_uom_view_search
 msgid "Archived"
-msgstr "已存档"
+msgstr "已归档"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_uom__factor_inv
@@ -92,7 +94,7 @@ msgstr "综合比率"
 msgid ""
 "Conversion between Units of Measure can only occur if they belong to the "
 "same category. The conversion will be made based on the ratios."
-msgstr "仅同类别的计量单位可以互相转换。根据比例进行转换。"
+msgstr "计量单位转换只能基于转换比例对同一个类别进行转换。"
 
 #. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__create_uid
@@ -104,7 +106,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:uom.field_uom_category__create_date
 #: model:ir.model.fields,field_description:uom.field_uom_uom__create_date
 msgid "Created on"
-msgstr "创建日期"
+msgstr "创建时间"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_day
@@ -125,7 +127,7 @@ msgstr "打"
 #. module: uom
 #: model_terms:ir.ui.view,arch_db:uom.uom_uom_view_search
 msgid "Group By"
-msgstr "分组方式"
+msgstr "分组"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_hour
@@ -153,6 +155,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: uom
+#: model:ir.model.fields,field_description:uom.field_uom_category____last_update
+#: model:ir.model.fields,field_description:uom.field_uom_uom____last_update
+msgid "Last Modified on"
+msgstr "最后修改时间"
+
+#. module: uom
 #: model:ir.model.fields,field_description:uom.field_uom_category__write_uid
 #: model:ir.model.fields,field_description:uom.field_uom_uom__write_uid
 msgid "Last Updated by"
@@ -162,7 +170,7 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:uom.field_uom_category__write_date
 #: model:ir.model.fields,field_description:uom.field_uom_uom__write_date
 msgid "Last Updated on"
-msgstr "上次更新日期"
+msgstr "最后更新时间"
 
 #. module: uom
 #: model:uom.category,name:uom.uom_categ_length
@@ -221,7 +229,6 @@ msgid "Smaller than the reference Unit of Measure"
 msgstr "小于参照计量单位"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid ""
@@ -259,7 +266,6 @@ msgid "The conversion ratio for a unit of measure cannot be 0!"
 msgstr "计量单位的转换比率不能为 0！"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid ""
@@ -280,7 +286,6 @@ msgid "The rounding precision must be strictly positive."
 msgstr "小数点的精度必须为正数。"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid ""
@@ -291,7 +296,6 @@ msgid ""
 msgstr "订单行上定义的计量单位%s与产品上定义的计量单位%s不属于同一类别。请纠正在订单行或产品上定义的计量单位，它们应该属于同一类别。"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "The value of ratio could not be Zero"
@@ -360,21 +364,18 @@ msgstr ""
 "您将有以下计量单位：小时，天。"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "UoM category %s must have at least one reference unit of measure."
 msgstr "计量单位类别%s必须至少有一个参照计量单位。"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "UoM category %s should have a reference unit of measure."
 msgstr "计量单位类别%s应该有一个参照计量单位。"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "UoM category %s should only have one reference unit of measure."
@@ -391,11 +392,10 @@ msgid "Volume"
 msgstr "体积"
 
 #. module: uom
-#. odoo-python
 #: code:addons/uom/models/uom_uom.py:0
 #, python-format
 msgid "Warning for %s"
-msgstr "警告%s"
+msgstr "警告 %s"
 
 #. module: uom
 #: model:uom.category,name:uom.product_uom_categ_kgm
@@ -405,7 +405,7 @@ msgstr "重量"
 #. module: uom
 #: model:uom.category,name:uom.uom_categ_wtime
 msgid "Working Time"
-msgstr "工时"
+msgstr "工作时间"
 
 #. module: uom
 #: model_terms:ir.actions.act_window,help:uom.product_uom_form_action
@@ -449,7 +449,7 @@ msgstr "gal (US)"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_inch
 msgid "in"
-msgstr "在"
+msgstr "in"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_cubic_inch
@@ -464,7 +464,7 @@ msgstr "kg"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_km
 msgid "km"
-msgstr "千米"
+msgstr "km"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_lb
@@ -474,7 +474,7 @@ msgstr "lb"
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_mile
 msgid "mi"
-msgstr "英里"
+msgstr "mi"
 
 #. module: uom
 #: model:uom.uom,name:uom.product_uom_millimeter

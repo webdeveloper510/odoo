@@ -3,15 +3,18 @@
 # 	* website_sale_loyalty
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
+# Luis Bispo, 2023
+# Kevilyn Rosa, 2023
+# Layna Nascimento, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Wil Odoo, 2023\n"
+"POT-Creation-Date: 2022-10-10 10:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
+"Last-Translator: Layna Nascimento, 2023\n"
 "Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,24 +23,12 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
-msgid "<strong> - </strong>"
-msgstr "<strong> - </strong>"
-
-#. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
-msgid "<strong>Coupons - </strong>"
-msgstr "<strong>Cupons - </strong>"
-
-#. module: website_sale_loyalty
-#. odoo-python
-#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
 #, python-format
 msgid "A coupon is needed for coupon programs."
 msgstr "É necessário um cupom para os programas de cupons."
 
 #. module: website_sale_loyalty
-#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "A coupon with the same code was found."
@@ -56,12 +47,7 @@ msgstr "Disponível no site"
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Claim"
-msgstr "Resgatar"
-
-#. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
-msgid "Code:"
-msgstr "Código:"
+msgstr "Reivindicação"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
@@ -81,8 +67,7 @@ msgstr "Cupom"
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_coupon_share
 msgid "Create links that apply a coupon and redirect to a specific page"
-msgstr ""
-"Criar links que apliquem um cupom e redirecionem para uma página específica"
+msgstr "Create links that apply a coupon and redirect to a specific page"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__create_uid
@@ -97,12 +82,17 @@ msgstr "Criado em"
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_sale_order__disabled_auto_rewards
 msgid "Disabled Auto Rewards"
-msgstr "Recompensas automáticas desabilitadas"
+msgstr "Recompensas para automóveis para deficientes"
 
 #. module: website_sale_loyalty
 #: model:ir.ui.menu,name:website_sale_loyalty.menu_discount_loyalty_type_config
 msgid "Discount & Loyalty"
 msgstr "Desconto e fidelidade"
+
+#. module: website_sale_loyalty
+#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.reduction_coupon_code
+msgid "Discount code or gift card"
+msgstr "Código de desconto ou vale-presente"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.cart_discount
@@ -125,21 +115,9 @@ msgid "Done"
 msgstr "Concluído"
 
 #. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
-msgid "Expired Date:"
-msgstr "Data de expiração:"
-
-#. module: website_sale_loyalty
-#. odoo-javascript
-#: code:addons/website_sale_loyalty/static/src/js/website_sale_loyalty_delivery.js:0
-#, python-format
-msgid "Free"
-msgstr "Gratuito"
-
-#. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.coupon_share_view_form
 msgid "Generate Short Link"
-msgstr "Gerar um link curto"
+msgstr "Generate Short Link"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.sale_coupon_result
@@ -160,6 +138,11 @@ msgstr "ID"
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Invalid or expired promo code."
 msgstr "Código promocional expirado ou inválido."
+
+#. module: website_sale_loyalty
+#: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share____last_update
+msgid "Last Modified on"
+msgstr "Última modificação em"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__write_uid
@@ -184,22 +167,22 @@ msgstr "Cupom de fidelidade"
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_loyalty_program
 msgid "Loyalty Program"
-msgstr "Programa de fidelidade"
+msgstr "Programa de Fidelidade"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.res_config_settings_view_form_inherit_website_sale_loyalty
 msgid "Loyalty Programs"
-msgstr "Programas de fidelidade"
+msgstr "Programas de Fidelidade"
 
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_loyalty_rule
 msgid "Loyalty Rule"
-msgstr "Regra de fidelidade"
+msgstr "Regra de Lealdade"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "Pay with eWallet"
-msgstr "Pagar com carteira digital"
+msgstr "Pagar com carteira eletrônica "
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__program_id
@@ -217,8 +200,7 @@ msgid "Promo Code"
 msgstr "Código promocional"
 
 #. module: website_sale_loyalty
-#. odoo-python
-#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
 #, python-format
 msgid "Provide either a coupon or a program."
 msgstr "Forneça um cupom ou um programa."
@@ -243,12 +225,11 @@ msgstr "Pedido de venda"
 #. module: website_sale_loyalty
 #: model:ir.model,name:website_sale_loyalty.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Linha do pedido de venda"
+msgstr "Linha do pedido de vendas"
 
 #. module: website_sale_loyalty
-#. odoo-python
-#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
-#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_card_view_tree_inherit_website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.loyalty_program_view_tree_inherit_website_sale_loyalty
 #, python-format
@@ -271,7 +252,6 @@ msgid "Show Discount in Subtotal"
 msgstr "Exibir desconto no subtotal"
 
 #. module: website_sale_loyalty
-#. odoo-python
 #: code:addons/website_sale_loyalty/controllers/main.py:0
 #, python-format
 msgid ""
@@ -287,23 +267,16 @@ msgid "The following promo code was applied on your order:"
 msgstr "O seguinte código promocional foi aplicado em seu pedido:"
 
 #. module: website_sale_loyalty
-#. odoo-python
 #: code:addons/website_sale_loyalty/models/loyalty_rule.py:0
 #, python-format
 msgid "The promo code must be unique."
 msgstr "O código promocional deve ser exclusivo."
 
 #. module: website_sale_loyalty
-#. odoo-python
-#: code:addons/website_sale_loyalty/wizard/coupon_share.py:0
+#: code:addons/website_sale_loyalty/wizard/sale_coupon_share.py:0
 #, python-format
 msgid "The shared website should correspond to the website of the program."
 msgstr "O site compartilhado deve corresponder ao site do programa."
-
-#. module: website_sale_loyalty
-#: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
-msgid "Use"
-msgstr "Usar"
 
 #. module: website_sale_loyalty
 #: model:ir.model.fields,field_description:website_sale_loyalty.field_coupon_share__website_id
@@ -330,7 +303,7 @@ msgstr "Você tem"
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form
 msgid "You have successfully applied the following code:"
-msgstr "Você aplicou o seguinte código de desconto com sucesso:"
+msgstr "You have successfully applied the following code:"
 
 #. module: website_sale_loyalty
 #: model_terms:ir.ui.view,arch_db:website_sale_loyalty.modify_code_form

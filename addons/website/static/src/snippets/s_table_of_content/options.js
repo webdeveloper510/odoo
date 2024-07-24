@@ -1,7 +1,7 @@
-/** @odoo-module **/
+odoo.define('website.s_table_of_content_options', function (require) {
+'use strict';
 
-import { uniqueId } from "@web/core/utils/functions";
-import options from "@web_editor/js/editor/snippets.options";
+const options = require('web_editor.snippets.options');
 
 options.registry.TableOfContent = options.Class.extend({
     /**
@@ -118,9 +118,9 @@ options.registry.TableOfContent = options.Class.extend({
         // We dispose the scrollSpy because the navbar will be updated.
         this._disposeScrollSpy();
         navEl.innerHTML = '';
-        headingsEls.forEach((el) => {
+        _.each(headingsEls, el => {
             const $el = $(el);
-            const id = uniqueId("table_of_content_heading_" + new Date().getTime() + "_");
+            const id = 'table_of_content_heading_' + _.now() + '_' + _.uniqueId();
             const visibilityId = $el.closest('section').attr('data-visibility-id');
             $('<a>').attr({ 'href': "#" + id, 'data-visibility-id': visibilityId })
                     .addClass('table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0')
@@ -192,4 +192,5 @@ options.registry.TableOfContentNavbar = options.Class.extend({
 
 options.registry.TableOfContentMainColumns = options.Class.extend({
     forceNoDeleteButton: true,
+});
 });

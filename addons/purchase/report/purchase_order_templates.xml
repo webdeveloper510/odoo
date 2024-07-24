@@ -40,7 +40,7 @@
                     <p t-field="o.date_approve" class="m-0"/>
                 </div>
                 <div t-elif="o.date_order" class="col-3 bm-2">
-                    <strong>Order Deadline:</strong>
+                    <strong >Order Deadline:</strong>
                     <p t-field="o.date_order" class="m-0"/>
                 </div>
             </div>
@@ -53,22 +53,21 @@
                         <th name="th_date_req" class="text-center"><strong>Date Req.</strong></th>
                         <th name="th_quantity" class="text-end"><strong>Qty</strong></th>
                         <th name="th_price_unit" class="text-end"><strong>Unit Price</strong></th>
-                        <th name="th_subtotal" class="text-end">
-                            <strong>Amount</strong>
-                        </th>
+                        <th name="th_amount" class="text-end"><strong>Amount</strong></th>
                     </tr>
                 </thead>
                 <tbody>
                     <t t-set="current_subtotal" t-value="0"/>
                     <t t-foreach="o.order_line" t-as="line">
-                        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal"/>
+                        <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                        <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
 
                         <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                             <t t-if="not line.display_type">
                                 <td id="product">
                                     <span t-field="line.name"/>
                                 </td>
-                                <t t-set="taxes" t-value="', '.join([(tax.invoice_label or tax.name) for tax in line.taxes_id])"/>
+                                <t t-set="taxes" t-value="', '.join([(tax.description or tax.name) for tax in line.taxes_id])"/>
                                 <td name="td_taxes" t-attf-class="text-end {{ 'text-nowrap' if len(taxes) &lt; 10 else '' }}">
                                     <span t-out="taxes">Tax 15%</span>
                                 </td>
@@ -78,9 +77,6 @@
                                 <td class="text-end">
                                     <span t-field="line.product_qty"/>
                                     <span t-field="line.product_uom.name" groups="uom.group_uom"/>
-                                    <span t-if="line.product_packaging_id">
-                                        (<span t-field="line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="line.product_packaging_id"/>)
-                                    </span>
                                 </td>
                                 <td class="text-end">
                                     <span t-field="line.price_unit"/>
@@ -122,7 +118,7 @@
                 <div class="col-4">
                     <table class="table table-sm table-borderless">
                         <t t-set="tax_totals" t-value="o.tax_totals"/>
-                        <t t-call="purchase.document_tax_totals"/>
+                        <t t-call="account.document_tax_totals"/>
                     </table>
                 </div>
             </div>
@@ -140,8 +136,4 @@
         </t>
     </t>
 </template>
-
- <!-- Allow edits (e.g. studio) without changing the often inherited base template -->
-<template id="document_tax_totals" inherit_id="account.document_tax_totals_template" primary="True"></template>
-
 </odoo>

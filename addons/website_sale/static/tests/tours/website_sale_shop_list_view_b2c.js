@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
-import tourUtils from '@website_sale/js/tours/tour_utils';
-import wTourUtils from '@website/js/tours/tour_utils';
+import tourUtils from 'website_sale.tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 wTourUtils.registerWebsitePreviewTour('shop_list_view_b2c', {
     test: true,
     url: '/shop?search=Test Product',
 },
-    () => [
+    [
         {
             content: "check price on /shop",
             trigger: 'iframe .oe_product_cart .oe_currency_value:contains("825.00")',
@@ -64,7 +64,7 @@ wTourUtils.registerWebsitePreviewTour('shop_list_view_b2c', {
         },
         {
             content: "click on 'Add to Cart' button",
-            trigger: 'iframe a:contains(Add to cart)',
+            trigger: 'iframe a:contains(ADD TO CART)',
         },
         tourUtils.goToCart({backend: true}),
         {

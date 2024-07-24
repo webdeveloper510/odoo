@@ -6,7 +6,8 @@ import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { listView } from '@web/views/list/list_view';
 import { kanbanView } from '@web/views/kanban/kanban_view';
 import { useService } from "@web/core/utils/hooks";
-import { useEffect, useRef } from "@odoo/owl";
+
+const { useEffect, useRef } = owl;
 
 export function useSurveyLoadSampleHook(selector) {
     const rootRef = useRef("root");

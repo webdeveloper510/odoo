@@ -25,15 +25,16 @@ class AccountBankStatement(models.Model):
         """
         rand = populate.Random('account_bank_statement+Populate')
 
-        read_group_res = self.env['account.bank.statement.line']._read_group(
+        read_group_res = self.env['account.bank.statement.line'].read_group(
             [('statement_id', '=', False)],
+            ['ids:array_agg(id)'],
             ['journal_id'],
-            ['id:array_agg'],
         )
 
         bank_statement_vals_list = []
-        for journal, ids in read_group_res:
-            nb_ids = len(ids)
+        for res in read_group_res:
+            available_ids = res['ids']
+            nb_ids = len(available_ids)
             while nb_ids > 0:
                 batch_size = min(rand.randint(1, 19), nb_ids)
                 nb_ids -= batch_size
@@ -45,8 +46,8 @@ class AccountBankStatement(models.Model):
 
                 bank_statement_vals_list.append({
                     'name': f"statement_{len(bank_statement_vals_list) + 1}",
-                    'journal_id': journal.id,
-                    'line_ids': [Command.set(ids)],
+                    'journal_id': res['journal_id'][0],
+                    'line_ids': [Command.set(res['ids'])],
                 })
 
         return self.env['account.bank.statement'].create(bank_statement_vals_list)
@@ -75,7 +76,7 @@ class AccountBankStatementLine(models.Model):
             :return (list<int>): the ids of partner the company has access to.
             """
             return self.env['res.partner'].search([
-                *self.env['res.company']._check_company_domain(company_id),
+                '|', ('company_id', '=', company_id), ('company_id', '=', False),
                 ('id', 'in', self.env.registry.populated_models['res.partner']),
             ]).ids
 
@@ -123,14 +124,14 @@ class AccountBankStatementLine(models.Model):
             return currency if currency != (journal.currency_id or journal.company_id.currency_id).id else False
 
         company_ids = self.env['res.company'].search([
-            ('chart_template', '!=', False),
+            ('chart_template_id', '!=', False),
             ('id', 'in', self.env.registry.populated_models['res.company']),
         ])
         if not company_ids:
             return []
 
         journal_ids = self.env['account.journal'].search([
-            *self.env['account.journal']._check_company_domain(company_ids),
+            ('company_id', 'in', company_ids.ids),
             ('type', 'in', ('cash', 'bank')),
         ]).ids
         return [

@@ -60,7 +60,7 @@ class AccountEdiXmlUBLNL(models.AbstractModel):
         vals_list = super()._get_invoice_line_allowance_vals_list(line, tax_values_list=tax_values_list)
         # [BR-NL-32] Use of Discount reason code ( AllowanceChargeReasonCode ) is not recommended.
         # [BR-EN-34] Use of Charge reason code ( AllowanceChargeReasonCode ) is not recommended.
-        # Careful! [BR-42]-Each Invoice line allowance (BG-27) shall have an Invoice line allowance reason (BT-139)
+        # Careful ! [BR-42]-Each Invoice line allowance (BG-27) shall have an Invoice line allowance reason (BT-139)
         # or an Invoice line allowance reason code (BT-140).
         for vals in vals_list:
             if vals.get('allowance_charge_reason'):
@@ -79,7 +79,7 @@ class AccountEdiXmlUBLNL(models.AbstractModel):
         # EXTENDS account.edi.xml.ubl_bis3
         vals = super()._export_invoice_vals(invoice)
 
-        vals['vals']['customization_id'] = self._get_customization_ids()['nlcius']
+        vals['vals']['customization_id'] = 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0'
 
         # [BR-NL-24] Use of previous invoice date ( IssueDate ) is not recommended.
         # vals['vals'].pop('issue_date')  # careful, this causes other errors from the validator...

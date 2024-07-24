@@ -3,24 +3,21 @@
 # 	* crm
 # 
 # Translators:
-# Tiffany Chang, 2024
-# Cozmin Candea <office@terrabit.ro>, 2024
-# Foldi Robert <foldirobert@nexterp.ro>, 2024
-# Claudia Baisan, 2024
-# Martin Trigaux, 2024
-# Hongu Cosmin <cosmin513@gmail.com>, 2024
-# Larisa_nexterp, 2024
-# Corina Calin, 2024
+# Foldi Robert <foldirobert@nexterp.ro>, 2022
+# Hongu Cosmin <cosmin513@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Cozmin Candea <office@terrabit.ro>, 2023
+# Claudia Baisan, 2023
 # Dorin Hongu <dhongu@gmail.com>, 2024
-# Maria Muntean, 2024
+# Tiffany Chang, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Maria Muntean, 2024\n"
+"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"Last-Translator: Tiffany Chang, 2024\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,6 +29,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_count
 msgid "# Leads/Opps assigned this month"
 msgstr "# Piste / Opțiuni alocate luna aceasta"
+
+#. module: crm
+#: model:ir.model.fields,field_description:crm.field_crm_lead__calendar_event_count
+msgid "# Meetings"
+msgstr "# Întâlniri"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_recurring_plan__number_of_months
@@ -124,6 +126,11 @@ msgstr ""
 "progresează în ciclul de vânzări."
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
+msgid "<b>Predictive Lead Scoring</b>"
+msgstr "<b>Scorul predictiv al pistelor</b>"
+
+#. module: crm
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
@@ -150,11 +157,6 @@ msgstr ""
 "automată\" aria-label=\"Comută la probabilitatea automată\"/>"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-msgid "<i class=\"fa fa-info-circle me-2\" title=\"Assigned Lead Count\"/>"
-msgstr ""
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
 "<i title=\"Update now\" role=\"img\" aria-label=\"Update now\" class=\"fa "
@@ -164,44 +166,63 @@ msgstr ""
 " class=\"fa fa-fw fa-refresh\"/>"
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
+msgid "<span class=\"bg-danger\">Lost</span>"
+msgstr "<span class=\"bg-danger\">Pierdut</span>"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
 "title=\"By saving this change, the customer email will also be updated.\" "
-"invisible=\"not partner_email_update\"/>"
+"attrs=\"{'invisible': [('partner_email_update', '=', False)]}\"/>"
 msgstr ""
+"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"title=\"By saving this change, the customer email will also be updated.\" "
+"attrs=\"{'invisible': [('partner_email_update', '=', False)]}\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
 "title=\"By saving this change, the customer phone number will also be "
-"updated.\" invisible=\"not partner_phone_update\"/>"
+"updated.\" attrs=\"{'invisible': [('partner_phone_update', '=', False)]}\"/>"
 msgstr ""
+"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"title=\"By saving this change, the customer phone number will also be "
+"updated.\" attrs=\"{'invisible': [('partner_phone_update', '=', False)]}\"/>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">Similar Leads</span>\n"
-"                                    <span class=\"o_stat_text\" invisible=\"duplicate_lead_count &gt; 1\">Similar Lead</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&lt;', 2)]}\"> Meetings</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&gt;', 1)]}\"> Meeting</span>"
 msgstr ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&lt;', 2)]}\"> Întâlniri</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('calendar_event_count', '&gt;', 1)]}\"> Întâlnire</span>"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&lt;', 2)]}\">Similar Leads</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&gt;', 1)]}\">Similar Lead</span>"
+msgstr ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&lt;', 2)]}\">Piste similare</span>\n"
+"                                    <span class=\"o_stat_text\" attrs=\"{'invisible': [('duplicate_lead_count', '&gt;', 1)]}\">Oportunitate similară</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"not use_leads\">Leads</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"use_leads\">Opportunities</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', False)]}\">Leads</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', True)]}\">Opportunities</span>"
 msgstr ""
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', False)]}\">Piste</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('use_leads', '=', True)]}\">Oportunități</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 msgid "<span class=\"o_stat_text\"> Leads</span>"
 msgstr "<span class=\"o_stat_text\"> Piste</span>"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid "<span class=\"oe_grey p-2 text-nowrap\"> at </span>"
-msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -214,8 +235,13 @@ msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid "<span class=\"oe_grey p-2\"> %</span>"
-msgstr ""
+msgid "<span class=\"oe_grey p-2\"> at </span>"
+msgstr "<span class=\"oe_grey p-2\"> la </span>"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+msgid "<span class=\"oe_grey\"> %</span>"
+msgstr "<span class=\"oe_grey\"> %</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_member_view_form
@@ -226,18 +252,6 @@ msgstr "<span class=\"oe_inline\"> (max) </span>"
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_member_view_form
 msgid "<span class=\"oe_inline\"> / </span>"
 msgstr "<span class=\"oe_inline\"> / </span>"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
-msgid "<span class=\"text-bg-danger\">Lost</span>"
-msgstr ""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-msgid ""
-"<span> leads assigned this month\n"
-"                            on a maximum of </span>"
-msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -253,11 +267,16 @@ msgstr "<span>Îmbină pista/oportunitatea</span>"
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
 "<span>Periodically assign leads based on rules</span><br/>\n"
-"                                <span invisible=\"not crm_use_auto_assignment\">\n"
-"                                    All sales teams will use this setting by default unless\n"
-"                                    specified otherwise.\n"
-"                                </span>"
+"                                    <span attrs=\"{'invisible': [('crm_use_auto_assignment', '=', False)]}\">\n"
+"                                        All sales teams will use this setting by default unless\n"
+"                                        specified otherwise.\n"
+"                                    </span>"
 msgstr ""
+"<span>Atribuie periodic piste pe baza unor reguli</span><br/>\n"
+"                                    <span attrs=\"{'invisible': [('crm_use_auto_assignment', '=', False)]}\">\n"
+"                                        Toate echipele de vânzări vor folosi această setare în mod implicit, cu excepția cazului în care\n"
+"                                        este specificat altfel.\n"
+"                                    </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -425,11 +444,6 @@ msgid "Activity Exception Decoration"
 msgstr "Activitate Excepție Decorare"
 
 #. module: crm
-#: model:ir.ui.menu,name:crm.mail_activity_plan_menu_config_lead
-msgid "Activity Plans"
-msgstr "Planuri de activitate"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__activity_state
 msgid "Activity State"
 msgstr "Stare activitate"
@@ -459,11 +473,6 @@ msgstr "Activitate de"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Add a description..."
 msgstr "Adaugă o descriere..."
-
-#. module: crm
-#: model_terms:ir.actions.act_window,help:crm.mail_activity_plan_action_lead
-msgid "Add a new plan"
-msgstr "Adăugați un nou plan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -507,34 +516,14 @@ msgid "Alias Contact Security"
 msgstr "Alias Contact Securitate"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_domain_id
-msgid "Alias Domain"
-msgstr "Alias Domain"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_domain
-msgid "Alias Domain Name"
-msgstr "Alias ​​Nume de domeniu"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_full_name
-msgid "Alias Email"
-msgstr "Alias Email"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_name
 msgid "Alias Name"
 msgstr "Nume alias"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_status
-msgid "Alias Status"
-msgstr "Stare Alias"
-
-#. module: crm
-#: model:ir.model.fields,help:crm.field_crm_team__alias_status
-msgid "Alias status assessed on the last message received."
-msgstr "Starea aliasului evaluată pe ultimul mesaj primit."
+#: model:ir.model.fields,field_description:crm.field_crm_team__alias_domain
+msgid "Alias domain"
+msgstr "Nume domeniu"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_model_id
@@ -592,6 +581,11 @@ msgstr ""
 "Pentru a lucra în CRM, trebuie să vă alăturați unei echipe."
 
 #. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
+msgid "Assign Documentation"
+msgstr "Atribuie documentație"
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
 msgid "Assign Leads"
 msgstr "Atribuie piste"
@@ -615,6 +609,11 @@ msgstr "Atribuie oportunitățile către"
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 msgid "Assign this opportunity to"
 msgstr "Atribuie oportunitatea către"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
+msgid "Assigned Leads Count"
+msgstr "Număr de Piste Alocate"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__author_id
@@ -737,6 +736,7 @@ msgstr "Stadii CRM"
 
 #. module: crm
 #: model:ir.actions.server,name:crm.ir_cron_crm_lead_assign_ir_actions_server
+#: model:ir.cron,cron_name:crm.ir_cron_crm_lead_assign
 msgid "CRM: Lead Assignment"
 msgstr "CRM: Atribuire pistă"
 
@@ -804,7 +804,6 @@ msgid "City"
 msgstr "Localitate"
 
 #. module: crm
-#: model:ir.model.fields,help:crm.field_crm_activity_report__tag_ids
 #: model:ir.model.fields,help:crm.field_crm_lead__tag_ids
 msgid ""
 "Classify and analyze your lead/opportunity categories like: Training, "
@@ -891,6 +890,16 @@ msgstr "Setări de configurare"
 #: model:ir.ui.menu,name:crm.crm_menu_config
 msgid "Configuration"
 msgstr "Configurare"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
+msgid "Configure a custom domain"
+msgstr "Configurare domeniu personalizat"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
+msgid "Confirm"
+msgstr "Confirmă"
 
 #. module: crm
 #. odoo-javascript
@@ -1004,6 +1013,13 @@ msgstr ""
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__phone_state__correct
 msgid "Correct"
 msgstr "Corect"
+
+#. module: crm
+#. odoo-javascript
+#: code:addons/crm/static/src/views/crm_kanban/crm_kanban_renderer.js:0
+#, python-format
+msgid "Count"
+msgstr "Număr"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__message_bounce
@@ -1140,12 +1156,12 @@ msgstr "Crm: Fluxul meu de activitate"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__company_currency
 msgid "Currency"
-msgstr "Monedă"
+msgstr "Moneda"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_bounced_content
 msgid "Custom Bounced Message"
-msgstr "Mesaj personalizat de respingere"
+msgstr "Mesaj personalizat de respins"
 
 #. module: crm
 #. odoo-python
@@ -1286,7 +1302,7 @@ msgstr "Nume afișat"
 #, python-format
 msgid "Do not have access, skip this data for user's digest email"
 msgstr ""
-"Nu aveți acces, săriți aceste date pentru e-mail-ul rezumat al "
+"Nu aveți acces, săriți aceste date pentru e-mail-ul de digerare al "
 "utilizatorului"
 
 #. module: crm
@@ -1294,6 +1310,11 @@ msgstr ""
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead2opportunity_partner_mass__action__nothing
 msgid "Do not link to a customer"
 msgstr "Nu asociați unui client"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
+msgid "Documentation"
+msgstr "Documentație"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_member_view_form
@@ -1305,15 +1326,20 @@ msgstr "Domeniu"
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
-msgid "Drag your opportunity to <b>Won</b> when you get the deal. Congrats!"
+msgid "Drag your opportunity to <b>Won</b> when you get the deal. Congrats !"
 msgstr ""
+"Trageți oportunitatea la <b>Câștigat</b> când obțineți oferta. Felicitări!"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Duration: %s"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
+msgid "Dropdown menu"
+msgstr "Meniul derulant"
+
+#. module: crm
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
+#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
+msgid "E.g. Monthly"
+msgstr "De exemplu. Lunar"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_forecast
@@ -1336,15 +1362,9 @@ msgid "Email"
 msgstr "Email"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_email
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
 msgid "Email Alias"
-msgstr "Alias de e-mail"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__email_domain_criterion
-msgid "Email Domain Criterion"
-msgstr ""
+msgstr "Email Alias"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__email_state
@@ -1412,11 +1432,6 @@ msgstr ""
 #: model:ir.model.fields,help:crm.field_crm_lead__date_deadline
 msgid "Estimate of the date on which the opportunity will be won."
 msgstr "Estimare dată în care oportunitatea va fi câștigată."
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__lead_all_assigned_month_exceeded
-msgid "Exceed monthly lead assignement"
-msgstr ""
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__date_deadline
@@ -1562,8 +1577,8 @@ msgstr "De la %(source_name)s"
 #. odoo-python
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
-msgid "From %(source_name)s: %(source_subject)s"
-msgstr ""
+msgid "From %(source_name)s : %(source_subject)s"
+msgstr "De la %(source_name)s: %(source_subject)s"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
@@ -1580,8 +1595,7 @@ msgstr "Generați noi piste pe baza țării, industriei, dimensiunii, etc."
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Generate new leads based on their country, industry, size, etc."
-msgstr ""
-"Generați noi piste în funcție de țara lor, industrie, dimensiune, etc."
+msgstr "Generați noi piste pe baza țării, industriei, dimensiunii, etc."
 
 #. module: crm
 #: model:ir.model,name:crm.model_crm_lead_lost
@@ -1812,12 +1826,6 @@ msgid "Is automated probability?"
 msgstr "Probabilitatea este automatizată?"
 
 #. module: crm
-#: model:ir.model.fields,help:crm.field_crm_lead__duration_tracking
-msgid "JSON that maps ids from a many2one field to seconds spent"
-msgstr ""
-"JSON care mapează id-urile dintr-un câmp many2one la secunde petrecute"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__function
 msgid "Job Position"
 msgstr "Funcție"
@@ -1858,21 +1866,30 @@ msgid "Language:"
 msgstr "Limba:"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__date_automation_last
+#: model:ir.model.fields,field_description:crm.field_crm_lead__date_action_last
 msgid "Last Action"
 msgstr "Ultima acțiune"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
-msgid "Last Automation:"
-msgstr ""
+msgid "Last Action:"
+msgstr "Ultima acțiune:"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Last Meeting"
-msgstr "Ultima întâlnire"
+#: model:ir.model.fields,field_description:crm.field_crm_activity_report____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner_mass____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_lost____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_pls_update____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency_field____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_lost_reason____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_merge_opportunity____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_recurring_plan____last_update
+#: model:ir.model.fields,field_description:crm.field_crm_stage____last_update
+msgid "Last Modified on"
+msgstr "Ultima modificare la"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__date_last_stage_update
@@ -1958,11 +1975,6 @@ msgid "Lead Mining"
 msgstr "Extragere pistă"
 
 #. module: crm
-#: model:ir.actions.act_window,name:crm.mail_activity_plan_action_lead
-msgid "Lead Plans"
-msgstr ""
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_properties_definition
 msgid "Lead Properties"
 msgstr "Proprietăți pistă"
@@ -1991,12 +2003,6 @@ msgstr "Data de începere a evaluării pistelor"
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__predictive_lead_scoring_start_date_str
 msgid "Lead Scoring Starting Date in String"
 msgstr "Data de începere a evaluării pistelor în șir"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
-#: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_tree
-msgid "Lead Tags"
-msgstr ""
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team_member__lead_month_count
@@ -2036,7 +2042,6 @@ msgstr "Pistă/Oportunitate creată"
 #: code:addons/crm/models/crm_lost_reason.py:0
 #: model:ir.actions.act_window,name:crm.crm_case_form_view_salesteams_lead
 #: model:ir.actions.act_window,name:crm.crm_lead_all_leads
-#: model:ir.model.fields,field_description:crm.field_crm_lead_lost__lead_ids
 #: model:ir.model.fields,field_description:crm.field_crm_team__use_leads
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__group_use_lead
 #: model:ir.ui.menu,name:crm.crm_menu_leads
@@ -2046,7 +2051,6 @@ msgstr "Pistă/Oportunitate creată"
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-#: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_kanban
 #, python-format
 msgid "Leads"
 msgstr "Piste"
@@ -2181,11 +2185,6 @@ msgstr ""
 "găsi un partener după nume, TIN, e-mail sau referință internă."
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_team__alias_incoming_local
-msgid "Local-part based incoming detection"
-msgstr "Detectare bazată pe partea locală a destinatarului"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__lang_code
 msgid "Locale Code"
 msgstr "Cod local"
@@ -2200,16 +2199,21 @@ msgstr "Se pare că nimic nu este planificat."
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid ""
-"Looks like nothing is planned. :(<br><br><i>Tip: Schedule activities to keep"
-" track of everything you have to do!</i>"
+"Looks like nothing is planned. :(<br><br><i>Tip : Schedule activities to "
+"keep track of everything you have to do!</i>"
 msgstr ""
+"Se pare că nimic nu este planificat. :(<br><br><i> Sfat: programați "
+"activități pentru a urmări tot ceea ce trebuie să faceți! </i>"
 
 #. module: crm
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_kanban_forecast
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
+#, python-format
 msgid "Lost"
 msgstr "Pierdut(ă)"
 
@@ -2226,13 +2230,10 @@ msgid "Lost Count"
 msgstr "Număr pierdut"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
-msgid "Lost Lead"
-msgstr ""
-
-#. module: crm
+#: model:ir.actions.act_window,name:crm.crm_lead_lost_action
 #: model:ir.model.fields,field_description:crm.field_crm_lead__lost_reason_id
 #: model:ir.model.fields,field_description:crm.field_crm_lead_lost__lost_reason_id
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
@@ -2254,6 +2255,11 @@ msgstr "Motivele pierderii"
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__priority__0
 msgid "Low"
 msgstr "Scăzut"
+
+#. module: crm
+#: model:ir.model.fields,field_description:crm.field_crm_lead__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Atașament principal"
 
 #. module: crm
 #: model:mail.activity.type,name:crm.mail_activity_demo_make_quote
@@ -2282,26 +2288,7 @@ msgid "Manually"
 msgstr "Manual"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#: model:ir.actions.act_window,name:crm.crm_lead_lost_action
-#, python-format
-msgid "Mark Lost"
-msgstr "Marchează drept pierdut"
-
-#. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Mark Won"
-msgstr "Marchează drept câștigat(ă)"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
-msgid "Mark as Lost"
-msgstr "Marchează ca pierdută"
-
-#. module: crm
+#: model:ir.actions.server,name:crm.action_mark_as_lost
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Mark as lost"
 msgstr "Marchează ca pierdut(ă)"
@@ -2336,21 +2323,11 @@ msgid "Medium:"
 msgstr "Mediu:"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__meeting_display_date
-msgid "Meeting Display Date"
-msgstr ""
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__meeting_display_label
-msgid "Meeting Display Label"
-msgstr ""
-
-#. module: crm
 #. odoo-python
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
-msgid "Meeting scheduled at %s"
-msgstr ""
+msgid "Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s"
+msgstr "Întâlnire programată la '%s'<br> Subiect: %s <br> Durată: %s"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.act_crm_opportunity_calendar_event_new
@@ -2516,13 +2493,6 @@ msgid "Next Activity Type"
 msgstr "Tip de activitate următoare"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Next Meeting"
-msgstr "Următoarea întâlnire"
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Next Run"
 msgstr "Următoarea execuție"
@@ -2543,13 +2513,6 @@ msgstr "Următoarea activitate întârziată"
 #, python-format
 msgid "No"
 msgstr "Nu"
-
-#. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "No Meeting"
-msgstr "Nicio întâlnire"
 
 #. module: crm
 #. odoo-python
@@ -2685,7 +2648,7 @@ msgstr "Număr de acțiuni"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_has_error_counter
 msgid "Number of errors"
-msgstr "Număr de erori"
+msgstr "Numărul de erori"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_res_config_settings__crm_auto_assignment_interval_number
@@ -2762,7 +2725,6 @@ msgstr "Motivul pierderii oportunității"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_graph
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
-#: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_kanban
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner
 #: model_terms:ir.ui.view,arch_db:crm.view_partners_form_crm1
 msgid "Opportunities"
@@ -2801,7 +2763,7 @@ msgstr "Veniturile oportunităților"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_digest_digest__kpi_crm_opportunities_won
 msgid "Opportunities Won"
-msgstr "Oportunități câștigate"
+msgstr "Oportunitate câștigată"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_my_activities_filter
@@ -2910,6 +2872,11 @@ msgstr "Venituri de la oportunități întârziate"
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_view_kanban_dashboard
 msgid "Overdue Opportunity"
 msgstr "Oportunitate întârziată"
+
+#. module: crm
+#: model:ir.model.fields,field_description:crm.field_crm_team__alias_user_id
+msgid "Owner"
+msgstr "Proprietar"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_parent_model_id
@@ -3048,17 +3015,13 @@ msgid "Potential Duplicate Lead Count"
 msgstr "Număr pistă potențială duplicată"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
-msgid "Predictive Lead Scoring"
-msgstr ""
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__predictive_lead_scoring_field_labels
 msgid "Predictive Lead Scoring Field Labels"
 msgstr "Etichetele câmpurilor de evaluare a pistelor predictive"
 
 #. module: crm
 #: model:ir.actions.server,name:crm.website_crm_score_cron_ir_actions_server
+#: model:ir.cron,cron_name:crm.website_crm_score_cron
 msgid "Predictive Lead Scoring: Recompute Automated Probabilities"
 msgstr "Evaluare pistă predictivă: Recalculează probabilitățile automate"
 
@@ -3091,8 +3054,6 @@ msgstr "Probabilitate:"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__lead_properties
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
-#: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
-#: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
 msgid "Properties"
 msgstr "Proprietăți"
 
@@ -3105,11 +3066,6 @@ msgstr "Propunere"
 #: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue_monthly_prorated
 msgid "Prorated MRR"
 msgstr "MRR proporțional"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__recurring_revenue_prorated
-msgid "Prorated Recurring Revenues"
-msgstr ""
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__prorated_revenue
@@ -3125,11 +3081,6 @@ msgstr "Venituri pro-rate"
 #: model:crm.stage,name:crm.stage_lead2
 msgid "Qualified"
 msgstr "Calificat"
-
-#. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__rating_ids
-msgid "Ratings"
-msgstr "Evaluări"
 
 #. module: crm
 #. odoo-javascript
@@ -3182,7 +3133,7 @@ msgstr "Recomandat de:"
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner__action
 #: model:ir.model.fields,field_description:crm.field_crm_lead2opportunity_partner_mass__action
 msgid "Related Customer"
-msgstr "Client asociat"
+msgstr "Client corelat"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__crm_auto_assignment_interval_number
@@ -3226,7 +3177,7 @@ msgstr "Utilizator responsabil"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Restore"
-msgstr "Restabilire"
+msgstr "Restabiliți"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_res_config_settings__crm_use_auto_assignment
@@ -3270,6 +3221,13 @@ msgstr "Echipa de vânzări"
 #: model:ir.model,name:crm.model_crm_team_member
 msgid "Sales Team Member"
 msgstr "Membru al echipei de vânzări"
+
+#. module: crm
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0
+#, python-format
+msgid "Sales Team Settings"
+msgstr "Setări echipă de vânzări"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -3515,11 +3473,6 @@ msgstr ""
 "Planificate: activități viitoare."
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_lead__duration_tracking
-msgid "Status time"
-msgstr "Stare timp"
-
-#. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__street
 msgid "Street"
 msgstr "Stradă"
@@ -3540,11 +3493,9 @@ msgid "Street2"
 msgstr "Strada2"
 
 #. module: crm
-#. odoo-python
-#: code:addons/crm/models/crm_lead.py:0
-#, python-format
-msgid "Subject: "
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
+msgid "Submit"
+msgstr "Trimite"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__subtype_id
@@ -3563,7 +3514,6 @@ msgid "Tag"
 msgstr "Etichetă"
 
 #. module: crm
-#: model:ir.model.fields,field_description:crm.field_crm_activity_report__tag_ids
 #: model:ir.model.fields,field_description:crm.field_crm_lead__tag_ids
 #: model:ir.ui.menu,name:crm.menu_crm_lead_categ
 msgid "Tags"
@@ -3635,6 +3585,20 @@ msgstr ""
 #: model:ir.model.constraint,message:crm.constraint_crm_recurring_plan_check_number_of_months
 msgid "The number of month can't be negative."
 msgstr "Numărul lunii nu poate fi negativ."
+
+#. module: crm
+#: model:ir.model.fields,help:crm.field_crm_team__alias_user_id
+msgid ""
+"The owner of records created upon receiving emails on this alias. If this "
+"field is not set the system will attempt to find the right owner based on "
+"the sender (From) address, or will use the Administrator account if no "
+"system user is found for that address."
+msgstr ""
+"Deținătorul înregistrărilor create la primirea de email-uri în acest alias. "
+"Dacă acest câmp nu este setat, sistemul va încerca să găsească proprietarul "
+"potrivit pe baza adresei expeditorului (De la), sau va folosi Contul "
+"Administrator dacă nu este găsit un utilizator al sistemului pentru acea "
+"adresă."
 
 #. module: crm
 #: model:ir.model.constraint,message:crm.constraint_crm_lead_check_probability
@@ -3830,13 +3794,6 @@ msgid "Trailing 12 months"
 msgstr "Ultimele 12 luni"
 
 #. module: crm
-#: model:ir.model.fields,help:crm.field_crm_team__lead_all_assigned_month_exceeded
-msgid ""
-"True if the monthly lead assignment count is greater than the maximum "
-"assignment limit, false otherwise."
-msgstr ""
-
-#. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
 msgid "Try sending an email"
 msgstr "Încercați să trimiteți un e-mail"
@@ -3898,11 +3855,6 @@ msgstr "Mesaje necitite"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_search_forecast
 msgid "Upcoming Closings"
 msgstr "Închideri viitoare"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
-msgid "Update"
-msgstr "Actualizare"
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.crm_lead_pls_update_action
@@ -3973,8 +3925,7 @@ msgstr ""
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid ""
-"Use the <i>New</i> button, or send an email to %(email_link)s to test the "
-"email gateway."
+"Use the <i>New</i> button, or send an email to %s to test the email gateway."
 msgstr ""
 
 #. module: crm
@@ -3998,7 +3949,7 @@ msgstr "Folosit la ordonarea etapelor. Mai mic este mai bine."
 #. module: crm
 #: model:ir.model,name:crm.model_res_users
 msgid "User"
-msgstr "Utilizator"
+msgstr "Operator"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__user_company_ids
@@ -4033,7 +3984,7 @@ msgstr "Nu avem oameni / abilități"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__website
 msgid "Website"
-msgstr "Site web"
+msgstr "Pagină web"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__website_message_ids
@@ -4067,16 +4018,18 @@ msgstr "Bine ați venit Demo"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_lost_view_form
-msgid "What went wrong?"
-msgstr ""
+msgid "What went wrong ?"
+msgstr "Ce a mers prost?"
 
 #. module: crm
-#: model:crm.stage,name:crm.stage_lead4
+#. odoo-python
+#: code:addons/crm/models/crm_lead.py:0 model:crm.stage,name:crm.stage_lead4
 #: model_terms:ir.ui.view,arch_db:crm.crm_activity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_kanban_forecast
 #: model_terms:ir.ui.view,arch_db:crm.crm_opportunity_report_view_search
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
+#, python-format
 msgid "Won"
 msgstr "Câștigat(ă)"
 
@@ -4161,22 +4114,6 @@ msgid "Zip"
 msgstr "Cod postal"
 
 #. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "e.g. \"0123456789\""
-msgstr ""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "e.g. \"Monthly\""
-msgstr ""
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "e.g. \"email@address.com\""
-msgstr ""
-
-#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_stage_form
 msgid "e.g. Negotiation"
 msgstr "ex. Negociere"
@@ -4191,11 +4128,6 @@ msgstr "ex. Prețuri produs"
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 msgid "e.g. Too expensive"
 msgstr "ex. Prea scump"
-
-#. module: crm
-#: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
-msgid "e.g. domain.com"
-msgstr "ex. domeniu.com"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form

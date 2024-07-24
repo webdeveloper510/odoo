@@ -3,22 +3,22 @@
 # 	* hr_work_entry
 # 
 # Translators:
-# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2023
+# Jussi Lehto <jussi@gulfeo.com>, 2022
+# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2022
+# Eino Mäkitalo <eino.makitalo@netitbe.fi>, 2022
 # Martin Trigaux, 2023
-# Jussi Lehto <jussi@gulfeo.com>, 2023
 # Kari Lindgren <kari.lindgren@emsystems.fi>, 2023
-# Veikko Väätäjä <veikko.vaataja@gmail.com>, 2023
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
-# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
-# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
+# Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024\n"
+"POT-Creation-Date: 2023-04-14 05:51+0000\n"
+"PO-Revision-Date: 2022-09-22 05:52+0000\n"
+"Last-Translator: Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2023\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,17 +32,6 @@ msgstr ""
 #, python-format
 msgid "%s work entries"
 msgstr "%s työkirjaukset"
-
-#. module: hr_work_entry
-#: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_employee_view_form
-msgid ""
-"<span class=\"o_stat_text\">\n"
-"                            Work Entries\n"
-"                            </span>"
-msgstr ""
-"<span class=\"o_stat_text\">\n"
-"                            Työkirjaukset\n"
-"                            </span>"
 
 #. module: hr_work_entry
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_form
@@ -79,7 +68,6 @@ msgid "Cancelled"
 msgstr "Peruttu"
 
 #. module: hr_work_entry
-#: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry__code
 #: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__code
 msgid ""
 "Careful, the Code is used in many references, changing it could lead to "
@@ -87,6 +75,11 @@ msgid ""
 msgstr ""
 "Ole varovainen, koodia käytetään monissa viittauksissa, ja sen muuttaminen "
 "voi johtaa ei-toivottuihin muutoksiin."
+
+#. module: hr_work_entry
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__code
+msgid "Code"
+msgstr "Koodi"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__color
@@ -167,6 +160,11 @@ msgid "Draft"
 msgstr "Luonnos"
 
 #. module: hr_work_entry
+#: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_type_view_kanban
+msgid "Dropdown menu"
+msgstr "Alasvetovalikko"
+
+#. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__duration
 msgid "Duration"
 msgstr "Kesto"
@@ -185,12 +183,6 @@ msgid "End"
 msgstr "Loppu"
 
 #. module: hr_work_entry
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__external_code
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__external_code
-msgid "External Code"
-msgstr "Ulkoinen koodi"
-
-#. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__date_start
 msgid "From"
 msgstr "Alkaa"
@@ -198,17 +190,12 @@ msgstr "Alkaa"
 #. module: hr_work_entry
 #: model:ir.model,name:hr_work_entry.model_hr_work_entry
 msgid "HR Work Entry"
-msgstr "HR-työkirjaus"
+msgstr "HR-työmerkintä"
 
 #. module: hr_work_entry
 #: model:ir.model,name:hr_work_entry.model_hr_work_entry_type
 msgid "HR Work Entry Type"
 msgstr "HR-työn kirjaustyyppi"
-
-#. module: hr_work_entry
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_employee__has_work_entries
-msgid "Has Work Entries"
-msgstr "On työkirjauksia"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee__id
@@ -225,6 +212,13 @@ msgid ""
 msgstr ""
 "Jos aktiivisen kentän arvoksi asetetaan false, voit piilottaa "
 "työmerkintätyypin poistamatta sitä."
+
+#. module: hr_work_entry
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee____last_update
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry____last_update
+#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type____last_update
+msgid "Last Modified on"
+msgstr "Viimeksi muokattu"
 
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_user_work_entry_employee__write_uid
@@ -262,20 +256,9 @@ msgid "Note: Validated work entries cannot be modified."
 msgstr "Huomautus: Vahvistettuja työmerkintöjä ei voi muuttaa."
 
 #. module: hr_work_entry
-#: model:hr.work.entry.type,name:hr_work_entry.overtime_work_entry_type
-msgid "Overtime Hours"
-msgstr "Ylityötunnit"
-
-#. module: hr_work_entry
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__code
-#: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry_type__code
-msgid "Payroll Code"
-msgstr "Palkanlaskennan koodi"
-
-#. module: hr_work_entry
 #: model:ir.model,name:hr_work_entry.model_resource_calendar_leaves
 msgid "Resource Time Off Detail"
-msgstr "Resurssien vapaa-aika, yksityiskohtaiset tiedot"
+msgstr "Resurssien vapaa-aika, Yksityiskohtaiset tiedot"
 
 #. module: hr_work_entry
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_search
@@ -312,7 +295,7 @@ msgstr "Aloitusaika tulisi olla ennen lopetusaikaa."
 #. module: hr_work_entry
 #: model:ir.model.fields,field_description:hr_work_entry.field_hr_work_entry__state
 msgid "State"
-msgstr "Alue"
+msgstr "Tila"
 
 #. module: hr_work_entry
 #: model:ir.model.constraint,message:hr_work_entry.constraint_hr_work_entry_type_unique_work_entry_code
@@ -358,12 +341,6 @@ msgid "Undefined Type"
 msgstr "Määrittelemätön tyyppi"
 
 #. module: hr_work_entry
-#: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry__external_code
-#: model:ir.model.fields,help:hr_work_entry.field_hr_work_entry_type__external_code
-msgid "Use this code to export your data to a third party"
-msgstr "Käytä tätä koodia viedäksesi tietosi kolmannelle osapuolelle"
-
-#. module: hr_work_entry
 #: model:ir.model.fields.selection,name:hr_work_entry.selection__hr_work_entry__state__validated
 msgid "Validated"
 msgstr "Vahvistettu"
@@ -379,6 +356,7 @@ msgid "Work Detail"
 msgstr "Työn yksityiskohdat"
 
 #. module: hr_work_entry
+#: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_employee_view_form
 #: model_terms:ir.ui.view,arch_db:hr_work_entry.hr_work_entry_view_pivot
 msgid "Work Entries"
 msgstr "Työkirjaukset"

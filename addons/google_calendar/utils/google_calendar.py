@@ -29,10 +29,8 @@ class GoogleCalendarService():
         self.google_service = google_service
 
     @requires_auth_token
-    def get_events(self, sync_token=None, token=None, event_id=None, timeout=TIMEOUT):
+    def get_events(self, sync_token=None, token=None, timeout=TIMEOUT):
         url = "/calendar/v3/calendars/primary/events"
-        if event_id:
-            url += f"/{event_id}"
         headers = {'Content-type': 'application/json'}
         params = {'access_token': token}
         if sync_token:
@@ -53,11 +51,6 @@ class GoogleCalendarService():
                 raise InvalidSyncToken("Invalid sync token. Full sync required")
             raise e
 
-        if event_id:
-            next_sync_token = None
-            default_reminders = ()
-            return GoogleEvent([data]), next_sync_token, default_reminders
-
         events = data.get('items', [])
         next_page_token = data.get('nextPageToken')
         while next_page_token:
@@ -72,16 +65,13 @@ class GoogleCalendarService():
         return GoogleEvent(events), next_sync_token, default_reminders
 
     @requires_auth_token
-    def insert(self, values, token=None, timeout=TIMEOUT, callback_method=None):
+    def insert(self, values, token=None, timeout=TIMEOUT):
         send_updates = self.google_service._context.get('send_updates', True)
         url = "/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=%s" % ("all" if send_updates else "none")
         headers = {'Content-type': 'application/json', 'Authorization': 'Bearer %s' % token}
         if not values.get('id'):
             values['id'] = uuid4().hex
-        request_values = self.google_service._do_request(url, json.dumps(values), headers, method='POST', timeout=timeout)
-        # Execute optional callback function using the returned values from insertion. TODO (gdpf) refactor in master.
-        if callable(callback_method):
-            callback_method(request_values, values)
+        self.google_service._do_request(url, json.dumps(values), headers, method='POST', timeout=timeout)
         return values['id']
 
     @requires_auth_token

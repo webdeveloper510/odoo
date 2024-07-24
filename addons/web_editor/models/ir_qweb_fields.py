@@ -29,7 +29,7 @@ from odoo import _, api, models, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import ustr, posix_to_ldml, pycompat
 from odoo.tools import html_escape as escape
-from odoo.tools.misc import file_open, get_lang, babel_locale_parse
+from odoo.tools.misc import get_lang, babel_locale_parse
 
 REMOTE_CONNECTION_TIMEOUT = 2.5
 
@@ -215,10 +215,6 @@ class ManyToOne(models.AbstractModel):
             if many2one:
                 attrs['data-oe-many2one-id'] = many2one.id
                 attrs['data-oe-many2one-model'] = many2one._name
-            if options.get('null_text'):
-                attrs['data-oe-many2one-allowreset'] = 1
-                if not many2one:
-                    attrs['data-oe-many2one-model'] = record._fields[field_name].comodel_name
         return attrs
 
     @api.model
@@ -228,18 +224,12 @@ class ManyToOne(models.AbstractModel):
         M2O = self.env[field.comodel_name]
         field_name = element.get('data-oe-field')
         many2one_id = int(element.get('data-oe-many2one-id'))
-
-        allow_reset = element.get('data-oe-many2one-allowreset')
-        if allow_reset and not many2one_id:
-            # Reset the id of the many2one
-            Model.browse(id).write({field_name: False})
-            return None
-
         record = many2one_id and M2O.browse(many2one_id)
         if record and record.exists():
             # save the new id of the many2one
             Model.browse(id).write({field_name: many2one_id})
 
+        # not necessary, but might as well be explicit about it
         return None
 
 
@@ -403,25 +393,19 @@ class HTML(models.AbstractModel):
         if options.get('inherit_branding'):
             field = record._fields[field_name]
             if field.sanitize:
-                if field.sanitize_overridable:
-                    if record.user_has_groups('base.group_sanitize_override'):
-                        # Don't mark the field as 'sanitize' if the sanitize
-                        # is defined as overridable and the user has the right
-                        # to do so
-                        return attrs
-                    else:
-                        try:
-                            field.convert_to_column(record[field_name], record)
-                        except UserError:
-                            # The field contains element(s) that would be
-                            # removed if sanitized. It means that someone who
-                            # was part of a group allowing to bypass the
-                            # sanitation saved that field previously. Mark the
-                            # field as not editable.
-                            attrs['data-oe-sanitize-prevent-edition'] = 1
-                            return attrs
-                # The field edition is not fully prevented and the sanitation cannot be bypassed
-                attrs['data-oe-sanitize'] = 'no_block' if field.sanitize_attributes else 1 if field.sanitize_form else 'allow_form'
+                if field.sanitize_overridable and not record.user_has_groups('base.group_sanitize_override'):
+                    try:
+                        field.convert_to_column(record[field_name], record)
+                    except UserError:
+                        # The field contains element(s) that would be removed if
+                        # sanitized. It means that someone who was part of a
+                        # group allowing to bypass the sanitation saved that
+                        # field previously. Mark the field as not editable.
+                        attrs['data-oe-sanitize-prevent-edition'] = 1
+                if not (field.sanitize_overridable and record.user_has_groups('base.group_sanitize_override')):
+                    # Don't mark the field as 'sanitize' if the sanitize is
+                    # defined as overridable and the user has the right to do so
+                    attrs['data-oe-sanitize'] = 1 if field.sanitize_form else 'allow_form'
 
         return attrs
 
@@ -447,7 +431,6 @@ class Image(models.AbstractModel):
     _inherit = 'ir.qweb.field.image'
 
     local_url_re = re.compile(r'^/(?P<module>[^]]+)/static/(?P<rest>.+)$')
-    redirect_url_re = re.compile(r'\/web\/image\/\d+-redirect\/')
 
     @api.model
     def from_html(self, model, field, element):
@@ -471,8 +454,6 @@ class Image(models.AbstractModel):
                 oid = query.get('id', fragments[4])
                 field = query.get('field', fragments[5])
             item = self.env[model].browse(int(oid))
-            if self.redirect_url_re.match(url_object.path):
-                return self.load_remote_url(item.url)
             return item[field]
 
         if self.local_url_re.match(url_object.path):
@@ -482,13 +463,20 @@ class Image(models.AbstractModel):
 
     def load_local_url(self, url):
         match = self.local_url_re.match(urls.url_parse(url).path)
-        rest = match.group('rest')
 
-        path = os.path.join(
-            match.group('module'), 'static', rest)
+        rest = match.group('rest')
+        for sep in os.sep, os.altsep:
+            if sep and sep != '/':
+                rest.replace(sep, '/')
+
+        path = odoo.modules.get_module_resource(
+            match.group('module'), 'static', *(rest.split('/')))
+
+        if not path:
+            return None
 
         try:
-            with file_open(path, 'rb') as f:
+            with open(path, 'rb') as f:
                 # force complete image load to ensure it's valid image data
                 image = I.open(f)
                 image.load()

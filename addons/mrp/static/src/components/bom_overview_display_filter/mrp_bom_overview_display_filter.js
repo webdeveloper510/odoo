@@ -1,17 +1,16 @@
 /** @odoo-module **/
-
-import { _t } from "@web/core/l10n/translation";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { Component } from "@odoo/owl";
+
+const { Component } = owl;
 
 export class BomOverviewDisplayFilter extends Component {
     setup() {
         this.displayOptions = {
-            availabilities: _t('Availabilities'),
-            leadTimes: _t('Lead Times'),
-            costs: _t('Costs'),
-            operations: _t('Operations'),
+            availabilities: this.env._t('Availabilities'),
+            leadTimes: this.env._t('Lead Times'),
+            costs: this.env._t('Costs'),
+            operations: this.env._t('Operations'),
         };
     }
 
@@ -19,6 +18,10 @@ export class BomOverviewDisplayFilter extends Component {
 
     get displayableOptions() {
         return Object.keys(this.displayOptions);
+    }
+
+    get currentDisplayedNames() {
+        return this.displayableOptions.filter(key => this.props.showOptions[key]).map(key => this.displayOptions[key]).join(", ");
     }
 }
 

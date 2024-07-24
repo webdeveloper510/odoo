@@ -3,18 +3,21 @@
 # 	* website_sale_stock
 # 
 # Translators:
-# Константин Коровин <korovin74@gmail.com>, 2023
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
-# Martin Trigaux, 2023
-# Oleg Kuryan <oleg@ventor.tech>, 2023
+# Константин Коровин <korovin74@gmail.com>, 2022
+# Сергей Шебанин <sergey@shebanin.ru>, 2022
+# Ivan Kropotkin <yelizariev@itpp.dev>, 2022
+# Irina Fedulova <istartlin@gmail.com>, 2022
+# Martin Trigaux, 2022
+# ILMIR <karamov@it-projects.info>, 2022
+# Oleg Kuryan <oleg@ventor.tech>, 2022
 # Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -25,8 +28,10 @@ msgstr ""
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
-msgid "<span invisible=\"not show_availability\">Units</span>"
-msgstr "<span invisible=\"not show_availability\">Единицы</span>"
+msgid ""
+"<span attrs=\"{'invisible': [('show_availability', '=', "
+"False)]}\">Units</span>"
+msgstr ""
 
 #. module: website_sale_stock
 #: model:ir.model.fields,field_description:website_sale_stock.field_product_product__stock_notification_partner_ids
@@ -36,13 +41,13 @@ msgstr "Уведомления о наличии на складе"
 #. module: website_sale_stock
 #: model:ir.model,name:website_sale_stock.model_res_config_settings
 msgid "Config Settings"
-msgstr "Параметры конфигурации"
+msgstr "Конфигурационные настройки"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.product_template_form_view_inherit_website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
 msgid "Continue Selling"
-msgstr "Продолжить продажу"
+msgstr "Продолжить продажи"
 
 #. module: website_sale_stock
 #: model:ir.model.fields,field_description:website_sale_stock.field_product_product__allow_out_of_stock_order
@@ -62,8 +67,8 @@ msgid ""
 "Default availability mode set on newly created storable products. This can "
 "be changed at the product level."
 msgstr ""
-"Режим доступности по умолчанию, установленный для вновь созданных хранимых "
-"продуктов. Это можно изменить на уровне продукта."
+"Режим доступности по умолчанию установлено на только что созданные товары, "
+"которые можно хранить. Это можно изменить на уровне товара."
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.res_config_settings_view_form
@@ -112,7 +117,7 @@ msgstr "Только"
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.availability_email_body
 msgid "Order Now"
-msgstr "Заказать Сейчас"
+msgstr "Заказать сейчас"
 
 #. module: website_sale_stock
 #. odoo-javascript
@@ -139,7 +144,7 @@ msgstr "Сообщение об отсутствии товара на скла�
 #: model:ir.model,name:website_sale_stock.model_product_template
 #, python-format
 msgid "Product"
-msgstr "Товар"
+msgstr "Продукт"
 
 #. module: website_sale_stock
 #: model:ir.model,name:website_sale_stock.model_product_product
@@ -148,13 +153,14 @@ msgstr "Вариант продукта"
 
 #. module: website_sale_stock
 #: model:ir.actions.server,name:website_sale_stock.ir_cron_send_availability_email_ir_actions_server
+#: model:ir.cron,cron_name:website_sale_stock.ir_cron_send_availability_email
 msgid "Product: send email regarding products availability"
 msgstr "Продукт: отправлять электронное сообщение о наличии товара"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.availability_email_body
 msgid "Regards,"
-msgstr "С Уважением,"
+msgstr "С уважением,"
 
 #. module: website_sale_stock
 #: model:ir.model,name:website_sale_stock.model_sale_order
@@ -194,20 +200,13 @@ msgid ""
 "Some products became unavailable and your cart has been updated. We're sorry"
 " for the inconvenience."
 msgstr ""
-"Некоторые товары стали недоступны, и ваша корзина была обновлена. Приносим "
-"извинения за причиненные неудобства."
+"Некоторые товары стали недоступными, а вашу корзину был обновлен. Извините "
+"за неудобства."
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.availability_email_body
 msgid "The following product is now available."
 msgstr "Теперь доступен следующий продукт."
-
-#. module: website_sale_stock
-#. odoo-python
-#: code:addons/website_sale_stock/models/sale_order.py:0
-#, python-format
-msgid "The item has not been added to your cart since it is not available."
-msgstr "Этот товар не был добавлен в вашу корзину, так как его нет в наличии."
 
 #. module: website_sale_stock
 #. odoo-python
@@ -226,7 +225,7 @@ msgstr "Этого товара нет в наличии."
 #. module: website_sale_stock
 #: model:ir.model,name:website_sale_stock.model_stock_picking
 msgid "Transfer"
-msgstr "Перевод"
+msgstr "Перемещение"
 
 #. module: website_sale_stock
 #: model_terms:ir.ui.view,arch_db:website_sale_stock.product_template_form_view_inherit_website_sale_stock
@@ -251,7 +250,7 @@ msgstr "Мы уведомим вас, как только товар снова 
 #: model:ir.model,name:website_sale_stock.model_website
 #: model:ir.model.fields,field_description:website_sale_stock.field_stock_picking__website_id
 msgid "Website"
-msgstr "Сайт"
+msgstr "Вебсайт"
 
 #. module: website_sale_stock
 #: model:ir.model.fields,help:website_sale_stock.field_stock_picking__website_id

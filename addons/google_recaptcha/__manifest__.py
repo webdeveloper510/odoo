@@ -6,7 +6,7 @@
     'category': 'Hidden',
     'version': '1.0',
     'description': """
-This module implements reCaptchaV3 so that you can prevent bot spam on your public modules.
+        This module implements reCaptchaV3 so that you can prevent bot spam on your public modules.
     """,
     'depends': ['base_setup'],
     'data': [
@@ -16,6 +16,9 @@ This module implements reCaptchaV3 so that you can prevent bot spam on your publ
         'web.assets_frontend': [
             'google_recaptcha/static/src/scss/recaptcha.scss',
             'google_recaptcha/static/src/js/recaptcha.js',
+            # TODO remove next line in master, it was kept here as part of a
+            # stable fix in stable but is unused in the current codebase.
+            'google_recaptcha/static/src/xml/recaptcha.xml',
         ],
         'web.assets_backend': [
             # TODO we may want to consider moving that file in website instead

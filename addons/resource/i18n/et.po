@@ -3,28 +3,27 @@
 # 	* resource
 # 
 # Translators:
-# Birgit Vijar, 2023
-# Piia Paurson <piia@avalah.ee>, 2023
+# Piia Paurson <piia@avalah.ee>, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Egon Raamat <egon@avalah.ee>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Martin Trigaux, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Anna, 2023
 # JanaAvalah, 2023
-# Eneli Õigus <enelioigus@gmail.com>, 2023
-# Andre Roomet <andreroomet@gmail.com>, 2023
-# Rivo Zängov <eraser@eraser.ee>, 2023
-# Arma Gedonsky <armagedonsky@hot.ee>, 2023
-# Patrick-Jordan Kiudorv, 2023
-# Triine Aavik <triine@avalah.ee>, 2023
 # Leaanika Randmets, 2023
-# Algo Kärp <algokarp@gmail.com>, 2023
-# Martin Aavastik <martin@avalah.ee>, 2023
-# Martin Trigaux, 2023
-# Anna, 2024
 # Katrin Kampura, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-10-10 10:23+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: Katrin Kampura, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
@@ -34,28 +33,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-#: code:addons/resource/models/resource_resource.py:0
+#: code:addons/resource/models/resource.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (koopia)"
 
 #. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "<span class=\"o_stat_text\">Time Off</span>"
-msgstr "<span class=\"o_stat_text\">Puudumised</span>"
-
-#. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
-msgid "<span class=\"o_stat_text\">Work Resources</span>"
-msgstr "<span class=\"o_stat_text\">Tööressursid</span>"
-
-#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__active
 #: model:ir.model.fields,field_description:resource.field_resource_resource__active
 msgid "Active"
-msgstr "Aktiivne"
+msgstr "Tegev"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__afternoon
@@ -63,7 +51,6 @@ msgid "Afternoon"
 msgstr "Pärastlõuna"
 
 #. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 #: model_terms:ir.ui.view,arch_db:resource.resource_resource_form
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_search
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
@@ -73,20 +60,19 @@ msgstr "Arhiveeritud"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid ""
-"Are you sure you want to switch this calendar to 1 week calendar? All "
+"Are you sure you want to switch this calendar to 1 week calendar ? All "
 "entries will be lost"
 msgstr ""
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid ""
-"Are you sure you want to switch this calendar to 2 weeks calendar? All "
+"Are you sure you want to switch this calendar to 2 weeks calendar ? All "
 "entries will be lost"
 msgstr ""
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Attendances can't overlap."
 msgstr "Kohalolekud ei saa kattuda."
@@ -100,11 +86,6 @@ msgstr "Keskmine tundide arv päevas"
 #: model:ir.model.fields,help:resource.field_resource_calendar__hours_per_day
 msgid ""
 "Average hours per day a resource is supposed to work with this calendar."
-msgstr ""
-
-#. module: resource
-#: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__lunch
-msgid "Break"
 msgstr ""
 
 #. module: resource
@@ -139,7 +120,7 @@ msgstr "Ettevõte"
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__create_uid
 #: model:ir.model.fields,field_description:resource.field_resource_resource__create_uid
 msgid "Created by"
-msgstr "Loodud (kelle poolt?)"
+msgstr "Loonud"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__create_date
@@ -147,12 +128,7 @@ msgstr "Loodud (kelle poolt?)"
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__create_date
 #: model:ir.model.fields,field_description:resource.field_resource_resource__create_date
 msgid "Created on"
-msgstr "Loodud"
-
-#. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
-msgid "Date"
-msgstr "Kuupäev"
+msgstr "Loomise kuupäev"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__day_period
@@ -168,7 +144,7 @@ msgstr "Nädalapäev"
 #: model:ir.model.fields,field_description:resource.field_res_company__resource_calendar_id
 #: model:ir.model.fields,field_description:resource.field_res_users__resource_calendar_id
 msgid "Default Working Hours"
-msgstr "Vaikimisi tööaeg"
+msgstr "Default Working Hours"
 
 #. module: resource
 #: model_terms:ir.actions.act_window,help:resource.action_resource_calendar_form
@@ -183,22 +159,12 @@ msgstr "Määratle oma projektiliikmete töötunnid ja ajaarvestustabel."
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__display_name
 #: model:ir.model.fields,field_description:resource.field_resource_resource__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__display_type
 msgid "Display Type"
 msgstr "Kuvamise tüüp"
-
-#. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__duration_days
-msgid "Duration (days)"
-msgstr "Kestus (päevades)"
-
-#. module: resource
-#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__duration_hours
-msgid "Duration (hours)"
-msgstr "Kestus (tundides)"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_resource__time_efficiency
@@ -222,8 +188,7 @@ msgid "First"
 msgstr "Esimene"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar_attendance.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "First week"
 msgstr "Esimene nädal"
@@ -234,22 +199,13 @@ msgid "Friday"
 msgstr "Reede"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Friday Afternoon"
 msgstr "reede pärastlõuna"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-#, python-format
-msgid "Friday Lunch"
-msgstr "reede lõuna"
-
-#. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Friday Morning"
 msgstr "Friday Morning"
@@ -268,12 +224,12 @@ msgstr "Riiklikud pühad"
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
 msgid "Group By"
-msgstr "Rühmitamine"
+msgstr "Grupeeri"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_attendance_form
 msgid "Hours"
-msgstr "Tund(i)"
+msgstr "Tunnid"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_resource__resource_type__user
@@ -311,12 +267,19 @@ msgid ""
 msgstr ""
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid ""
 "In a calendar with 2 weeks mode, all periods need to be in the sections."
 msgstr ""
+
+#. module: resource
+#: model:ir.model.fields,field_description:resource.field_resource_calendar____last_update
+#: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance____last_update
+#: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves____last_update
+#: model:ir.model.fields,field_description:resource.field_resource_resource____last_update
+msgid "Last Modified on"
+msgstr "Viimati muudetud"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__write_uid
@@ -324,7 +287,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__write_uid
 #: model:ir.model.fields,field_description:resource.field_resource_resource__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__write_date
@@ -333,6 +296,17 @@ msgstr "Viimati uuendatud"
 #: model:ir.model.fields,field_description:resource.field_resource_resource__write_date
 msgid "Last Updated on"
 msgstr "Viimati uuendatud"
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
+msgid "Leave Date"
+msgstr ""
+
+#. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_leave_form
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_leave_tree
+msgid "Leave Detail"
+msgstr "Puudumiste andmed"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_resource__resource_type__material
@@ -346,22 +320,13 @@ msgid "Monday"
 msgstr "Esmaspäev"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Monday Afternoon"
 msgstr "esmaspäeva pärastlõuna"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-#, python-format
-msgid "Monday Lunch"
-msgstr "esmaspäeva lõuna"
-
-#. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Monday Morning"
 msgstr "Monday Morning"
@@ -381,7 +346,7 @@ msgstr "Nimi"
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_leaves__time_type__other
 msgid "Other"
-msgstr "Meeldetuletuse lisamine"
+msgstr "Muu"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
@@ -491,8 +456,7 @@ msgid "Second"
 msgstr "Teine"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar_attendance.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Second week"
 msgstr "Teine nädal"
@@ -500,15 +464,14 @@ msgstr "Teine nädal"
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__display_type__line_section
 msgid "Section"
-msgstr "Sektsioon"
+msgstr "Lõik"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__sequence
 msgid "Sequence"
-msgstr "Jada"
+msgstr "Järjestus"
 
 #. module: resource
-#. odoo-python
 #: code:addons/resource/models/res_company.py:0
 #, python-format
 msgid "Standard 40 hours/week"
@@ -533,8 +496,8 @@ msgstr "Alguskuupäev"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_leaves_search
-msgid "Starting Date of Time Off"
-msgstr "Puudumise alguskuupäev"
+msgid "Starting Date of Leave"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__6
@@ -557,15 +520,13 @@ msgid "Technical field for UX purpose."
 msgstr "Tehniline väli UX tarvis."
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "The current week (from %s to %s) correspond to the  %s one."
 msgstr ""
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar_leaves.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "The start date of the time off must be earlier than the end date."
 msgstr "Puudumise alguskuupäev peab olema enne lõppkuupäeva."
@@ -599,22 +560,13 @@ msgid "Thursday"
 msgstr "Neljapäev"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Thursday Afternoon"
 msgstr "neljapäeva pärastlõuna"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-#, python-format
-msgid "Thursday Lunch"
-msgstr "neljapäeva lõuna"
-
-#. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Thursday Morning"
 msgstr "Thursday Morning"
@@ -622,14 +574,9 @@ msgstr "Thursday Morning"
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__leave_ids
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_leaves__time_type__leave
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "Time Off"
 msgstr "Puudumised"
-
-#. module: resource
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_leave_form
-#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_leave_tree
-msgid "Time Off Detail"
-msgstr "Puudumise detailid"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves__time_type
@@ -659,22 +606,13 @@ msgid "Tuesday"
 msgstr "Teisipäev"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Tuesday Afternoon"
 msgstr "teisipäeva pärastlõuna"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-#, python-format
-msgid "Tuesday Lunch"
-msgstr "teisipäeva lõuna"
-
-#. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Tuesday Morning"
 msgstr "Tuesday Morning"
@@ -698,22 +636,13 @@ msgid "Wednesday"
 msgstr "Kolmapäev"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Wednesday Afternoon"
 msgstr "kolmapäeva pärastlõuna"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
-#, python-format
-msgid "Wednesday Lunch"
-msgstr "kolmapäeva lõuna"
-
-#. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Wednesday Morning"
 msgstr "Wednesday Morning"
@@ -736,6 +665,11 @@ msgid "Work Detail"
 msgstr "Work Detail"
 
 #. module: resource
+#: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
+msgid "Work Resources"
+msgstr "Work Resources"
+
+#. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__hour_from
 msgid "Work from"
 msgstr "Töötab alates"
@@ -754,17 +688,10 @@ msgid "Working Hours"
 msgstr "Tööaeg"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "Working Hours of %s"
 msgstr "Working Hours of %s"
-
-#. module: resource
-#: model:ir.actions.act_window,name:resource.action_resource_calendar_form
-#: model:ir.ui.menu,name:resource.menu_resource_calendar
-msgid "Working Schedules"
-msgstr "Tööajad"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__attendance_ids
@@ -779,36 +706,37 @@ msgid "Working Time"
 msgstr "Tööaeg"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: model:ir.actions.act_window,name:resource.action_resource_calendar_form
+#: model:ir.ui.menu,name:resource.menu_resource_calendar
+msgid "Working Times"
+msgstr "Tööajad"
+
+#. module: resource
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "You can't delete section between weeks."
 msgstr ""
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "first"
 msgstr "esimesena"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar_attendance.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "other week"
 msgstr ""
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "second"
 msgstr "teine"
 
 #. module: resource
-#. odoo-python
-#: code:addons/resource/models/resource_calendar_attendance.py:0
+#: code:addons/resource/models/resource.py:0
 #, python-format
 msgid "this week"
 msgstr "see nädal"

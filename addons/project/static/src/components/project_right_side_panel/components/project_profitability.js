@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component } from "@odoo/owl";
+const { Component } = owl;
 
 export class ProjectProfitability extends Component {
     get revenues() {

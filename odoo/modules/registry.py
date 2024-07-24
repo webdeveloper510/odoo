@@ -9,8 +9,6 @@ from collections.abc import Mapping
 from contextlib import closing, contextmanager
 from functools import partial
 from operator import attrgetter
-
-import inspect
 import logging
 import os
 import threading
@@ -24,35 +22,14 @@ from odoo.modules.db import FunctionStatus
 from odoo.osv.expression import get_unaccent_wrapper
 from .. import SUPERUSER_ID
 from odoo.sql_db import TestCursor
-from odoo.tools import (
-    config, existing_tables, lazy_classproperty,
-    lazy_property, sql, Collector, OrderedSet, SQL,
-    format_frame
-)
+from odoo.tools import (config, existing_tables, lazy_classproperty,
+                        lazy_property, sql, Collector, OrderedSet)
 from odoo.tools.func import locked
 from odoo.tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
 _schema = logging.getLogger('odoo.schema')
 
-
-_REGISTRY_CACHES = {
-    'default': 8192,
-    'assets': 512, # arbitrary
-    'templates': 1024, # arbitrary
-    'routing': 1024,  # 2 entries per website
-    'routing.rewrites': 8192,  # url_rewrite entries
-    'templates.cached_values': 2048, # arbitrary
-}
-
-# cache invalidation dependencies, as follows:
-# { 'cache_key': ('cache_container_1', 'cache_container_3', ...) }
-_CACHES_BY_KEY = {
-    'default': ('default', 'templates.cached_values'),
-    'assets': ('assets', 'templates.cached_values'),
-    'templates': ('templates', 'templates.cached_values'),
-    'routing': ('routing', 'routing.rewrites', 'templates.cached_values'),
-}
 
 class Registry(Mapping):
     """ Model registry for a particular database.
@@ -141,7 +118,7 @@ class Registry(Mapping):
         self._fields_by_model = None
         self._ordinary_tables = None
         self._constraint_queue = deque()
-        self.__caches = {cache_name: LRU(cache_size) for cache_name, cache_size in _REGISTRY_CACHES.items()}
+        self.__cache = LRU(8192)
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
@@ -174,7 +151,7 @@ class Registry(Mapping):
         # The `base_cache_signaling sequence` indicates all caches must be
         # invalidated (i.e. cleared).
         self.registry_sequence = None
-        self.cache_sequences = {}
+        self.cache_sequence = None
 
         # Flags indicating invalidation of the registry or the cache.
         self._invalidation_flags = threading.local()
@@ -256,8 +233,7 @@ class Registry(Mapping):
         from .. import models
 
         # clear cache to ensure consistency, but do not signal it
-        for cache in self.__caches.values():
-            cache.clear()
+        self.__cache.clear()
 
         lazy_property.reset_all(self)
         self._field_trigger_trees.clear()
@@ -288,8 +264,7 @@ class Registry(Mapping):
                 model._unregister_hook()
 
         # clear cache to ensure consistency, but do not signal it
-        for cache in self.__caches.values():
-            cache.clear()
+        self.__cache.clear()
 
         lazy_property.reset_all(self)
         self._field_trigger_trees.clear()
@@ -354,30 +329,12 @@ class Registry(Mapping):
                     computed[field] = group = groups[field.compute]
                     group.append(field)
             for fields in groups.values():
-                if len(fields) < 2:
-                    continue
                 if len({field.compute_sudo for field in fields}) > 1:
-                    fnames = ", ".join(field.name for field in fields)
-                    warnings.warn(
-                        f"{model_name}: inconsistent 'compute_sudo' for computed fields {fnames}. "
-                        f"Either set 'compute_sudo' to the same value on all those fields, or "
-                        f"use distinct compute methods for sudoed and non-sudoed fields."
-                    )
+                    _logger.warning("%s: inconsistent 'compute_sudo' for computed fields: %s",
+                                    model_name, ", ".join(field.name for field in fields))
                 if len({field.precompute for field in fields}) > 1:
-                    fnames = ", ".join(field.name for field in fields)
-                    warnings.warn(
-                        f"{model_name}: inconsistent 'precompute' for computed fields {fnames}. "
-                        f"Either set all fields as precompute=True (if possible), or "
-                        f"use distinct compute methods for precomputed and non-precomputed fields."
-                    )
-                if len({field.store for field in fields}) > 1:
-                    fnames1 = ", ".join(field.name for field in fields if not field.store)
-                    fnames2 = ", ".join(field.name for field in fields if field.store)
-                    warnings.warn(
-                        f"{model_name}: inconsistent 'store' for computed fields, "
-                        f"accessing {fnames1} may recompute and update {fnames2}. "
-                        f"Use distinct compute methods for stored and non-stored fields."
-                    )
+                    _logger.warning("%s: inconsistent 'precompute' for computed fields: %s",
+                                    model_name, ", ".join(field.name for field in fields))
         return computed
 
     def get_trigger_tree(self, fields: list, select=bool) -> "TriggerTree":
@@ -577,7 +534,6 @@ class Registry(Mapping):
             env['ir.model.fields']._reflect_fields(model_names)
             env['ir.model.fields.selection']._reflect_selections(model_names)
             env['ir.model.constraint']._reflect_constraints(model_names)
-            env['ir.model.inherit']._reflect_inherits(model_names)
 
             self._ordinary_tables = None
 
@@ -600,9 +556,8 @@ class Registry(Mapping):
 
     def check_indexes(self, cr, model_names):
         """ Create or drop column indexes for the given models. """
-
         expected = [
-            (sql.make_index_name(Model._table, field.name), Model._table, field, getattr(field, 'unaccent', False))
+            (f"{Model._table}_{field.name}_index", Model._table, field, getattr(field, 'unaccent', False))
             for model_name in model_names
             for Model in [self.models[model_name]]
             if Model._auto and not Model._abstract
@@ -618,11 +573,12 @@ class Registry(Mapping):
         existing = dict(cr.fetchall())
 
         for indexname, tablename, field, unaccent in expected:
+            column_expression = f'"{field.name}"'
             index = field.index
             assert index in ('btree', 'btree_not_null', 'trigram', True, False, None)
             if index and indexname not in existing and \
                     ((not field.translate and index != 'trigram') or (index == 'trigram' and self.has_trigram)):
-                column_expression = f'"{field.name}"'
+
                 if index == 'trigram':
                     if field.translate:
                         column_expression = f'''(jsonb_path_query_array({column_expression}, '$.*')::text)'''
@@ -725,35 +681,17 @@ class Registry(Mapping):
             for table in missing_tables:
                 _logger.error("Model %s has no table.", table2model[table])
 
-    def clear_cache(self, *cache_names):
-        """ Clear the caches associated to methods decorated with
-        ``tools.ormcache``if cache is in `cache_name` subset. """
-        cache_names = cache_names or ('default',)
-        assert not any('.' in cache_name for cache_name in cache_names)
-        for cache_name in cache_names:
-            for cache in _CACHES_BY_KEY[cache_name]:
-                self.__caches[cache].clear()
-            self.cache_invalidated.add(cache_name)
+    def _clear_cache(self):
+        """ Clear the cache and mark it as invalidated. """
+        self.__cache.clear()
+        self.cache_invalidated = True
 
-        # log information about invalidation_cause
-        if _logger.isEnabledFor(logging.DEBUG):
-            # could be interresting to log in info but this will need to minimize invalidation first,
-            # mainly in some setupclass and crons
-            caller_info = format_frame(inspect.currentframe().f_back)
-            _logger.debug('Invalidating %s model caches from %s', ','.join(cache_names), caller_info)
-
-    def clear_all_caches(self):
+    def clear_caches(self):
         """ Clear the caches associated to methods decorated with
-        ``tools.ormcache``.
+        ``tools.ormcache`` or ``tools.ormcache_multi`` for all the models.
         """
-        for cache_name, caches in _CACHES_BY_KEY.items():
-            for cache in caches:
-                self.__caches[cache].clear()
-            self.cache_invalidated.add(cache_name)
-
-        caller_info = format_frame(inspect.currentframe().f_back)
-        log = _logger.info if self.loaded else _logger.debug
-        log('Invalidating all model caches from %s', caller_info)
+        for model in self.models.values():
+            model.clear_caches()
 
     def is_an_ordinary_table(self, model):
         """ Return whether the given model has an ordinary table. """
@@ -785,11 +723,11 @@ class Registry(Mapping):
     @property
     def cache_invalidated(self):
         """ Determine whether the current thread has modified the cache. """
-        try:
-            return self._invalidation_flags.cache
-        except AttributeError:
-            names = self._invalidation_flags.cache = set()
-            return names
+        return getattr(self._invalidation_flags, 'cache', False)
+
+    @cache_invalidated.setter
+    def cache_invalidated(self, value):
+        self._invalidation_flags.cache = value
 
     def setup_signaling(self):
         """ Setup the inter-process signaling on this registry. """
@@ -799,37 +737,21 @@ class Registry(Mapping):
         with self.cursor() as cr:
             # The `base_registry_signaling` sequence indicates when the registry
             # must be reloaded.
-            # The `base_cache_signaling_...` sequences indicates when caches must
+            # The `base_cache_signaling` sequence indicates when all caches must
             # be invalidated (i.e. cleared).
-            sequence_names = ('base_registry_signaling', *(f'base_cache_signaling_{cache_name}' for cache_name in _CACHES_BY_KEY))
-            cr.execute("SELECT sequence_name FROM information_schema.sequences WHERE sequence_name IN %s", [sequence_names])
-            existing_sequences = tuple(s[0] for s in cr.fetchall())  # could be a set but not efficient with such a little list
+            cr.execute("SELECT sequence_name FROM information_schema.sequences WHERE sequence_name='base_registry_signaling'")
+            if not cr.fetchall():
+                cr.execute("CREATE SEQUENCE base_registry_signaling INCREMENT BY 1 START WITH 1")
+                cr.execute("SELECT nextval('base_registry_signaling')")
+                cr.execute("CREATE SEQUENCE base_cache_signaling INCREMENT BY 1 START WITH 1")
+                cr.execute("SELECT nextval('base_cache_signaling')")
 
-            for sequence_name in sequence_names:
-                if sequence_name not in existing_sequences:
-                    cr.execute(SQL(
-                        "CREATE SEQUENCE %s INCREMENT BY 1 START WITH 1",
-                        SQL.identifier(sequence_name),
-                    ))
-                    cr.execute(SQL("SELECT nextval(%s)", sequence_name))
-
-            db_registry_sequence, db_cache_sequences = self.get_sequences(cr)
-            self.registry_sequence = db_registry_sequence
-            self.cache_sequences.update(db_cache_sequences)
-
-            _logger.debug("Multiprocess load registry signaling: [Registry: %s] %s",
-                          self.registry_sequence, ' '.join('[Cache %s: %s]' % cs for cs in self.cache_sequences.items()))
-
-    def get_sequences(self, cr):
-        cache_sequences_query = ', '.join([f'base_cache_signaling_{cache_name}' for cache_name in _CACHES_BY_KEY])
-        cache_sequences_values_query = ',\n'.join([f'base_cache_signaling_{cache_name}.last_value' for cache_name in _CACHES_BY_KEY])
-        cr.execute(f"""
-            SELECT base_registry_signaling.last_value, {cache_sequences_values_query}
-            FROM base_registry_signaling, {cache_sequences_query}
-        """)
-        registry_sequence, *cache_sequences_values = cr.fetchone()
-        cache_sequences = dict(zip(_CACHES_BY_KEY, cache_sequences_values))
-        return registry_sequence, cache_sequences
+            cr.execute(""" SELECT base_registry_signaling.last_value,
+                                  base_cache_signaling.last_value
+                           FROM base_registry_signaling, base_cache_signaling""")
+            self.registry_sequence, self.cache_sequence = cr.fetchone()
+            _logger.debug("Multiprocess load registry signaling: [Registry: %s] [Cache: %s]",
+                          self.registry_sequence, self.cache_sequence)
 
     def check_signaling(self):
         """ Check whether the registry has changed, and performs all necessary
@@ -839,46 +761,33 @@ class Registry(Mapping):
             return self
 
         with closing(self.cursor()) as cr:
-            db_registry_sequence, db_cache_sequences = self.get_sequences(cr)
-            changes = ''
+            cr.execute(""" SELECT base_registry_signaling.last_value,
+                                  base_cache_signaling.last_value
+                           FROM base_registry_signaling, base_cache_signaling""")
+            r, c = cr.fetchone()
+            _logger.debug("Multiprocess signaling check: [Registry - %s -> %s] [Cache - %s -> %s]",
+                          self.registry_sequence, r, self.cache_sequence, c)
             # Check if the model registry must be reloaded
-            if self.registry_sequence != db_registry_sequence:
+            if self.registry_sequence != r:
                 _logger.info("Reloading the model registry after database signaling.")
                 self = Registry.new(self.db_name)
-                self.registry_sequence = db_registry_sequence
-                if _logger.isEnabledFor(logging.DEBUG):
-                    changes += "[Registry - %s -> %s]" % (self.registry_sequence, db_registry_sequence)
             # Check if the model caches must be invalidated.
-            else:
-                invalidated = []
-                for cache_name, cache_sequence in self.cache_sequences.items():
-                    expected_sequence = db_cache_sequences[cache_name]
-                    if cache_sequence != expected_sequence:
-                        for cache in _CACHES_BY_KEY[cache_name]: # don't call clear_cache to avoid signal loop
-                            if cache not in invalidated:
-                                invalidated.append(cache)
-                                self.__caches[cache].clear()
-                        self.cache_sequences[cache_name] = expected_sequence
-                        if _logger.isEnabledFor(logging.DEBUG):
-                            changes += "[Cache %s - %s -> %s]" % (cache_name, cache_sequence, expected_sequence)
-                if invalidated:
-                    _logger.info("Invalidating caches after database signaling: %s", sorted(invalidated))
-            if changes:
-                _logger.debug("Multiprocess signaling check: %s", changes)
+            elif self.cache_sequence != c:
+                _logger.info("Invalidating all model caches after database signaling.")
+                self.clear_caches()
+
+            # prevent re-signaling the clear_caches() above, or any residual one that
+            # would be inherited from the master process (first request in pre-fork mode)
+            self.cache_invalidated = False
+
+            self.registry_sequence = r
+            self.cache_sequence = c
+
         return self
 
     def signal_changes(self):
         """ Notifies other processes if registry or cache has been invalidated. """
-        if self.in_test_mode():
-            if self.registry_invalidated:
-                self.registry_sequence += 1
-            for cache_name in self.cache_invalidated or ():
-                self.cache_sequences[cache_name] += 1
-            self.registry_invalidated = False
-            self.cache_invalidated.clear()
-            return
-
-        if self.registry_invalidated:
+        if self.registry_invalidated and not self.in_test_mode():
             _logger.info("Registry changed, signaling through the database")
             with closing(self.cursor()) as cr:
                 cr.execute("select nextval('base_registry_signaling')")
@@ -886,15 +795,14 @@ class Registry(Mapping):
 
         # no need to notify cache invalidation in case of registry invalidation,
         # because reloading the registry implies starting with an empty cache
-        elif self.cache_invalidated:
-            _logger.info("Caches invalidated, signaling through the database: %s", sorted(self.cache_invalidated))
+        elif self.cache_invalidated and not self.in_test_mode():
+            _logger.info("At least one model cache has been invalidated, signaling through the database.")
             with closing(self.cursor()) as cr:
-                for cache_name in self.cache_invalidated:
-                    cr.execute("select nextval(%s)", [f'base_cache_signaling_{cache_name}'])
-                    self.cache_sequences[cache_name] = cr.fetchone()[0]
+                cr.execute("select nextval('base_cache_signaling')")
+                self.cache_sequence = cr.fetchone()[0]
 
         self.registry_invalidated = False
-        self.cache_invalidated.clear()
+        self.cache_invalidated = False
 
     def reset_changes(self):
         """ Reset the registry and cancel all invalidations. """
@@ -903,10 +811,8 @@ class Registry(Mapping):
                 self.setup_models(cr)
                 self.registry_invalidated = False
         if self.cache_invalidated:
-            for cache_name in self.cache_invalidated:
-                for cache in _CACHES_BY_KEY[cache_name]:
-                    self.__caches[cache].clear()
-            self.cache_invalidated.clear()
+            self.__cache.clear()
+            self.cache_invalidated = False
 
     @contextmanager
     def manage_changes(self):
@@ -992,9 +898,6 @@ class TriggerTree(dict):
 
     def __bool__(self):
         return bool(self.root or len(self))
-
-    def __repr__(self) -> str:
-        return f"TriggerTree(root={self.root!r}, {super().__repr__()})"
 
     def increase(self, key):
         try:

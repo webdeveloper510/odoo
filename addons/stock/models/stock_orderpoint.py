@@ -12,7 +12,7 @@ from odoo import SUPERUSER_ID, _, api, fields, models, registry
 from odoo.addons.stock.models.stock_rule import ProcurementException
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import float_compare, float_is_zero, frozendict, split_every
+from odoo.tools import float_compare, frozendict, split_every
 
 _logger = logging.getLogger(__name__)
 
@@ -23,6 +23,17 @@ class StockWarehouseOrderpoint(models.Model):
     _description = "Minimum Inventory Rule"
     _check_company_auto = True
     _order = "location_id,company_id,id"
+
+    @api.model
+    def _domain_product_id(self):
+        domain = "('type', '=', 'product')"
+        if self.env.context.get('active_model') == 'product.template':
+            product_template_id = self.env.context.get('active_id', False)
+            domain = f"('product_tmpl_id', '=', {product_template_id})"
+        elif self.env.context.get('default_product_id', False):
+            product_id = self.env.context.get('default_product_id', False)
+            domain = f"('id', '=', {product_id})"
+        return f"[{domain}, '|', ('company_id', '=', False), ('company_id', '=', company_id)]"
 
     name = fields.Char(
         'Name', copy=False, required=True, readonly=True,
@@ -44,9 +55,7 @@ class StockWarehouseOrderpoint(models.Model):
     product_tmpl_id = fields.Many2one('product.template', related='product_id.product_tmpl_id')
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=("[('product_tmpl_id', '=', context.get('active_id', False))] if context.get('active_model') == 'product.template' else"
-            " [('id', '=', context.get('default_product_id', False))] if context.get('default_product_id') else"
-            " [('type', '=', 'product')]"),
+        domain=lambda self: self._domain_product_id(),
         ondelete='cascade', required=True, check_company=True)
     product_category_id = fields.Many2one('product.category', name='Product Category', related='product_id.categ_id', store=True)
     product_uom = fields.Many2one(
@@ -75,19 +84,16 @@ class StockWarehouseOrderpoint(models.Model):
     rule_ids = fields.Many2many('stock.rule', string='Rules used', compute='_compute_rules')
     lead_days_date = fields.Date(compute='_compute_lead_days')
     route_id = fields.Many2one(
-        'stock.route', string='Route', domain="[('product_selectable', '=', True)]")
+        'stock.route', string='Preferred Route', domain="[('product_selectable', '=', True)]")
     qty_on_hand = fields.Float('On Hand', readonly=True, compute='_compute_qty', digits='Product Unit of Measure')
     qty_forecast = fields.Float('Forecast', readonly=True, compute='_compute_qty', digits='Product Unit of Measure')
     qty_to_order = fields.Float('To Order', compute='_compute_qty_to_order', store=True, readonly=False, digits='Product Unit of Measure')
 
-    #TODO: remove this field in master
     days_to_order = fields.Float(compute='_compute_days_to_order', help="Numbers of days  in advance that replenishments demands are created.")
     visibility_days = fields.Float(
         compute='_compute_visibility_days', inverse='_set_visibility_days', readonly=False,
         help="Consider product forecast these many days in the future upon product replenishment, set to 0 for just-in-time.\n"
              "The value depends on the type of the route (Buy or Manufacture)")
-
-    unwanted_replenish = fields.Boolean('Unwanted Replenish', compute="_compute_unwanted_replenish")
 
     _sql_constraints = [
         ('qty_multiple_check', 'CHECK( qty_multiple >= 0 )', 'Qty Multiple must be greater than or equal to zero.'),
@@ -115,7 +121,7 @@ class StockWarehouseOrderpoint(models.Model):
                 continue
             values = orderpoint._get_lead_days_values()
             lead_days, dummy = orderpoint.rule_ids._get_lead_days(orderpoint.product_id, **values)
-            lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days['total_delay'])
+            lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days)
             orderpoint.lead_days_date = lead_days_date
 
     @api.depends('route_id', 'product_id', 'location_id', 'company_id', 'warehouse_id', 'product_id.route_ids')
@@ -164,15 +170,6 @@ class StockWarehouseOrderpoint(models.Model):
                 ], limit=1)
             orderpoint.location_id = warehouse.lot_stock_id.id
 
-    @api.depends('product_id', 'qty_to_order', 'product_max_qty')
-    def _compute_unwanted_replenish(self):
-        for orderpoint in self:
-            if not orderpoint.product_id or float_is_zero(orderpoint.qty_to_order, precision_rounding=orderpoint.product_uom.rounding) or float_compare(orderpoint.product_max_qty, 0, precision_rounding=orderpoint.product_uom.rounding) == -1:
-                orderpoint.unwanted_replenish = False
-            else:
-                after_replenish_qty = orderpoint.product_id.with_context(company_id=orderpoint.company_id.id, location=orderpoint.location_id.id).virtual_available + orderpoint.qty_to_order
-                orderpoint.unwanted_replenish = float_compare(after_replenish_qty, orderpoint.product_max_qty, precision_rounding=orderpoint.product_uom.rounding) > 0
-
     @api.onchange('product_id')
     def _onchange_product_id(self):
         if self.product_id:
@@ -216,14 +213,8 @@ class StockWarehouseOrderpoint(models.Model):
         action['res_id'] = res.id
         return action
 
-    def action_replenish(self, force_to_max=False):
-        now = self.env.cr.now()
-        if force_to_max:
-            for orderpoint in self:
-                orderpoint.qty_to_order = orderpoint.product_max_qty - orderpoint.qty_forecast
-                remainder = orderpoint.qty_multiple > 0 and orderpoint.qty_to_order % orderpoint.qty_multiple or 0.0
-                if not float_is_zero(remainder, precision_rounding=orderpoint.product_uom.rounding):
-                    orderpoint.qty_to_order += orderpoint.qty_multiple - remainder
+    def action_replenish(self):
+        now = datetime.now()
         try:
             self._procure_orderpoint_confirm(company_id=self.env.company)
         except UserError as e:
@@ -235,6 +226,7 @@ class StockWarehouseOrderpoint(models.Model):
                 'res_model': 'product.product',
                 'res_id': self.product_id.id,
                 'views': [(self.env.ref('product.product_normal_form_view').id, 'form')],
+                'context': {'form_view_initial_mode': 'edit'}
             }, _('Edit Product'))
         notification = False
         if len(self) == 1:
@@ -306,10 +298,12 @@ class StockWarehouseOrderpoint(models.Model):
             ('location_dest_id', 'in', self.location_id.ids),
             ('action', 'in', ['pull_push', 'pull']),
             ('route_id.active', '!=', False)
-        ], ['location_dest_id', 'route_id'])
-        for location_dest, route in rules_groups:
-            orderpoints = self.filtered(lambda o: o.location_id.id == location_dest.id)
-            orderpoints.route_id = route
+        ], ['location_dest_id', 'route_id'], ['location_dest_id', 'route_id'], lazy=False)
+        for g in rules_groups:
+            if not g.get('route_id'):
+                continue
+            orderpoints = self.filtered(lambda o: o.location_id.id == g['location_dest_id'][0])
+            orderpoints.route_id = g['route_id']
 
     def _get_lead_days_values(self):
         self.ensure_one()
@@ -363,29 +357,29 @@ class StockWarehouseOrderpoint(models.Model):
         domain_move_out = expression.AND([domain_product, domain_state, domain_move_out_loc])
 
         moves_in = defaultdict(list)
-        for item in Move._read_group(domain_move_in, ['product_id', 'location_dest_id'], ['product_qty:sum']):
-            moves_in[item[0]].append((item[1], item[2]))
+        for item in Move._read_group(domain_move_in, ['product_qty'], ['product_id', 'location_dest_id'], lazy=False):
+            moves_in[item['product_id'][0]].append((item['location_dest_id'][0], item['product_qty']))
 
         moves_out = defaultdict(list)
-        for item in Move._read_group(domain_move_out, ['product_id', 'location_id'], ['product_qty:sum']):
-            moves_out[item[0]].append((item[1], item[2]))
+        for item in Move._read_group(domain_move_out, ['product_qty'], ['product_id', 'location_id'], lazy=False):
+            moves_out[item['product_id'][0]].append((item['location_id'][0], item['product_qty']))
 
         quants = defaultdict(list)
-        for item in Quant._read_group(domain_quant, ['product_id', 'location_id'], ['quantity:sum']):
-            quants[item[0]].append((item[1], item[2]))
+        for item in Quant._read_group(domain_quant, ['quantity'], ['product_id', 'location_id'], lazy=False):
+            quants[item['product_id'][0]].append((item['location_id'][0], item['quantity']))
 
         rounding = {product.id: product.uom_id.rounding for product in all_product_ids}
-        path = {loc: loc.parent_path for loc in self.env['stock.location'].with_context(active_test=False).search([('id', 'child_of', all_replenish_location_ids.ids)])}
+        path = {loc.id: loc.parent_path for loc in self.env['stock.location'].with_context(active_test=False).search([('id', 'child_of', all_replenish_location_ids.ids)])}
         for loc in all_replenish_location_ids:
             for product in all_product_ids:
-                qty_available = sum(q[1] for q in quants.get(product, [(0, 0)]) if q[0] and loc.parent_path in path[q[0]])
-                incoming_qty = sum(m[1] for m in moves_in.get(product, [(0, 0)]) if m[0] and loc.parent_path in path[m[0]])
-                outgoing_qty = sum(m[1] for m in moves_out.get(product, [(0, 0)]) if m[0] and loc.parent_path in path[m[0]])
+                qty_available = sum(q[1] for q in quants.get(product.id, [(0, 0)]) if q[0] and loc.parent_path in path[q[0]])
+                incoming_qty = sum(m[1] for m in moves_in.get(product.id, [(0, 0)]) if m[0] and loc.parent_path in path[m[0]])
+                outgoing_qty = sum(m[1] for m in moves_out.get(product.id, [(0, 0)]) if m[0] and loc.parent_path in path[m[0]])
                 if float_compare(qty_available + incoming_qty - outgoing_qty, 0, precision_rounding=rounding[product.id]) < 0:
                     # group product by lead_days and location in order to read virtual_available
                     # in batch
                     rules = product._get_rules_from_location(loc)
-                    lead_days = rules.with_context(bypass_delay_description=True)._get_lead_days(product)[0]['total_delay']
+                    lead_days = rules.with_context(bypass_delay_description=True)._get_lead_days(product)[0]
                     ploc_per_day[(lead_days, loc)].add(product.id)
 
         # recompute virtual_available with lead days
@@ -410,11 +404,11 @@ class StockWarehouseOrderpoint(models.Model):
         # Group orderpoint by product-location
         orderpoint_by_product_location = self.env['stock.warehouse.orderpoint']._read_group(
             [('id', 'in', orderpoints.ids)],
-            ['product_id', 'location_id'],
-            ['qty_to_order:sum'])
+            ['product_id', 'location_id', 'qty_to_order:sum'],
+            ['product_id', 'location_id'], lazy=False)
         orderpoint_by_product_location = {
-            (product.id, location.id): qty_to_order_sum
-            for product, location, qty_to_order_sum in orderpoint_by_product_location
+            (record.get('product_id')[0], record.get('location_id')[0]): record.get('qty_to_order')
+            for record in orderpoint_by_product_location
         }
         for (product, location), product_qty in to_refill.items():
             qty_in_progress = qty_by_product_loc.get((product, location)) or 0.0
@@ -429,18 +423,18 @@ class StockWarehouseOrderpoint(models.Model):
         # With archived ones to avoid `product_location_check` SQL constraints
         orderpoint_by_product_location = self.env['stock.warehouse.orderpoint'].with_context(active_test=False)._read_group(
             [('id', 'in', orderpoints.ids)],
-            ['product_id', 'location_id'],
-            ['id:recordset'])
+            ['product_id', 'location_id', 'ids:array_agg(id)'],
+            ['product_id', 'location_id'], lazy=False)
         orderpoint_by_product_location = {
-            (product.id, location.id): orderpoint
-            for product, location, orderpoint in orderpoint_by_product_location
+            (record.get('product_id')[0], record.get('location_id')[0]): record.get('ids')[0]
+            for record in orderpoint_by_product_location
         }
 
         orderpoint_values_list = []
         for (product, location_id), product_qty in to_refill.items():
-            orderpoint = orderpoint_by_product_location.get((product, location_id))
-            if orderpoint:
-                orderpoint.qty_forecast += product_qty
+            orderpoint_id = orderpoint_by_product_location.get((product, location_id))
+            if orderpoint_id:
+                self.env['stock.warehouse.orderpoint'].browse(orderpoint_id).qty_forecast += product_qty
             else:
                 orderpoint_values = self.env['stock.warehouse.orderpoint']._get_orderpoint_values(product, location_id)
                 location = self.env['stock.location'].browse(location_id)
@@ -471,20 +465,14 @@ class StockWarehouseOrderpoint(models.Model):
         self.ensure_one()
         domain = [('orderpoint_id', 'in', self.ids)]
         if self.env.context.get('written_after'):
-            domain = expression.AND([domain, [('write_date', '>=', self.env.context.get('written_after'))]])
+            domain = expression.AND([domain, [('write_date', '>', self.env.context.get('written_after'))]])
         move = self.env['stock.move'].search(domain, limit=1)
         if move.picking_id:
-            action = self.env.ref('stock.stock_picking_action_picking_type')
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': _('The inter-warehouse transfers have been generated'),
-                    'message': '%s',
-                    'links': [{
-                        'label': move.picking_id.name,
-                        'url': f'#action={action.id}&id={move.picking_id.id}&model=stock.picking&view_type=form'
-                    }],
                     'sticky': False,
                 }
             }
@@ -514,12 +502,11 @@ class StockWarehouseOrderpoint(models.Model):
         comming from an orderpoint. This method could be override in order to add other custom key that could
         be used in move/po creation.
         """
-        date_deadline = date or fields.Date.today()
-        dates_info = self.product_id._get_dates_info(date_deadline, self.location_id, route_ids=self.route_id)
+        date_planned = date or fields.Date.today()
+        date_planned = self.product_id._get_date_with_security_lead_days(date_planned, self.location_id, route_ids=self.route_id)
         return {
             'route_ids': self.route_id,
-            'date_planned': dates_info['date_planned'],
-            'date_order': dates_info['date_order'],
+            'date_planned': date_planned,
             'date_deadline': date or False,
             'warehouse_id': self.warehouse_id,
             'orderpoint_id': self,

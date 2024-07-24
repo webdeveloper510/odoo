@@ -1252,7 +1252,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
     def test_amounts_sign(self):
         for tax_sign in (1, -1):
             tax = self.env['account.tax'].create({
-                'name': f"tax {tax_sign}",
+                'name': "tax",
                 'amount_type': 'percent',
                 'amount': tax_sign * 10.0,
             })

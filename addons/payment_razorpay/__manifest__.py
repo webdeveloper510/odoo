@@ -14,11 +14,7 @@
 
         'data/payment_provider_data.xml',  # Depends on views/payment_razorpay_templates.xml
     ],
-    'assets': {
-        'web.assets_frontend': [
-            'payment_razorpay/static/src/js/payment_form.js',
-        ],
-    },
+    'application': False,
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',

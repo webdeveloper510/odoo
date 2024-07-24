@@ -3,7 +3,7 @@ from hashlib import sha256
 from base64 import b64encode
 from lxml import etree
 from odoo import models, fields
-from odoo.tools.misc import file_path
+from odoo.modules.module import get_module_resource
 import re
 
 TAX_EXEMPTION_CODES = ['VATEX-SA-29', 'VATEX-SA-29-7', 'VATEX-SA-30']
@@ -57,7 +57,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
 
         def _transform_and_canonicalize_xml(content):
             """ Transform XML content to remove certain elements and signatures using an XSL template """
-            invoice_xsl = etree.parse(file_path('l10n_sa_edi/data/pre-hash_invoice.xsl'))
+            invoice_xsl = etree.parse(get_module_resource('l10n_sa_edi', 'data', 'pre-hash_invoice.xsl'))
             transform = etree.XSLT(invoice_xsl)
             return _canonicalize_xml(transform(content))
 
@@ -91,7 +91,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
     def _get_delivery_vals_list(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
         shipping_address = invoice.partner_shipping_id
-        return [{'actual_delivery_date': invoice.delivery_date or invoice.invoice_date,
+        return [{'actual_delivery_date': invoice.l10n_sa_delivery_date,
                  'delivery_address_vals': self._get_partner_address_vals(shipping_address) if shipping_address else {},}]
 
     def _get_partner_contact_vals(self, partner):
@@ -118,7 +118,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
     def _get_invoice_payment_means_vals_list(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
         res = super()._get_invoice_payment_means_vals_list(invoice)
-        res[0]['payment_means_code'] = PAYMENT_MEANS_CODE[self._l10n_sa_get_payment_means_code(invoice)]
+        res[0]['payment_means_code'] = PAYMENT_MEANS_CODE.get(self._l10n_sa_get_payment_means_code(invoice), PAYMENT_MEANS_CODE['unknown'])
         res[0]['payment_means_code_attrs'] = {'listID': 'UN/ECE 4461'}
         res[0]['adjustment_reason'] = invoice.ref
         return res
@@ -128,7 +128,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         return {
             **super()._get_partner_address_vals(partner),
             'building_number': partner.l10n_sa_edi_building_number,
-            'city_subdivision_name ': partner.street2,
+            'neighborhood': partner.street2,
             'plot_identification': partner.l10n_sa_edi_plot_identification,
         }
 
@@ -163,7 +163,11 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
                 - 381: Credit Note
                 - 388: Invoice
         """
-        return 383 if invoice.debit_origin_id else 381 if invoice.move_type == 'out_refund' else 388
+        return (
+            383 if invoice.debit_origin_id else
+            381 if invoice.move_type == 'out_refund' else
+            386 if invoice._is_downpayment() else 388
+        )
 
     def _l10n_sa_get_billing_reference_vals(self, invoice):
         """ Get the billing reference vals required to render the BillingReference for credit/debit notes """
@@ -204,9 +208,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         """ Calculate the down-payment amount according to ZATCA rules """
         downpayment_lines = False if invoice._is_downpayment() else invoice.line_ids.filtered(lambda l: l._get_downpayment_lines())
         if downpayment_lines:
-            tax_vals = invoice._prepare_invoice_aggregated_taxes(
-                filter_tax_values_to_apply=lambda l, t: not self.env['account.tax'].browse(t['id']).l10n_sa_is_retention
-            )
+            tax_vals = invoice._prepare_edi_tax_details(filter_to_apply=lambda l, t: not self.env['account.tax'].browse(t['id']).l10n_sa_is_retention)
             base_amount = abs(sum(tax_vals['tax_details_per_record'][l]['base_amount_currency'] for l in downpayment_lines))
             tax_amount = abs(sum(tax_vals['tax_details_per_record'][l]['tax_amount_currency'] for l in downpayment_lines))
             return {
@@ -220,36 +222,65 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         # We use base_amount_currency + tax_amount_currency instead of amount_total because we do not want to include
         # withholding tax amounts in our calculations
         total_amount = abs(vals['taxes_vals']['base_amount_currency'] + vals['taxes_vals']['tax_amount_currency'])
-
+        line_extension_amount = vals['vals']['legal_monetary_total_vals']['line_extension_amount']
         tax_inclusive_amount = total_amount
         tax_exclusive_amount = abs(vals['taxes_vals']['base_amount_currency'])
         prepaid_amount = 0
         payable_amount = total_amount
-
         # - When we calculate the tax values, we filter out taxes and invoice lines linked to downpayments.
         #   As such, when we calculate the TaxInclusiveAmount, it already accounts for the tax amount of the downpayment
         #   Same goes for the TaxExclusiveAmount, and we do not need to add the Tax amount of the downpayment
         # - The payable amount does not account for the tax amount of the downpayment, so we add it
         downpayment_vals = self._l10n_sa_get_prepaid_amount(invoice, vals)
-
+        allowance_charge_vals = vals['vals']['allowance_charge_vals']
+        allowance_total_amount = sum(a['amount'] for a in allowance_charge_vals if a['charge_indicator'] == 'false')
         if downpayment_vals:
-            # Makes no sense, but according to ZATCA, if there is a downpayment, the TotalInclusiveAmount
-            # should include the total amount of the invoice (including downpayment amount) PLUS the downpayment
-            # total amount, AGAIN.
-            prepaid_amount = tax_inclusive_amount + downpayment_vals['total_amount']
-            payable_amount = - downpayment_vals['total_amount']
-
+            # - BR-KSA-80: To calculate prepaid, we need to sum up the amounts of standard lines (neither a down-payments, nor a discount)
+            #   then we add the total amount of the down-payment.
+            # - BR-CO-16: To calculate payable amount, we substract the calculated prepaid amount from the total tax inclusive amount of the invoice
+            regular_line_vals = invoice._prepare_edi_tax_details(
+                filter_invl_to_apply=lambda line: (line.price_subtotal > 0 and not line._get_downpayment_lines())
+            )
+            prepaid_amount = abs(regular_line_vals['base_amount_currency'] + regular_line_vals['tax_amount_currency']) + downpayment_vals['total_amount']
+            payable_amount = tax_inclusive_amount - prepaid_amount
         return {
+            'line_extension_amount': line_extension_amount - allowance_total_amount,
             'tax_inclusive_amount': tax_inclusive_amount,
             'tax_exclusive_amount': tax_exclusive_amount,
             'prepaid_amount': prepaid_amount,
-            'payable_amount': payable_amount
+            'payable_amount': payable_amount,
+            'allowance_total_amount': allowance_total_amount
         }
 
     def _get_tax_category_list(self, invoice, taxes):
         """ Override to filter out withholding taxes """
         non_retention_taxes = taxes.filtered(lambda t: not t.l10n_sa_is_retention)
         return super()._get_tax_category_list(invoice, non_retention_taxes)
+
+    def _get_document_allowance_charge_vals_list(self, invoice):
+        """
+        Charge Reasons & Codes (As per ZATCA):
+        https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5189.htm
+        As far as ZATCA is concerned, we calculate Allowance/Charge vals for global discounts as
+        a document level allowance, and we do not include any other charges or allowances
+        """
+        res = super()._get_document_allowance_charge_vals_list(invoice)
+        for line in invoice.invoice_line_ids.filtered(lambda l: l._is_global_discount_line()):
+            taxes = line.tax_ids.flatten_taxes_hierarchy().filtered(lambda t: t.amount_type != 'fixed')
+            res.append({
+                'charge_indicator': 'false',
+                'allowance_charge_reason_code': "95",
+                'allowance_charge_reason': "Discount",
+                'amount': abs(line.price_subtotal),
+                'currency_dp': 2,
+                'currency_name': invoice.currency_id.name,
+                'tax_category_vals': [{
+                    'id': tax['id'],
+                    'percent': tax['percent'],
+                    'tax_scheme_id': 'VAT',
+                } for tax in self._get_tax_category_list(line.move_id, taxes)],
+            })
+        return res
 
     def _export_invoice_vals(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
@@ -258,11 +289,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         vals.update({
             'main_template': 'account_edi_ubl_cii.ubl_20_Invoice',
             'InvoiceType_template': 'l10n_sa_edi.ubl_21_InvoiceType_zatca',
-            'CreditNoteType_template': 'l10n_sa_edi.ubl_21_CreditNoteType_zatca',
-            'DebitNoteType_template': 'l10n_sa_edi.ubl_21_DebitNoteType_zatca',
             'InvoiceLineType_template': 'l10n_sa_edi.ubl_21_InvoiceLineType_zatca',
-            'CreditNoteLineType_template': 'l10n_sa_edi.ubl_21_CreditNoteLineType_zatca',
-            'DebitNoteLineType_template': 'l10n_sa_edi.ubl_21_DebitNoteLineType_zatca',
             'AddressType_template': 'l10n_sa_edi.ubl_21_AddressType_zatca',
             'PartyType_template': 'l10n_sa_edi.ubl_21_PartyType_zatca',
             'TaxTotalType_template': 'l10n_sa_edi.ubl_21_TaxTotalType_zatca',
@@ -271,9 +298,8 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
 
         vals['vals'].update({
             'profile_id': 'reporting:1.0',
-            'document_type_code_attrs': {'name': self._l10n_sa_get_invoice_transaction_code(invoice)},
-            'document_type_code': self._l10n_sa_get_invoice_type(invoice),
-            'tax_currency_code': invoice.company_currency_id.name,
+            'invoice_type_code_attrs': {'name': self._l10n_sa_get_invoice_transaction_code(invoice)},
+            'invoice_type_code': self._l10n_sa_get_invoice_type(invoice),
             'issue_date': fields.Datetime.context_timestamp(self.with_context(tz='Asia/Riyadh'),
                                                             invoice.l10n_sa_confirmation_datetime),
             'previous_invoice_hash': self._l10n_sa_get_previous_invoice_hash(invoice),
@@ -283,9 +309,21 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             'due_date': None,
         })
 
-        vals['vals']['monetary_total_vals'].update(self._l10n_sa_get_monetary_vals(invoice, vals))
+        vals['vals']['legal_monetary_total_vals'].update(self._l10n_sa_get_monetary_vals(invoice, vals))
+        self._l10n_sa_postprocess_line_vals(vals)
 
         return vals
+
+    def _l10n_sa_postprocess_line_vals(self, vals):
+        """
+            Postprocess vals to remove negative line amounts, as those will be used to compute
+            document level allowances (global discounts)
+        """
+        final_line_vals = []
+        for line_vals in vals['vals']['invoice_line_vals']:
+            if line_vals['price_vals']['price_amount'] >= 0:
+                final_line_vals.append(line_vals)
+        vals['vals']['invoice_line_vals'] = final_line_vals
 
     def _l10n_sa_get_additional_tax_total_vals(self, invoice, vals):
         """
@@ -327,7 +365,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             }
         return {}
 
-    def _get_invoice_line_vals(self, line, line_id, taxes_vals):
+    def _get_invoice_line_vals(self, line, taxes_vals):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
 
         def grouping_key_generator(base_line, tax_values):
@@ -348,12 +386,12 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             # values to set in the TaxableAmount and TaxAmount nodes on the InvoiceLine for the down payment.
             # This means ZATCA will return a warning message for the BR-KSA-80 rule since it cannot calculate the
             # TaxableAmount and the TaxAmount nodes correctly. To avoid this, we re-caclculate the taxes_vals just before
-            # we set the values for the down payment line, and we do not pass any filters to the
-            # _prepare_invoice_aggregated_taxes method
-            line_taxes = line.move_id._prepare_invoice_aggregated_taxes(grouping_key_generator=grouping_key_generator)
+            # we set the values for the down payment line, and we do not pass any filters to the _prepare_edi_tax_details
+            # method
+            line_taxes = line.move_id._prepare_edi_tax_details(grouping_key_generator=grouping_key_generator)
             taxes_vals = line_taxes['tax_details_per_record'][line]
 
-        line_vals = super()._get_invoice_line_vals(line, line_id, taxes_vals)
+        line_vals = super()._get_invoice_line_vals(line, taxes_vals)
         total_amount_sa = abs(taxes_vals['tax_amount_currency'] + taxes_vals['base_amount_currency'])
         extension_amount = abs(line_vals['line_extension_amount'])
         if not line.move_id._is_downpayment() and line._get_downpayment_lines():
@@ -362,7 +400,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             line_vals['tax_total_vals'][0]['tax_amount'] = 0
             line_vals['prepayment_vals'] = self._l10n_sa_get_line_prepayment_vals(line, taxes_vals)
         line_vals['tax_total_vals'][0]['total_amount_sa'] = total_amount_sa
-        line_vals['line_quantity'] = abs(line_vals['line_quantity'])
+        line_vals['invoiced_quantity'] = abs(line_vals['invoiced_quantity'])
         line_vals['line_extension_amount'] = extension_amount
 
         return line_vals

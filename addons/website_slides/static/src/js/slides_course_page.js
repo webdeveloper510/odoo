@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import publicWidget from '@web/legacy/js/public/public_widget';
-import { session } from "@web/session";
-import { renderToElement } from "@web/core/utils/render";
+import publicWidget from 'web.public.widget';
+import session from 'web.session';
+import { qweb as QWeb } from 'web.core';
+
 
 /**
  * Global widget for both fullscreen view and non-fullscreen view of a slide course.
@@ -19,22 +20,6 @@ export const SlideCoursePage = publicWidget.Widget.extend({
         'slide_mark_completed': '_onSlideMarkCompleted',
     },
 
-    init() {
-        this._super(...arguments);
-        this.rpc = this.bindService("rpc");
-    },
-
-    /**
-     * Collapse the next category when the current one has just been completed
-     */
-    collapseNextCategory: function (nextCategoryId) {
-        const categorySection = document.getElementById(`category-collapse-${nextCategoryId}`);
-        if (categorySection?.getAttribute('aria-expanded') === 'false') {
-            categorySection.setAttribute('aria-expanded', true);
-            document.querySelector(`ul[id=collapse-${nextCategoryId}]`).classList.add('show');
-        }
-    },
-
     /**
      * Greens up the bullet when the slide is completed
      *
@@ -49,10 +34,9 @@ export const SlideCoursePage = publicWidget.Widget.extend({
             return;
         }
 
-        const newButton = renderToElement('website.slides.sidebar.done.button', {
+        const newButton = QWeb.render('website.slides.sidebar.done.button', {
             slideId: slide.id,
-            uncompletedIcon: $button.data('uncompletedIcon') ?? 'fa-circle-thin',
-            slideCompleted: completed ? 1 : 0,
+            slideCompleted: completed,
             canSelfMarkUncompleted: slide.canSelfMarkUncompleted,
             canSelfMarkCompleted: slide.canSelfMarkCompleted,
             isMember: slide.isMember,
@@ -105,16 +89,13 @@ export const SlideCoursePage = publicWidget.Widget.extend({
             return;
         }
 
-        const data = await this.rpc(
-            `/slides/slide/${completed ? 'set_completed' : 'set_uncompleted'}`,
-            {slide_id: slide.id},
-        );
+        const data = await this._rpc({
+            route: `/slides/slide/${completed ? 'set_completed' : 'set_uncompleted'}`,
+            params: {slide_id: slide.id},
+        });
 
         this.toggleCompletionButton(slide, completed);
         this.updateProgressbar(data.channel_completion);
-        if (data.next_category_id) {
-            this.collapseNextCategory(data.next_category_id);
-        }
     },
     /**
      * Retrieve the slide data corresponding to the slide id given in argument.

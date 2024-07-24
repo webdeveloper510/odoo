@@ -2,10 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import fields
+from odoo.fields import Command
+from odoo.tests import tagged
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.product.tests.test_product_attribute_value_config import TestProductAttributeValueCommon
-from odoo.tests import tagged
+from odoo.addons.product.tests.common import ProductAttributesCommon
+from odoo.addons.sale.tests.common import SaleCommon
 
 
 @tagged("post_install", "-at_install")
@@ -16,8 +19,6 @@ class TestSaleProductAttributeValueCommon(AccountTestInvoicingCommon, TestProduc
         super().setUpClass(chart_template_ref=chart_template_ref)
         cls.computer.company_id = cls.env.company
         cls.computer = cls.computer.with_env(cls.env)
-        cls.env['product.pricelist'].sudo().search([]).action_archive()
-        cls.env['product.pricelist'].create({'name': 'Base Pricelist'})
 
     @classmethod
     def _setup_currency(cls, currency_ratio=2):
@@ -202,8 +203,153 @@ class TestSaleProductAttributeValueConfig(TestSaleProductAttributeValueCommon):
         self.assertEqual(computer_ssd_256_after.attribute_line_id, computer_ssd_256_before.attribute_line_id)
         do_test(self)
 
+    def test_02_get_combination_info(self):
+        # If using multi-company, company_id will be False, and this code should
+        # still work.
+        # The case with a company_id will be implicitly tested on website_sale.
+        self.computer.company_id = False
+
+        computer_ssd_256 = self._get_product_template_attribute_value(self.ssd_256)
+        computer_ram_8 = self._get_product_template_attribute_value(self.ram_8)
+        computer_hdd_1 = self._get_product_template_attribute_value(self.hdd_1)
+
+        # CASE: no pricelist, no currency, with existing combination, with price_extra on attributes
+        combination = computer_ssd_256 + computer_ram_8 + computer_hdd_1
+        computer_variant = self.computer._get_variant_for_combination(combination)
+
+        res = self.computer._get_combination_info(combination)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], computer_variant.id)
+        self.assertEqual(res['display_name'], "Super Computer (256 GB, 8 GB, 1 To)")
+        self.assertEqual(res['price'], 2222)
+        self.assertEqual(res['list_price'], 2222)
+        self.assertEqual(res['price_extra'], 222)
+
+        # CASE: no combination, product given
+        res = self.computer._get_combination_info(self.env['product.template.attribute.value'], computer_variant.id)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], computer_variant.id)
+        self.assertEqual(res['display_name'], "Super Computer (256 GB, 8 GB, 1 To)")
+        self.assertEqual(res['price'], 2222)
+        self.assertEqual(res['list_price'], 2222)
+        self.assertEqual(res['price_extra'], 222)
+
+        # CASE: using pricelist, quantity rule
+        pricelist, pricelist_item, currency_ratio, discount_ratio = self._setup_pricelist()
+
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], computer_variant.id)
+        self.assertEqual(res['display_name'], "Super Computer (256 GB, 8 GB, 1 To)")
+        self.assertEqual(res['price'], 2222 * currency_ratio * discount_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+
+        # CASE: no_variant combination, it's another variant now
+
+        self.computer_ssd_attribute_lines.write({'active': False})
+        self.ssd_attribute.create_variant = 'no_variant'
+        self._add_ssd_attribute_line()
+        computer_ssd_256 = self._get_product_template_attribute_value(self.ssd_256)
+        computer_ram_8 = self._get_product_template_attribute_value(self.ram_8)
+        computer_hdd_1 = self._get_product_template_attribute_value(self.hdd_1)
+        combination = computer_ssd_256 + computer_ram_8 + computer_hdd_1
+
+        computer_variant_new = self.computer._get_variant_for_combination(combination)
+        self.assertTrue(computer_variant_new)
+
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], computer_variant_new.id)
+        self.assertEqual(res['display_name'], "Super Computer (8 GB, 1 To)")
+        self.assertEqual(res['price'], 2222 * currency_ratio * discount_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+
+        # CASE: dynamic combination, but the variant already exists
+        self.computer_hdd_attribute_lines.write({'active': False})
+        self.hdd_attribute.create_variant = 'dynamic'
+        self._add_hdd_attribute_line()
+        computer_ssd_256 = self._get_product_template_attribute_value(self.ssd_256)
+        computer_ram_8 = self._get_product_template_attribute_value(self.ram_8)
+        computer_hdd_1 = self._get_product_template_attribute_value(self.hdd_1)
+        combination = computer_ssd_256 + computer_ram_8 + computer_hdd_1
+
+        computer_variant_new = self.computer._create_product_variant(combination)
+        self.assertTrue(computer_variant_new)
+
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], computer_variant_new.id)
+        self.assertEqual(res['display_name'], "Super Computer (8 GB, 1 To)")
+        self.assertEqual(res['price'], 2222 * currency_ratio * discount_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+
+        # CASE: dynamic combination, no variant existing
+        # Test invalidate_cache on product.template _create_variant_ids
+        self._add_keyboard_attribute()
+        combination += self._get_product_template_attribute_value(self.keyboard_excluded)
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], False)
+        self.assertEqual(res['display_name'], "Super Computer (8 GB, 1 To, Excluded)")
+        self.assertEqual(res['price'], (2222 - 5) * currency_ratio * discount_ratio)
+        self.assertEqual(res['list_price'], (2222 - 5) * currency_ratio)
+        self.assertEqual(res['price_extra'], (222 - 5) * currency_ratio)
+
+        # CASE: pricelist set value to 0, no variant
+        # Test invalidate_cache on product.pricelist write
+        pricelist_item.percent_price = 100
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['product_template_id'], self.computer.id)
+        self.assertEqual(res['product_id'], False)
+        self.assertEqual(res['display_name'], "Super Computer (8 GB, 1 To, Excluded)")
+        self.assertEqual(res['price'], 0)
+        self.assertEqual(res['list_price'], (2222 - 5) * currency_ratio)
+        self.assertEqual(res['price_extra'], (222 - 5) * currency_ratio)
+
+    def test_03_get_combination_info_discount_policy(self):
+        computer_ssd_256 = self._get_product_template_attribute_value(self.ssd_256)
+        computer_ram_8 = self._get_product_template_attribute_value(self.ram_8)
+        computer_hdd_1 = self._get_product_template_attribute_value(self.hdd_1)
+        combination = computer_ssd_256 + computer_ram_8 + computer_hdd_1
+
+        pricelist, pricelist_item, currency_ratio, discount_ratio = self._setup_pricelist()
+
+        pricelist.discount_policy = 'with_discount'
+
+        # CASE: no discount, setting with_discount
+        res = self.computer._get_combination_info(combination, add_qty=1, pricelist=pricelist)
+        self.assertEqual(res['price'], 2222 * currency_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+        self.assertEqual(res['has_discounted_price'], False)
+
+        # CASE: discount, setting with_discount
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['price'], 2222 * currency_ratio * discount_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+        self.assertEqual(res['has_discounted_price'], False)
+
+        # CASE: no discount, setting without_discount
+        pricelist.discount_policy = 'without_discount'
+        res = self.computer._get_combination_info(combination, add_qty=1, pricelist=pricelist)
+        self.assertEqual(res['price'], 2222 * currency_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+        self.assertEqual(res['has_discounted_price'], False)
+
+        # CASE: discount, setting without_discount
+        res = self.computer._get_combination_info(combination, add_qty=2, pricelist=pricelist)
+        self.assertEqual(res['price'], 2222 * currency_ratio * discount_ratio)
+        self.assertEqual(res['list_price'], 2222 * currency_ratio)
+        self.assertEqual(res['price_extra'], 222 * currency_ratio)
+        self.assertEqual(res['has_discounted_price'], True)
+
     def test_04_create_product_variant_non_dynamic(self):
-        """The goal of this test is to make sure the _create_product_variant does
+        """The goal of this test is to make sure the create_product_variant does
         not create variant if the type is not dynamic. It can however return a
         variant if it already exists."""
         computer_ssd_256 = self._get_product_template_attribute_value(self.ssd_256)
@@ -224,7 +370,7 @@ class TestSaleProductAttributeValueConfig(TestSaleProductAttributeValueCommon):
         self.assertEqual(self.computer._create_product_variant(combination), Product)
 
     def test_05_create_product_variant_dynamic(self):
-        """The goal of this test is to make sure the _create_product_variant does
+        """The goal of this test is to make sure the create_product_variant does
         work with dynamic. If the combination is possible, it should create it.
         If it's not possible, it should not create it."""
         self.computer_hdd_attribute_lines.write({'active': False})
@@ -275,3 +421,101 @@ class TestSaleProductAttributeValueConfig(TestSaleProductAttributeValueCommon):
         })
         self.computer_keyboard_attribute_lines.product_template_value_ids[0].price_extra = 5
         self.computer_keyboard_attribute_lines.product_template_value_ids[1].price_extra = -5
+
+
+@tagged('post_install', '-at_install')
+class TestSaleProductVariants(ProductAttributesCommon, SaleCommon):
+
+    # TODO move to sale_product_configurator tests in 16.3+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.product_template_2lines_2attributes = cls.env['product.template'].create({
+            'name': '2 lines 2 attributes',
+            'uom_id': cls.uom_unit.id,
+            'uom_po_id': cls.uom_unit.id,
+            'categ_id': cls.product_category.id,
+            'attribute_line_ids': [
+                Command.create({
+                    'attribute_id': cls.color_attribute.id,
+                    'value_ids': [Command.set([
+                        cls.color_attribute_red.id,
+                        cls.color_attribute_blue.id,
+                    ])],
+                }),
+                Command.create({
+                    'attribute_id': cls.size_attribute.id,
+                    'value_ids': [Command.set([
+                        cls.size_attribute_s.id,
+                        cls.size_attribute_m.id,
+                    ])]
+                })
+            ]
+        })
+
+        # Sell all variants
+        cls.empty_order.order_line = [
+            Command.create({
+                'product_id': product.id,
+            })
+            for product in cls.product_template_2lines_2attributes.product_variant_ids
+        ]
+
+    def test_attribute_removal(self):
+        def _get_ptavs():
+            return self.product_template_2lines_2attributes.with_context(
+                active_test=False
+            ).attribute_line_ids.product_template_value_ids
+
+        def _get_archived_variants():
+            return self.product_template_2lines_2attributes.with_context(
+                active_test=False
+            ).product_variant_ids.filtered(lambda p: not p.active)
+
+        def _get_active_variants():
+            return self.product_template_2lines_2attributes.product_variant_ids
+
+        self.assertEqual(len(_get_ptavs()), 4)
+        self.product_template_2lines_2attributes.attribute_line_ids = [
+            Command.unlink(self.product_template_2lines_2attributes.attribute_line_ids.filtered(
+                lambda ptal: ptal.attribute_id.id == self.size_attribute.id
+            ).id)
+        ]
+        self.assertEqual(len(_get_ptavs()), 4)
+
+        # Use products s.t. they are archived and not deleted
+        self.empty_order.order_line = [
+            Command.create({
+                'product_id': product.id,
+            })
+            for product in self.product_template_2lines_2attributes.product_variant_ids
+        ]
+
+        self.assertEqual(len(_get_archived_variants()), 4)
+        self.assertEqual(len(_get_active_variants()), 2)
+
+        self.product_template_2lines_2attributes.attribute_line_ids = [
+            Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([
+                    self.size_attribute_s.id,
+                ])]
+            })
+        ]
+        self.assertEqual(len(_get_ptavs()), 4)
+        self.assertEqual(len(_get_active_variants()), 2)
+        self.assertEqual(len(_get_archived_variants()), 4)
+
+        # When adding a single attribute line, the attribute will be added to all existing variants
+        # Instead of unarchiving existing archived variants with the same combination
+        # Leading to a state where the database holds two variants with the same combination
+        # We don't want this combination to be excluded from the product configurator as it is valid
+        # as long as there is one active variant with this configuration.
+        exclusions_data = self.product_template_2lines_2attributes._get_attribute_exclusions()
+        self.assertTrue(
+            all(
+                tuple(product.product_template_attribute_value_ids.ids) not in exclusions_data['archived_combinations']
+                for product in _get_active_variants()
+            )
+        )

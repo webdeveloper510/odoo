@@ -3,15 +3,17 @@
 # 	* website_event
 # 
 # Translators:
-# Wil Odoo, 2024
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
+# Martin Trigaux, 2022
+# Wichanon Jamwutthipreecha, 2022
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-29 10:44+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-02-07 08:56+0000\n"
+"PO-Revision-Date: 2022-09-22 05:56+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +38,7 @@ msgid "(Ref:"
 msgstr "(อ้างอิง:"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "(only"
 msgstr "(เฉพาะ"
 
@@ -44,10 +46,8 @@ msgstr "(เฉพาะ"
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid ""
 ")\n"
-"                                    <i class=\"fa fa-long-arrow-down d-block text-muted mx-3 my-2\" style=\"font-size: 1.5rem\"/>"
+"                                <i class=\"fa fa-long-arrow-down d-block text-muted mx-3 my-2\" style=\"font-size: 1.5rem\"/>"
 msgstr ""
-")\n"
-"                                    <i class=\"fa fa-long-arrow-down d-block text-muted mx-3 my-2\" style=\"font-size: 1.5rem\"/>"
 
 #. module: website_event
 #. odoo-javascript
@@ -76,7 +76,14 @@ msgstr ""
 "มันสร้างความมั่นใจในกิจกรรมของคุณ</em>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.template_intro
+msgid ""
+"<font style=\"font-size: 62px;\" "
+"class=\"o_default_snippet_text\">Introduction</font>"
+msgstr "<font style=\"font-size: 62px;\" class=\"o_default_snippet_text\">บทนำ</font>"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "<i class=\"fa fa-ban me-2\"/>Sold Out"
 msgstr "<i class=\"fa fa-ban me-2\"/>ขายหมดแล้ว"
 
@@ -86,24 +93,10 @@ msgid "<i class=\"fa fa-ban me-2\"/>Unpublished"
 msgstr "<i class=\"fa fa-ban me-2\"/>ไม่เผยแพร่"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-calendar me-2\"/>Add to Calendar"
-msgstr "<i class=\"fa fa-calendar me-2\"/>เพิ่มลงในปฏิทิน"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+#: model_terms:ir.ui.view,arch_db:website_event.event_details
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
 msgid "<i class=\"fa fa-check me-2\"/>Registered"
 msgstr "<i class=\"fa fa-check me-2\"/>ลงทะเบียนแล้ว"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.navbar
-msgid ""
-"<i class=\"fa fa-chevron-left me-2\"/>\n"
-"            <span>Back to events</span>"
-msgstr ""
-"<i class=\"fa fa-chevron-left me-2\"/>\n"
-"            <span>กลับไปที่กิจกรรม</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
@@ -162,14 +155,20 @@ msgstr ""
 "title=\"LinkedIn\"/>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-map-marker fa-fw\" role=\"img\"/>Get the direction"
-msgstr "<i class=\"fa fa-map-marker fa-fw\" role=\"รูปภาพ\"/> รับแผนที่"
+#: model_terms:ir.ui.view,arch_db:website_event.layout
+msgid ""
+"<i class=\"fa fa-long-arrow-left me-2\"/>\n"
+"                            <span>All Events</span>"
+msgstr ""
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
-msgid "<i class=\"fa fa-tiktok text-tiktok\" aria-label=\"TikTok\" title=\"TikTok\"/>"
-msgstr "<i class=\"fa fa-tiktok text-tiktok\" aria-label=\"TikTok\" title=\"TikTok\"/>"
+#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form_add
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"Arrow\"/>"
+msgstr ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"ลูกศร\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
@@ -197,9 +196,9 @@ msgstr ""
 "o_wevent_badge\">ผู้บรรยาย</span>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.events_list
-msgid "<span class=\"fa fa-plus me-1\"/> Create an Event"
-msgstr "<span class=\"fa fa-plus me-1\"/> สร้างกิจกรรม"
+#: model_terms:ir.ui.view,arch_db:website_event.index_topbar
+msgid "<span class=\"navbar-brand h4 my-0 me-auto\">Events</span>"
+msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.display_timer_widget
@@ -238,15 +237,22 @@ msgstr ""
 "class=\"o_countdown_metric\"/>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
+msgid "<span class=\"py-2 o_wevent_registration_title text-start\">Tickets</span>"
+msgstr ""
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
+msgid "<span class=\"text-dark fw-bold align-middle px-2\">Qty</span>"
+msgstr ""
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid ""
 "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" class=\"text-danger\">\n"
-"                                        <i class=\"fa fa-ban me-2\"/>Sold Out\n"
-"                                    </span>"
+"                                    <i class=\"fa fa-ban me-2\"/>Sold Out\n"
+"                                </span>"
 msgstr ""
-"<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" class=\"text-danger\">\n"
-"                                        <i class=\"fa fa-ban me-2\"/>ขายหมดแล้ว\n"
-"                                    </span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_location
@@ -254,14 +260,18 @@ msgid "<span>Online Events</span>"
 msgstr "<span>อีเวนต์ออนไลน์</span>"
 
 #. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
+msgid ""
+"<span>Tickets</span>\n"
+"                        <span class=\"btn p-0 close d-none\">×</span>"
+msgstr ""
+"<span>ทิกเก็ต</span>\n"
+"                        <span class=\"btn p-0 close d-none\">×</span>"
+
+#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "<strong> You ordered more tickets than available seats</strong>"
 msgstr "<strong>คุณสั่งซื้อทิกเก็ตเกินจำนวนที่นั่งที่มีอยู่</strong>"
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_0_question_2_answer_2
-msgid "A friend"
-msgstr "เพื่อน"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_photos
@@ -277,6 +287,11 @@ msgstr "เกี่ยวกับเรา"
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_about_us
 msgid "About us"
 msgstr "เกี่ยวกับเรา"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+msgid "Add to Calendar"
+msgstr "เพิ่มในปฏิทิน"
 
 #. module: website_event
 #. odoo-python
@@ -298,40 +313,14 @@ msgid "All countries"
 msgstr "ประเทศทั้งหมด"
 
 #. module: website_event
-#: model:event.question,title:website_event.event_0_question_1
-msgid "Allergies"
-msgstr "โรคภูมิแพ้"
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__website_menu
 msgid "Allows to display and manage event-specific menus on website."
 msgstr "อนุญาตให้แสดงและจัดการเมนูเฉพาะอีเวนต์บนเว็บไซต์"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__name
-msgid "Answer"
-msgstr "คำตอบ"
-
-#. module: website_event
-#: model:ir.actions.act_window,name:website_event.action_event_registration_report
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_answer_view_graph
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_answer_view_pivot
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_answer_view_tree
-msgid "Answer Breakdown"
-msgstr "เฉลยคำตอบ"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__answer_ids
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_question_view_form
-msgid "Answers"
-msgstr "คำตอบ"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__once_per_order
-msgid "Ask once per order"
-msgstr "ถามหนึ่งครั้งต่อคำสั่งซื้อ"
+#: model_terms:ir.ui.view,arch_db:website_event.res_config_settings_view_form
+msgid "Ask questions to attendees when registering online"
+msgstr "ถามคำถามกับผู้เข้าร่วมเมื่อลงทะเบียนออนไลน์"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_speaker_bio
@@ -348,16 +337,6 @@ msgstr ""
 "ซึ่งเป็นซอฟต์แวร์ธุรกิจโอเพ่นซอร์สที่มีการติดตั้งมากที่สุดจากทั่วโลก"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_registration__registration_answer_ids
-msgid "Attendee Answers"
-msgstr "คำตอบผู้เข้าร่วม"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_registration__registration_answer_choice_ids
-msgid "Attendee Selection Answers"
-msgstr "คำตอบการคัดเลือกผู้เข้าร่วม"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "Attendees"
 msgstr "ผู้เข้าร่วม"
@@ -368,27 +347,14 @@ msgid "Author"
 msgstr "ผู้เขียน"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_1_question_0_answer_1
-#: model:event.question.answer,name:website_event.event_5_question_0_answer_1
-#: model:event.question.answer,name:website_event.event_type_data_sports_question_0_answer_1
-msgid "Blog Post"
-msgstr "บล็อกโพสต์"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__partner_id
-msgid "Booked by"
-msgstr "จองแล้วโดย"
-
-#. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/website_snippet_filter.py:0
 #, python-format
 msgid "Business Workshops"
-msgstr "การสัมมนาทางธุรกิจ"
+msgstr "การสัมนาทางธุรกิจ"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__can_publish
-#: model:ir.model.fields,field_description:website_event.field_event_tag__can_publish
 #: model:ir.model.fields,field_description:website_event.field_event_tag_category__can_publish
 msgid "Can Publish"
 msgstr "สามารถเผยแพร่"
@@ -404,32 +370,10 @@ msgid "Cards"
 msgstr "การ์ด"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.snippet_options
-msgid "Card design"
-msgstr "การออกแบบการ์ด"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.snippet_options
-msgid "Template badge"
-msgstr "ป้ายเทมเพลต"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.display_timer_alert_widget
-#: model_terms:ir.ui.view,arch_db:website_event.index_topbar
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "Close"
 msgstr "ปิด"
-
-#. module: website_event
-#: model_terms:ir.actions.act_window,help:website_event.action_event_registration_report
-msgid "Come back once you have registrations to overview answers."
-msgstr "กลับมาอีกครั้งเมื่อคุณลงทะเบียนเพื่อรับภาพรวมคำตอบแล้ว"
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_0_question_2_answer_1
-msgid "Commercials"
-msgstr "โฆษณา"
 
 #. module: website_event
 #. odoo-python
@@ -448,10 +392,9 @@ msgid "Community Menu"
 msgstr "เมนูชุมชน"
 
 #. module: website_event
-#: model:ir.model.fields.selection,name:website_event.selection__event_question__question_type__company_name
 #: model_terms:ir.ui.view,arch_db:website_event.s_speaker_bio
 msgid "Company"
-msgstr "บริษัท"
+msgstr "บริษัทเดียว"
 
 #. module: website_event
 #. odoo-python
@@ -461,22 +404,11 @@ msgid "Conference For Architects"
 msgstr "การประชุมสำหรับสถาปนิก"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.registration_configure_tickets_button
-msgid "Configure event tickets"
-msgstr "กำหนดค่าตั๋วกิจกรรม"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
-msgid "Confirm Registration"
-msgstr "ยืนยันการลงทะเบียน"
+msgid "Continue"
+msgstr "ต่อไป"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_7_question_0_answer_0
-msgid "Consumers"
-msgstr "ผู้บริโภค"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_location
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Countries"
 msgstr "ประเทศ"
@@ -487,23 +419,16 @@ msgid "Cover Properties"
 msgstr "คุณสมบัติปก"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__create_uid
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__create_uid
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__create_uid
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__create_uid
 msgid "Created by"
 msgstr "สร้างโดย"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__create_date
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__create_date
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__create_date
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__create_date
 msgid "Created on"
 msgstr "สร้างเมื่อ"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_time
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Date"
 msgstr "วันที่"
@@ -529,9 +454,6 @@ msgid "Description"
 msgstr "คำอธิบาย"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__display_name
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__display_name
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__display_name
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__display_name
 msgid "Display Name"
 msgstr "แสดงชื่อ"
@@ -555,22 +477,9 @@ msgid "Don't forget to click <b>save</b> when you're done."
 msgstr "อย่าลืมคลิก<b>บันทึก</b> เมื่อคุณทำเสร็จ"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "Download All Tickets"
-msgstr "ดาวน์โหลดตั๋วทั้งหมด"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.registration_complete
-msgid "Download Tickets <i class=\"ms-1 fa fa-download\"/>"
-msgstr "ดาวน์โหลดตั๋ว <i class=\"ms-1 fa fa-download\"/>"
-
-#. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_type.py:0
-#: model:ir.model.fields.selection,name:website_event.selection__event_question__question_type__email
-#, python-format
-msgid "Email"
-msgstr "อีเมล"
+#: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
+msgid "Email *"
+msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -579,8 +488,6 @@ msgstr "จบ -"
 
 #. module: website_event
 #: model:ir.model,name:website_event.model_event_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__event_id
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__event_id
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__event_id
 msgid "Event"
 msgstr "อีเวนต์"
@@ -613,7 +520,7 @@ msgstr "ชื่ออีเวนต์"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Event Page"
-msgstr "หน้ากิจกรรม"
+msgstr "เพจกิจกรรม"
 
 #. module: website_event
 #: model:ir.actions.act_window,name:website_event.action_event_pages_list
@@ -621,24 +528,9 @@ msgid "Event Pages"
 msgstr "หน้ากิจกรรม"
 
 #. module: website_event
-#: model:ir.model,name:website_event.model_event_question
-msgid "Event Question"
-msgstr "คำถามอีเวนต์"
-
-#. module: website_event
-#: model:ir.model,name:website_event.model_event_question_answer
-msgid "Event Question Answer"
-msgstr "คำถามคำตอบอีเวนต์"
-
-#. module: website_event
 #: model:ir.model,name:website_event.model_event_registration
 msgid "Event Registration"
 msgstr "การลงทะเบียนอีเวนต์"
-
-#. module: website_event
-#: model:ir.model,name:website_event.model_event_registration_answer
-msgid "Event Registration Answer"
-msgstr "คำตอบการลงทะเบียนอีเวนต์"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_visitor__event_registration_ids
@@ -647,14 +539,9 @@ msgstr "การลงทะเบียนอีเวนต์"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__subtitle
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+#: model_terms:ir.ui.view,arch_db:website_event.event_details
 msgid "Event Subtitle"
 msgstr "คำบรรยายอีเวนต์"
-
-#. module: website_event
-#: model:ir.model,name:website_event.model_event_tag
-msgid "Event Tag"
-msgstr "แท็กอีเวนต์"
 
 #. module: website_event
 #: model:ir.model,name:website_event.model_event_tag_category
@@ -672,14 +559,9 @@ msgid "Event Template"
 msgstr "เทมเพลตอีเวนต์"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+#: model_terms:ir.ui.view,arch_db:website_event.event_details
 msgid "Event Title"
 msgstr "หัวเรื่องอีเวนต์"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__event_type_id
-msgid "Event Type"
-msgstr "ประเภทอีเวนต์"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.404
@@ -704,7 +586,6 @@ msgstr "ไม่ได้เผยแพร่อีเวนต์"
 #: model:ir.ui.menu,name:website_event.menu_event_pages
 #: model:website.menu,name:website_event.menu_events
 #: model_terms:ir.ui.view,arch_db:website_event.event_searchbar_input_snippet_options
-#: model_terms:ir.ui.view,arch_db:website_event.index_topbar
 #: model_terms:ir.ui.view,arch_db:website_event.snippets
 #, python-format
 msgid "Events"
@@ -716,7 +597,7 @@ msgid "Events Page"
 msgstr "หน้ากิจกรรม"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "Expired"
 msgstr "หมดอายุ"
 
@@ -726,21 +607,6 @@ msgstr "หมดอายุ"
 #: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
 msgid "Extra Register Button"
 msgstr "ปุ่มลงทะเบียนเพิ่มเติม"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_location
-msgid "Filter by Country"
-msgstr "กรองตามประเทศ"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_time
-msgid "Filter by Date"
-msgstr "กรองตามวันที่"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.index_topbar
-msgid "Filters"
-msgstr "ตัวกรอง"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -766,9 +632,9 @@ msgid "Following content will appear on all events."
 msgstr "เนื้อหาต่อไปนี้จะปรากฏในทุกอีเวนต์"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_event__general_question_ids
-msgid "General Questions"
-msgstr "คำถามทั่วไป"
+#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+msgid "Get the direction"
+msgstr "ขอเส้นทาง"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -795,42 +661,14 @@ msgid "Hockey Tournament"
 msgstr "การแข่งขันฮอกกี้"
 
 #. module: website_event
-#: model:event.question,title:website_event.event_7_question_1
-msgid "How did you hear about us?"
-msgstr "คุณได้ยินเกี่ยวกับเราได้อย่างไร?"
-
-#. module: website_event
-#: model:event.question,title:website_event.event_0_question_2
-#: model:event.question,title:website_event.event_1_question_0
-#: model:event.question,title:website_event.event_5_question_0
-#: model:event.question,title:website_event.event_type_data_sports_question_0
-msgid "How did you learn about this event?"
-msgstr "คุณเรียนรู้เกี่ยวกับอีเวนต์นี้ได้อย่างไร"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__id
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__id
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__id
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__id
 msgid "ID"
 msgstr "ไอดี"
 
 #. module: website_event
-#: model:ir.model.fields,help:website_event.field_event_question__once_per_order
-msgid ""
-"If True, this question will be asked only once and its value will be "
-"propagated to every attendees.If not it will be asked for every attendee of "
-"a reservation."
-msgstr ""
-"หากเป็นจริง คำถามนี้จะถูกถามเพียงครั้งเดียว "
-"และมูลค่าของคำถามจะถูกถ่ายทอดไปยังผู้เข้าร่วมทุกคน หากไม่เป็นเช่นนั้น "
-"ระบบจะถามผู้เข้าร่วมที่ทำการจองทุกคน"
-
-#. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/event_event.py:0
 #: model:ir.model.fields.selection,name:website_event.selection__website_event_menu__menu_type__introduction
-#: model_terms:ir.ui.view,arch_db:website_event.template_intro
 #, python-format
 msgid "Introduction"
 msgstr "แนะนำ"
@@ -862,7 +700,6 @@ msgstr "กำลังเข้าร่วม"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__is_published
-#: model:ir.model.fields,field_description:website_event.field_event_tag__is_published
 #: model:ir.model.fields,field_description:website_event.field_event_tag_category__is_published
 msgid "Is Published"
 msgstr "เผยแพร่"
@@ -873,17 +710,16 @@ msgid "John DOE"
 msgstr "John DOE"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__write_uid
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__write_uid
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__write_uid
+#: model:ir.model.fields,field_description:website_event.field_website_event_menu____last_update
+msgid "Last Modified on"
+msgstr "แก้ไขครั้งล่าสุดเมื่อ"
+
+#. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__write_uid
 msgid "Last Updated by"
 msgstr "อัปเดตครั้งล่าสุดโดย"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__write_date
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__write_date
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__write_date
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__write_date
 msgid "Last Updated on"
 msgstr "อัปเดตครั้งล่าสุดเมื่อ"
@@ -935,22 +771,6 @@ msgstr ""
 "ดูดีมากเลย!  <b>เผยแพร่</b>หน้านี้กันเถอะ เพจนี้จะ<b>ปรากฏ</b> บนเว็บไซต์!"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_type_view_form
-msgid "Mandatory"
-msgstr "จำเป็น"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__is_mandatory_answer
-msgid "Mandatory Answer"
-msgstr "คำตอบบังคับ"
-
-#. module: website_event
-#: model:event.question,title:website_event.event_0_question_0
-msgid "Meal Type"
-msgstr "ประเภทอาหาร"
-
-#. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__menu_id
 msgid "Menu"
 msgstr "เมนู"
@@ -966,18 +786,14 @@ msgid "Menus"
 msgstr "เมนู"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_0_question_0_answer_0
-msgid "Mixed"
-msgstr "ผสม"
+#: model_terms:ir.ui.view,arch_db:website_event.registration_complete
+msgid "N/A"
+msgstr "ไม่ระบุ"
 
 #. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_type.py:0
-#: model:ir.model.fields,field_description:website_event.field_event_event__address_name
-#: model:ir.model.fields.selection,name:website_event.selection__event_question__question_type__name
-#, python-format
-msgid "Name"
-msgstr "ชื่อ"
+#: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
+msgid "Name *"
+msgstr ""
 
 #. module: website_event
 #: model:ir.actions.act_window,name:website_event.event_event_action_add
@@ -992,24 +808,14 @@ msgid "Next Events"
 msgstr "อีเวนต์ต่อไป"
 
 #. module: website_event
-#: model_terms:ir.actions.act_window,help:website_event.action_event_registration_report
-msgid "No Answers yet!"
-msgstr "ยังไม่มีคำตอบ!"
-
-#. module: website_event
 #: model_terms:ir.actions.act_window,help:website_event.website_event_menu_action
 msgid "No Website Menu Items yet!"
 msgstr "ยังไม่มีเมนูไอเทมเว็บไซต์!"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
-msgid "No event matching your search criteria could be found."
-msgstr "ไม่พบเหตุการณ์ที่ตรงกับเกณฑ์การค้นหาของคุณ"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.events_list
-msgid "No events scheduled yet"
-msgstr "ยังไม่มีกำหนดกิจกรรม"
+msgid "No events found."
+msgstr "ไม่พบอีเวนต์"
 
 #. module: website_event
 #: model_terms:ir.actions.act_window,help:website_event.event_registration_action_from_visitor
@@ -1027,22 +833,11 @@ msgid "Not Published"
 msgstr "ไม่เผยแพร่"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_type_view_form
-msgid "Once per Order"
-msgstr "หนึ่งครั้งต่อการสั่งซื้อ"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_location
-msgid "Online Events"
-msgstr "กิจกรรมออนไลน์"
-
-#. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/website_snippet_filter.py:0
 #, python-format
 msgid "OpenWood Collection Online Reveal"
-msgstr "เปิดเผยคอลเลกชัน OpenWood ออนไลน์"
+msgstr "OpenWood Collection Online Reveal"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -1055,11 +850,6 @@ msgid "Our Trainings"
 msgstr "การอบรมของเรา"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_0_question_2_answer_0
-msgid "Our website"
-msgstr "เว็บไซต์ของเรา"
-
-#. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/event_event.py:0
 #, python-format
@@ -1067,17 +857,9 @@ msgid "Past Events"
 msgstr "อีเวนต์ที่ผ่านมา"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_0_question_0_answer_2
-msgid "Pastafarian"
-msgstr "Pastafarian"
-
-#. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_type.py:0
-#: model:ir.model.fields.selection,name:website_event.selection__event_question__question_type__phone
-#, python-format
-msgid "Phone"
-msgstr "โทรศัพท์"
+#: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
+msgid "Phone <small>(Optional)</small>"
+msgstr "โทรศัพท์ <small>(เลือกได้)</small>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_photos
@@ -1086,38 +868,20 @@ msgid "Photos"
 msgstr "รูปภาพ"
 
 #. module: website_event
+#. odoo-javascript
+#: code:addons/website_event/static/src/js/website_event.js:0
+#, python-format
+msgid "Please select at least one ticket."
+msgstr "โปรดเลือกทิกเก็ตอย่างน้อยหนึ่งใบ"
+
+#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_event_view_search
 #: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
 msgid "Published"
 msgstr "เผยแพร่แล้ว"
 
 #. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__question_id
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__question_id
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_question_view_form
-msgid "Question"
-msgstr "คำถาม"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__question_type
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__question_type
-msgid "Question Type"
-msgstr "ประเภทคำถาม"
-
-#. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_question.py:0
-#, python-format
-msgid "Question cannot be linked to both an Event and an Event Type."
-msgstr "คำถามไม่สามารถเชื่อมโยงกับทั้งกิจกรรมและประเภทกิจกรรมได้"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_event__question_ids
-#: model:ir.model.fields,field_description:website_event.field_event_type__question_ids
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_type_view_form
+#: model_terms:ir.ui.view,arch_db:website_event.res_config_settings_view_form
 msgid "Questions"
 msgstr "คำถาม"
 
@@ -1127,25 +891,17 @@ msgid "Quotes"
 msgstr "คำคม"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_1_question_0_answer_2
-#: model:event.question.answer,name:website_event.event_5_question_0_answer_2
-#: model:event.question.answer,name:website_event.event_type_data_sports_question_0_answer_2
-msgid "Radio Ad"
-msgstr "โฆษณาทางวิทยุ"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Ref:"
 msgstr "อ้างอิง:"
 
 #. module: website_event
-#. odoo-javascript
 #. odoo-python
+#. odoo-javascript
 #: code:addons/website_event/models/event_event.py:0
 #: code:addons/website_event/static/src/js/register_toaster_widget.js:0
 #: model:ir.model.fields.selection,name:website_event.selection__website_event_menu__menu_type__register
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
-#: model_terms:ir.ui.view,arch_db:website_event.navbar
+#: model_terms:ir.ui.view,arch_db:website_event.layout
 #: model_terms:ir.ui.view,arch_db:website_event.registration_template
 #, python-format
 msgid "Register"
@@ -1174,8 +930,7 @@ msgstr "ลงทะเบียนอีเวนต์แล้ว"
 #. module: website_event
 #. odoo-python
 #: code:addons/website_event/controllers/main.py:0
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__registration_id
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 #, python-format
 msgid "Registration"
 msgstr "การลงทะเบียน"
@@ -1184,11 +939,6 @@ msgstr "การลงทะเบียน"
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Registration confirmed!"
 msgstr "ยืนยันการลงทะเบียน!"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
-msgid "Registration failed! These tickets are not available anymore."
-msgstr "การลงทะเบียนไม่สำเร็จ! ทิกเก็ตเหล่านี้ไม่สามารถใช้ได้อีกต่อไป"
 
 #. module: website_event
 #: model:ir.actions.act_window,name:website_event.event_registration_action_from_visitor
@@ -1224,14 +974,7 @@ msgid "Remaining time before event starts (minutes)"
 msgstr "เวลาที่เหลือก่อนเริ่มอีเวนต์ (นาที)"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_7_question_0_answer_2
-msgid "Research"
-msgstr "วิจัย"
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__website_id
-#: model:ir.model.fields,help:website_event.field_event_tag__website_id
-#: model:ir.model.fields,help:website_event.field_event_tag_category__website_id
 msgid "Restrict publishing to this website."
 msgstr "จำกัดการเผยแพร่ในเว็บไซต์นี้"
 
@@ -1247,26 +990,16 @@ msgstr "ปรับ SEO ให้เหมาะสม"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "Share"
-msgstr "แชร์"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "SHARE"
 msgstr "แชร์"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_7_question_0_answer_1
-msgid "Sales"
-msgstr "การขาย"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "Sales end on"
 msgstr "การขายเสร็จสิ้นเมื่อ"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "Sales start on"
 msgstr "การขายเริ่มต้นเมื่อ"
 
@@ -1282,31 +1015,9 @@ msgid "Search an event..."
 msgstr "ค้นหาอีเวนต์..."
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_view_search
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_view_tree
-msgid "Selected Answers"
-msgstr "คำตอบที่เลือก"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_answer_view_tree
-msgid "Selected answer"
-msgstr "คำตอบที่เลือก"
-
-#. module: website_event
-#: model:ir.model.fields.selection,name:website_event.selection__event_question__question_type__simple_choice
-msgid "Selection"
-msgstr "การเลือก"
-
-#. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__seo_name
 msgid "Seo name"
 msgstr "ชื่อ Seo"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__sequence
-#: model:ir.model.fields,field_description:website_event.field_event_question_answer__sequence
-msgid "Sequence"
-msgstr "ลำดับ"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_tag_category_view_form
@@ -1320,15 +1031,7 @@ msgid "Sidebar"
 msgstr "แถบด้านข้าง"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_1_question_0_answer_0
-#: model:event.question.answer,name:website_event.event_5_question_0_answer_0
-#: model:event.question.answer,name:website_event.event_type_data_sports_question_0_answer_0
-msgid "Social Media"
-msgstr "สื่อสังคมออนไลน์"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
 #: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "Sold Out"
 msgstr "ขายหมดแล้ว"
@@ -1337,11 +1040,6 @@ msgstr "ขายหมดแล้ว"
 #: model_terms:ir.ui.view,arch_db:website_event.404
 msgid "Sorry, the requested event is not available anymore."
 msgstr "ขออภัย อีเวนต์ที่ร้องขอไม่มีอยู่แล้ว"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_event__specific_question_ids
-msgid "Specific Questions"
-msgstr "คำถามเฉพาะ"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -1364,19 +1062,9 @@ msgid "Starts <span/>"
 msgstr "เริ่ม <span/>"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-msgid "Stats"
-msgstr "สแตท"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Sub-menu (Specific)"
 msgstr "เมนูย่อย (เฉพาะ)"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__value_answer_id
-msgid "Suggested answer"
-msgstr "คำตอบที่แนะนำ"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
@@ -1384,18 +1072,7 @@ msgid "Templates"
 msgstr "เทมเพลต"
 
 #. module: website_event
-#: model:ir.model.fields.selection,name:website_event.selection__event_question__question_type__text_box
-msgid "Text Input"
-msgstr "ป้อนข้อความ"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_registration_answer__value_text_box
-msgid "Text answer"
-msgstr "ข้อความตอบกลับ"
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__website_url
-#: model:ir.model.fields,help:website_event.field_event_tag__website_url
 #: model:ir.model.fields,help:website_event.field_event_tag_category__website_url
 msgid "The full URL to access the document through the website."
 msgstr "URL แบบเต็มเพื่อเข้าถึงเอกสารผ่านเว็บไซต์"
@@ -1406,11 +1083,6 @@ msgstr "URL แบบเต็มเพื่อเข้าถึงเอก�
 #, python-format
 msgid "The website must be from the same company as the event."
 msgstr "เว็บไซต์จะต้องมาจากบริษัทเดียวกันกับงาน"
-
-#. module: website_event
-#: model:ir.model.constraint,message:website_event.constraint_event_registration_answer_value_check
-msgid "There must be a suggested value or a text value."
-msgstr "จะต้องมีค่าที่แนะนำหรือค่าข้อความ"
 
 #. module: website_event
 #. odoo-python
@@ -1449,20 +1121,9 @@ msgid "Ticket Sales starting on"
 msgstr "เริ่มจำหน่ายทิกเก็ตวันที่"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
-#: model_terms:ir.ui.view,arch_db:website_event.registration_template
-msgid "Tickets"
-msgstr "ทิกเก็ต"
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "Tickets for this Event are <b>Sold Out</b>"
 msgstr "ทิกเก็ตสำหรับอีเวนต์นี้ <b>ขายหมด</b>แล้ว"
-
-#. module: website_event
-#: model:ir.model.fields,field_description:website_event.field_event_question__title
-msgid "Title"
-msgstr "คำนำหน้าชื่อ"
 
 #. module: website_event
 #. odoo-python
@@ -1472,7 +1133,7 @@ msgid "Today"
 msgstr "วันนี้"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.navbar
+#: model_terms:ir.ui.view,arch_db:website_event.layout
 msgid "Toggle navigation"
 msgstr "ระบบนำทางแบบสลับ"
 
@@ -1482,12 +1143,6 @@ msgid "Top Bar Filter"
 msgstr "ตัวกรองบาร์ด้านบน"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_registration_view_form
-msgid "Type"
-msgstr "ประเภท"
-
-#. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/event_event.py:0
 #: model:website.snippet.filter,name:website_event.website_snippet_filter_event_list
@@ -1495,6 +1150,11 @@ msgstr "ประเภท"
 #, python-format
 msgid "Upcoming Events"
 msgstr "อีเวนต์ที่จะเกิดขึ้น"
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.events_list
+msgid "Use the top button '<b>+ New</b>' to create an event."
+msgstr "ใช้ปุ่มด้านบน '<b>+ ใหม่</b>' เพื่อสร้างอีเวนต์"
 
 #. module: website_event
 #. odoo-javascript
@@ -1515,18 +1175,12 @@ msgid "Used when not being an url based menu"
 msgstr "ใช้เมื่อไม่เป็นเมนูที่ใช้ url"
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_0_question_0_answer_1
-msgid "Vegetarian"
-msgstr "มังสวิรัติ"
-
-#. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__view_id
 msgid "View"
 msgstr "ดู"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__website_published
-#: model:ir.model.fields,field_description:website_event.field_event_tag__website_published
 #: model:ir.model.fields,field_description:website_event.field_event_tag_category__website_published
 msgid "Visible on current website"
 msgstr "ปรากฏบนเว็บไซต์ปัจจุบัน"
@@ -1537,21 +1191,8 @@ msgid "Visitor"
 msgstr "ผู้เยี่ยมชม"
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.events_list
-msgid "We couldn't find any event matching your search for:"
-msgstr "เราไม่พบกิจกรรมที่ตรงกับการค้นหาของคุณ:"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.events_list
-msgid "We couldn't find any event scheduled at this moment."
-msgstr "เราไม่พบกิจกรรมที่กำหนดไว้ในขณะนี้"
-
-#. module: website_event
 #: model:ir.model,name:website_event.model_website
 #: model:ir.model.fields,field_description:website_event.field_event_event__website_id
-#: model:ir.model.fields,field_description:website_event.field_event_tag__website_id
-#: model:ir.model.fields,field_description:website_event.field_event_tag_category__website_id
-#: model_terms:ir.ui.view,arch_db:website_event.event_tag_category_view_form
 msgid "Website"
 msgstr "เว็บไซต์"
 
@@ -1596,7 +1237,6 @@ msgstr "เมนูย่อยเว็บไซต์"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__website_url
-#: model:ir.model.fields,field_description:website_event.field_event_tag__website_url
 #: model:ir.model.fields,field_description:website_event.field_event_tag_category__website_url
 msgid "Website URL"
 msgstr "เว็บไซต์ URL"
@@ -1627,11 +1267,6 @@ msgid "Website opengraph image"
 msgstr "รูป Opengraph บนเว็บไซต์"
 
 #. module: website_event
-#: model:event.question,title:website_event.event_5_question_1
-msgid "What's your Hockey level?"
-msgstr "ระดับฮ็อกกี้ของคุณคือเท่าไร?"
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__is_ongoing
 msgid "Whether event has begun"
 msgstr "อีเวนต์ได้เริ่มต้นขึ้นแล้วหรือยัง"
@@ -1640,11 +1275,6 @@ msgstr "อีเวนต์ได้เริ่มต้นขึ้นแล
 #: model:ir.model.fields,help:website_event.field_event_event__start_today
 msgid "Whether event is going to start today if still not ongoing"
 msgstr "ไอีเวนต์จะเริ่มวันนี้หรือไม่ ถ้ายังไม่ดำเนินต่อ"
-
-#. module: website_event
-#: model:event.question,title:website_event.event_7_question_0
-msgid "Which field are you working in"
-msgstr "คุณทำงานด้านไหน"
 
 #. module: website_event
 #. odoo-javascript
@@ -1658,31 +1288,7 @@ msgstr ""
 "<b>ปรับแต่ง</b>ซึ่งผู้เยี่ยมชมเว็บจะเห็นเมื่อลงทะเบียน"
 
 #. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_question.py:0
-#, python-format
-msgid ""
-"You cannot change the question type of a question that already has answers!"
-msgstr "คุณไม่สามารถเปลี่ยนประเภทคำถามของคำถามที่มีคำตอบอยู่แล้ว!"
-
-#. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_question.py:0
-#, python-format
-msgid ""
-"You cannot delete a question that has already been answered by attendees."
-msgstr "คุณไม่สามารถลบคำถามที่ผู้เข้าร่วมตอบไปแล้วได้"
-
-#. module: website_event
-#. odoo-python
-#: code:addons/website_event/models/event_question_answer.py:0
-#, python-format
-msgid ""
-"You cannot delete an answer that has already been selected by attendees."
-msgstr "คุณไม่สามารถลบคำตอบที่ผู้เข้าร่วมเลือกไว้แล้วได้"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+#: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "available)"
 msgstr "มีอยู่)"
 
@@ -1690,12 +1296,6 @@ msgstr "มีอยู่)"
 #: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form_add
 msgid "e.g. \"Conference for Architects\""
 msgstr "เช่น “สัมมนาสำหรับสถาปนิก”"
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
-#: model_terms:ir.ui.view,arch_db:website_event.event_question_view_form
-msgid "e.g. \"Do you have any diet restrictions?\""
-msgstr "เช่น “คุณมีข้อจำกัดเรื่องอาหารหรือไม่?”"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full

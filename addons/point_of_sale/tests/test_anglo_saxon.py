@@ -18,7 +18,7 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
         cls.warehouse = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.company.id)], limit=1)
         cls.partner = cls.env['res.partner'].create({'name': 'Partner 1'})
         cls.category = cls.env.ref('product.product_category_all')
-        cls.category = cls.category.copy({'name': 'New category','property_valuation': 'real_time'})
+        cls.category = cls.category.copy({'name': 'New category', 'property_valuation': 'real_time'})
         cls.account = cls.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00', 'account_type': 'asset_receivable', 'reconcile': True})
         account_expense = cls.env['account.account'].create({'name': 'Expense', 'code': 'EXP00', 'account_type': 'expense', 'reconcile': True})
         account_income = cls.env['account.account'].create({'name': 'Income', 'code': 'INC00', 'account_type': 'income', 'reconcile': True})
@@ -31,15 +31,8 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
         cls.category.property_stock_account_output_categ_id = account_output
         cls.category.property_stock_valuation_account_id = account_valuation
         cls.category.property_stock_journal = cls.env['account.journal'].create({'name': 'Stock journal', 'type': 'sale', 'code': 'STK00'})
-        cls.cash_journal = cls.env['account.journal'].create(
-            {'name': 'CASH journal', 'type': 'cash', 'code': 'CSH02'})
-        cls.cash_payment_method = cls.env['pos.payment.method'].create({
-            'name': 'Cash Test',
-            'journal_id': cls.cash_journal.id,
-        })
         cls.pos_config = cls.env['pos.config'].create({
             'name': 'New POS config',
-            'payment_method_ids': cls.cash_payment_method,
         })
         cls.product = cls.env['product.product'].create({
             'name': 'New product',
@@ -94,7 +87,6 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
             'amount_tax': 0,
             'amount_paid': 0,
             'amount_return': 0,
-            'last_order_preparation_change': '{}'
         })
 
         # I make a payment to fully pay the order
@@ -175,7 +167,6 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
             'amount_tax': 0,
             'amount_paid': 0,
             'amount_return': 0,
-            'last_order_preparation_change': '{}'
         }
 
         return self.PosOrder.create(pos_order_values)
@@ -247,7 +238,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
             'pricelist_id': self.company.partner_id.property_product_pricelist.id,
             'session_id': self.pos_config.current_session_id.id,
             'to_invoice': False,
-            'shipping_date': '2023-01-01',
+            'to_ship': True,
             'lines': [(0, 0, {
                 'name': "OL/0001",
                 'product_id': self.product.id,
@@ -261,7 +252,6 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
             'amount_tax': 0,
             'amount_paid': 0,
             'amount_return': 0,
-            'last_order_preparation_change': '{}'
         })
 
         # I make a payment to fully pay the order
@@ -282,7 +272,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         self.assertEqual(current_session_id.state, 'closed', 'Check that session is closed')
 
         self.assertEqual(len(current_session.picking_ids), 2, "There should be 2 pickings")
-        current_session.picking_ids.move_ids_without_package.write({'quantity': 1, 'picked': True})
+        current_session.picking_ids.move_ids_without_package.quantity_done = 1
         current_session.picking_ids.button_validate()
 
         # I test that the generated journal entries are correct.

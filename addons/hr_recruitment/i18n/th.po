@@ -3,15 +3,21 @@
 # 	* hr_recruitment
 # 
 # Translators:
-# Wil Odoo, 2024
+# gsong <gsong2014@foxmail.com>, 2022
+# Chatcha Mee, 2022
+# Odoo Thaidev <odoothaidev@gmail.com>, 2022
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
+# Martin Trigaux, 2023
+# Wichanon Jamwutthipreecha, 2023
+# Wil Odoo, 2023
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-05-23 08:22+0000\n"
+"PO-Revision-Date: 2022-09-22 05:52+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +28,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "1 Meeting"
 msgstr "1 ประชุม"
@@ -79,6 +85,11 @@ msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
+msgid "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"Manage\" title=\"Manage\"/>"
+msgstr "<i class=\"fa fa-ellipsis-v\" role=\"img\" aria-label=\"จัดการ\" title=\"Manage\"/>"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
 msgid "<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" title=\"Alias\"/>"
 msgstr "<i class=\"fa fa-envelope-o\" role=\"img\" aria-label=\"Alias\" title=\"นามแฝง\"/>"
 
@@ -93,18 +104,63 @@ msgid "<i class=\"fa fa-paperclip\" role=\"img\" aria-label=\"Documents\"/>"
 msgstr "<i class=\"fa fa-paperclip\" role=\"img\" aria-label=\"เอกสาร\"/>"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
 msgid ""
-"<span class=\"badge rounded-pill text-bg-danger float-end me-4\" invisible=\"application_status != 'refused'\">Refused</span>\n"
-"                            <span class=\"badge rounded-pill text-bg-secondary float-end me-4\" invisible=\"application_status != 'archived'\">Archived</span>"
+"<span attrs=\"{'invisible': [('address_id', '!=', False)]}\" "
+"class=\"oe_read_only\">Remote</span>"
 msgstr ""
-"<span class=\"badge rounded-pill text-bg-danger float-end me-4\" invisible=\"application_status != 'refused'\">ปฏิเสธ</span>\n"
-"                            <span class=\"badge rounded-pill text-bg-secondary float-end me-4\" invisible=\"application_status != 'archived'\">เก็บถาวร</span>"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
+msgid ""
+"<span attrs=\"{'invisible': [('is_warning_visible', '=', False)]}\">\n"
+"                            <span class=\"fa fa-exclamation-triangle text-danger ps-3\">\n"
+"                            </span>\n"
+"                            <span class=\"text-danger\">\n"
+"                                All applications will lose their hired date and hired status.\n"
+"                            </span>\n"
+"                        </span>"
+msgstr ""
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-msgid "<span class=\"o_stat_text\">Employee</span>"
-msgstr "<span class=\"o_stat_text\">พนักงาน</span>"
+msgid ""
+"<span attrs=\"{'invisible':[('salary_expected_extra','=',False)]}\"> + "
+"</span>"
+msgstr ""
+"<span attrs=\"{'invisible':[('salary_expected_extra','=',False)]}\"> + "
+"</span>"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+msgid ""
+"<span attrs=\"{'invisible':[('salary_proposed_extra','=',False)]}\"> + "
+"</span>"
+msgstr ""
+"<span attrs=\"{'invisible':[('salary_proposed_extra','=',False)]}\"> + "
+"</span>"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
+msgid ""
+"<span class=\"badge rounded-pill text-bg-danger float-end me-4\" "
+"attrs=\"{'invisible': ['|', ('active', '=', True), ('refuse_reason_id', '=',"
+" False)]}\">Refused</span>"
+msgstr ""
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
+msgid "<span class=\"bg-success\">Hired</span>"
+msgstr "<span class=\"bg-success\">จ้างแล้ว</span>"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
+msgid ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
+"specific.\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"ค่าที่กำหนดเป็นค่าเฉพาะของ "
+"บริษัท.\"/>"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
@@ -112,43 +168,9 @@ msgid "<span class=\"o_stat_text\">Trackers</span>"
 msgstr "<span class=\"o_stat_text\">ตัวติดตาม</span>"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
-msgid "<span class=\"text-bg-success\">Hired</span>"
-msgstr "<span class=\"text-bg-success\">ได้รับการว่าจ้าง</span>"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
-msgid "<span invisible=\"address_id\" class=\"oe_read_only\">Remote</span>"
-msgstr "<span invisible=\"address_id\" class=\"oe_read_only\">ระยะไกล</span>"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
-msgid ""
-"<span invisible=\"not is_warning_visible\">\n"
-"                                <span class=\"fa fa-exclamation-triangle text-danger ps-3\">\n"
-"                                </span>\n"
-"                                <span class=\"text-danger\">\n"
-"                                    All applications will lose their hired date and hired status.\n"
-"                                </span>\n"
-"                            </span>"
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+msgid "<span class=\"o_stat_value\">Employee</span>"
 msgstr ""
-"<span invisible=\"not is_warning_visible\">\n"
-"                                <span class=\"fa fa-exclamation-triangle text-danger ps-3\">\n"
-"                                </span>\n"
-"                                <span class=\"text-danger\">\n"
-"                                    การสมัครทั้งหมดจะสูญเสียวันที่จ้างงานและสถานะการจ้างงาน\n"
-"                                </span>\n"
-"                            </span>"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-msgid "<span invisible=\"not salary_expected_extra\"> + </span>"
-msgstr "<span invisible=\"not salary_expected_extra\"> + </span>"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-msgid "<span invisible=\"not salary_proposed_extra\"> + </span>"
-msgstr "<span invisible=\"not salary_proposed_extra\"> + </span>"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_recruitment_stage_kanban
@@ -269,7 +291,7 @@ msgstr ""
 "\n"
 "                <h3 style=\"color:#9A6C8E;\"><strong>ขั้นตอนต่อไปคืออะไร?</strong></h3>\n"
 "                โดยปกติ <strong>เราจะตอบใบสมัครภายในสองสามวัน</strong><br><br>\n"
-"                โปรด<strong>ติดต่อเราหากคุณต้องการ\n"
+"                โปรด<strong>โปรดติดต่อเราหากคุณต้องการ\n"
 "                การตอบกลับที่รวดเร็วขึ้น</strong> หรือหากคุณไม่ได้รับการตอบกลับจากเรา\n"
 "                เร็วเพียงพอ ให้ตอบกลับอีเมลนี้\n"
 "\n"
@@ -693,6 +715,11 @@ msgid "Add a new tag"
 msgstr "เพิ่มแท็กใหม่"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_job__address_id
+msgid "Address where employees are working"
+msgstr "ที่อยู่ที่พนักงานทำงานอยู่"
+
+#. module: hr_recruitment
 #: model:res.groups,name:hr_recruitment.group_hr_recruitment_manager
 msgid "Administrator"
 msgstr "ผู้ดูแลระบบ"
@@ -708,21 +735,6 @@ msgid "Alias Contact Security"
 msgstr "นามแฝงสำหรับติดต่อเพื่อความปลอดภัย"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_domain_id
-msgid "Alias Domain"
-msgstr "ชื่อโดเมน"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_domain
-msgid "Alias Domain Name"
-msgstr "ชื่อโดเมนนามแฝง"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_full_name
-msgid "Alias Email"
-msgstr "อีเมลนามแฝง"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__alias_id
 msgid "Alias ID"
 msgstr "นามแฝงไอดี"
@@ -733,14 +745,9 @@ msgid "Alias Name"
 msgstr "นามแฝง"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_status
-msgid "Alias Status"
-msgstr "สถานะนามแฝง"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_status
-msgid "Alias status assessed on the last message received."
-msgstr "ประเมินสถานะนามแฝงตามข้อความล่าสุดที่ได้รับ"
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_domain
+msgid "Alias domain"
+msgstr "นามแฝงโดเมน"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_model_id
@@ -779,20 +786,10 @@ msgid "Applicant Degree"
 msgstr "ระดับปริญญาผู้สมัคร"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__applicant_emails
-msgid "Applicant Emails"
-msgstr "อีเมลของผู้สมัคร"
-
-#. module: hr_recruitment
 #: model:mail.message.subtype,name:hr_recruitment.mt_applicant_hired
 #: model:mail.message.subtype,name:hr_recruitment.mt_job_applicant_hired
 msgid "Applicant Hired"
 msgstr "ผู้สมัครได้รับการว่าจ้าง"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__applicant_properties_definition
-msgid "Applicant Properties"
-msgstr "คุณสมบัติของผู้สมัคร"
 
 #. module: hr_recruitment
 #: model:mail.message.subtype,name:hr_recruitment.mt_job_applicant_stage_changed
@@ -803,6 +800,16 @@ msgstr "เปลี่ยนขั้นตอนของผู้สมัค
 #: model:mail.message.subtype,description:hr_recruitment.mt_applicant_new
 msgid "Applicant created"
 msgstr "ผู้สมัครถูกสร้างแล้ว"
+
+#. module: hr_recruitment
+#: model:mail.message.subtype,description:hr_recruitment.mt_applicant_hired
+msgid "Applicant hired"
+msgstr "ผู้สมัครได้รับการว่าจ้าง"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_hired_template
+msgid "Applicant hired<br/>"
+msgstr "ผู้สมัครถูกจ้าง<br/>"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_name
@@ -828,7 +835,6 @@ msgstr "ผู้สมัครที่ได้รับการว่าจ
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_applications
-#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
 msgid ""
 "Applicants and their attached CV are created automatically when an email is sent.\n"
 "                If you install the document management modules, all resumes are indexed automatically,\n"
@@ -837,6 +843,17 @@ msgstr ""
 "ผู้สมัครและ CV ที่แนบมาจะถูกสร้างขึ้นโดยอัตโนมัติเมื่อมีการส่งอีเมล\n"
 "                หากคุณติดตั้งโมดูลการจัดการเอกสาร เรซูเม่ทั้งหมดจะถูกสร้างดัชนีโดยอัตโนมัติ\n"
 "                เพื่อให้คุณสามารถค้นหาเนื้อหาได้อย่างง่ายดาย"
+
+#. module: hr_recruitment
+#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
+msgid ""
+"Applicants and their attached CV are created automatically when an email is sent.\n"
+"            If you install the document management modules, all resumes are indexed automatically,\n"
+"            so that you can easily search through their content."
+msgstr ""
+"ผู้สมัครและ CV ที่แนบมาจะถูกสร้างขึ้นโดยอัตโนมัติเมื่อมีการส่งอีเมล\n"
+"           หากคุณติดตั้งโมดูลการจัดการเอกสาร เรซูเม่ทั้งหมดจะถูกสร้างดัชนีโดยอัตโนมัติ\n"
+"            เพื่อให้คุณสามารถค้นหาเนื้อหาได้อย่างง่ายดาย"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
@@ -894,19 +911,12 @@ msgid "Applied Job"
 msgstr "สมัครงานแล้ว"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__create_date
-msgid "Applied on"
-msgstr "นำไปใช้เมื่อ"
-
-#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.view_hr_job_kanban
 msgid "Archive"
 msgstr "เก็บถาวร"
 
 #. module: hr_recruitment
-#: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__application_status__archived
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Archived"
@@ -924,6 +934,7 @@ msgstr "จำนวนสิ่งที่แนบมา"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__attachment_ids
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Attachments"
 msgstr "แนบ"
 
@@ -943,24 +954,8 @@ msgid "Bachelor Degree"
 msgstr "ปริญญาตรี"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__is_blacklisted
-msgid "Blacklist"
-msgstr "บัญชีดำ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__mobile_blacklisted
-msgid "Blacklisted Phone Is Mobile"
-msgstr "โทรศัพท์ที่ถูกขึ้นบัญชีดำคือมือถือ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_blacklisted
-msgid "Blacklisted Phone is Phone"
-msgstr "โทรศัพท์ที่ถูกขึ้นบัญชีดำคือโทรศัพท์"
-
-#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment_stage.py:0
-#: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job1
 #: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job2
 #: model:hr.recruitment.stage,legend_blocked:hr_recruitment.stage_job3
@@ -970,16 +965,6 @@ msgstr "โทรศัพท์ที่ถูกขึ้นบัญชีด
 #, python-format
 msgid "Blocked"
 msgstr "บล็อก"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__body_has_template_value
-msgid "Body content is the same as the template"
-msgstr "เนื้อหาเนื้อความเหมือนกับเทมเพลต"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_bounce
-msgid "Bounce"
-msgstr "การตีกลับ"
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_job_position
@@ -1058,9 +1043,8 @@ msgstr "ดัชนีสี"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__company_id
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Company"
-msgstr "บริษัท"
+msgstr "บริษัทเดียว"
 
 #. module: hr_recruitment
 #: model:ir.model,name:hr_recruitment.model_res_config_settings
@@ -1080,7 +1064,7 @@ msgstr "อีเมลยืนยันได้ถูกส่งไปยั
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_id
 #, python-format
 msgid "Contact"
@@ -1088,7 +1072,7 @@ msgstr "ติดต่อ"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "Contact Email"
 msgstr "อีเมลติดต่อ"
@@ -1126,11 +1110,6 @@ msgid "Copy this email address, to paste it in your email composer, to apply."
 msgstr "คัดลอกที่อยู่อีเมลนี้ สำหรับวางในตัวเขียนอีเมลของคุณ เพื่อนำไปใช้"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__message_bounce
-msgid "Counter of the number of bounced emails for this contact"
-msgstr "ตัวนับจำนวนอีเมลตีกลับสำหรับผู้ติดต่อรายนี้"
-
-#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "Create"
 msgstr "สร้าง"
@@ -1145,13 +1124,6 @@ msgstr "สร้างพนักงาน"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "Create a Job Position"
 msgstr "สร้างตำแหน่งงาน"
-
-#. module: hr_recruitment
-#. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
-#, python-format
-msgid "Create new applications by sending an email to"
-msgstr "สร้างแอปพลิเคชันใหม่โดยส่งอีเมลไปที่"
 
 #. module: hr_recruitment
 #. odoo-javascript
@@ -1184,6 +1156,7 @@ msgid "Created on"
 msgstr "สร้างเมื่อ"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__create_date
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Creation Date"
@@ -1224,17 +1197,18 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_job_stage_act
 msgid ""
 "Define here your stages of the recruitment process, for example:\n"
-"                    qualification call, first interview, second interview, refused,\n"
-"                    hired."
+"            qualification call, first interview, second interview, refused,\n"
+"            hired."
 msgstr ""
-"กำหนดขั้นตอนของกระบวนการสรรหางานที่นี่ เช่น: \n"
-"                    การโทรคัดเลือก, สัมภาษณ์ครั้งแรก, สัมภาษณ์ครั้งที่สอง, ปฏิเสธ, \n"
-"                    จ้างงาน"
+"กำหนดที่นี่ขั้นตอนของกระบวนการสรรหา เช่น:\n"
+"            การเรียกคุณสมบัติ สัมภาษณ์ครั้งแรก สัมภาษณ์ครั้งที่สอง การปฏิเสธ\n"
+"            การว่าจ้าง"
 
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.hr_recruitment_degree_action
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__type_id
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_degree_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_degree_tree
 msgid "Degree"
@@ -1295,12 +1269,6 @@ msgid "Digitize your CV to extract name and email automatically."
 msgstr "แปลง CV ของคุณเป็นดิจิทัลเพื่อแยกชื่อและอีเมลโดยอัตโนมัติ"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
-msgid "Directly Available"
-msgstr "พร้อมโดยตรง"
-
-#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "Discard"
 msgstr "ละทิ้ง"
@@ -1341,9 +1309,14 @@ msgid "Document Count"
 msgstr "จำนวนเอกสาร"
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
+msgid "Documentation"
+msgstr "เอกสารประกอบ"
+
+#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #: code:addons/hr_recruitment/models/hr_job.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__document_ids
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
@@ -1360,15 +1333,20 @@ msgstr "ไม่ตรงตามข้อกำหนดของงาน"
 #: model_terms:ir.actions.act_window,help:hr_recruitment.hr_recruitment_stage_act
 msgid ""
 "Don't forget to specify the department if your recruitment process\n"
-"                is different according to the job position."
+"            is different according to the job position."
 msgstr ""
-"อย่าลืมระบุแผนกหากกระบวนการสรรหาบุคลากรของคุณ\n"
-"              แตกต่างกันตามตำแหน่งงาน"
+"อย่าลืมระบุแผนกหากกระบวนการสรรหาของคุณ\n"
+"           จะแตกต่างกันไปตามตำแหน่งของงาน"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
+msgid "Dropdown menu"
+msgstr "เมนูดรอปดาว์น"
 
 #. module: hr_recruitment
 #: model:hr.applicant.refuse.reason,name:hr_recruitment.refuse_reason_6
 msgid "Duplicate"
-msgstr "คัดลอก"
+msgstr "ทำซ้ำ"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__email_from
@@ -1378,7 +1356,6 @@ msgid "Email"
 msgstr "อีเมล"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_email
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
 msgid "Email Alias"
@@ -1426,7 +1403,7 @@ msgstr "ต้องเลือกเทมเพลตอีเมลเพื
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.model,name:hr_recruitment.model_hr_employee
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__emp_id
 #, python-format
@@ -1434,24 +1411,19 @@ msgid "Employee"
 msgstr "พนักงาน"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__emp_is_active
-msgid "Employee Active"
-msgstr "พนักงานใช้งานอยู่"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__employee_name
 msgid "Employee Name"
 msgstr "ชื่อพนักงาน"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_hired_template
-msgid "Employee created:"
-msgstr "พนักงานสร้าง:"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__emp_id
 msgid "Employee linked to the applicant."
 msgstr "พนักงานที่เชื่อมโยงกับผู้สมัคร"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_hired_template
+msgid "Employee:"
+msgstr "พนักงาน:"
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_recruitment_config_employees
@@ -1507,14 +1479,6 @@ msgstr "ประโยชน์เสริม..."
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__favorite_user_ids
 msgid "Favorite User"
 msgstr "ผู้ใช้ที่โปรดปราน"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_sanitized
-msgid ""
-"Field used to store sanitized phone number. Helps speeding up searches and "
-"comparisons."
-msgstr ""
-"ช่องที่ใช้เก็บหมายเลขโทรศัพท์ที่ถูกต้อง ช่วยเร่งการค้นหาและเปรียบเทียบ"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.ir_attachment_hr_recruitment_list_view
@@ -1604,6 +1568,11 @@ msgid "Group By"
 msgstr "กลุ่มโดย"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__hr_responsible_id
+msgid "HR Responsible"
+msgstr "ความรับผิดชอบ HR "
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__has_domain
 msgid "Has Domain"
 msgstr "มีโดเมน"
@@ -1621,7 +1590,6 @@ msgstr "วันที่จ้าง"
 #. module: hr_recruitment
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__application_status__hired
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Hired"
 msgstr "จ้างงานแล้ว"
 
@@ -1629,11 +1597,6 @@ msgstr "จ้างงานแล้ว"
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_stage__hired_stage
 msgid "Hired Stage"
 msgstr "ขั้นตอนการจ้าง"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
-msgid "Hiring Date"
-msgstr "วันที่จ้าง"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__id
@@ -1653,7 +1616,7 @@ msgid ""
 "ID of the parent record holding the alias (example: project holding the task"
 " creation alias)"
 msgstr ""
-"ไอดีของบันทึกหลักที่มีนามแฝง (ตัวอย่าง: โปรเจ็กต์ที่มีนามแฝงในการสร้างงาน)"
+"ไอดีของบันทึกหลักที่มีนามแฝง (ตัวอย่าง: โปรเจกต์ที่มีนามแฝงในการสร้างงาน)"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__activity_exception_icon
@@ -1701,15 +1664,6 @@ msgstr ""
 "เนื้อหานี้จะถูกส่งไปยังผู้ใช้ที่ไม่ได้รับอนุญาตโดยอัตโนมัติแทนข้อความเริ่มต้น"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__emp_is_active
-msgid ""
-"If the active field is set to False, it will allow you to hide the resource "
-"record without removing it."
-msgstr ""
-"หากฟิลด์ที่ใช้งานอยู่ถูกตั้งค่าเป็น เท็จ "
-"ฟิลด์นี้จะอนุญาตให้คุณซ่อนการบันทึกทรัพยากรโดยไม่ต้องลบออก"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__active
 msgid ""
 "If the active field is set to false, it will allow you to hide the case "
@@ -1719,56 +1673,16 @@ msgstr ""
 "ฟิลด์นี้จะอนุญาตให้คุณซ่อนเคสโดยไม่ต้องลบออก"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__is_blacklisted
-msgid ""
-"If the email address is on the blacklist, the contact won't receive mass "
-"mailing anymore, from any list"
-msgstr ""
-"หากที่อยู่อีเมลมีอยู่ในบัญชีแบล็คลิสต์ "
-"ผู้ติดต่อจะไม่ได้รับอีเมลกลุ่มอีกต่อไป หรือจากรายการใดก็ตาม"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_sanitized_blacklisted
-msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive"
-" mass mailing sms anymore, from any list"
-msgstr ""
-"หากหมายเลขโทรศัพท์ที่ถูกต้องอยู่ในบัญชีดำ ผู้ติดต่อจะไม่ได้รับ SMS "
-"ทางเมลกลุ่มจากรายการใด ๆ อีกต่อไป"
-
-#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment_stage.py:0
-#: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job1
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job2
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job3
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job4
 #: model:hr.recruitment.stage,legend_normal:hr_recruitment.stage_job5
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 #, python-format
 msgid "In Progress"
 msgstr "กำลังดำเนินการ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__mobile_blacklisted
-msgid ""
-"Indicates if a blacklisted sanitized phone number is a mobile number. Helps "
-"distinguish which number is blacklisted             when there is both a "
-"mobile and phone field in a model."
-msgstr ""
-"ระบุว่าหมายเลขโทรศัพท์ที่ถูกต้องในบัญชีดำเป็นหมายเลขโทรศัพท์มือถือหรือไม่ "
-"ช่วยแยกแยะว่าหมายเลขใดถูกขึ้นบัญชีดำเมื่อมีทั้งฟิลด์มือถือและโทรศัพท์ในโมเดล"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__phone_blacklisted
-msgid ""
-"Indicates if a blacklisted sanitized phone number is a phone number. Helps "
-"distinguish which number is blacklisted             when there is both a "
-"mobile and phone field in a model."
-msgstr ""
-"ระบุว่าหมายเลขโทรศัพท์ที่ถูกต้องในบัญชีดำเป็นหมายเลขโทรศัพท์หรือไม่ "
-"ช่วยแยกแยะว่าหมายเลขที่ถูกขึ้นบัญชีดำเมื่อมีฟิลด์มือถือและโทรศัพท์ในโมเดล"
 
 #. module: hr_recruitment
 #: model:hr.recruitment.stage,name:hr_recruitment.stage_job1
@@ -1779,11 +1693,6 @@ msgstr "คุณสมบัติเบื้องต้น"
 #: model:ir.model.fields,field_description:hr_recruitment.field_res_config_settings__module_hr_recruitment_survey
 msgid "Interview Forms"
 msgstr "ฟอร์มการสัมภาษณ์"
-
-#. module: hr_recruitment
-#: model:res.groups,name:hr_recruitment.group_hr_recruitment_interviewer
-msgid "Interviewer"
-msgstr "ผู้สัมภาษณ์"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__interviewer_ids
@@ -1812,11 +1721,6 @@ msgid "Is Warning Visible"
 msgstr "เป็นคำเตือนที่มองเห็นได้"
 
 #. module: hr_recruitment
-#: model:res.groups,comment:hr_recruitment.group_hr_recruitment_interviewer
-msgid "It will also allow to send surveys and see the resume."
-msgstr "นอกจากนี้ยังจะอนุญาตให้ส่งแบบสอบถามและดูเรซูเม่ได้"
-
-#. module: hr_recruitment
 #. odoo-python
 #: code:addons/hr_recruitment/models/hr_job.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__job_id
@@ -1828,7 +1732,7 @@ msgstr "งาน"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__application_ids
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.crm_case_pivot_view_job
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
@@ -1931,10 +1835,22 @@ msgstr "ปัญหาด้านภาษา"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "Last Meeting"
 msgstr "การประชุมล่าสุด"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_category____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_degree____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source____last_update
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_stage____last_update
+msgid "Last Modified on"
+msgstr "แก้ไขครั้งล่าสุดเมื่อ"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__last_stage_id
@@ -2029,11 +1945,6 @@ msgid "LinkedIn Profile"
 msgstr "โปรไฟล์ LinkedIn"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_incoming_local
-msgid "Local-part based incoming detection"
-msgstr "การตรวจจับขาเข้าตามชิ้นส่วนในพื้นที่"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__template_id
 msgid "Mail Template"
 msgstr "เทมเพลตเมล"
@@ -2052,12 +1963,12 @@ msgstr "ปริญญาโท"
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__medium_id
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_source__medium_id
 msgid "Medium"
-msgstr "วิธีที่เข้ามา"
+msgstr "สื่อกลาง"
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_recruitment_utm_mediums
 msgid "Mediums"
-msgstr "วิธีที่เข้ามา"
+msgstr "สื่อกลาง"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__meeting_display_date
@@ -2125,7 +2036,6 @@ msgid "Name"
 msgstr "ชื่อ"
 
 #. module: hr_recruitment
-#: model:hr.recruitment.stage,name:hr_recruitment.stage_job0
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 msgid "New"
 msgstr "ใหม่"
@@ -2165,6 +2075,21 @@ msgid "New Hired Employee"
 msgstr "การจ้างพนักงานใหม่"
 
 #. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_employee_view_search
+msgid "Newly Hired"
+msgstr "การจ้างใหม่"
+
+#. module: hr_recruitment
+#: model:ir.actions.act_window,name:hr_recruitment.hr_employee_action_from_department
+msgid "Newly Hired Employees"
+msgstr "การจ้างพนักงานใหม่"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_employee__newly_hired_employee
+msgid "Newly hired employee"
+msgstr "การจ้างพนักงานใหม่"
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_tree_activity
 msgid "Next Activities"
 msgstr "กิจกรรมถัดไป"
@@ -2191,28 +2116,28 @@ msgstr "ประเภทกิจกรรมถัดไป"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "Next Meeting"
 msgstr "การประชุมถัดไป"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "No Meeting"
 msgstr "ไม่มีการประชุม"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "No Subject"
 msgstr "ไม่มีหัวเรื่อง"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "No application found. Let's create one !"
 msgstr "ไม่พบแอปพลิเคชัน มาสร้างกันเถอะ!"
@@ -2239,11 +2164,6 @@ msgstr "ยังไม่มีข้อมูล!"
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__priority__0
 msgid "Normal"
 msgstr "ปกติ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__email_normalized
-msgid "Normalized Email"
-msgstr "ทำให้อีเมลเป็นมาตรฐาน"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__message_needaction_counter
@@ -2284,7 +2204,6 @@ msgstr "จํานวนข้อความที่มีข้อผิด
 
 #. module: hr_recruitment
 #: model_terms:ir.actions.act_window,help:hr_recruitment.action_hr_job_applications
-#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
 msgid ""
 "Odoo helps you track applicants in the recruitment\n"
 "                process and follow up all operations: meetings, interviews, etc."
@@ -2293,9 +2212,18 @@ msgstr ""
 "                ดำเนินการและติดตามการดำเนินงานทั้งหมด: การประชุม สัมภาษณ์ และอื่น ๆ "
 
 #. module: hr_recruitment
+#: model_terms:ir.actions.act_window,help:hr_recruitment.crm_case_categ0_act_job
+msgid ""
+"Odoo helps you track applicants in the recruitment\n"
+"            process and follow up all operations: meetings, interviews, etc."
+msgstr ""
+"Odoo ช่วยคุณติดตามผู้สมัครในการรับสมัคร\n"
+"            ดำเนินการและติดตามการดำเนินงานทั้งหมด: การประชุม สัมภาษณ์ และ อื่น ๆ "
+
+#. module: hr_recruitment
 #: model:res.groups,name:hr_recruitment.group_hr_recruitment_user
-msgid "Officer: Manage all applicants"
-msgstr "เจ้าหน้าที่: จัดการผู้สมัครทั้งหมด"
+msgid "Officer : Manage all applicants"
+msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__old_application_count
@@ -2306,7 +2234,7 @@ msgstr "การสมัครเก่า"
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__application_status__ongoing
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 msgid "Ongoing"
-msgstr "กำลังดำเนินการ"
+msgstr "ต่อเนื่อง"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_res_config_settings__module_website_hr_recruitment
@@ -2350,6 +2278,11 @@ msgid "Other applications"
 msgstr "การสมัครอื่น ๆ "
 
 #. module: hr_recruitment
+#: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_user_id
+msgid "Owner"
+msgstr "เจ้าของ"
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_parent_model_id
 msgid "Parent Model"
 msgstr "โมเดลหลัก"
@@ -2372,32 +2305,20 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "People can also apply by email to save time."
 msgstr "ผู้คนสามารถสมัครทางอีเมลได้เพื่อประหยัดเวลา"
 
 #. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_job__hr_responsible_id
+msgid "Person responsible of validating the employee's contracts."
+msgstr "บุคคลที่รับผิดชอบในการตรวจสอบสัญญาของพนักงาน"
+
+#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_phone
 msgid "Phone"
 msgstr "โทรศัพท์"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_sanitized_blacklisted
-msgid "Phone Blacklisted"
-msgstr "โทรศัพท์ขึ้นบัญชีดำ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_mobile_search
-msgid "Phone/Mobile"
-msgstr "โทรศัพท์/มือถือ"
-
-#. module: hr_recruitment
-#. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
-#, python-format
-msgid "Please provide an applicant name."
-msgstr "กรุณาระบุชื่อผู้สมัคร"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_contact
@@ -2418,11 +2339,6 @@ msgid "Probability"
 msgstr "ความน่าจะเป็น"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__applicant_properties
-msgid "Properties"
-msgstr "คุณสมบัติ"
-
-#. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__salary_proposed
 msgid "Proposed Salary"
 msgstr "เงินเดือนที่เสนอ"
@@ -2438,14 +2354,8 @@ msgid "Publish available jobs on your website"
 msgstr "ลงประกาศตำแหน่งงานที่ว่างบนเว็บไซต์ของคุณ"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__rating_ids
-msgid "Ratings"
-msgstr "การให้คะแนน"
-
-#. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_recruitment_stage.py:0
-#: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job1
 #: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job2
 #: model:hr.recruitment.stage,legend_done:hr_recruitment.stage_job3
@@ -2497,6 +2407,11 @@ msgid "Recruitment Analysis"
 msgstr "วิเคราะห์การสรรหา"
 
 #. module: hr_recruitment
+#: model:res.groups,name:hr_recruitment.group_hr_recruitment_interviewer
+msgid "Recruitment Interviewer"
+msgstr ""
+
+#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
 msgid "Recruitment Process"
 msgstr "กระบวนการสรรหา"
@@ -2514,12 +2429,12 @@ msgstr "การรับสมัคร: การรับทราบใบ�
 #. module: hr_recruitment
 #: model:mail.template,name:hr_recruitment.email_template_data_applicant_interest
 msgid "Recruitment: Interest"
-msgstr "การรับสมัคร : สนใจ"
+msgstr "การรับสมัคร : ความสนใจ"
 
 #. module: hr_recruitment
 #: model:mail.template,name:hr_recruitment.email_template_data_applicant_not_interested
 msgid "Recruitment: Not interested anymore"
-msgstr "การรับสมัคร : ไม่สนใจแล้ว"
+msgstr "รับสมัคร : ไม่สนใจแล้ว"
 
 #. module: hr_recruitment
 #: model:mail.template,name:hr_recruitment.email_template_data_applicant_refuse
@@ -2542,7 +2457,6 @@ msgid "Red Kanban Label"
 msgstr "ป้ายคัมบังสีแดง"
 
 #. module: hr_recruitment
-#: model:ir.actions.server,name:hr_recruitment.ir_actions_server_refuse_applicant
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_get_refuse_reason_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
@@ -2551,7 +2465,7 @@ msgstr "ปฏิเสธ"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.actions.act_window,name:hr_recruitment.applicant_get_refuse_reason_action
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__refuse_reason_id
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__refuse_reason_id
@@ -2641,11 +2555,6 @@ msgid "Restore"
 msgstr "คืนค่า"
 
 #. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
-msgid "Resume's content"
-msgstr "เนื้อหาของเรซูเม่"
-
-#. module: hr_recruitment
 #: model:hr.applicant.refuse.reason,name:hr_recruitment.refuse_reason_5
 msgid "Role already fulfilled"
 msgstr "ทำหน้าที่สำเร็จแล้ว"
@@ -2681,26 +2590,11 @@ msgid "Salary Proposed by the Organisation, extra advantages"
 msgstr "เงินเดือนที่เสนอโดยองค์กร สวัสดิการพิเศษ"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_mobile_sanitized
-msgid "Sanitized Mobile Number"
-msgstr "ทำความสะอาดเบอร์มือถือ"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__phone_sanitized
-msgid "Sanitized Number"
-msgstr "หมายเลขที่ถูกต้อง"
-
-#. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__partner_phone_sanitized
-msgid "Sanitized Phone Number"
-msgstr "ทำความสะอาดเบอร์โทรศัพท์"
-
-#. module: hr_recruitment
 #. odoo-javascript
 #: code:addons/hr_recruitment/static/src/js/tours/hr_recruitment.js:0
 #, python-format
-msgid "Save it!"
-msgstr "เก็บไว้!"
+msgid "Save it !"
+msgstr "บันทึกมัน !"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_kanban_view_applicant
@@ -2723,15 +2617,6 @@ msgid "Second Interview"
 msgstr "สัมภาษณ์ครั้งที่สอง"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_job__address_id
-msgid ""
-"Select the location where the applicant will work. Addresses listed here are"
-" defined on the company's contact information."
-msgstr ""
-"เลือกสถานที่ที่ผู้สมัครจะทำงาน "
-"ที่อยู่ที่แสดงไว้ที่นี่ถูกกำหนดไว้ในข้อมูลติดต่อของบริษัท"
-
-#. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_send_mail_view_form
 msgid "Send"
 msgstr "ส่ง"
@@ -2743,7 +2628,7 @@ msgstr "ส่ง CV ไปที่ OCR เพื่อกรอกใบสม
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #: model:ir.actions.server,name:hr_recruitment.action_applicant_send_mail
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_get_refuse_reason__send_mail
 #, python-format
@@ -2756,7 +2641,6 @@ msgid "Send Interview Survey"
 msgstr "ส่งแบบสอบถามการสัมภาษณ์"
 
 #. module: hr_recruitment
-#: model:ir.actions.act_window,name:hr_recruitment.action_hr_applicant_mass_sms
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
 msgid "Send SMS"
 msgstr "ส่ง SMS"
@@ -2764,8 +2648,11 @@ msgstr "ส่ง SMS"
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.res_config_settings_view_form
 msgid ""
-"Send an Interview Survey to the applicant during the recruitment process"
-msgstr "ส่งแบบสอบถามการสัมภาษณ์ให้กับผู้สมัครในระหว่างกระบวนการสรรหาบุคลากร"
+"Send an Interview Survey to the applicant during\n"
+"                                        the recruitment process"
+msgstr ""
+"ส่งแบบสอบถามการสัมภาษณ์ให้กับผู้สมัครในช่วง\n"
+"                                       ขั้นตอนการรับสมัคร"
 
 #. module: hr_recruitment
 #: model:ir.model,name:hr_recruitment.model_applicant_send_mail
@@ -2785,7 +2672,6 @@ msgid "Send your email. Followers will get a copy of the communication."
 msgstr "ส่งอีเมลของคุณ ผู้ติดตามจะได้รับสำเนาของการติดต่อสื่อสาร"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant_refuse_reason__sequence
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_degree__sequence
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_recruitment_stage__sequence
 msgid "Sequence"
@@ -2916,8 +2802,8 @@ msgstr "ชื่อแท็ก"
 
 #. module: hr_recruitment
 #: model:ir.model.constraint,message:hr_recruitment.constraint_hr_applicant_category_name_uniq
-msgid "Tag name already exists!"
-msgstr "มีชื่อแท็กแล้ว!"
+msgid "Tag name already exists !"
+msgstr "ชื่อแท็กนี้มีอยู่แล้ว!"
 
 #. module: hr_recruitment
 #: model:ir.actions.act_window,name:hr_recruitment.hr_applicant_category_action
@@ -2927,6 +2813,7 @@ msgstr "มีชื่อแท็กแล้ว!"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_category_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
 msgid "Tags"
 msgstr "แท็ก"
 
@@ -2992,7 +2879,7 @@ msgid ""
 msgstr ""
 "โมเดล (ชนิดเอกสาร Odoo) ซึ่งสอดคล้องกับนามแฝงนี้ อีเมลขาเข้าใดๆ "
 "ที่ไม่ตอบกลับบันทึกที่มีอยู่จะทำให้เกิดการสร้างบันทึกใหม่ของโมเดลนี้ (เช่น "
-"โปรเจ็กต์งาน)"
+"โปรเจกต์งาน)"
 
 #. module: hr_recruitment
 #: model:ir.model.constraint,message:hr_recruitment.constraint_hr_recruitment_degree_name_uniq
@@ -3009,13 +2896,16 @@ msgstr ""
 "<jobs@example.odoo.com>"
 
 #. module: hr_recruitment
-#: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__email_normalized
+#: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_user_id
 msgid ""
-"This field is used to search on email address as the primary email field can"
-" contain more than strictly an email address."
+"The owner of records created upon receiving emails on this alias. If this "
+"field is not set the system will attempt to find the right owner based on "
+"the sender (From) address, or will use the Administrator account if no "
+"system user is found for that address."
 msgstr ""
-"ฟิลด์นี้ใช้เพื่อค้นหาที่อยู่อีเมล เนื่องจากฟิลด์อีเมลหลักสามารถใส่สิ่งอื่น ๆ"
-" มากกว่าที่อยู่อีเมลที่เคร่งครัด"
+"เจ้าของบันทึกที่สร้างขึ้นเมื่อได้รับอีเมลในนามแฝงนี้ "
+"หากไม่ได้ตั้งค่าฟิลด์นี้ ระบบจะพยายามค้นหาเจ้าของที่ถูกต้องตามที่อยู่ผู้ส่ง "
+"(จาก) หรือจะใช้บัญชีผู้ดูแลระบบหากไม่พบผู้ใช้ระบบสำหรับที่อยู่นั้น"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__campaign_id
@@ -3029,7 +2919,7 @@ msgstr ""
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__medium_id
 msgid "This is the method of delivery, e.g. Postcard, Email, or Banner Ad"
-msgstr "นี้เป็นวิธีการจัดส่งเช่น โปสการ์ด อีเมล หรือป้ายโฆษณา"
+msgstr "นี้เป็นวิธีการจัดส่งเช่น โปสการ์ด อีเมล หรือโฆษณาแบนเนอร์"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,help:hr_recruitment.field_hr_applicant__source_id
@@ -3192,7 +3082,7 @@ msgstr "เขียนข้อความของคุณที่นี่
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "You are not allowed to perform this action."
 msgstr "คุณไม่ได้รับอนุญาตให้ดำเนินการนี้"
@@ -3201,14 +3091,14 @@ msgstr "คุณไม่ได้รับอนุญาตให้ดำเ
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_recruitment_stage_form
 msgid ""
 "You can define here the labels that will be displayed for the kanban state instead\n"
-"                            of the default labels."
+"                        of the default labels."
 msgstr ""
-"คุณสามารถกำหนดป้ายชื่อที่จะแสดงสำหรับสถานะคัมบัง\n"
-"                          แทนป้ายชื่อเริ่มต้นได้ที่นี่"
+"คุณสามารถกำหนดป้ายกำกับที่จะแสดงสำหรับสถานะคัมบังแทนได้\n"
+"                        ป้ายกำกับที่เป็นค่าเริ่มต้น"
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid ""
 "You can search into attachment's content, like resumes, with the searchbar."
@@ -3227,7 +3117,8 @@ msgstr ""
 
 #. module: hr_recruitment
 #. odoo-python
-#: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
+#: code:addons/hr_recruitment/models/hr_recruitment.py:0
 #, python-format
 msgid "You must define a Contact Name for this applicant."
 msgstr "คุณต้องกำหนดชื่อผู้ติดต่อสำหรับผู้สมัครรายนี้"
@@ -3263,16 +3154,5 @@ msgstr "เช่น ผู้จัดการฝ่ายขาย ประ�
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_survey
-msgid "e.g. domain.com"
-msgstr "e.g. domain.com"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "e.g. sales-manager"
 msgstr "เช่น sales-manager"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_get_refuse_reason_view_form
-msgid "to"
-msgstr "ถึง"

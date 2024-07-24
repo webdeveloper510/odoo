@@ -20,6 +20,3 @@ StatusBarButtons.components = {
     Dropdown,
     DropdownItem,
 };
-StatusBarButtons.props = {
-    slots: { type: Object, optional: 1 },
-};

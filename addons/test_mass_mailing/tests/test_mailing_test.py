@@ -11,31 +11,18 @@ from odoo.tools import mute_logger
 @tagged('mailing_manage')
 class TestMailingTest(TestMassMailCommon):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.test_records = cls.env['mailing.test.blacklist'].create([
-            {
-                'email_from': f'test.mailing.{idx}@test.example.com',
-                'name': f'Test Mailing {idx}',
-                'user_id': cls.user_marketing.id,
-            }
-            for idx in range(5)
-        ])
-        cls.test_mailing_bl = cls.env['mailing.mailing'].create({
-            'body_html': '<p>Hello <t t-out="object.name"/></p>',
-            'mailing_domain': [('id', 'in', cls.test_records.ids)],
-            'mailing_model_id': cls.env['ir.model']._get_id('mailing.test.blacklist'),
-            'mailing_type': 'mail',
-            'name': 'TestButton',
-            'preview': 'Preview {{ object.name }}',
-            'subject': 'Subject {{ object.name }}',
-        })
-
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_render_mixin')
     def test_mailing_test_button(self):
-        mailing = self.test_mailing_bl.with_env(self.env)
+        mailing = self.env['mailing.mailing'].create({
+            'name': 'TestButton',
+            'subject': 'Subject {{ object.name }}',
+            'preview': 'Preview {{ object.name }}',
+            'state': 'draft',
+            'mailing_type': 'mail',
+            'body_html': '<p>Hello <t t-out="object.name"/></p>',
+            'mailing_model_id': self.env['ir.model']._get('res.partner').id,
+        })
         mailing_test = self.env['mailing.mailing.test'].create({
             'email_to': 'test@test.com',
             'mass_mailing_id': mailing.id,
@@ -75,52 +62,27 @@ class TestMailingTest(TestMassMailCommon):
         with self.mock_mail_gateway(), self.assertRaises(Exception):
             mailing_test.send_mail_test()
 
-    @users('user_marketing')
-    @mute_logger('odoo.addons.mail.models.mail_render_mixin')
-    def test_mailing_test_button_links(self):
-        """This tests that the link provided by the View in Browser snippet is correctly replaced
-        when sending a test mailing while the Unsubscribe button's link isn't, to preserve the testing route
-        /unsubscribe_from_list.
-        This also checks that other links containing the /view route aren't replaced along the way.
-        """
-        mailing = self.test_mailing_bl.with_env(self.env)
-        mailing_test = self.env['mailing.mailing.test'].create({
-            'email_to': 'test@test.com',
-            'mass_mailing_id': mailing.id,
-        })
-        # Test if link snippets are correctly converted
-        mailing.write({
-            'body_html':
-                '''<p>
-                Hello <a href="http://www.example.com/view">World<a/>
-                    <div class="o_snippet_view_in_browser o_mail_snippet_general pt16 pb16" style="text-align: center; padding-left: 15px; padding-right: 15px;">
-                        <a href="/view">
-                            View Online
-                        </a>
-                    </div>
-                    <div class="o_mail_footer_links">
-                        <a role="button" href="/unsubscribe_from_list" class="btn btn-link">Unsubscribe</a>
-                    </div>
-                </p>''',
-            'preview': 'Preview {{ object.name }}',
-            'subject': 'Subject {{ object.name }}',
-        })
-
-        with self.mock_mail_gateway():
-            mailing_test.send_mail_test()
-
-        body_html = self._mails.pop()['body']
-        self.assertIn(f'/mailing/{mailing.id}/view', body_html)  # Is replaced
-        self.assertIn('/unsubscribe_from_list', body_html)  # Isn't replaced
-        self.assertIn('http://www.example.com/view', body_html)  # Isn't replaced
-
     def test_mailing_test_equals_reality(self):
-        """ Check that both test and real emails will format the qweb and inline
-        placeholders correctly in body and subject. """
-        mailing = self.test_mailing_bl.with_env(self.env)
-        mailing.write({
-            'body_html': '<p>Hello {{ object.name }} <t t-out="object.name"/></p>',
+        """
+        Check that both test and real emails will format the qweb and inline placeholders correctly in body and subject.
+        """
+        self.env['mailing.contact'].search([]).unlink()
+        contact_list = self.env['mailing.list'].create({
+            'name': 'Testers',
+            'contact_ids': [Command.create({
+                'name': 'Mitchell Admin',
+                'email': 'real@real.com',
+            })],
+        })
+
+        mailing = self.env['mailing.mailing'].create({
+            'name': 'TestButton',
             'subject': 'Subject {{ object.name }} <t t-out="object.name"/>',
+            'state': 'draft',
+            'mailing_type': 'mail',
+            'body_html': '<p>Hello {{ object.name }} <t t-out="object.name"/></p>',
+            'mailing_model_id': self.env['ir.model']._get('mailing.list').id,
+            'contact_list_ids': [contact_list.id],
         })
         mailing_test = self.env['mailing.mailing.test'].create({
             'email_to': 'test@test.com',
@@ -130,10 +92,8 @@ class TestMailingTest(TestMassMailCommon):
         with self.mock_mail_gateway():
             mailing_test.send_mail_test()
 
-        expected_test_record = self.env[mailing.mailing_model_real].search([], limit=1)
-        self.assertEqual(expected_test_record, self.test_records[0], 'Should take first found one')
-        expected_subject = f'Subject {expected_test_record.name} <t t-out="object.name"/>'
-        expected_body = 'Hello {{ object.name }}' + f' {expected_test_record.name}'
+        expected_subject = 'Subject Mitchell Admin <t t-out="object.name"/>'
+        expected_body = 'Hello {{ object.name }} Mitchell Admin'
 
         self.assertSentEmail(self.env.user.partner_id, ['test@test.com'],
             subject=expected_subject,
@@ -144,9 +104,6 @@ class TestMailingTest(TestMassMailCommon):
             mailing.action_launch()
             self.env.ref('mass_mailing.ir_cron_mass_mailing_queue').method_direct_trigger()
 
-        self.assertSentEmail(
-            self.env.user.partner_id,
-            [expected_test_record.email_from],
+        self.assertSentEmail(self.env.user.partner_id, ['real@real.com'],
             subject=expected_subject,
-            body_content=expected_body,
-        )
+            body_content=expected_body)

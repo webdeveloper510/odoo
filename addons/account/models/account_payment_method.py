@@ -108,27 +108,17 @@ class AccountPaymentMethodLine(models.Model):
         copy=False,
         ondelete='restrict',
         domain="[('deprecated', '=', False), "
+                "('company_id', '=', company_id), "
+                "('account_type', 'not in', ('asset_receivable', 'liability_payable')), "
                 "'|', ('account_type', 'in', ('asset_current', 'liability_current')), ('id', '=', parent.default_account_id)]"
     )
-    journal_id = fields.Many2one(
-        comodel_name='account.journal',
-        ondelete="cascade",
-        check_company=True,
-    )
+    journal_id = fields.Many2one(comodel_name='account.journal', ondelete="cascade")
 
     # == Display purpose fields ==
     code = fields.Char(related='payment_method_id.code')
     payment_type = fields.Selection(related='payment_method_id.payment_type')
     company_id = fields.Many2one(related='journal_id.company_id')
     available_payment_method_ids = fields.Many2many(related='journal_id.available_payment_method_ids')
-
-    @api.depends('journal_id')
-    @api.depends_context('show_payment_journal_id')
-    def _compute_display_name(self):
-        if not self.env.context.get('show_payment_journal_id'):
-            return super()._compute_display_name()
-        for method in self:
-            method.display_name = f"{method.name} ({method.journal_id.name})"
 
     @api.depends('payment_method_id.name')
     def _compute_name(self):

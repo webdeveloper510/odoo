@@ -3,27 +3,29 @@
 # 	* delivery
 # 
 # Translators:
-# Arma Gedonsky <armagedonsky@hot.ee>, 2023
-# Rivo Zängov <eraser@eraser.ee>, 2023
-# Leaanika Randmets, 2023
-# Triine Aavik <triine@avalah.ee>, 2023
-# Patrick-Jordan Kiudorv, 2023
+# Maidu Targama <m.targama@gmail.com>, 2022
+# Arma Gedonsky <armagedonsky@hot.ee>, 2022
+# Martin Aavastik <martin@avalah.ee>, 2022
+# Egon Raamat <egon@avalah.ee>, 2022
+# Triine Aavik <triine@avalah.ee>, 2022
+# Helen Sulaoja <helen@avalah.ee>, 2022
+# Rivo Zängov <eraser@eraser.ee>, 2022
+# Algo Kärp <algokarp@gmail.com>, 2022
+# Andre Roomet <andreroomet@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Eneli Õigus <enelioigus@gmail.com>, 2022
+# Piia Paurson <piia@avalah.ee>, 2022
 # JanaAvalah, 2023
-# Algo Kärp <algokarp@gmail.com>, 2023
-# Piia Paurson <piia@avalah.ee>, 2023
-# Martin Trigaux, 2023
-# Martin Aavastik <martin@avalah.ee>, 2023
-# Eneli Õigus <enelioigus@gmail.com>, 2023
-# Helen Sulaoja <helen@avalah.ee>, 2023
-# Anna, 2024
+# Anna, 2023
+# Leaanika Randmets, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Anna, 2024\n"
+"POT-Creation-Date: 2022-12-15 12:50+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
+"Last-Translator: Leaanika Randmets, 2023\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,22 +35,20 @@ msgstr ""
 
 #. module: delivery
 #. odoo-python
-#: code:addons/delivery/wizard/choose_delivery_carrier.py:0
+#: code:addons/delivery/models/sale_order.py:0
 #, python-format
-msgid "%(carrier)s Error"
-msgstr ""
+msgid " (Estimated Cost: %s )"
+msgstr " (Hinnanguline maksumus: %s )"
 
 #. module: delivery
-#. odoo-python
-#: code:addons/delivery/models/delivery_carrier.py:0
-#, python-format
-msgid "%(old_name)s (copy)"
-msgstr "%(old_name)s (koopia)"
+#: model_terms:ir.ui.view,arch_db:delivery.view_quant_package_weight_form
+msgid "(computed:"
+msgstr "(arvutatud: "
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Get rate"
-msgstr ""
+msgid "<i class=\"fa fa-arrow-right me-1\"/>Get rate"
+msgstr "<i class=\"fa fa-arrow-right me-1\"/>Arvuta hind"
 
 #. module: delivery
 #. odoo-python
@@ -66,14 +66,16 @@ msgstr ""
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
-"<span class=\"o_stat_text o_warning_text fw-bold\">Test</span>\n"
-"                                <span class=\"o_stat_text\">Environment</span>"
+"<span class=\"o_warning_text\">Test</span>\n"
+"                                    <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
+"<span class=\"o_warning_text\">Test</span>\n"
+"                                    <span class=\"o_stat_text\">Environment</span>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
-msgid "<span class=\"o_stat_text text-danger\">No debug</span>"
-msgstr "<span class=\"o_stat_text text-danger\">No debug</span>"
+msgid "<span class=\"text-danger\">No debug</span>"
+msgstr "<span class=\"text-danger\">Ei ole debug</span>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -84,15 +86,84 @@ msgstr "<span class=\"text-success\">Debug päringud</span>"
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
-"                                <span class=\"o_stat_text\">Environment</span>"
+"                                    <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
-"<span class=\"text-success\">Tootmine</span>\n"
-"                                <span class=\"o_stat_text\">Keskkond</span>"
+"<span class=\"text-success\">Production</span>\n"
+"                                    <span class=\"o_stat_text\">Environment</span>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.stock_report_delivery_package_section_line_inherit_delivery
+msgid "<span> - Weight (estimated): </span>"
+msgstr "<span> - Kaal (hinnanguline): </span>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.delivery_stock_report_delivery_no_package_section_line
+#: model_terms:ir.ui.view,arch_db:delivery.stock_report_delivery_package_section_line_inherit_delivery
+msgid "<span> - Weight: </span>"
+msgstr "<span> - Kaal: </span>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_package_barcode_small_delivery
+msgid "<span>Shipping Weight: </span>"
+msgstr "<span>Saadetise kaal: </span>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_delivery_document2
+#: model_terms:ir.ui.view,arch_db:delivery.report_shipping2
+msgid "<strong>Carrier:</strong>"
+msgstr "<strong>Transpordifirma:</strong>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_delivery_document2
+msgid "<strong>HS Code</strong>"
+msgstr "<strong>HS kood</strong>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.delivery_report_saleorder_document
 msgid "<strong>Shipping Description:</strong>"
 msgstr "<strong>Tarne kirjeldus:</strong>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_package_barcode_delivery
+msgid "<strong>Shipping Weight: </strong>"
+msgstr "<strong>Saadetise kaal: </strong>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_package_barcode_delivery
+msgid ""
+"<strong>Shipping Weight:</strong>\n"
+"                    <br/>"
+msgstr ""
+"<strong>Saadetise kaal:</strong>\n"
+"                    <br/>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_delivery_document2
+msgid ""
+"<strong>Total Weight:</strong>\n"
+"                <br/>"
+msgstr ""
+"<strong>Kaal kokku:</strong>\n"
+"                <br/>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_delivery_document2
+msgid "<strong>Tracking Number:</strong>"
+msgstr "<strong>Jälgimisnumber:</strong>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_package_barcode_delivery
+msgid "<strong>Weight: </strong>"
+msgstr "<strong>Kaal: </strong>"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_shipping2
+msgid ""
+"<strong>Weight:</strong>\n"
+"                <br/>"
+msgstr ""
+"<strong>Kaal:</strong>\n"
+"                <br/>"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__carrier_description
@@ -112,7 +183,7 @@ msgstr "Action while validating Delivery Orders"
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__active
 msgid "Active"
-msgstr "Aktiivne"
+msgstr "Tegev"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
@@ -131,11 +202,6 @@ msgstr "Lisa tarneviis"
 #: model_terms:ir.ui.view,arch_db:delivery.view_order_form_with_carrier
 msgid "Add shipping"
 msgstr "Lisa transport"
-
-#. module: delivery
-#: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
-msgid "Additional margin"
-msgstr ""
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__amount
@@ -168,12 +234,33 @@ msgid "Based on Rules"
 msgstr "Reeglipõhine hind"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__weight_bulk
+msgid "Bulk Weight"
+msgstr "Põhiosa kaal"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__can_generate_return
 msgid "Can Generate Return"
 msgstr "Saab luua tagastusi"
 
 #. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid "Cancel"
+msgstr "Tühista"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid ""
+"Cancelling a delivery may not be undoable. Are you sure you want to "
+"continue?"
+msgstr ""
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__carrier_id
+#: model:ir.model.fields,field_description:delivery.field_stock_move_line__carrier_id
+#: model:ir.model.fields,field_description:delivery.field_stock_package_type__package_carrier_type
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__carrier_id
+#: model_terms:ir.ui.view,arch_db:delivery.stock_move_line_view_search_delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_search
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_tree
@@ -181,12 +268,28 @@ msgid "Carrier"
 msgstr "Transpordifirma"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_package_type__shipper_package_code
+msgid "Carrier Code"
+msgstr "Transpordifirma kood"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__carrier_description
 msgid "Carrier Description"
 msgstr "Transpordifirma kirjeldus"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_move_line__carrier_name
+msgid "Carrier Name"
+msgstr "Transpordifirma nimi"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.stock_move_line_view_search_delivery
+msgid "Carrier name"
+msgstr "Transpordifirma nimi"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__company_id
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__company_id
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__company_id
 msgid "Company"
 msgstr "Ettevõte"
@@ -213,24 +316,24 @@ msgstr "Riigid"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__create_uid
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__create_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__create_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__create_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__create_uid
 msgid "Created by"
-msgstr "Loodud (kelle poolt?)"
+msgstr "Loonud"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__create_date
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__create_date
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__create_date
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__create_date
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__create_date
 msgid "Created on"
-msgstr "Loodud"
+msgstr "Loomise kuupäev"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__currency_id
-#: model:ir.model.fields,field_description:delivery.field_delivery_carrier__currency_id
-#: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__currency_id
 msgid "Currency"
 msgstr "Valuuta"
 
@@ -253,7 +356,7 @@ msgstr "Müügitellimustel vaikimisi kasutatav tarneviis."
 #. module: delivery
 #: model_terms:ir.actions.act_window,help:delivery.action_delivery_carrier_form
 msgid "Define a new delivery method"
-msgstr "Määrake uus tarneviis."
+msgstr "Määra uus tarneviis."
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_search
@@ -283,6 +386,16 @@ msgstr "Tarneteade"
 #: model:ir.model.fields,field_description:delivery.field_sale_order__carrier_id
 msgid "Delivery Method"
 msgstr "Tarneviis"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_choose_delivery_package
+msgid "Delivery Package Selection Wizard"
+msgstr "Tarneviiside valiku loomine"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__delivery_package_type_id
+msgid "Delivery Package Type"
+msgstr "Tarnepaki tüübid"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__delivery_price
@@ -324,7 +437,7 @@ msgstr "Tarne maksumus tuleks ümber arvutada"
 #: model_terms:ir.actions.act_window,help:delivery.action_delivery_zip_prefix_list
 msgid ""
 "Delivery zip prefixes are assigned to delivery carriers to restrict\n"
-"            which zips it is available to."
+"                which zips it is available to."
 msgstr ""
 
 #. module: delivery
@@ -333,35 +446,58 @@ msgid "Description"
 msgstr "Kirjeldus"
 
 #. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.vpicktree_view_tree
+msgid "Destination"
+msgstr "Sihtkoht"
+
+#. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid "Destination Availability"
 msgstr "Sihtkohad"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_move_line__destination_country_code
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__destination_country_code
+msgid "Destination Country"
+msgstr "Sihtriik"
+
+#. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__sequence
 msgid "Determine the display order"
-msgstr "Määrake kuvamise järjekord"
+msgstr ""
+"\n"
+"Määrake kuvamise järjekord"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
+#: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_package_view_form
 msgid "Discard"
 msgstr "Loobu"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__display_name
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__display_name
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__display_name
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__display_name
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__display_name
 msgid "Display Name"
-msgstr "Kuvatav nimi"
+msgstr "Näidatav nimi"
+
+#. module: delivery
+#: model:ir.actions.act_window,name:delivery.act_delivery_trackers_url
+msgid "Display tracking links"
+msgstr "Kuva jälgimislingid"
 
 #. module: delivery
 #: model_terms:ir.actions.act_window,help:delivery.action_delivery_carrier_form
 msgid ""
 "Each carrier (e.g. UPS) can have several delivery methods (e.g.\n"
-"            UPS Express, UPS Standard) with a set of pricing rules attached\n"
-"            to each method."
+"                UPS Express, UPS Standard) with a set of pricing rules attached\n"
+"                to each method."
 msgstr ""
+"Igal tarnijal (nt, UPS) võib olla mitu tarneviisi (nt.\n"
+"              UPS Express, UPS Standard), millele igale meetodile on \n"
+"               kehtestatud hinnakujundusreeglid."
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__prod_environment
@@ -371,7 +507,7 @@ msgstr "Keskkond"
 #. module: delivery
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
-#: code:addons/delivery/models/delivery_carrier.py:0
+#: code:addons/delivery/models/delivery_grid.py:0
 #, python-format
 msgid "Error: this delivery method is not available for this address."
 msgstr "Viga: see tarnimsviis pole kasutusel sellele aadressile"
@@ -380,7 +516,7 @@ msgstr "Viga: see tarnimsviis pole kasutusel sellele aadressile"
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__invoice_policy
 msgid ""
 "Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
+"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of the shipping will be updated on the SO after the delivery."
 msgstr ""
 
 #. module: delivery
@@ -403,11 +539,6 @@ msgstr ""
 "kliendi aadressile."
 
 #. module: delivery
-#: model:ir.model.fields,field_description:delivery.field_delivery_carrier__fixed_margin
-msgid "Fixed Margin"
-msgstr ""
-
-#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__fixed_price
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_carrier__delivery_type__fixed
 msgid "Fixed Price"
@@ -419,6 +550,12 @@ msgstr "Fikseeritud hind"
 #, python-format
 msgid "Free Shipping"
 msgstr "Tasuta tarne"
+
+#. module: delivery
+#: model:delivery.carrier,name:delivery.free_delivery_carrier
+#: model:product.template,name:delivery.product_product_delivery_product_template
+msgid "Free delivery charges"
+msgstr "Tasuta kohaletoimetamine"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__free_over
@@ -443,10 +580,18 @@ msgstr "Arvuta hind ja loo saadetis"
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_search
 msgid "Group By"
-msgstr "Rühmitamine"
+msgstr "Grupeeri"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_product_product__hs_code
+#: model:ir.model.fields,field_description:delivery.field_product_template__hs_code
+#: model_terms:ir.ui.view,arch_db:delivery.product_template_hs_code
+msgid "HS Code"
+msgstr "HS kood"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__id
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__id
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__id
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__id
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__id
@@ -488,20 +633,36 @@ msgid "Invoicing Policy"
 msgstr "Arvelduse meetod"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__is_return_picking
+msgid "Is Return Picking"
+msgstr "on tagastussiire."
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_sale_order_line__is_delivery
 msgid "Is a Delivery"
 msgstr "Is a Delivery"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier____last_update
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package____last_update
+#: model:ir.model.fields,field_description:delivery.field_delivery_carrier____last_update
+#: model:ir.model.fields,field_description:delivery.field_delivery_price_rule____last_update
+#: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix____last_update
+msgid "Last Modified on"
+msgstr "Viimati muudetud"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__write_uid
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__write_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__write_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__write_uid
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__write_uid
 msgid "Last Updated by"
-msgstr "Viimati uuendatud"
+msgstr "Viimati uuendas"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__write_date
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__write_date
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__write_date
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__write_date
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__write_date
@@ -557,11 +718,21 @@ msgid "New Providers"
 msgstr "Uued teenusepakkujad"
 
 #. module: delivery
+#: model:ir.model.fields.selection,name:delivery.selection__stock_package_type__package_carrier_type__none
+msgid "No carrier integration"
+msgstr "Puudu integratsioon transpordifirmaga"
+
+#. module: delivery
 #. odoo-python
-#: code:addons/delivery/models/delivery_carrier.py:0
+#: code:addons/delivery/models/delivery_grid.py:0
 #, python-format
-msgid "Not available for current order"
-msgstr ""
+msgid "No price rule matching this order; delivery cost cannot be computed."
+msgstr "No price rule matching this order; delivery cost cannot be computed."
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.delivery_tracking_url_warning_form
+msgid "OK"
+msgstr "OK"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__operator
@@ -571,12 +742,43 @@ msgstr "Operaator"
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__order_id
 msgid "Order"
-msgstr "Ost"
+msgstr "Tellimus"
 
 #. module: delivery
-#: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
-msgid "Please select a country before choosing a state or a zip prefix."
-msgstr ""
+#: model:ir.model.fields,field_description:delivery.field_product_product__country_of_origin
+#: model:ir.model.fields,field_description:delivery.field_product_template__country_of_origin
+msgid "Origin of Goods"
+msgstr "Kaupade päritolu"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_package_view_form
+msgid "Package"
+msgstr "Pakend"
+
+#. module: delivery
+#. odoo-python
+#: code:addons/delivery/models/stock_picking.py:0
+#, python-format
+msgid "Package Details"
+msgstr "Pakendi detailid"
+
+#. module: delivery
+#. odoo-python
+#: code:addons/delivery/wizard/choose_delivery_package.py:0
+#, python-format
+msgid "Package too heavy!"
+msgstr "Pakend on liiga raske!"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_stock_quant_package
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__package_ids
+msgid "Packages"
+msgstr "Pakid"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__picking_id
+msgid "Picking"
+msgstr "Laoleht"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_zip_prefix__name
@@ -612,12 +814,28 @@ msgstr "Hinnareeglid"
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid "Pricing"
-msgstr "Hinnastamine"
+msgstr "Hinnakujundus"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__price_rule_ids
 msgid "Pricing Rules"
 msgstr "Hinnakujundusreeglid"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.sale_order_portal_content_inherit_sale_stock_inherit_website_sale_delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid "Print Return Label"
+msgstr "Prindi tagastussilt"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_product_template
+msgid "Product"
+msgstr "Toode"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_stock_move_line
+msgid "Product Moves (Stock Move Line)"
+msgstr "Toote liikumised"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_sale_order_line__product_qty
@@ -627,6 +845,7 @@ msgstr "Toote kogus"
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__delivery_type
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__delivery_type
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__delivery_type
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_search
 msgid "Provider"
 msgstr "Hind"
@@ -638,9 +857,32 @@ msgid "Quantity"
 msgstr "Kogus"
 
 #. module: delivery
+#: model:ir.model.fields.selection,name:delivery.selection__delivery_carrier__invoice_policy__real
+msgid "Real cost"
+msgstr "Reaalne kulu"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__return_label_ids
+msgid "Return Label"
+msgstr "Tagastussilt"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__get_return_label_from_portal
 msgid "Return Label Accessible from Customer Portal"
 msgstr "Tagastamissilt on leitav kliendiportaalis"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_stock_return_picking
+msgid "Return Picking"
+msgstr "Tagastuse laoleht"
+
+#. module: delivery
+#: model:ir.model.fields,help:delivery.field_product_product__country_of_origin
+#: model:ir.model.fields,help:delivery.field_product_template__country_of_origin
+msgid ""
+"Rules of origin determine where goods originate, i.e. not where they have been shipped from, but where they have been produced or manufactured.\n"
+"As such, the ‘origin’ is the 'economic nationality' of goods traded in commerce."
+msgstr ""
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__list_base_price
@@ -649,6 +891,7 @@ msgstr "Sale Base Price"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__list_price
+#: model:ir.model.fields,field_description:delivery.field_stock_move_line__sale_price
 msgid "Sale Price"
 msgstr "Müügihind"
 
@@ -663,10 +906,20 @@ msgid "Sales Order Line"
 msgstr "Müügitellimuse rida"
 
 #. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_package_view_form
+msgid "Save"
+msgstr "Salvesta"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid "Send to Shipper"
+msgstr "Send to Shipper"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__sequence
 #: model:ir.model.fields,field_description:delivery.field_delivery_price_rule__sequence
 msgid "Sequence"
-msgstr "Jada"
+msgstr "Järjestus"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_sale_order__is_all_service
@@ -679,6 +932,27 @@ msgid "Set to True if your credentials are certified for production."
 msgstr "Set to True if your credentials are certified for production."
 
 #. module: delivery
+#. odoo-python
+#: code:addons/delivery/models/stock_picking.py:0
+#, python-format
+msgid ""
+"Shipment sent to carrier %(carrier_name)s for shipping with tracking number "
+"%(ref)s<br/>Cost: %(price).2f %(currency)s"
+msgstr ""
+"Saadetis on saadetud transpordifirmale %(carrier_name)s jälgimisnumbriga "
+"%(ref)s<br/>Maksumus: %(price).2f %(currency)s"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__carrier_price
+msgid "Shipping Cost"
+msgstr "Transpordi hinnad"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid "Shipping Information"
+msgstr "Tarneinfo"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__carrier_id
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid "Shipping Method"
@@ -687,15 +961,22 @@ msgstr "Tarneviis"
 #. module: delivery
 #: model:ir.actions.act_window,name:delivery.action_delivery_carrier_form
 #: model:ir.model,name:delivery.model_delivery_carrier
+#: model:ir.ui.menu,name:delivery.menu_action_delivery_carrier_form
 #: model:ir.ui.menu,name:delivery.sale_menu_action_delivery_carrier_form
 #: model_terms:ir.ui.view,arch_db:delivery.res_config_settings_view_form
 msgid "Shipping Methods"
 msgstr "Tarneviisid"
 
 #. module: delivery
-#: model:ir.model.fields,field_description:delivery.field_sale_order__shipping_weight
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__shipping_weight
+#: model:ir.model.fields,field_description:delivery.field_stock_quant_package__shipping_weight
 msgid "Shipping Weight"
 msgstr "Saadetise kaal"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_package_barcode_small_delivery
+msgid "Shipping Weight:"
+msgstr "Shipping Weight:"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__shipping_insurance
@@ -714,9 +995,11 @@ msgstr ""
 "kinnistusmeilis. (nt. juhised)"
 
 #. module: delivery
-#: model:delivery.carrier,name:delivery.free_delivery_carrier
-#: model:product.template,name:delivery.product_product_delivery_product_template
-msgid "Standard delivery"
+#: model:ir.model.fields,help:delivery.field_product_product__hs_code
+#: model:ir.model.fields,help:delivery.field_product_template__hs_code
+msgid ""
+"Standardized code for international shipping and goods declaration. At the "
+"moment, only used for the FedEx shipping provider."
 msgstr ""
 
 #. module: delivery
@@ -725,15 +1008,55 @@ msgid "States"
 msgstr "Maakonnad"
 
 #. module: delivery
+#: model:ir.model,name:delivery.model_stock_move
+msgid "Stock Move"
+msgstr "Laoliikumine"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_stock_package_type
+msgid "Stock package type"
+msgstr "Ladusta pakendi tüüp"
+
+#. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__supports_shipping_insurance
 msgid "Supports Shipping Insurance"
 msgstr "Toetab tarnekindlustust"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_quant_package__weight_uom_rounding
+msgid "Technical field indicating weight's number of decimal places"
+msgstr "Tehniline väli, mis näitab kaalu kümnendkohtade arvu."
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_quant_package__weight_is_kg
+msgid "Technical field indicating whether weight uom is kg or not (i.e. lb)"
+msgstr "Tehniline väli, kas kaalu mõõtühik on kg või ei ole"
+
+#. module: delivery
+#: model:ir.model.fields,help:delivery.field_stock_move_line__destination_country_code
+#: model:ir.model.fields,help:delivery.field_stock_picking__destination_country_code
+msgid ""
+"The ISO country code in two chars. \n"
+"You can use this field for quick search."
+msgstr ""
+"ISO riigi kood kahe tähega. \n"
+"Saad kasutada seda välja kiirotsinguks"
 
 #. module: delivery
 #: model:delivery.carrier,name:delivery.delivery_carrier
 #: model:product.template,name:delivery.product_product_delivery_poste_product_template
 msgid "The Poste"
 msgstr "Poste"
+
+#. module: delivery
+#. odoo-python
+#: code:addons/delivery/models/delivery_carrier.py:0
+#: code:addons/delivery/models/delivery_carrier.py:0
+#, python-format
+msgid ""
+"The package cannot be created because the total weight of the products in "
+"the picking is 0.0 %s"
+msgstr ""
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__get_return_label_from_portal
@@ -760,17 +1083,38 @@ msgid "The shipping is free since the order amount exceeds %.2f."
 msgstr "Kohaletoimetamine on tasuta, kuna tellimuse summa on üle %.2f."
 
 #. module: delivery
-#: model_terms:ir.actions.act_window,help:delivery.action_delivery_carrier_form
+#. odoo-python
+#: code:addons/delivery/wizard/choose_delivery_carrier.py:0
+#, python-format
+msgid "The shipping price will be set once the delivery is done."
+msgstr "Tarne maksumus määratakse pärast kohaletoimetamist."
+
+#. module: delivery
+#. odoo-python
+#: code:addons/delivery/wizard/choose_delivery_package.py:0
+#, python-format
 msgid ""
-"These methods allow to automatically compute the delivery price\n"
-"            according to your settings; on the sales order (based on the\n"
-"            quotation) or the invoice (based on the delivery orders)."
+"The weight of your package is higher than the maximum weight authorized for "
+"this package type. Please choose another package type."
 msgstr ""
 
 #. module: delivery
-#: model:ir.model.fields,help:delivery.field_delivery_carrier__fixed_margin
-msgid "This fixed amount will be added to the shipping price."
+#. odoo-python
+#: code:addons/delivery/models/delivery_grid.py:0
+#, python-format
+msgid "There is no matching delivery rule."
 msgstr ""
+
+#. module: delivery
+#: model_terms:ir.actions.act_window,help:delivery.action_delivery_carrier_form
+msgid ""
+"These methods allow to automatically compute the delivery price\n"
+"                according to your settings; on the sales order (based on the\n"
+"                quotation) or the invoice (based on the delivery orders)."
+msgstr ""
+"Need meetodid võimaldavad automaatselt arvutada tarnehinda.\n"
+"               vastavalt teie seadistustele; müügitellimusel (mis põhineb\n"
+"               hinnapakkumisel) või arvel (tarnekorralduste alusel)."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__margin
@@ -778,9 +1122,62 @@ msgid "This percentage will be added to the shipping price."
 msgstr "See protsent lisandub saatmise hinnale"
 
 #. module: delivery
-#: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__total_weight
-msgid "Total Order Weight"
+#: model:ir.model.fields,help:delivery.field_stock_quant_package__weight
+msgid "Total weight of all the products contained in the package."
 msgstr ""
+
+#. module: delivery
+#: model:ir.model.fields,help:delivery.field_stock_picking__shipping_weight
+msgid ""
+"Total weight of packages and products not in a package. Packages with no "
+"shipping weight specified will default to their products' total weight. This"
+" is the weight used to compute the cost of the shipping."
+msgstr ""
+
+#. module: delivery
+#: model:ir.model.fields,help:delivery.field_stock_picking__weight_bulk
+msgid "Total weight of products which are not in a package."
+msgstr ""
+
+#. module: delivery
+#: model:ir.model.fields,help:delivery.field_stock_quant_package__shipping_weight
+msgid "Total weight of the package."
+msgstr "Pakendi kogukaal."
+
+#. module: delivery
+#: model:ir.model.fields,help:delivery.field_stock_picking__weight
+msgid "Total weight of the products in the picking."
+msgstr ""
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.delivery_tracking_url_warning_form
+msgid "Trackers URL"
+msgstr "Jälgijate URL"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid "Tracking"
+msgstr "Jälgimine"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__carrier_tracking_ref
+msgid "Tracking Reference"
+msgstr "Jälgimiskood"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__carrier_tracking_url
+msgid "Tracking URL"
+msgstr "Jälgimise URL"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.sale_order_portal_content_inherit_sale_stock_inherit_website_sale_delivery
+msgid "Tracking:"
+msgstr "Jälgimine:"
+
+#. module: delivery
+#: model:ir.model,name:delivery.model_stock_picking
+msgid "Transfer"
+msgstr "Ülekanne"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
@@ -812,8 +1209,12 @@ msgid "Volume"
 msgstr "Ruumala"
 
 #. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_stock_move__weight
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__weight
+#: model:ir.model.fields,field_description:delivery.field_stock_quant_package__weight
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_price_rule__variable__weight
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_price_rule__variable_factor__weight
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
 msgid "Weight"
 msgstr "Kaal"
 
@@ -824,9 +1225,26 @@ msgid "Weight * Volume"
 msgstr "Kaal * Maht"
 
 #. module: delivery
-#: model:ir.model.fields,field_description:delivery.field_choose_delivery_carrier__weight_uom_name
-msgid "Weight Uom Name"
-msgstr ""
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__shipping_weight
+msgid "Weight for Shipping"
+msgstr "Saadetise kaal"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.view_picking_withcarrier_out_form
+msgid "Weight for shipping"
+msgstr "Saadetise kaal"
+
+#. module: delivery
+#: model:ir.model.fields,field_description:delivery.field_choose_delivery_package__weight_uom_name
+#: model:ir.model.fields,field_description:delivery.field_stock_picking__weight_uom_name
+#: model:ir.model.fields,field_description:delivery.field_stock_quant_package__weight_uom_name
+msgid "Weight unit of measure label"
+msgstr "Kaalu mõõtühiku silt"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.report_package_barcode_small_delivery
+msgid "Weight:"
+msgstr "Kaal:"
 
 #. module: delivery
 #. odoo-python
@@ -840,7 +1258,24 @@ msgid ""
 msgstr ""
 
 #. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.delivery_tracking_url_warning_form
+msgid "You have multiple tracker links, they are available in the chatter."
+msgstr ""
+
+#. module: delivery
+#. odoo-python
+#: code:addons/delivery/models/stock_picking.py:0
+#, python-format
+msgid ""
+"Your delivery method has no redirect on courier provider's website to track "
+"this order."
+msgstr ""
+"Your delivery method has no redirect on courier provider's website to track "
+"this order."
+
+#. module: delivery
 #: model:ir.actions.act_window,name:delivery.action_delivery_zip_prefix_list
+#: model:ir.ui.menu,name:delivery.menu_delivery_zip_prefix
 msgid "Zip Prefix"
 msgstr "Sihtnumbri prefiks"
 
@@ -848,6 +1283,26 @@ msgstr "Sihtnumbri prefiks"
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__zip_prefix_ids
 msgid "Zip Prefixes"
 msgstr "Sihtnumbri prefiks"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.label_package_template_view_delivery
+msgid "^A0N,44,33^FDShipping Weight:"
+msgstr "^A0N,44,33^FDSaadetise kaal:"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.label_package_template_view_delivery
+msgid "^A0N,44,33^FDWeight:"
+msgstr "^A0N,44,33^FDKaal:"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.label_package_template_view_delivery
+msgid "^FO310,200"
+msgstr "^FO310,200"
+
+#. module: delivery
+#: model_terms:ir.ui.view,arch_db:delivery.label_package_template_view_delivery
+msgid "^FS"
+msgstr "^FS"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form

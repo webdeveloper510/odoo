@@ -3,21 +3,20 @@
 # 	* product_images
 # 
 # Translators:
+# Haojun Zou <apollo_zhj@msn.com>, 2022
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
+# Anders Wallenquist <anders.wallenquist@vertel.se>, 2022
+# Martin Trigaux, 2022
+# Simon S, 2022
 # Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023
-# Robin Calvin, 2023
-# Martin Trigaux, 2023
-# Simon S, 2023
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2023
-# Haojun Zou <apollo_zhj@msn.com>, 2023
-# Anders Wallenquist <anders.wallenquist@vertel.se>, 2023
 # Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -40,15 +39,11 @@ msgstr ""
 #. module: product_images
 #: model_terms:ir.ui.view,arch_db:product_images.product_fetch_image_wizard_view_form
 msgid ""
-"<span invisible=\"nb_products_selected &lt;= 10000\">\n"
+"<span attrs=\"{'invisible': [('nb_products_selected', '&lt;=', 10000)]}\">\n"
 "                            As only 10,000 products can be processed per day, the remaining will be\n"
 "                            done tomorrow.\n"
 "                        </span>"
 msgstr ""
-"<span invisible=\"nb_products_selected &lt;= 10000\">\n"
-"                            Eftersom endast 10.000 produkter kan bearbetas per dag, kommer de återstående att\n"
-"                            göras i morgon.\n"
-"                        </span>"
 
 #. module: product_images
 #. odoo-python
@@ -84,7 +79,7 @@ msgstr "Skapad av"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__create_date
 msgid "Created on"
-msgstr "Skapad den"
+msgstr "Skapad"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__display_name
@@ -127,6 +122,11 @@ msgid "Image Fetch Pending"
 msgstr "Bildhämtning pågår"
 
 #. module: product_images
+#: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard____last_update
+msgid "Last Modified on"
+msgstr "Senast redigerad den"
+
+#. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__write_uid
 msgid "Last Updated by"
 msgstr "Senast uppdaterad av"
@@ -134,7 +134,7 @@ msgstr "Senast uppdaterad av"
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__write_date
 msgid "Last Updated on"
-msgstr "Senast uppdaterad den"
+msgstr "Senast uppdaterad på"
 
 #. module: product_images
 #: model:ir.model.fields,field_description:product_images.field_product_fetch_image_wizard__nb_products_unable_to_process
@@ -162,6 +162,7 @@ msgstr ""
 
 #. module: product_images
 #: model:ir.actions.server,name:product_images.ir_cron_fetch_image_ir_actions_server
+#: model:ir.cron,cron_name:product_images.ir_cron_fetch_image
 msgid "Product Images: Get product images from Google"
 msgstr "Produktbilder: Hämta produktbilder från Google"
 

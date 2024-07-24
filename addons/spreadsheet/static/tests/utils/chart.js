@@ -1,23 +1,18 @@
 /** @odoo-module */
 
 import { nextTick } from "@web/../tests/helpers/utils";
-import * as spreadsheet from "@odoo/o-spreadsheet";
+import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
 import { createModelWithDataSource } from "./model";
 const uuidGenerator = new spreadsheet.helpers.UuidGenerator();
 
-/** @typedef {import("@odoo/o-spreadsheet").Model} Model */
+/** @typedef {import("@spreadsheet/o_spreadsheet/o_spreadsheet").Model} Model */
 
 /**
  *
  * @param {Model} model
- * @param {string} type
- * @param {import("@spreadsheet/chart/odoo_chart/odoo_chart").OdooChartDefinition} definition
  */
-export function insertChartInSpreadsheet(
-    model,
-    type = "odoo_bar",
-    definition = getChartDefinition(type)
-) {
+export function insertChartInSpreadsheet(model, type = "odoo_bar") {
+    const definition = getChartDefinition(type);
     model.dispatch("CREATE_CHART", {
         sheetId: model.getters.getActiveSheetId(),
         id: definition.id,
@@ -31,20 +26,21 @@ export function insertChartInSpreadsheet(
 /**
  *
  * @param {Object} params
- * @param {function} [params.definition]
  * @param {function} [params.mockRPC]
  * @param {object} [params.serverData]
  * @param {string} [params.type]
- * @param {import("./data").ServerData} [params.serverData]
  *
  * @returns { Promise<{ model: Model, env: Object }>}
  */
 export async function createSpreadsheetWithChart(params = {}) {
-    const model = await createModelWithDataSource(params);
+    const model = await createModelWithDataSource({
+        mockRPC: params.mockRPC,
+        serverData: params.serverData,
+    });
 
-    insertChartInSpreadsheet(model, params.type, params.definition);
+    insertChartInSpreadsheet(model, params.type);
 
-    const env = model.config.custom.env;
+    const env = model.config.evalContext.env;
     env.model = model;
     await nextTick();
     return { model, env };

@@ -3,16 +3,17 @@
 # 	* survey
 # 
 # Translators:
-# Wil Odoo, 2023
-# Abe Manyo, 2024
+# Ryanto The <ry.the77@gmail.com>, 2022
+# Martin Trigaux, 2022
+# Abe Manyo, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Abe Manyo, 2024\n"
+"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"PO-Revision-Date: 2022-09-22 05:55+0000\n"
+"Last-Translator: Abe Manyo, 2023\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -67,17 +68,10 @@ msgstr "% selesai"
 
 #. module: survey
 #. odoo-python
-#: code:addons/survey/models/survey_user_input.py:0
-#, python-format
-msgid "%(participant)s just participated in \"%(survey_title)s\"."
-msgstr "%(participant)s baru saja berpartisipasi di \"%(survey_title)s\"."
-
-#. module: survey
-#. odoo-python
 #: code:addons/survey/models/survey_survey.py:0
 #, python-format
 msgid "%s (copy)"
-msgstr "%s (salin)"
+msgstr "%s (salinan)"
 
 #. module: survey
 #. odoo-python
@@ -97,11 +91,6 @@ msgstr "%s sertifikasi challenge"
 #: model:ir.actions.report,print_report_name:survey.certification_report
 msgid "'Certification - %s' % (object.survey_id.display_name)"
 msgstr "'Sertifikasi - %s' % (object.survey_id.display_name)"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "0000000010"
-msgstr "0000000010"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q2_sug2
@@ -149,11 +138,6 @@ msgid "16.2 kg"
 msgstr "16.2 kg"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "2023-08-18"
-msgstr "2023-08-18"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q1_sug2
 msgid "3700 km"
 msgstr "3700 km"
@@ -184,7 +168,8 @@ msgid "99 years"
 msgstr "99 tahun"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
 msgid ""
 "<b>Certificate</b>\n"
 "                            <br/>"
@@ -220,9 +205,10 @@ msgstr ""
 "                                <span class=\"text-muted\">Durasi Rata-Rata</span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "<br/> <span>by</span>"
-msgstr "<br/> <span>oleh</span>"
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+msgid "<br/>by"
+msgstr "<br/>oleh"
 
 #. module: survey
 #: model:mail.template,body_html:survey.mail_template_certification
@@ -232,7 +218,7 @@ msgid ""
 "        <tbody>\n"
 "            <tr><td>\n"
 "                <!-- We use the logo of the company that created the survey (to handle multi company cases) -->\n"
-"                <a href=\"/\"><img t-if=\"not object.survey_id.create_uid.company_id.uses_default_logo\" t-attf-src=\"/logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" style=\"vertical-align:baseline;max-width:100px;\"></a>\n"
+"                <a href=\"/\"><img t-attf-src=\"/logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" style=\"vertical-align:baseline;max-width:100px;\"></a>\n"
 "            </td><td style=\"text-align:right;vertical-align:middle;\">\n"
 "                    Certification: <t t-out=\"object.survey_id.display_name or ''\">Feedback Form</t>\n"
 "            </td></tr>\n"
@@ -247,39 +233,13 @@ msgid ""
 "                        <strong t-out=\"object.survey_id.display_name or ''\">Furniture Creation</strong>\n"
 "                    certification\n"
 "                </p>\n"
-"                <p>Congratulations for passing the test with a score of <strong t-out=\"object.scoring_percentage\"></strong>%!</p>\n"
+"                <p>Congratulations for passing the test with a score of <strong t-out=\"object.scoring_percentage\"></strong>% !</p>\n"
 "            </td></tr>\n"
 "        </tbody>\n"
 "    </table>\n"
 "</div>\n"
 "            "
 msgstr ""
-"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
-"    <table style=\"width:600px;margin:5px auto;\">\n"
-"        <tbody>\n"
-"            <tr><td>\n"
-"                <!-- We use the logo of the company that created the survey (to handle multi company cases) -->\n"
-"                <a href=\"/\"><img t-if=\"not object.survey_id.create_uid.company_id.uses_default_logo\" t-attf-src=\"/logo.png?company={{ object.survey_id.create_uid.company_id.id }}\" style=\"vertical-align:baseline;max-width:100px;\"></a>\n"
-"            </td><td style=\"text-align:right;vertical-align:middle;\">\n"
-"                    Sertifikasi: <t t-out=\"object.survey_id.display_name or ''\">Formulir Feedback</t>\n"
-"            </td></tr>\n"
-"        </tbody>\n"
-"    </table>\n"
-"    <table style=\"width:600px;margin:0px auto;background:white;border:1px solid #e1e1e1;\">\n"
-"        <tbody>\n"
-"            <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
-"                <p>Yth <span t-out=\"object.partner_id.name or 'participant'\">peserta</span></p>\n"
-"                <p>\n"
-"                    Silakan temukan terlampir sertifikasi\n"
-"                        <strong t-out=\"object.survey_id.display_name or ''\">Pembuatan Furnitur</strong>\n"
-"                    Anda\n"
-"                </p>\n"
-"                <p>Selamat! Anda lulus ujian dengan nilai <strong t-out=\"object.scoring_percentage\"></strong>%!</p>\n"
-"            </td></tr>\n"
-"        </tbody>\n"
-"    </table>\n"
-"</div>\n"
-"            "
 
 #. module: survey
 #: model:mail.template,body_html:survey.mail_template_user_input_invite
@@ -398,13 +358,8 @@ msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
-msgid ""
-"<i class=\"fa fa-exclamation-triangle\"/> It is currently not possible to "
-"pass this assessment because no question is configured to give any points."
+msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Edit Survey"
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle\"/> Saat ini tidak mungkin untuk lulus"
-" penilaian ini karena tidak ada pertanyaan yang dikonfigurasi untuk "
-"memberikan poin apapun."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
@@ -433,22 +388,31 @@ msgstr "<i class=\"fa fa-list-ol me-1\"/>Paling Umum"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Panah\"/>"
+msgid "<i class=\"fa fa-square-o fa-lg me-2\"/>answer"
+msgstr "<i class=\"fa fa-square-o fa-lg me-2\"/>jawaban"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
-msgid "<i class=\"fa fa-print\"/> Print"
-msgstr "<i class=\"fa fa-print\"/> Cetak"
+#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
+msgid "<i class=\"fa fa-trash me-1\"/>Remove all filters"
+msgstr "<i class=\"fa fa-trash me-1\"/>Hapus semua filter"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "<i class=\"fa fa-square-o fa-lg me-2\"/>answer"
-msgstr "<i class=\"fa fa-square-o fa-lg me-2\"/>jawaban"
+msgid ""
+"<span attrs=\"{'invisible': [('is_scored_question', '!=', "
+"True)]}\">Points</span>"
+msgstr ""
+"<span attrs=\"{'invisible': [('is_scored_question', '!=', True)]}\">Poin-"
+"Poin</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid ""
+"<span attrs=\"{'invisible': [('is_time_limited', '=', False)]}\"> "
+"seconds</span>"
+msgstr ""
+"<span attrs=\"{'invisible': [('is_time_limited', '=', False)]}\"> detik-"
+"detik</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
@@ -478,60 +442,18 @@ msgstr ""
 "</span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-msgid ""
-"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Avg "
-"</span>"
-msgstr ""
-"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Rata-Rata"
-" </span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-msgid ""
-"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Max "
-"</span>"
-msgstr ""
-"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Maks "
-"</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-msgid ""
-"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Min "
-"</span>"
-msgstr ""
-"<span class=\"badge text-bg-secondary only_left_radius px-2 pt-1\">Min "
-"</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"d-block text-muted\">Responded</span>"
-msgstr "<span class=\"d-block text-muted\">Ditanggapi</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"d-block text-muted\">Skipped</span>"
-msgstr "<span class=\"d-block text-muted\">Dilewati</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"d-block text-success\">Correct</span>"
-msgstr "<span class=\"d-block text-success\">Betul</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"d-block text-warning\">Partial</span>"
-msgstr "<span class=\"d-block text-warning\">Parsial</span>"
+#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
+msgid "<span class=\"fa fa-filter me-1\"/>Filters"
+msgstr "<span class=\"fa fa-filter me-1\"/>Filter"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
 msgid ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\" id=\"enter-"
-"tooltip\"> or press CTRL+Enter</span>"
+"tooltip\"> or press Enter</span>"
 msgstr ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\" id=\"enter-"
-"tooltip\"> atau pencet CTRL+Enter</span>"
+"tooltip\"> atau pencet Enter</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
@@ -548,35 +470,30 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
 msgid ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
-"                    <span id=\"enter-tooltip\">or press CTRL+Enter</span>\n"
-"                </span>"
+"                        <span id=\"enter-tooltip\">or press Enter</span>\n"
+"                    </span>"
 msgstr ""
 "<span class=\"fw-bold text-muted ms-2 d-none d-md-inline\">\n"
-"                    <span id=\"enter-tooltip\">atau pencet CTRL+Enter</span>\n"
-"                </span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
-msgid "<span class=\"mx-1\">-</span>"
-msgstr "<span class=\"mx-1\">-</span>"
+"                        <span id=\"enter-tooltip\">atau pencet Enter</span>\n"
+"                    </span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.res_partner_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"certifications_company_count &lt; 2\">Certifications</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"certifications_company_count &gt; 1\">Certification</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&lt;', 2)]}\">Certifications</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&gt;', 1)]}\">Certification</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"certifications_company_count &lt; 2\">Sertifikasi-Sertifikasi</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"certifications_company_count &gt; 1\">Sertifikasi</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&lt;', 2)]}\">Sertifikasi-Sertifikasi</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_company_count', '&gt;', 1)]}\">Sertifikasi</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.res_partner_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"certifications_count &lt; 2\">Certifications</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"certifications_count &gt; 1\">Certification</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&lt;', 2)]}\">Certifications</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&gt;', 1)]}\">Certification</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"certifications_count &lt; 2\">Sertifikasi-Sertifikasi</span>\n"
-"                        <span class=\"o_stat_text\" invisible=\"certifications_count &gt; 1\">Sertifikasi</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&lt;', 2)]}\">Sertifikasi-Sertifikasi</span>\n"
+"                        <span class=\"o_stat_text\" attrs=\"{'invisible': [('certifications_count', '&gt;', 1)]}\">Sertifikasi</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_start
@@ -599,17 +516,6 @@ msgstr ""
 "position-relative\">Key</span></span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
-msgid ""
-"<span class=\"o_survey_results_topbar_clear_filters text-primary\">\n"
-"                                <i class=\"fa fa-trash me-1\"/>Remove all filters\n"
-"                            </span>"
-msgstr ""
-"<span class=\"o_survey_results_topbar_clear_filters text-primary\">\n"
-"                                <i class=\"fa fa-trash me-1\"/>Hapus semua filter\n"
-"                            </span>"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
 msgid ""
 "<span class=\"o_survey_session_answer_count\">0</span>\n"
@@ -617,15 +523,6 @@ msgid ""
 msgstr ""
 "<span class=\"o_survey_session_answer_count\">0</span>\n"
 "                                     /"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.user_input_session_open
-msgid ""
-"<span class=\"o_survey_session_navigation_next_label me-2 fw-bold\">Start</span>\n"
-"                        <i class=\"fw-bold oi oi-chevron-right\"/>"
-msgstr ""
-"<span class=\"o_survey_session_navigation_next_label me-2 fw-bold\">Mulai</span>\n"
-"                        <i class=\"fw-bold oi oi-chevron-right\"/>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -643,39 +540,9 @@ msgid "<span class=\"text-muted\">Registered</span>"
 msgstr "<span class=\"text-muted\">Didaftarkan</span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"text-muted\">Responded</span>"
-msgstr "<span class=\"text-muted\">Menanggapi</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"text-muted\">Skipped</span>"
-msgstr "<span class=\"text-muted\">Melewati</span>"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 msgid "<span class=\"text-muted\">Success</span>"
 msgstr "<span class=\"text-muted\">Sukses</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"text-success\">Correct</span>"
-msgstr "<span class=\"text-success\">Betul</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
-msgid "<span class=\"text-warning\">Partial</span>"
-msgstr "<span class=\"text-warning\">Parsial</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "<span invisible=\"not is_scored_question\">Points</span>"
-msgstr "<span invisible=\"not is_scored_question\">Poin</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "<span invisible=\"not is_time_limited\"> seconds</span>"
-msgstr "<span invisible=\"not is_time_limited\"> detik</span>"
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p3_q1
@@ -702,11 +569,21 @@ msgstr "<span>Best time to do it, is the right time to do it.</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
+msgid ""
+"<span>Click on the filter icon (<span class=\"fa fa-filter text-primary\"/>)\n"
+"                                    next to an answer to filter surveys on similar answers only.</span>"
+msgstr ""
+"<span>Klik pada ikon filter (<span class=\"fa fa-filter text-primary\"/>)\n"
+"                                    di sebelah jawaban untuk memfilter survei hanya pada jawaban yang mirip.</span>"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
 msgid "<span>Completed surveys</span>"
 msgstr "<span>Survei selesai</span>"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
 msgid "<span>Date</span>"
 msgstr "<span>Tanggal</span>"
 
@@ -760,15 +637,13 @@ msgstr "<span>Jumlah percobaan tersisa</span>:"
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p2_q1
-msgid "<span>Our famous Leader!</span>"
-msgstr "<span>Pemimpin terkenal Kami!</span>"
+msgid "<span>Our famous Leader !</span>"
+msgstr ""
 
 #. module: survey
 #: model_terms:survey.question,description:survey.survey_demo_quiz_p3_q3
-msgid "<span>Our sales people have an advantage, but you can do it!</span>"
+msgid "<span>Our sales people have an advantage, but you can do it !</span>"
 msgstr ""
-"<span>Sales people kami memiliki keuntungan, tapi Anda juga dapat "
-"melakukannya!</span>"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
@@ -779,24 +654,6 @@ msgstr "<span>Lulus dan Gagal</span>"
 #: model_terms:ir.ui.view,arch_db:survey.survey_results_filters
 msgid "<span>Passed only</span>"
 msgstr "<span>Hanya yang lulus</span>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid ""
-"<span>This certificate is presented to</span>\n"
-"                                <br/>"
-msgstr ""
-"<span>Sertifikat ini diberikan ke</span>\n"
-"                                <br/>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
-msgid ""
-"<span>This is a Test Survey Entry. </span><i class=\"oi oi-fw oi-arrow-"
-"right\"/>Edit Survey"
-msgstr ""
-"<span>Ini adalah Entri Survei Test. </span><i class=\"oi oi-fw oi-arrow-"
-"right\"/>Edit Survei"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
@@ -828,15 +685,6 @@ msgstr "<span>Yang mana yang kuning?</span><br/>"
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "<span>Which is yellow?</span><br/>"
 msgstr "<span>Yang mana kuning?</span><br/>"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid ""
-"<span>for successfully completing</span>\n"
-"                                <br/>"
-msgstr ""
-"<span>karena berhasil menyelesaikan</span>\n"
-"                                <br/>"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q4
@@ -888,17 +736,6 @@ msgid "A question can either be skipped or answered, not both."
 msgstr "Pertanyaan dapat dilewati atau dijawab, tidak keduanya."
 
 #. module: survey
-#. odoo-python
-#: code:addons/survey/models/survey_survey.py:0
-#, python-format
-msgid ""
-"A scored survey needs at least one question that gives points.\n"
-"Please check answers and their scores."
-msgstr ""
-"Survei yang bernilai membutuhkan setidaknya satu pertanyaan yang memberikan poin.\n"
-"Mohon periksa jawaban dan nilai mereka."
-
-#. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2
 msgid "About our ecommerce"
 msgstr "Mengenai ecommerce kami"
@@ -928,7 +765,7 @@ msgstr "Token akses harus unik"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_needaction
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_needaction
 msgid "Action Needed"
-msgstr "Tindakan Diperluka"
+msgstr "Perlu Tindakan"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__active
@@ -958,6 +795,13 @@ msgstr "Status Aktivitas"
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_type_icon
 msgid "Activity Type Icon"
 msgstr "Ikon Jenis Aktifitas"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid ""
+"Add a list of email recipients (separated by commas, semicolons or line "
+"breaks). They will not be converted into contacts."
+msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -1000,10 +844,8 @@ msgstr "Afrika"
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q6
 msgid ""
 "After watching this video, will you swear that you are not going to "
-"procrastinate to trim your hedge this year?"
+"procrastinate to trim your hedge this year ?"
 msgstr ""
-"Setelah menonton video ini, apakah Anda berjanji untuk tidak malas merapikan"
-" pagar kebun Anda?"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_feedback_p2_q2_col3
@@ -1039,16 +881,6 @@ msgid "All surveys"
 msgstr "Semua survei"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
-msgid "Allow Roaming"
-msgstr "Izinkan Roaming"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__allowed_triggering_question_ids
-msgid "Allowed Triggering Questions"
-msgstr "Pertanyaan Pemicu yang Diizinkan"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p3_q2_sug2
 msgid "Amenhotep"
 msgstr "Amenhotep"
@@ -1077,7 +909,6 @@ msgstr "Anonymous"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_tree
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Answer"
 msgstr "Jawaban"
@@ -1093,12 +924,17 @@ msgid "Answer deadline"
 msgstr "Deadline jawaban"
 
 #. module: survey
+#: model:ir.model.fields,help:survey.field_survey_question__triggering_answer_id
+msgid "Answer that will trigger the display of the current question."
+msgstr "Jawaban yang akan memicu penampilan pertanyaan saat ini."
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__user_input_line_ids
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__user_input_line_ids
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Answers"
-msgstr "Jawaban"
+msgstr "Semua Jawaban"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__session_answer_count
@@ -1133,11 +969,6 @@ msgid "Archived"
 msgstr "Diarsipkan"
 
 #. module: survey
-#: model:survey.question,title:survey.survey_demo_food_preferences_q1
-msgid "Are you vegetarian?"
-msgstr "Apakah Anda vegetarian?"
-
-#. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p1_q1_sug4
 msgid "Art & Culture"
@@ -1152,12 +983,6 @@ msgstr "Arthur B. McDonald"
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q4_sug2
 msgid "Asia"
 msgstr "Asia"
-
-#. module: survey
-#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__assessment
-#: model_terms:ir.actions.act_window,help:survey.action_survey_form
-msgid "Assessment"
-msgstr "Penilaian"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_attachment_count
@@ -1234,14 +1059,8 @@ msgstr "Rata-rata"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__answer_duration_avg
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 msgid "Average Duration"
 msgstr "Durasi Rata-Rata"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
-msgid "Average Score"
-msgstr "Nilai Rata-Rata"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__answer_duration_avg
@@ -1257,6 +1076,11 @@ msgstr "Nilai Rata-Rata (%)"
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q1_sug3
 msgid "Avicii"
 msgstr "Avicii"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
+msgid "Back Button"
+msgstr "Tombol Kembali"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__background_image
@@ -1287,8 +1111,8 @@ msgstr "Lebah"
 
 #. module: survey
 #: model:survey.question,question_placeholder:survey.vendor_certification_page_3_question_3
-msgid "Beware of leap years!"
-msgstr "Jangan lupa tahun lompat!"
+msgid "Beware of leap years !"
+msgstr ""
 
 #. module: survey
 #. odoo-python
@@ -1296,11 +1120,6 @@ msgstr "Jangan lupa tahun lompat!"
 #, python-format
 msgid "Blue Pen"
 msgstr "Pena Biru"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_invite__body_has_template_value
-msgid "Body content is the same as the template"
-msgstr "Konten badan sama dengan templat"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q4_sug4
@@ -1342,16 +1161,22 @@ msgstr "Kaktus"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__can_edit_body
 msgid "Can Edit Body"
-msgstr "Dapat Mengedit Body"
+msgstr "Dapat Mengedit Badan"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q3
-msgid "Can Humans ever directly see a photon?"
-msgstr "Apakah Manusia dapat melihat foton secara langsung?"
+msgid "Can Humans ever directly see a photon ?"
+msgstr ""
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Cancel"
+msgstr "Batal"
 
 #. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
+#: model_terms:ir.actions.act_window,help:survey.action_survey_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_tree
 #, python-format
 msgid "Certification"
@@ -1375,12 +1200,24 @@ msgid "Certification Badge is not configured for the survey %(survey_name)s"
 msgstr "Lencana Sertifikasi tidak dikonfigurasi untuk survei %(survey_name)s"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+#: model:mail.template,report_name:survey.mail_template_certification
+msgid "Certification Document"
+msgstr ""
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
 msgid "Certification Failed"
 msgstr "Sertifikasi Gagal"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
+msgid "Certification Title"
+msgstr "Judul Sertifikasi"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
 msgid "Certification n°"
 msgstr "Sertifikasi n°"
 
@@ -1428,6 +1265,11 @@ msgid "Chair floor protection"
 msgstr "Perlindungan lantai kursi"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
+msgid "Chart"
+msgstr "Bagan"
+
+#. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #, python-format
@@ -1452,18 +1294,8 @@ msgstr "Pilihan"
 
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_demo_burger_quiz
-msgid "Choose your favourite subject and show how good you are. Ready?"
-msgstr "Pilih subject favorit Anda dan tunjukkan kepintaranmu. Siap?"
-
-#. module: survey
-#: model:survey.question,title:survey.survey_demo_food_preferences_q3
-msgid "Choose your green meal"
-msgstr "Pilih makanan hijau Anda"
-
-#. module: survey
-#: model:survey.question,title:survey.survey_demo_food_preferences_q4
-msgid "Choose your meal"
-msgstr "Pilih makanan Anda"
+msgid "Choose your favourite subject and show how good you are. Ready ?"
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__certification_report_layout__classic_blue
@@ -1492,7 +1324,6 @@ msgstr "Cliff Burton"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form
-#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Close"
 msgstr "Tutup"
@@ -1512,17 +1343,6 @@ msgstr "Warna"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__color
 msgid "Color Index"
 msgstr "Indeks Warna"
-
-#. module: survey
-#. odoo-python
-#: code:addons/survey/models/survey_survey.py:0
-#, python-format
-msgid ""
-"Combining roaming and \"Scoring with answers after each page\" is not possible; please update the following surveys:\n"
-"- %(survey_names)s"
-msgstr ""
-"Menggabungkan roaming dan \"Menilai jawaban setelah setiap halaman\" tidak dapat dilakukan; mohon update survei berikut:\n"
-"- %(survey_names)s"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_question_form
@@ -1553,7 +1373,6 @@ msgstr "Jumlah Sertifikasi Perusahaan"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_user_input__state__done
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_search
 msgid "Completed"
 msgstr "Selesai"
@@ -1576,19 +1395,9 @@ msgid "Computing score requires a question in arguments."
 msgstr "Menghitung nilai membutuhkan pertanyaan dalam argument."
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "Conditional display"
-msgstr "Tampilan kondisional"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-#, python-format
-msgid ""
-"Conditional display is not available when questions are randomly picked."
-msgstr ""
-"Tampilan kondisional tidak tersedia saat pertanyaan dipilih secara acak."
+#: model:ir.model.fields,field_description:survey.field_survey_question__is_conditional
+msgid "Conditional Display"
+msgstr "Tampilan Kondisional"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_2_choice_3
@@ -1612,7 +1421,7 @@ msgstr "Selamat, Anda sekarang vendor resmi untuk PerusahaanSaya"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
 msgid "Congratulations, you have passed the test!"
-msgstr "Selamat, Anda lulus ujian!"
+msgstr "Selamat, Anda lulus test!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
@@ -1654,8 +1463,8 @@ msgstr "Cookies"
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_session_manage.js:0
 #, python-format
-msgid "Copied!"
-msgstr "Disalin!"
+msgid "Copied !"
+msgstr "Disalin !"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q1_sug3
@@ -1674,6 +1483,7 @@ msgstr "Meja Sudut Kanan"
 #: code:addons/survey/static/src/js/survey_result.js:0
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__is_correct
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__answer_is_correct
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 #, python-format
 msgid "Correct"
 msgstr "Benar"
@@ -1727,11 +1537,6 @@ msgstr "Cosmic rays"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Create Live Session"
 msgstr "Buat Sesi Live"
-
-#. module: survey
-#: model_terms:ir.actions.act_window,help:survey.action_survey_form
-msgid "Create a custom survey from scratch"
-msgstr "Buat survei kustom dari nol"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__create_uid
@@ -1811,12 +1616,6 @@ msgid "Currently only supported for live sessions."
 msgstr "Saat ini hanya mendukung sesi live."
 
 #. module: survey
-#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__custom
-#: model_terms:ir.actions.act_window,help:survey.action_survey_form
-msgid "Custom"
-msgstr "Khusus"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid ""
 "Customers will receive a new token and be able to completely retake the "
@@ -1832,11 +1631,6 @@ msgstr "Pelanggan akan menerima token yang sama."
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_2_choice_5
 msgid "Customizable Lamp"
 msgstr "Lampu yang Dapat Dikustomisasi"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "DEMO_CERTIFIED_NAME"
-msgstr "DEMO_CERTIFIED_NAME"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_question__question_type__date
@@ -1858,7 +1652,7 @@ msgstr "Datetime"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__value_datetime
 msgid "Datetime answer"
-msgstr "Tanggalwaktu jawaban "
+msgstr "Jawaban tanggalwaktu"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_user_input__deadline
@@ -1921,26 +1715,14 @@ msgid "Display Progress as"
 msgstr "Tampilkan Progress sebagai"
 
 #. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
-#, python-format
-msgid "Displayed if \"%s\"."
-msgstr "Ditampilkan bila \"%s\"."
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "Displayed when the answer entered is not valid."
-msgstr "Ditampilkan hanya saat jawaban yang dimasukkan tidak valid."
-
-#. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_1
 msgid "Do we sell Acoustic Bloc Screens?"
 msgstr "Apakah Anda menjual Layar Acoustic Bloc?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q3
-msgid "Do you have any other comments, questions, or concerns?"
-msgstr "Apakah Anda memiliki komentar, pertanyaan, atau kekhawatiran lain?"
+msgid "Do you have any other comments, questions, or concerns ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_5
@@ -1955,8 +1737,8 @@ msgstr "Anjing"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q1
-msgid "Dogwood is from which family of trees?"
-msgstr "Dogwood adalah dari keluarga pohon apa?"
+msgid "Dogwood is from which family of trees ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,question_placeholder:survey.survey_demo_quiz_p1_q2
@@ -1974,9 +1756,9 @@ msgid "Drawer"
 msgstr "Laci"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
-msgid "Duplicate Question"
-msgstr "Gandakan Pertanyaan"
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
+msgid "Dropdown menu"
+msgstr "Menu dropdown"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
@@ -2003,19 +1785,12 @@ msgstr "Tutup Sesi Live"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__description_done
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "End Message"
-msgstr "Pesan Penutup"
+msgstr "Tutup Pesan"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__end_datetime
 msgid "End date and time"
 msgstr "Tanggal dan waktu akhir"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
-#, python-format
-msgid "End of Survey"
-msgstr "Akhir dari Survei"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_session_code
@@ -2045,7 +1820,7 @@ msgstr "Kecualikan Test"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__existing_partner_ids
 msgid "Existing Partner"
-msgstr "Partner Yang Ada"
+msgstr "Partner Tersedia"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__existing_emails
@@ -2058,7 +1833,10 @@ msgid "Eyjafjallajökull (Iceland)"
 msgstr "Eyjafjallajökull (Iceland)"
 
 #. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
+#, python-format
 msgid "Failed"
 msgstr "Gagal"
 
@@ -2076,6 +1854,7 @@ msgstr "Fanta"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #: model:survey.survey,title:survey.survey_feedback
+#: model_terms:ir.actions.act_window,help:survey.action_survey_form
 #, python-format
 msgid "Feedback Form"
 msgstr "Formulir Feedback"
@@ -2088,8 +1867,6 @@ msgstr "Ficus"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 #: model_terms:ir.ui.view,arch_db:survey.question_result_matrix
-#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-#: model_terms:ir.ui.view,arch_db:survey.question_result_text
 msgid "Filter surveys"
 msgstr "Filter survei-survei"
 
@@ -2100,11 +1877,6 @@ msgstr "Filter survei-survei"
 #, python-format
 msgid "Final Leaderboard"
 msgstr "Leaderboard Final"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q4_sug2
-msgid "Fish"
-msgstr "Ikan"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_follower_ids
@@ -2125,11 +1897,6 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Ikon font awesome, misalnya fa-tasks"
 
 #. module: survey
-#: model:survey.survey,title:survey.survey_demo_food_preferences
-msgid "Food Preferences"
-msgstr "Preferensi Makanan"
-
-#. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_user_input_line__answer_type__text_box
 msgid "Free Text"
 msgstr "Teks Gratis"
@@ -2140,9 +1907,14 @@ msgid "Free Text answer"
 msgstr "Gratis Teks Jawaban"
 
 #. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_invite__email_from
+msgid "From"
+msgstr "Dari"
+
+#. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q4
-msgid "From which continent is native the Scots pine (pinus sylvestris)?"
-msgstr "Dari benua mana asal pinus Skotlandia (pinus sylvestris)?"
+msgid "From which continent is native the Scots pine (pinus sylvestris) ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q1_sug1
@@ -2153,11 +1925,6 @@ msgstr "Buah-Buah"
 #: model:survey.question,title:survey.survey_demo_quiz_p3
 msgid "Fruits and vegetables"
 msgstr "Buah dan sayuran"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "Functional Training"
-msgstr "Training Fungsional"
 
 #. module: survey
 #: model:ir.model,name:survey.model_gamification_badge
@@ -2206,11 +1973,6 @@ msgstr "Good luck!"
 #: model:survey.question.answer,value:survey.survey_feedback_p2_q1_sug4
 msgid "Good value for money"
 msgstr "Good value for money"
-
-#. module: survey
-#: model_terms:survey.survey,description_done:survey.survey_demo_food_preferences
-msgid "Got it!"
-msgstr "Paham!"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q4_sug2
@@ -2288,8 +2050,8 @@ msgstr "Riwayat"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q3
-msgid "How frequently do you buy products online?"
-msgstr "Seberapa sering Anda membeli produk online?"
+msgid "How frequently do you buy products online ?"
+msgstr ""
 
 #. module: survey
 #. odoo-python
@@ -2340,8 +2102,8 @@ msgstr "Berapa banyak pesanan yang Anda lewati selama 6 bulan terakhir?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q4
-msgid "How many times did you order products on our website?"
-msgstr "Berapa kali Anda memesan produk dari website kami?"
+msgid "How many times did you order products on our website ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_4
@@ -2350,8 +2112,8 @@ msgstr "Berapa banyak versi Meja Sudut yang kami miliki?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q3
-msgid "How many years did the 100 years war last?"
-msgstr "Berapa tahun lama-nya perang 100 tahun berlangsung?"
+msgid "How many years did the 100 years war last ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2_question_1
@@ -2365,8 +2127,8 @@ msgstr "Seberapa sering Anda sebaiknya menyirami tanaman tersebut"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q4
-msgid "How old are you?"
-msgstr "Berapa umur Anda?"
+msgid "How old are you ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug4
@@ -2398,8 +2160,8 @@ msgstr "Saya tidak tahu sama sekali, saya hanya anjing!"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p5_q3_sug3
-msgid "I've been noticing gravity since I was very young!"
-msgstr "Saya telah memperhatikan gravitasi semenjak saya sangat muda!"
+msgid "I've been noticing gravity since I was very young !"
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__id
@@ -2485,6 +2247,15 @@ msgstr ""
 "panggilannya."
 
 #. module: survey
+#: model:ir.model.fields,help:survey.field_survey_question__is_conditional
+msgid ""
+"If checked, this question will be displayed only\n"
+"        if the specified conditional answer have been selected in a previous question"
+msgstr ""
+"Bila dicentang, pertanyaan ini hanya akan ditampilkan\n"
+"        bila jawaban kondisional yang ditentukan telah dipilih di pertanyaan sebelumnya"
+
+#. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__users_can_go_back
 msgid "If checked, users can go back to previous pages."
 msgstr "Jika diperiksa, pengguna dapat kembali ke halaman sebelumnya."
@@ -2533,7 +2304,6 @@ msgstr "Jika Anda ingin, Anda dapat"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__value_image
-#: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 msgid "Image"
 msgstr "Gambar"
 
@@ -2573,8 +2343,8 @@ msgstr "Di daftar di bawah, pilih semua yang bersifat coniferous."
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q2
-msgid "In which country did the bonsai technique develop?"
-msgstr "Di negara mana teknik bonsai dikembangkan?"
+msgid "In which country did the bonsai technique develop ?"
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__is_scored_question
@@ -2617,13 +2387,13 @@ msgstr "Khusus untuk pengikut yang diundang"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__is_mail_template_editor
 msgid "Is Editor"
-msgstr "Adalah Editor"
+msgstr "Is Editor"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_is_follower
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_is_follower
 msgid "Is Follower"
-msgstr "Adalah Follower"
+msgstr "Pengikut"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__certification
@@ -2642,11 +2412,6 @@ msgid "Is in a Session"
 msgstr "Apakah dalam Sesi"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__is_placed_before_trigger
-msgid "Is misplaced?"
-msgstr "Apakah salah tempat?"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Is not a Certification"
 msgstr "Apakah bukan Sertifikasi"
@@ -2658,23 +2423,13 @@ msgstr "Apakah input user bagian dari sesi survei atau tidak."
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p4_q3
-msgid "Is the wood of a coniferous hard or soft?"
-msgstr "Apakah kayu dari pohon yang coniferous keras atau lembut? "
-
-#. module: survey
-#: model:ir.model.fields,help:survey.field_survey_question__is_placed_before_trigger
-msgid "Is this question placed before any of its trigger questions?"
-msgstr "Apakah pertanyaan ini dipasang sebelum pertanyaan pemicunya?"
+msgid "Is the wood of a coniferous hard or soft ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p2_q2_sug4
 msgid "Istanbul"
 msgstr "Istanbul"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug3
-msgid "It depends"
-msgstr "Tergantung"
 
 #. module: survey
 #. odoo-python
@@ -2703,7 +2458,8 @@ msgstr "Ini membantu peserta mengingat konten presentasi Anda"
 #, python-format
 msgid "It is a small bit of text, displayed to help participants answer"
 msgstr ""
-"Ini adalah teks yang kecil, ditampilkan untuk membantu peserta menjawab"
+"Ini adalah teks yang cukup kecil, ditampilkan untuk membantu peserta "
+"menjawab"
 
 #. module: survey
 #. odoo-python
@@ -2715,7 +2471,7 @@ msgstr "Ini adalah opsi yang bisa bebeda untuk setiap Survei"
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_feedback_p2_q2_row2
 msgid "It is easy to find the product that I want"
-msgstr "Mudah untuk mencari produk yang saya ingin"
+msgstr "Gampang untuk mencari produk yang saya ingin"
 
 #. module: survey
 #. odoo-python
@@ -2801,6 +2557,16 @@ msgid "Large Desk"
 msgstr "Meja Besar"
 
 #. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_invite____last_update
+#: model:ir.model.fields,field_description:survey.field_survey_question____last_update
+#: model:ir.model.fields,field_description:survey.field_survey_question_answer____last_update
+#: model:ir.model.fields,field_description:survey.field_survey_survey____last_update
+#: model:ir.model.fields,field_description:survey.field_survey_user_input____last_update
+#: model:ir.model.fields,field_description:survey.field_survey_user_input_line____last_update
+msgid "Last Modified on"
+msgstr "Terakhir diubah pada"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__write_uid
 #: model:ir.model.fields,field_description:survey.field_survey_question__write_uid
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__write_uid
@@ -2808,7 +2574,7 @@ msgstr "Meja Besar"
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__write_uid
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__write_uid
 msgid "Last Updated by"
-msgstr "Terakhir Diperbarui oleh"
+msgstr "Terakhir diperbarui oleh"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__write_date
@@ -2818,7 +2584,7 @@ msgstr "Terakhir Diperbarui oleh"
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__write_date
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__write_date
 msgid "Last Updated on"
-msgstr "Terakhir Diperbarui pada"
+msgstr "Terakhir diperbarui pada"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__last_displayed_page_id
@@ -2833,18 +2599,18 @@ msgstr "Aktifitas terakhir"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_session_code
 msgid "Launch Session"
-msgstr "Mulai Sesi"
+msgstr "Sesi Peluncuran"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
+msgid "Layout"
+msgstr "Layout"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
 msgid "Leaderboard"
 msgstr "Leaderboard"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_access_error
-msgid "Leave"
-msgstr "Keluar"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_3_choice_4
@@ -2894,7 +2660,7 @@ msgstr "Mungkin"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Limit Attempts"
-msgstr "Batasi Percobaan"
+msgstr "Batas Percobaan"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__is_attempts_limited
@@ -2906,8 +2672,12 @@ msgstr "Jumlah percobaan yang terbatas"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 #, python-format
+msgid "Live Presentation"
+msgstr ""
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Live Session"
 msgstr "Sesi Live"
 
@@ -2915,11 +2685,6 @@ msgstr "Sesi Live"
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Live Sessions"
 msgstr "Sesi-Sesi Live"
-
-#. module: survey
-#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__live_session
-msgid "Live session"
-msgstr "Sesi live"
 
 #. module: survey
 #. odoo-javascript
@@ -2937,6 +2702,12 @@ msgstr "Masuk diwajibkan"
 #: model:ir.model.fields,field_description:survey.field_survey_invite__template_id
 msgid "Mail Template"
 msgstr "Templat Email"
+
+#. module: survey
+#: model:ir.model.fields,field_description:survey.field_survey_survey__message_main_attachment_id
+#: model:ir.model.fields,field_description:survey.field_survey_user_input__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Lampiran Utama"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__constr_mandatory
@@ -2981,7 +2752,6 @@ msgstr "Nilai Max tidak bisa lebih kecil dari nilai min!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Maximum"
 msgstr "Maksimum"
 
@@ -2999,11 +2769,6 @@ msgstr "Tanggalwaktu Maksimum"
 #: model:ir.model.fields,field_description:survey.field_survey_question__validation_length_max
 msgid "Maximum Text Length"
 msgstr "Maksimum Teks Panjang"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_survey__scoring_max_obtainable
-msgid "Maximum obtainable score"
-msgstr "Nilai maksimum yang dapat diraih"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__validation_max_float_value
@@ -3028,13 +2793,7 @@ msgid "Messages"
 msgstr "Pesan"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "Min/Max Limits"
-msgstr "Batas Min/Max"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "Minimum"
 msgstr "Minimum"
 
@@ -3174,19 +2933,6 @@ msgid "New invite"
 msgstr "Undangan baru"
 
 #. module: survey
-#: model:mail.message.subtype,description:survey.mt_survey_survey_user_input_completed
-msgid "New participation completed."
-msgstr "Partisipasi baru selesai."
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
-#: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
-#, python-format
-msgid "Next"
-msgstr "Next"
-
-#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_calendar_event_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
@@ -3211,18 +2957,11 @@ msgid "Next Activity Type"
 msgstr "Tipe Aktivitas Berikutnya"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_in_progress
-msgid "Next Skipped"
-msgstr "Lewati Berikutnya"
-
-#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__nickname
 msgid "Nickname"
 msgstr "Nama panggilan"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug2
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q2_sug2
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q6_sug2
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_1_choice_1
 msgid "No"
@@ -3240,7 +2979,6 @@ msgstr "Tidak ada Survei yang Ditemukan"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_user_input
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 msgid "No answers yet!"
 msgstr "Belum ada jawaban!"
 
@@ -3250,6 +2988,11 @@ msgstr "Belum ada jawaban!"
 #, python-format
 msgid "No attempts left."
 msgstr "Tidak ada percobaan lagi yang tersisa."
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "No one answered this question."
+msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_void_content
@@ -3273,7 +3016,7 @@ msgstr "Tidak ada baris input user yang ditemukan"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_burger_quiz_p4_q3_sug2
-msgid "No, it's too small for the human eye."
+msgid "No, it's to small for the human eye."
 msgstr "Tidak, itu terlalu kecil untuk mata manusia."
 
 #. module: survey
@@ -3315,7 +3058,7 @@ msgstr "Nomor"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_needaction_counter
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Jumlah Action"
+msgstr "Jumlah Tindakan"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__attempts_limit
@@ -3344,7 +3087,7 @@ msgstr "Jumlah pesan yang membutuhkan tindakan"
 #: model:ir.model.fields,help:survey.field_survey_survey__message_has_error_counter
 #: model:ir.model.fields,help:survey.field_survey_user_input__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr "Jumlah pesan dengan kesalahan pengiriman"
+msgstr "Jumlah dari pesan dengan kesalahan pengiriman"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_question__question_type__numerical_box
@@ -3367,11 +3110,6 @@ msgstr "Object-Directed Open Organization"
 #: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
 msgid "Occurrence"
 msgstr "Occurrence"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
-msgid "Odoo"
-msgstr "Odoo"
 
 #. module: survey
 #. odoo-python
@@ -3469,8 +3207,6 @@ msgstr "Hanya satu pertanyaan lagi!"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 #: model_terms:ir.ui.view,arch_db:survey.question_result_matrix
-#: model_terms:ir.ui.view,arch_db:survey.question_result_number_or_date_or_datetime
-#: model_terms:ir.ui.view,arch_db:survey.question_result_text
 msgid "Only show survey results having selected this answer"
 msgstr "Hanya tunjukkan hasil survei setelah memilih jawaban ini"
 
@@ -3488,15 +3224,6 @@ msgid "Oops! No survey matches this code."
 msgstr "Oops! Tidak ada survei yang cocok dengan kode ini."
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_access_error
-msgid ""
-"Oopsie! We could not let you open this survey. Make sure you are using the correct link and are allowed to\n"
-"                        participate or get in touch with its organizer."
-msgstr ""
-"Oopsie! Kita tidak dapat membuka survei ini untuk Anda. Pastikan Anda menggunakan link yang tepat dan diizinkan untuk\n"
-"                        berpartisipasi atau hubungi organizer."
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Open Session Manager"
 msgstr "Buka Manajer Sesi"
@@ -3507,11 +3234,6 @@ msgstr "Buka Manajer Sesi"
 #, python-format
 msgid "Open section"
 msgstr "Buka bagian"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid "Optional previous answers required"
-msgstr "Jawaban opsional sebelumnya dibutuhkan"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_invite__lang
@@ -3590,6 +3312,11 @@ msgid "Papyrus"
 msgstr "Papyrus"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "Partial"
+msgstr "Sebagian"
+
+#. module: survey
 #. odoo-javascript
 #. odoo-python
 #: code:addons/survey/models/survey_user_input.py:0
@@ -3609,27 +3336,9 @@ msgid "Participants"
 msgstr "Partisipan"
 
 #. module: survey
-#. odoo-python
-#: code:addons/survey/wizard/survey_invite.py:0
-#, python-format
-msgid "Participate to %(survey_name)s"
-msgstr "Berpartisipasi dalam %(survey_name)s"
-
-#. module: survey
 #: model:mail.template,subject:survey.mail_template_user_input_invite
 msgid "Participate to {{ object.survey_id.display_name }} survey"
 msgstr "Berpartisipasi dalam survei {{ object.survey_id.display_name }}"
-
-#. module: survey
-#: model:mail.message.subtype,name:survey.mt_survey_survey_user_input_completed
-#: model:mail.message.subtype,name:survey.mt_survey_user_input_completed
-msgid "Participation completed"
-msgstr "Partisipasi selesai"
-
-#. module: survey
-#: model:mail.message.subtype,description:survey.mt_survey_user_input_completed
-msgid "Participation completed."
-msgstr "Partisipasi selesai."
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_user_input
@@ -3644,8 +3353,11 @@ msgid "Partner"
 msgstr "Rekanan"
 
 #. module: survey
+#. odoo-python
+#: code:addons/survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_kanban
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
+#, python-format
 msgid "Passed"
 msgstr "Lolo"
 
@@ -3707,15 +3419,6 @@ msgid "Pick a subject"
 msgstr "Pilih subjek"
 
 #. module: survey
-#: model:ir.model.fields,help:survey.field_survey_question__triggering_answer_ids
-msgid ""
-"Picking any of these answers will trigger this question.\n"
-"Leave the field empty if the question should always be displayed."
-msgstr ""
-"Memilih salah satu dari jawaban iniakan memicu pertanyaan ini.\n"
-"Biarkan field ini kosong bila pertanyaan harusnya selalu ditampilkan."
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.question_result_choice
 msgid "Pie Graph"
 msgstr "Grafik Lingkaran"
@@ -3747,11 +3450,6 @@ msgstr ""
 #, python-format
 msgid "Please enter at least one valid recipient."
 msgstr "Silakan masukkan sedikitnya satu penerima valid."
-
-#. module: survey
-#: model_terms:survey.survey,description:survey.survey_demo_food_preferences
-msgid "Please give us your preferences for this event's dinner!"
-msgstr "Mohon berikan kami preferensi Anda untuk makan malam acara ini!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_void_content
@@ -3801,7 +3499,6 @@ msgid "Prices"
 msgstr "Harga"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Print"
@@ -3811,11 +3508,6 @@ msgstr "Cetak"
 #: model:survey.question,title:survey.vendor_certification_page_1
 msgid "Products"
 msgstr "Produk"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.user_input_session_manage_content
-msgid "Progress bar"
-msgstr "Progress bar"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__question_id
@@ -3868,6 +3560,13 @@ msgid "Question Type"
 msgstr "Tipe Pertanyaan"
 
 #. module: survey
+#: model:ir.model.fields,help:survey.field_survey_question__triggering_question_id
+msgid ""
+"Question containing the triggering answer to display the current question."
+msgstr ""
+"Pertanyaan memiliki jawaban pemicu untuk menampilkan pertanyaan berikutnya."
+
+#. module: survey
 #. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 #, python-format
@@ -3879,7 +3578,6 @@ msgstr "Tipe pertanyaan harusnya kosong untuk halaman-halaman berikut: %s"
 #: model:ir.model.fields,field_description:survey.field_survey_question__question_ids
 #: model:ir.model.fields,field_description:survey.field_survey_survey__question_ids
 #: model:ir.ui.menu,name:survey.menu_survey_question_form1
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Questions"
 msgstr "Pertanyaan"
@@ -3888,15 +3586,6 @@ msgstr "Pertanyaan"
 #: model:ir.ui.menu,name:survey.survey_menu_questions
 msgid "Questions & Answers"
 msgstr "Pertanyaan & Jawaban"
-
-#. module: survey
-#: model:ir.model.fields,help:survey.field_survey_question__triggering_question_ids
-msgid ""
-"Questions containing the triggering answer(s) to display the current "
-"question."
-msgstr ""
-"Pertanyaan yang memiliki jawaban pemicu untuk menampilkan pertanyaan "
-"berikutnya."
 
 #. module: survey
 #: model:survey.survey,title:survey.survey_demo_quiz
@@ -3926,12 +3615,6 @@ msgid "Rarely (1-3 times per month)"
 msgstr "Jarang (1-3 kali per bulan)"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_survey__rating_ids
-#: model:ir.model.fields,field_description:survey.field_survey_user_input__rating_ids
-msgid "Ratings"
-msgstr "Rating"
-
-#. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__session_state__ready
 msgid "Ready"
 msgstr "Siap"
@@ -3945,8 +3628,8 @@ msgstr "Siap untuk merubah cara Anda <b>mengumpulkan data</b>?"
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.action_survey_form
-msgid "Ready to test? Pick a sample or create one from scratch..."
-msgstr "Siap untuk mencoba? Pilih sampel atau buat satu dari nol..."
+msgid "Ready to test? Pick a sample..."
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__partner_ids
@@ -3962,7 +3645,6 @@ msgstr "Pena Merah"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__answer_count
-#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Registered"
 msgstr "Terdaftar"
@@ -3996,12 +3678,17 @@ msgstr "Kirim Ulang Komentar"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_form
 msgid "Resend Invitation"
-msgstr "Kirim Ulang Undangan"
+msgstr "Kirim Ulang Undanga"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_invite__existing_mode__resend
 msgid "Resend invite"
 msgstr "Kirim Ulang undangan"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
+msgid "Responded"
+msgstr "Ditanggapi"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__user_id
@@ -4064,7 +3751,7 @@ msgstr "Baris"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_has_sms_error
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr "Kesalahan Pengiriman SMS`"
+msgstr "Kesalahan Pengiriman SMS"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q1_sug4
@@ -4125,19 +3812,14 @@ msgid "Scoring Type"
 msgstr "Tipe Nilai"
 
 #. module: survey
-#: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_with_answers_after_page
-msgid "Scoring with answers after each page"
-msgstr "Menilai dengan jawaban setelah setiap halaman"
-
-#. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_with_answers
 msgid "Scoring with answers at the end"
 msgstr "Menilai dengan jawaban di akhir"
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__scoring_type__scoring_without_answers
-msgid "Scoring without answers"
-msgstr "Menilai tanpa jawaban"
+msgid "Scoring without answers at the end"
+msgstr "Menilai tanpa jawaban di akhir"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_search
@@ -4177,11 +3859,6 @@ msgid "See results"
 msgstr "Lihat hasil"
 
 #. module: survey
-#: model_terms:survey.survey,description_done:survey.survey_demo_food_preferences
-msgid "See you soon!"
-msgstr "Sampai jumpa sebentar lagi!"
-
-#. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_1_question_3
 msgid "Select all the available customizations for our Customizable Desk"
 msgstr "Pilih semua kustomisasi tersedia untuk Customizable Desk kami"
@@ -4205,16 +3882,6 @@ msgstr "Pilih pohon yang membuat lebih dari 20K sales tahun ini"
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
 msgid "Send"
 msgstr "Kirim"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_invite__send_email
-msgid "Send Email"
-msgstr "Kirim Email"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
-msgid "Send by Email"
-msgstr "Kirim sebagai Email"
 
 #. module: survey
 #: model:mail.template,description:survey.mail_template_certification
@@ -4271,42 +3938,9 @@ msgid "Share a Survey"
 msgstr "Bagikan Survei"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.question_table_pagination
-msgid "Show All"
-msgstr "Tunjukkan Semua"
-
-#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question__comments_allowed
 msgid "Show Comments Field"
 msgstr "Tampilkan Komentar Lapangan"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
-#, python-format
-msgid "Show Correct Answer(s)"
-msgstr "Tunjukkan Jawaban Benar"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
-#, python-format
-msgid "Show Final Leaderboard"
-msgstr "Tunjukkan Leaderboard Final"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
-#, python-format
-msgid "Show Leaderboard"
-msgstr "Tunjukkan Leaderboar"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
-#, python-format
-msgid "Show Results"
-msgstr "Tunjukkan Hasil"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__session_show_leaderboard
@@ -4337,6 +3971,7 @@ msgstr "Kotak Teks Baris Tunggal"
 #: code:addons/survey/models/survey_user_input.py:0
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__skipped
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_print
+#: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_question
 #, python-format
 msgid "Skipped"
 msgstr "Sebuah pertanyaan tidak bisa terjawab dan melewatkan"
@@ -4368,13 +4003,6 @@ msgid "Some questions about our company. Do you really know us?"
 msgstr ""
 "Beberapa pertanyaan mengenai perusahaan kami. Apakah Anda betul-betul "
 "mengenal kami?"
-
-#. module: survey
-#. odoo-python
-#: code:addons/survey/models/survey_user_input.py:0
-#, python-format
-msgid "Someone just participated in \"%(survey_title)s\"."
-msgstr "Seseorang baru saja berpartisipasi di \"%(survey_title)s\"."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_header
@@ -4422,10 +4050,7 @@ msgid "Spring"
 msgstr "Musim Semi"
 
 #. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/js/survey_session_manage.js:0
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p1
-#, python-format
 msgid "Start"
 msgstr "Mulai"
 
@@ -4469,11 +4094,6 @@ msgstr ""
 "Direncanakan: Aktivitas yang akan datang."
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q4_sug1
-msgid "Steak with french fries"
-msgstr "Steak dengan kentang goreng"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q6_row2
 msgid "Strawberries"
 msgstr "Stroberi"
@@ -4481,7 +4101,7 @@ msgstr "Stroberi"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__subject
 msgid "Subject"
-msgstr "Judul"
+msgstr "Subjek"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
@@ -4505,8 +4125,8 @@ msgstr "Rasio Sukses (%)"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_page_statistics_inner
-msgid "Success rate"
-msgstr "Tingkat kesuksesan"
+msgid "Success rate:"
+msgstr "Tingkat kesuksesan:"
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.survey_question_answer_action
@@ -4541,10 +4161,7 @@ msgstr "Musim Panas"
 #: model:ir.model.fields,field_description:survey.field_survey_question__survey_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__survey_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__survey_id
-#: model:ir.model.fields.selection,name:survey.selection__survey_survey__survey_type__survey
-#: model_terms:ir.actions.act_window,help:survey.action_survey_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_search
-#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_activity
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_tree
@@ -4554,19 +4171,9 @@ msgid "Survey"
 msgstr "Penelitian"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_access_error
-msgid "Survey Access Error"
-msgstr "Error Akses Survei"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_response_line_view_tree
 msgid "Survey Answer Line"
 msgstr "Jawaban survei"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_user_input__survey_first_submitted
-msgid "Survey First Submitted"
-msgstr "Survei Yang Pertama Selesai"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_gamification_badge__survey_ids
@@ -4583,11 +4190,6 @@ msgstr "Wizard Undangan Survei"
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_tree
 msgid "Survey Label"
 msgstr "Label"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
-msgid "Survey Link"
-msgstr "Link Survei"
 
 #. module: survey
 #. odoo-python
@@ -4615,13 +4217,9 @@ msgstr "Batas Waktu Limit Tercapai"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__title
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "Survey Title"
 msgstr "Judul Survei"
-
-#. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_survey__survey_type
-msgid "Survey Type"
-msgstr "Tipe Survei"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__survey_start_url
@@ -4729,9 +4327,8 @@ msgstr "Terima kasih atas partisipasi Anda, hope you had a good time!"
 #. odoo-python
 #: code:addons/survey/models/survey_survey_template.py:0
 #, python-format
-msgid "Thank you very much for your feedback. We highly value your opinion!"
+msgid "Thank you very much for your feedback. We highly value your opinion !"
 msgstr ""
-"Terima kasih banyak untuk feedback Anda. Kami sangat menghargai opini Anda!"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_fill_form_done
@@ -4765,6 +4362,7 @@ msgstr "Jawabannya harus dalam jenis yang tepat"
 #: code:addons/survey/models/survey_question.py:0
 #: code:addons/survey/models/survey_question.py:0
 #: model_terms:ir.ui.view,arch_db:survey.question_container
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 #, python-format
 msgid "The answer you entered is not valid."
 msgstr "Jawaban yang Anda masukkan tidak valid."
@@ -4797,6 +4395,20 @@ msgstr "Jawaban yang benar adalah:"
 #: model:ir.model.fields,help:survey.field_survey_survey__session_question_id
 msgid "The current question of the survey session."
 msgstr "Pertanyaan saat ini untuk sesi survei ini."
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_form.js:0
+#, python-format
+msgid "The date you selected is greater than the maximum date: "
+msgstr "Tanggal yang Anda pilih lebih besar dari tanggal maksimum:"
+
+#. module: survey
+#. odoo-javascript
+#: code:addons/survey/static/src/js/survey_form.js:0
+#, python-format
+msgid "The date you selected is lower than the minimum date: "
+msgstr "Tanggal yang Anda pilih lebih dini dari tanggal minimum:"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__description
@@ -4927,13 +4539,6 @@ msgstr "Mereka adalah parameter teknis yang menjamin daya tanggap halaman"
 
 #. module: survey
 #. odoo-python
-#: code:addons/survey/models/survey_user_input.py:0
-#, python-format
-msgid "This answer cannot be overwritten."
-msgstr "Jawaban ini tidak dapat ditimpa."
-
-#. module: survey
-#. odoo-python
 #: code:addons/survey/models/survey_question.py:0
 #: code:addons/survey/tests/test_survey.py:0
 #, python-format
@@ -4948,6 +4553,18 @@ msgid "This answer must be an email address."
 msgstr "Jawaban harus merupakan alamat email."
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+msgid "This certificate is presented to"
+msgstr ""
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+msgid ""
+"This certificate is presented to\n"
+"                                <br/>"
+msgstr ""
+
+#. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__session_code
 msgid ""
 "This code will be used by your attendees to reach your session. Feel free to"
@@ -4955,6 +4572,11 @@ msgid ""
 msgstr ""
 "Code ini akan digunakan oleh peserta Anda untuk memasuki sesi Anda. SIlakan "
 "customize sesuai keinginan Anda!"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_button_form_view
+msgid "This is a Test Survey."
+msgstr "Ini adalah Survei Test."
 
 #. module: survey
 #. odoo-javascript
@@ -4975,9 +4597,24 @@ msgid "This is not a number"
 msgstr "Nomor"
 
 #. module: survey
+#: model:ir.model.fields,help:survey.field_survey_invite__emails
+msgid ""
+"This list of emails of recipients will not be converted in contacts.        "
+"Emails must be separated by commas, semicolons or newline."
+msgstr ""
+"Daftar email penerima ini tidak akan dimasukkan ke daftar kontak.        "
+"Email harus dipisahkan oleh koma, titik koma, atau baris baru."
+
+#. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__description_done
 msgid "This message will be displayed when survey is completed"
 msgstr "Pesan ini akan ditampilkan saat survei selesai"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_question_tree
+#: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
+msgid "This question depends on another question's answer."
+msgstr ""
 
 #. module: survey
 #. odoo-python
@@ -5012,10 +4649,8 @@ msgstr "Bagian ini mengenai pengalaman eCommerce kami sendiri"
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_demo_quiz
 msgid ""
-"This small quiz will test your knowledge about our Company. Be prepared!"
+"This small quiz will test your knowledge about our Company. Be prepared !"
 msgstr ""
-"Quiz singkat ini akan menguji pengetahuan Anda mengenai Perusahaan kami. "
-"Semoga Anda siap!"
 
 #. module: survey
 #: model_terms:survey.survey,description:survey.survey_feedback
@@ -5039,8 +4674,8 @@ msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_closed_expired
-msgid "This survey is now closed. Thank you for your interest!"
-msgstr "Survei ini sekarang ditutup. Terima kasih atas perhatian Anda!"
+msgid "This survey is now closed. Thank you for your interest !"
+msgstr ""
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_auth_required
@@ -5123,25 +4758,14 @@ msgid "Trees"
 msgstr "Pohon-Pohon"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_answer_ids
-msgid "Triggering Answers"
+#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_answer_id
+msgid "Triggering Answer"
 msgstr "Jawaban Pemicu"
 
 #. module: survey
-#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_question_ids
-msgid "Triggering Questions"
+#: model:ir.model.fields,field_description:survey.field_survey_question__triggering_question_id
+msgid "Triggering Question"
 msgstr "Pertanyaan Pemicu"
-
-#. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/views/widgets/survey_question_trigger/survey_question_trigger.js:0
-#, python-format
-msgid ""
-"Triggers based on the following questions will not work because they are positioned after this question:\n"
-"\"%s\"."
-msgstr ""
-"Pemicu berdasarkan pertanyaan berikut tidak akan bekerja karena mereka dipasang setelah pertanyaan ini:\n"
-"\"%s\"."
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_search
@@ -5308,12 +4932,9 @@ msgid "Validate entry"
 msgstr "Validasi"
 
 #. module: survey
-#. odoo-javascript
-#: code:addons/survey/static/src/question_page/question_page_one2many_field.js:0
 #: model:ir.model.fields,field_description:survey.field_survey_question__validation_error_msg
-#, python-format
-msgid "Validation Error"
-msgstr "Eror Validasi"
+msgid "Validation Error message"
+msgstr "Pesan Eror Validasi"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p3_q1_sug2
@@ -5321,19 +4942,9 @@ msgid "Vegetables"
 msgstr "Vegetables"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q3_sug2
-msgid "Vegetarian burger"
-msgstr "Burger vegetarian"
-
-#. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q3_sug1
-msgid "Vegetarian pizza"
-msgstr "Pizza vegetarian"
-
-#. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_2_question_3_choice_1
 msgid "Very underpriced"
-msgstr "Sangat di bawah harga"
+msgstr "Sangat di bawah hagra"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q2_sug3
@@ -5406,8 +5017,8 @@ msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q2
-msgid "What do you think about our new eCommerce?"
-msgstr "Apa pemikiran Anda mengenai eCommerce baru kami?"
+msgid "What do you think about our new eCommerce ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2_question_3
@@ -5416,8 +5027,8 @@ msgstr "Apa pemikiran Anda mengenai harga kami (tidak dirating)?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p5_q1
-msgid "What do you think about this survey?"
-msgstr "Apa pemikiran Anda mengenai survei ini?"
+msgid "What do you think about this survey ?"
+msgstr ""
 
 #. module: survey
 #. odoo-python
@@ -5449,33 +5060,33 @@ msgstr "Apa cara terbaik untuk mendapatkan perhatian audiens?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2_q2
-msgid "What is the biggest city in the world?"
-msgstr "Apa kota terbesar di dunia?"
+msgid "What is the biggest city in the world ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q1
-msgid "What is your email?"
-msgstr "Apa email Anda?"
+msgid "What is your email ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q2
-msgid "What is your nickname?"
-msgstr "Apa nama panggilan Anda?"
+msgid "What is your nickname ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q2
-msgid "What is, approximately, the critical mass of plutonium-239?"
-msgstr "Apa, kurang lebih, massa kritis dari plutonium-239?"
+msgid "What is, approximately, the critical mass of plutonium-239 ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q1
-msgid "When did Genghis Khan die?"
-msgstr "Kapan Genghis Khan meninggal?"
+msgid "When did Genghis Khan die ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p2_q2
-msgid "When did precisely Marc Demo crop its first apple tree?"
-msgstr "Kapan tepatnya Marc Demo memanen pohon apel pertamanya?"
+msgid "When did precisely Marc Demo crop its first apple tree ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q6
@@ -5484,13 +5095,13 @@ msgstr "Kapan Anda memanen buah-buah tersebut"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p2_q1
-msgid "When is Mitchell Admin born?"
-msgstr "Kapan Mitchell Admin lahir?"
+msgid "When is Mitchell Admin born ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q2
-msgid "When is your date of birth?"
-msgstr "Kapan tanggal lahir Anda?"
+msgid "When is your date of birth ?"
+msgstr ""
 
 #. module: survey
 #. odoo-javascript
@@ -5501,13 +5112,13 @@ msgstr "Kapanpun Anda memilih jawaban, Odoo menyimpannya untuk Anda."
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1_q3
-msgid "Where are you from?"
-msgstr "Dari mana Anda berasal?"
+msgid "Where are you from ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p1_q1
-msgid "Where do you live?"
-msgstr "Di mana Anda tinggal?"
+msgid "Where do you live ?"
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__session_show_leaderboard
@@ -5518,8 +5129,8 @@ msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q1
-msgid "Which Musician is not in the 27th Club?"
-msgstr "Musisi mana yang bukan merupakan bagian 27th Club?"
+msgid "Which Musician is not in the 27th Club ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q1
@@ -5528,15 +5139,13 @@ msgstr "Tomat berada di kategori mana "
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p2_q3
-msgid "Which is the highest volcano in Europe?"
-msgstr "Gunung api mana tertinggi di Eropa?"
+msgid "Which is the highest volcano in Europe ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_feedback_p2_q1
-msgid "Which of the following words would you use to describe our products?"
+msgid "Which of the following words would you use to describe our products ?"
 msgstr ""
-"Kata-kata mana dari kumpulan berikut yang Anda akan gunakan untuk "
-"mendeskripsikan produk-produk Anda?"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p3_q2
@@ -5545,8 +5154,8 @@ msgstr "Apa dari yang berikut yang akan Anda gunakan untuk polinasi"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q2
-msgid "Which painting/drawing was not made by Pablo Picasso?"
-msgstr "Lukisan/gambar mana yang tidak dibuat Pablo Picasso?"
+msgid "Which painting/drawing was not made by Pablo Picasso ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p5_q3
@@ -5555,22 +5164,20 @@ msgstr "Kutipan mana yang dibuat Jean-Claude Van Damme"
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_quiz_p1
-msgid "Who are you?"
-msgstr "Siapa Anda?"
+msgid "Who are you ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p3_q2
-msgid "Who is the architect of the Great Pyramid of Giza?"
-msgstr "Siapa arsitek untuk Piramida Agung Giza?"
+msgid "Who is the architect of the Great Pyramid of Giza ?"
+msgstr ""
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_burger_quiz_p4_q1
 msgid ""
 "Who received a Nobel prize in Physics for the discovery of neutrino "
-"oscillations, which shows that neutrinos have mass?"
+"oscillations, which shows that neutrinos have mass ?"
 msgstr ""
-"Siapa yang menerima Penghargaan Nobel Fisika untuk penemuan osilasi "
-"neutrino, yang menunjukkan bahwa neutrino memiliki massa? "
 
 #. module: survey
 #. odoo-python
@@ -5598,11 +5205,6 @@ msgid "Winter"
 msgstr "Musim Dingin"
 
 #. module: survey
-#: model:survey.question,title:survey.survey_demo_food_preferences_q2
-msgid "Would you prefer a veggie meal if possible?"
-msgstr "Apakah Anda lebih memilih makanan vegetarian?"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid ""
 "YYYY-MM-DD\n"
@@ -5628,8 +5230,6 @@ msgid "Yellow Pen"
 msgstr "Pena Kuning"
 
 #. module: survey
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q1_sug1
-#: model:survey.question.answer,value:survey.survey_demo_food_preferences_q2_sug1
 #: model:survey.question.answer,value:survey.survey_demo_quiz_p4_q6_sug1
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_1_choice_2
 msgid "Yes"
@@ -5755,13 +5355,6 @@ msgid "Zoomed Image"
 msgstr "Gambar yang di-Zoom"
 
 #. module: survey
-#. odoo-python
-#: code:addons/survey/models/survey_question.py:0
-#, python-format
-msgid "[Question Title]"
-msgstr "[Judul Pertanyaan]"
-
-#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_form
 msgid "ans"
 msgstr "ans"
@@ -5782,13 +5375,6 @@ msgstr "percobaan"
 #, python-format
 msgid "close"
 msgstr "tutup"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
-msgid ""
-"e.g.  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
-msgstr ""
-"contoh,  'Rick Sanchez' <rick_sanchez@contoh.com>, hictor_vugo@contoh.com"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
@@ -5837,6 +5423,14 @@ msgid "ex@mple.com"
 msgstr "ex@mple.com"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
+msgid ""
+"for successfully completing\n"
+"                                <br/>"
+msgstr ""
+
+#. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_auth_required
 msgid "log in"
 msgstr "Login Member"
@@ -5852,7 +5446,8 @@ msgid "of"
 msgstr "dari"
 
 #. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_general
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
+#: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
 msgid "of achievement"
 msgstr "dari pencapaian"
 
@@ -5906,12 +5501,3 @@ msgstr "halaman ini"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "to"
 msgstr "kepada"
-
-#. module: survey
-#: model_terms:ir.ui.view,arch_db:survey.survey_question_form
-msgid ""
-"⚠️ This question is positioned before some or all of its triggers and could "
-"be skipped."
-msgstr ""
-"⚠️ Pertanyaan ini dipasang sebelum beberapa atau semua pemicunya dan tidak "
-"dapat dilewati."

@@ -58,7 +58,7 @@ class EventMailScheduler(models.Model):
                     )
                     scheduler.update({
                         'mail_done': True,
-                        'mail_count_done': len(scheduler.event_id.registration_ids.filtered(lambda r: r.state != 'cancel'))
+                        'mail_count_done': scheduler.event_id.seats_expected,
                     })
 
         return super(EventMailScheduler, self).execute()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="web.PropertyValue">
-        <t t-if="props.readonly and !['boolean', 'many2one', 'many2many', 'tags'].includes(props.type)">
+    <t t-name="web.PropertyValue" owl="1">
+        <t t-if="props.readonly &amp;&amp; !['boolean', 'many2one', 'many2many', 'tags'].includes(props.type)">
             <span t-if="displayValue" t-out="displayValue"/>
         </t>
         <t t-else="">
@@ -13,12 +13,18 @@
                     onChange.bind="onValueChange"
                 />
             </t>
-            <t t-elif="['date', 'datetime'].includes(props.type)">
-                <DateTimeInput
-                    id="props.id"
-                    type="props.type"
-                    value="propertyValue"
-                    onChange.bind="onValueChange"
+            <t t-elif="props.type === 'datetime'">
+                <DateTimePicker
+                    inputId="props.id"
+                    date="propertyValue"
+                    onDateTimeChanged.bind="onValueChange"
+                />
+            </t>
+            <t t-elif="props.type === 'date'">
+                <DatePicker
+                    inputId="props.id"
+                    date="propertyValue"
+                    onDateTimeChanged.bind="onValueChange"
                 />
             </t>
             <t t-elif="props.type === 'integer'">
@@ -68,17 +74,16 @@
             </t>
             <div
                 t-elif="props.type === 'many2one'"
-                class="o_field_property_many2one_value d-flex flex-row align-items-center"
-                t-att-class="{'avatar': showAvatar}">
+                t-attf-class="d-flex flex-row align-items-center o_field_property_many2one_value {{showAvatar ? 'avatar' : ''}}">
                 <t t-if="props.comodel">
                     <t t-set="hasAccess" t-value="!propertyValue || propertyValue[1]"/>
-                    <img t-if="showAvatar and propertyValue[0] and hasAccess"
+                    <img t-if="showAvatar &amp;&amp; propertyValue[0] &amp;&amp; hasAccess"
                         t-attf-src="/web/image/{{props.comodel}}/{{propertyValue[0]}}/avatar_128"
-                        class="o_avatar rounded me-1"/>
+                        class="rounded-circle me-1"/>
                     <t t-if="props.readonly || !hasAccess">
                         <a
                             t-if="clickableRelational || !hasAccess"
-                            t-attf-class="o_form_uri {{propertyValue and propertyValue[1] ? '' : 'disabled'}}"
+                            t-attf-class="o_form_uri {{propertyValue &amp;&amp; propertyValue[1] ? '' : 'disabled'}}"
                             t-att-href="propertyValue[0] ? `#id=${propertyValue[0]}&amp;model=${props.comodel}` : '#'"
                             t-on-click.prevent="onMany2oneClick">
                             <t t-if="hasAccess" t-out="propertyValue[1]"/>
@@ -86,7 +91,7 @@
                         </a>
                         <span
                             t-else=""
-                            t-out="propertyValue and propertyValue[1] || ''" />
+                            t-out="propertyValue &amp;&amp; propertyValue[1] || ''" />
                     </t>
                     <Many2XAutocomplete
                         t-else=""
@@ -103,9 +108,9 @@
                         activeActions="{ create: true, createEdit: true, write: true }"
                     />
                     <button
-                        t-if="!props.readonly and propertyValue and propertyValue[0] and hasAccess"
+                        t-if="!props.readonly &amp;&amp; propertyValue &amp;&amp; propertyValue[0] &amp;&amp; hasAccess"
                         type="button"
-                        class="btn btn-secondary oi oi-arrow-right o_external_button o_properties_external_button py-0"
+                        class="btn btn-secondary fa fa-arrow-right o_external_button o_properties_external_button py-0"
                         tabindex="-1"
                         draggable="false"
                         aria-label="Internal link"
@@ -115,7 +120,7 @@
                 </t>
             </div>
             <t t-elif="props.type === 'many2many'">
-                <div t-if="props.comodel" class="o_field_property_many2many_value d-flex flex-wrap flex-row gap-1 ms-0 pe-1 w-100 "
+                <div t-if="props.comodel" class="o_field_property_many2many_value d-flex flex-row ms-0 pe-1 w-100 flex-wrap"
                     t-attf-class="o_field_widget o_field_many2many_tags {{showAvatar ? 'avatar' : ''}} {{props.readonly ? 'readonly' : ''}}">
                     <!-- Copy many2many tags style without duplicating all CSS -->
                     <TagsList tags="propertyValue"/>

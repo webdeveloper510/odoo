@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import wTourUtils from '@website/js/tours/tour_utils';
+import wTourUtils from "website.tour_utils";
 
 // Note: cannot import @website/../tests/tour_utils/widget_lifecycle_dep_widget
 // here because that module requires web.public.widget which is not available
@@ -13,7 +13,7 @@ wTourUtils.registerWebsitePreviewTour("widget_lifecycle", {
     test: true,
     url: "/",
     edition: true,
-}, () => [
+}, [
     wTourUtils.dragNDrop({
         id: "s_countdown",
         name: "Countdown",
@@ -39,10 +39,10 @@ wTourUtils.registerWebsitePreviewTour("widget_lifecycle", {
         trigger: "iframe .s_countdown.public_widget_started",
         run: () => {
             const result = JSON.parse(window.localStorage.widgetAndWysiwygLifecycle);
-            const expected = ["widgetStop", "wysiwygStop", "widgetStart",
+            const expected = ["widgetStop", "wysiwygStop", "wysiwygStop", "widgetStart",
                 "widgetStop", "wysiwygStart", "wysiwygStarted", "widgetStart",
             ];
-            const alternative = ["widgetStop", "widgetStart", "wysiwygStop",
+            const alternative = ["widgetStop", "wysiwygStop", "widgetStart", "wysiwygStop",
                 "widgetStop", "wysiwygStart", "wysiwygStarted", "widgetStart",
             ];
             const resultIsEqualTo = (arr) => {

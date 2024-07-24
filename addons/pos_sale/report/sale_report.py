@@ -10,17 +10,17 @@ class SaleReport(models.Model):
     @api.model
     def _get_done_states(self):
         done_states = super()._get_done_states()
-        done_states.extend(['paid', 'invoiced', 'done'])
+        done_states.extend(['paid', 'pos_done', 'invoiced'])
         return done_states
 
     state = fields.Selection(
         selection_add=[
+            ('pos_draft', 'New'),
             ('paid', 'Paid'),
+            ('pos_done', 'Posted'),
             ('invoiced', 'Invoiced')
         ],
     )
-
-    order_reference = fields.Reference(selection_add=[('pos.order', 'POS Order')])
 
     def _select_pos(self):
         select_ = f"""
@@ -51,8 +51,7 @@ class SaleReport(models.Model):
             count(*) AS nbr,
             pos.name AS name,
             pos.date_order AS date,
-            (CASE WHEN pos.state = 'done' THEN 'sale' ELSE pos.state END) AS state,
-            NULL as invoice_status,
+            CASE WHEN pos.state = 'draft' THEN 'pos_draft' WHEN pos.state = 'done' THEN 'pos_done' else pos.state END AS state,
             pos.partner_id AS partner_id,
             pos.user_id AS user_id,
             pos.company_id AS company_id,
@@ -64,11 +63,9 @@ class SaleReport(models.Model):
             NULL AS analytic_account_id,
             pos.crm_team_id AS team_id,
             p.product_tmpl_id,
-            partner.commercial_partner_id AS commercial_partner_id,
             partner.country_id AS country_id,
             partner.industry_id AS industry_id,
-            partner.state_id AS state_id,
-            partner.zip AS partner_zip,
+            partner.commercial_partner_id AS commercial_partner_id,
             (SUM(p.weight) * l.qty / u.factor) AS weight,
             (SUM(p.volume) * l.qty / u.factor) AS volume,
             l.discount AS discount,
@@ -76,7 +73,7 @@ class SaleReport(models.Model):
                 / {self._case_value_or_one('pos.currency_rate')}
                 * {self._case_value_or_one('currency_table.rate')}))
             AS discount_amount,
-            concat('pos.order', ',', pos.id) AS order_reference"""
+            NULL AS order_id"""
 
         additional_fields = self._select_additional_fields()
         additional_fields_info = self._fill_pos_fields(additional_fields)
@@ -86,23 +83,13 @@ class SaleReport(models.Model):
             select_ += template % (value, fname)
         return select_
 
-    def _available_additional_pos_fields(self):
-        """Hook to replace the additional fields from sale with the one from pos_sale."""
-        return {
-            'warehouse_id': 'picking.warehouse_id',
-        }
-
     def _fill_pos_fields(self, additional_fields):
         """Hook to fill additional fields for the pos_sale.
 
         :param values: dictionary of values to fill
         :type values: dict
         """
-        filled_fields = {x: 'NULL' for x in additional_fields}
-        for fname, value in self._available_additional_pos_fields().items():
-            if fname in additional_fields:
-                filled_fields[fname] = value
-        return filled_fields
+        return {x: 'NULL' for x in additional_fields}
 
     def _from_pos(self):
         return """
@@ -114,10 +101,13 @@ class SaleReport(models.Model):
             LEFT JOIN uom_uom u ON u.id=t.uom_id
             LEFT JOIN pos_session session ON session.id = pos.session_id
             LEFT JOIN pos_config config ON config.id = session.config_id
-            LEFT JOIN stock_picking_type picking ON picking.id = config.picking_type_id
             JOIN {currency_table} ON currency_table.company_id = pos.company_id
             """.format(
-            currency_table=self.env['res.currency']._get_query_currency_table(self.env.companies.ids, fields.Date.today())
+            currency_table=self.env['res.currency']._get_query_currency_table(
+                {
+                    'multi_company': True,
+                    'date': {'date_to': fields.Date.today()}
+                }),
             )
 
     def _where_pos(self):
@@ -133,7 +123,6 @@ class SaleReport(models.Model):
             l.qty,
             t.uom_id,
             t.categ_id,
-            pos.id,
             pos.name,
             pos.date_order,
             pos.partner_id,
@@ -142,15 +131,12 @@ class SaleReport(models.Model):
             pos.company_id,
             pos.pricelist_id,
             p.product_tmpl_id,
-            partner.commercial_partner_id,
             partner.country_id,
             partner.industry_id,
-            partner.state_id,
-            partner.zip,
+            partner.commercial_partner_id,
             u.factor,
             pos.crm_team_id,
-            currency_table.rate,
-            picking.warehouse_id"""
+            currency_table.rate"""
 
     def _query(self):
         res = super()._query()

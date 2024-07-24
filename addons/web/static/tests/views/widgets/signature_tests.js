@@ -19,6 +19,7 @@ QUnit.module("Widgets", (hooks) => {
                             type: "many2one",
                             relation: "product",
                         },
+                        __last_update: { type: "datetime" },
                         sign: { string: "Signature", type: "binary" },
                     },
                     records: [
@@ -54,7 +55,7 @@ QUnit.module("Widgets", (hooks) => {
 
         patchWithCleanup(NameAndSignature.prototype, {
             setup() {
-                super.setup(...arguments);
+                this._super.apply(this, arguments);
                 assert.strictEqual(this.props.signature.name, "");
             },
         });
@@ -96,7 +97,7 @@ QUnit.module("Widgets", (hooks) => {
     QUnit.test("Signature widget: full_name option", async function (assert) {
         patchWithCleanup(NameAndSignature.prototype, {
             setup() {
-                super.setup(...arguments);
+                this._super.apply(this, arguments);
                 assert.step(this.props.signature.name);
             },
         });

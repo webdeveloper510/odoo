@@ -1,25 +1,26 @@
 /** @odoo-module **/
 import { getOdooFunctions } from "@spreadsheet/helpers/odoo_functions_helpers";
 
-/**
- * @typedef {import("@spreadsheet/helpers/odoo_functions_helpers").Token} Token
- * @typedef  {import("@spreadsheet/helpers/odoo_functions_helpers").OdooFunctionDescription} OdooFunctionDescription
- */
+/** @typedef  {import("@spreadsheet/helpers/odoo_functions_helpers").OdooFunctionDescription} OdooFunctionDescription*/
 
 /**
- * @param {Token[]} tokens
+ * @param {string} formula
  * @returns {number}
  */
-export function getNumberOfAccountFormulas(tokens) {
-    return getOdooFunctions(tokens, ["ODOO.BALANCE", "ODOO.CREDIT", "ODOO.DEBIT"]).length;
+export function getNumberOfAccountFormulas(formula) {
+    return getOdooFunctions(formula, ["ODOO.BALANCE", "ODOO.CREDIT", "ODOO.DEBIT"]).filter(
+        (fn) => fn.isMatched
+    ).length;
 }
 
 /**
  * Get the first Account function description of the given formula.
  *
- * @param {Token[]} tokens
+ * @param {string} formula
  * @returns {OdooFunctionDescription | undefined}
  */
-export function getFirstAccountFunction(tokens) {
-    return getOdooFunctions(tokens, ["ODOO.BALANCE", "ODOO.CREDIT", "ODOO.DEBIT"])[0];
+export function getFirstAccountFunction(formula) {
+    return getOdooFunctions(formula, ["ODOO.BALANCE", "ODOO.CREDIT", "ODOO.DEBIT"]).find(
+        (fn) => fn.isMatched
+    );
 }

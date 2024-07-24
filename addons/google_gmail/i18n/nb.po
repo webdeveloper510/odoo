@@ -3,17 +3,17 @@
 # 	* google_gmail
 # 
 # Translators:
-# Marius Stedjan <marius@stedjan.com>, 2024
-# Henning Fyllingsnes, 2024
-# Martin Trigaux, 2024
+# Marius Stedjan <marius@stedjan.com>, 2022
+# Martin Trigaux, 2022
+# Henning Fyllingsnes, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Martin Trigaux, 2024\n"
+"POT-Creation-Date: 2022-09-20 09:02+0000\n"
+"PO-Revision-Date: 2022-09-22 05:46+0000\n"
+"Last-Translator: Henning Fyllingsnes, 2023\n"
 "Language-Team: Norwegian Bokmål (https://app.transifex.com/odoo/teams/41243/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,21 +24,21 @@ msgstr ""
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
-msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
-msgstr ""
-
-#. module: google_gmail
-#: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
-#: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"fa fa-arrow-right\"/>\n"
 "                        Connect your Gmail account"
 msgstr ""
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
+#: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
+msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
+msgstr ""
+
+#. module: google_gmail
+#: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 msgid ""
-"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('server_type', '!=', 'gmail'), ('google_gmail_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Valid\n"
 "                    </span>"
 msgstr ""
@@ -46,7 +46,7 @@ msgstr ""
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 msgid ""
-"<span invisible=\"smtp_authentication != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('smtp_authentication', '!=', 'gmail'), ('google_gmail_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Valid\n"
 "                    </span>"
 msgstr ""
@@ -66,7 +66,6 @@ msgid "Access Token Expiration Timestamp"
 msgstr ""
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/controllers/main.py:0
 #: code:addons/google_gmail/controllers/main.py:0
 #, python-format
@@ -74,7 +73,6 @@ msgid "An error occur during the authentication process."
 msgstr ""
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "An error occurred when fetching the access token."
@@ -98,7 +96,6 @@ msgid "Config Settings"
 msgstr "Innstillinger"
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/fetchmail_server.py:0
 #, python-format
 msgid ""
@@ -107,7 +104,6 @@ msgid ""
 msgstr ""
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
 msgid ""
@@ -152,7 +148,6 @@ msgid "Incoming Mail Server"
 msgstr "Innkommende e-postserver"
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
 msgid ""
@@ -166,31 +161,18 @@ msgid "Mail Server"
 msgstr ""
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "Only the administrator can link a Gmail mail server."
 msgstr ""
 
 #. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "Please configure your Gmail credentials."
 msgstr ""
 
 #. module: google_gmail
-#. odoo-python
-#: code:addons/google_gmail/models/ir_mail_server.py:0
-#, python-format
-msgid ""
-"Please fill the \"Username\" field with your Gmail username (your email "
-"address). This should be the same account as the one used for the Gmail "
-"OAuthentication Token."
-msgstr ""
-
-#. module: google_gmail
-#. odoo-python
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 #, python-format
 msgid ""
@@ -239,6 +221,14 @@ msgstr ""
 #: model:ir.model.fields,help:google_gmail.field_ir_mail_server__google_gmail_uri
 msgid "The URL to generate the authorization code from Google"
 msgstr "URL for å generere autorisasjonskode fra Google"
+
+#. module: google_gmail
+#: code:addons/google_gmail/models/ir_mail_server.py:0
+#, python-format
+msgid ""
+"This server %r can only be used for your personal email address. Please fill"
+" the \"from_filter\" field with %r."
+msgstr ""
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_fetchmail_server__google_gmail_uri

@@ -29,7 +29,7 @@ class AccountEdiXmlUBLSG(models.AbstractModel):
         vals = super()._get_partner_party_vals(partner, role)
 
         for party_tax_scheme in vals['party_tax_scheme_vals']:
-            party_tax_scheme['tax_scheme_vals'] = {'id': 'GST'}
+            party_tax_scheme['tax_scheme_id'] = 'GST'
 
         return vals
 
@@ -60,7 +60,7 @@ class AccountEdiXmlUBLSG(models.AbstractModel):
             res.append({
                 'id': self._get_tax_sg_codes(invoice, tax),
                 'percent': tax.amount if tax.amount_type == 'percent' else False,
-                'tax_scheme_vals': {'id': 'GST'},
+                'tax_scheme_id': 'GST',
             })
         return res
 
@@ -69,7 +69,7 @@ class AccountEdiXmlUBLSG(models.AbstractModel):
         vals = super()._export_invoice_vals(invoice)
 
         vals['vals'].update({
-            'customization_id': self._get_customization_ids()['ubl_sg'],
+            'customization_id': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0',
         })
 
         return vals

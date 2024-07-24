@@ -1,28 +1,21 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { StockMoveX2ManyField, stockMoveX2ManyField, MovesListRenderer } from "@stock/views/picking_form/stock_move_one2many";
+import { X2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { ListRenderer } from "@web/views/list/list_renderer";
 
-export class MrpProductionComponentsListRenderer extends MovesListRenderer  {
+export class MrpProductionComponentsListRenderer extends ListRenderer {
     getCellClass(column, record) {
         let classNames = super.getCellClass(...arguments);
-        if (column.name == "quantity" && !record.data.manual_consumption) {
+        if (column.name == "quantity_done" && !record.data.manual_consumption) {
             classNames += ' o_non_manual_consumption';
         }
         return classNames;
     }
 }
 
-export class MrpProductionComponentsX2ManyField extends StockMoveX2ManyField {}
-MrpProductionComponentsX2ManyField.components = {
-    ...StockMoveX2ManyField.components,
-    ListRenderer: MrpProductionComponentsListRenderer,
-};
+export class MrpProductionComponentsX2ManyField extends X2ManyField {}
+MrpProductionComponentsX2ManyField.components = { ...X2ManyField.components, ListRenderer: MrpProductionComponentsListRenderer };
 
-export const mrpProductionComponentsX2ManyField = {
-    ...stockMoveX2ManyField,
-    component: MrpProductionComponentsX2ManyField,
-    additionalClasses: [...StockMoveX2ManyField.additionalClasses || [], "o_field_many2many"],
-};
-
-registry.category("fields").add("mrp_production_components_x2many", mrpProductionComponentsX2ManyField);
+MrpProductionComponentsX2ManyField.additionalClasses = ['o_field_many2many'];
+registry.category("fields").add("mrp_production_components_x2many", MrpProductionComponentsX2ManyField);

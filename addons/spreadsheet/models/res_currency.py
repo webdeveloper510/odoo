@@ -4,7 +4,6 @@ from odoo import api, models
 class ResCurrency(models.Model):
     _inherit = "res.currency"
 
-    # TODO remove this method in master. It's not used anymore.
     @api.model
     def get_currencies_for_spreadsheet(self, currency_names):
         """

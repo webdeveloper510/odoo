@@ -74,7 +74,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
             'location_id': sm.location_id.id,
             'location_dest_id': sm.location_dest_id.id,
             'product_id': sm.product_id.id,
-            'quantity': 12,
+            'qty_done': 12,
             'company_id': sm.company_id.id,
             'product_uom_id': sm.product_uom.id,
             'picking_id': delivery.id,
@@ -82,10 +82,9 @@ class TestSalePurchaseStockFlow(TransactionCase):
         delivery.button_validate()
 
         self.assertEqual(delivery.state, 'done')
-        self.assertEqual(delivery.move_ids.move_line_ids.quantity, 12)
         self.assertEqual(so.order_line.qty_delivered, 12)
 
-        sm.move_line_ids.quantity = 10
+        sm.move_line_ids.qty_done = 10
         self.assertEqual(so.order_line.qty_delivered, 10)
 
     def test_auto_trigger_snoozed_orderpoint(self):
@@ -143,71 +142,3 @@ class TestSalePurchaseStockFlow(TransactionCase):
         so_2.action_confirm()
         po = self.env['purchase.order'].search([('partner_id', '=', self.vendor.id), ('state', '!=', 'cancel')], limit=1)
         self.assertFalse(po)
-
-    def test_sale_need_purchase_variants(self):
-        """
-        MTO+Buy product with two variants P1 and P2 with a different vendor.
-        Create a SO with 2 lines, one for each variant: 2 PO should be created.
-        """
-
-        att_color = self.env['product.attribute'].create({
-            'name': 'Color',
-            'value_ids': [
-                Command.create({'name': 'red', 'sequence': 1}),
-                Command.create({'name': 'blue', 'sequence': 2}),
-            ],
-        })
-        product_template = self.env['product.template'].create({
-            'name': 'SuperProduct',
-            'route_ids': [Command.set((self.mto_route + self.buy_route).ids)],
-            'attribute_line_ids': [
-                Command.create({
-                    'attribute_id': att_color.id,
-                    'value_ids': att_color.value_ids.ids,
-                }),
-            ],
-        })
-        red_product, blue_product = product_template.product_variant_ids
-        red_vendor, blue_vendor = self.env['res.partner'].create([
-            {'name': 'Super red vendor'},
-            {'name': 'Super blue vendor'},
-        ])
-        self.env['product.supplierinfo'].create([
-            {
-                'product_id': red_product.id,
-                'partner_id': red_vendor.id,
-                'price': 5,
-            },
-            {
-                'product_id': blue_product.id,
-                'partner_id': blue_vendor.id,
-                'price': 10,
-            },
-        ])
-        so = self.env['sale.order'].create({
-            'partner_id': self.customer.id,
-            'order_line': [
-                Command.create({
-                    'name': red_product.name,
-                    'product_id': red_product.id,
-                    'product_uom_qty': 2,
-                    'product_uom': red_product.uom_id.id,
-                    'price_unit': 20,
-                }),
-                Command.create({
-                    'name': blue_product.name,
-                    'product_id': blue_product.id,
-                    'product_uom_qty': 3,
-                    'product_uom': blue_product.uom_id.id,
-                    'price_unit': 30,
-                }),
-            ],
-        })
-        so.action_confirm()
-
-        red_po = self.env['purchase.order'].search([('partner_id', '=', red_vendor.id)], limit=1)
-        self.assertTrue(red_po)
-        self.assertRecordValues(red_po.order_line, [{'product_id': red_product.id, 'product_uom_qty': 2, 'price_unit': 5}])
-        blue_po = self.env['purchase.order'].search([('partner_id', '=', blue_vendor.id)], limit=1)
-        self.assertTrue(blue_po)
-        self.assertRecordValues(blue_po.order_line, [{'product_id': blue_product.id, 'product_uom_qty': 3, 'price_unit': 10}])

@@ -11,10 +11,14 @@ async function addChartGlobalFilter(model) {
         id: "42",
         type: "date",
         label: "Last Year",
-        rangeType: "fixedPeriod",
+        rangeType: "year",
         defaultValue: { yearOffset: -1 },
     };
-    await addGlobalFilter(model, filter, { chart: { [chartId]: { chain: "date", type: "date" } } });
+    await addGlobalFilter(
+        model,
+        { filter },
+        { chart: { [chartId]: { chain: "date", type: "date" } } }
+    );
 }
 
 QUnit.module("spreadsheet > Global filters chart", {}, () => {
@@ -50,11 +54,13 @@ QUnit.module("spreadsheet > Global filters chart", {}, () => {
             id: "42",
             type: "date",
             label: "Last Year",
-            rangeType: "fixedPeriod",
+            rangeType: "year",
         };
-        await addGlobalFilter(model, filter, {
-            chart: { [chartId]: { chain: "date", type: "date" } },
-        });
+        await addGlobalFilter(
+            model,
+            { filter },
+            { chart: { [chartId]: { chain: "date", type: "date" } } }
+        );
         model.updateMode("dashboard");
         let computedDomain = model.getters.getChartDataSource(chartId).getComputedDomain();
         assert.deepEqual(computedDomain, []);
@@ -82,14 +88,14 @@ QUnit.module("spreadsheet > Global filters chart", {}, () => {
             id: chartId,
         });
         assert.deepEqual(
-            globalFiltersFieldMatchers["chart"].getIds(),
+            globalFiltersFieldMatchers["chart"].geIds(),
             [],
             "it should have removed the chart and its fieldMatching and datasource altogether"
         );
         model.dispatch("REQUEST_UNDO");
         assert.deepEqual(model.getters.getChartFieldMatch(chartId)[filter.id], matching);
         model.dispatch("REQUEST_REDO");
-        assert.deepEqual(globalFiltersFieldMatchers["chart"].getIds(), []);
+        assert.deepEqual(globalFiltersFieldMatchers["chart"].geIds(), []);
     });
 
     QUnit.test("field matching is removed when filter is deleted", async function (assert) {

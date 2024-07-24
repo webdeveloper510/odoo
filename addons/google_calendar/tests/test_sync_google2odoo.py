@@ -6,7 +6,6 @@ from datetime import datetime, date, timedelta
 
 from dateutil.relativedelta import relativedelta
 from odoo.tests.common import new_test_user
-from odoo.exceptions import ValidationError
 from odoo.addons.google_calendar.tests.test_sync_common import TestSyncGoogle, patch_api
 from odoo.addons.google_calendar.utils.google_calendar import GoogleEvent, GoogleCalendarService
 from odoo import Command, tools
@@ -16,7 +15,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
 
     def setUp(self):
         super().setUp()
-        self.other_company = self.env['res.company'].create({'name': 'Other Company'})
         self.public_partner = self.env['res.partner'].create({
             'name': 'Public Contact',
             'email': 'public_email@example.com',
@@ -29,7 +27,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.private_partner = self.env['res.partner'].create({
             'name': 'Private Contact',
             'email': 'private_email@example.com',
-            'company_id': self.other_company.id,
+            'type': 'private',
         })
 
     def generate_recurring_event(self, mock_dt, **values):
@@ -284,8 +282,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertGoogleEventPatched(event.google_id, {
             'id': event.google_id,
             'summary': 'coucou',
-            'start': {'date': str(event.start_date), 'dateTime': None},
-            'end': {'date': str(event.stop_date + relativedelta(days=1)), 'dateTime': None},
+            'start': {'date': str(event.start_date)},
+            'end': {'date': str(event.stop_date + relativedelta(days=1))},
             'attendees': [{'email': 'odoobot@example.com', 'responseStatus': 'declined'}],
             'extendedProperties': {'private': {'%s_odoo_id' % self.env.cr.dbname: event.id}},
             'reminders': {'overrides': [], 'useDefault': False},
@@ -417,8 +415,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'visibility': 'public',
             'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;COUNT=3;BYDAY=MO'],
             'reminders': {'useDefault': True},
-            'start': {'dateTime': '2020-01-06T18:00:00+01:00', 'date': None},
-            'end': {'dateTime': '2020-01-06T19:00:00+01:00', 'date': None},
+            'start': {'dateTime': '2020-01-06T18:00:00+01:00'},
+            'end': {'dateTime': '2020-01-06T19:00:00+01:00'},
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', values.get('id'))])
@@ -501,8 +499,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'status': 'confirmed',
             'summary': 'rrule',
             'reminders': {'useDefault': True},
-            'updated': self.now,
-            'guestsCanModify': True,
+            'updated': self.now
         }, {
             'summary': 'edited',  # Name changed
             'id': '%s_20200101' % recurrence_id,
@@ -512,7 +509,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'end': {'date': '2020-01-02'},
             'reminders': {'useDefault': True},
             'updated': self.now,
-            'guestsCanModify': True,
         }])
         self.sync(events)
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', recurrence_id)])
@@ -570,7 +566,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'end': {'date': '2020-01-7'},
             'reminders': {'useDefault': True},
             'updated': self.now,
-            'guestsCanModify': True,
         },
         {  # Third event has been moved
             'id': '%s_20200113' % recurrence_id,
@@ -580,7 +575,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'originalStartTime': {'date': '2020-01-13'},
             'reminders': {'useDefault': True},
             'updated': self.now,
-            'guestsCanModify': True,
         }])
         self.sync(events)
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', recurrence_id)])
@@ -619,11 +613,10 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             "attendees": [
                 {
-                    "email": "odoobot@example.com", "responseStatus": "accepted",
+                    "email": "odoobot@example.com", "state": "accepted",
                 },
             ],
             'updated': self.now,
-            'guestsCanModify': True,
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         events = recurrence.calendar_event_ids.sorted('start')
@@ -663,7 +656,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             "attendees": [
                 {
-                    "email": "odoobot@example.com", "responseStatus": "accepted",
+                    "email": "odoobot@example.com", "state": "accepted",
                 },
             ],
             'updated': self.now,
@@ -711,12 +704,12 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'id': google_id,
             'summary': 'coucou again',
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
-            'start': {'dateTime': '2021-02-15T09:00:00+01:00', 'date': None},  # 8:00 UTC
-            'end': {'dateTime': '2021-02-15-T11:00:00+01:00', 'date': None},
+            'start': {'dateTime': '2021-02-15T09:00:00+01:00'}, # 8:00 UTC
+            'end': {'dateTime': '2021-02-15-T11:00:00+01:00'},
             'reminders': {'useDefault': True},
             "attendees": [
                 {
-                    "email": "odoobot@example.com", "responseStatus": "accepted",
+                    "email": "odoobot@example.com", "state": "accepted",
                 },
             ],
             'updated': self.now,
@@ -761,16 +754,15 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'id': google_id,
             'summary': "It's me again",
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=MO'],
-            'start': {'dateTime': '2021-02-15T12:00:00+01:00', 'date': None},  # 11:00 UTC
-            'end': {'dateTime': '2021-02-15-T15:00:00+01:00', 'date': None},
+            'start': {'dateTime': '2021-02-15T12:00:00+01:00'},  # 11:00 UTC
+            'end': {'dateTime': '2021-02-15-T15:00:00+01:00'},
             'reminders': {'useDefault': True},
             "attendees": [
                 {
-                    "email": "odoobot@example.com", "responseStatus": "accepted",
+                    "email": "odoobot@example.com", "state": "accepted",
                 },
             ],
             'updated': self.now,
-            'guestsCanModify': True,
         }
 
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
@@ -823,8 +815,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'visibility': 'public',
             'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;COUNT=3;BYDAY=MO'],
             'reminders': {'useDefault': True},
-            'start': {'dateTime': '2020-01-06T18:00:00+01:00', 'timeZone': 'Pacific/Auckland', 'date': None},
-            'end': {'dateTime': '2020-01-06T19:00:00+01:00', 'timeZone': 'Pacific/Auckland', 'date': None},
+            'start': {'dateTime': '2020-01-06T18:00:00+01:00', 'timeZone': 'Pacific/Auckland'},
+            'end': {'dateTime': '2020-01-06T19:00:00+01:00', 'timeZone': 'Pacific/Auckland'},
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', values.get('id'))])
@@ -864,7 +856,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 "status": "confirmed",
                 "summary": "Weekly test",
                 "updated": "2023-02-20T11:45:08.547Z",
-                'guestsCanModify': True,
             },
             {
                 "attendees": [
@@ -896,7 +887,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 "status": "confirmed",
                 "summary": "Weekly test 2",
                 "updated": "2023-02-20T11:48:00.634Z",
-                'guestsCanModify': True,
             },
         ]
         google_events = GoogleEvent(values)
@@ -963,13 +953,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-06T18:00:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
@@ -982,8 +970,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'visibility': 'public',
             'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;COUNT=3;BYDAY=MO'],
             'reminders': {'useDefault': True},
-            'start': {'dateTime': '2020-01-06T18:00:00+01:00', 'timeZone': 'Europe/Brussels', 'date': None},
-            'end': {'dateTime': '2020-01-06T19:00:00+01:00', 'timeZone': 'Europe/Brussels', 'date': None},
+            'start': {'dateTime': '2020-01-06T18:00:00+01:00', 'timeZone': 'Europe/Brussels'},
+            'end': {'dateTime': '2020-01-06T19:00:00+01:00', 'timeZone': 'Europe/Brussels'},
         }
         recurrence = self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         events = recurrence.calendar_event_ids.sorted('start')
@@ -1015,13 +1003,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'overrides': [{"method": "email", "minutes": 10}], 'useDefault': False},
             'start': {
                 'dateTime': pytz.utc.localize(start).isoformat(),
-                'timeZone': 'Europe/Brussels',
-                'date': None
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': pytz.utc.localize(end).isoformat(),
-                'timeZone': 'Europe/Brussels',
-                'date': None
+                'timeZone': 'Europe/Brussels'
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
@@ -1046,13 +1032,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'overrides': [{"method": "email", "minutes": 10}], 'useDefault': False},
             'start': {
                 'dateTime': pytz.utc.localize(start).isoformat(),
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': pytz.utc.localize(end).isoformat(),
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
@@ -1091,13 +1075,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None
+                'timeZone': 'Europe/Brussels'
             },
             'transparency': 'opaque',
         }
@@ -1124,8 +1106,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         # guestsCanModify property is not properly handled yet
         self.assertGoogleEventPatched(event.google_id, {
             'id': event.google_id,
-            'start': {'date': str(event.start_date), 'dateTime': None},
-            'end': {'date': str(event.stop_date + relativedelta(days=1)), 'dateTime': None},
+            'start': {'date': str(event.start_date)},
+            'end': {'date': str(event.stop_date + relativedelta(days=1))},
             'summary': 'coucou',
             'description': '',
             'location': '',
@@ -1171,8 +1153,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             # 'visibility': 'public',
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
             'reminders': {'useDefault': True},
-            'start': {'dateTime': '2021-02-15T8:00:00+01:00', 'timeZone': 'Europe/Brussels', 'date': None},
-            'end': {'dateTime': '2021-02-15T10:00:00+01:00', 'timeZone': 'Europe/Brussels', 'date': None},
+            'start': {'dateTime': '2021-02-15T8:00:00+01:00', 'timeZone': 'Europe/Brussels'},
+            'end': {'dateTime': '2021-02-15T10:00:00+01:00', 'timeZone': 'Europe/Brussels'},
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         attendee = recurrence.calendar_event_ids.attendee_ids.mapped('state')
@@ -1192,9 +1174,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             # 'visibility': 'public',
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
             'reminders': {'useDefault': True},
-            'start': {'dateTime': '2021-02-15T8:00:00+01:00', 'timeZone': 'Europe/Brussels', 'date': None},
-            'end': {'dateTime': '2021-02-15T10:00:00+01:00', 'timeZone': 'Europe/Brussels', 'date': None},
-            'guestsCanModify': True,
+            'start': {'dateTime': '2021-02-15T8:00:00+01:00', 'timeZone': 'Europe/Brussels'},
+            'end': {'dateTime': '2021-02-15T10:00:00+01:00', 'timeZone': 'Europe/Brussels'},
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
@@ -1260,13 +1241,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'recurrence': ['RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=MO'],
             'start': {
                 'dateTime': '2020-01-13T16:00:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T20:00:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None
+                'timeZone': 'Europe/Brussels'
             },
         }])
         self.sync(gevent)
@@ -1294,13 +1273,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:00:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T20:00:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
         }
         event = self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
@@ -1323,13 +1300,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None
+                'timeZone': 'Europe/Brussels'
             },
             'conferenceData': {
                 'entryPoints': [{
@@ -1421,13 +1396,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'transparency': 'transparent'
         }
@@ -1457,20 +1430,19 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
         }
 
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
         event = self.env['calendar.event'].search([('google_id', '=', values.get('id'))])
         private_attendee = event.attendee_ids.filtered(lambda e: e.email == self.private_partner.email)
-        self.assertEqual(self.private_partner.id, private_attendee.partner_id.id)
+        self.assertNotEqual(self.private_partner.id, private_attendee.partner_id.id)
+        self.assertNotEqual(private_attendee.partner_id.type, 'private')
         self.assertGoogleAPINotCalled()
 
     @patch_api
@@ -1496,14 +1468,16 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         recurrence = self.env['calendar.recurrence'].search([('google_id', '=', values.get('id'))])
         events = recurrence.calendar_event_ids
         private_attendees = events.mapped('attendee_ids').filtered(lambda e: e.email == self.private_partner.email)
-        self.assertTrue(all([a.partner_id == self.private_partner for a in private_attendees]))
+        self.assertTrue(all([a.partner_id.id != self.private_partner.id for a in private_attendees]))
         self.assertTrue(all([a.partner_id.type != 'private' for a in private_attendees]))
         self.assertGoogleAPINotCalled()
 
     @patch_api
     def test_alias_email_sync_recurrence(self):
+        catchall_domain = self.env['ir.config_parameter'].sudo().get_param("mail.catchall.domain")
         alias_model = self.env['ir.model'].search([('model', '=', 'calendar.event')])
-        mail_alias = self.env['mail.alias'].create({'alias_name': 'sale', 'alias_model_id': alias_model.id})
+        self.env['mail.alias'].create({'alias_name': 'sale', 'alias_model_id': alias_model.id})
+        alias_email = 'sale@%s' % catchall_domain if catchall_domain else 'sale@'
 
         google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
         base_event = self.env['calendar.event'].create({
@@ -1531,8 +1505,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             "attendees": [
                 {
-                    "email": mail_alias.display_name,
-                    "responseStatus": "accepted",
+                    "email": alias_email, "state": "accepted",
                 },
             ],
             'updated': self.now,
@@ -1557,13 +1530,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
@@ -1602,13 +1573,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'reminders': {'useDefault': True},
             'start': {
                 'dateTime': '2020-01-13T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
+                'timeZone': 'Europe/Brussels'
             },
             'end': {
                 'dateTime': '2020-01-13T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None
+                'timeZone': 'Europe/Brussels'
             },
         }
 
@@ -1639,7 +1608,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 "recurrence": [f"RRULE:FREQ={frequency};COUNT={count}"],
                 "reminders": {"useDefault": True},
                 "updated": "2023-03-27T11:45:08.547Z",
-                'guestsCanModify': True,
             }]
         google_event = GoogleEvent(google_value)
         self.env['calendar.recurrence']._sync_google2odoo(google_event)
@@ -1671,8 +1639,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'summary': 'First title',
                 'creator': {'email': 'john.doe@example.com', 'self': True},
                 'organizer': {'email': 'john.doe@example.com', 'self': True},
-                'start': {'dateTime': '2023-05-12T09:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
-                'end': {'dateTime': '2023-05-12T10:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
+                'start': {'dateTime': '2023-05-12T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
+                'end': {'dateTime': '2023-05-12T10:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20230518T215959Z;BYDAY=FR'],
                 'iCalUID': '59orfkiunbn2vlp6c2tndq6ui0@google.com',
                 'reminders': {'useDefault': True},
@@ -1687,8 +1655,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'summary': 'Second title',
                 'creator': {'email': 'john.doe@example.com', 'self': True},
                 'organizer': {'email': 'john.doe@example.com', 'self': True},
-                'start': {'dateTime': '2023-05-19T09:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
-                'end': {'dateTime': '2023-05-19T10:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
+                'start': {'dateTime': '2023-05-19T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
+                'end': {'dateTime': '2023-05-19T10:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;COUNT=2;BYDAY=FR'],
                 'iCalUID': '59orfkiunbn2vlp6c2tndq6ui0_R20230519T070000@google.com',
                 'reminders': {'useDefault': True},
@@ -1703,8 +1671,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'summary': 'Second title',
                 'creator': {'email': 'john.doe@example.com', 'self': True},
                 'organizer': {'email': 'john.doe@example.com', 'self': True},
-                'start': {'dateTime': '2023-05-26T08:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
-                'end': {'dateTime': '2023-05-26T09:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
+                'start': {'dateTime': '2023-05-26T08:00:00+02:00', 'timeZone': 'Europe/Brussels'},
+                'end': {'dateTime': '2023-05-26T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'recurringEventId': '59orfkiunbn2vlp6c2tndq6ui0_R20230519T070000',
                 'originalStartTime': {'dateTime': '2023-05-26T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'reminders': {'useDefault': True},
@@ -1779,8 +1747,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'summary': 'First title',
                 'creator': {'email': 'john.doe@example.com', 'self': True},
                 'organizer': {'email': 'john.doe@example.com', 'self': True},
-                'start': {'dateTime': '2023-05-12T09:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
-                'end': {'dateTime': '2023-05-12T10:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
+                'start': {'dateTime': '2023-05-12T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
+                'end': {'dateTime': '2023-05-12T10:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20230518T215959Z;BYDAY=FR'],
                 'iCalUID': '59orfkiunbn2vlp6c2tndq6ui0@google.com',
                 'reminders': {'useDefault': True},
@@ -1795,8 +1763,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'summary': 'Second title',
                 'creator': {'email': 'john.doe@example.com', 'self': True},
                 'organizer': {'email': 'john.doe@example.com', 'self': True},
-                'start': {'dateTime': '2023-05-19T09:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
-                'end': {'dateTime': '2023-05-19T10:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
+                'start': {'dateTime': '2023-05-19T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
+                'end': {'dateTime': '2023-05-19T10:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'recurrence': ['RRULE:FREQ=WEEKLY;WKST=SU;COUNT=2;BYDAY=FR'],
                 'iCalUID': '59orfkiunbn2vlp6c2tndq6ui0_R20230519T070000@google.com',
                 'reminders': {'useDefault': True},
@@ -1811,8 +1779,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
                 'summary': 'Second title',
                 'creator': {'email': 'john.doe@example.com', 'self': True},
                 'organizer': {'email': 'john.doe@example.com', 'self': True},
-                'start': {'dateTime': '2023-05-26T08:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
-                'end': {'dateTime': '2023-05-26T09:00:00+02:00', 'timeZone': 'Europe/Brussels', 'date': None},
+                'start': {'dateTime': '2023-05-26T08:00:00+02:00', 'timeZone': 'Europe/Brussels'},
+                'end': {'dateTime': '2023-05-26T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'recurringEventId': '59orfkiunbn2vlp6c2tndq6ui0', # Range removed
                 'originalStartTime': {'dateTime': '2023-05-26T09:00:00+02:00', 'timeZone': 'Europe/Brussels'},
                 'reminders': {'useDefault': True},
@@ -1853,95 +1821,6 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertGoogleAPINotCalled()
 
     @patch_api
-    def test_event_guest_modify_permission(self):
-        """
-        'guestsCanModify' is a permission set on Google side to allow or forbid guests editing the event.
-        This test states that Odoo Calendar:
-        1. forbids the updates of non-editable events by guests.
-        2. allows editable events being updated by guests.
-        3. allows guests to stop and restart their synchronizations with Google Calendars.
-        """
-        guest_user = new_test_user(self.env, login='calendar-user')
-
-        # Create an event editable only by the organizer. Guests can't modify it.
-        not_editable_event_values = {
-            'id': 'notEditableEventGoogleId',
-            'guestsCanModify': False,
-            'description': 'Editable only by organizer',
-            'organizer': {'email': self.env.user.email, 'self': True},
-            'summary': 'Editable only by organizer',
-            'visibility': 'public',
-            'attendees': [{
-                'displayName': 'Guest User',
-                'email': guest_user.email,
-                'responseStatus': 'accepted'
-            }],
-            'reminders': {'useDefault': True},
-            'start': {
-                'dateTime': '2023-07-05T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None
-            },
-            'end': {
-                'dateTime': '2023-07-05T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None
-            },
-        }
-        # Create an event editable by guests and organizer.
-        editable_event_values = {
-            'id': 'editableEventGoogleId',
-            'guestsCanModify': True,
-            'description': 'Editable by everyone',
-            'organizer': {'email': self.env.user.email, 'self': True},
-            'summary': 'Editable by everyone',
-            'visibility': 'public',
-            'attendees': [{
-                'displayName': 'Guest User',
-                'email': guest_user.email,
-                'responseStatus': 'accepted'
-            }],
-            'reminders': {'useDefault': True},
-            'start': {
-                'dateTime': '2023-07-05T16:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
-            },
-            'end': {
-                'dateTime': '2023-07-05T19:55:00+01:00',
-                'timeZone': 'Europe/Brussels',
-                'date': None,
-            },
-        }
-        # Sync events from Google to Odoo and get them after sync.
-        self.env['calendar.event']._sync_google2odoo(GoogleEvent([not_editable_event_values, editable_event_values]))
-        not_editable_event = self.env['calendar.event'].search([('google_id', '=', not_editable_event_values.get('id'))])
-        editable_event = self.env['calendar.event'].search([('google_id', '=', editable_event_values.get('id'))])
-
-        # Assert that event is created in Odoo with proper values for guests_readonly variable.
-        self.assertFalse(editable_event.guests_readonly, "Value 'guestCanModify' received from Google must be True.")
-        self.assertTrue(not_editable_event.guests_readonly, "Value 'guestCanModify' received from Google must be False.")
-
-        # Assert that organizer can edit both events.
-        self.assertTrue(editable_event.with_user(editable_event.user_id).write({'name': 'Edited by organizer!'}))
-        self.assertTrue(not_editable_event.with_user(not_editable_event.user_id).write({'name': 'Edited by organizer!'}))
-
-        # Assert that a validation error is raised when guest updates the not editable event.
-        with self.assertRaises(ValidationError):
-            self.assertTrue(not_editable_event.with_user(guest_user).write({'name': 'Edited by attendee!'}),
-                            "Attendee shouldn't be able to modify event with 'guests_readonly' variable as 'True'.")
-
-        # Assert that normal event can be edited by guest.
-        self.assertTrue(editable_event.with_user(guest_user).write({'name': 'Edited by attendee!'}),
-                        "Attendee should be able to modify event with 'guests_readonly' variable as 'False'.")
-
-        # Assert that guest user can restart the synchronization of its calendar (containing non-editable events).
-        guest_user.sudo().stop_google_synchronization()
-        self.assertTrue(guest_user.google_synchronization_stopped)
-        guest_user.sudo().restart_google_synchronization()
-        self.assertFalse(guest_user.google_synchronization_stopped)
-
-    @patch_api
     def test_attendee_status_is_not_updated_when_syncing_and_time_data_is_not_changed(self):
         recurrence_id = "aaaaaaaa"
         organizer = new_test_user(self.env, login="organizer")
@@ -1968,8 +1847,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'summary': 'coucou',
             'id': recurrence_id,
             'recurrence': ['RRULE:FREQ=DAILY;INTERVAL=1;COUNT=3'],
-            'start': {'dateTime': '2020-01-06T10:00:00+01:00', 'date': None},
-            'end': {'dateTime': '2020-01-06T11:00:00+01:00', 'date': None},
+            'start': {'dateTime': '2020-01-06T10:00:00+01:00'},
+            'end': {'dateTime': '2020-01-06T11:00:00+01:00'},
             'reminders': {'useDefault': True},
             'organizer': {'email': organizer.partner_id.email},
             'attendees': [{'email': organizer.partner_id.email, 'responseStatus': 'accepted'}, {'email': other_user.partner_id.email, 'responseStatus': 'accepted'}],

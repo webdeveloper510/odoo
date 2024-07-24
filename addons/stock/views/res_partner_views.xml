@@ -32,8 +32,7 @@
                         <separator string="Warning on the Picking" colspan="2"/>
                         <field name="picking_warn" nolabel="1" colspan="2" required="1"/>
                         <field name="picking_warn_msg" placeholder="Type a message..." colspan="2" nolabel="1"
-                            invisible="picking_warn in (False, 'no-message')"
-                            required="picking_warn and picking_warn != 'no-message'"/>
+                            attrs="{'required':[('picking_warn','!=', False), ('picking_warn','!=','no-message')], 'invisible':[('picking_warn','in',(False,'no-message'))]}"/>
                     </group>
                 </group>
             </page>

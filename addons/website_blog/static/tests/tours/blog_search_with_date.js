@@ -1,14 +1,14 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
+import tour from 'web_tour.tour';
 
 /**
  * Makes sure that blog search can be used with the date filtering.
  */
-registry.category("web_tour.tours").add("blog_autocomplete_with_date", {
+tour.register('blog_autocomplete_with_date', {
     test: true,
     url: '/blog',
-    steps: () => [{
+}, [{
     content: "Select first month",
     trigger: 'select[name=archive]',
     run: 'text option 2',
@@ -25,4 +25,4 @@ registry.category("web_tour.tours").add("blog_autocomplete_with_date", {
     content: "Ensure both filters are applied",
     trigger: '#o_wblog_posts_loop:has(span:has(i.fa-calendar-o):has(a[href="/blog?search=a"])):has(span:has(i.fa-search):has(a[href^="/blog?date_begin"]))',
     run: () => {}, // This is a check.
-}]});
+}]);

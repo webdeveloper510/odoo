@@ -3,15 +3,15 @@
 # 	* event_booth_sale
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2023
 # Larissa Manderfeld, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-04-14 05:52+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Larissa Manderfeld, 2023\n"
 "Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
@@ -19,11 +19,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: event_booth_sale
-#: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
-msgid "<span class=\"o_stat_text\">Sale Order</span>"
-msgstr "<span class=\"o_stat_text\">Verkaufsauftrag</span>"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,help:event_booth_sale.field_product_product__detailed_type
@@ -105,6 +100,11 @@ msgstr "Kontakt"
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__contact_email
 msgid "Contact Email"
 msgstr "Kontakt-E-Mail"
+
+#. module: event_booth_sale
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__contact_mobile
+msgid "Contact Mobile"
+msgstr "Kontakt Mobil"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__contact_name
@@ -220,6 +220,12 @@ msgid "Journal Entry"
 msgstr "Journalbuchung"
 
 #. module: event_booth_sale
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator____last_update
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration____last_update
+msgid "Last Modified on"
+msgstr "Letzte Änderung am"
+
+#. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__write_uid
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__write_uid
 msgid "Last Updated by"
@@ -252,17 +258,6 @@ msgid "Pending Booths"
 msgstr "Ausstehende Stände"
 
 #. module: event_booth_sale
-#. odoo-python
-#: code:addons/event_booth_sale/models/sale_order.py:0
-#, python-format
-msgid ""
-"Please make sure all your event-booth related lines are configured before "
-"confirming this order:%s"
-msgstr ""
-"Bitte vergewissern Sie sich, dass alle Zeilen für Ihren Veranstaltungsstand "
-"konfiguriert sind, bevor Sie diese Bestellung bestätigen:%s"
-
-#. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__price
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__price
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_type_booth__price
@@ -280,16 +275,13 @@ msgid "Price Reduce Tax inc"
 msgstr "Reduzierter Preis inkl. MwSt"
 
 #. module: event_booth_sale
-#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__price_incl
-msgid "Price incl"
-msgstr "Preis inkl."
-
-#. module: event_booth_sale
 #: model:ir.model,name:event_booth_sale.model_product_template
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__product_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__product_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__product_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_type_booth__product_id
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_template_line__product_id
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_template_option__product_id
 msgid "Product"
 msgstr "Produkt"
 
@@ -303,6 +295,16 @@ msgstr "Produktart"
 #: model:ir.model,name:event_booth_sale.model_product_product
 msgid "Product Variant"
 msgstr "Produktvariante"
+
+#. module: event_booth_sale
+#: model:ir.model,name:event_booth_sale.model_sale_order_template_line
+msgid "Quotation Template Line"
+msgstr "Angebotsvorlagenzeile"
+
+#. module: event_booth_sale
+#: model:ir.model,name:event_booth_sale.model_sale_order_template_option
+msgid "Quotation Template Option"
+msgstr "Angebotsvorlagenoption"
 
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
@@ -322,6 +324,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__sale_order_line_registration_ids
 msgid "SO Lines with reservations"
 msgstr "Verkaufsauftragspositionen mit Reservierungen"
+
+#. module: event_booth_sale
+#: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
+msgid "Sale Order"
+msgstr "Verkaufsauftrag"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__sale_order_line_id

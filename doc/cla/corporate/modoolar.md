@@ -1,4 +1,4 @@
-Serbia, 2024-01-11
+Serbia, 2018-06-11
 
 Modoolar agrees to the terms of the Odoo Corporate Contributor License
 Agreement v1.0.
@@ -16,6 +16,4 @@ List of contributors:
 - Igor Jovanović igor.jovanovic@modoolar.com https://github.com/ijovanovic-modoolar
 - Mladen Meseldžija mladen.meseldzija@modoolar.com https://github.com/mmeseldzija-modoolar
 - Petar Najman petar.najman@modoolar.com https://github.com/pnajman-modoolar
-- Dejan Mirosavljević dejan.mirosavljevic@modoolar.com https://github.com/dmirosavljevic-modoolar
-- Vojin Maksimović vojin.maksimovic@modoolar.com https://github.com/vmaksimovic-modoolar
-
+- Slađan Kantar sladjan.kantar@modoolar.com https://github.com/skantar

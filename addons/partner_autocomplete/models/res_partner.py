@@ -214,10 +214,10 @@ class ResPartner(models.Model):
             if partners.additional_info:
                 template_values = json.loads(partners.additional_info)
                 template_values['flavor_text'] = _("Partner created by Odoo Partner Autocomplete Service")
-                partners.message_post_with_source(
+                partners.message_post_with_view(
                     'iap_mail.enrich_company',
-                    render_values=template_values,
-                    subtype_xmlid='mail.mt_note',
+                    values=template_values,
+                    subtype_id=self.env.ref('mail.mt_note').id,
                 )
                 partners.write({'additional_info': False})
 
@@ -229,16 +229,3 @@ class ResPartner(models.Model):
             self._update_autocomplete_data(values.get('vat', False))
 
         return res
-
-    @api.model
-    def _get_view(self, view_id=None, view_type='form', **options):
-        arch, view = super()._get_view(view_id, view_type, **options)
-
-        if view_type == 'form':
-            for node in arch.xpath(
-                "//field[@name='name']"
-                "|//field[@name='vat']"
-            ):
-                node.attrib['widget'] = 'field_partner_autocomplete'
-
-        return arch, view

@@ -118,6 +118,7 @@ class AccountMove(models.Model):
                 continue
             MoveLines = self.env["account.move.line"].with_company(company_id)
             query = MoveLines._search(domain)
+            query.order = None
             query_str, params = query.select(
                 "SUM(debit) AS debit", "SUM(credit) AS credit"
             )
@@ -136,11 +137,11 @@ class AccountMove(models.Model):
     def get_account_group(self, account_types):
         data = self._read_group(
             [
-                *self._check_company_domain(self.env.company),
                 ("account_type", "in", account_types),
+                ("company_id", "=", self.env.company.id),
             ],
-            ['account_type'],
-            ['code:array_agg'],
+            ["code:array_agg"],
+            ["account_type"],
         )
-        mapped = dict(data)
+        mapped = {group["account_type"]: group["code"] for group in data}
         return [mapped.get(account_type, []) for account_type in account_types]

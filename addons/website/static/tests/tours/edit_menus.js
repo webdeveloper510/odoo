@@ -1,11 +1,11 @@
 /** @odoo-module */
 
-import wTourUtils from '@website/js/tours/tour_utils';
+import wTourUtils from 'website.tour_utils';
 
 wTourUtils.registerWebsitePreviewTour('edit_menus', {
     test: true,
     url: '/',
-}, () => [
+}, [
     // Add a megamenu item from the menu.
     {
         content: "open site menu",
@@ -38,14 +38,14 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     wTourUtils.clickOnExtraMenuItem({extra_trigger: 'body:not(:has(.oe_menu_editor))'}, true),
     {
         content: "There should be a new megamenu item.",
-        trigger: 'iframe .top_menu .nav-item a.o_mega_menu_toggle:contains("Megaaaaa!")',
+        trigger: 'iframe #top_menu .nav-item a.o_mega_menu_toggle:contains("Megaaaaa!")',
         run: () => {}, // It's a check.
     },
     // Add a menu item in edit mode.
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     {
         content: "Click on a menu item",
-        trigger: "iframe .top_menu .nav-item a",
+        trigger: 'iframe #top_menu .nav-item a',
     },
     {
         content: "Click on Edit Menu",
@@ -90,9 +90,7 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     wTourUtils.clickOnExtraMenuItem({extra_trigger: '#oe_snippets.o_loaded'}, true),
     {
         content: "Menu should have a new link item",
-        trigger: 'iframe .top_menu .nav-item a:contains("Random!")',
-        // Don't click the new menu when the editor is still blocked.
-        extra_trigger: ".o_website_preview.editor_enable.editor_has_snippets:not(.o_is_blocked)",
+        trigger: 'iframe #top_menu .nav-item a:contains("Random!")',
     },
     {
         content: "navbar shouldn't have any zwnbsp and no o_link_in_selection class",
@@ -113,10 +111,11 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
         trigger: '.modal-footer .btn-primary',
     },
     ...wTourUtils.clickOnSave(),
-    wTourUtils.clickOnExtraMenuItem({}, true),
+    wTourUtils.clickOnExtraMenuItem({extra_trigger: 'iframe body:not(.editor_enable)'}, true),
     {
         content: "Label should have changed",
-        trigger: 'iframe .top_menu .nav-item a:contains("Modnar")',
+        extra_trigger: "iframe body:not(.editor_enable)",
+        trigger: 'iframe #top_menu .nav-item a:contains("Modnar")',
         run: () => {}, // it's a check
     },
     // Edit the menu item from the "edit menu" popover button
@@ -124,7 +123,7 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     wTourUtils.clickOnExtraMenuItem({}, true),
     {
         content: "Click on the 'Modnar' link",
-        trigger: 'iframe .top_menu .nav-item a:contains("Modnar")',
+        trigger: 'iframe #top_menu .nav-item a:contains("Modnar")',
     },
     {
         content: "Click on the popover Edit Menu button",
@@ -155,10 +154,10 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     // Drag a block to be able to scroll later.
     wTourUtils.dragNDrop({id: 's_media_list', name: 'Media List'}),
     ...wTourUtils.clickOnSave(),
-    wTourUtils.clickOnExtraMenuItem({}, true),
+    wTourUtils.clickOnExtraMenuItem({extra_trigger: 'iframe body:not(.editor_enable)'}, true),
     {
         content: "Label should have changed",
-        trigger: 'iframe .top_menu .nav-item a:contains("Modnar !!")',
+        trigger: 'iframe #top_menu .nav-item a:contains("Modnar !!")',
         run: () => {}, // It's a check.
     },
     // Nest menu item from the menu.
@@ -171,23 +170,10 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
         trigger: 'a[data-menu-xmlid="website.menu_edit_menu"]',
     },
     {
-        content: "Avoid flickering during DnD",
-        trigger: ".modal-dialog",
-        run: () => {
-            const modalDialog = document.querySelector(".modal .modal-dialog");
-            modalDialog.classList.remove("modal-dialog-centered");
-        },
-        debugHelp: "This is a hack/workaround for the next step",
-    },
-    {
-        content: "Drag 'Contact Us' item below the 'Home' item",
-        trigger: '.oe_menu_editor li:contains("Contact us") .fa-bars',
-        run: "drag_and_drop_native .oe_menu_editor li:contains('Home') + li .fa-bars",
-    },
-    {
-        content: "Drag 'Contact Us' item as a child of the 'Home' item",
-        trigger: '.oe_menu_editor li:contains("Contact us") .fa-bars',
-        run: "drag_and_drop_native .oe_menu_editor li:contains('Home') + li .form-control",
+        content: "Drag item into parent",
+        trigger: '.oe_menu_editor li:contains("Contact us") > .ui-sortable-handle',
+        // Menu rows are 38px tall.
+        run: "drag_move_and_drop [50,38]@.oe_menu_editor li:contains('Home') > .ui-sortable-handle => .oe_menu_editor li:contains('Home') .ui-sortable-placeholder",
     },
     {
         content: "Wait for drop",
@@ -197,8 +183,8 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     // Drag the Mega menu to the first position.
     {
         content: "Drag Mega at the top",
-        trigger: '.oe_menu_editor li:contains("Megaaaaa!") .fa-bars',
-        run: "drag_and_drop_native .oe_menu_editor li:contains('Home') .fa-bars",
+        trigger: '.oe_menu_editor li:contains("Megaaaaa!") > .ui-sortable-handle',
+        run: "drag_move_and_drop [0,0]@.oe_menu_editor li:contains('Home') > .ui-sortable-handle => .oe_menu_editor li",
     },
     {
         content: "Wait for drop",
@@ -211,13 +197,13 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     },
     {
         content: "Menu item should have a child",
-        trigger: 'iframe .top_menu .nav-item a.dropdown-toggle:contains("Home")',
+        trigger: 'iframe #top_menu .nav-item a.dropdown-toggle:contains("Home")',
     },
     // Check that with the auto close of dropdown menus, the dropdowns remain
     // openable.
     {
         content: "When menu item is opened, child item must appear in the shown menu",
-        trigger: 'iframe .top_menu .nav-item:contains("Home") ul.show li a.dropdown-item:contains("Contact us")[href="/contactus"]',
+        trigger: 'iframe #top_menu .nav-item:contains("Home") ul.show li a.dropdown-item:contains("Contact us")[href="/contactus"]',
         run: function () {
             // Scroll down.
             this.$anchor[0].closest('body').querySelector('.o_footer_copyright_name')
@@ -226,35 +212,35 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     },
     {
         content: "The Home menu should be closed",
-        trigger: 'iframe .top_menu .nav-item:contains("Home"):has(ul:not(.show))',
+        trigger: 'iframe #top_menu .nav-item:contains("Home"):has(ul:not(.show))',
         run: () => {}, // It's a check.
     },
     {
         content: "Open the Home menu after scroll",
-        trigger: 'iframe .top_menu .nav-item a.dropdown-toggle:contains("Home")',
+        trigger: 'iframe #top_menu .nav-item a.dropdown-toggle:contains("Home")',
     },
     {
         content: "Check that the Home menu is opened",
-        trigger: 'iframe .top_menu .nav-item:contains("Home") ul.show li' +
+        trigger: 'iframe #top_menu .nav-item:contains("Home") ul.show li' +
             ' a.dropdown-item:contains("Contact us")[href="/contactus"]',
         run: () => {}, // It's a check.
     },
     {
         content: "Close the Home menu",
-        trigger: 'iframe .top_menu .nav-item:has(a.dropdown-toggle:contains("Home"))',
+        trigger: 'iframe #top_menu .nav-item:has(a.dropdown-toggle:contains("Home"))',
     },
     {
         content: "Check that the Home menu is closed",
-        trigger: 'iframe .top_menu .nav-item:contains("Home"):has(ul:not(.show))',
+        trigger: 'iframe #top_menu .nav-item:contains("Home"):has(ul:not(.show))',
         run: () => {}, // It's a check.
     },
     {
         content: "Open the mega menu",
-        trigger: 'iframe .top_menu .nav-item a.o_mega_menu_toggle:contains("Megaaaaa!")',
+        trigger: 'iframe #top_menu .nav-item a.o_mega_menu_toggle:contains("Megaaaaa!")',
     },
     {
         content: "When the mega menu is opened, scroll up",
-        trigger: "iframe .top_menu .o_mega_menu_toggle.show",
+        trigger: 'iframe #top_menu .o_mega_menu_toggle.show',
         run: function () {
             const marginTopOfMegaMenu = getComputedStyle(
                 this.$anchor[0].closest('.dropdown').querySelector('.o_mega_menu'))['margin-top'];
@@ -268,28 +254,28 @@ wTourUtils.registerWebsitePreviewTour('edit_menus', {
     },
     {
         content: "Check that the mega menu is closed",
-        trigger: 'iframe .top_menu .nav-item:contains("Megaaaaa!"):has(div[data-name="Mega Menu"]:not(.show))',
-        run: () => {}, // It's a check.
+        trigger: 'iframe #top_menu .nav-item:contains("Megaaaaa!"):has(div[data-name="Mega Menu"]:not(.show))',
+        run:() => {}, // It's a check.
     },
     {
         content: "Open the mega menu after scroll",
-        trigger: 'iframe .top_menu .nav-item a.o_mega_menu_toggle:contains("Megaaaaa!")',
+        trigger: 'iframe #top_menu .nav-item a.o_mega_menu_toggle:contains("Megaaaaa!")',
     },
     {
         content: "Check that the mega menu is opened",
-        trigger: 'iframe .top_menu .nav-item:has(a.o_mega_menu_toggle:contains("Megaaaaa!")) ' +
+        trigger: 'iframe #top_menu .nav-item:has(a.o_mega_menu_toggle:contains("Megaaaaa!")) ' +
                  '.s_mega_menu_odoo_menu',
         run: () => {}, // It's a check.
     },
     ...wTourUtils.clickOnEditAndWaitEditMode(),
     {
         content: "Open nested menu item",
-        trigger: 'iframe .top_menu .nav-item:contains("Home"):nth(1) .dropdown-toggle',
+        trigger: 'iframe #top_menu .nav-item:contains("Home"):nth(1) .dropdown-toggle',
     },
     {
         // If this step fails, it means that a patch inside bootstrap was lost.
         content: "Press the 'down arrow' key.",
-        trigger: 'iframe .top_menu .nav-item:contains("Home") li:contains("Contact us")',
+        trigger: 'iframe #top_menu .nav-item:contains("Home") li:contains("Contact us")',
         run: function (actions) {
             this.$anchor[0].dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown" }));
         },

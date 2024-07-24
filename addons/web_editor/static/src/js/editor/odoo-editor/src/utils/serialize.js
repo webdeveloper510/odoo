@@ -18,17 +18,14 @@ export function serializeNode(node, nodesToStripFromChildren = new Set()) {
             result.attributes[node.attributes[i].name] = node.attributes[i].value;
         }
         let child = node.firstChild;
-        // Don't serialize transient nodes
-        if (!["true", ""].includes(node.dataset.oeTransientContent)) {
-            while (child) {
-                if (!nodesToStripFromChildren.has(child.oid)) {
-                    const serializedChild = serializeNode(child, nodesToStripFromChildren);
-                    if (serializedChild) {
-                        result.children.push(serializedChild);
-                    }
+        while (child) {
+            if (!nodesToStripFromChildren.has(child.oid)) {
+                const serializedChild = serializeNode(child, nodesToStripFromChildren);
+                if (serializedChild) {
+                    result.children.push(serializedChild);
                 }
-                child = child.nextSibling;
             }
+            child = child.nextSibling;
         }
     }
     return result;

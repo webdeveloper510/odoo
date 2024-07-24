@@ -11,17 +11,17 @@ export class ProjectSharingFormController extends FormController {
     setup() {
         super.setup();
         this.uiService = useService('ui');
-        const { xmlDoc } = this.archInfo;
+        const { arch, xmlDoc } = this.archInfo;
         const template = createElement('t');
         const xmlDocChatter = xmlDoc.querySelector("div.oe_chatter");
         if (xmlDocChatter && xmlDocChatter.parentNode.nodeName === "form") {
             template.appendChild(xmlDocChatter.cloneNode(true));
         }
-        const mailTemplates = useViewCompiler(ProjectSharingChatterCompiler, { Mail: template });
+        const mailTemplates = useViewCompiler(ProjectSharingChatterCompiler, arch, { Mail: template }, {});
         this.mailTemplate = mailTemplates.Mail;
     }
 
-    get actionMenuItems() {
+    getActionMenuItems() {
         return {};
     }
 

@@ -1,4 +1,4 @@
-import contextlib
+# -*- coding: utf-8 -*-
 import logging
 from unittest.mock import patch
 
@@ -29,7 +29,7 @@ class TestPosCapture(TestPoSCommon):
     """
 
     def setUp(self):
-        super().setUp()
+        super(TestPosCapture, self).setUp()
         self.config = self.basic_config
 
         self.product1 = self.create_product('Product 1', self.categ_basic, 10, 5)
@@ -50,8 +50,8 @@ class TestPosCapture(TestPoSCommon):
 
         self.assert_activity_and_attachment(session, 0)
         with patch.object(PosOrder, '_process_order', mocked_process_order),\
-             patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
-             self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR) as logger_error_output:
+            patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
+            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR) as logger_error_output:
             try:
                 self.env['pos.order'].create_from_ui(orders)
             except IntendedException:
@@ -68,8 +68,8 @@ class TestPosCapture(TestPoSCommon):
         order2 = [self.create_ui_order_data([(self.product1, 1)], uid='12345-678-1999')]  # Different order with same content but different uuid
 
         with patch.object(PosOrder, '_process_order', mocked_process_order),\
-             patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
-             self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
+            patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
+            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
             try:
                 self.env['pos.order'].create_from_ui(order1)
             except IntendedException:
@@ -89,8 +89,8 @@ class TestPosCapture(TestPoSCommon):
 
         self.assert_activity_and_attachment(session, 0)
         with patch.object(PosOrder, '_process_order', mocked_process_order),\
-             patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
-             self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
+            patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
+            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
             for _ in range(2):
                 try:
                     self.env['pos.order'].create_from_ui(orders)
@@ -107,8 +107,8 @@ class TestPosCapture(TestPoSCommon):
 
         self.assert_activity_and_attachment(session, 0)
         with patch.object(PosOrder, '_process_order', mocked_process_order),\
-             patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
-             self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
+            patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
+            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
             try:
                 self.env['pos.order'].create_from_ui(order1)
             except IntendedException:
@@ -128,10 +128,12 @@ class TestPosCapture(TestPoSCommon):
 
         self.assert_activity_and_attachment(session, 0)
         with patch.object(PosOrder, '_process_order', mocked_process_order),\
-             patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
-             self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR),\
-             contextlib.suppress(IntendedException):
-            self.env['pos.order'].create_from_ui(orders)
+            patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
+            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
+            try:
+                self.env['pos.order'].create_from_ui(orders)
+            except IntendedException:
+                pass
 
         self.assert_activity_and_attachment(session, 1)
         # Resync the order, this time it should go through!
@@ -148,8 +150,8 @@ class TestPosCapture(TestPoSCommon):
         order2 = [self.create_ui_order_data([(self.product1, 1)], uid='12345-678-1999')]  # Different order with same content but different uuid
 
         with patch.object(PosOrder, '_process_order', mocked_process_order),\
-             patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
-             self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
+            patch.object(PosSession, '_handle_order_process_fail', mocked_handle_order_process_fail),\
+            self.assertLogs('odoo.addons.point_of_sale.models.pos_order', level=logging.ERROR):
             try:
                 self.env['pos.order'].create_from_ui(order1)
             except IntendedException:

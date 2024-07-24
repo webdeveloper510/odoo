@@ -6,43 +6,24 @@ SDK: [Stripe.js](https://stripe.com/docs/js) version `3`
 
 API: [Stripe API](https://stripe.com/docs/api) version `2019-05-16`
 
-This module relies on the Web Elements SDK to render the list of available payment methods and their
-payment detail inputs on the payment form. The JS and CSS assets of the SDK are loaded on the pages
-where the form is visible using a script tag.
-
-When the Web Elements need to fetch/push information from/to Stripe or when a payment operation
-(e.g., refund, offline payment) is executed from the backend, a server-to-server API call is made to
-the appropriate API endpoint.
-
-This is achieved by following the [Collect payment details before creating an Intent]
-(https://docs.stripe.com/payments/accept-a-payment-deferred) guide. It is preferred over the
-recommended "Payment Element" where payment intent is created beforehand because the
-`payment.transaction` object doesn't exist yet when the form is rendered, so we don't have any
-reference to communicate to Stripe. Also, all the methods to create Stripe objects
-(e.g., intents or customers) are defined on the `payment.transaction`​ object.
+This module integrates Stripe using a custom implementation of the payment with redirection flow: no
+redirect form is rendered and, instead, a Checkout Session object is created from the server before
+the customer is redirected to the session's payment page from the front-end. This is achieved by
+following the [Stripe-hosted page](https://stripe.com/docs/checkout/quickstart) guide.
 
 The module also offers a quick onboarding thanks to the Stripe Connect platform solution.
 
 ## Supported features
 
-- Direct payment flow
+- Payment with redirection flow
 - Webhook notifications
 - Tokenization with or without payment
-- Full manual capture
+- Manual capture
 - Full and partial refunds
 - Express checkout
 
-## Not implemented features
-
-- Partial manual capture
-
 ## Module history
 
-- `16.4`
-  - The previous Checkout API that allowed for redirect payments is replaced by the Payment Intents
-    API that supports direct payments. odoo/odoo#123573
-  - The support for eMandates for recurring payments is added. odoo/odoo#123573
-  - The responses of webhook notifications are sent with the proper HTTP code. odoo/odoo#117940
 - `16.0`
   - Stripe uses the payment methods set up on the account when none are assigned to the payment
     provider in Odoo, instead of only offering the "Card" payment method. odoo/odoo#107647

@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
+import { formatDate } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { useDebounced } from "@web/core/utils/timing";
 import { getColor } from "../colors";
 import { useCalendarPopover, useFullCalendar } from "../hooks";
 import { CalendarYearPopover } from "./calendar_year_popover";
-import { getWeekNumber } from "../utils";
 
-import { Component, useEffect, useRef } from "@odoo/owl";
+import { Component, useEffect, useRef, onRendered } from "@odoo/owl";
 
 export class CalendarYearRenderer extends Component {
     setup() {
@@ -25,6 +25,11 @@ export class CalendarYearRenderer extends Component {
 
         useEffect(() => {
             this.updateSize();
+        });
+
+        onRendered(() => {
+            const year = formatDate(this.props.model.date, { format: "yyyy" });
+            this.env.config.setDisplayName(`${this.props.displayName} (${year})`);
         });
     }
 
@@ -57,9 +62,9 @@ export class CalendarYearRenderer extends Component {
             selectable: this.props.model.canCreate,
             showNonCurrentDates: false,
             timeZone: luxon.Settings.defaultZone.name,
-            titleFormat: { month: "long", year: "numeric" },
+            titleFormat: { month: "short", year: "numeric" },
             unselectAuto: false,
-            weekNumberCalculation: (date) => getWeekNumber(date, this.props.model.firstDayOfWeek),
+            weekNumberCalculation: "ISO",
             weekNumbers: false,
             windowResize: this.onWindowResizeDebounced,
         };

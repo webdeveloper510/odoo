@@ -1,20 +1,23 @@
-/** @odoo-module **/
+odoo.define('website.s_chart_options', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import options from "@web_editor/js/editor/snippets.options";
-import weUtils from "@web_editor/js/common/utils";
-import { isCSSColor } from '@web/core/utils/colors';
+var core = require('web.core');
+const {ColorpickerWidget} = require('web.Colorpicker');
+var options = require('web_editor.snippets.options');
+const weUtils = require('web_editor.utils');
+
+var _t = core._t;
 
 options.registry.InnerChart = options.Class.extend({
-    custom_events: Object.assign({}, options.Class.prototype.custom_events, {
+    custom_events: _.extend({}, options.Class.prototype.custom_events, {
         'get_custom_colors': '_onGetCustomColors',
     }),
-    events: Object.assign({}, options.Class.prototype.events, {
+    events: _.extend({}, options.Class.prototype.events, {
         'click we-button.add_column': '_onAddColumnClick',
         'click we-button.add_row': '_onAddRowClick',
         'click we-button.o_we_matrix_remove_col': '_onRemoveColumnClick',
         'click we-button.o_we_matrix_remove_row': '_onRemoveRowClick',
-        'input we-matrix input': '_onMatrixInputInput',
+        'blur we-matrix input': '_onMatrixInputFocusOut',
         'focus we-matrix input': '_onMatrixInputFocus',
     }),
 
@@ -76,7 +79,7 @@ options.registry.InnerChart = options.Class.extend({
             const color = el.dataset.backgroundColor || el.dataset.borderColor;
             if (color) {
                 el.style.border = '2px solid';
-                el.style.borderColor = isCSSColor(color) ? color : weUtils.getCSSVariableValue(color, this.style);
+                el.style.borderColor = ColorpickerWidget.isCSSColor(color) ? color : weUtils.getCSSVariableValue(color, this.style);
             }
         });
     },
@@ -168,13 +171,9 @@ options.registry.InnerChart = options.Class.extend({
         } else {
             // Find max value from each row/column data
             const datasets = JSON.parse(dataset.data).datasets || [];
-            const dataValue = datasets
-                .map((el) => {
-                    return el.data.map((data) => {
-                        return !isNaN(parseInt(data)) ? parseInt(data) : 0;
-                    });
-                })
-                .flat();
+            const dataValue = _.flatten(datasets.map(el => el.data.map(data => {
+                return !isNaN(parseInt(data)) ? parseInt(data) : 0;
+            })));
             // When max value is not given and min value is greater than chart
             // data values
             if (minValue >= Math.max(...dataValue)) {
@@ -303,9 +302,6 @@ options.registry.InnerChart = options.Class.extend({
         const newEl = document.createElement(tag);
         const contentEl = document.createElement('input');
         contentEl.type = 'text';
-        if (tag === 'td') {
-            contentEl.type = 'number';
-        }
         contentEl.value = value || '';
         if (backgroundColor) {
             contentEl.dataset.backgroundColor = backgroundColor;
@@ -477,8 +473,9 @@ options.registry.InnerChart = options.Class.extend({
     },
     /**
      * @private
+     * @param {Event} ev
      */
-    _onMatrixInputInput() {
+    _onMatrixInputFocusOut: function (ev) {
         this._reloadGraph();
     },
     /**
@@ -504,4 +501,5 @@ options.registry.InnerChart = options.Class.extend({
         }
         this.updateUI();
     },
+});
 });

@@ -32,27 +32,25 @@ export class LoadingIndicator extends Component {
         useBus(this.env.bus, "RPC:RESPONSE", this.responseCall);
     }
 
-    requestCall({ detail }) {
-        if (detail.settings.silent) {
-            return;
-        }
+    requestCall({ detail: rpcId }) {
         if (this.state.count === 0) {
             browser.clearTimeout(this.startShowTimer);
             this.startShowTimer = browser.setTimeout(() => {
                 if (this.state.count) {
                     this.state.show = true;
+                    this.blockUITimer = browser.setTimeout(() => {
+                        this.shouldUnblock = true;
+                        this.uiService.block();
+                    }, 3000);
                 }
             }, 250);
         }
-        this.rpcIds.add(detail.data.id);
+        this.rpcIds.add(rpcId);
         this.state.count++;
     }
 
-    responseCall({ detail }) {
-        if (detail.settings.silent) {
-            return;
-        }
-        this.rpcIds.delete(detail.data.id);
+    responseCall({ detail: rpcId }) {
+        this.rpcIds.delete(rpcId);
         this.state.count = this.rpcIds.size;
         if (this.state.count === 0) {
             browser.clearTimeout(this.startShowTimer);
@@ -68,7 +66,6 @@ export class LoadingIndicator extends Component {
 
 LoadingIndicator.template = "web.LoadingIndicator";
 LoadingIndicator.components = { Transition };
-LoadingIndicator.props = {};
 
 registry.category("main_components").add("LoadingIndicator", {
     Component: LoadingIndicator,

@@ -1,15 +1,11 @@
 /** @odoo-module **/
 /* global Stripe */
 
-import { _t } from '@web/core/l10n/translation';
+import { _t } from "@web/core/l10n/translation";
 import { paymentExpressCheckoutForm } from '@payment/js/express_checkout_form';
 import { StripeOptions } from '@payment_stripe/js/stripe_options';
 
 paymentExpressCheckoutForm.include({
-    init() {
-        this._super(...arguments);
-        this.rpc = this.bindService("rpc");
-    },
 
     /**
      * Get the order details to display on the payment form.
@@ -20,15 +16,17 @@ paymentExpressCheckoutForm.include({
      * @returns {Object} The information to be displayed on the payment form.
      */
     _getOrderDetails(deliveryAmount, amountFreeShipping) {
-        const pending = this.paymentContext['shippingInfoRequired'] && deliveryAmount === undefined;
-        const minorAmount = parseInt(this.paymentContext['minorAmount'])
+        const pending = this.txContext.shippingInfoRequired && deliveryAmount === undefined;
+        const amount = deliveryAmount
+            ? this.txContext.minorAmount + deliveryAmount + amountFreeShipping
+            : this.txContext.minorAmount;
         const displayItems = [
             {
                 label: _t("Your order"),
-                amount: minorAmount,
+                amount: this.txContext.minorAmount,
             },
         ];
-        if (this.paymentContext['shippingInfoRequired'] && deliveryAmount !== undefined) {
+        if (this.txContext.shippingInfoRequired && deliveryAmount !== undefined) {
             displayItems.push({
                 label: _t("Delivery"),
                 amount: deliveryAmount,
@@ -42,8 +40,8 @@ paymentExpressCheckoutForm.include({
         }
         return {
             total: {
-                label: this.paymentContext['merchantName'],
-                amount: minorAmount + (deliveryAmount ?? 0) + (amountFreeShipping ?? 0),
+                label: this.txContext.merchantName,
+                amount: amount,
                 // Delay the display of the amount until the shipping price is retrieved.
                 pending: pending,
             },
@@ -57,7 +55,7 @@ paymentExpressCheckoutForm.include({
      * @override method from payment.express_form
      * @private
      * @param {Object} providerData - The provider-specific data.
-     * @return {void}
+     * @return {Promise}
      */
     async _prepareExpressCheckoutForm(providerData) {
         /*
@@ -65,9 +63,8 @@ paymentExpressCheckoutForm.include({
          * that case, the check is whether the variable is defined because the server doesn't send
          * the value when it equals '0'.
          */
-        if (providerData.providerCode !== 'stripe' || !this.paymentContext['amount']) {
-            this._super(...arguments);
-            return;
+        if (providerData.providerCode !== 'stripe' || !this.txContext.amount) {
+            return this._super(...arguments);
         }
 
         const stripeJS = Stripe(
@@ -76,11 +73,11 @@ paymentExpressCheckoutForm.include({
         );
         const paymentRequest = stripeJS.paymentRequest({
             country: providerData.countryCode,
-            currency: this.paymentContext['currencyName'],
+            currency: this.txContext.currencyName,
             requestPayerName: true, // Force fetching the billing address for Apple Pay.
             requestPayerEmail: true,
             requestPayerPhone: true,
-            requestShipping: this.paymentContext['shippingInfoRequired'],
+            requestShipping: this.txContext.shippingInfoRequired,
             ...this._getOrderDetails(),
         });
         if (this.stripePaymentRequests === undefined) {
@@ -118,7 +115,7 @@ paymentExpressCheckoutForm.include({
                     state: ev.paymentMethod.billing_details.address.state,
                 }
             };
-            if (this.paymentContext['shippingInfoRequired']) {
+            if (this.txContext.shippingInfoRequired) {
                 addresses.shipping_address = {
                     name: ev.shippingAddress.recipient,
                     email: ev.payerEmail,
@@ -133,15 +130,14 @@ paymentExpressCheckoutForm.include({
                 addresses.shipping_option = ev.shippingOption;
             }
             // Update the customer addresses on the related document.
-            this.paymentContext.partnerId = parseInt(await this.rpc(
-                this.paymentContext['expressCheckoutRoute'],
-                addresses,
-            ));
+            this.txContext.partnerId = parseInt(await this._rpc({
+                route: this.txContext.expressCheckoutRoute, params: addresses,
+            }));
             // Call the transaction route to create the transaction and retrieve the client secret.
-            const { client_secret } = await this.rpc(
-                this.paymentContext['transactionRoute'],
-                this._prepareTransactionRouteParams(providerData.providerId),
-            );
+            const { client_secret } = await this._rpc({
+                route: this.txContext.transactionRoute,
+                params: this._prepareTransactionRouteParams(providerData.providerId),
+            });
             // Confirm the PaymentIntent without handling eventual next actions (e.g. 3DS).
             const { paymentIntent, error: confirmError } = await stripeJS.confirmCardPayment(
                 client_secret, {payment_method: ev.paymentMethod.id}, {handleActions: false}
@@ -161,16 +157,16 @@ paymentExpressCheckoutForm.include({
             }
         });
 
-        if (this.paymentContext['shippingInfoRequired']) {
+        if (this.txContext.shippingInfoRequired) {
             // Wait until the express checkout form is loaded for Apple Pay and Google Pay to select
             // a default shipping address and trigger the `shippingaddresschange` event, so we can
             // fetch the available shipping options. When the customer manually selects a different
             // shipping address, the shipping options need to be fetched again.
             paymentRequest.on('shippingaddresschange', async (ev) => {
                 // Call the shipping address update route to fetch the shipping options.
-                const availableCarriers = await this.rpc(
-                    this.paymentContext['shippingAddressUpdateRoute'],
-                    {
+                const availableCarriers = await this._rpc({
+                    route: this.txContext.shippingAddressUpdateRoute,
+                    params: {
                         partial_shipping_address: {
                             zip: ev.shippingAddress.postalCode,
                             city: ev.shippingAddress.city,
@@ -178,7 +174,7 @@ paymentExpressCheckoutForm.include({
                             state: ev.shippingAddress.region,
                         },
                     },
-                );
+                });
                 if (availableCarriers.length === 0) {
                     ev.updateWith({status: 'invalid_shipping_address'});
                 } else {
@@ -187,7 +183,7 @@ paymentExpressCheckoutForm.include({
                         shippingOptions: availableCarriers.map(carrier => ({
                             id: String(carrier.id),
                             label: carrier.name,
-                            detail: carrier.description ? carrier.description:'',
+                            detail: carrier.description ? carrier.description:"",
                             amount: carrier.minorAmount,
                         })),
                         ...this._getOrderDetails(availableCarriers[0].minorAmount),
@@ -197,8 +193,11 @@ paymentExpressCheckoutForm.include({
 
             // When the customer selects a different shipping option, update the displayed total.
             paymentRequest.on('shippingoptionchange', async (ev) => {
-                const result = await this.rpc('/shop/update_carrier', {
-                    carrier_id: parseInt(ev.shippingOption.id),
+                const result = await this._rpc({
+                    route: '/shop/update_carrier',
+                    params: {
+                        carrier_id: parseInt(ev.shippingOption.id),
+                    },
                 });
                 ev.updateWith({
                     status: 'success',
@@ -218,7 +217,7 @@ paymentExpressCheckoutForm.include({
      * @private
      * @param {number} newAmount - The new amount.
      * @param {number} newMinorAmount - The new minor amount.
-     * @return {void}
+     * @return {undefined}
      */
     _updateAmount(newAmount, newMinorAmount) {
         this._super(...arguments);

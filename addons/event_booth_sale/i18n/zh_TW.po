@@ -3,15 +3,15 @@
 # 	* event_booth_sale
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2023
 # Tony Ng, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-04-14 05:52+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Tony Ng, 2023\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -19,11 +19,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: event_booth_sale
-#: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
-msgid "<span class=\"o_stat_text\">Sale Order</span>"
-msgstr "<span class=\"o_stat_text\">銷售訂單</span>"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,help:event_booth_sale.field_product_product__detailed_type
@@ -106,9 +101,14 @@ msgid "Contact Email"
 msgstr "聯繫電郵"
 
 #. module: event_booth_sale
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__contact_mobile
+msgid "Contact Mobile"
+msgstr "聯繫手機"
+
+#. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__contact_name
 msgid "Contact Name"
-msgstr "聯繫人姓名"
+msgstr "聯絡人姓名"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__contact_phone
@@ -119,7 +119,7 @@ msgstr "聯絡電話"
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__create_uid
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__create_uid
 msgid "Created by"
-msgstr "建立人員"
+msgstr "創立者"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__create_date
@@ -132,7 +132,7 @@ msgstr "建立於"
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__currency_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_type_booth__currency_id
 msgid "Currency"
-msgstr "貨幣"
+msgstr "幣別"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__partner_id
@@ -142,7 +142,7 @@ msgstr "客戶"
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_registration_view_form
 msgid "Details"
-msgstr "詳細資訊"
+msgstr "詳細訊息"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__display_name
@@ -196,12 +196,12 @@ msgstr "最終銷售訂單項目"
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration__id
 msgid "ID"
-msgstr "識別號"
+msgstr "ID"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__image_1920
 msgid "Image"
-msgstr "圖片"
+msgstr "圖像"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_line__is_event_booth
@@ -216,7 +216,13 @@ msgstr "為已支付"
 #. module: event_booth_sale
 #: model:ir.model,name:event_booth_sale.model_account_move
 msgid "Journal Entry"
-msgstr "日記賬記項"
+msgstr "日記帳分錄"
+
+#. module: event_booth_sale
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator____last_update
+#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_registration____last_update
+msgid "Last Modified on"
+msgstr "最後修改於"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__write_uid
@@ -243,21 +249,12 @@ msgstr "訂單關聯"
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
 msgid "Paid"
-msgstr "已付款"
+msgstr "已支付"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_line__event_booth_pending_ids
 msgid "Pending Booths"
 msgstr "待確認攤位"
-
-#. module: event_booth_sale
-#. odoo-python
-#: code:addons/event_booth_sale/models/sale_order.py:0
-#, python-format
-msgid ""
-"Please make sure all your event-booth related lines are configured before "
-"confirming this order:%s"
-msgstr "在確認此訂單之前，請確保所有與活動展位相關的資料行都已配置:%s"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__price
@@ -277,16 +274,13 @@ msgid "Price Reduce Tax inc"
 msgstr "減稅後價格"
 
 #. module: event_booth_sale
-#: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__price_incl
-msgid "Price incl"
-msgstr "價格已包括"
-
-#. module: event_booth_sale
 #: model:ir.model,name:event_booth_sale.model_product_template
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__product_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_category__product_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__product_id
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_type_booth__product_id
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_template_line__product_id
+#: model:ir.model.fields,field_description:event_booth_sale.field_sale_order_template_option__product_id
 msgid "Product"
 msgstr "商品"
 
@@ -300,6 +294,16 @@ msgstr "產品類型"
 #: model:ir.model,name:event_booth_sale.model_product_product
 msgid "Product Variant"
 msgstr "產品款式"
+
+#. module: event_booth_sale
+#: model:ir.model,name:event_booth_sale.model_sale_order_template_line
+msgid "Quotation Template Line"
+msgstr "報價單範本項目"
+
+#. module: event_booth_sale
+#: model:ir.model,name:event_booth_sale.model_sale_order_template_option
+msgid "Quotation Template Option"
+msgstr "報價單範本選項"
 
 #. module: event_booth_sale
 #: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
@@ -317,6 +321,11 @@ msgstr "來自同一訂單明細的租用必須屬於單個活動。"
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth__sale_order_line_registration_ids
 msgid "SO Lines with reservations"
 msgstr "預訂的 SO 項目"
+
+#. module: event_booth_sale
+#: model_terms:ir.ui.view,arch_db:event_booth_sale.event_booth_view_form_from_event
+msgid "Sale Order"
+msgstr "銷售訂單"
 
 #. module: event_booth_sale
 #: model:ir.model.fields,field_description:event_booth_sale.field_event_booth_configurator__sale_order_line_id

@@ -44,11 +44,11 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         # <field name="invoice_vendor_bill_id" position="after">
         #     <field name="purchase_id" invisible="1"/>
         #     <label for="purchase_vendor_bill_id" string="Auto-Complete" class="oe_edit_only"
-        #             invisible="state != 'draft' or move_type != 'in_invoice'" />
+        #             attrs="{'invisible': ['|', ('state','!=','draft'), ('move_type', '!=', 'in_invoice')]}" />
         #     <field name="purchase_vendor_bill_id" nolabel="1"
-        #             invisible="state != 'draft' or move_type != 'in_invoice'"
+        #             attrs="{'invisible': ['|', ('state','!=','draft'), ('move_type', '!=', 'in_invoice')]}"
         #             class="oe_edit_only"
-        #             domain="('company_id', '=', company_id), ('partner_id.commercial_partner_id', '=', commercial_partner_id)] if partner_id else [('company_id', '=', company_id)]"
+        #             domain="partner_id and [('company_id', '=', company_id), ('partner_id.commercial_partner_id', '=', commercial_partner_id)] or [('company_id', '=', company_id)]"
         #             placeholder="Select a purchase order or an old bill"
         #             context="{'show_total_amount': True}"
         #             options="{'no_create': True, 'no_open': True}"/>
@@ -166,11 +166,9 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
                 }),
             ],
         })
-        currency_eur_id = self.env.ref("base.EUR")
-        currency_eur_id.active = True
         po_2 = self.env['purchase.order'].create({
             'partner_id': self.partner_a.id,
-            'currency_id': currency_eur_id.id,
+            'currency_id': self.env['res.currency'].search([('name', '=', 'EUR')], limit=1).id,
             'order_line': [
                 (0, 0, {
                     'product_id': self.product_a.id,

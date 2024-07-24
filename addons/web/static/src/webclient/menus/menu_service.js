@@ -25,23 +25,6 @@ function makeFetchLoadMenus() {
 
 function makeMenus(env, menusData, fetchLoadMenus) {
     let currentAppId;
-    function _getMenu(menuId) {
-        return menusData[menuId];
-    }
-    function _updateURL(menuId) {
-        env.services.router.pushState({ menu_id: menuId }, { lock: true });
-    }
-    function _setCurrentMenu(menu, updateURL = true) {
-        menu = typeof menu === "number" ? _getMenu(menu) : menu;
-        if (menu && menu.appID !== currentAppId) {
-            currentAppId = menu.appID;
-            env.bus.trigger("MENUS:APP-CHANGED");
-            if (updateURL) {
-                _updateURL(menu.id);
-            }
-        }
-    }
-
     return {
         getAll() {
             return Object.values(menusData);
@@ -49,7 +32,9 @@ function makeMenus(env, menusData, fetchLoadMenus) {
         getApps() {
             return this.getMenu("root").children.map((mid) => this.getMenu(mid));
         },
-        getMenu: _getMenu,
+        getMenu(menuID) {
+            return menusData[menuID];
+        },
         getCurrentApp() {
             if (!currentAppId) {
                 return;
@@ -68,15 +53,19 @@ function makeMenus(env, menusData, fetchLoadMenus) {
             if (!menu.actionID) {
                 return;
             }
-            await env.services.action.doAction(menu.actionID, {
-                clearBreadcrumbs: true,
-                onActionReady: () => {
-                    _setCurrentMenu(menu, false);
-                },
-            });
-            _updateURL(menu.id);
+            await env.services.action.doAction(menu.actionID, { clearBreadcrumbs: true });
+            this.setCurrentMenu(menu);
         },
-        setCurrentMenu: (menu) => _setCurrentMenu(menu),
+        setCurrentMenu(menu) {
+            menu = typeof menu === "number" ? this.getMenu(menu) : menu;
+            if (menu && menu.appID !== currentAppId) {
+                currentAppId = menu.appID;
+                env.bus.trigger("MENUS:APP-CHANGED");
+                // FIXME: lock API: maybe do something like
+                // pushState({menu_id: ...}, { lock: true}); ?
+                env.services.router.pushState({ menu_id: menu.id }, { lock: true });
+            }
+        },
         async reload() {
             if (fetchLoadMenus) {
                 menusData = await fetchLoadMenus(true);

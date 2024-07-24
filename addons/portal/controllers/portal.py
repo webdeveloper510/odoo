@@ -148,10 +148,6 @@ class CustomerPortal(Controller):
         partner_sudo = request.env.user.partner_id
         if partner_sudo.user_id and not partner_sudo.user_id._is_public():
             sales_user_sudo = partner_sudo.user_id
-        else:
-            fallback_sales_user = partner_sudo.commercial_partner_id.user_id
-            if fallback_sales_user and not fallback_sales_user._is_public():
-                sales_user_sudo = fallback_sales_user
 
         return {
             'sales_user': sales_user_sudo,
@@ -186,15 +182,12 @@ class CustomerPortal(Controller):
         })
 
         if post and request.httprequest.method == 'POST':
-            if not partner.can_edit_vat():
-                post['country_id'] = str(partner.country_id.id)
-
             error, error_message = self.details_form_validate(post)
             values.update({'error': error, 'error_message': error_message})
             values.update(post)
             if not error:
-                values = {key: post[key] for key in self._get_mandatory_fields()}
-                values.update({key: post[key] for key in self._get_optional_fields() if key in post})
+                values = {key: post[key] for key in self.MANDATORY_BILLING_FIELDS}
+                values.update({key: post[key] for key in self.OPTIONAL_BILLING_FIELDS if key in post})
                 for field in set(['country_id', 'state_id']) & set(values.keys()):
                     try:
                         values[field] = int(values[field])
@@ -263,7 +256,7 @@ class CustomerPortal(Controller):
                 msg = _('The old password you provided is incorrect, your password was not changed.')
             return {'errors': {'password': {'old': msg}}}
         except UserError as e:
-            return {'errors': {'password': str(e)}}
+            return {'errors': {'password': e.name}}
 
         # update session token so the user does not get logged out (cache cleared by passwd change)
         new_token = request.env.user._compute_session_token(request.session.sid)
@@ -334,7 +327,7 @@ class CustomerPortal(Controller):
         # Avoid using sudo when not necessary: internal users can create attachments,
         # as opposed to public and portal users.
         if not request.env.user._is_internal():
-            IrAttachment = IrAttachment.sudo()
+            IrAttachment = IrAttachment.sudo().with_context(binary_field_real_user=IrAttachment.env.user)
 
         # At this point the related message does not exist yet, so we assign
         # those specific res_model and res_is. They will be correctly set
@@ -377,7 +370,7 @@ class CustomerPortal(Controller):
         error_message = []
 
         # Validation
-        for field_name in self._get_mandatory_fields():
+        for field_name in self.MANDATORY_BILLING_FIELDS:
             if not data.get(field_name):
                 error[field_name] = 'missing'
 
@@ -411,20 +404,12 @@ class CustomerPortal(Controller):
         if [err for err in error.values() if err == 'missing']:
             error_message.append(_('Some required fields are empty.'))
 
-        unknown = [k for k in data if k not in self._get_mandatory_fields() + self._get_optional_fields()]
+        unknown = [k for k in data if k not in self.MANDATORY_BILLING_FIELDS + self.OPTIONAL_BILLING_FIELDS]
         if unknown:
             error['common'] = 'Unknown field'
             error_message.append("Unknown field '%s'" % ','.join(unknown))
 
         return error, error_message
-
-    def _get_mandatory_fields(self):
-        """ This method is there so that we can override the mandatory fields """
-        return self.MANDATORY_BILLING_FIELDS
-
-    def _get_optional_fields(self):
-        """ This method is there so that we can override the optional fields """
-        return self.OPTIONAL_BILLING_FIELDS
 
     def _document_check_access(self, model_name, document_id, access_token=None):
         """Check if current user is allowed to access the specified record.
@@ -498,18 +483,14 @@ class CustomerPortal(Controller):
 
         method_name = '_render_qweb_%s' % (report_type)
         report = getattr(ReportAction, method_name)(report_ref, list(model.ids), data={'report_type': report_type})[0]
-        headers = self._get_http_headers(model, report_type, report, download)
-        return request.make_response(report, headers=list(headers.items()))
-
-    def _get_http_headers(self, model, report_type, report, download):
-        headers = {
-            'Content-Type': 'application/pdf' if report_type == 'pdf' else 'text/html',
-            'Content-Length': len(report),
-        }
+        reporthttpheaders = [
+            ('Content-Type', 'application/pdf' if report_type == 'pdf' else 'text/html'),
+            ('Content-Length', len(report)),
+        ]
         if report_type == 'pdf' and download:
             filename = "%s.pdf" % (re.sub(r'\W+', '-', model._get_report_base_filename()))
-            headers['Content-Disposition'] = content_disposition(filename)
-        return headers
+            reporthttpheaders.append(('Content-Disposition', content_disposition(filename)))
+        return request.make_response(report, headers=reporthttpheaders)
 
 def get_error(e, path=''):
     """ Recursively dereferences `path` (a period-separated sequence of dict

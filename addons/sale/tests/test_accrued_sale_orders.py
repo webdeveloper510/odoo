@@ -25,7 +25,7 @@ class TestAccruedSaleOrders(AccountTestInvoicingCommon):
             'invoice_policy': 'delivery',
             'property_account_income_id': cls.alt_inc_account.id,
         })
-        cls.default_plan = cls.env['account.analytic.plan'].create({'name': 'Default'})
+        cls.default_plan = cls.env['account.analytic.plan'].create({'name': 'Default', 'company_id': False})
         cls.analytic_account_a = cls.env['account.analytic.account'].create({
             'name': 'analytic_account_a',
             'plan_id': cls.default_plan.id,
@@ -99,9 +99,7 @@ class TestAccruedSaleOrders(AccountTestInvoicingCommon):
         ])
 
         # delivered products invoiced, nothing to invoice left
-        invoices = self.sale_order._create_invoices()
-        invoices.invoice_date = self.wizard.date
-        invoices.action_post()
+        self.sale_order.with_context(default_invoice_date=self.wizard.date)._create_invoices().action_post()
         with self.assertRaises(UserError):
             self.wizard.create_entries()
         self.assertTrue(self.wizard.display_amount)

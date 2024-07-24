@@ -3,23 +3,20 @@
 # 	* gamification
 # 
 # Translators:
-# Claudia Baisan, 2024
-# banica <banica.marian@gmail.com>, 2024
-# Cozmin Candea <office@terrabit.ro>, 2024
+# banica <banica.marian@gmail.com>, 2022
+# Hongu Cosmin <cosmin513@gmail.com>, 2022
+# Foldi Robert <foldirobert@nexterp.ro>, 2022
+# Martin Trigaux, 2022
+# Cozmin Candea <office@terrabit.ro>, 2023
 # Dorin Hongu <dhongu@gmail.com>, 2024
-# Hongu Cosmin <cosmin513@gmail.com>, 2024
-# Martin Trigaux, 2024
-# Emanuel Bruda, 2024
-# Foldi Robert <foldirobert@nexterp.ro>, 2024
-# Larisa_nexterp, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Larisa_nexterp, 2024\n"
+"POT-Creation-Date: 2023-05-23 08:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:46+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2024\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -48,6 +45,46 @@ msgid "%s has refused the challenge"
 msgstr "%sa refuzat provocarea"
 
 #. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid "<br/> %(rank)d. %(user_name)s - %(reward_name)s"
+msgstr "<br/> %(rank)d. %(user_name)s - %(reward_name)s"
+
+#. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid ""
+"<br/>Nobody has succeeded to reach every goal, no badge is rewarded for this"
+" challenge."
+msgstr ""
+"<br/>Nimeni nu a reușit să atingă fiecare obiectiv, nici o insignă nu este "
+"recompensată pentru această provocare."
+
+#. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid ""
+"<br/>Reward (badge %(badge_name)s) for every succeeding user was sent to "
+"%(users)s."
+msgstr ""
+"<br/>Recompensă (insignă%(badge_name)s) pentru fiecare utilizator succesor a"
+" fost trimis la %(users)s."
+
+#. module: gamification
+#. odoo-python
+#: code:addons/gamification/models/gamification_challenge.py:0
+#, python-format
+msgid ""
+"<br/>Special rewards were sent to the top competing users. The ranking for "
+"this challenge is :"
+msgstr ""
+"<br/>Recompense speciale au fost trimise utilizatorilor concurenți de top. "
+"Clasamentul pentru această provocare este:"
+
+#. module: gamification
 #: model:mail.template,body_html:gamification.mail_template_data_new_rank_reached
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
@@ -60,10 +97,10 @@ msgid ""
 "                    <span t-out=\"object.name or ''\">Joel Willis</span>!\n"
 "                </p>\n"
 "                <p>\n"
-"                    You just reached a new rank: <strong t-out=\"object.rank_id.name or ''\">Newbie</strong>\n"
+"                    You just reached a new rank : <strong t-out=\"object.rank_id.name or ''\">Newbie</strong>\n"
 "                </p>\n"
 "                <t t-if=\"object.next_rank_id.name\">\n"
-"                    <p>Continue your work to become a <strong t-out=\"object.next_rank_id.name or ''\">Student</strong>!</p>\n"
+"                    <p>Continue your work to become a <strong t-out=\"object.next_rank_id.name or ''\">Student</strong> !</p>\n"
 "                </t>\n"
 "                <div style=\"margin: 16px 0px 16px 0px;\">\n"
 "                    <t t-set=\"gamification_redirection_data\" t-value=\"object.get_gamification_redirection_data()\"></t>\n"
@@ -108,9 +145,11 @@ msgstr ""
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_kanban_view
 msgid ""
-"<i role=\"img\" class=\"text-700 fa fa-clock-o fa-3x\" title=\"Goal in "
-"Progress\" aria-label=\"Goal in Progress\"/>"
+"<i role=\"img\" class=\"fa fa-clock-o fa-3x\" title=\"Goal in Progress\" "
+"aria-label=\"Goal in Progress\"/>"
 msgstr ""
+"<i role=\"img\" class=\"fa fa-clock-o fa-3x\" title=\"Goal in Progress\" "
+"aria-label=\"Goal in Progress\"/>"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_kanban_view
@@ -128,8 +167,13 @@ msgstr ""
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
-msgid "<span class=\"o_stat_text\">Related Goals</span>"
+msgid ""
+"<span class=\"o_stat_text\">Related</span>\n"
+"                                <span class=\"o_stat_text\">Goals</span>"
 msgstr ""
+"<span class=\"o_stat_text\">Obiective</span>\n"
+"<span class=\"o_stat_text\">Asociate</span>\n"
+"                               "
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_rank_view_form
@@ -149,7 +193,7 @@ msgid ""
 "                <tr><td valign=\"middle\">\n"
 "                    <span style=\"font-size: 10px;\">Your Badge</span><br>\n"
 "                    <span style=\"font-size: 20px; font-weight: bold;\" t-out=\"object.badge_id.name or ''\"></span>\n"
-"                </td><td valign=\"middle\" align=\"right\" t-if=\"not object.user_id.company_id.uses_default_logo\">\n"
+"                </td><td valign=\"middle\" align=\"right\">\n"
 "                    <img t-attf-src=\"/logo.png?company={{ object.user_id.company_id.id }}\" style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt=\"object.user_id.company_id.name\">\n"
 "                </td></tr>\n"
 "                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
@@ -164,8 +208,8 @@ msgid ""
 "            <table width=\"590\" border=\"0\" cellpadding=\"0\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                <tr><td valign=\"top\" style=\"font-size: 14px;\">\n"
 "                    <div>\n"
-"                        Congratulations <t t-out=\"object.user_id.name or ''\"></t>!<br>\n"
-"                        You just received badge <strong t-out=\"object.badge_id.name or ''\"></strong>!<br>\n"
+"                        Congratulations <t t-out=\"object.user_id.name or ''\"></t> !<br>\n"
+"                        You just received badge <strong t-out=\"object.badge_id.name or ''\"></strong> !<br>\n"
 "                        <table t-if=\"not is_html_empty(object.badge_id.description)\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"width: 560px; margin-top: 5px;\">\n"
 "                            <tbody><tr>\n"
 "                                <td valign=\"center\">\n"
@@ -497,15 +541,6 @@ msgid "Active"
 msgstr "Activ"
 
 #. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_karma_tracking.py:0
-#: code:addons/gamification/models/res_users.py:0
-#: code:addons/gamification/tests/test_karma_tracking.py:0
-#, python-format
-msgid "Add Manually"
-msgstr ""
-
-#. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
 msgid "Advanced Options"
 msgstr "Opțiuni Avansate"
@@ -579,7 +614,7 @@ msgstr "Licență"
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_user_wizard__badge_id
 #: model_terms:ir.ui.view,arch_db:gamification.badge_form_view
 msgid "Badge"
-msgstr "Etichetă"
+msgstr "Insignă"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_form_view
@@ -761,13 +796,6 @@ msgid "Consolidated"
 msgstr "Consolidat"
 
 #. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_karma_tracking.py:0
-#, python-format
-msgid "Consolidation from %s to %s"
-msgstr ""
-
-#. module: gamification
 #: model:ir.actions.act_window,name:gamification.action_new_simplified_res_users
 msgid "Create User"
 msgstr "Creați utilizator"
@@ -860,11 +888,6 @@ msgid "Data"
 msgstr "Data"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
-msgid "Date"
-msgstr "Dată"
-
-#. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_goal_definition__field_date_id
 msgid "Date Field"
 msgstr "Câmp de dată"
@@ -915,7 +938,6 @@ msgstr "Descrieți ce au făcut și de ce contează (va fi public)"
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__description
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__description
 #: model:ir.model.fields,field_description:gamification.field_gamification_karma_rank__description
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__reason
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_rank_view_form
 msgid "Description"
 msgstr "Descriere"
@@ -982,8 +1004,8 @@ msgstr "Ciornă"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_newbie
-msgid "Earn your first points and join the adventure!"
-msgstr ""
+msgid "Earn your first points and join the adventure !"
+msgstr "Câștigă primele tale puncte și alătură-te aventurii!"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__end_date
@@ -1080,11 +1102,6 @@ msgid "Full Suffix"
 msgstr "Sufix întreg"
 
 #. module: gamification
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__gain
-msgid "Gain"
-msgstr "Câştig"
-
-#. module: gamification
 #: model:ir.model,name:gamification.model_gamification_badge
 msgid "Gamification Badge"
 msgstr "Insignă Competiție"
@@ -1141,11 +1158,13 @@ msgstr ""
 
 #. module: gamification
 #: model:ir.actions.server,name:gamification.ir_cron_check_challenge_ir_actions_server
+#: model:ir.cron,cron_name:gamification.ir_cron_check_challenge
 msgid "Gamification: Goal Challenge Check"
 msgstr "Competiție: Verificare provocare obiectiv"
 
 #. module: gamification
-#: model:ir.actions.server,name:gamification.ir_cron_consolidate_ir_actions_server
+#: model:ir.actions.server,name:gamification.ir_cron_consolidate_last_month_ir_actions_server
+#: model:ir.cron,cron_name:gamification.ir_cron_consolidate_last_month
 msgid "Gamification: Karma tracking consolidation"
 msgstr ""
 
@@ -1254,11 +1273,6 @@ msgstr "Insignă acordată lui"
 #: model_terms:ir.ui.view,arch_db:gamification.badge_form_view
 msgid "Grant this Badge"
 msgstr "Acordă această insignă"
-
-#. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "Granted By"
-msgstr ""
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_user_kanban_view
@@ -1437,7 +1451,6 @@ msgstr "Este urmăritor"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_res_users__karma
-#: model_terms:ir.ui.view,arch_db:gamification.res_users_view_form
 msgid "Karma"
 msgstr "Reputație"
 
@@ -1447,24 +1460,18 @@ msgid "Karma Changes"
 msgstr "Schimbări karma"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_form
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
-msgid "Karma Owner"
-msgstr ""
-
-#. module: gamification
-#: model:ir.actions.act_window,name:gamification.gamification_karma_tracking_action
-#: model:ir.ui.menu,name:gamification.gamification_karma_tracking_menu
-msgid "Karma Tracking"
-msgstr ""
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/res_users.py:0
-#, python-format
-msgid "Karma Updates"
-msgstr ""
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge_user____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge_user_wizard____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_challenge____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_challenge_line____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_goal____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_goal_definition____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_goal_wizard____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_karma_rank____last_update
+#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking____last_update
+msgid "Last Modified on"
+msgstr "Ultima modificare la"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__last_report_date
@@ -1530,9 +1537,10 @@ msgid "List of goals that will be set"
 msgstr "Lista obiectivelor ce vor fi setate"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "Manual"
-msgstr "Manual"
+#: model:ir.model.fields,field_description:gamification.field_gamification_badge__message_main_attachment_id
+#: model:ir.model.fields,field_description:gamification.field_gamification_challenge__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Atașament principal"
 
 #. module: gamification
 #: model:gamification.karma.rank,name:gamification.rank_master
@@ -1600,11 +1608,6 @@ msgid "My Goals"
 msgstr "Obiectivele mele"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "My Karma"
-msgstr ""
-
-#. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__stat_my_monthly_sending
 msgid "My Monthly Sending Total"
 msgstr "Totalul meu trimis lunar"
@@ -1666,11 +1669,6 @@ msgid "Next Report Date"
 msgstr "Data următorului raport"
 
 #. module: gamification
-#: model_terms:ir.actions.act_window,help:gamification.gamification_karma_tracking_action
-msgid "No Karma Tracking"
-msgstr ""
-
-#. module: gamification
 #: model_terms:ir.actions.act_window,help:gamification.goals_from_challenge_act
 msgid "No goal found"
 msgstr "Niciun obiectiv găsit"
@@ -1689,15 +1687,6 @@ msgstr "Nimeni nu poate rezolva provocările ca tine."
 #: model:ir.model.fields.selection,name:gamification.selection__gamification_badge__rule_auth__nobody
 msgid "No one, assigned through challenges"
 msgstr "Nimănui, alocată prin provocări"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_challenge.py:0
-#, python-format
-msgid ""
-"Nobody has succeeded to reach every goal, no badge is rewarded for this "
-"challenge."
-msgstr ""
 
 #. module: gamification
 #. odoo-python
@@ -1732,7 +1721,7 @@ msgstr "Număr de acțiuni"
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__message_has_error_counter
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__message_has_error_counter
 msgid "Number of errors"
-msgstr "Număr de erori"
+msgstr "Numărul de erori"
 
 #. module: gamification
 #: model:ir.model.fields,help:gamification.field_gamification_badge__message_needaction_counter
@@ -1816,11 +1805,6 @@ msgid "Periodicity"
 msgstr "Periodicitate"
 
 #. module: gamification
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
-msgid "Previous Total"
-msgstr ""
-
-#. module: gamification
 #: model:gamification.badge,name:gamification.badge_problem_solver
 msgid "Problem Solver"
 msgstr "Problemă rezolvată"
@@ -1881,23 +1865,23 @@ msgstr ""
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_bachelor
-msgid "Reach the next rank and gain a very magic wand!"
-msgstr ""
+msgid "Reach the next rank and gain a very magic wand !"
+msgstr "Ajungeți la următorul rang și câștigați o baghetă magică!"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_master
-msgid "Reach the next rank and gain a very nice hat!"
-msgstr ""
+msgid "Reach the next rank and gain a very nice hat !"
+msgstr "Ajungeți la următorul rang și câștigați o pălărie foarte drăguță!"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_student
-msgid "Reach the next rank and gain a very nice mug!"
-msgstr ""
+msgid "Reach the next rank and gain a very nice mug !"
+msgstr "Ajungeți la următorul rang și câștigați o cană foarte drăguță!"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_doctor
-msgid "Reach the next rank and gain a very nice unicorn!"
-msgstr ""
+msgid "Reach the next rank and gain a very nice unicorn !"
+msgstr "Ajunge la următorul rang și câștigă un unicorn foarte drăguț!"
 
 #. module: gamification
 #: model_terms:gamification.karma.rank,description_motivational:gamification.rank_bachelor
@@ -2002,15 +1986,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
 msgid "Reward"
 msgstr "Recompensă"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_challenge.py:0
-#, python-format
-msgid ""
-"Reward (badge %(badge_name)s) for every succeeding user was sent to "
-"%(users)s."
-msgstr ""
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__reward_failure
@@ -2172,26 +2147,6 @@ msgid "Silver badges count"
 msgstr "Număr ecusoare de arging"
 
 #. module: gamification
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__origin_ref
-msgid "Source"
-msgstr "Sursa"
-
-#. module: gamification
-#: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__origin_ref_model_name
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
-msgid "Source Type"
-msgstr "Tipul sursă"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_challenge.py:0
-#, python-format
-msgid ""
-"Special rewards were sent to the top competing users. The ranking for this "
-"challenge is:"
-msgstr ""
-
-#. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.challenge_form_view
 msgid "Start Challenge"
 msgstr "Start provocare"
@@ -2257,14 +2212,6 @@ msgstr "Valoare țintă de atins"
 #: model_terms:ir.ui.view,arch_db:gamification.goal_kanban_view
 msgid "Target: less than"
 msgstr "Ținta: mai mică de"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/tests/test_karma_tracking.py:0
-#: code:addons/gamification/tests/test_karma_tracking.py:0
-#, python-format
-msgid "Test Reason"
-msgstr ""
 
 #. module: gamification
 #: model:ir.model.fields,help:gamification.field_gamification_goal_definition__action_id
@@ -2503,18 +2450,12 @@ msgstr "De actualizat"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge__granted_count
-#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
 msgid "Total"
 msgstr "Total"
 
 #. module: gamification
 #: model:ir.model,name:gamification.model_gamification_karma_tracking
 msgid "Track Karma Changes"
-msgstr ""
-
-#. module: gamification
-#: model_terms:ir.actions.act_window,help:gamification.gamification_karma_tracking_action
-msgid "Track the sources of the users karma and monitor"
 msgstr ""
 
 #. module: gamification
@@ -2528,6 +2469,8 @@ msgid "Tracking Date"
 msgstr ""
 
 #. module: gamification
+#: model:ir.actions.act_window,name:gamification.gamification_karma_tracking_action
+#: model:ir.ui.menu,name:gamification.gamification_karma_tracking_menu
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_tree
 msgid "Trackings"
 msgstr ""
@@ -2555,24 +2498,15 @@ msgid "Update %s"
 msgstr "Actualizare %s"
 
 #. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/gamification_karma_tracking.py:0
 #: model:ir.model,name:gamification.model_res_users
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_user__user_id
 #: model:ir.model.fields,field_description:gamification.field_gamification_badge_user_wizard__user_id
 #: model:ir.model.fields,field_description:gamification.field_gamification_goal__user_id
 #: model:ir.model.fields,field_description:gamification.field_gamification_karma_tracking__user_id
+#: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_tracking_view_search
 #: model_terms:ir.ui.view,arch_db:gamification.goal_search_view
-#, python-format
 msgid "User"
-msgstr "Utilizator"
-
-#. module: gamification
-#. odoo-python
-#: code:addons/gamification/models/res_users.py:0
-#, python-format
-msgid "User Creation"
-msgstr ""
+msgstr "Operator"
 
 #. module: gamification
 #: model:ir.model.fields,field_description:gamification.field_gamification_challenge__user_domain
@@ -2739,8 +2673,8 @@ msgstr "ex. Rezolvator de probleme"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.gamification_karma_rank_view_form
-msgid "e.g. Reach this rank to gain a free mug!"
-msgstr ""
+msgid "e.g. Reach this rank to gain a free mug !"
+msgstr "de exemplu. Atingeți acest rang pentru a obține o cană gratuită!"
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.goal_definition_form_view
@@ -2775,7 +2709,7 @@ msgstr "decât ținta."
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_user_kanban_view
 msgid "the"
-msgstr "la"
+msgstr " "
 
 #. module: gamification
 #: model_terms:ir.ui.view,arch_db:gamification.badge_kanban_view

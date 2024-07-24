@@ -10,7 +10,7 @@ class StockPicking(models.Model):
     def _create_move_from_pos_order_lines(self, lines):
         lines_to_unreserve = self.env['pos.order.line']
         for line in lines:
-            if line.order_id.shipping_date:
+            if line.order_id.to_ship:
                 continue
             if any(wh != line.order_id.config_id.warehouse_id for wh in line.sale_order_line_id.move_ids.location_id.warehouse_id):
                 continue

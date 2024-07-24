@@ -1,19 +1,14 @@
 /** @odoo-module **/
 
 import { sprintf } from '@web/core/utils/strings';
-import { _t } from "@web/core/l10n/translation";
-import publicWidget from '@web/legacy/js/public/public_widget';
+import { _t } from 'web.core';
+import publicWidget from 'web.public.widget';
 import '@website_slides/js/slides';
 
 var SlideLikeWidget = publicWidget.Widget.extend({
     events: {
         'click .o_wslides_js_slide_like_up': '_onClickUp',
         'click .o_wslides_js_slide_like_down': '_onClickDown',
-    },
-
-    init() {
-        this._super(...arguments);
-        this.rpc = this.bindService("rpc");
     },
 
     //--------------------------------------------------------------------------
@@ -47,9 +42,12 @@ var SlideLikeWidget = publicWidget.Widget.extend({
      */
     _onClick: function (slideId, voteType) {
         var self = this;
-        this.rpc('/slides/slide/like', {
-            slide_id: slideId,
-            upvote: voteType === 'like',
+        this._rpc({
+            route: '/slides/slide/like',
+            params: {
+                slide_id: slideId,
+                upvote: voteType === 'like',
+            },
         }).then(function (data) {
             if (! data.error) {
                 const $likesBtn = self.$('span.o_wslides_js_slide_like_up');

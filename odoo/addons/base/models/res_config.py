@@ -306,7 +306,18 @@ class ResConfigInstaller(models.TransientModel, ResConfigModuleInstallationMixin
 
         IrModule = self.env['ir.module.module']
         modules = IrModule.search([('name', 'in', to_install)])
-        return self._install_modules(modules)
+        module_names = {module.name for module in modules}
+        to_install_missing_names = [name for name in to_install if name not in module_names]
+
+        result = self._install_modules(modules)
+        #FIXME: if result is not none, the corresponding todo will be skipped because it was just marked done
+        if to_install_missing_names:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'apps',
+                'params': {'modules': to_install_missing_names},
+            }
+        return result
 
 
 class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin):
@@ -335,7 +346,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             The attribute 'group' may contain several xml ids, separated by commas.
 
         *   For a selection field like 'group_XXX' composed of 2 string values ('0' and '1'),
-            ``execute`` adds/removes 'implied_group' to/from the implied groups of 'group',
+            ``execute`` adds/removes 'implied_group' to/from the implied groups of 'group', 
             depending on the field's value.
             By default 'group' is the group Employee.  Groups are given by their xml id.
             The attribute 'group' may contain several xml ids, separated by commas.
@@ -343,8 +354,8 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         *   For a boolean field like 'module_XXX', ``execute`` triggers the immediate
             installation of the module named 'XXX' if the field has value ``True``.
 
-        *   For a selection field like 'module_XXX' composed of 2 string values ('0' and '1'),
-            ``execute`` triggers the immediate installation of the module named 'XXX'
+        *   For a selection field like 'module_XXX' composed of 2 string values ('0' and '1'), 
+            ``execute`` triggers the immediate installation of the module named 'XXX' 
             if the field has the value ``'1'``.
 
         *   For a field with no specific prefix BUT an attribute 'config_parameter',
@@ -455,17 +466,15 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
 
     @api.model
     def default_get(self, fields):
-        res = super().default_get(fields)
-        if not fields:
-            return res
-
         IrDefault = self.env['ir.default']
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
         classified = self._get_classified_fields(fields)
 
+        res = super(ResConfigSettings, self).default_get(fields)
+
         # defaults: take the corresponding default value they set
         for name, model, field in classified['default']:
-            value = IrDefault._get(model, field)
+            value = IrDefault.get(model, field)
             if value is not None:
                 res[name] = value
 
@@ -535,15 +544,16 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
                 IrDefault.set(model, field, value)
 
         # group fields: modify group / implied groups
-        for name, groups, implied_group in sorted(classified['group'], key=lambda k: self[k[0]]):
-            groups = groups.sudo()
-            implied_group = implied_group.sudo()
-            if self[name] == current_settings[name]:
-                continue
-            if int(self[name]):
-                groups._apply_group(implied_group)
-            else:
-                groups._remove_group(implied_group)
+        with self.env.norecompute():
+            for name, groups, implied_group in sorted(classified['group'], key=lambda k: self[k[0]]):
+                groups = groups.sudo()
+                implied_group = implied_group.sudo()
+                if self[name] == current_settings[name]:
+                    continue
+                if int(self[name]):
+                    groups._apply_group(implied_group)
+                else:
+                    groups._remove_group(implied_group)
 
         # config fields: store ir.config_parameters
         IrConfigParameter = self.env['ir.config_parameter'].sudo()
@@ -628,11 +638,12 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             return actions.read()[0]
         return {}
 
-    def _compute_display_name(self):
-        """ Override display_name method to return an appropriate configuration wizard
+    def name_get(self):
+        """ Override name_get method to return an appropriate configuration wizard
         name, and not the generated name."""
         action = self.env['ir.actions.act_window'].search([('res_model', '=', self._name)], limit=1)
-        self.display_name = action.name or self._name
+        name = action.name or self._name
+        return [(record.id, name) for record in self]
 
     @api.model
     def get_option_path(self, menu_xml_id):

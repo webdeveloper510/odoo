@@ -23,20 +23,19 @@ class Partner(models.Model):
 
     def _compute_meeting(self):
         if self.ids:
-            # prefetch 'parent_id'
-            all_partners = self.with_context(active_test=False).search_fetch(
-                [('id', 'child_of', self.ids)], ['parent_id'],
-            )
+            all_partners = self.with_context(active_test=False).search_read([('id', 'child_of', self.ids)], ["parent_id"])
+            all_partners_parents = {p["id"]: p['parent_id'][0] for p in all_partners if p.get('parent_id')}
 
-            query = self.env['calendar.event']._search([])  # ir.rules will be applied
-            query_str, params = query.subselect()
+            event_id = self.env['calendar.event']._search([])  # ir.rules will be applied
+            subquery_string, subquery_params = event_id.select()
+            subquery = self.env.cr.mogrify(subquery_string, subquery_params).decode()
 
-            self.env.cr.execute(f"""
+            self.env.cr.execute("""
                 SELECT res_partner_id, calendar_event_id, count(1)
                   FROM calendar_event_res_partner_rel
-                 WHERE res_partner_id IN %s AND calendar_event_id IN {query_str}
+                 WHERE res_partner_id IN %s AND calendar_event_id IN ({})
               GROUP BY res_partner_id, calendar_event_id
-            """, [tuple(all_partners.ids)] + params)
+            """.format(subquery), [tuple(p["id"] for p in all_partners)])
 
             meeting_data = self.env.cr.fetchall()
 
@@ -46,19 +45,19 @@ class Partner(models.Model):
                 meetings.setdefault(p_id, set()).add(m_id)
 
             # Add the events linked to the children of the partner
-            for p in self.browse(meetings.keys()):
-                partner = p
-                while partner.parent_id:
-                    partner = partner.parent_id
-                    if partner in self:
-                        meetings[partner.id] = meetings.get(partner.id, set()) | meetings[p.id]
+            for meeting_pid in set(meetings):
+                partner_id = meeting_pid
+                while partner_id in all_partners_parents:
+                    partner_id = all_partners_parents[partner_id]
+                    if partner_id in self.ids:
+                        meetings[partner_id] = meetings.get(partner_id, set()) | meetings[meeting_pid]
             return {p_id: list(meetings.get(p_id, set())) for p_id in self.ids}
         return {}
 
     def get_attendee_detail(self, meeting_ids):
         """ Return a list of dict of the given meetings with the attendees details
             Used by:
-                - many2many_attendee.js: Many2ManyAttendee
+                - base_calendar.js : Many2ManyAttendee
                 - calendar_model.js (calendar.CalendarModel)
         """
         attendees_details = []

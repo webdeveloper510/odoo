@@ -1,15 +1,12 @@
-/** @odoo-module **/
+odoo.define('website_mail_group.s_group_options', function (require) {
+'use strict';
 
-import { _t } from "@web/core/l10n/translation";
-import options from "@web_editor/js/editor/snippets.options";
-import wUtils from "@website/js/utils";
+const core = require('web.core');
+const options = require('web_editor.snippets.options');
+const wUtils = require('website.utils');
+const _t = core._t;
 
 options.registry.Group = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -62,7 +59,13 @@ options.registry.Group = options.Class.extend({
             return;
         }
 
-        const groupId = await this.orm.create("mail.group", [{ name: name }]);
+        const groupId = await this._rpc({
+            model: 'mail.group',
+            method: 'create',
+            args: [{
+                name: name,
+            }],
+        });
 
         this.$target.attr("data-id", groupId);
         return this._rerenderXML();
@@ -90,6 +93,11 @@ options.registry.Group = options.Class.extend({
      * @return {Promise}
      */
     _getMailGroups() {
-        return this.orm.call("mail.group", "name_search", [""]);
+        return this._rpc({
+            model: 'mail.group',
+            method: 'name_search',
+            args: [''],
+        });
     },
+});
 });

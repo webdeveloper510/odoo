@@ -3,15 +3,15 @@
 # 	* data_recycle
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
 # Thi Huong Nguyen, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-09-20 09:01+0000\n"
+"PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2023\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,6 @@ msgstr ""
 "Bạn có thể xác thực những thay đổi đó"
 
 #. module: data_recycle
-#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_record.py:0
 #, python-format
 msgid "**Record Deleted**"
@@ -88,19 +87,14 @@ msgstr "Được tạo vào"
 #. module: data_recycle
 #: model:ir.ui.menu,name:data_recycle.menu_data_cleaning_root
 msgid "Data Cleaning"
-msgstr "Làm sạch Dữ liệu"
+msgstr "Làm sạch dữ liệu"
 
 #. module: data_recycle
 #: model:ir.actions.server,name:data_recycle.ir_cron_clean_records_ir_actions_server
+#: model:ir.cron,cron_name:data_recycle.ir_cron_clean_records
+#: model:ir.cron,name:data_recycle.ir_cron_clean_records
 msgid "Data Recycle: Clean Records"
 msgstr "Tái chế dữ liệu: Dọn dẹp tập dữ liệu"
-
-#. module: data_recycle
-#. odoo-python
-#: code:addons/data_recycle/models/data_recycle_model.py:0
-#, python-format
-msgid "Data to Recycle"
-msgstr "Dữ liệu cần tái chế"
 
 #. module: data_recycle
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__notify_frequency_period__days
@@ -162,6 +156,12 @@ msgid "Include Archived"
 msgstr "Bao gồm dữ liệu đã lưu trữ"
 
 #. module: data_recycle
+#: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model____last_update
+#: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record____last_update
+msgid "Last Modified on"
+msgstr "Sửa lần cuối vào"
+
+#. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__last_notification
 msgid "Last Notification"
 msgstr "Last Notification"
@@ -170,7 +170,7 @@ msgstr "Last Notification"
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__write_uid
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__write_uid
 msgid "Last Updated by"
-msgstr "Cập nhật lần cuối bởi"
+msgstr "Last Updated by"
 
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__write_date
@@ -192,13 +192,13 @@ msgstr "Thủ công"
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__res_model_id
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__res_model_id
 msgid "Model"
-msgstr "Mô hình"
+msgstr "Model"
 
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_model__res_model_name
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__res_model_name
 msgid "Model Name"
-msgstr "Tên mô hình"
+msgstr "Tên đối tượng"
 
 #. module: data_recycle
 #: model:ir.model.fields.selection,name:data_recycle.selection__data_recycle_model__notify_frequency_period__months
@@ -235,7 +235,7 @@ msgstr "Notify Users"
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__res_id
 msgid "Record ID"
-msgstr "ID tập dữ liệu"
+msgstr "ID dữ liệu"
 
 #. module: data_recycle
 #: model:ir.model.fields,field_description:data_recycle.field_data_recycle_record__name
@@ -325,7 +325,6 @@ msgid "The notification frequency should be greater than 0"
 msgstr "The notification frequency should be greater than 0"
 
 #. module: data_recycle
-#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_model.py:0
 #, python-format
 msgid "This model doesn't manage archived records. Only deletion is possible."
@@ -337,21 +336,20 @@ msgid "Time Field"
 msgstr "Trường thời gian"
 
 #. module: data_recycle
-#. odoo-python
 #: code:addons/data_recycle/models/data_recycle_record.py:0
 #, python-format
 msgid "Undefined Name"
 msgstr "Tên không xác định"
 
 #. module: data_recycle
-#. odoo-javascript
+#. openerp-web
 #: code:addons/data_recycle/static/src/views/data_recycle_list_view.xml:0
 #, python-format
 msgid "Unselect"
 msgstr "Unselect"
 
 #. module: data_recycle
-#. odoo-javascript
+#. openerp-web
 #: code:addons/data_recycle/static/src/views/data_recycle_list_view.xml:0
 #: model_terms:ir.ui.view,arch_db:data_recycle.view_data_recycle_record_list
 #, python-format

@@ -1,30 +1,22 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import pytz
-
 from collections import defaultdict
 from datetime import datetime, timedelta
 from operator import itemgetter
-from pytz import timezone
 
+import pytz
 from odoo import models, fields, api, exceptions, _
-from odoo.addons.resource.models.utils import Intervals
 from odoo.tools import format_datetime
 from odoo.osv.expression import AND, OR
 from odoo.tools.float_utils import float_is_zero
 from odoo.exceptions import AccessError
-from odoo.tools import format_duration
-
-def get_google_maps_url(latitude, longitude):
-    return "https://maps.google.com?q=%s,%s" % (latitude, longitude)
 
 
 class HrAttendance(models.Model):
     _name = "hr.attendance"
     _description = "Attendance"
     _order = "check_in desc"
-    _inherit = "mail.thread"
 
     def _default_employee(self):
         return self.env.user.employee_id
@@ -32,133 +24,32 @@ class HrAttendance(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Employee", default=_default_employee, required=True, ondelete='cascade', index=True)
     department_id = fields.Many2one('hr.department', string="Department", related="employee_id.department_id",
         readonly=True)
-    check_in = fields.Datetime(string="Check In", default=fields.Datetime.now, required=True, tracking=True)
-    check_out = fields.Datetime(string="Check Out", tracking=True)
+    check_in = fields.Datetime(string="Check In", default=fields.Datetime.now, required=True)
+    check_out = fields.Datetime(string="Check Out")
     worked_hours = fields.Float(string='Worked Hours', compute='_compute_worked_hours', store=True, readonly=True)
-    color = fields.Integer(compute='_compute_color')
-    overtime_hours = fields.Float(string="Over Time", compute='_compute_overtime_hours', store=True)
-    in_latitude = fields.Float(string="Latitude", digits=(10, 7), readonly=True)
-    in_longitude = fields.Float(string="Longitude", digits=(10, 7), readonly=True)
-    in_country_name = fields.Char(string="Country", help="Based on IP Address", readonly=True)
-    in_city = fields.Char(string="City", readonly=True)
-    in_ip_address = fields.Char(string="IP Address", readonly=True)
-    in_browser = fields.Char(string="Browser", readonly=True)
-    in_mode = fields.Selection(string="Mode",
-                               selection=[('kiosk', "Kiosk"),
-                                          ('systray', "Systray"),
-                                          ('manual', "Manual")],
-                               readonly=True,
-                               default='manual')
-    out_latitude = fields.Float(digits=(10, 7), readonly=True)
-    out_longitude = fields.Float(digits=(10, 7), readonly=True)
-    out_country_name = fields.Char(help="Based on IP Address", readonly=True)
-    out_city = fields.Char(readonly=True)
-    out_ip_address = fields.Char(readonly=True)
-    out_browser = fields.Char(readonly=True)
-    out_mode = fields.Selection(selection=[('kiosk', "Kiosk"),
-                                           ('systray', "Systray"),
-                                           ('manual', "Manual")],
-                                readonly=True,
-                                default='manual')
 
-    def _compute_color(self):
-        for attendance in self:
-            if attendance.check_out:
-                attendance.color = 1 if attendance.worked_hours > 16 else 0
-            else:
-                attendance.color = 1 if attendance.check_in < (datetime.today() - timedelta(days=1)) else 10
-
-    @api.depends('worked_hours')
-    def _compute_overtime_hours(self):
-        att_progress_values = dict()
-        if self.employee_id:
-            self.env['hr.attendance'].flush_model(['worked_hours'])
-            self.env['hr.attendance.overtime'].flush_model(['duration'])
-            self.env.cr.execute('''
-                WITH employee_time_zones AS (
-                    SELECT employee.id AS employee_id,
-                           calendar.tz AS timezone
-                      FROM hr_employee employee
-                INNER JOIN resource_calendar calendar
-                        ON calendar.id = employee.resource_calendar_id
-                )
-                SELECT att.id AS att_id,
-                       att.worked_hours AS att_wh,
-                       ot.id AS ot_id,
-                       ot.duration AS ot_d,
-                       ot.date AS od,
-                       att.check_in AS ad
-                  FROM hr_attendance att
-            INNER JOIN employee_time_zones etz
-                    ON att.employee_id = etz.employee_id
-            INNER JOIN hr_attendance_overtime ot
-                    ON date_trunc('day',
-                                  CAST(att.check_in
-                                           AT TIME ZONE 'utc'
-                                           AT TIME ZONE etz.timezone
-                                  as date)) = date_trunc('day', ot.date)
-                   AND att.employee_id = ot.employee_id
-                   AND att.employee_id IN %s
-              ORDER BY att.check_in DESC
-            ''', (tuple(self.employee_id.ids),))
-            a = self.env.cr.dictfetchall()
-            grouped_dict = dict()
-            for row in a:
-                if row['ot_id'] and row['att_wh']:
-                    if row['ot_id'] not in grouped_dict:
-                        grouped_dict[row['ot_id']] = {'attendances': [(row['att_id'], row['att_wh'])], 'overtime_duration': row['ot_d']}
-                    else:
-                        grouped_dict[row['ot_id']]['attendances'].append((row['att_id'], row['att_wh']))
-
-            for ot in grouped_dict:
-                ot_bucket = grouped_dict[ot]['overtime_duration']
-                for att in grouped_dict[ot]['attendances']:
-                    if ot_bucket > 0:
-                        sub_time = att[1] - ot_bucket
-                        if sub_time < 0:
-                            att_progress_values[att[0]] = 0
-                            ot_bucket -= att[1]
-                        else:
-                            att_progress_values[att[0]] = float(((att[1] - ot_bucket) / att[1])*100)
-                            ot_bucket = 0
-                    else:
-                        att_progress_values[att[0]] = 100
-        for attendance in self:
-            attendance.overtime_hours = attendance.worked_hours * ((100 - att_progress_values.get(attendance.id, 100))/100)
-
-    @api.depends('employee_id', 'check_in', 'check_out')
-    def _compute_display_name(self):
+    def name_get(self):
+        result = []
         for attendance in self:
             if not attendance.check_out:
-                attendance.display_name = _(
-                    "From %s",
-                    format_datetime(self.env, attendance.check_in, dt_format="HH:mm"),
-                )
+                result.append((attendance.id, _("%(empl_name)s from %(check_in)s") % {
+                    'empl_name': attendance.employee_id.name,
+                    'check_in': format_datetime(self.env, attendance.check_in, dt_format=False),
+                }))
             else:
-                attendance.display_name = _(
-                    "%s : (%s-%s)",
-                    format_duration(attendance.worked_hours),
-                    format_datetime(self.env, attendance.check_in, dt_format="HH:mm"),
-                    format_datetime(self.env, attendance.check_out, dt_format="HH:mm"),
-                )
-
-    def _get_employee_calendar(self):
-        self.ensure_one()
-        return self.employee_id.resource_calendar_id or self.employee_id.company_id.resource_calendar_id
+                result.append((attendance.id, _("%(empl_name)s from %(check_in)s to %(check_out)s") % {
+                    'empl_name': attendance.employee_id.name,
+                    'check_in': format_datetime(self.env, attendance.check_in, dt_format=False),
+                    'check_out': format_datetime(self.env, attendance.check_out, dt_format=False),
+                }))
+        return result
 
     @api.depends('check_in', 'check_out')
     def _compute_worked_hours(self):
         for attendance in self:
-            if attendance.check_out and attendance.check_in and attendance.employee_id:
-                calendar = attendance._get_employee_calendar()
-                resource = attendance.employee_id.resource_id
-                tz = timezone(calendar.tz)
-                check_in_tz = attendance.check_in.astimezone(tz)
-                check_out_tz = attendance.check_out.astimezone(tz)
-                lunch_intervals = attendance.employee_id._employee_attendance_intervals(check_in_tz, check_out_tz, lunch=True)
-                attendance_intervals = Intervals([(check_in_tz, check_out_tz, attendance)]) - lunch_intervals
-                delta = sum((i[1] - i[0]).total_seconds() for i in attendance_intervals)
-                attendance.worked_hours = delta / 3600.0
+            if attendance.check_out and attendance.check_in:
+                delta = attendance.check_out - attendance.check_in
+                attendance.worked_hours = delta.total_seconds() / 3600.0
             else:
                 attendance.worked_hours = False
 
@@ -185,9 +76,10 @@ class HrAttendance(models.Model):
                 ('id', '!=', attendance.id),
             ], order='check_in desc', limit=1)
             if last_attendance_before_check_in and last_attendance_before_check_in.check_out and last_attendance_before_check_in.check_out > attendance.check_in:
-                raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
-                                                   empl_name=attendance.employee_id.name,
-                                                   datetime=format_datetime(self.env, attendance.check_in, dt_format=False)))
+                raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s") % {
+                    'empl_name': attendance.employee_id.name,
+                    'datetime': format_datetime(self.env, attendance.check_in, dt_format=False),
+                })
 
             if not attendance.check_out:
                 # if our attendance is "open" (no check_out), we verify there is no other "open" attendance
@@ -197,9 +89,10 @@ class HrAttendance(models.Model):
                     ('id', '!=', attendance.id),
                 ], order='check_in desc', limit=1)
                 if no_check_out_attendances:
-                    raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s",
-                                                       empl_name=attendance.employee_id.name,
-                                                       datetime=format_datetime(self.env, no_check_out_attendances.check_in, dt_format=False)))
+                    raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s") % {
+                        'empl_name': attendance.employee_id.name,
+                        'datetime': format_datetime(self.env, no_check_out_attendances.check_in, dt_format=False),
+                    })
             else:
                 # we verify that the latest attendance with check_in time before our check_out time
                 # is the same as the one before our check_in time computed before, otherwise it overlaps
@@ -209,9 +102,10 @@ class HrAttendance(models.Model):
                     ('id', '!=', attendance.id),
                 ], order='check_in desc', limit=1)
                 if last_attendance_before_check_out and last_attendance_before_check_in != last_attendance_before_check_out:
-                    raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
-                                                       empl_name=attendance.employee_id.name,
-                                                       datetime=format_datetime(self.env, last_attendance_before_check_out.check_in, dt_format=False)))
+                    raise exceptions.ValidationError(_("Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s") % {
+                        'empl_name': attendance.employee_id.name,
+                        'datetime': format_datetime(self.env, last_attendance_before_check_out.check_in, dt_format=False),
+                    })
 
     @api.model
     def _get_day_start_and_day(self, employee, dt):
@@ -246,7 +140,7 @@ class HrAttendance(models.Model):
 
         overtime_to_unlink = self.env['hr.attendance.overtime']
         overtime_vals_list = []
-        affected_employees = self.env['hr.employee']
+
         for emp, attendance_dates in employee_attendance_dates.items():
             # get_attendances_dates returns the date translated from the local timezone without tzinfo,
             # and contains all the date which we need to check for overtime
@@ -269,8 +163,7 @@ class HrAttendance(models.Model):
             stop = pytz.utc.localize(max(attendance_dates, key=itemgetter(0))[0] + timedelta(hours=24))
 
             # Retrieve expected attendance intervals
-            calendar = emp.resource_calendar_id or emp.company_id.resource_calendar_id
-            expected_attendances = emp._employee_attendance_intervals(start, stop)
+            expected_attendances = emp._get_expected_attendances(start, stop, domain=AND([self._get_overtime_leave_domain(), [('company_id', 'in', [False, emp.company_id.id])]]))
 
             # working_times = {date: [(start, stop)]}
             working_times = defaultdict(lambda: [])
@@ -341,13 +234,7 @@ class HrAttendance(models.Model):
                                 pre_work_time += (min(planned_start_dt, local_check_out) - local_check_in).total_seconds() / 3600.0
                             # Interval inside the working hours -> Considered as working time
                             if local_check_in <= planned_end_dt and local_check_out >= planned_start_dt:
-                                start_dt = max(planned_start_dt, local_check_in)
-                                stop_dt = min(planned_end_dt, local_check_out)
-                                work_duration += (stop_dt - start_dt).total_seconds() / 3600.0
-                                # remove lunch time from work duration
-                                lunch_intervals = emp._employee_attendance_intervals(start_dt, stop_dt, lunch=True)
-                                work_duration -= sum((i[1] - i[0]).total_seconds() / 3600.0 for i in lunch_intervals)
-
+                                work_duration += (min(planned_end_dt, local_check_out) - max(planned_start_dt, local_check_in)).total_seconds() / 3600.0
                             # There is an overtime at the end of the day
                             if local_check_out > planned_end_dt:
                                 post_work_time += (local_check_out - max(planned_end_dt, local_check_in)).total_seconds() / 3600.0
@@ -378,16 +265,10 @@ class HrAttendance(models.Model):
                             'duration': overtime_duration,
                             'duration_real': overtime_duration
                         })
-                        affected_employees |= overtime.employee_id
                 elif overtime:
                     overtime_to_unlink |= overtime
-        created_overtimes = self.env['hr.attendance.overtime'].sudo().create(overtime_vals_list)
-        employees_worked_hours_to_compute = (affected_employees.ids +
-                                             created_overtimes.employee_id.ids +
-                                             overtime_to_unlink.employee_id.ids)
+        self.env['hr.attendance.overtime'].sudo().create(overtime_vals_list)
         overtime_to_unlink.sudo().unlink()
-        self.env.add_to_compute(self._fields['overtime_hours'],
-                                self.search([('employee_id', 'in', employees_worked_hours_to_compute)]))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -398,7 +279,7 @@ class HrAttendance(models.Model):
     def write(self, vals):
         if vals.get('employee_id') and \
             vals['employee_id'] not in self.env.user.employee_ids.ids and \
-            not self.env.user.has_group('hr_attendance.group_hr_attendance_officer'):
+            not self.env.user.has_group('hr_attendance.group_hr_attendance_user'):
             raise AccessError(_("Do not have access, user cannot edit the attendances that are not his own."))
         attendances_dates = self._get_attendances_dates()
         result = super(HrAttendance, self).write(vals)
@@ -412,26 +293,9 @@ class HrAttendance(models.Model):
 
     def unlink(self):
         attendances_dates = self._get_attendances_dates()
-        res = super().unlink()
+        super(HrAttendance, self).unlink()
         self._update_overtime(attendances_dates)
-        return res
 
     @api.returns('self', lambda value: value.id)
-    def copy(self, default=None):
+    def copy(self):
         raise exceptions.UserError(_('You cannot duplicate an attendance.'))
-
-    def action_in_attendance_maps(self):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_url',
-            'url': get_google_maps_url(self.in_latitude, self.in_longitude),
-            'target': 'new'
-        }
-
-    def action_out_attendance_maps(self):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_url',
-            'url': get_google_maps_url(self.out_latitude, self.out_longitude),
-            'target': 'new'
-        }

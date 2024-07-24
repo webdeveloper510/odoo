@@ -1,15 +1,9 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
+import { _lt } from "../l10n/translation";
 import { makeErrorFromResponse, ConnectionLostError } from "@web/core/network/rpc_service";
 import { browser } from "@web/core/browser/browser";
 
-/* eslint-disable */
-/**
- * The following sections are from libraries, they have been slightly modified
- * to allow patching them during tests, but should not be linted, so that we can
- * keep a minimal diff that is easy to reapply when upgrading
- */
 // -----------------------------------------------------------------------------
 // Content Disposition Library
 // -----------------------------------------------------------------------------
@@ -322,16 +316,13 @@ function _download(data, filename, mimetype) {
         anchor.href = url; // assign href prop to temp anchor
         if (anchor.href.indexOf(url) !== -1) {
             // if the browser determines that it's a potentially valid url path:
-            return new Promise((resolve, reject) => {
-                let xhr = new browser.XMLHttpRequest();
-                xhr.open("GET", url, true);
-                configureBlobDownloadXHR(xhr, {
-                    onSuccess: resolve,
-                    onFailure: reject,
-                    url
-                });
-                xhr.send();
-            });
+            let ajax = new XMLHttpRequest();
+            ajax.open("GET", url, true);
+            configureBlobDownloadXHR(ajax);
+            setTimeout(() => {
+                ajax.send();
+            }, 0); // allows setting custom ajax headers using the return:
+            return ajax;
         }
     }
 
@@ -371,7 +362,7 @@ function _download(data, filename, mimetype) {
             anchor.href = url;
             anchor.setAttribute("download", fileName);
             anchor.className = "download-js-link";
-            anchor.innerText = _t("downloading...");
+            anchor.innerText = _lt("downloading...");
             anchor.style.display = "none";
             document.body.appendChild(anchor);
             setTimeout(() => {
@@ -429,7 +420,7 @@ function _download(data, filename, mimetype) {
         if (typeof blob === "string" || blob.constructor === toString) {
             try {
                 return saver(`data:${mimeType};base64,${self.btoa(blob)}`);
-            } catch {
+            } catch (_y) {
                 return saver(`data:${mimeType},${encodeURIComponent(blob)}`);
             }
         }
@@ -443,7 +434,6 @@ function _download(data, filename, mimetype) {
     }
     return true;
 }
-/* eslint-enable */
 
 // -----------------------------------------------------------------------------
 // Exported download functions
@@ -503,7 +493,6 @@ download._download = (options) => {
         configureBlobDownloadXHR(xhr, {
             onSuccess: resolve,
             onFailure: reject,
-            url: options.url,
         });
         xhr.send(data);
     });
@@ -518,12 +507,8 @@ download._download = (options) => {
  * @param {object} [options]
  * @param {(filename: string) => void} [options.onSuccess]
  * @param {(Error) => void} [options.onFailure]
- * @param {string} [options.url]
  */
-export function configureBlobDownloadXHR(
-    xhr,
-    { onSuccess = () => {}, onFailure = () => {}, url } = {}
-) {
+export function configureBlobDownloadXHR(xhr, { onSuccess = () => {}, onFailure = () => {} } = {}) {
     xhr.responseType = "blob";
     xhr.onload = () => {
         const mimetype = xhr.response.type;
@@ -537,7 +522,7 @@ export function configureBlobDownloadXHR(
             onSuccess(filename);
         } else if (xhr.status === 502) {
             // If Odoo is behind another server (nginx)
-            onFailure(new ConnectionLostError(url));
+            onFailure(new ConnectionLostError());
         } else {
             const decoder = new FileReader();
             decoder.onload = () => {
@@ -570,6 +555,6 @@ export function configureBlobDownloadXHR(
         }
     };
     xhr.onerror = () => {
-        onFailure(new ConnectionLostError(url));
+        onFailure(new ConnectionLostError());
     };
 }

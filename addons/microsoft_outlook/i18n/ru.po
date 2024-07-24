@@ -3,17 +3,18 @@
 # 	* microsoft_outlook
 # 
 # Translators:
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
-# Martin Trigaux, 2023
-# ILMIR <karamov@it-projects.info>, 2023
+# Ivan Kropotkin <yelizariev@itpp.dev>, 2022
+# Сергей Шебанин <sergey@shebanin.ru>, 2022
+# Martin Trigaux, 2022
+# ILMIR <karamov@it-projects.info>, 2022
 # Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-29 10:45+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2023-05-23 08:23+0000\n"
+"PO-Revision-Date: 2022-09-22 05:53+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -25,52 +26,46 @@ msgstr ""
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
+msgid ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                        Connect your Outlook account"
+msgstr ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                       Подключите ваш аккаунт Outlook"
+
+#. module: microsoft_outlook
+#: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
+#: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
 msgstr "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
-#: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                        Connect your Outlook account"
-msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
-"                        Подключите учетную запись Outlook"
-
-#. module: microsoft_outlook
-#: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
-msgid ""
-"<span invisible=\"server_type != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('server_type', '!=', 'outlook'), ('microsoft_outlook_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Outlook Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"server_type != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
-"                        Токен Outlook действителен\n"
-"                    </span>"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid ""
-"<span invisible=\"smtp_authentication != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span attrs=\"{'invisible': ['|', ('smtp_authentication', '!=', 'outlook'), ('microsoft_outlook_refresh_token', '=', False)]}\" class=\"badge text-bg-success\">\n"
 "                        Outlook Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"smtp_authentication != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
-"                        Токен Outlook действителен\n"
-"                    </span>"
 
 #. module: microsoft_outlook
 #. odoo-python
 #: code:addons/microsoft_outlook/models/microsoft_outlook_mixin.py:0
 #, python-format
 msgid "An error occurred when fetching the access token. %s"
-msgstr "При получении маркера доступа произошла ошибка. %s"
+msgstr "Возникла ошибка при получении токена доступа. %s"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_ir_mail_server__smtp_authentication
 msgid "Authenticate with"
-msgstr "Пройдите аутентификацию с помощью"
+msgstr "Авторизоваться через"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_fetchmail_server__microsoft_outlook_uri
@@ -82,7 +77,7 @@ msgstr "URI аутентификации"
 #. module: microsoft_outlook
 #: model:ir.model,name:microsoft_outlook.model_res_config_settings
 msgid "Config Settings"
-msgstr "Параметры конфигурации"
+msgstr "Конфигурационные настройки"
 
 #. module: microsoft_outlook
 #. odoo-python
@@ -109,12 +104,12 @@ msgstr ""
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.microsoft_outlook_oauth_error
 msgid "Go back to your mail server"
-msgstr "Вернитесь на свой почтовый сервер"
+msgstr "Перейти обратно на почтовый сервер"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.res_config_settings_view_form
 msgid "ID"
-msgstr "ID"
+msgstr "Идентификатор"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.res_config_settings_view_form
@@ -134,56 +129,56 @@ msgid ""
 "Incorrect Connection Security for Outlook mail server %r. Please set it to "
 "\"TLS (STARTTLS)\"."
 msgstr ""
-"Неверная защита соединения для почтового сервера Outlook %r. Пожалуйста, "
-"установите значение \"TLS (STARTTLS)\"."
+"Установлено неверное значение Безопасности доступа для почтового сервера "
+"Outlook %r. Пожалуйста, укажите \"TLS (STARTTLS)\"."
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_fetchmail_server__is_microsoft_outlook_configured
 #: model:ir.model.fields,field_description:microsoft_outlook.field_ir_mail_server__is_microsoft_outlook_configured
 #: model:ir.model.fields,field_description:microsoft_outlook.field_microsoft_outlook_mixin__is_microsoft_outlook_configured
 msgid "Is Outlook Credential Configured"
-msgstr "Настроена ли учетная запись Outlook"
+msgstr "Настроены ли учетные данные Outlook"
 
 #. module: microsoft_outlook
 #: model:ir.model,name:microsoft_outlook.model_ir_mail_server
 msgid "Mail Server"
-msgstr "Почтовый Сервер"
+msgstr "Почтовый сервер"
 
 #. module: microsoft_outlook
 #: model:ir.model,name:microsoft_outlook.model_microsoft_outlook_mixin
 msgid "Microsoft Outlook Mixin"
-msgstr "Миксин Microsoft Outlook"
+msgstr "Microsoft Outlook Mixin"
 
 #. module: microsoft_outlook
 #. odoo-python
 #: code:addons/microsoft_outlook/models/microsoft_outlook_mixin.py:0
 #, python-format
 msgid "Only the administrator can link an Outlook mail server."
-msgstr "Только администратор может связать почтовый сервер Outlook."
+msgstr "Связывать почтовый сервер Outlook могут только администраторы."
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_fetchmail_server__microsoft_outlook_access_token
 #: model:ir.model.fields,field_description:microsoft_outlook.field_ir_mail_server__microsoft_outlook_access_token
 #: model:ir.model.fields,field_description:microsoft_outlook.field_microsoft_outlook_mixin__microsoft_outlook_access_token
 msgid "Outlook Access Token"
-msgstr "Токен доступа к Outlook"
+msgstr "Токен доступа Outlook"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_fetchmail_server__microsoft_outlook_access_token_expiration
 #: model:ir.model.fields,field_description:microsoft_outlook.field_ir_mail_server__microsoft_outlook_access_token_expiration
 #: model:ir.model.fields,field_description:microsoft_outlook.field_microsoft_outlook_mixin__microsoft_outlook_access_token_expiration
 msgid "Outlook Access Token Expiration Timestamp"
-msgstr "Временная метка истечения срока действия токена доступа к Outlook"
+msgstr "Время истечения срока действия токена доступа Outlook"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_res_config_settings__microsoft_outlook_client_identifier
 msgid "Outlook Client Id"
-msgstr "Идентификатор клиента Outlook"
+msgstr "Id клиента Outlook"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,field_description:microsoft_outlook.field_res_config_settings__microsoft_outlook_client_secret
 msgid "Outlook Client Secret"
-msgstr "Секрет клиента Outlook"
+msgstr "Секретный ключ клиента Outlook"
 
 #. module: microsoft_outlook
 #: model:ir.model.fields.selection,name:microsoft_outlook.selection__fetchmail_server__server_type__outlook
@@ -203,7 +198,7 @@ msgstr "Токен обновления Outlook"
 #: code:addons/microsoft_outlook/models/microsoft_outlook_mixin.py:0
 #, python-format
 msgid "Please configure your Outlook credentials."
-msgstr "Пожалуйста, настройте учетные данные Outlook."
+msgstr "Пожалуйста настройте учетные данные Outlook"
 
 #. module: microsoft_outlook
 #. odoo-python
@@ -233,13 +228,13 @@ msgid ""
 "Please leave the password field empty for Outlook mail server %r. The OAuth "
 "process does not require it"
 msgstr ""
-"Пожалуйста, оставьте поле пароля пустым для почтового сервера Outlook %r. "
-"Процесс OAuth не требует этого"
+"Пожалуйста оставьте поле для ввода пароля пустым для почтового сервера "
+"Outlook %r. Это не требуется для протокола OAuth."
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid "Read More"
-msgstr "Подробнее"
+msgstr "Читать далее"
 
 #. module: microsoft_outlook
 #. odoo-python
@@ -270,15 +265,24 @@ msgid ""
 "Setup your Outlook API credentials in the general settings to link a Outlook"
 " account."
 msgstr ""
-"Установите учетные данные Outlook API в общих настройках, чтобы связать "
-"учетную запись Outlook."
+"Укажите ваши учетные данные для Outlook API в общих настройках для того, "
+"чтобы привязать аккаунт Outlook."
 
 #. module: microsoft_outlook
 #: model:ir.model.fields,help:microsoft_outlook.field_fetchmail_server__microsoft_outlook_uri
 #: model:ir.model.fields,help:microsoft_outlook.field_ir_mail_server__microsoft_outlook_uri
 #: model:ir.model.fields,help:microsoft_outlook.field_microsoft_outlook_mixin__microsoft_outlook_uri
 msgid "The URL to generate the authorization code from Outlook"
-msgstr "URL-адрес для генерации кода авторизации из Outlook"
+msgstr "URL для генерации кода авторизации от Outlook"
+
+#. module: microsoft_outlook
+#. odoo-python
+#: code:addons/microsoft_outlook/models/ir_mail_server.py:0
+#, python-format
+msgid ""
+"This server %r can only be used for your personal email address. Please fill"
+" the \"from_filter\" field with %r."
+msgstr ""
 
 #. module: microsoft_outlook
 #. odoo-python

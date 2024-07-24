@@ -287,7 +287,7 @@ class Import(models.TransientModel):
             return importable_fields
 
         model_fields = Model.fields_get()
-        blacklist = models.MAGIC_COLUMNS
+        blacklist = models.MAGIC_COLUMNS + [Model.CONCURRENCY_CHECK_FIELD]
         for name, field in model_fields.items():
             if name in blacklist:
                 continue
@@ -296,7 +296,13 @@ class Import(models.TransientModel):
             if field.get('deprecated', False) is not False:
                 continue
             if field.get('readonly'):
-                continue
+                states = field.get('states')
+                if not states:
+                    continue
+                # states = {state: [(attr, value), (attr2, value2)], state2:...}
+                if not any(attr == 'readonly' and value is False
+                           for attr, value in itertools.chain.from_iterable(states.values())):
+                    continue
             field_value = {
                 'id': name,
                 'name': name,
@@ -1389,9 +1395,7 @@ class Import(models.TransientModel):
             if dryrun:
                 self._cr.execute('ROLLBACK TO SAVEPOINT import')
                 # cancel all changes done to the registry/ormcache
-                # we need to clear the cache in case any created id was added to an ormcache and would be missing afterward
-                self.pool.clear_all_caches()
-                # don't propagate to other workers since it was rollbacked
+                self.pool.clear_caches()
                 self.pool.reset_changes()
             else:
                 self._cr.execute('RELEASE SAVEPOINT import')
@@ -1567,7 +1571,7 @@ class Import(models.TransientModel):
                     if fallback_values[field]['field_type'] == "boolean":
                         value = value if value.lower() in ('0', '1', 'true', 'false') else fallback_value
                     # Selection
-                    elif fallback_values[field]['field_type'] == "selection" and value.lower() not in fallback_values[field]["selection_values"]:
+                    elif value.lower() not in fallback_values[field]["selection_values"]:
                         value = fallback_value if fallback_value != 'skip' else None  # don't set any value if we skip
 
                     input_file_data[record_index][column_index] = value

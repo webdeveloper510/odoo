@@ -25,8 +25,6 @@ class TestWebsiteSaleImage(odoo.tests.HttpCase):
         color_blue = '#4169E1'
         name_blue = 'Royal Blue'
 
-        self.env['product.pricelist'].sudo().search([]).action_archive()
-
         # create the color attribute
         product_attribute = self.env['product.attribute'].create({
             'name': 'Beautiful Color',
@@ -91,7 +89,7 @@ class TestWebsiteSaleImage(odoo.tests.HttpCase):
         image_png = base64.b64encode(f.read())
 
         # create the template, without creating the variants
-        template = self.env['product.template'].with_context(create_product_product=False).create({
+        template = self.env['product.template'].with_context(create_product_product=True).create({
             'name': 'A Colorful Image',
             'product_template_image_ids': [(0, 0, {'name': 'image 1', 'image_1920': image_gif}), (0, 0, {'name': 'image 4', 'image_1920': image_svg})],
         })
@@ -214,9 +212,23 @@ class TestWebsiteSaleImage(odoo.tests.HttpCase):
             [('key', '=', 'website_sale.product_picture_magnify_click')]
         ).write({'active': True})
 
-        # Ensure that no pricelist is available during the test.
+        # Ensure that only one pricelist is available during the test, with the company currency.
         # This ensures that tours with triggers on the amounts will run properly.
-        self.env['product.pricelist'].search([]).action_archive()
+        # To this purpose, we will ensure that only the public_pricelist is available for the default_website.
+        public_pricelist = self.env.ref('product.list0')
+        default_website = self.env.ref('website.default_website')
+        website_2 = self.env.ref('website.website2', raise_if_not_found=False)
+        if not website_2:
+            website_2 = self.env['website'].create({
+                'name': 'My Website 2',
+                'domain': '',
+                'sequence': 20,
+            })
+        self.env['product.pricelist'].search([
+            ('id', '!=', public_pricelist.id),
+            ('website_id', 'in', [False, default_website.id])]
+        ).website_id = website_2
+        public_pricelist.currency_id = self.env.company.currency_id
 
         self.start_tour("/", 'shop_zoom', login="admin")
 
@@ -301,7 +313,7 @@ class TestWebsiteSaleImage(odoo.tests.HttpCase):
         }])
 
         # create the template, without creating the variants
-        template = self.env['product.template'].with_context(create_product_product=False).create({
+        template = self.env['product.template'].with_context(create_product_product=True).create({
             'name': 'Test subject',
         })
 
@@ -380,7 +392,7 @@ class TestEnvironmentWebsiteSaleImage(odoo.tests.HttpCase):
         f.seek(0)
         blue_image = base64.b64encode(f.read())
 
-        self.template = self.env['product.template'].with_context(create_product_product=False).create({
+        self.template = self.env['product.template'].with_context(create_product_product=True).create({
             'name': 'Test Remove Image',
             'image_1920': blue_image,
         })

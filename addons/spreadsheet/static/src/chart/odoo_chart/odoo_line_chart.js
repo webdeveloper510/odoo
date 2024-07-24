@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import * as spreadsheet from "@odoo/o-spreadsheet";
+import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
 import { _t } from "@web/core/l10n/translation";
 import { OdooChart } from "./odoo_chart";
 import { LINE_FILL_TRANSPARENCY } from "@web/views/graph/graph_renderer";
@@ -48,10 +48,9 @@ chartRegistry.add("odoo_line", {
 function createOdooChartRuntime(chart, getters) {
     const background = chart.background || "#FFFFFF";
     const { datasets, labels } = chart.dataSource.getData();
-    const locale = getters.getLocale();
-    const chartJsConfig = getLineConfiguration(chart, labels, locale);
+    const chartJsConfig = getLineConfiguration(chart, labels);
     const colors = new ChartColors();
-    for (let [index, { label, data, cumulatedStart }] of datasets.entries()) {
+    for (let [index, { label, data }] of datasets.entries()) {
         const color = colors.next();
         const backgroundRGBA = colorToRGBA(color);
         if (chart.stacked) {
@@ -59,7 +58,7 @@ function createOdooChartRuntime(chart, getters) {
             backgroundRGBA.a = LINE_FILL_TRANSPARENCY;
         }
         if (chart.cumulative) {
-            let accumulator = cumulatedStart;
+            let accumulator = 0;
             data = data.map((value) => {
                 accumulator += value;
                 return accumulator;
@@ -81,18 +80,18 @@ function createOdooChartRuntime(chart, getters) {
     return { background, chartJsConfig };
 }
 
-function getLineConfiguration(chart, labels, locale) {
+function getLineConfiguration(chart, labels) {
     const fontColor = chartFontColor(chart.background);
-    const config = getDefaultChartJsRuntime(chart, labels, fontColor, { locale });
+    const config = getDefaultChartJsRuntime(chart, labels, fontColor);
     config.type = chart.type.replace("odoo_", "");
     const legend = {
         ...config.options.legend,
         display: chart.legendPosition !== "none",
         labels: {
-            color: fontColor,
+            fontColor,
             generateLabels(chart) {
                 const { data } = chart;
-                const labels = window.Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                const labels = window.Chart.defaults.global.legend.labels.generateLabels(chart);
                 for (const [index, label] of labels.entries()) {
                     label.fillStyle = data.datasets[index].borderColor;
                 }
@@ -101,33 +100,36 @@ function getLineConfiguration(chart, labels, locale) {
         },
     };
     legend.position = chart.legendPosition;
-    config.options.plugins = config.options.plugins || {};
-    config.options.plugins.legend = legend;
+    config.options.legend = legend;
     config.options.layout = {
         padding: { left: 20, right: 20, top: chart.title ? 10 : 25, bottom: 10 },
     };
     config.options.scales = {
-        x: {
-            ticks: {
-                // x axis configuration
-                maxRotation: 60,
-                minRotation: 15,
-                padding: 5,
-                labelOffset: 2,
-                color: fontColor,
+        xAxes: [
+            {
+                ticks: {
+                    // x axis configuration
+                    maxRotation: 60,
+                    minRotation: 15,
+                    padding: 5,
+                    labelOffset: 2,
+                    fontColor,
+                },
             },
-        },
-        y: {
-            position: chart.verticalAxisPosition,
-            ticks: {
-                color: fontColor,
-                // y axis configuration
+        ],
+        yAxes: [
+            {
+                position: chart.verticalAxisPosition,
+                ticks: {
+                    fontColor,
+                    // y axis configuration
+                    beginAtZero: true, // the origin of the y axis is always zero
+                },
             },
-            beginAtZero: true, // the origin of the y axis is always zero
-        },
+        ],
     };
     if (chart.stacked) {
-        config.options.scales.y.stacked = true;
+        config.options.scales.yAxes[0].stacked = true;
     }
     return config;
 }

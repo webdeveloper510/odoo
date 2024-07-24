@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
@@ -32,10 +33,6 @@ class ResCompany(models.Model):
         store=True, readonly=False, help="Fiscal code of your company")
     l10n_it_tax_system = fields.Selection(selection=TAX_SYSTEM, string="Tax System",
         help="Please select the Tax system to which you are subjected.")
-    l10n_it_edi_proxy_user_id = fields.Many2one(
-        comodel_name="account_edi_proxy_client.user",
-        compute="_compute_l10n_it_edi_proxy_user_id",
-    )
 
     # Economic and Administrative Index
     l10n_it_has_eco_index = fields.Boolean(default=False,
@@ -110,49 +107,6 @@ class ResCompany(models.Model):
                 raise ValidationError(_("Your tax representative partner must have a tax number."))
             if not record.l10n_it_tax_representative_partner_id.country_id:
                 raise ValidationError(_("Your tax representative partner must have a country."))
-
-    @api.depends("account_edi_proxy_client_ids")
-    def _compute_l10n_it_edi_proxy_user_id(self):
-        for company in self:
-            company.l10n_it_edi_proxy_user_id = company.account_edi_proxy_client_ids.filtered(lambda x: x.proxy_type == 'l10n_it_edi')
-
-    def _l10n_it_edi_export_check(self):
-        checks = {
-            'company_vat_codice_fiscale_missing': {
-                'fields': [('vat', 'l10n_it_codice_fiscale')],
-                'message': _("Company/ies should have a VAT number or Codice Fiscale."),
-            },
-            'company_address_missing': {
-                'fields': [('street', 'street2'), ('zip',), ('city',), ('country_id',)],
-                'message': _("Company/ies should have a complete address, verify their Street, City, Zipcode and Country."),
-            },
-            'company_l10n_it_tax_system_missing': {
-                'fields': [('l10n_it_tax_system',)],
-                'message': _("Company/ies should have a Tax System"),
-            },
-        }
-        errors = {}
-        for key, check in checks.items():
-            for fields_tuple in check.pop('fields'):
-                if invalid_records := self.filtered(lambda record: not any(record[field] for field in fields_tuple)):
-                    errors[key] = {
-                        'message': check['message'],
-                        'action_text': _("View Company/ies"),
-                        'action': invalid_records._get_records_action(name=_("Check Company Data")),
-                    }
-        if self.filtered(lambda x: not x.l10n_it_edi_proxy_user_id):
-            new_context = {
-                **self.env.context,
-                'module': 'account',
-                'default_search_setting': _("Italian Electronic Invoicing"),
-                'bin_size': False,
-            }
-            errors['settings_l10n_it_edi_proxy_user_id'] = {
-                'message': _("You must accept the terms and conditions in the Settings to use the IT EDI."),
-                'action_text': _("View Settings"),
-                'action': self.env['res.config.settings']._get_records_action(name=_("Settings"), context=new_context),
-            }
-        return errors
 
     @api.onchange("l10n_it_has_tax_representative")
     def _onchange_l10n_it_has_tax_represeentative(self):

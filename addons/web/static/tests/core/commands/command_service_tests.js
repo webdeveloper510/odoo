@@ -9,7 +9,7 @@ import { dialogService } from "@web/core/dialog/dialog_service";
 import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
 import { registry } from "@web/core/registry";
 import { uiService, useActiveElement } from "@web/core/ui/ui_service";
-import testUtils from "@web/../tests/legacy/helpers/test_utils";
+import testUtils from "web.test_utils";
 import { clearRegistryWithCleanup, makeTestEnv } from "../../helpers/mock_env";
 import {
     click,
@@ -42,13 +42,13 @@ export async function backspaceSearchBar() {
 }
 
 class TestComponent extends Component {
-    get OverlayContainer() {
-        return registry.category("main_components").get("OverlayContainer");
+    get DialogContainer() {
+        return registry.category("main_components").get("DialogContainer");
     }
 }
 TestComponent.template = xml`
   <div>
-    <t t-component="OverlayContainer.Component" t-props="OverlayContainer.props" />
+    <t t-component="DialogContainer.Component" t-props="DialogContainer.props" />
   </div>
 `;
 
@@ -236,7 +236,7 @@ QUnit.test("global command with hotkey", async (assert) => {
             useActiveElement("active");
         }
     }
-    MyComponent.template = xml`<div t-ref="active"><button/></div>`;
+    MyComponent.template = xml`<div t-ref="active"></div>`;
     await mount(MyComponent, target, { env });
 
     triggerHotkey("a");
@@ -244,131 +244,6 @@ QUnit.test("global command with hotkey", async (assert) => {
     triggerHotkey("b");
     await nextTick();
     assert.verifySteps([globalHotkey]);
-});
-
-QUnit.test("command with hotkey and isAvailable", async (assert) => {
-    assert.expect(3);
-
-    const hotkey = "a";
-    let isAvailable = false;
-    env.services.command.add("test", () => assert.step(hotkey), {
-        hotkey,
-        isAvailable: () => isAvailable,
-    });
-    await nextTick();
-
-    triggerHotkey("a");
-    await nextTick();
-    assert.verifySteps([]);
-
-    isAvailable = true;
-    triggerHotkey("a");
-    await nextTick();
-    assert.verifySteps([hotkey]);
-});
-
-QUnit.test("useCommand hook with hotkey and hotkeyOptions", async (assert) => {
-    const allowRepeatKey = "a";
-    const disallowRepeatKey = "b";
-    const defaultBehaviourKey = "c";
-    class MyComponent extends TestComponent {
-        setup() {
-            useCommand("Allow repeat key", () => assert.step(allowRepeatKey), {
-                hotkey: allowRepeatKey,
-                hotkeyOptions: {
-                    allowRepeat: true,
-                },
-            });
-            useCommand("Disallow repeat key", () => assert.step(disallowRepeatKey), {
-                hotkey: disallowRepeatKey,
-                hotkeyOptions: {
-                    allowRepeat: false,
-                },
-            });
-            useCommand("Default repeat key", () => assert.step(defaultBehaviourKey), {
-                hotkey: defaultBehaviourKey,
-            });
-        }
-    }
-    await mount(MyComponent, target, { env });
-
-    // Dispatch the three keys without repeat:
-    triggerHotkey(allowRepeatKey);
-    triggerHotkey(disallowRepeatKey);
-    triggerHotkey(defaultBehaviourKey);
-    await nextTick();
-
-    assert.verifySteps([allowRepeatKey, disallowRepeatKey, defaultBehaviourKey]);
-
-    // Dispatch the three keys with repeat:
-    triggerHotkey(allowRepeatKey, false, { repeat: true });
-    triggerHotkey(disallowRepeatKey, false, { repeat: true });
-    triggerHotkey(defaultBehaviourKey, false, { repeat: true });
-    await nextTick();
-
-    assert.verifySteps([allowRepeatKey]);
-});
-
-QUnit.test("useCommand hook with hotkey and isAvailable", async (assert) => {
-    const hotkeys = ["a", "b", "c", "d", "e"];
-    class MyComponent extends TestComponent {
-        setup() {
-            useCommand("Command 1", () => assert.step(hotkeys[0]), {
-                hotkey: hotkeys[0],
-                isAvailable: () => true,
-                hotkeyOptions: {
-                    allowRepeat: true,
-                    isAvailable: () => true,
-                },
-            });
-            useCommand("Command 2", () => assert.step(hotkeys[1]), {
-                hotkey: hotkeys[1],
-                isAvailable: () => true,
-                hotkeyOptions: {
-                    allowRepeat: true,
-                    isAvailable: () => false,
-                },
-            });
-            useCommand("Command 3", () => assert.step(hotkeys[2]), {
-                hotkey: hotkeys[2],
-                isAvailable: () => false,
-                hotkeyOptions: {
-                    allowRepeat: true,
-                    isAvailable: () => true,
-                },
-            });
-            useCommand("Command 4", () => assert.step(hotkeys[3]), {
-                hotkey: hotkeys[3],
-                isAvailable: () => true,
-                hotkeyOptions: {
-                    allowRepeat: true,
-                },
-            });
-            useCommand("Command 5", () => assert.step(hotkeys[4]), {
-                hotkey: hotkeys[4],
-                isAvailable: () => false,
-                hotkeyOptions: {
-                    allowRepeat: true,
-                },
-            });
-        }
-    }
-    await mount(MyComponent, target, { env });
-
-    for (const hotkey of hotkeys) {
-        triggerHotkey(hotkey);
-    }
-    await nextTick();
-    assert.verifySteps(["a", "d"]);
-
-    triggerHotkey("control+k");
-    await nextTick();
-    assert.containsOnce(target, ".o_command_palette");
-    assert.containsN(target, ".o_command", 3);
-    assert.deepEqual(
-        [...target.querySelectorAll(".o_command")].map((el) => el.textContent),
-        ["Command 1A", "Command 2B", "Command 4D"]
-    );
 });
 
 QUnit.test("open command palette with command config", async (assert) => {

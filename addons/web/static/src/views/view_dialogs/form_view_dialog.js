@@ -11,7 +11,6 @@ export class FormViewDialog extends Component {
         super.setup();
 
         this.modalRef = useChildRef();
-        this.env.dialogData.dismiss = () => this.discardRecord();
 
         const buttonTemplate = this.props.isToMany
             ? "web.FormViewDialog.ToMany.buttons"
@@ -29,9 +28,14 @@ export class FormViewDialog extends Component {
             viewId: this.props.viewId || false,
             preventCreate: this.props.preventCreate,
             preventEdit: this.props.preventEdit,
-            discardRecord: this.discardRecord.bind(this),
+            discardRecord: async () => {
+                if (this.props.onRecordDiscarded) {
+                    await this.props.onRecordDiscarded();
+                }
+                this.props.close();
+            },
             saveRecord: async (record, { saveAndNew }) => {
-                const saved = await record.save({ reload: false });
+                const saved = await record.save({ stayInEdition: true, noReload: true });
                 if (saved) {
                     await this.props.onRecordSaved(record);
                     if (saveAndNew) {
@@ -41,7 +45,7 @@ export class FormViewDialog extends Component {
                                 delete context[k];
                             }
                         });
-                        await record.model.load({ resId: false, context });
+                        await record.model.load({ resId: null, context });
                     } else {
                         this.props.close();
                     }
@@ -66,13 +70,6 @@ export class FormViewDialog extends Component {
                 }
             }
         });
-    }
-
-    async discardRecord() {
-        if (this.props.onRecordDiscarded) {
-            await this.props.onRecordDiscarded();
-        }
-        this.props.close();
     }
 }
 

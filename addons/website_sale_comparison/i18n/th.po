@@ -3,15 +3,19 @@
 # 	* website_sale_comparison
 # 
 # Translators:
-# Wil Odoo, 2023
+# Amin Cheloh <amincheloh@gmail.com>, 2022
+# Odoo Thaidev <odoothaidev@gmail.com>, 2022
+# Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2022
+# Martin Trigaux, 2022
+# Wichanon Jamwutthipreecha, 2022
 # Rasareeyar Lappiam, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2022-12-15 12:45+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
 "Last-Translator: Rasareeyar Lappiam, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
@@ -41,15 +45,6 @@ msgstr ""
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid ""
-"<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
-"role=\"img\" aria-label=\"Collapse\" title=\"Collapse\"/><span>Tags</span>"
-msgstr ""
-"<i class=\"fa fa-chevron-circle-down o_product_comparison_collpase\" "
-"role=\"รูปภาพ\" aria-label=\"ยุบ\" title=\"ยุบ\"/><span>แท็ก</span>"
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
 msgid "<i class=\"fa fa-shopping-cart me-2\"/>Add to Cart"
 msgstr "<i class=\"fa fa-shopping-cart me-2\"/>หยิบลงตะกร้า"
 
@@ -62,12 +57,6 @@ msgstr "<i class=\"fa fa-trash\" role=\"img\" aria-label=\"ลบออก\"/>"
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_add_to_compare
 msgid "<span class=\"fa fa-exchange me-2\"/>Compare"
 msgstr "<span class=\"fa fa-exchange me-2\"/>เปรียบเทียบ"
-
-#. module: website_sale_comparison
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body
-#: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
-msgid "<span>Tags</span>"
-msgstr "<span>แท็ก</span>"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
@@ -94,6 +83,11 @@ msgstr "หมวดหมู่คุณลักษณะ"
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.snippet_options
 msgid "Bottom of Page"
 msgstr "ด้านล่างของหน้า"
+
+#. module: website_sale_comparison
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute__category_id
+msgid "Category"
+msgstr "หมวดหมู่"
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__name
@@ -175,6 +169,11 @@ msgid "ID"
 msgstr "ไอดี"
 
 #. module: website_sale_comparison
+#: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category____last_update
+msgid "Last Modified on"
+msgstr "แก้ไขครั้งล่าสุดเมื่อ"
+
+#. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category__write_uid
 msgid "Last Updated by"
 msgstr "อัปเดตครั้งล่าสุดโดย"
@@ -211,7 +210,7 @@ msgstr "หมวดหมู่คุณลักษณะผลิตภัณ
 #. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
-msgstr "รายการคุณลักษณะเทมเพลตสินค้า"
+msgstr "ไลน์คุณลักษณะเทมเพลตสินค้า"
 
 #. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_product
@@ -243,9 +242,9 @@ msgstr "ลำดับ"
 #: model:ir.model.fields,help:website_sale_comparison.field_product_attribute__category_id
 msgid ""
 "Set a category to regroup similar attributes under the same section in the "
-"Comparison page of eCommerce."
+"Comparison page of eCommerce"
 msgstr ""
-"ตั้งค่าหมวดหมู่เพื่อจัดกลุ่มแอตทริบิวต์ที่คล้ายกันใหม่ภายใต้ส่วนเดียวกันในหน้าการเปรียบเทียบของอีคอมเมิร์ซ"
+"ตั้งค่าหมวดหมู่เพื่อจัดกลุ่มคุณลักษณะที่คล้ายกันใหม่ภายใต้ส่วนเดียวกันในหน้าเปรียบเทียบของอีคอมเมิร์ซ"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_compare
@@ -287,11 +286,6 @@ msgstr "น้ำหนัก"
 #, python-format
 msgid "You can compare max 4 products."
 msgstr "คุณสามารถเปรียบเทียบผลิตภัณฑ์ได้สูงสุด 4 รายการ"
-
-#. module: website_sale_comparison
-#: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute__category_id
-msgid "eCommerce Category"
-msgstr "หมวดหมู่อีคอมเมิร์ซ"
 
 #. module: website_sale_comparison
 #: model_terms:ir.ui.view,arch_db:website_sale_comparison.product_attributes_body

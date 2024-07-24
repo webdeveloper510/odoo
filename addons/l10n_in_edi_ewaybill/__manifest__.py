@@ -2,8 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     "name": """Indian - E-waybill""",
-    "countries": ["in"],
     "version": "1.03.00",
+    "icon": "/l10n_in/static/description/icon.png",
     "category": "Accounting/Localizations/EDI",
     "depends": [
         "l10n_in_edi",
@@ -29,8 +29,11 @@ Step 4: Repeat steps 1,2,3 for all GSTIN you have in odoo. If you have a multi-c
     ],
     "demo": [
         "demo/demo_company.xml",
+        "demo/res_partner_demo.xml",
+        "demo/account_invoice_demo.xml",
     ],
     "installable": True,
-    # not auto_install because the company can be related to the service industry
+    # not applicable when company is related to service industry so auto install is False
+    "auto_install": False,
     "license": "LGPL-3",
 }

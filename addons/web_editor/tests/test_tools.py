@@ -80,28 +80,19 @@ class TestVideoUtils(common.BaseCase):
         self.assertEqual('B6dXGTxggTG', tools.get_video_source_data(TestVideoUtils.urls['instagram'])[1])
 
     def test_get_video_url_data(self):
-        self.assertEqual(4, len(tools.get_video_url_data(TestVideoUtils.urls['youtube'])))
+        self.assertEqual(2, len(tools.get_video_url_data(TestVideoUtils.urls['youtube'])))
         #youtube
         self.assertEqual('youtube', tools.get_video_url_data(TestVideoUtils.urls['youtube'])['platform'])
         #vimeo
         for key in ['vimeo', 'vimeo_player']:
             self.assertEqual(tools.get_video_url_data(TestVideoUtils.urls[key]), {
                 'platform': 'vimeo',
-                'embed_url': '//player.vimeo.com/video/395399735?autoplay=0',
-                'video_id': '395399735',
-                'params': {
-                    'autoplay': 0
-                }
+                'embed_url': '//player.vimeo.com/video/395399735?autoplay=0'
             })
         for key in ['vimeo_unlisted_video', 'vimeo_player_unlisted_video']:
             self.assertEqual(tools.get_video_url_data(TestVideoUtils.urls[key]), {
                 'platform': 'vimeo',
-                'embed_url': '//player.vimeo.com/video/795669787?autoplay=0&h=0763fdb816',
-                'video_id': '795669787',
-                'params': {
-                    'autoplay': 0,
-                    'h': '0763fdb816'
-                }
+                'embed_url': '//player.vimeo.com/video/795669787?autoplay=0&h=0763fdb816'
             })
         #dailymotion
         self.assertEqual('dailymotion', tools.get_video_url_data(TestVideoUtils.urls['dailymotion'])['platform'])

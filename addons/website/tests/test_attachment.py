@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from urllib.parse import urlparse
 
 import odoo.tests
@@ -54,6 +51,3 @@ class TestWebsiteAttachment(odoo.tests.HttpCase):
 
         req = self.opener.get(base + '/web/image/test.an_image_redirect_301', allow_redirects=True)
         self.assertEqual(req.status_code, 200)
-
-    def test_02_image_quality(self):
-        self.start_tour(self.env['website'].get_client_action_url('/'), 'website_image_quality', login="admin")

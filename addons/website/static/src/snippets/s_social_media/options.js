@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import fonts from '@web_editor/js/wysiwyg/fonts';
-import weUtils from '@web_editor/js/common/utils';
-import options from '@web_editor/js/editor/snippets.options';
-import { _t } from "@web/core/l10n/translation";
-import { ICON_SELECTOR } from "@web_editor/js/editor/odoo-editor/src/utils/utils";
+import fonts from 'wysiwyg.fonts';
+import {generateHTMLId} from 'web_editor.utils';
+import options from 'web_editor.snippets.options';
+import {_t} from 'web.core';
+import {ICON_SELECTOR} from "@web_editor/js/editor/odoo-editor/src/utils/utils";
 
 let dbSocialValues;
 let dbSocialValuesProm;
@@ -12,16 +12,8 @@ const clearDbSocialValuesCache = () => {
     dbSocialValuesProm = undefined;
     dbSocialValues = undefined;
 };
-const getDbSocialValuesCache = () => {
-    return dbSocialValues;
-};
 
 options.registry.SocialMedia = options.Class.extend({
-    init() {
-        this._super(...arguments);
-        this.orm = this.bindService("orm");
-    },
-
     /**
      * @override
      */
@@ -64,7 +56,11 @@ options.registry.SocialMedia = options.Class.extend({
                 websiteId = ctx['website_id'];
             },
         });
-        await this.orm.write("website", [websiteId], dbSocialValues);
+        await this._rpc({
+            model: 'website',
+            method: 'write',
+            args: [[websiteId], dbSocialValues],
+        });
     },
     /**
      * @override
@@ -84,29 +80,6 @@ options.registry.SocialMedia = options.Class.extend({
      * @see this.selectClass for parameters
      */
     async renderListItems(previewMode, widgetValue, params) {
-        const ariaLabelsOfSocialNetworks = {
-            "facebook": _t("Facebook"),
-            "twitter": _t("Twitter"),
-            "linkedin": _t("LinkedIn"),
-            "youtube": _t("YouTube"),
-            "instagram": _t("Instagram"),
-            "github": _t("GitHub"),
-            "tiktok": _t("TikTok"),
-        };
-        const setAriaLabelOfSocialNetwork = (el, name, url) => {
-            let ariaLabel = ariaLabelsOfSocialNetworks[name];
-            if (!ariaLabel) {
-                try {
-                    // Return the domain of the given url.
-                    ariaLabel = new URL(url).hostname.split('.').slice(-2)[0];
-                } catch {
-                    // Fallback if the url is not valid.
-                    ariaLabel = _t("Other social network");
-                }
-            }
-            el.setAttribute("aria-label", ariaLabel);
-        };
-
         const anchorEls = this.$target[0].querySelectorAll(':scope > a');
         let entries = JSON.parse(widgetValue);
         const anchorsToRemoveEls = [];
@@ -162,7 +135,6 @@ options.registry.SocialMedia = options.Class.extend({
                         anchorEl.href = `/website/social/${encodeURIComponent(entry.media)}`;
                         anchorEl.classList.add(`s_social_media_${entry.media}`);
                     }
-                    setAriaLabelOfSocialNetwork(anchorEl, entry.media, entry.display_name);
                 }
             } else {
                 if (anchorEl) {
@@ -177,10 +149,9 @@ options.registry.SocialMedia = options.Class.extend({
                 // Handle URL change for custom links.
                 const href = anchorEl.getAttribute('href');
                 if (href !== entry.display_name) {
-                    let socialMedia = null;
                     if (this._isValidURL(entry.display_name)) {
                         // Propose an icon only for valid URLs (no mailto).
-                        socialMedia = this._findRelevantSocialMedia(entry.display_name);
+                        const socialMedia = this._findRelevantSocialMedia(entry.display_name);
                         if (socialMedia) {
                             const iEl = anchorEl.querySelector(ICON_SELECTOR);
                             this._removeSocialMediaClasses(anchorEl);
@@ -191,7 +162,6 @@ options.registry.SocialMedia = options.Class.extend({
                         }
                     }
                     anchorEl.setAttribute('href', entry.display_name);
-                    setAriaLabelOfSocialNetwork(anchorEl, socialMedia, entry.display_name);
                 }
             }
             // Place the link at the correct position
@@ -233,7 +203,7 @@ options.registry.SocialMedia = options.Class.extend({
                 listPosition++;
             }
             return {
-                id: weUtils.generateHTMLId(),
+                id: generateHTMLId(),
                 display_name: media ? dbSocialValues[`social_${media}`] : el.getAttribute('href'),
                 placeholder: `https://${encodeURIComponent(media) || 'example'}.com/yourPage`,
                 undeletable: !!media,
@@ -251,7 +221,7 @@ options.registry.SocialMedia = options.Class.extend({
                 const entryNotInDom = this.entriesNotInDom.find(entry => entry.media === media);
                 if (!entryNotInDom) {
                     this.entriesNotInDom.push({
-                        id: weUtils.generateHTMLId(),
+                        id: generateHTMLId(),
                         display_name: link,
                         placeholder: `https://${encodeURIComponent(media)}.com/yourPage`,
                         undeletable: true,
@@ -287,15 +257,12 @@ options.registry.SocialMedia = options.Class.extend({
                 },
             });
             // Fetch URLs for db links.
-            dbSocialValuesProm = this.orm.read("website", [websiteId], [
-                "social_facebook",
-                "social_twitter",
-                "social_linkedin",
-                "social_youtube",
-                "social_instagram",
-                "social_github",
-                "social_tiktok",
-            ]).then(function (values) {
+            dbSocialValuesProm = this._rpc({
+                model: 'website',
+                method: 'read',
+                args: [websiteId, ['social_facebook', 'social_twitter', 'social_linkedin',
+                    'social_youtube', 'social_instagram', 'social_github']],
+            }).then(function (values) {
                 [dbSocialValues] = values;
                 delete dbSocialValues.id;
             });
@@ -309,12 +276,13 @@ options.registry.SocialMedia = options.Class.extend({
      * @return {String} The social network to which the url leads to.
      */
     _findRelevantSocialMedia(url) {
-        // Note that linkedin, twitter, github and tiktok will also work because
-        // the url will match the good icon so we don't need a specific regex.
         const supportedSocialMedia = [
             ['facebook', /^(https?:\/\/)(www\.)?(facebook|fb|m\.facebook)\.(com|me).*$/],
+            ['twitter', /^(https?:\/\/)((www\.)?twitter\.com).*$/],
             ['youtube', /^(https?:\/\/)(www\.)?(youtube.com|youtu.be).*$/],
             ['instagram', /^(https?:\/\/)(www\.)?(instagram.com|instagr.am|instagr.com).*$/],
+            ['linkedin', /^(https?:\/\/)((www\.)?linkedin\.com).*$/],
+            ['github', /^(https?:\/\/)((www\.)?github\.com).*$/],
         ];
         for (const [socialMedia, regex] of supportedSocialMedia) {
             if (regex.test(url)) {
@@ -328,7 +296,7 @@ options.registry.SocialMedia = options.Class.extend({
             const iconNames = fonts.fontIcons[0].alias;
             const exactIcon = iconNames.find(el => el === `fa-${domain}`);
             return (exactIcon || iconNames.find(el => el.includes(domain))).split('fa-').pop();
-        } catch {
+        } catch (_error) {
             return false;
         }
     },
@@ -361,7 +329,7 @@ options.registry.SocialMedia = options.Class.extend({
         let url;
         try {
             url = new URL(str);
-        } catch {
+        } catch (_error) {
             return false;
         }
         return url.protocol.startsWith('http');
@@ -402,5 +370,4 @@ options.registry.SocialMedia = options.Class.extend({
 export default {
     SocialMedia: options.registry.SocialMedia,
     clearDbSocialValuesCache,
-    getDbSocialValuesCache,
 };

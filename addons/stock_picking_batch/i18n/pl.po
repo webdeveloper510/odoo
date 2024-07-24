@@ -3,14 +3,36 @@
 # 	* stock_picking_batch
 # 
 # Translators:
+# Rafał Kozak <rafal.kozak@openglobe.pl>, 2022
+# Tomasz Leppich <t.leppich@gmail.com>, 2022
+# Piotr Strębski <strebski@gmail.com>, 2022
+# Marcin Młynarczyk <mlynarczyk@gmail.com>, 2022
+# Andrzej Wiśniewski <a.wisniewski@hadron.eu.com>, 2022
+# Karol Rybak <karolrybak85@gmail.com>, 2022
+# Dariusz Żbikowski <darek@krokus.com.pl>, 2022
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
+# Dawid Prus, 2022
+# Piotr Cierkosz <piotr.w.cierkosz@gmail.com>, 2022
+# Jacek Michalski <michalski.jck@gmail.com>, 2022
+# Radosław Biegalski <radoslaw.biegalski@openglobe.pl>, 2022
+# Natalia Gros <nag@odoo.com>, 2022
+# Paweł Wodyński <pw@myodoo.pl>, 2022
+# Maksym <ms@myodoo.pl>, 2022
+# Wojciech Warczakowski <w.warczakowski@gmail.com>, 2022
+# Judyta Kaźmierczak <judyta.kazmierczak@openglobe.pl>, 2022
+# Martin Trigaux, 2022
+# Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2022
+# Maja Stawicka <mjstwck@wp.pl>, 2022
+# Tadeusz Karpiński <tadeusz.karpinski@braintec.com>, 2023
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
 # Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:32+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:55+0000\n"
 "Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
@@ -20,16 +42,13 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "2023-08-20"
-msgstr ""
-
-#. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.view_picking_type_form_inherit
 msgid ""
-"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Group "
-"by</span>"
+"<span class=\"o_form_label fw-bold\" attrs=\"{'invisible':[('auto_batch', "
+"'=', False)]}\">Group by</span>"
 msgstr ""
+"<span class=\"o_form_label fw-bold\" attrs=\"{'invisible':[('auto_batch', "
+"'=', False)]}\">Grupuj według</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -213,15 +232,9 @@ msgid "Barcode"
 msgstr "Kod kreskowy"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_form_inherit
 msgid "Batch"
 msgstr "Lista płac"
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Batch Name"
-msgstr "Nazwa partii"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -277,7 +290,7 @@ msgstr "Anuluj"
 #. module: stock_picking_batch
 #: model:ir.model.fields.selection,name:stock_picking_batch.selection__stock_picking_batch__state__cancel
 msgid "Cancelled"
-msgstr "Anulowano"
+msgstr "Anulowane"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -304,6 +317,11 @@ msgstr "Wybierz Układ Etykiet"
 #, python-format
 msgid "Choose Type of Labels To Print"
 msgstr "Wybierz typ etykiet do wydrukowania"
+
+#. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "Clear quantities"
+msgstr "Wyraźne ilości"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__company_id
@@ -418,11 +436,6 @@ msgid "Group By"
 msgstr "Grupuj wg"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Gujarat"
-msgstr ""
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__has_message
 msgid "Has Message"
 msgstr "Ma wiadomość"
@@ -483,9 +496,11 @@ msgid "Is Follower"
 msgstr "Jest obserwatorem"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "John Doe"
-msgstr ""
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave____last_update
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch____last_update
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_to_batch____last_update
+msgid "Last Modified on"
+msgstr "Data ostatniej modyfikacji"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__write_uid
@@ -517,19 +532,9 @@ msgid "List of transfers associated to this batch"
 msgstr "Lista przekazów powiązanych z tą partią"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Location From Name"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Location To Name"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Lot Number"
-msgstr ""
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Główny załącznik"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_type__batch_max_lines
@@ -623,11 +628,6 @@ msgid "Operations"
 msgstr "Operacje"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Package ID"
-msgstr ""
-
-#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__picking_ids
 msgid "Picking"
 msgstr "Pobranie"
@@ -663,19 +663,9 @@ msgid "Product"
 msgstr "Produkt"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Product Barcode"
-msgstr ""
-
-#. module: stock_picking_batch
 #: model:ir.model,name:stock_picking_batch.model_stock_move_line
 msgid "Product Moves (Stock Move Line)"
 msgstr "Przesunięcia produktu (pozycja przesunięcia zasobów)"
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Product Name"
-msgstr "Nazwa produktu"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -686,16 +676,6 @@ msgstr "Umieść w Paczce"
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
 msgid "Quantity"
 msgstr "Ilość"
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Quantity Done"
-msgstr "Ilość wykonanych:"
-
-#. module: stock_picking_batch
-#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__rating_ids
-msgid "Ratings"
-msgstr "Oceny"
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__user_id
@@ -709,11 +689,6 @@ msgstr "Odpowiedzialny"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__activity_user_id
 msgid "Responsible User"
 msgstr "Użytkownik odpowiedzialny"
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Result Package ID"
-msgstr ""
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__message_has_sms_error
@@ -745,6 +720,11 @@ msgid "Search Batch Transfer"
 msgstr "Wyszukiwanie przekazu partii"
 
 #. module: stock_picking_batch
+#: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
+msgid "Set quantities"
+msgstr "Ustaw ilości"
+
+#. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_allocation
 msgid "Show Allocation Button"
 msgstr "Pokaż przycisk alokacji"
@@ -768,6 +748,11 @@ msgstr "Pokaż tekst partii"
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_set_qty_button
 msgid "Show Set Qty Button"
 msgstr "Pokaż przycisk Ustaw ilość"
+
+#. module: stock_picking_batch
+#: model:ir.model.fields,field_description:stock_picking_batch.field_stock_picking_batch__show_validate
+msgid "Show Validate Button"
+msgstr "Pokaż przycisk walidacji"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -847,10 +832,13 @@ msgstr "Podsumowanie:"
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, python-format
 msgid ""
-"The following transfers cannot be added to batch transfer %s. Please check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %s. Please check their states and operation types, if they aren't immediate transfers.\n"
 "\n"
 "Incompatibilities: %s"
 msgstr ""
+"Następujące przekazy nie mogą zostać dodane do przekazu zbiorczego %s. Sprawdź ich stany i typy operacji, jeśli nie są to przelewy natychmiastowe.\n"
+"\n"
+"Niezgodności: %s"
 
 #. module: stock_picking_batch
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
@@ -928,16 +916,6 @@ msgid "Transfer"
 msgstr "Przekaz"
 
 #. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Transfer Display Name"
-msgstr ""
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Transfer Name"
-msgstr "Nazwa transferu"
-
-#. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, python-format
@@ -959,16 +937,6 @@ msgstr "Typ operacji"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Typ wyjątku działania na rekordzie."
-
-#. module: stock_picking_batch
-#: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
-msgid "Unit of Measure"
-msgstr "Jednostka miary"
-
-#. module: stock_picking_batch
-#: model:ir.actions.server,name:stock_picking_batch.action_unreserve_batch_picking
-msgid "Unreserve"
-msgstr "Skasuj rezerwację"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form

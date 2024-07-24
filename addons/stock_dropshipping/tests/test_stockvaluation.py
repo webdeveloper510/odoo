@@ -49,6 +49,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
                 'price_unit': 12,
                 'tax_id': [(6, 0, [])],
             })],
+            'pricelist_id': self.env.ref('product.list0').id,
             'picking_policy': 'direct',
         })
         self.sale_order1.action_confirm()
@@ -59,7 +60,9 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         # validate the dropshipping picking
         self.assertEqual(len(self.sale_order1.picking_ids), 1)
-        self.sale_order1.picking_ids.button_validate()
+        wizard = self.sale_order1.picking_ids.button_validate()
+        immediate_transfer = Form(self.env[wizard['res_model']].with_context(wizard['context'])).save()
+        immediate_transfer.process()
         self.assertEqual(self.sale_order1.picking_ids.state, 'done')
 
         # create the vendor bill
@@ -280,8 +283,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         stock_return_picking = stock_return_picking_form.save()
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_ids[0].move_line_ids[0].quantity = 1.0
-        return_pick.move_ids[0].picked = True
+        return_pick.move_ids[0].move_line_ids[0].qty_done = 1.0
         return_pick._action_done()
         self.assertEqual(return_pick.move_ids._is_dropshipped_returned(), True)
 
@@ -317,8 +319,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         stock_return_picking = stock_return_picking_form.save()
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
-        return_pick.move_ids[0].move_line_ids[0].quantity = 1.0
-        return_pick.move_ids[0].picked = True
+        return_pick.move_ids[0].move_line_ids[0].qty_done = 1.0
         return_pick._action_done()
 
         self.assertTrue(8 in return_pick.move_ids.stock_valuation_layer_ids.mapped('value'))
@@ -331,8 +332,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         stock_return_picking_2 = stock_return_picking_form_2.save()
         stock_return_picking_action_2 = stock_return_picking_2.create_returns()
         return_pick_2 = self.env['stock.picking'].browse(stock_return_picking_action_2['res_id'])
-        return_pick_2.move_ids[0].move_line_ids[0].quantity = 1.0
-        return_pick_2.move_ids[0].picked = True
+        return_pick_2.move_ids[0].move_line_ids[0].qty_done = 1.0
         return_pick_2._action_done()
 
         self.assertTrue(8 in return_pick_2.move_ids.stock_valuation_layer_ids.mapped('value'))

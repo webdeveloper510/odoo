@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { CalendarFilterPanel } from "@web/views/calendar/filter_panel/calendar_filter_panel";
-import { click, getFixture } from "../../helpers/utils";
+import { click, getFixture, triggerEvent } from "../../helpers/utils";
 import { makeEnv, makeFakeModel, mountComponent } from "./helpers";
 
 let target;
@@ -47,13 +47,13 @@ QUnit.module("CalendarView - FilterPanel", ({ beforeEach }) => {
         assert.containsN(sections[0], ".o_calendar_filter_item", 4);
         assert.strictEqual(
             sections[0].textContent.trim(),
-            "AttendeesMitchell AdminBrandon FreemanMarc DemoEverybody's calendar"
+            "AttendeesMitchell AdminMarc DemoBrandon FreemanEverybody's calendar"
         );
 
         header = sections[1].querySelector(".o_cw_filter_label");
         assert.strictEqual(header.textContent, "Users");
         assert.containsN(sections[1], ".o_calendar_filter_item", 2);
-        assert.strictEqual(sections[1].textContent.trim(), "UsersBrandon FreemanMarc Demo");
+        assert.strictEqual(sections[1].textContent.trim(), "UsersMarc DemoBrandon Freeman");
     });
 
     QUnit.test("section can collapse", async (assert) => {
@@ -101,12 +101,12 @@ QUnit.module("CalendarView - FilterPanel", ({ beforeEach }) => {
         assert.hasAttrValue(
             filters[1].querySelector(".o_cw_filter_avatar"),
             "data-src",
-            "/web/image/res.partner/4/avatar_128"
+            "/web/image/res.partner/6/avatar_128"
         );
         assert.hasAttrValue(
             filters[2].querySelector(".o_cw_filter_avatar"),
             "data-src",
-            "/web/image/res.partner/6/avatar_128"
+            "/web/image/res.partner/4/avatar_128"
         );
     });
 
@@ -148,7 +148,7 @@ QUnit.module("CalendarView - FilterPanel", ({ beforeEach }) => {
 
         await click(filters[1], ".o_calendar_filter_item .o_remove");
         await click(filters[2], ".o_calendar_filter_item .o_remove");
-        assert.verifySteps(["partner_ids 1", "partner_ids 2"]);
+        assert.verifySteps(["partner_ids 2", "partner_ids 1"]);
     });
 
     QUnit.test("click on filter", async (assert) => {
@@ -172,10 +172,42 @@ QUnit.module("CalendarView - FilterPanel", ({ beforeEach }) => {
         await click(filters[3], "input");
         assert.verifySteps([
             "partner_ids 3 false",
-            "partner_ids 4 false",
             "partner_ids 6 true",
+            "partner_ids 4 false",
             "partner_ids all true",
             "partner_ids all false",
         ]);
+    });
+
+    QUnit.test("hover filter opens tooltip", async (assert) => {
+        await start({
+            services: {
+                popover: {
+                    start: () => ({
+                        add: (target, _, props) => {
+                            assert.step(props.filter.label);
+                            assert.step("" + props.filter.hasAvatar);
+                            assert.step("" + props.filter.value);
+                            return () => {
+                                assert.step("popOver Closed");
+                            };
+                        },
+                    }),
+                },
+            },
+        });
+
+        const section = target.querySelectorAll(".o_calendar_filter")[0];
+        const filters = section.querySelectorAll(".o_calendar_filter_item");
+
+        await triggerEvent(filters[0], null, "mouseenter");
+        assert.verifySteps(["Mitchell Admin", "true", "3"]);
+        await triggerEvent(filters[0], null, "mouseleave");
+        assert.verifySteps(["popOver Closed"]);
+
+        await triggerEvent(filters[3], null, "mouseenter");
+        assert.verifySteps([]);
+        await triggerEvent(filters[3], null, "mouseleave");
+        assert.verifySteps([]);
     });
 });

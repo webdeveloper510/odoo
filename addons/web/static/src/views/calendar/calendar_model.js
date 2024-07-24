@@ -10,8 +10,7 @@ import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { Model } from "@web/model/model";
-import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
+import { Model } from "@web/views/model";
 
 export class CalendarModel extends Model {
     setup(params, services) {
@@ -23,12 +22,8 @@ export class CalendarModel extends Model {
 
         const formViewFromConfig = (this.env.config.views || []).find((view) => view[1] === "form");
         const formViewIdFromConfig = formViewFromConfig ? formViewFromConfig[0] : false;
-        const fieldNodes = params.popoverFieldNodes;
-        const { activeFields, fields } = extractFieldsFromArchInfo({ fieldNodes }, params.fields);
         this.meta = {
             ...params,
-            activeFields,
-            fields,
             firstDayOfWeek: (localization.weekStart || 0) % 7,
             formViewId: params.formViewId || formViewIdFromConfig,
         };
@@ -107,7 +102,7 @@ export class CalendarModel extends Model {
         return this.meta.hasEditDialog;
     }
     get hasQuickCreate() {
-        return this.meta.quickCreate;
+        return this.meta.hasQuickCreate;
     }
     get isDateHidden() {
         return this.meta.isDateHidden;
@@ -115,11 +110,8 @@ export class CalendarModel extends Model {
     get isTimeHidden() {
         return this.meta.isTimeHidden;
     }
-    get popoverFieldNodes() {
-        return this.meta.popoverFieldNodes;
-    }
-    get activeFields() {
-        return this.meta.activeFields;
+    get popoverFields() {
+        return this.meta.popoverFields;
     }
     get rangeEnd() {
         return this.data.range.end;
@@ -141,14 +133,6 @@ export class CalendarModel extends Model {
     }
     get unusualDays() {
         return this.data.unusualDays;
-    }
-
-    get quickCreateFormViewId() {
-        return this.meta.quickCreateViewId;
-    }
-
-    get defaultFilterLabel() {
-        return _t("Undefined");
     }
 
     //--------------------------------------------------------------------------
@@ -204,8 +188,6 @@ export class CalendarModel extends Model {
                             [info.filterFieldName]: active,
                         };
                         await this.orm.write(info.writeResModel, [filter.recordId], data);
-                    } else if (filter.type === "all") {
-                        this.meta.allFilter[section.label] = active;
                     }
                 }
             }
@@ -236,7 +218,7 @@ export class CalendarModel extends Model {
                 end = start;
             } else {
                 // in week mode or day mode, convert allday event to event
-                end = start.plus({ hours: 1 });
+                end = start.plus({ hours: 2 });
             }
         }
 
@@ -497,7 +479,7 @@ export class CalendarModel extends Model {
      * @param {Record<string, any>} rawRecord
      */
     normalizeRecord(rawRecord) {
-        const { fields, fieldMapping, isTimeHidden } = this.meta;
+        const { fields, fieldMapping, isTimeHidden, scale } = this.meta;
 
         const startType = fields[fieldMapping.date_start].type;
         const isAllDay =
@@ -529,6 +511,7 @@ export class CalendarModel extends Model {
 
         const showTime =
             !(fieldMapping.all_day && rawRecord[fieldMapping.all_day]) &&
+            scale !== "year" &&
             startType !== "date" &&
             start.day === end.day;
 
@@ -550,20 +533,10 @@ export class CalendarModel extends Model {
             isHatched: rawRecord["is_hatched"] || false,
             isStriked: rawRecord["is_striked"] || false,
             isTimeHidden: isTimeHidden || !showTime,
-            isMonth: this.meta.scale === "month",
-            isSmall: this.env.isSmall,
             rawRecord,
         };
     }
 
-    /**
-     * @protected
-     */
-    addFilterFields(record, filterInfo) {
-        return {
-            colorIndex: record.colorIndex,
-        };
-    }
     //--------------------------------------------------------------------------
 
     /**
@@ -619,7 +592,7 @@ export class CalendarModel extends Model {
         }
 
         const previousAllFilter = previousFilters.find((f) => f.type === "all");
-        filters.push(this.makeFilterAll(previousAllFilter, isUserOrPartner, filterInfo.label));
+        filters.push(this.makeFilterAll(previousAllFilter, isUserOrPartner));
 
         return {
             label: filterInfo.label,
@@ -672,7 +645,7 @@ export class CalendarModel extends Model {
                     filters.push({
                         id: value,
                         [fieldName]: rawValue,
-                        ...this.addFilterFields(record, filterInfo),
+                        colorIndex: record.colorIndex,
                     });
                 }
             }
@@ -755,7 +728,7 @@ export class CalendarModel extends Model {
             type: "dynamic",
             recordId: null,
             value,
-            label: formatter(rawValue, { field }) || this.defaultFilterLabel,
+            label: formatter(rawValue, { field }) || _t("Undefined"),
             active: previousFilter ? previousFilter.active : true,
             canRemove: false,
             colorIndex,
@@ -833,17 +806,19 @@ export class CalendarModel extends Model {
     /**
      * @protected
      */
-    makeFilterAll(previousAllFilter, isUserOrPartner, sectionLabel) {
+    makeFilterAll(previousAllFilter, isUserOrPartner) {
         return {
             type: "all",
             recordId: null,
             value: "all",
-            label: isUserOrPartner ? _t("Everybody's calendars") : _t("Everything"),
-            active: previousAllFilter ? previousAllFilter.active : this.meta.allFilter[sectionLabel] || false,
+            label: isUserOrPartner
+                ? this.env._t("Everybody's calendars")
+                : this.env._t("Everything"),
+            active: previousAllFilter ? previousAllFilter.active : false,
             canRemove: false,
             colorIndex: null,
             hasAvatar: false,
         };
     }
 }
-CalendarModel.services = ["user", "rpc"];
+CalendarModel.services = ["user"];

@@ -28,9 +28,7 @@
 
   function isHTMLElement(node) {
     var OwnElement = getWindow(node).HTMLElement;
-    // Updated to handle checks of HTMLElement created in a different document
-    // which is required to position the colorpicker correctly.
-    return node instanceof OwnElement || node.nodeType === Node.ELEMENT_NODE;
+    return node instanceof OwnElement || node instanceof HTMLElement;
   }
 
   function isShadowRoot(node) {

@@ -3,7 +3,6 @@
 
 {
     'name': 'Italy - E-invoicing (Withholding)',
-    'countries': ['it'],
     'version': '0.1',
     'depends': [
         'l10n_it_edi'
@@ -19,9 +18,12 @@ Withholding and Pension Fund handling for the E-invoice implementation for Italy
     Please also update the Italian Accounting module (l10n_it) when you install this module.
     """,
     'category': 'Accounting/Localizations/EDI',
-    'website': 'https://www.odoo.com/documentation/17.0/applications/finance/accounting/fiscal_localizations/localizations/italy.html',
+    'website': 'https://www.odoo.com/documentation/16.0/applications/finance/accounting/fiscal_localizations/localizations/italy.html',
     'data': [
+        'data/account_tax_group_data.xml',
         'data/account_withholding_report_data.xml',
+        'data/account.account.template.csv',
+        'data/account_tax_template.xml',
         'data/invoice_it_template.xml',
         'views/l10n_it_view.xml'
     ],

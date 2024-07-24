@@ -3,15 +3,15 @@
 # 	* website_slides_survey
 # 
 # Translators:
-# Wil Odoo, 2023
+# Martin Trigaux, 2022
 # Abe Manyo, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:56+0000\n"
-"PO-Revision-Date: 2023-10-26 23:10+0000\n"
+"POT-Creation-Date: 2023-05-23 08:24+0000\n"
+"PO-Revision-Date: 2022-09-22 05:57+0000\n"
 "Last-Translator: Abe Manyo, 2023\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
@@ -70,9 +70,19 @@ msgstr ""
 "            "
 
 #. module: website_slides_survey
+#: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
+msgid "<i class=\"fa fa-arrow-right me-1\"/>Add Questions to this Survey"
+msgstr ""
+
+#. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"fa fa-arrow-right\"/> Get Certified"
-msgstr "<i class=\"fa fa-arrow-right\"/> Dapatkan Sertifikat"
+msgid "<i class=\"fa fa-arrow-right me-1\"/>All Certifications"
+msgstr ""
+
+#. module: website_slides_survey
+#: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
+msgid "<i class=\"fa fa-arrow-right\"/> See Certifications"
+msgstr ""
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
@@ -107,21 +117,6 @@ msgid "<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>"
 msgstr "<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>"
 
 #. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Add Questions to this Survey"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Tambahkan Pertanyaan ke Survei ini"
-
-#. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Certifications"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Semua Sertifikasi"
-
-#. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
-msgid "<i class=\"oi oi-arrow-right\"/> See Certifications"
-msgstr "<i class=\"oi oi-arrow-right\"/> Lihat Sertifikasi"
-
-#. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.badge_content
 msgid "<i class=\"text-muted\"> awarded users</i>"
 msgstr "<i class=\"text-muted\"> user dengan piala</i>"
@@ -134,11 +129,11 @@ msgstr "<span class=\"ms-1\">Sertifikasi</span>"
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_channel_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"nbr_certification &gt; 0\">Finished</span>\n"
-"                <span class=\"o_stat_text\" invisible=\"nbr_certification == 0\">Certified</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '&gt;', 0)]}\">Finished</span>\n"
+"                <span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '=', 0)]}\">Certified</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"nbr_certification &gt; 0\">Selesai</span>\n"
-"                <span class=\"o_stat_text\" invisible=\"nbr_certification == 0\">Bersertifikat</span>"
+"<span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '&gt;', 0)]}\">Selesai</span>\n"
+"                <span class=\"o_stat_text\" attrs=\"{'invisible': [('nbr_certification', '=', 0)]}\">Bersertifikasi</span>"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.all_user_card
@@ -162,10 +157,8 @@ msgstr "<span class=\"text-muted\">Selesai</span>"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.course_main
-msgid "<span>Start Now</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
+msgid "<span>Start Now</span><i class=\"fa fa-chevron-right ms-2 align-middle\"/>"
 msgstr ""
-"<span>Mulai Sekarang</span><i class=\"oi oi-chevron-right ms-2 align-"
-"middle\"/>"
 
 #. module: website_slides_survey
 #: model:ir.model.constraint,message:website_slides_survey.constraint_slide_slide_check_survey_id
@@ -336,11 +329,6 @@ msgid "Certifications"
 msgstr "Sertifikat-Sertifikat"
 
 #. module: website_slides_survey
-#: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "Certifications are exams that you successfully passed. <br/>"
-msgstr "Sertifikasi adalah ujian yang sudah sukses diselesaikan. <br/>"
-
-#. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_sidebar_done_button
 msgid "Certifications you have passed cannot be marked as not done"
@@ -490,13 +478,13 @@ msgstr "Slide kursus terkait"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "Score:"
-msgstr "Nilai:"
+msgid "Score :"
+msgstr ""
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
 msgid "Search"
-msgstr "Cari"
+msgstr "Pencarian"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content

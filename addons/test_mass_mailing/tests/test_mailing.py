@@ -117,12 +117,6 @@ class TestMassMailing(TestMassMailCommon):
         mailing.invalidate_recordset()
         self.assertMailingStatistics(mailing, expected=5, delivered=4, sent=5, opened=1, clicked=1, bounced=1)
         self.assertEqual(recipients[1].message_bounce, 1)
-        self.assertMailTraces([{
-            'email': 'test.record.01@test.example.com',
-            'failure_reason': 'This is the bounce email',
-            'failure_type': 'mail_bounce',
-            'trace_status': 'bounce',
-        }], mailing, recipients[1], check_mail=False)
 
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_mail')
@@ -394,8 +388,8 @@ class TestMassMailing(TestMassMailCommon):
         self.env['mail.blacklist'].create({'email': recipients[4].email_normalized})
 
         # unblacklist record 2
-        self.env['mail.blacklist']._remove(
-            recipients[2].email_normalized, message="human error"
+        self.env['mail.blacklist'].action_remove_with_reason(
+            recipients[2].email_normalized, "human error"
         )
         self.env['mail.blacklist'].flush_model(['active'])
 
@@ -538,9 +532,8 @@ class TestMassMailing(TestMassMailCommon):
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_mailing_mailing_list_optout(self):
         """ Test mailing list model specific optout behavior """
-        # as duplication checks body and subject, we create 2 exact copies to make sure only 1 is sent
-        mailing_contact_1 = self.env['mailing.contact'].create({'name': 'test 1', 'email': 'test@test.example.com'})
-        mailing_contact_2 = self.env['mailing.contact'].create({'name': 'test 1', 'email': 'test@test.example.com'})
+        mailing_contact_1 = self.env['mailing.contact'].create({'name': 'test 1A', 'email': 'test@test.example.com'})
+        mailing_contact_2 = self.env['mailing.contact'].create({'name': 'test 1B', 'email': 'test@test.example.com'})
         mailing_contact_3 = self.env['mailing.contact'].create({'name': 'test 3', 'email': 'test3@test.example.com'})
         mailing_contact_4 = self.env['mailing.contact'].create({'name': 'test 4', 'email': 'test4@test.example.com'})
         mailing_contact_5 = self.env['mailing.contact'].create({'name': 'test 5', 'email': 'test5@test.example.com'})
@@ -565,7 +558,7 @@ class TestMassMailing(TestMassMailCommon):
         # contact_1 is optout but same email is not optout from the same list
         # contact 3 is optout in list 1 but not in list 2
         # contact 5 is optout
-        subs = self.env['mailing.subscription'].search([
+        subs = self.env['mailing.contact.subscription'].search([
             '|', '|',
             '&', ('contact_id', '=', mailing_contact_1.id), ('list_id', '=', mailing_list_1.id),
             '&', ('contact_id', '=', mailing_contact_3.id), ('list_id', '=', mailing_list_1.id),
@@ -591,8 +584,7 @@ class TestMassMailing(TestMassMailCommon):
              {'email': 'test4@test.example.com'},
              {'email': 'test5@test.example.com', 'trace_status': 'cancel', 'failure_type': 'mail_optout'}],
             mailing,
-            # mailing_contact_1 + mailing_contact_2 + mailing_contact_3 + mailing_contact_4 + mailing_contact_5,
-            mailing_contact_2 + mailing_contact_1 + mailing_contact_3 + mailing_contact_4 + mailing_contact_5,
+            mailing_contact_1 + mailing_contact_2 + mailing_contact_3 + mailing_contact_4 + mailing_contact_5,
             check_mail=True
         )
         self.assertEqual(mailing.canceled, 2)

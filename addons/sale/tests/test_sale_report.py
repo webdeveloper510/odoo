@@ -21,9 +21,6 @@ class TestSaleReportCurrencyRate(SaleCommon):
         cls.eur_cmp = cls.env['res.company'].create({
             'name': 'EUR Company', 'currency_id': cls.env.ref('base.EUR').id,
         })
-        # The test requires the main company to be in USD so that the currency of the products
-        # shared between companies is USD
-        cls._use_currency('USD')
 
     def test_sale_report_foreign_currency(self):
         """
@@ -43,9 +40,9 @@ class TestSaleReportCurrencyRate(SaleCommon):
 
         # Create corresponding pricelists and rates.
         pricelists = self.env['product.pricelist'].create([
-            {'name': 'Pricelist (USD)', 'currency_id': usd.id, 'company_id': False},
-            {'name': 'Pricelist (EUR)', 'currency_id': eur.id, 'company_id': False},
-            {'name': 'Pricelist (ARS)', 'currency_id': ars.id, 'company_id': False},
+            {'name': 'Pricelist (USD)', 'currency_id': usd.id},
+            {'name': 'Pricelist (EUR)', 'currency_id': eur.id},
+            {'name': 'Pricelist (ARS)', 'currency_id': ars.id},
         ])
         self.env['res.currency.rate'].create([
             {'name': past_day, 'rate': 555, 'currency_id': ars.id, 'company_id': self.eur_cmp.id},
@@ -124,7 +121,7 @@ class TestSaleReportCurrencyRate(SaleCommon):
         # The report should show the amount in the current (in this case usd) company currency.
         report_lines = self.env['sale.report'].sudo().with_context(
             allow_company_ids=[self.usd_cmp.id, self.eur_cmp.id]
-        ).search([('order_reference', 'in', [f'sale.order,{so_id}' for so_id in sale_orders.ids])])
+        ).search([('order_id', 'in', sale_orders.ids)])
 
         price_total = sum(report_lines.mapped('price_total'))
-        self.assertAlmostEqual(price_total, expected_reported_amount)
+        self.assertEqual(price_total, expected_reported_amount)

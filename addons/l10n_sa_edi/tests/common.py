@@ -3,6 +3,7 @@ from datetime import datetime
 
 from odoo import Command
 from odoo.tests import tagged
+from odoo.tests.common import new_test_user
 from odoo.addons.account_edi.tests.common import AccountEdiTestCommon
 
 
@@ -10,7 +11,7 @@ from odoo.addons.account_edi.tests.common import AccountEdiTestCommon
 class TestSaEdiCommon(AccountEdiTestCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref='sa', edi_format_ref='l10n_sa_edi.edi_sa_zatca'):
+    def setUpClass(cls, chart_template_ref='l10n_sa.sa_chart_template_standard', edi_format_ref='l10n_sa_edi.edi_sa_zatca'):
         super().setUpClass(chart_template_ref=chart_template_ref, edi_format_ref=edi_format_ref)
         # Setup company
         cls.company = cls.company_data['company']
@@ -18,7 +19,7 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         cls.company.country_id = cls.env.ref('base.sa')
         cls.company.email = "info@company.saexample.com"
         cls.company.phone = '+966 51 234 5678'
-        cls.customer_invoice_journal = cls.env['account.journal'].search([('company_id', '=', cls.company.id), ('type', '=', 'sale')], limit=1)
+        cls.customer_invoice_journal = cls.env['account.journal'].search([('company_id', '=', cls.company.id), ('name', '=', 'Customer Invoices')])
         cls.company.l10n_sa_edi_building_number = '1234'
         cls.company.l10n_sa_edi_plot_identification = '1234'
         cls.company.street2 = "Testomania"
@@ -85,7 +86,7 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         })
 
         # 15% tax
-        cls.tax_15 = cls.env['account.tax'].search([('company_id', '=', cls.company.id), ('amount', '=', 15.0)], limit=1)
+        cls.tax_15 = cls.env['account.tax'].search([('company_id', '=', cls.company.id), ('name', '=', 'Sales Tax 15%')])
 
         # Large cabinet product
         cls.product_a = cls.env['product.product'].create({
@@ -195,6 +196,7 @@ class TestSaEdiCommon(AccountEdiTestCommon):
                     <InstructionNote>___ignore___</InstructionNote>
                 </xpath>
                 '''
+        cls.user_saudi = new_test_user(cls.env, 'xav', email='em@il.com', notification_type='inbox', groups='account.group_account_invoice', tz='Asia/Riyadh')
 
     def _create_invoice(self, **kwargs):
         vals = {
@@ -213,7 +215,8 @@ class TestSaEdiCommon(AccountEdiTestCommon):
             }),
             ],
         }
-        move = self.env['account.move'].create(vals)
+        user = kwargs.get('user') or self.env.user
+        move = self.env['account.move'].with_user(user.id).create(vals)
         move.state = 'posted'
         move.l10n_sa_confirmation_datetime = datetime.now()
         # move.payment_reference = move.name
@@ -235,6 +238,7 @@ class TestSaEdiCommon(AccountEdiTestCommon):
         move = self._create_invoice(**kwargs)
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=move.ids).create({
             'reason': 'no reason',
+            'refund_method': 'refund',
             'journal_id': move.journal_id.id,
         })
         reversal = move_reversal.reverse_moves()

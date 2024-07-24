@@ -3,18 +3,18 @@
 # 	* pos_hr
 # 
 # Translators:
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2023
-# Simon S, 2023
-# Kim Asplund <kim.asplund@gmail.com>, 2023
-# Martin Trigaux, 2023
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2022
+# Simon S, 2022
+# Kim Asplund <kim.asplund@gmail.com>, 2022
+# Martin Trigaux, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
-"PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"POT-Creation-Date: 2024-02-06 13:32+0000\n"
+"PO-Revision-Date: 2022-09-22 05:54+0000\n"
+"Last-Translator: Martin Trigaux, 2022\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,18 +25,7 @@ msgstr ""
 #. module: pos_hr
 #: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
-msgid "Advanced rights"
-msgstr ""
-
-#. module: pos_hr
-#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
-msgid "All employees"
-msgstr ""
-
-#. module: pos_hr
-#: model_terms:ir.ui.view,arch_db:pos_hr.pos_config_form_view_inherit
-#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
-msgid "Basic rights"
+msgid "Allowed Employees"
 msgstr ""
 
 #. module: pos_hr
@@ -48,7 +37,7 @@ msgstr "Kassör"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/js/SelectCashierMixin.js:0
 #, python-format
 msgid "Change Cashier"
 msgstr "Byt Kassör"
@@ -74,62 +63,37 @@ msgid "Employee: %s - PoS Config(s): %s \n"
 msgstr "Användare: %s - Kassa Configurering: %s \n"
 
 #. module: pos_hr
-#: model:ir.model.fields,field_description:pos_hr.field_pos_config__basic_employee_ids
-#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_basic_employee_ids
-msgid "Employees with basic access"
-msgstr ""
+#: model:ir.model.fields,field_description:pos_hr.field_pos_config__employee_ids
+#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_employee_ids
+msgid "Employees with access"
+msgstr "Användare med behörighet"
 
 #. module: pos_hr
-#: model:ir.model.fields,field_description:pos_hr.field_pos_config__advanced_employee_ids
-#: model:ir.model.fields,field_description:pos_hr.field_res_config_settings__pos_advanced_employee_ids
-msgid "Employees with manager access"
-msgstr ""
-
-#. module: pos_hr
-#: model:ir.model.fields,help:pos_hr.field_pos_config__basic_employee_ids
-#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_basic_employee_ids
-msgid "If left empty, all employees can log in to PoS"
-msgstr ""
-
-#. module: pos_hr
-#: model:ir.model.fields,help:pos_hr.field_pos_config__advanced_employee_ids
-#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_advanced_employee_ids
-msgid "If left empty, only Odoo users have extended rights in PoS"
-msgstr ""
+#: model:ir.model.fields,help:pos_hr.field_pos_config__employee_ids
+#: model:ir.model.fields,help:pos_hr.field_res_config_settings__pos_employee_ids
+msgid "If left empty, all employees can log in to the PoS session"
+msgstr "Om tomt, alla användare kan logga in i kassa sessionen"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/js/SelectCashierMixin.js:0
 #, python-format
 msgid "Incorrect Password"
 msgstr "Felaktigt lösenord"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/header_lock_button/header_lock_button.xml:0
-#: code:addons/pos_hr/static/src/overrides/components/navbar/navbar.xml:0
-#, python-format
-msgid "Lock"
-msgstr "Lås"
-
-#. module: pos_hr
-#. odoo-javascript
-#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
 #, python-format
 msgid "Log in to"
 msgstr "Logga in i"
 
 #. module: pos_hr
-#: model_terms:ir.ui.view,arch_db:pos_hr.res_config_settings_view_form
-msgid "No employee"
-msgstr ""
-
-#. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
+#: code:addons/pos_hr/static/src/js/SelectCashierMixin.js:0
 #, python-format
-msgid "Password?"
-msgstr ""
+msgid "Password ?"
+msgstr "Lösenord ?"
 
 #. module: pos_hr
 #: model:ir.model.fields,help:pos_hr.field_pos_order__employee_id
@@ -139,13 +103,6 @@ msgid ""
 msgstr ""
 "Person som använder kassan. Det kan vara en avbytare, en student eller en "
 "tillfällig anställd."
-
-#. module: pos_hr
-#. odoo-javascript
-#: code:addons/pos_hr/static/src/app/select_cashier_mixin.js:0
-#, python-format
-msgid "Please try again."
-msgstr ""
 
 #. module: pos_hr
 #: model:ir.model,name:pos_hr.model_pos_config
@@ -169,14 +126,14 @@ msgstr "Kassasession"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
 #, python-format
 msgid "Scan your badge"
 msgstr "Skanna din bricka"
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
 #, python-format
 msgid "Select Cashier"
 msgstr "Välj kassör"
@@ -194,7 +151,7 @@ msgstr ""
 
 #. module: pos_hr
 #. odoo-javascript
-#: code:addons/pos_hr/static/src/app/login_screen/login_screen.xml:0
+#: code:addons/pos_hr/static/src/xml/LoginScreen.xml:0
 #, python-format
 msgid "or"
 msgstr "eller"

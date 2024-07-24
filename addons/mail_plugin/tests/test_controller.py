@@ -190,7 +190,7 @@ class TestMailPluginController(TestMailPluginControllerCommon):
 
     def test_get_partner_is_default_from(self):
         """When the email_from is the server default from address, we return a custom message instead of trying to match a partner record."""
-        self.env['mail.alias.domain'].create({'name': 'example.com', 'default_from': 'notification'})
+        self.env["ir.config_parameter"].sudo().set_param("mail.default.from", "notification@example.com")
         mock_iap_enrich = Mock()
         result = self.mock_plugin_partner_get("Test partner", "notificaTION@EXAMPLE.COM", mock_iap_enrich)
         self.assertEqual(

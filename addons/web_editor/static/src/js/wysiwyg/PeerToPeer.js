@@ -127,12 +127,21 @@ const baseNotificationMethods = {
                 );
             return;
         }
-        if (debugShowLog) {
-            console.log(`%cisOfferRacing: ${isOfferRacing}`, 'background: red;');
-            console.log(`%c SETREMOTEDESCRIPTION`, 'background: navy; color:white;');
-        }
+        if (debugShowLog) console.log(`%cisOfferRacing: ${isOfferRacing}`, 'background: red;');
+
         try {
-            await pc.setRemoteDescription(description);
+            if (isOfferRacing) {
+                if (debugShowLog)
+                    console.log(`%c SETREMOTEDESCRIPTION 1`, 'background: navy; color:white;');
+                await Promise.all([
+                    pc.setLocalDescription({ type: 'rollback' }),
+                    pc.setRemoteDescription(description),
+                ]);
+            } else {
+                if (debugShowLog)
+                    console.log(`%c SETREMOTEDESCRIPTION 2`, 'background: navy; color:white;');
+                await pc.setRemoteDescription(description);
+            }
         } catch (e) {
             if (e instanceof DOMException && e.name === 'InvalidStateError') {
                 console.error(e);
@@ -343,18 +352,12 @@ export class PeerToPeer {
                     );
                 }
             }
-            try {
-                const baseMethod = baseNotificationMethods[notification.notificationName];
-                if (baseMethod) {
-                    return baseMethod.call(this, notification);
-                }
-                if (this.options.onNotification) {
-                    return this.options.onNotification(notification);
-                }
-            } catch (error) {
-                console.groupCollapsed('=== ERROR: On notification in collaboration ===');
-                console.error(error);
-                console.groupEnd();
+            const baseMethod = baseNotificationMethods[notification.notificationName];
+            if (baseMethod) {
+                return baseMethod.call(this, notification);
+            }
+            if (this.options.onNotification) {
+                return this.options.onNotification(notification);
             }
         }
     }
@@ -593,8 +596,8 @@ export class PeerToPeer {
         );
     }
     /**
-     * Attempts a connection recovery by updating the tracks, which will start
-     * a new transaction: negotiationneeded -> offer -> answer -> ...
+     * Attempts a connection recovery by updating the tracks, which will start a new transaction:
+     * negotiationneeded -> offer -> answer -> ...
      *
      * @private
      * @param {Object} [param1]

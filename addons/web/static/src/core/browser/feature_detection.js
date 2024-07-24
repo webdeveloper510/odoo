@@ -7,23 +7,21 @@ import { browser } from "./browser";
 // -----------------------------------------------------------------------------
 
 /**
- * True if the browser is based on Chromium (Google Chrome, Opera, Edge).
- */
-export function isBrowserChrome() {
-    return /Chrome/i.test(browser.navigator.userAgent);
-}
-
-export function isBrowserFirefox() {
-    return /Firefox/i.test(browser.navigator.userAgent);
-}
-
-/**
- * true if the browser is based on Safari (Safari, Epiphany)
+ * true if the browser is based on Chromium (Google Chrome, Opera, Edge)
  *
  * @returns {boolean}
  */
-export function isBrowserSafari() {
-    return !isBrowserChrome() && browser.navigator.userAgent.includes("Safari");
+export function isBrowserChrome() {
+    return browser.navigator.userAgent.includes("Chrome");
+}
+
+/**
+ * true if the browser is Firefox
+ *
+ * @returns {boolean}
+ */
+export function isBrowserFirefox() {
+    return browser.navigator.userAgent.includes("Firefox");
 }
 
 export function isAndroid() {
@@ -42,7 +40,7 @@ export function isOtherMobileOS() {
 }
 
 export function isMacOS() {
-    return /Mac/i.test(browser.navigator.userAgent);
+    return Boolean(browser.navigator.userAgent.match(/Mac/i));
 }
 
 export function isMobileOS() {
@@ -53,16 +51,8 @@ export function isIosApp() {
     return /OdooMobile \(iOS\)/i.test(browser.navigator.userAgent);
 }
 
-export function isAndroidApp() {
-    return /OdooMobile.+Android/i.test(browser.navigator.userAgent);
-}
-
-export function isDisplayStandalone() {
-    return browser.matchMedia("(display-mode: standalone)").matches;
-}
-
 export function hasTouch() {
-    return browser.ontouchstart !== undefined || browser.matchMedia("(pointer:coarse)").matches;
+    return browser.ontouchstart !== undefined;
 }
 
 export function maxTouchPoints() {
